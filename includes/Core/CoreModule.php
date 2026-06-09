@@ -99,12 +99,6 @@ final class CoreModule extends AbstractModule {
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
 		add_action( 'init', array( $this, 'register_cron_schedules' ) );
 
-		add_action(
-			'rest_api_init',
-			array( Rest\Controllers\RestNotificationShimController::class, 'register_late_shims' ),
-			999
-		);
-
 		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
 
 		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Fields/Types/*.php' ) ?: array() as $f ) {

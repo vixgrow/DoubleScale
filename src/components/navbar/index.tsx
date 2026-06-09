@@ -103,7 +103,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	integrations: 'system',
 	'smtp/:tab?': 'system',
 	'team-managers': 'system',
-	'settings/:tab?': 'system',
+	'settings/:tab?/:subtab?': 'system',
 	extensions: 'system',
 };
 

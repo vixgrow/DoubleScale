@@ -689,7 +689,7 @@ registerAdminPage('emails-analytics', {
 // });
 
 registerAdminPage('settings', {
-	path: 'settings/:tab?',
+	path: 'settings/:tab?/:subtab?',
 	component: () => <Setting />,
 	label: __('Settings', 'doublescale'),
 	icon: <SettingsIcon />,

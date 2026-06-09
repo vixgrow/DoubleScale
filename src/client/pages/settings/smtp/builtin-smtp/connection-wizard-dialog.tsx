@@ -466,7 +466,7 @@ export function ConnectionWizardDialog({
 															<p className="text-xs text-muted-foreground">
 																{step3MailerMeta.accountNameHint ||
 																	__(
-																		'Required for some providers (for example Amazon SES).',
+																		'This is used to identify the account in the connection list.',
 																		'doublescale'
 																	)}
 															</p>
@@ -763,7 +763,7 @@ export function ConnectionWizardDialog({
 																				<p className="text-xs text-muted-foreground">
 																					{step3MailerMeta.accountNameHint ||
 																						__(
-																							'Required for some providers (for example Amazon SES).',
+																							'This is used to identify the account in the connection list.',
 																							'doublescale'
 																						)}
 																				</p>

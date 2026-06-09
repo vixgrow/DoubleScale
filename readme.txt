@@ -96,6 +96,16 @@ The PHP code follows the WordPress Coding Standards (WPCS 3.x) with `WordPress-E
 
 For plugin-structure / readme / asset-organization checks, install the official [Plugin Check](https://wordpress.org/plugins/plugin-check/) plugin into a local WordPress install and run it via **Tools → Plugin Check**. Plugin Check is the same tool the WordPress.org review team runs.
 
+== Screenshots ==
+
+1. **Dashboard** — Analytics overview with KPI cards, quick links, recent contacts, and contact analytics chart.
+2. **Contact Details** — Full contact profile with activity timeline, channel subscriptions, lists, and tags.
+3. **Email Builder** — Drag-and-drop campaign editor with responsive blocks, merge tags, and template library.
+4. **Automation Builder** — Visual workflow editor with triggers, conditions, and branching actions.
+5. **Booking Event Setup** — Configure event details, duration, color, location, and live preview.
+6. **Booking Calendar** — Frontend booking page with date/time picker and automatic time-zone detection.
+7. **SMTP Providers** — Choose from 20+ mail providers including SendGrid, Amazon SES, Gmail, Mailgun, and more.
+
 == Installation ==
 
 = Automatic =

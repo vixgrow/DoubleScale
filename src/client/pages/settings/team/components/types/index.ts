@@ -23,6 +23,23 @@ export const ManagerRoleValues = {
 	doublescale_support_manager: 'Support Manager',
 	doublescale_support_agent: 'Support Agent',
 };
+/** Module slug required before the role can be newly assigned (Settings → Modules). */
+export const ManagerRoleModuleRequirements: Partial<
+	Record<ManagerRole, string>
+> = {
+	doublescale_sales_manager: 'deals',
+	doublescale_sales_rep: 'deals',
+	doublescale_support_manager: 'support',
+	doublescale_support_agent: 'support',
+};
+
+/** Roles that require DoubleScale Pro to be active. */
+export const ManagerRoleProRequirements: ManagerRole[] = [
+	'doublescale_crm_manager',
+	'doublescale_sales_manager',
+	'doublescale_sales_rep',
+];
+
 export const ManagerRoleOptions = [
 	{ id: 'doublescale_crm_manager' as ManagerRole, label: 'CRM Manager' },
 	{ id: 'doublescale_sales_manager' as ManagerRole, label: 'Sales Manager' },

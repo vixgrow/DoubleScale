@@ -62,6 +62,14 @@ final class Module extends AbstractModule {
 		return true;
 	}
 
+	public function onActivate(): void {
+		\DoubleScale\Core\UserRoles\UserRoles::provision_support_roles();
+	}
+
+	public function onDeactivate(): void {
+		\DoubleScale\Core\UserRoles\UserRoles::deprovision_support_roles();
+	}
+
 	public function dependencies(): array {
 		// `activities` carries ticket replies/notes; `contacts` holds the
 		// customer identity; `emails` provides the outbound rendering /

@@ -78,61 +78,14 @@ final class UserRoles {
 	 * @since 1.0.0
 	 */
 	public static function add_roles_and_capabilities() {
-		// Support roles are provisioned in the free plugin so customer-support
-		// teams can be set up without owning a Pro license. CRM roles (Sales
-		// Rep / Sales Manager / CRM Manager) remain gated to Pro, where the
-		// CRM modules they depend on actually exist.
-		$pro_active = defined( 'DOUBLESCALE_PRO_PLUGIN_FILE' );
-
 		$roles = self::get_roles();
 
 		foreach ( $roles as $role => $label ) {
-			$is_support_role = in_array( $role, array( self::SUPPORT_AGENT, self::SUPPORT_MANAGER ), true );
-			if ( ! $pro_active && ! $is_support_role ) {
+			if ( ! self::is_role_module_enabled( $role ) ) {
 				continue;
 			}
 
-			if ( $role === self::CRM_MANAGER ) {
-				$capabilities = self::get_crm_manager_capabilities();
-			} elseif ( $role === self::SALES_MANAGER ) {
-				$capabilities = self::get_sales_manager_capabilities();
-			} elseif ( $role === self::SALES_REP ) {
-				$capabilities = self::get_sales_rep_capabilities();
-			} elseif ( $role === self::SUPPORT_MANAGER ) {
-				$capabilities = self::get_support_manager_capabilities();
-			} elseif ( $role === self::SUPPORT_AGENT ) {
-				$capabilities = self::get_support_agent_capabilities();
-			} else {
-				continue;
-			}
-
-			$capabilities = array_fill_keys( $capabilities, true );
-
-			if ( ! get_role( $role ) ) {
-				add_role( $role, $label, $capabilities );
-			} else {
-				$role_obj = get_role( $role );
-
-				// Add the caps this role should currently have.
-				foreach ( $capabilities as $cap => $grant ) {
-					$role_obj->add_cap( $cap, $grant );
-				}
-
-				// SYNC: strip any DoubleScale cap the role still carries but is
-				// no longer in its definition. Without this, removing a cap from
-				// get_capabilities() would never take effect for already-
-				// provisioned roles (add_cap is additive). Scoped to our own
-				// `doublescale_` caps so we never touch WP/WC core capabilities
-				// (e.g. `list_users`, `read`) the role legitimately holds.
-				foreach ( self::all_capabilities() as $known_cap ) {
-					if ( 0 !== strpos( $known_cap, self::PREFIX ) ) {
-						continue; // Skip non-DoubleScale caps (read, list_users, …).
-					}
-					if ( ! isset( $capabilities[ $known_cap ] ) && $role_obj->has_cap( $known_cap ) ) {
-						$role_obj->remove_cap( $known_cap );
-					}
-				}
-			}
+			self::provision_role( $role );
 		}
 
 		// Administrators always get every CRM + Support cap so they can see
@@ -147,6 +100,253 @@ final class UserRoles {
 				$admin_role->add_cap( $capability, true );
 			}
 		}
+	}
+
+	/**
+	 * Add one DoubleScale role with its caps if missing, else sync caps.
+	 *
+	 * @param string $role Role slug from {@see get_roles()}.
+	 * @return void
+	 */
+	public static function provision_role( string $role ): void {
+		$roles = self::get_roles();
+		if ( ! isset( $roles[ $role ] ) ) {
+			return;
+		}
+
+		$capabilities = self::get_role_capability_list( $role );
+		if ( null === $capabilities ) {
+			return;
+		}
+
+		$capabilities = array_fill_keys( $capabilities, true );
+		$label        = $roles[ $role ];
+
+		if ( ! get_role( $role ) ) {
+			add_role( $role, $label, $capabilities );
+			return;
+		}
+
+		$role_obj = get_role( $role );
+
+		foreach ( $capabilities as $cap => $grant ) {
+			$role_obj->add_cap( $cap, $grant );
+		}
+
+		foreach ( self::all_capabilities() as $known_cap ) {
+			if ( 0 !== strpos( $known_cap, self::PREFIX ) ) {
+				continue;
+			}
+			if ( ! isset( $capabilities[ $known_cap ] ) && $role_obj->has_cap( $known_cap ) ) {
+				$role_obj->remove_cap( $known_cap );
+			}
+		}
+	}
+
+	/**
+	 * Remove a DoubleScale role definition from `wp_user_roles` only. User
+	 * assignments in `wp_usermeta` are preserved so re-enabling the module
+	 * restores caps without re-assigning the team.
+	 *
+	 * @param string $role Role slug.
+	 * @return void
+	 */
+	public static function deprovision_role( string $role ): void {
+		if ( get_role( $role ) ) {
+			remove_role( $role );
+		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function provision_support_roles(): void {
+		self::provision_role( self::SUPPORT_MANAGER );
+		self::provision_role( self::SUPPORT_AGENT );
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function deprovision_support_roles(): void {
+		self::deprovision_role( self::SUPPORT_MANAGER );
+		self::deprovision_role( self::SUPPORT_AGENT );
+	}
+
+	/**
+	 * Provision Sales Rep + Sales Manager only. CRM Manager is org admin and
+	 * is not tied to the deals module toggle.
+	 *
+	 * @return void
+	 */
+	public static function provision_crm_roles(): void {
+		self::provision_role( self::SALES_REP );
+		self::provision_role( self::SALES_MANAGER );
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function deprovision_crm_roles(): void {
+		self::deprovision_role( self::SALES_REP );
+		self::deprovision_role( self::SALES_MANAGER );
+	}
+
+	/**
+	 * DoubleScale roles owned by a toggleable module (for disable warnings).
+	 *
+	 * @param string $module_slug Module slug (`support`, `deals`, …).
+	 * @return array<int, string>
+	 */
+	public static function get_role_slugs_for_module( string $module_slug ): array {
+		if ( 'support' === $module_slug ) {
+			return array( self::SUPPORT_MANAGER, self::SUPPORT_AGENT );
+		}
+
+		if ( 'deals' === $module_slug ) {
+			return array( self::SALES_REP, self::SALES_MANAGER );
+		}
+
+		return array();
+	}
+
+	/**
+	 * Team members who currently hold a role tied to the given module.
+	 *
+	 * @param string $module_slug Module slug.
+	 * @return array<int, array{id: int, name: string, email: string, roles: array<int, string>}>
+	 */
+	public static function get_users_with_module_roles( string $module_slug ): array {
+		$roles = self::get_role_slugs_for_module( $module_slug );
+		if ( empty( $roles ) ) {
+			return array();
+		}
+
+		$users   = get_users(
+			array(
+				'role__in' => $roles,
+				'orderby'  => 'display_name',
+				'order'    => 'ASC',
+			)
+		);
+		$payload = array();
+
+		foreach ( $users as $user ) {
+			$matched_roles = array_values( array_intersect( (array) $user->roles, $roles ) );
+			if ( empty( $matched_roles ) ) {
+				continue;
+			}
+
+			$payload[] = array(
+				'id'    => (int) $user->ID,
+				'name'  => (string) $user->display_name,
+				'email' => (string) $user->user_email,
+				'roles' => $matched_roles,
+			);
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Role slugs that require DoubleScale Pro (CRM + pipeline/deals roles).
+	 *
+	 * @return array<int, string>
+	 */
+	public static function get_pro_role_slugs(): array {
+		return array(
+			self::CRM_MANAGER,
+			self::SALES_MANAGER,
+			self::SALES_REP,
+		);
+	}
+
+	/**
+	 * Provision every Pro-gated role. Sales roles are skipped when the deals
+	 * module is toggled off.
+	 *
+	 * @return void
+	 */
+	public static function provision_pro_roles(): void {
+		if ( ! self::is_pro_addon_active() ) {
+			return;
+		}
+
+		self::provision_role( self::CRM_MANAGER );
+
+		if ( ! function_exists( 'doublescale_is_module_active' ) || doublescale_is_module_active( 'deals' ) ) {
+			self::provision_crm_roles();
+		}
+	}
+
+	/**
+	 * Remove Pro-gated role definitions from wp_user_roles. User assignments
+	 * in usermeta are preserved for when Pro is re-activated.
+	 *
+	 * @return void
+	 */
+	public static function deprovision_pro_roles(): void {
+		self::deprovision_role( self::CRM_MANAGER );
+		self::deprovision_crm_roles();
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function is_pro_addon_active(): bool {
+		if ( function_exists( 'doublescale_is_pro_addon_active' ) ) {
+			return doublescale_is_pro_addon_active();
+		}
+
+		return defined( 'DOUBLESCALE_PRO_PLUGIN_FILE' );
+	}
+
+	/**
+	 * @param string $plugin Plugin basename relative to wp-content/plugins.
+	 * @return void
+	 */
+	public static function handle_pro_plugin_activated( string $plugin ): void {
+		if ( 'doublescale-pro/doublescale-pro.php' !== $plugin ) {
+			return;
+		}
+
+		self::provision_pro_roles();
+	}
+
+	/**
+	 * @param string $plugin Plugin basename relative to wp-content/plugins.
+	 * @return void
+	 */
+	public static function handle_pro_plugin_deactivated( string $plugin ): void {
+		if ( 'doublescale-pro/doublescale-pro.php' !== $plugin ) {
+			return;
+		}
+
+		self::deprovision_pro_roles();
+	}
+
+	/**
+	 * @param string $role Role slug.
+	 * @return array<int, string>|null
+	 */
+	private static function get_role_capability_list( string $role ): ?array {
+		if ( $role === self::CRM_MANAGER ) {
+			return self::get_crm_manager_capabilities();
+		}
+		if ( $role === self::SALES_MANAGER ) {
+			return self::get_sales_manager_capabilities();
+		}
+		if ( $role === self::SALES_REP ) {
+			return self::get_sales_rep_capabilities();
+		}
+		if ( $role === self::SUPPORT_MANAGER ) {
+			return self::get_support_manager_capabilities();
+		}
+		if ( $role === self::SUPPORT_AGENT ) {
+			return self::get_support_agent_capabilities();
+		}
+
+		return null;
 	}
 
 	/**
@@ -294,15 +494,204 @@ final class UserRoles {
 	}
 
 	/**
-	 * Returns the list of role slugs that can be assigned through the Team
-	 * settings UI / REST endpoints. Centralized so REST validation and UI
-	 * stay in sync — any role added to {@see get_roles()} is automatically
-	 * assignable.
+	 * Whether a DoubleScale role should exist / grant caps given Pro + module state.
+	 *
+	 * @param string $role Role slug.
+	 * @return bool
+	 */
+	public static function is_role_module_enabled( string $role ): bool {
+		if ( ! isset( self::get_roles()[ $role ] ) ) {
+			return false;
+		}
+
+		$pro_active    = self::is_pro_addon_active();
+		$is_support    = in_array( $role, array( self::SUPPORT_AGENT, self::SUPPORT_MANAGER ), true );
+		$is_deals_role = in_array( $role, array( self::SALES_REP, self::SALES_MANAGER ), true );
+
+		if ( ! $pro_active && ! $is_support ) {
+			return false;
+		}
+
+		if ( $is_support && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'support' ) ) {
+			return false;
+		}
+
+		if ( $is_deals_role && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'deals' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the role may be assigned to a user (module on + role definition exists).
+	 *
+	 * @param string $role Role slug.
+	 * @return bool
+	 */
+	public static function is_role_assignable( string $role ): bool {
+		if ( ! self::is_role_module_enabled( $role ) ) {
+			return false;
+		}
+
+		return null !== get_role( $role );
+	}
+
+	/**
+	 * Every DoubleScale role slug (for listing team members and resolving
+	 * effective roles — includes roles whose module is temporarily off).
+	 *
+	 * @return array<int, string>
+	 */
+	public static function get_known_role_slugs(): array {
+		return array_keys( self::get_roles() );
+	}
+
+	/**
+	 * Returns the list of role slugs that can be newly assigned through the Team
+	 * settings UI / REST endpoints. Module-disabled roles stay on existing users
+	 * but cannot be added until the module is turned back on.
 	 *
 	 * @return array<int, string>
 	 */
 	public static function get_assignable_role_slugs(): array {
-		return array_keys( self::get_roles() );
+		return array_values(
+			array_filter(
+				self::get_known_role_slugs(),
+				array( self::class, 'is_role_assignable' )
+			)
+		);
+	}
+
+	/**
+	 * Remove role definitions that belong to a disabled module (covers manual
+	 * tampering with the `user_roles` option in wp_options).
+	 *
+	 * @return void
+	 */
+	public static function enforce_module_scoped_roles(): void {
+		foreach ( array_keys( self::get_roles() ) as $role ) {
+			if ( self::is_role_module_enabled( $role ) ) {
+				continue;
+			}
+			self::deprovision_role( $role );
+		}
+	}
+
+	/**
+	 * Block assignment paths outside the Team UI (WP Users screen, direct API).
+	 *
+	 * @return void
+	 */
+	public static function register_enforcement_hooks(): void {
+		add_action( 'init', array( self::class, 'enforce_module_scoped_roles' ), 1 );
+		add_filter( 'editable_roles', array( self::class, 'filter_editable_roles' ) );
+		add_filter( 'user_has_cap', array( self::class, 'filter_capabilities_for_module_state' ), 99, 4 );
+		add_action( 'activated_plugin', array( self::class, 'handle_pro_plugin_activated' ), 10, 1 );
+		add_action( 'deactivated_plugin', array( self::class, 'handle_pro_plugin_deactivated' ), 10, 1 );
+	}
+
+	/**
+	 * @param array<string, string> $roles Editable roles for the Users screen.
+	 * @return array<string, string>
+	 */
+	public static function filter_editable_roles( array $roles ): array {
+		foreach ( array_keys( self::get_roles() ) as $slug ) {
+			if ( ! self::is_role_assignable( $slug ) && isset( $roles[ $slug ] ) ) {
+				unset( $roles[ $slug ] );
+			}
+		}
+
+		return $roles;
+	}
+
+	/**
+	 * Deny DoubleScale caps when the owning module is off, even if someone
+	 * re-inserted the role into wp_options or assigned it directly.
+	 *
+	 * @param array<string, bool> $allcaps All capabilities for the user.
+	 * @param array<int, string>  $caps    Requested capabilities.
+	 * @param array<int, mixed>   $args    Capability check args.
+	 * @param \WP_User            $user    User object.
+	 * @return array<string, bool>
+	 */
+	public static function filter_capabilities_for_module_state( $allcaps, $caps, $args, $user ) {
+		if ( ! $user instanceof \WP_User ) {
+			return $allcaps;
+		}
+
+		if ( in_array( self::ADMINISTRATOR, (array) $user->roles, true ) ) {
+			return $allcaps;
+		}
+
+		$user_roles = (array) $user->roles;
+
+		foreach ( $user_roles as $role ) {
+			if ( ! isset( self::get_roles()[ $role ] ) || self::is_role_module_enabled( $role ) ) {
+				continue;
+			}
+
+			$role_caps = self::get_role_capability_list( $role );
+			if ( null === $role_caps ) {
+				continue;
+			}
+
+			foreach ( $role_caps as $cap ) {
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'support' ) ) {
+			foreach ( self::get_support_capability_slugs() as $cap ) {
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		if (
+			function_exists( 'doublescale_is_module_active' )
+			&& ! doublescale_is_module_active( 'deals' )
+			&& ! in_array( self::CRM_MANAGER, $user_roles, true )
+		) {
+			foreach ( self::get_deals_capability_slugs() as $cap ) {
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private static function get_support_capability_slugs(): array {
+		$caps = self::get_capabilities();
+
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['support_common'],
+					$caps[ self::SUPPORT_MANAGER ],
+					$caps[ self::SUPPORT_AGENT ]
+				)
+			)
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private static function get_deals_capability_slugs(): array {
+		$caps = self::get_capabilities();
+
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['crm_common'],
+					$caps[ self::SALES_REP ],
+					$caps[ self::SALES_MANAGER ]
+				)
+			)
+		);
 	}
 
 	/**
@@ -319,7 +708,7 @@ final class UserRoles {
 	 * @return string|null The highest-priority assignable role, or null if none match.
 	 */
 	public static function get_highest_role( array $roles ): ?string {
-		foreach ( self::get_assignable_role_slugs() as $role ) {
+		foreach ( self::get_known_role_slugs() as $role ) {
 			if ( in_array( $role, $roles, true ) ) {
 				return $role;
 			}
@@ -467,7 +856,7 @@ final class UserRoles {
 	 * Bump this string when the role-to-capability map changes so existing
 	 * installs re-run {@see add_roles_and_capabilities()} on next boot.
 	 */
-	private const ROLES_PROVISION_VERSION = '2026-05-25-view-admin-dashboard';
+	private const ROLES_PROVISION_VERSION = '2026-06-09-module-scoped-roles';
 
 	/**
 	 * Allow logged-in users with any DoubleScale role to bypass WooCommerce's

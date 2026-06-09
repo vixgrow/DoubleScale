@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\ModuleManager;
+use DoubleScale\Core\UserRoles\UserRoles;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -27,6 +28,25 @@ class RestModulesController extends RestController {
 	protected $rest_base = 'modules';
 
 	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/role-impact',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_module_role_impact' ),
+					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'args'                => array(
+						'slug' => array(
+							'required' => true,
+							'type'     => 'string',
+							'enum'     => array( 'support', 'deals' ),
+						),
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -58,6 +78,45 @@ class RestModulesController extends RestController {
 			);
 		}
 		return true;
+	}
+
+	/**
+	 * Users assigned to roles that depend on a module (for disable warnings).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_module_role_impact( $request ) {
+		$slug  = (string) $request->get_param( 'slug' );
+		$roles = UserRoles::get_role_slugs_for_module( $slug );
+
+		if ( empty( $roles ) ) {
+			return new WP_Error(
+				'invalid_module',
+				__( 'This module does not have team roles tied to it.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$all_roles   = UserRoles::get_roles();
+		$role_labels = array();
+		foreach ( $roles as $role_slug ) {
+			if ( isset( $all_roles[ $role_slug ] ) ) {
+				$role_labels[] = $all_roles[ $role_slug ];
+			}
+		}
+
+		$users = UserRoles::get_users_with_module_roles( $slug );
+
+		return new WP_REST_Response(
+			array(
+				'slug'        => $slug,
+				'user_count'  => count( $users ),
+				'users'       => $users,
+				'role_labels' => $role_labels,
+			),
+			200
+		);
 	}
 
 	/**

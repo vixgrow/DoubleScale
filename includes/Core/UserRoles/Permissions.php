@@ -266,7 +266,7 @@ final class Permissions {
 	 */
 	public static function check_user_has_role( $user_id ) {
 		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, UserRoles::get_assignable_role_slugs(), true );
+		return in_array( $user_role, UserRoles::get_known_role_slugs(), true );
 	}
 
 

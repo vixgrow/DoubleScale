@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { __ } from '@wordpress/i18n';
+import React, { useState, useEffect, useCallback } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { CRMUser } from '@doublescale/services/user-management';
-import { ManagerRole, ManagerRoleOptions } from './types';
+import Config from '@doublescale/config';
+import { useModulesEnabled } from '@doublescale/hooks/use-module-enabled';
+import {
+	ManagerRole,
+	ManagerRoleModuleRequirements,
+	ManagerRoleOptions,
+	ManagerRoleProRequirements,
+} from './types';
 import {
 	CustomDialogHeader,
 	GradientAddContactIcon,
@@ -52,6 +59,34 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	const [error, setError] = useState<string>('');
 
 	const availableRoles = ManagerRoleOptions;
+	const moduleFlags = useModulesEnabled( [ 'support', 'deals' ] );
+	const isProActive = Boolean( Config.getProPluginData()?.is_active );
+
+	const getModuleLabel = useCallback( ( slug: string ) => {
+		return (
+			Config.getModules().find( ( mod ) => mod.slug === slug )?.label ??
+			slug
+		);
+	}, [] );
+
+	const isRoleAssignable = useCallback(
+		( roleId: ManagerRole ) => {
+			if (
+				ManagerRoleProRequirements.includes( roleId ) &&
+				! isProActive
+			) {
+				return false;
+			}
+
+			const moduleSlug = ManagerRoleModuleRequirements[ roleId ];
+			if ( ! moduleSlug ) {
+				return true;
+			}
+
+			return moduleFlags[ moduleSlug ] ?? false;
+		},
+		[ isProActive, moduleFlags ]
+	);
 
 	const isEditMode = mode === 'edit';
 
@@ -86,14 +121,20 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	}, [manager, mode, isEditMode]);
 
 	const handleRoleToggle = (roleId: ManagerRole, checked: boolean) => {
-		setSelectedRoles((prev) =>
+		if ( checked && ! isRoleAssignable( roleId ) ) {
+			return;
+		}
+
+		setSelectedRoles( ( prev ) =>
 			checked
-				? prev.includes(roleId)
+				? prev.includes( roleId )
 					? prev
-					: [...prev, roleId]
-				: prev.filter((r) => r !== roleId)
+					: [ ...prev, roleId ]
+				: prev.filter( ( r ) => r !== roleId )
 		);
-		if (error) setError(''); // Clear error when user changes roles
+		if ( error ) {
+			setError( '' );
+		}
 	};
 
 	const handleUserChange = (
@@ -288,31 +329,76 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 							)}
 						</p>
 
-						<div className="space-y-2">
-							{availableRoles.map((role) => (
-								<div
-									key={role.id}
-									className="flex items-center space-x-3"
-								>
-									<Checkbox
-										id={role.id}
-										checked={selectedRoles.includes(role.id)}
-										onCheckedChange={(checked) =>
-											handleRoleToggle(
-												role.id,
-												checked === true
-											)
-										}
-										className="h-5 w-5"
-									/>
-									<Label
-										htmlFor={role.id}
-										className="text-sm font-normal text-gray-700 cursor-pointer"
-									>
-										{__(role.label, 'doublescale')}
-									</Label>
-								</div>
-							))}
+						<div className="space-y-3">
+							{availableRoles.map( ( role ) => {
+								const moduleSlug =
+									ManagerRoleModuleRequirements[ role.id ];
+								const requiresPro =
+									ManagerRoleProRequirements.includes(
+										role.id
+									);
+								const roleAssignable = isRoleAssignable(
+									role.id
+								);
+								const isAssigned = selectedRoles.includes(
+									role.id
+								);
+								const checkboxDisabled =
+									! roleAssignable && ! isAssigned;
+
+								return (
+									<div key={role.id} className="space-y-1">
+										<div className="flex items-center space-x-3">
+											<Checkbox
+												id={role.id}
+												checked={isAssigned}
+												disabled={checkboxDisabled}
+												onCheckedChange={( checked ) =>
+													handleRoleToggle(
+														role.id,
+														checked === true
+													)
+												}
+												className="h-5 w-5"
+											/>
+											<Label
+												htmlFor={role.id}
+												className={
+													checkboxDisabled
+														? 'text-sm font-normal text-gray-400 cursor-not-allowed'
+														: 'text-sm font-normal text-gray-700 cursor-pointer'
+												}
+											>
+												{__( role.label, 'doublescale' )}
+											</Label>
+										</div>
+										{ requiresPro && ! isProActive && (
+											<p className="text-xs text-amber-700 pl-8">
+												{__(
+													'Activate DoubleScale Pro to assign this role.',
+													'doublescale'
+												)}
+											</p>
+										) }
+										{ roleAssignable === false &&
+											moduleSlug &&
+											( requiresPro ? isProActive : true ) && (
+												<p className="text-xs text-amber-700 pl-8">
+													{sprintf(
+														/* translators: %s: module label from Settings → Modules */
+														__(
+															'Enable the %s module in Settings → Modules to assign this role.',
+															'doublescale'
+														),
+														getModuleLabel(
+															moduleSlug
+														)
+													)}
+												</p>
+											) }
+									</div>
+								);
+							} ) }
 						</div>
 					</div>
 

@@ -115,7 +115,7 @@ class RestUserManagementController extends RestController {
 							'type'     => 'array',
 							'items'    => array(
 								'type' => 'string',
-								'enum' => UserRoles::get_assignable_role_slugs(),
+								'enum' => UserRoles::get_known_role_slugs(),
 							),
 						),
 						'role'  => array(
@@ -148,7 +148,7 @@ class RestUserManagementController extends RestController {
 							'type'     => 'array',
 							'items'    => array(
 								'type' => 'string',
-								'enum' => UserRoles::get_assignable_role_slugs(),
+								'enum' => UserRoles::get_known_role_slugs(),
 							),
 						),
 					),
@@ -183,18 +183,18 @@ class RestUserManagementController extends RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_crm_users( $request ) {
-		$crm_roles = UserRoles::get_assignable_role_slugs();
+		$known_roles = UserRoles::get_known_role_slugs();
 
 		$users = get_users(
 			array(
-				'role__in' => $crm_roles,
+				'role__in' => $known_roles,
 			)
 		);
 
 		$formatted_users = array();
 
 		foreach ( $users as $user ) {
-			$user_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
+			$user_crm_roles = array_values( array_intersect( $user->roles, $known_roles ) );
 
 			$formatted_users[] = array(
 				'id'         => $user->ID,
@@ -240,7 +240,7 @@ class RestUserManagementController extends RestController {
 		}
 
 		if ( $filter_crm_users ) {
-			$user_args['role__in'] = array_merge( UserRoles::get_assignable_role_slugs(), array( UserRoles::ADMINISTRATOR ) );
+			$user_args['role__in'] = array_merge( UserRoles::get_known_role_slugs(), array( UserRoles::ADMINISTRATOR ) );
 		}
 
 		$users = get_users( $user_args );
@@ -310,21 +310,26 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_already_has_crm_role', 'User already has a CRM role.', array( 'status' => 400 ) );
 		}
 
-		$crm_roles = UserRoles::get_assignable_role_slugs();
+		$known_roles      = UserRoles::get_known_role_slugs();
+		$assignable_roles = UserRoles::get_assignable_role_slugs();
+		$requested_roles  = array_values( array_intersect( (array) $roles, $known_roles ) );
 
 		// Add new CRM roles FIRST so listeners on doublescale_user_role_revoked
 		// don't observe a transient zero-roles state if any of the existing roles
 		// need to be removed afterward. (Same race as assign_crm_role.)
-		foreach ( $roles as $role ) {
-			if ( in_array( $role, $crm_roles, true ) && ! in_array( $role, (array) $user->roles, true ) ) {
+		foreach ( $requested_roles as $role ) {
+			if ( ! in_array( $role, $assignable_roles, true ) ) {
+				continue;
+			}
+			if ( ! in_array( $role, (array) $user->roles, true ) ) {
 				$user->add_role( $role );
 				do_action( 'doublescale_user_role_assigned', $user->ID, $role );
 			}
 		}
 
-		// Remove any CRM roles the user had that aren't in the new $roles set.
-		foreach ( $crm_roles as $crm_role ) {
-			if ( in_array( $crm_role, (array) $roles, true ) ) {
+		// Remove only roles the admin explicitly left out of the request.
+		foreach ( $known_roles as $crm_role ) {
+			if ( in_array( $crm_role, $requested_roles, true ) ) {
 				continue;
 			}
 			if ( in_array( $crm_role, (array) $user->roles, true ) ) {
@@ -333,7 +338,7 @@ class RestUserManagementController extends RestController {
 			}
 		}
 
-		$assigned_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
+		$assigned_crm_roles = array_values( array_intersect( $user->roles, $known_roles ) );
 
 		return new WP_REST_Response(
 			array(
@@ -374,12 +379,11 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		$crm_roles = UserRoles::get_assignable_role_slugs();
+		$known_roles      = UserRoles::get_known_role_slugs();
+		$assignable_roles = UserRoles::get_assignable_role_slugs();
+		$requested_roles  = array_values( array_intersect( (array) $roles, $known_roles ) );
 
-		// Keep only valid assignable roles from the request.
-		$target_roles = array_values( array_intersect( (array) $roles, $crm_roles ) );
-
-		if ( empty( $target_roles ) ) {
+		if ( empty( $requested_roles ) ) {
 			return new WP_Error( 'invalid_roles', 'Invalid roles provided.', array( 'status' => 400 ) );
 		}
 
@@ -388,16 +392,19 @@ class RestUserManagementController extends RestController {
 		// zero-roles state during the revoke loop. Otherwise the booking module's
 		// purge_host_data() listener triggers mid-swap and deletes the host's
 		// calendar+availability before the new role is added.
-		foreach ( $target_roles as $role ) {
+		foreach ( $requested_roles as $role ) {
+			if ( ! in_array( $role, $assignable_roles, true ) ) {
+				continue;
+			}
 			if ( ! in_array( $role, (array) $user->roles, true ) ) {
 				$user->add_role( $role );
 				do_action( 'doublescale_user_role_assigned', $user->ID, $role );
 			}
 		}
 
-		// Remove any CRM roles the user had that aren't in the new target set.
-		foreach ( $crm_roles as $crm_role ) {
-			if ( in_array( $crm_role, $target_roles, true ) ) {
+		// Remove only roles the admin explicitly left out of the request.
+		foreach ( $known_roles as $crm_role ) {
+			if ( in_array( $crm_role, $requested_roles, true ) ) {
 				continue;
 			}
 			if ( in_array( $crm_role, (array) $user->roles, true ) ) {
@@ -406,7 +413,7 @@ class RestUserManagementController extends RestController {
 			}
 		}
 
-		$assigned_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
+		$assigned_crm_roles = array_values( array_intersect( $user->roles, $known_roles ) );
 
 		return new WP_REST_Response(
 			array(
@@ -437,9 +444,9 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		$crm_roles = UserRoles::get_assignable_role_slugs();
+		$known_roles = UserRoles::get_known_role_slugs();
 
-		foreach ( $crm_roles as $crm_role ) {
+		foreach ( $known_roles as $crm_role ) {
 			if ( in_array( $crm_role, $user->roles, true ) ) {
 				$user->remove_role( $crm_role );
 				do_action( 'doublescale_user_role_revoked', $user->ID, $crm_role );

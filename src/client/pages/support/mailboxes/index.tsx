@@ -520,6 +520,16 @@ const SupportMailboxes: React.FC = () => {
 			return;
 		}
 		const isNew = !editing.id;
+		if (isNew && mailboxes.length >= 1) {
+			setNotice({
+				type: 'error',
+				message: __(
+					'Only one mailbox is allowed.',
+					'doublescale'
+				),
+			});
+			return;
+		}
 		const boxType = editing.box_type || 'web';
 		try {
 			await apiFetch({
@@ -712,14 +722,14 @@ const SupportMailboxes: React.FC = () => {
 				<div className="text-foreground font-semibold text-2xl">
 					{__('Mailboxes', 'doublescale')}
 				</div>
-				{!editing && (
+				{!editing && mailboxes.length === 0 && (
 					<Button
 						variant="gradient"
 						className="rounded-lg"
 						onClick={() =>
 							setEditing({
 								box_type: 'web',
-								is_default: mailboxes.length === 0,
+								is_default: true,
 								identity: { from_email: '' },
 								notifications: seedTemplateMap(
 									undefined,
@@ -1315,86 +1325,82 @@ const SupportMailboxes: React.FC = () => {
 											>
 												<SettingsIcon className="w-4 h-4" />
 											</Button>
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button
-														variant="ghost"
-														size="icon"
-														className="h-9 w-9"
-														aria-label={__(
-															'More options',
-															'doublescale'
-														)}
+											{mailboxes.length > 1 && (
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="ghost"
+															size="icon"
+															className="h-9 w-9"
+															aria-label={__(
+																'More options',
+																'doublescale'
+															)}
+														>
+															<MoreVertical className="w-4 h-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent
+														align="end"
+														className="min-w-[10rem]"
 													>
-														<MoreVertical className="w-4 h-4" />
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent
-													align="end"
-													className="min-w-[10rem]"
-												>
-													{!mb.is_default && (
+														{!mb.is_default && (
+															<DropdownMenuItem
+																className="cursor-pointer gap-2"
+																onSelect={() =>
+																	handleSetAsDefault(
+																		mb.id
+																	)
+																}
+																disabled={
+																	settingDefaultId ===
+																	mb.id
+																}
+															>
+																{settingDefaultId ===
+																mb.id ? (
+																	<Loader2 className="w-4 h-4 animate-spin" />
+																) : (
+																	<FolderCheck className="w-4 h-4" />
+																)}
+																{__(
+																	'Set as Default',
+																	'doublescale'
+																)}
+															</DropdownMenuItem>
+														)}
 														<DropdownMenuItem
 															className="cursor-pointer gap-2"
 															onSelect={() =>
-																handleSetAsDefault(
+																openMoveTickets(
 																	mb.id
 																)
 															}
-															disabled={
-																settingDefaultId ===
-																mb.id
-															}
 														>
-															{settingDefaultId ===
-															mb.id ? (
-																<Loader2 className="w-4 h-4 animate-spin" />
-															) : (
-																<FolderCheck className="w-4 h-4" />
-															)}
+															<Pencil className="w-4 h-4" />
 															{__(
-																'Set as Default',
+																'Move Tickets',
 																'doublescale'
 															)}
 														</DropdownMenuItem>
-													)}
-													<DropdownMenuItem
-														className="cursor-pointer gap-2"
-														onSelect={() =>
-															openMoveTickets(
-																mb.id
-															)
-														}
-														disabled={
-															mailboxes.length <=
-															1
-														}
-													>
-														<Pencil className="w-4 h-4" />
-														{__(
-															'Move Tickets',
-															'doublescale'
-														)}
-													</DropdownMenuItem>
-													<DropdownMenuItem
-														className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-														onSelect={() =>
-															openDelete(mb.id)
-														}
-														disabled={
-															mb.is_default ||
-															mailboxes.length <=
-																1
-														}
-													>
-														<Trash2 className="w-4 h-4" />
-														{__(
-															'Delete',
-															'doublescale'
-														)}
-													</DropdownMenuItem>
-												</DropdownMenuContent>
-											</DropdownMenu>
+														<DropdownMenuItem
+															className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
+															onSelect={() =>
+																openDelete(mb.id)
+															}
+															disabled={
+																mb.is_default
+															}
+														>
+															<Trash2 className="w-4 h-4" />
+															{__(
+																'Delete',
+																'doublescale'
+															)}
+														</DropdownMenuItem>
+													</DropdownMenuContent>
+												</DropdownMenu>
+											)}
 										</div>
 									</li>
 								))}

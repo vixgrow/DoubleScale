@@ -77,7 +77,6 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'inbox',
 		'integrations',
 		'leadscoring',
-		'notifications',
 		'tasks',
 	);
 
@@ -128,11 +127,6 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Lead scoring', 'doublescale' ),
 				'description' => __( 'Score contacts from behavior and profile data for prioritization.', 'doublescale' ),
-			);
-		case 'notifications':
-			return array(
-				'label'       => __( 'Notifications', 'doublescale' ),
-				'description' => __( 'In-app and push notifications for campaigns, deals, tasks, and more.', 'doublescale' ),
 			);
 		case 'tasks':
 			return array(

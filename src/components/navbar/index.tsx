@@ -103,7 +103,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	integrations: 'system',
 	'smtp/:tab?': 'system',
 	'team-managers': 'system',
-	'settings/:tab?': 'system',
+	'settings/:tab?/:subtab?': 'system',
 	extensions: 'system',
 };
 
@@ -379,7 +379,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					// Unlike `booking` (whose parent path only redirects), the
 					// `support` parent path IS the inbox, so the first child
 					// links back to it explicitly. The group reads Inbox /
-					// Mailboxes / Custom fields (Pro replaces the page; free upsells).
+					// Reports / Mailboxes / Custom fields / Incoming Webhook /
+					// Auto close (Pro replaces the page; free upsells).
 					navItem.subMenu = [
 						{ path: 'support', label: __('Inbox', 'doublescale') },
 						{ path: 'support/reports', label: __('Reports', 'doublescale') },
@@ -393,6 +394,20 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{
 							path: 'support/custom-fields',
 							label: __('Custom fields', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_support_settings',
+							],
+						},
+						{
+							path: 'support/incoming-webhook',
+							label: __('Incoming Webhook', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_support_settings',
+							],
+						},
+						{
+							path: 'support/auto-close',
+							label: __('Auto close', 'doublescale'),
 							requiredCapability: [
 								'doublescale_manage_support_settings',
 							],

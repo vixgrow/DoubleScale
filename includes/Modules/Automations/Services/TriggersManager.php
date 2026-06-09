@@ -300,6 +300,17 @@ final class TriggersManager {
 					),
 				),
 			),
+			'support'     => array(
+				'label'  => __( 'Support', 'doublescale' ),
+				'groups' => array(
+					'support' => array(
+						'label'       => __( 'Support', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'support' ),
+					),
+				),
+			),
 			'forms'       => array(
 				'label'  => __( 'Forms', 'doublescale' ),
 				'groups' => array(),

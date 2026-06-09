@@ -40,6 +40,7 @@ import {
 	MoreVertical,
 	Info,
 	FolderCheck,
+	Bell,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,8 @@ import ConfigAPI from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { FromEmailSelector } from '@/components/from-email-selector';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import type { VerifiedSender } from '@/shared/config/types/config-data';
 import AttachmentLimitsCard from './attachment-limits-card';
 
@@ -191,7 +194,14 @@ const seedTemplateMap = (
 			if (typeof s.subject === 'string' && s.subject.trim()) {
 				base.subject = s.subject;
 			}
-			if (typeof s.body === 'string' && s.body.trim()) {
+			// Use the meaningful-content check (not a bare trim) so a
+			// legacy empty Lexical body (`<p><br></p>`) is treated as
+			// blank and falls back to the built-in default copy instead
+			// of rendering an empty paragraph in the customer email.
+			if (
+				typeof s.body === 'string' &&
+				htmlEditorHasMeaningfulContent(s.body)
+			) {
 				base.body = s.body;
 			}
 		}
@@ -251,14 +261,22 @@ const NotificationTemplatesEditor: React.FC<{
 										})
 									}
 								/>
-								<textarea
-									className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-									rows={5}
-									value={tpl.body}
+								<SupportRichText
+									message={tpl.body}
 									placeholder={__('Body', 'doublescale')}
-									onChange={(e) =>
+									onChange={(html) =>
 										setTemplate(evt.key, {
-											body: e.target.value,
+											// Normalize Lexical's empty `<p><br></p>` to
+											// '' so clearing the body reverts to the
+											// built-in default on reload (seedTemplateMap
+											// keeps a body only when it has real content).
+											// Otherwise an "empty" editor would persist a
+											// blank paragraph as the email body.
+											body: htmlEditorHasMeaningfulContent(
+												html
+											)
+												? html
+												: '',
 										})
 									}
 								/>
@@ -387,6 +405,7 @@ const PortalShortcodeCard: React.FC<{ boxId: number }> = ({ boxId }) => {
 };
 
 const SupportMailboxes: React.FC = () => {
+	const navigate = useNavigate();
 	const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
 	const [smtpSenders, setSmtpSenders] = useState<VerifiedSender[]>([]);
 	const [receivableEmails, setReceivableEmails] = useState<string[]>([]);
@@ -520,6 +539,16 @@ const SupportMailboxes: React.FC = () => {
 			return;
 		}
 		const isNew = !editing.id;
+		if (isNew && mailboxes.length >= 1) {
+			setNotice({
+				type: 'error',
+				message: __(
+					'Only one mailbox is allowed.',
+					'doublescale'
+				),
+			});
+			return;
+		}
 		const boxType = editing.box_type || 'web';
 		try {
 			await apiFetch({
@@ -708,18 +737,36 @@ const SupportMailboxes: React.FC = () => {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<div className="text-foreground font-semibold text-2xl">
-					{__('Mailboxes', 'doublescale')}
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<div className="text-foreground font-semibold text-2xl">
+						{__('Mailboxes', 'doublescale')}
+					</div>
+					<button
+						type="button"
+						onClick={() =>
+							navigate(
+								getToLink('settings/notifications/support')
+							)
+						}
+						className="mt-1 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+					>
+						<Bell className="w-3.5 h-3.5" />
+						{__(
+							'Manage your support notification settings',
+							'doublescale'
+						)}
+						<ArrowRight className="w-3 h-3" />
+					</button>
 				</div>
-				{!editing && (
+				{!editing && mailboxes.length === 0 && (
 					<Button
 						variant="gradient"
 						className="rounded-lg"
 						onClick={() =>
 							setEditing({
 								box_type: 'web',
-								is_default: mailboxes.length === 0,
+								is_default: true,
 								identity: { from_email: '' },
 								notifications: seedTemplateMap(
 									undefined,
@@ -1315,86 +1362,82 @@ const SupportMailboxes: React.FC = () => {
 											>
 												<SettingsIcon className="w-4 h-4" />
 											</Button>
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button
-														variant="ghost"
-														size="icon"
-														className="h-9 w-9"
-														aria-label={__(
-															'More options',
-															'doublescale'
-														)}
+											{mailboxes.length > 1 && (
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="ghost"
+															size="icon"
+															className="h-9 w-9"
+															aria-label={__(
+																'More options',
+																'doublescale'
+															)}
+														>
+															<MoreVertical className="w-4 h-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent
+														align="end"
+														className="min-w-[10rem]"
 													>
-														<MoreVertical className="w-4 h-4" />
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent
-													align="end"
-													className="min-w-[10rem]"
-												>
-													{!mb.is_default && (
+														{!mb.is_default && (
+															<DropdownMenuItem
+																className="cursor-pointer gap-2"
+																onSelect={() =>
+																	handleSetAsDefault(
+																		mb.id
+																	)
+																}
+																disabled={
+																	settingDefaultId ===
+																	mb.id
+																}
+															>
+																{settingDefaultId ===
+																mb.id ? (
+																	<Loader2 className="w-4 h-4 animate-spin" />
+																) : (
+																	<FolderCheck className="w-4 h-4" />
+																)}
+																{__(
+																	'Set as Default',
+																	'doublescale'
+																)}
+															</DropdownMenuItem>
+														)}
 														<DropdownMenuItem
 															className="cursor-pointer gap-2"
 															onSelect={() =>
-																handleSetAsDefault(
+																openMoveTickets(
 																	mb.id
 																)
 															}
-															disabled={
-																settingDefaultId ===
-																mb.id
-															}
 														>
-															{settingDefaultId ===
-															mb.id ? (
-																<Loader2 className="w-4 h-4 animate-spin" />
-															) : (
-																<FolderCheck className="w-4 h-4" />
-															)}
+															<Pencil className="w-4 h-4" />
 															{__(
-																'Set as Default',
+																'Move Tickets',
 																'doublescale'
 															)}
 														</DropdownMenuItem>
-													)}
-													<DropdownMenuItem
-														className="cursor-pointer gap-2"
-														onSelect={() =>
-															openMoveTickets(
-																mb.id
-															)
-														}
-														disabled={
-															mailboxes.length <=
-															1
-														}
-													>
-														<Pencil className="w-4 h-4" />
-														{__(
-															'Move Tickets',
-															'doublescale'
-														)}
-													</DropdownMenuItem>
-													<DropdownMenuItem
-														className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-														onSelect={() =>
-															openDelete(mb.id)
-														}
-														disabled={
-															mb.is_default ||
-															mailboxes.length <=
-																1
-														}
-													>
-														<Trash2 className="w-4 h-4" />
-														{__(
-															'Delete',
-															'doublescale'
-														)}
-													</DropdownMenuItem>
-												</DropdownMenuContent>
-											</DropdownMenu>
+														<DropdownMenuItem
+															className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
+															onSelect={() =>
+																openDelete(mb.id)
+															}
+															disabled={
+																mb.is_default
+															}
+														>
+															<Trash2 className="w-4 h-4" />
+															{__(
+																'Delete',
+																'doublescale'
+															)}
+														</DropdownMenuItem>
+													</DropdownMenuContent>
+												</DropdownMenu>
+											)}
 										</div>
 									</li>
 								))}

@@ -40,6 +40,7 @@ import {
 } from '@doublescale/components';
 import { Bell, Blocks, Inbox, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import { NotificationPreferences } from './notification-preferences';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
@@ -102,7 +103,10 @@ const SALES_REP_ALLOWED_TABS = new Set(['notifications', 'mailbox']);
 
 const SettingsPage: React.FC = () => {
 	const navigate = useNavigate();
-	const { tab: urlTab } = useParams<{ tab?: string }>();
+	const { tab: urlTab, subtab: urlSubtab } = useParams<{
+		tab?: string;
+		subtab?: string;
+	}>();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
 	const [settings, setSettings] = useState<Settings | null>(null);
@@ -429,19 +433,17 @@ const SettingsPage: React.FC = () => {
 	case 'modules':
 			return <ModulesSettings />;
 	case 'notifications':
+			// The notification engine + email channel now ship in Free, so the
+			// preferences UI is always available. Bell/desktop/push rows inside
+			// the component are gated off the API's allowed-channels payload, and
+			// the component shows a Pro upsell when those channels are absent.
+			// The filter is retained so Pro (or third parties) can still swap the
+			// whole panel, but Free renders the real component by default.
 			const NotificationsComponent = applyFilters(
 				'doublescale_settings_notifications_settings',
-				() => (
-					<ProFeatureNotice
-						featureName={__('Notification Preferences', 'doublescale')}
-						description={__(
-							'Configure how you receive notifications via bell icon and email with DoubleScale Pro.',
-							'doublescale'
-						)}
-					/>
-				)
-			) as React.ComponentType;
-			return <NotificationsComponent />;
+				NotificationPreferences
+			) as React.ComponentType<{ initialCategory?: string }>;
+			return <NotificationsComponent initialCategory={urlSubtab} />;
 		default: {
 			const DynamicComponent = applyFilters(
 				`doublescale_settings_${currentTab}_settings`,

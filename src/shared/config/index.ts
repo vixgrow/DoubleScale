@@ -20,6 +20,7 @@ import type {
 	ProPluginData,
 	DoubleScaleInfo,
 	UserCapabilities,
+	WhiteLabel,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -131,6 +132,11 @@ const configData: ConfigData = {
 	storeNonce: (serverData.storeNonce as string | undefined) ?? '',
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
 	aiConfigured: Boolean(serverData.aiConfigured),
+	// White-label is a Pro feature; the free server never injects it, so this
+	// stays undefined on free. Kept here so shared components can safely call
+	// getWhiteLabel() regardless of whether Pro is active.
+	whiteLabel: serverData.whiteLabel as WhiteLabel | undefined,
+	whiteLabelShowSettings: Boolean(serverData.whiteLabelShowSettings),
 };
 
 /**
@@ -930,6 +936,13 @@ export interface ConfigApi {
 	getModules: () => ModuleInfo[];
 	setModules: (value: ModuleInfo[]) => void;
 	isAiConfigured: () => boolean;
+	/**
+	 * White-label settings, or `undefined` on free (Pro-only feature). Shared
+	 * components rely on this being present on the API so they don't crash when
+	 * Pro is inactive; Pro's own ConfigAPI overrides it with real data.
+	 */
+	getWhiteLabel: () => WhiteLabel | undefined;
+	isWhiteLabelShowSettings: () => boolean;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -1008,6 +1021,9 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.isModuleToggleEnabled = isModuleToggleEnabled(data);
 	configApi.isModuleActive = isModuleActive(data);
 	configApi.isAiConfigured = () => Boolean(data.aiConfigured);
+	configApi.getWhiteLabel = () => data.whiteLabel;
+	configApi.isWhiteLabelShowSettings = () =>
+		data.whiteLabelShowSettings ?? false;
 	return configApi;
 };
 

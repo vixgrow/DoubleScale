@@ -14,6 +14,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useNotificationPreferences } from '@doublescale/hooks/use-notification-preferences';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 import ConfigAPI from '@/config';
 import {
 	Card,
@@ -61,6 +62,18 @@ interface PushConfig {
 	project_id: string;
 }
 
+/**
+ * Which delivery channels are available on this install. Derived from the
+ * preferences payload's channel keys: free ships email only, Pro unlocks the
+ * rest via the `doublescale_notification_allowed_channels` server filter.
+ */
+interface ChannelsAllowed {
+	bell: boolean;
+	email: boolean;
+	browser: boolean;
+	push: boolean;
+}
+
 // ──────────────────────────────────────────────────────
 // Shared Save Button
 // ──────────────────────────────────────────────────────
@@ -87,6 +100,143 @@ function SaveButton({
 }
 
 // ──────────────────────────────────────────────────────
+// Pro upsell for the locked Bell + Desktop channels (free only)
+// ──────────────────────────────────────────────────────
+function ProChannelsUpsell() {
+	const { handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
+	return (
+		<Card className="border-dashed">
+			<CardContent className="flex items-start justify-between gap-4 py-5">
+				<div className="flex items-start gap-3">
+					<div className="p-2 bg-amber-50 rounded-lg">
+						<Bell className="w-5 h-5 text-amber-600" />
+					</div>
+					<div>
+						<div className="font-medium flex items-center gap-2">
+							{__('Bell & desktop notifications', 'doublescale')}
+							<Badge
+								variant="secondary"
+								className="text-xs px-1.5 py-0"
+							>
+								{__('Pro', 'doublescale')}
+							</Badge>
+						</div>
+						<div className="text-sm text-muted-foreground">
+							{__(
+								'Get in-app bell alerts and desktop notifications with DoubleScale Pro. Email notifications are included free.',
+								'doublescale'
+							)}
+						</div>
+					</div>
+				</div>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => handleUpgradeClick()}
+					className="shrink-0"
+				>
+					{getUpgradeButtonText()}
+				</Button>
+			</CardContent>
+		</Card>
+	);
+}
+
+// ──────────────────────────────────────────────────────
+// Desktop channel column header (Bell / Email / Browser icons)
+//
+// Uses a fixed-width flex group (not a dynamically-built grid template) so the
+// icons line up as real column headers over the per-row switches below. Each
+// channel slot is 56px wide to match the switch slots in `ChannelSwitchRow`.
+// ──────────────────────────────────────────────────────
+function ChannelHeaderIcons({
+	showBell,
+	hasBrowser,
+}: {
+	showBell: boolean;
+	hasBrowser: boolean;
+}) {
+	return (
+		<div className="flex items-center shrink-0">
+			{showBell && (
+				<div className="w-14 flex justify-center text-muted-foreground">
+					<Bell className="w-4 h-4" />
+				</div>
+			)}
+			<div className="w-14 flex justify-center text-muted-foreground">
+				<Mail className="w-4 h-4" />
+			</div>
+			{hasBrowser && (
+				<div className="w-14 flex justify-center text-muted-foreground">
+					<Monitor className="w-4 h-4" />
+				</div>
+			)}
+		</div>
+	);
+}
+
+// ──────────────────────────────────────────────────────
+// One row of per-channel switches (Bell / Email / Browser) for a subcategory.
+// Mirrors the fixed 56px slots in `ChannelHeaderIcons` so columns stay aligned.
+// ──────────────────────────────────────────────────────
+function ChannelSwitchRow({
+	subPrefs,
+	subKey,
+	updateSubcategory,
+	preferences,
+	showBell,
+	hasBrowser,
+	browserPermission,
+}: {
+	subPrefs: { bell: boolean; email: boolean; browser?: boolean };
+	subKey: string;
+	updateSubcategory: ReturnType<typeof useNotificationPreferences>['updateSubcategory'];
+	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
+	showBell: boolean;
+	hasBrowser: boolean;
+	browserPermission: NotificationPermission;
+}) {
+	return (
+		<div className="flex items-center shrink-0">
+			{showBell && (
+				<div className="w-14 flex justify-center">
+					<Switch
+						checked={subPrefs.bell}
+						onCheckedChange={(c) =>
+							updateSubcategory(subKey, 'bell', c)
+						}
+						disabled={!preferences.channels.bell}
+					/>
+				</div>
+			)}
+			<div className="w-14 flex justify-center">
+				<Switch
+					checked={subPrefs.email}
+					onCheckedChange={(c) =>
+						updateSubcategory(subKey, 'email', c)
+					}
+					disabled={!preferences.channels.email}
+				/>
+			</div>
+			{hasBrowser && (
+				<div className="w-14 flex justify-center">
+					<Switch
+						checked={subPrefs.browser ?? true}
+						onCheckedChange={(c) =>
+							updateSubcategory(subKey, 'browser', c)
+						}
+						disabled={
+							!preferences.channels.browser ||
+							browserPermission !== 'granted'
+						}
+					/>
+				</div>
+			)}
+		</div>
+	);
+}
+
+// ──────────────────────────────────────────────────────
 // "Email & Desktop" sub-tab content
 // ──────────────────────────────────────────────────────
 function EmailDesktopTab({
@@ -99,11 +249,13 @@ function EmailDesktopTab({
 	isSaving,
 	onSave,
 	canManageRetentionSettings,
+	channelsAllowed,
 	browserPermission,
 	isRequestingPermission,
 	testNotificationShown,
 	onRequestPermission,
 	onTestNotification,
+	initialCategory,
 }: {
 	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
 	categories: ReturnType<typeof useNotificationPreferences>['categories'];
@@ -114,17 +266,47 @@ function EmailDesktopTab({
 	isSaving: boolean;
 	onSave: () => void;
 	canManageRetentionSettings: boolean;
+	channelsAllowed: ChannelsAllowed;
 	browserPermission: NotificationPermission;
 	isRequestingPermission: boolean;
 	testNotificationShown: boolean;
 	onRequestPermission: () => void;
 	onTestNotification: () => void;
+	initialCategory?: string;
 }) {
-	const hasBrowser = isBrowserNotificationSupported();
-	const [openCategory, setOpenCategory] = useState<string>('');
-	const desktopGridCols = hasBrowser
-		? 'grid-cols-[1fr_60px_60px_60px]'
-		: 'grid-cols-[1fr_60px_60px]';
+	// Bell/browser are Pro channels: only present when Pro unlocked them
+	// server-side (reflected in the preferences payload's channel keys). Browser
+	// additionally requires the runtime Notification API.
+	const showBell = channelsAllowed.bell;
+	const showBrowser = channelsAllowed.browser && isBrowserNotificationSupported();
+	const hasBrowser = showBrowser;
+
+	// Only categories that actually have toggleable subcategories are shown as
+	// tabs (matches the previous matrix, which skipped empty categories).
+	const categoryKeys = useMemo(
+		() =>
+			Object.keys(categories).filter(
+				(key) => Object.keys(subcategories[key] || {}).length > 0
+			),
+		[categories, subcategories]
+	);
+
+	// Active category subtab. Seed from the deep-link target when valid, else the
+	// first category. Re-syncs if the deep-link or the category set changes.
+	const [activeCategory, setActiveCategory] = useState<string>('');
+	useEffect(() => {
+		if (categoryKeys.length === 0) {
+			setActiveCategory('');
+			return;
+		}
+		setActiveCategory((current) => {
+			if (current && categoryKeys.includes(current)) return current;
+			if (initialCategory && categoryKeys.includes(initialCategory)) {
+				return initialCategory;
+			}
+			return categoryKeys[0];
+		});
+	}, [categoryKeys, initialCategory]);
 
 	return (
 		<div className="space-y-6">
@@ -142,31 +324,33 @@ function EmailDesktopTab({
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					{/* Bell */}
-					<div className="flex items-center justify-between">
-						<div className="flex items-start gap-3">
-							<div className="p-2 bg-blue-50 rounded-lg">
-								<Bell className="w-5 h-5 text-blue-600" />
-							</div>
-							<div>
-								<div className="font-medium">
-									{__('In-app (Bell)', 'doublescale')}
+					{/* Bell (Pro channel) */}
+					{showBell && (
+						<div className="flex items-center justify-between">
+							<div className="flex items-start gap-3">
+								<div className="p-2 bg-blue-50 rounded-lg">
+									<Bell className="w-5 h-5 text-blue-600" />
 								</div>
-								<div className="text-sm text-muted-foreground">
-									{__(
-										'Show notifications in the bell icon dropdown.',
-										'doublescale'
-									)}
+								<div>
+									<div className="font-medium">
+										{__('In-app (Bell)', 'doublescale')}
+									</div>
+									<div className="text-sm text-muted-foreground">
+										{__(
+											'Show notifications in the bell icon dropdown.',
+											'doublescale'
+										)}
+									</div>
 								</div>
 							</div>
+							<Switch
+								checked={preferences.channels.bell}
+								onCheckedChange={(checked) =>
+									updateChannel('bell', checked)
+								}
+							/>
 						</div>
-						<Switch
-							checked={preferences.channels.bell}
-							onCheckedChange={(checked) =>
-								updateChannel('bell', checked)
-							}
-						/>
-					</div>
+					)}
 
 					{/* Email */}
 					<div className="flex items-center justify-between">
@@ -254,6 +438,9 @@ function EmailDesktopTab({
 					)}
 				</CardContent>
 			</Card>
+
+			{/* Pro upsell — shown when neither Pro channel is available */}
+			{!showBell && !channelsAllowed.browser && <ProChannelsUpsell />}
 
 			{/* Browser Permission Management */}
 			{hasBrowser && browserPermission !== 'granted' && (
@@ -397,7 +584,9 @@ function EmailDesktopTab({
 				</Card>
 			)}
 
-			{/* Per-Category Toggles — Bell / Email / Browser columns (no push) */}
+			{/* Per-Category Toggles — categories as a subtab rail, the selected
+			    category's subcategories shown with Bell / Email / Browser
+			    switches (no push). */}
 			<Card>
 				<CardHeader>
 					<CardTitle>
@@ -405,50 +594,55 @@ function EmailDesktopTab({
 					</CardTitle>
 					<CardDescription>
 						{__(
-							'Choose which types of notifications you want to receive on desktop.',
+							'Pick a category, then choose which notifications you want on desktop.',
 							'doublescale'
 						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{/* Header */}
-					<div
-						className={`grid gap-4 pb-3 border-b mb-4 ${desktopGridCols}`}
-					>
-						<div className="text-sm font-medium text-muted-foreground">
-							{__('Category', 'doublescale')}
+					{categoryKeys.length === 0 ? (
+						<div className="text-sm text-muted-foreground">
+							{__(
+								'No notification categories are available yet.',
+								'doublescale'
+							)}
 						</div>
-						<div className="text-sm font-medium text-muted-foreground text-center">
-							<Bell className="w-4 h-4 mx-auto" />
-						</div>
-						<div className="text-sm font-medium text-muted-foreground text-center">
-							<Mail className="w-4 h-4 mx-auto" />
-						</div>
-						{hasBrowser && (
-							<div className="text-sm font-medium text-muted-foreground text-center">
-								<Monitor className="w-4 h-4 mx-auto" />
-							</div>
-						)}
-					</div>
+					) : (
+						<Tabs
+							value={activeCategory}
+							onValueChange={setActiveCategory}
+							orientation="vertical"
+							className="flex flex-col gap-6 sm:flex-row sm:gap-8"
+						>
+							{/* Category rail */}
+							<TabsList className="h-auto shrink-0 flex-row flex-wrap gap-1 bg-transparent p-0 sm:w-56 sm:flex-col sm:flex-nowrap sm:items-stretch">
+								{categoryKeys.map((key) => (
+									<TabsTrigger
+										key={key}
+										value={key}
+										className="justify-start rounded-md px-3 py-2 text-left text-sm data-[state=active]:bg-muted data-[state=active]:shadow-none"
+									>
+										{categories[key].label}
+									</TabsTrigger>
+								))}
+							</TabsList>
 
-					<div className="space-y-4">
-						{Object.entries(categories).map(
-							([key, category]) => {
-								const catSubs = subcategories[key] || {};
-								const subEntries = Object.entries(catSubs);
-								if (subEntries.length === 0) return null;
+							{/* Active category panel */}
+							<div className="min-w-0 flex-1">
+								{categoryKeys.map((key) => {
+									const category = categories[key];
+									const catSubs =
+										subcategories[key] || {};
+									const subEntries =
+										Object.entries(catSubs);
 
-								if (subEntries.length === 1) {
-									const [subKey] = subEntries[0];
-									const subPrefs =
-										preferences.subcategories[subKey];
-									if (!subPrefs) return null;
 									return (
-										<div
+										<TabsContent
 											key={key}
-											className={`grid ${desktopGridCols} gap-4 items-center`}
+											value={key}
+											className="mt-0"
 										>
-											<div>
+											<div className="mb-4">
 												<div className="font-medium">
 													{category.label}
 												</div>
@@ -456,202 +650,81 @@ function EmailDesktopTab({
 													{category.description}
 												</div>
 											</div>
-											<div className="flex justify-center">
-												<Switch
-													checked={subPrefs.bell}
-													onCheckedChange={(c) =>
-														updateSubcategory(
-															subKey,
-															'bell',
-															c
-														)
-													}
-													disabled={
-														!preferences
-															.channels.bell
-													}
-												/>
-											</div>
-											<div className="flex justify-center">
-												<Switch
-													checked={subPrefs.email}
-													onCheckedChange={(c) =>
-														updateSubcategory(
-															subKey,
-															'email',
-															c
-														)
-													}
-													disabled={
-														!preferences
-															.channels.email
-													}
-												/>
-											</div>
-											{hasBrowser && (
-												<div className="flex justify-center">
-													<Switch
-														checked={
-															subPrefs.browser ??
-															true
-														}
-														onCheckedChange={(
-															c
-														) =>
-															updateSubcategory(
-																subKey,
-																'browser',
-																c
-															)
-														}
-														disabled={
-															!preferences
-																.channels
-																.browser ||
-															browserPermission !==
-																'granted'
-														}
-													/>
-												</div>
-											)}
-										</div>
-									);
-								}
 
-								return (
-									<Accordion
-										key={key}
-										type="single"
-										collapsible
-										value={openCategory === key ? key : ''}
-										onValueChange={(val) => setOpenCategory(val)}
-									>
-										<AccordionItem value={key}>
-											<AccordionTrigger className="hover:no-underline">
-												<div className="flex-1 text-left">
-													<div className="font-medium">
-														{category.label}
-													</div>
-													<div className="text-sm text-muted-foreground">
-														{
-															category.description
-														}
-													</div>
-												</div>
-											</AccordionTrigger>
-											<AccordionContent>
-												<div className="space-y-3 pt-2 pl-4">
-													{subEntries.map(
-														([
-															subKey,
-															subInfo,
-														]) => {
-															const subPrefs =
-																preferences
-																	.subcategories[
+											{/* Channel column header */}
+											<div className="flex items-center justify-end gap-4 pb-3 border-b mb-3">
+												<ChannelHeaderIcons
+													showBell={showBell}
+													hasBrowser={hasBrowser}
+												/>
+											</div>
+
+											<div className="divide-y">
+												{subEntries.map(
+													([
+														subKey,
+														subInfo,
+													]) => {
+														const subPrefs =
+															preferences
+																.subcategories[
+																subKey
+															];
+														if (!subPrefs)
+															return null;
+														return (
+															<div
+																key={
 																	subKey
-																];
-															if (!subPrefs)
-																return null;
-															return (
-																<div
-																	key={
+																}
+																className="flex items-center justify-between gap-4 py-3"
+															>
+																<div className="min-w-0">
+																	<div className="font-medium text-sm">
+																		{
+																			subInfo.label
+																		}
+																	</div>
+																	<div className="text-xs text-muted-foreground">
+																		{
+																			subInfo.description
+																		}
+																	</div>
+																</div>
+																<ChannelSwitchRow
+																	subPrefs={
+																		subPrefs
+																	}
+																	subKey={
 																		subKey
 																	}
-																	className={`grid ${desktopGridCols} gap-4 items-center`}
-																>
-																	<div>
-																		<div className="font-medium text-sm">
-																			{
-																				subInfo.label
-																			}
-																		</div>
-																		<div className="text-xs text-muted-foreground">
-																			{
-																				subInfo.description
-																			}
-																		</div>
-																	</div>
-																	<div className="flex justify-center">
-																		<Switch
-																			checked={
-																				subPrefs.bell
-																			}
-																			onCheckedChange={(
-																				c
-																			) =>
-																				updateSubcategory(
-																					subKey,
-																					'bell',
-																					c
-																				)
-																			}
-																			disabled={
-																				!preferences
-																					.channels
-																					.bell
-																			}
-																		/>
-																	</div>
-																	<div className="flex justify-center">
-																		<Switch
-																			checked={
-																				subPrefs.email
-																			}
-																			onCheckedChange={(
-																				c
-																			) =>
-																				updateSubcategory(
-																					subKey,
-																					'email',
-																					c
-																				)
-																			}
-																			disabled={
-																				!preferences
-																					.channels
-																					.email
-																			}
-																		/>
-																	</div>
-																	{hasBrowser && (
-																		<div className="flex justify-center">
-																			<Switch
-																				checked={
-																					subPrefs.browser ??
-																					true
-																				}
-																				onCheckedChange={(
-																					c
-																				) =>
-																					updateSubcategory(
-																						subKey,
-																						'browser',
-																						c
-																					)
-																				}
-																				disabled={
-																					!preferences
-																						.channels
-																						.browser ||
-																					browserPermission !==
-																						'granted'
-																				}
-																			/>
-																		</div>
-																	)}
-																</div>
-															);
-														}
-													)}
-												</div>
-											</AccordionContent>
-										</AccordionItem>
-									</Accordion>
-								);
-							}
-						)}
-					</div>
+																	updateSubcategory={
+																		updateSubcategory
+																	}
+																	preferences={
+																		preferences
+																	}
+																	showBell={
+																		showBell
+																	}
+																	hasBrowser={
+																		hasBrowser
+																	}
+																	browserPermission={
+																		browserPermission
+																	}
+																/>
+															</div>
+														);
+													}
+												)}
+											</div>
+										</TabsContent>
+									);
+								})}
+							</div>
+						</Tabs>
+					)}
 				</CardContent>
 			</Card>
 
@@ -1223,7 +1296,16 @@ function MobileAppTab({
 // ──────────────────────────────────────────────────────
 // Main Component
 // ──────────────────────────────────────────────────────
-export function NotificationPreferences() {
+export function NotificationPreferences({
+	initialCategory,
+}: {
+	/**
+	 * Category key to open on mount (deep-link target, e.g. 'support'). When the
+	 * key isn't a real category on this install it's ignored and the first
+	 * category is selected instead.
+	 */
+	initialCategory?: string;
+} = {}) {
 	const {
 		isLoading,
 		isSaving,
@@ -1238,6 +1320,20 @@ export function NotificationPreferences() {
 	} = useNotificationPreferences();
 
 	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
+
+	// Which channels are available on this install. The preferences payload only
+	// contains keys for allowed channels (free = email only; Pro unlocks the
+	// rest via the `doublescale_notification_allowed_channels` server filter), so
+	// the presence of a channel key is the source of truth for the UI.
+	const channelsAllowed: ChannelsAllowed = useMemo(() => {
+		const keys = Object.keys(preferences.channels || {});
+		return {
+			bell: keys.includes('bell'),
+			email: keys.includes('email'),
+			browser: keys.includes('browser'),
+			push: keys.includes('push'),
+		};
+	}, [preferences.channels]);
 
 	const canManageRetentionSettings = !isSalesRep();
 	const hasLimitedAccess = isSalesRep() || (isSalesManager() && !isCrmManager());
@@ -1436,7 +1532,7 @@ export function NotificationPreferences() {
 	};
 
 	return (
-		<div className="space-y-6 max-w-2xl">
+		<div className="space-y-6 max-w-4xl">
 			{/* Header */}
 			<div>
 				<h2 className="text-2xl font-semibold text-foreground">
@@ -1450,65 +1546,90 @@ export function NotificationPreferences() {
 				</p>
 			</div>
 
-			{/* Sub-tabs */}
-			<Tabs defaultValue="email-desktop">
-				<TabsList>
-					<TabsTrigger value="email-desktop">
-						<Monitor className="w-4 h-4 mr-2" />
-						{__('Email & Desktop', 'doublescale')}
-					</TabsTrigger>
-					<TabsTrigger value="mobile-app">
-						<Smartphone className="w-4 h-4 mr-2" />
-						{__('Mobile app', 'doublescale')}
-					</TabsTrigger>
-				</TabsList>
+			{/* Sub-tabs. The Mobile (push) tab is a Pro channel — only shown when
+			    push is available on this install. With push unavailable there is a
+			    single panel, so we drop the tab chrome entirely. */}
+			{channelsAllowed.push ? (
+				<Tabs defaultValue="email-desktop">
+					<TabsList>
+						<TabsTrigger value="email-desktop">
+							<Monitor className="w-4 h-4 mr-2" />
+							{__('Email & Desktop', 'doublescale')}
+						</TabsTrigger>
+						<TabsTrigger value="mobile-app">
+							<Smartphone className="w-4 h-4 mr-2" />
+							{__('Mobile app', 'doublescale')}
+						</TabsTrigger>
+					</TabsList>
 
-				<TabsContent value="email-desktop" className="mt-6">
-					<EmailDesktopTab
-						preferences={preferences}
-						categories={categories}
-						subcategories={subcategories}
-						updateChannel={updateChannel}
-						updateSubcategory={updateSubcategory}
-						hasChanges={hasChanges}
-						isSaving={isSaving}
-						onSave={handleSave}
-						canManageRetentionSettings={canManageRetentionSettings}
-						browserPermission={browserPermission}
-						isRequestingPermission={isRequestingPermission}
-						testNotificationShown={testNotificationShown}
-						onRequestPermission={handleRequestPermission}
-						onTestNotification={handleTestNotification}
-					/>
-				</TabsContent>
+					<TabsContent value="email-desktop" className="mt-6">
+						<EmailDesktopTab
+							preferences={preferences}
+							categories={categories}
+							subcategories={subcategories}
+							updateChannel={updateChannel}
+							updateSubcategory={updateSubcategory}
+							hasChanges={hasChanges}
+							isSaving={isSaving}
+							onSave={handleSave}
+							canManageRetentionSettings={canManageRetentionSettings}
+							channelsAllowed={channelsAllowed}
+							browserPermission={browserPermission}
+							isRequestingPermission={isRequestingPermission}
+							testNotificationShown={testNotificationShown}
+							onRequestPermission={handleRequestPermission}
+							onTestNotification={handleTestNotification}
+							initialCategory={initialCategory}
+						/>
+					</TabsContent>
 
-				<TabsContent value="mobile-app" className="mt-6">
-					<MobileAppTab
-						preferences={preferences}
-						categories={categories}
-						subcategories={subcategories}
-						updateChannel={updateChannel}
-						updateSubcategory={updateSubcategory}
-						hasChanges={hasChanges}
-						isSaving={isSaving}
-						onSave={handleSave}
-						canManagePushSetup={canManagePushSetup}
-						whiteLabel={whiteLabel}
-						pushConfig={pushConfig}
-						pushConfigLoading={pushConfigLoading}
-						pushToggling={pushToggling}
-						pushTesting={pushTesting}
-						pushMessage={pushMessage}
-						pushCategories={pushCategories}
-						pushExcludedSubcategories={pushExcludedSubcategories}
-						onPushToggle={handlePushToggle}
-						onPushTest={handlePushTest}
-						pushSending={pushSending}
-						pushSendMessage={pushSendMessage}
-						onPushSend={handlePushSend}
-					/>
-				</TabsContent>
-			</Tabs>
+					<TabsContent value="mobile-app" className="mt-6">
+						<MobileAppTab
+							preferences={preferences}
+							categories={categories}
+							subcategories={subcategories}
+							updateChannel={updateChannel}
+							updateSubcategory={updateSubcategory}
+							hasChanges={hasChanges}
+							isSaving={isSaving}
+							onSave={handleSave}
+							canManagePushSetup={canManagePushSetup}
+							whiteLabel={whiteLabel}
+							pushConfig={pushConfig}
+							pushConfigLoading={pushConfigLoading}
+							pushToggling={pushToggling}
+							pushTesting={pushTesting}
+							pushMessage={pushMessage}
+							pushCategories={pushCategories}
+							pushExcludedSubcategories={pushExcludedSubcategories}
+							onPushToggle={handlePushToggle}
+							onPushTest={handlePushTest}
+							pushSending={pushSending}
+							pushSendMessage={pushSendMessage}
+							onPushSend={handlePushSend}
+						/>
+					</TabsContent>
+				</Tabs>
+			) : (
+				<EmailDesktopTab
+					preferences={preferences}
+					categories={categories}
+					subcategories={subcategories}
+					updateChannel={updateChannel}
+					updateSubcategory={updateSubcategory}
+					hasChanges={hasChanges}
+					isSaving={isSaving}
+					onSave={handleSave}
+					canManageRetentionSettings={canManageRetentionSettings}
+					channelsAllowed={channelsAllowed}
+					browserPermission={browserPermission}
+					isRequestingPermission={isRequestingPermission}
+					testNotificationShown={testNotificationShown}
+					onRequestPermission={handleRequestPermission}
+					onTestNotification={handleTestNotification}
+					initialCategory={initialCategory}
+				/>
+			)}
 		</div>
 	);
 }

@@ -21,6 +21,9 @@ const adminPages: Pages = {};
  * Whether a page tied to {@link PageSettings.requiresModule} should be registered.
  */
 export const adminPagePassesModuleGate = (settings: PageSettings): boolean => {
+	if (settings.alwaysRegister) {
+		return true;
+	}
 	const slug = settings.requiresModule;
 	if (!slug) {
 		return true;

@@ -216,7 +216,7 @@ class License {
 			array(
 				'edd_action' => 'get_version',
 				'license'    => $license['key'],
-				'item_id'    => 'ds-pro',
+				'item_id'    => 'doublescale-pro',
 			)
 		);
 

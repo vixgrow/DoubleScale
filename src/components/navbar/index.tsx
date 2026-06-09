@@ -53,6 +53,12 @@ import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 interface SubMenuItem {
 	path: string;
 	label: string;
+	/**
+	 * Optional capability gate (OR-matched). When set, the item is hidden from
+	 * the sidebar unless the current user holds one of these capabilities.
+	 * Mirrors the route-level `requiredCapability` so the link and the page agree.
+	 */
+	requiredCapability?: string[];
 }
 
 interface NavigationItem {
@@ -86,6 +92,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	contacts: 'crm',
 	'sales-pipeline': 'crm',
 	booking: 'crm',
+	support: 'crm',
 	tasks: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
@@ -122,6 +129,7 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	tasks: 'tasks',
 	forms: 'forms',
+	support: 'support',
 };
 
 /**
@@ -139,6 +147,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'email-sequences': 'campaigns',
 	'analytics-and-reports': 'analytics',
 	booking: 'booking',
+	support: 'support',
+	'support/ticket/:id': 'support',
 	'abandoned-carts': 'campaigns',
 	extensions: 'integrations',
 };
@@ -363,6 +373,33 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							label: __('Settings', 'doublescale'),
 						},
 					];
+				}
+
+				if (item.path === 'support') {
+					// Unlike `booking` (whose parent path only redirects), the
+					// `support` parent path IS the inbox, so the first child
+					// links back to it explicitly. The group reads Inbox /
+					// Mailboxes / Custom fields (Pro replaces the page; free upsells).
+					navItem.subMenu = [
+						{ path: 'support', label: __('Inbox', 'doublescale') },
+						{ path: 'support/reports', label: __('Reports', 'doublescale') },
+						{
+							path: 'support/mailboxes',
+							label: __('Mailboxes', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_support_settings',
+							],
+						},
+						{
+							path: 'support/custom-fields',
+							label: __('Custom fields', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_support_settings',
+							],
+						},
+					].filter((sub) =>
+						hasRequiredCapability(sub.requiredCapability)
+					);
 				}
 
 				if (navItem.subMenu) {

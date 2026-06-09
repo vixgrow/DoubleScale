@@ -205,13 +205,22 @@ class Fields extends Rule {
 			return array();
 		}
 
+		// Some custom-field sources store options under an "options" key:
+		// { "options": [ ... ] }. Unwrap it so we iterate the actual list.
+		if ( isset( $attributes['options'] ) && is_array( $attributes['options'] ) ) {
+			$attributes = $attributes['options'];
+		}
+
 		$options = array();
 		foreach ( $attributes as $attribute ) {
 			if ( is_array( $attribute ) && isset( $attribute['value'] ) ) {
 				$options[ $attribute['value'] ] = $attribute['label'] ?? $attribute['value'];
-			} else {
+			} elseif ( is_scalar( $attribute ) ) {
+				// Plain scalar option (e.g. "free") — use it as both key and label.
 				$options[ $attribute ] = $attribute;
 			}
+			// Any other shape (nested array without a 'value') is skipped rather
+			// than used as an array key, which would be an illegal offset.
 		}
 
 		return $options;

@@ -139,6 +139,27 @@
 			"@/renderer/booking/*": [
 				"renderer/booking/*"
 			],
+			"@/types/support": [
+				"types/support"
+			],
+			"@/types/support/*": [
+				"types/support/*"
+			],
+			"@/hooks/support": [
+				"hooks/support"
+			],
+			"@/hooks/support/*": [
+				"hooks/support/*"
+			],
+			"@/components/support": [
+				"components/support"
+			],
+			"@/components/support/*": [
+				"components/support/*"
+			],
+			"@/constants/support": [
+				"constants/support.ts"
+			],
 			"@/hooks/*": [
 				"shared/hooks/*"
 			],

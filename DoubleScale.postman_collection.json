@@ -6481,6 +6481,1292 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Booking Calendars",
+			"description": "Calendar CRUD plus team and integrations endpoints, served by RestCalendarController (`booking/calendars`).",
+			"item": [
+				{
+					"name": "List Calendars",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Calendar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sales Calendar\",\r\n    \"type\": \"individual\",\r\n    \"user_id\": 1,\r\n    \"description\": \"Primary sales availability\",\r\n    \"timezone\": \"UTC\",\r\n    \"avatar\": \"\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Calendars",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Calendar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Calendar",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sales Calendar — Updated\",\r\n    \"description\": \"Updated description\",\r\n    \"timezone\": \"UTC\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Calendar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone Events Into Calendar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_id\": [10, 11, 12]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}/clone",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}",
+								"clone"
+							]
+						},
+						"description": "Clone the supplied events into the target calendar. `event_id` is the list of source event IDs."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Calendar Team",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}/team",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}",
+								"team"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Calendar Integrations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/calendars/{{calendarId}}/integrations",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"calendars",
+								"{{calendarId}}",
+								"integrations"
+							],
+							"query": [
+								{
+									"key": "host_user_ids",
+									"value": "1,2",
+									"description": "Comma-separated user IDs to check (team calendars). Defaults to all team members.",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking Events",
+			"description": "Event CRUD, availability range, custom fields, duplicate, meta, disable status, latest. Served by RestEventController (`booking/events`).",
+			"item": [
+				{
+					"name": "List Events",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "filter[calendar_id]",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"calendar_id\": 1,\r\n    \"name\": \"30 min consultation\",\r\n    \"slug\": \"30-min-consult\",\r\n    \"description\": \"Quick chat\",\r\n    \"duration\": 30,\r\n    \"type\": \"one-to-one\",\r\n    \"color\": \"#6d78d8\",\r\n    \"status\": \"active\",\r\n    \"location\": {\r\n        \"type\": \"online\",\r\n        \"value\": \"\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Events",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\": [10, 11]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"30 min consultation — Updated\",\r\n    \"duration\": 45,\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event Range (Availability)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/range",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"range"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event Availability",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"availability\": {\r\n        \"type\": \"custom\",\r\n        \"weekly_hours\": {\r\n            \"monday\":    { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n            \"tuesday\":   { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n            \"wednesday\": { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n            \"thursday\":  { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n            \"friday\":    { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n            \"saturday\":  { \"off\": true,  \"times\": [] },\r\n            \"sunday\":    { \"off\": true,  \"times\": [] }\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/range",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"range"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event Fields",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/fields",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"fields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event Fields",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fields\": {\r\n        \"name\":  { \"enabled\": true,  \"required\": true,  \"label\": \"Name\" },\r\n        \"email\": { \"enabled\": true,  \"required\": true,  \"label\": \"Email\" },\r\n        \"phone\": { \"enabled\": false, \"required\": false, \"label\": \"Phone\" }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/fields",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"fields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/duplicate",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"duplicate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event Meta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/meta/{{metaKey}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"meta",
+								"{{metaKey}}"
+							]
+						},
+						"description": "Fetch a single meta value for an event by its key (e.g. `payments`, `sms_notifications`, `email_notifications`)."
+					},
+					"response": []
+				},
+				{
+					"name": "Set Event Disable Status",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/{{eventId}}/disable-status",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"{{eventId}}",
+								"disable-status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Latest Events",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/events/latest",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"events",
+								"latest"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "user_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"description": "active | inactive",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bookings",
+			"description": "Booking CRUD plus counts, analytics, total guests, and revenue. Served by RestBookingController (`booking/bookings`).",
+			"item": [
+				{
+					"name": "List Bookings",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"event_id\": 10,\r\n    \"start_at\": \"2026-06-01T09:00:00Z\",\r\n    \"timezone\": \"UTC\",\r\n    \"invitees\": [\r\n        {\r\n            \"name\": \"Jane Doe\",\r\n            \"email\": \"jane@example.com\",\r\n            \"phone\": \"+15555550100\"\r\n        }\r\n    ],\r\n    \"fields\": {},\r\n    \"location\": {\r\n        \"type\": \"online\"\r\n    },\r\n    \"status\": \"pending\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Booking",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/{{bookingId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"{{bookingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"completed\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/{{bookingId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"{{bookingId}}"
+							]
+						},
+						"description": "Update a booking. `status` accepts `pending`, `completed`, `cancelled`, or `no-show`."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Booking",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/{{bookingId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"{{bookingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Booking Counts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/counts?user=own",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"counts"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "own",
+									"description": "`own` for the current user, or a numeric user ID."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Booking Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/analytics?user=own&date=",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"analytics"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "own"
+								},
+								{
+									"key": "date",
+									"value": "",
+									"description": "Month and year, e.g. `March 2026`. Defaults to current month."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Total Guests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/total-guests?user=own",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"total-guests"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "own"
+								},
+								{
+									"key": "filter[from]",
+									"value": "2026-01-01",
+									"disabled": true
+								},
+								{
+									"key": "filter[to]",
+									"value": "2026-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Revenue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/bookings/revenue?user=own&period=monthly&year=2026",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"bookings",
+								"revenue"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "own"
+								},
+								{
+									"key": "period",
+									"value": "monthly",
+									"description": "weekly | monthly | quarterly | yearly"
+								},
+								{
+									"key": "year",
+									"value": "2026"
+								},
+								{
+									"key": "month",
+									"value": "5",
+									"description": "1-12. Used when period=monthly.",
+									"disabled": true
+								},
+								{
+									"key": "quarter",
+									"value": "2",
+									"description": "1-4. Used when period=quarterly.",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking Availability",
+			"description": "Availability profiles: list, CRUD, clone, set-default. Served by RestAvailabilityController (`booking/availabilities`).",
+			"item": [
+				{
+					"name": "List Availabilities",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities"
+							],
+							"query": [
+								{
+									"key": "filter[user_id]",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Availability",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": 1,\r\n    \"name\": \"Working Hours\",\r\n    \"timezone\": \"UTC\",\r\n    \"weekly_hours\": {\r\n        \"monday\":    { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n        \"tuesday\":   { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n        \"wednesday\": { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n        \"thursday\":  { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n        \"friday\":    { \"off\": false, \"times\": [{\"start\":\"09:00\",\"end\":\"17:00\"}] },\r\n        \"saturday\":  { \"off\": true,  \"times\": [] },\r\n        \"sunday\":    { \"off\": true,  \"times\": [] }\r\n    },\r\n    \"override\": {},\r\n    \"is_default\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities/{{availabilityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities",
+								"{{availabilityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Availability",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Working Hours — Updated\",\r\n    \"timezone\": \"UTC\",\r\n    \"weekly_hours\": {\r\n        \"monday\":    { \"off\": false, \"times\": [{\"start\":\"10:00\",\"end\":\"18:00\"}] },\r\n        \"tuesday\":   { \"off\": false, \"times\": [{\"start\":\"10:00\",\"end\":\"18:00\"}] },\r\n        \"wednesday\": { \"off\": false, \"times\": [{\"start\":\"10:00\",\"end\":\"18:00\"}] },\r\n        \"thursday\":  { \"off\": false, \"times\": [{\"start\":\"10:00\",\"end\":\"18:00\"}] },\r\n        \"friday\":    { \"off\": false, \"times\": [{\"start\":\"10:00\",\"end\":\"18:00\"}] },\r\n        \"saturday\":  { \"off\": true,  \"times\": [] },\r\n        \"sunday\":    { \"off\": true,  \"times\": [] }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities/{{availabilityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities",
+								"{{availabilityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Availability",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities/{{availabilityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities",
+								"{{availabilityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone Availability",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities/{{availabilityId}}/clone",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities",
+								"{{availabilityId}}",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Default Availability",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/availabilities/{{availabilityId}}/set-default",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"availabilities",
+								"{{availabilityId}}",
+								"set-default"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking Settings",
+			"description": "Global booking module settings plus provider status probes. Served by RestBookingSettingsController (`booking/settings`).",
+			"item": [
+				{
+					"name": "Get Booking Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/settings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking Settings",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"general\": {\r\n        \"start_from\": \"Monday\",\r\n        \"time_format\": \"12\",\r\n        \"auto_cancel_after\": 30,\r\n        \"auto_complete_after\": 30,\r\n        \"default_country_code\": \"us\",\r\n        \"default_time_slot_step\": 15,\r\n        \"enable_summary_email\": false,\r\n        \"summary_email_frequency\": \"daily\",\r\n        \"include_ics\": false\r\n    },\r\n    \"payments\": {\r\n        \"currency\": \"USD\"\r\n    },\r\n    \"theme\": {\r\n        \"color_scheme\": \"system\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/settings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"settings"
+							]
+						},
+						"description": "Body is the full settings document — sent through `Settings::update_many`. Capability required: `manage_options`."
+					},
+					"response": []
+				},
+				{
+					"name": "SMS Provider Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/settings/sms-provider-status",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"settings",
+								"sms-provider-status"
+							]
+						},
+						"description": "Returns `{configured, provider, config_url}` for the booking SMS provider. Free tier always returns `configured: false` (Pro hooks the filter to inject real state)."
+					},
+					"response": []
+				},
+				{
+					"name": "Payment Provider Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/doublescale/v1/booking/settings/payment-provider-status",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"doublescale",
+								"v1",
+								"booking",
+								"settings",
+								"payment-provider-status"
+							]
+						},
+						"description": "Returns `{configured, provider, config_url}` for the booking payment provider. Free tier always returns `configured: false` (Pro hooks the filter to inject real state)."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -6584,6 +7870,26 @@
 		{
 			"key": "notificationId",
 			"value": "1"
+		},
+		{
+			"key": "calendarId",
+			"value": "1"
+		},
+		{
+			"key": "eventId",
+			"value": "1"
+		},
+		{
+			"key": "bookingId",
+			"value": "1"
+		},
+		{
+			"key": "availabilityId",
+			"value": "1"
+		},
+		{
+			"key": "metaKey",
+			"value": "payments"
 		}
 	]
 }

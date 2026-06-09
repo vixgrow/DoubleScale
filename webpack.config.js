@@ -6,8 +6,22 @@ const RtlCssPlugin = require('rtlcss-webpack-plugin');
 
 const webpack = require('webpack');
 
+const fs = require('fs');
 const path = require('path');
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+
+const proSupportPortalCustomFields = path.resolve(
+	__dirname,
+	'../doublescale-pro/src/renderer/support/portal-new-ticket-custom-fields.tsx'
+);
+const supportPortalCustomFieldsAlias = fs.existsSync(
+	proSupportPortalCustomFields
+)
+	? proSupportPortalCustomFields
+	: path.resolve(
+			__dirname,
+			'src/renderer/support/portal-custom-fields-stub.ts'
+		);
 
 /**
  * Aliases used by both the admin SPA build and the public booking renderer.
@@ -34,6 +48,13 @@ const sharedAlias = {
 	'@/config/booking': path.resolve(__dirname, 'src/config/booking'),
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
+
+	// Support-scoped aliases — same ordering rule as booking (must precede the
+	// generic `@/<type>/*` fallbacks below).
+	'@/types/support': path.resolve(__dirname, 'src/types/support'),
+	'@/hooks/support': path.resolve(__dirname, 'src/hooks/support'),
+	'@/components/support': path.resolve(__dirname, 'src/components/support'),
+	'@/constants/support': path.resolve(__dirname, 'src/constants/support.ts'),
 
 	'@doublescale/email-sequences-page': path.resolve(
 		__dirname,
@@ -253,4 +274,52 @@ const bookingRendererConfig = {
 	},
 };
 
-module.exports = [adminClientConfig, bookingRendererConfig];
+/**
+ * Public support portal renderer build. Mirrors `bookingRendererConfig` but
+ * outputs to `build/renderer/support/` (where `PortalFrontendHandler.php`
+ * expects `index.js` + `style.css` + `index.asset.php`). Separate target so
+ * we can ship a lean bundle to public pages without dragging the admin SPA's
+ * weight onto storefront pages — only the shortcode page pays this cost.
+ */
+const supportRendererConfig = {
+	...defaultConfig,
+	name: 'support-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/support/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+			'@doublescale-pro/support-portal-custom-fields':
+				supportPortalCustomFieldsAlias,
+			'@pro/client': path.resolve(
+				__dirname,
+				'../doublescale-pro/src/client'
+			),
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/support'),
+		filename: '[name].js',
+	},
+};
+
+module.exports = [adminClientConfig, bookingRendererConfig, supportRendererConfig];

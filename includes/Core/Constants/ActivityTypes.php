@@ -49,6 +49,15 @@ class ActivityTypes {
 	const LOGGED_OUT = 'logged_out';
 
 	/**
+	 * Support ticket activity types — folded into activities so ticket replies/notes
+	 * appear in the unified contact timeline. Linkage to the parent ticket is via
+	 * {@see \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TICKET}.
+	 */
+	const SUPPORT_REPLY = 'support_reply'; // Customer-visible reply (web or email source)
+	const SUPPORT_NOTE  = 'support_note';  // Internal-only agent note
+	const SUPPORT_EVENT = 'support_event'; // System-generated activity (status change, assignment, etc.)
+
+	/**
 	 * Booking lifecycle types — virtual rows projected from `doublescale_bookings`
 	 * via `ActivityManager::build_bookings_union_sql()`. Read-only; the source of
 	 * truth is the booking row itself, edits go through booking endpoints.
@@ -93,6 +102,9 @@ class ActivityTypes {
 			self::BOOKING_CANCELLED,
 			self::BOOKING_COMPLETED,
 			self::BOOKING_REJECTED,
+			self::SUPPORT_REPLY,
+			self::SUPPORT_NOTE,
+			self::SUPPORT_EVENT,
 		);
 	}
 
@@ -109,6 +121,8 @@ class ActivityTypes {
 			self::EMAIL_SENT,
 			self::CALL_LOGGED,
 			self::MEETING_SCHEDULED,
+			self::SUPPORT_REPLY,
+			self::SUPPORT_NOTE,
 		);
 	}
 
@@ -126,6 +140,7 @@ class ActivityTypes {
 			self::STAGE_CHANGED,
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
+			self::SUPPORT_EVENT,
 		);
 	}
 
@@ -220,6 +235,11 @@ class ActivityTypes {
 			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'doublescale' ), $user_name ),
 			self::LOGGED_IN         => __( 'Contact logged in', 'doublescale' ),
 			self::LOGGED_OUT        => __( 'Contact logged out', 'doublescale' ),
+			/* translators: %s: user name */
+			self::SUPPORT_REPLY     => sprintf( __( '%s replied on a ticket', 'doublescale' ), $user_name ),
+			/* translators: %s: user name */
+			self::SUPPORT_NOTE      => sprintf( __( '%s added an internal note', 'doublescale' ), $user_name ),
+			self::SUPPORT_EVENT     => __( 'Ticket activity', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
@@ -260,6 +280,9 @@ class ActivityTypes {
 			self::BOOKING_CANCELLED   => __( 'Booking Cancelled', 'doublescale' ),
 			self::BOOKING_COMPLETED   => __( 'Booking Completed', 'doublescale' ),
 			self::BOOKING_REJECTED    => __( 'Booking Rejected', 'doublescale' ),
+			self::SUPPORT_REPLY       => __( 'Ticket Reply', 'doublescale' ),
+			self::SUPPORT_NOTE        => __( 'Ticket Note', 'doublescale' ),
+			self::SUPPORT_EVENT       => __( 'Ticket Activity', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

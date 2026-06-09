@@ -21,6 +21,9 @@ export const AutomationContext = createContext<{
 	isSaving: boolean;
 	viewMode?: boolean;
 	analyticsData?: StepAnalytics[];
+	canUndo: boolean;
+	canRedo: boolean;
+	isVersioning: boolean;
 	updatedSteps: {
 		[stepId: number]: Partial<AutomationStep>;
 	};
@@ -41,6 +44,9 @@ export const AutomationContext = createContext<{
 	setUpdatedSteps: (steps: {
 		[stepId: number]: Partial<AutomationStep>;
 	}) => void;
+	undo: () => Promise<void>;
+	redo: () => Promise<void>;
+	refreshVersions: () => Promise<void>;
 }>({
 	automation: null,
 	steps: [],
@@ -48,6 +54,9 @@ export const AutomationContext = createContext<{
 	isSaving: false,
 	viewMode: false,
 	analyticsData: [],
+	canUndo: false,
+	canRedo: false,
+	isVersioning: false,
 	updatedSteps: {},
 	setAutomation: (_automation: Automation) => {
 		throw new Error('setAutomation() not implemented');
@@ -89,6 +98,15 @@ export const AutomationContext = createContext<{
 		[stepId: number]: Partial<AutomationStep>;
 	}) => {
 		throw new Error('setUpdatedSteps() not implemented');
+	},
+	undo: async () => {
+		throw new Error('undo() not implemented');
+	},
+	redo: async () => {
+		throw new Error('redo() not implemented');
+	},
+	refreshVersions: async () => {
+		throw new Error('refreshVersions() not implemented');
 	},
 });
 

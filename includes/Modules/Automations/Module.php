@@ -62,6 +62,11 @@ final class Module extends AbstractModule {
 			Services\RulesManager::class,
 			static fn() => Services\RulesManager::instance()
 		);
+
+		$container->singleton(
+			Services\VersionManager::class,
+			static fn() => Services\VersionManager::instance()
+		);
 	}
 
 	public function restControllers(): array {
@@ -102,6 +107,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Messaging/*.php',
 				'includes/Modules/Automations/Triggers/Forms/*.php',
 				'includes/Modules/Automations/Triggers/Booking/*.php',
+				'includes/Modules/Automations/Triggers/Support/*.php',
 				'includes/Modules/Automations/Triggers/Surecart/*/*.php',
 				'includes/Modules/Automations/Triggers/Prestoplayer/*.php',
 				'includes/Modules/Automations/Actions/*.php',
@@ -117,6 +123,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Memberpress/*.php',
 				'includes/Modules/Automations/Actions/Pmpro/*.php',
 				'includes/Modules/Automations/Actions/Deal/*.php',
+				'includes/Modules/Automations/Actions/Support/*.php',
 				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/Email/*.php',
 				'includes/Modules/Automations/Actions/Prestoplayer/*.php',

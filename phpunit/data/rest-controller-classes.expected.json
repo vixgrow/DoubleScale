@@ -1,5 +1,6 @@
 [
     "RestActivityController",
+    "RestAttachmentController",
     "RestAutomationContactController",
     "RestAutomationController",
     "RestAutomationStepController",
@@ -14,8 +15,11 @@
     "RestImportExportController",
     "RestListController",
     "RestLogController",
+    "RestMailboxController",
     "RestModulesController",
     "RestPluginsController",
+    "RestPortalController",
+    "RestReplyController",
     "RestSettingsController",
     "RestSettingsControllerPro",
     "RestSiteVerificationController",
@@ -25,5 +29,6 @@
     "RestSmtpSettingsController",
     "RestTagController",
     "RestTemplateController",
+    "RestTicketController",
     "RestUserManagementController"
 ]

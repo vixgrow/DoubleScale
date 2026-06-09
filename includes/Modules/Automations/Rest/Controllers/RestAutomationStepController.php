@@ -23,6 +23,7 @@ use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
+use DoubleScale\Modules\Automations\Services\VersionManager;
 
 /**
  * RestAutomationStepController class
@@ -268,6 +269,8 @@ class RestAutomationStepController extends RestController {
 			$automation_step = AutomationStepModel::find( $automation_step->id );
 			$automation_step = $this->resolve_action_label( $automation_step );
 
+			$this->snapshot_version( $automation_step, __( 'Added step', 'doublescale' ) );
+
 			return new WP_REST_Response( $automation_step, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_create_error', $e->getMessage(), array( 'status' => 500 ) );
@@ -340,6 +343,8 @@ class RestAutomationStepController extends RestController {
 
 			$automation_step = $this->resolve_action_label( $automation_step );
 
+			$this->snapshot_version( $automation_step, __( 'Edited step', 'doublescale' ) );
+
 			doublescale_get_logger()->error(
 				'REST: After save automation step',
 				array(
@@ -394,6 +399,8 @@ class RestAutomationStepController extends RestController {
 				$this->update_orders( $updated_steps );
 			}
 
+			$this->snapshot_version( $automation_step, __( 'Deleted step', 'doublescale' ) );
+
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_delete_error', $e->getMessage(), array( 'status' => 500 ) );
@@ -434,6 +441,8 @@ class RestAutomationStepController extends RestController {
 			// Return the updated step
 			$automation_step = AutomationStepModel::find( $step_id );
 
+			$this->snapshot_version( $automation_step, __( 'Reordered steps', 'doublescale' ) );
+
 			return new WP_REST_Response( $automation_step, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_reorder_error', $e->getMessage(), array( 'status' => 500 ) );
@@ -459,6 +468,27 @@ class RestAutomationStepController extends RestController {
 			$step->order = $step_data['order'];
 			$step->save();
 		}
+	}
+
+	/**
+	 * Capture a version snapshot of the parent automation for undo / redo.
+	 *
+	 * No-op while a restore is in progress (the VersionManager guards against
+	 * recursion). Failures are swallowed by the manager so they never break the
+	 * step mutation that triggered them.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param AutomationStepModel|null $step  The mutated step.
+	 * @param string                   $label Short description of the change.
+	 *
+	 * @return void
+	 */
+	private function snapshot_version( $step, $label ) {
+		if ( ! $step || empty( $step->automation_id ) ) {
+			return;
+		}
+		VersionManager::instance()->snapshot( $step->automation_id, $label );
 	}
 
 	/**

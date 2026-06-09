@@ -109,6 +109,12 @@ class Install {
 
 		MigrationRunner::run_all( self::migration_registry() );
 
+		// Provision DoubleScale roles (Support roles always; CRM roles only
+		// when Pro is loaded — gating lives inside `add_roles_and_capabilities`).
+		if ( class_exists( \DoubleScale\Core\UserRoles\UserRoles::class ) ) {
+			\DoubleScale\Core\UserRoles\UserRoles::add_roles_and_capabilities();
+		}
+
 		self::update_doublescale_version();
 
 		delete_transient( 'doublescale_installing' );

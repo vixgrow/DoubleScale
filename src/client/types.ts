@@ -179,6 +179,7 @@ export type Automation = {
 		multiple_runs: boolean;
 		_trigger_label?: string;
 		_trigger_warning?: boolean;
+		_trigger_warning_message?: string;
 		[key: string]: any;
 	};
 	created_by?: number | null;

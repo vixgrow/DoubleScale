@@ -22,7 +22,7 @@ export interface AddUserRequest {
 }
 
 export interface UpdateUserRoleRequest {
-    role: ManagerRole;
+    roles: ManagerRole[];
 }
 
 /**
@@ -81,7 +81,7 @@ export class UserManagementAPI {
     ): Promise<{
         success: boolean;
         message: string;
-        user: { id: number; crm_role: ManagerRole };
+        user: { id: number; crm_role: ManagerRole; roles: ManagerRole[] };
     }> {
         try {
             const response = await apiFetch({
@@ -92,7 +92,7 @@ export class UserManagementAPI {
             return response as {
                 success: boolean;
                 message: string;
-                user: { id: number; crm_role: ManagerRole };
+                user: { id: number; crm_role: ManagerRole; roles: ManagerRole[] };
             };
         } catch (error) {
             console.error('Error updating user role:', error);

@@ -648,15 +648,16 @@ class RestSettingsControllerPro {
 		try {
 			$client = new ImapClient( $host, $port, $username, $password, $encryption, 'login' );
 			$client->connect();
-			$unseen_count = $client->count_unseen();
+			// Count only recent unseen mail (today onward) — see ImapClient::count_unseen().
+			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
 			return new WP_REST_Response(
 				array(
 					'success'      => true,
 					'message'      => sprintf(
-						/* translators: %d: number of unseen emails */
-						__( 'Connected successfully. Found %d unseen email(s) in INBOX.', 'doublescale' ),
+						/* translators: %d: number of recent unseen emails */
+						__( 'Connected successfully. Found %d new unseen email(s) today.', 'doublescale' ),
 						$unseen_count
 					),
 					'unseen_count' => $unseen_count,
@@ -720,15 +721,16 @@ class RestSettingsControllerPro {
 				$config['authentication']
 			);
 			$client->connect();
-			$unseen_count = $client->count_unseen();
+			// Count only recent unseen mail (today onward) — see ImapClient::count_unseen().
+			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
 			return new WP_REST_Response(
 				array(
 					'success'      => true,
 					'message'      => sprintf(
-						/* translators: 1: provider name, 2: number of unseen emails */
-						__( '%1$s connected successfully. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
+						/* translators: 1: provider name, 2: number of recent unseen emails */
+						__( '%1$s connected successfully. Found %2$d new unseen email(s) today.', 'doublescale' ),
 						ucfirst( $provider ),
 						$unseen_count
 					),
@@ -779,15 +781,20 @@ class RestSettingsControllerPro {
 				$config['authentication']
 			);
 			$client->connect();
-			$unseen_count = $client->count_unseen();
+			// Count only recent unseen mail (today onward). A raw UNSEEN count on
+			// Gmail can be thousands — its INBOX keeps a large backlog of mail
+			// read on the web but never IMAP-`\Seen`-flagged — which is both
+			// alarming and irrelevant: the poller ingests only mail that arrives
+			// after the mailbox is connected. See ImapClient::count_unseen().
+			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
 			return new WP_REST_Response(
 				array(
 					'success'      => true,
 					'message'      => sprintf(
-						/* translators: 1: email address, 2: number of unseen emails */
-						__( 'Gmail (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
+						/* translators: 1: email address, 2: number of recent unseen emails */
+						__( 'Gmail (%1$s) connected via smtp. Found %2$d new unseen email(s) today.', 'doublescale' ),
 						$config['username'],
 						$unseen_count
 					),
@@ -838,15 +845,17 @@ class RestSettingsControllerPro {
 				$config['authentication']
 			);
 			$client->connect();
-			$unseen_count = $client->count_unseen();
+			// Count only recent unseen mail (today onward) — see the Gmail branch
+			// and ImapClient::count_unseen() for why a raw backlog count misleads.
+			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
 			return new WP_REST_Response(
 				array(
 					'success'      => true,
 					'message'      => sprintf(
-						/* translators: 1: email address, 2: number of unseen emails */
-						__( 'Outlook (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
+						/* translators: 1: email address, 2: number of recent unseen emails */
+						__( 'Outlook (%1$s) connected via smtp. Found %2$d new unseen email(s) today.', 'doublescale' ),
 						$config['username'],
 						$unseen_count
 					),
@@ -1228,33 +1237,39 @@ class RestSettingsControllerPro {
 
 		$normalized = strtolower( $from_email );
 
-		// 1. Check SMTP Gmail accounts (preferred — handles token refresh).
-		$gmail_accounts = get_option( EmailOauth::mailer_settings_option_name( 'gmail' ), array() )['accounts'] ?? array();
-		foreach ( $gmail_accounts as $account_id => $account_data ) {
-			$creds = $account_data['credentials'] ?? array();
-			if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
-				continue;
+		// Steps 1 & 2 read smtp's OAuth account store via EmailOauth, a Pro class.
+		// Guard the whole block so free-only installs (Pro disabled) skip straight
+		// to the standalone-OAuth fallback below instead of fataling on the missing
+		// symbol — see has_email_oauth_layer().
+		if ( self::has_email_oauth_layer() ) {
+			// 1. Check SMTP Gmail accounts (preferred — handles token refresh).
+			$gmail_accounts = get_option( EmailOauth::mailer_settings_option_name( 'gmail' ), array() )['accounts'] ?? array();
+			foreach ( $gmail_accounts as $account_id => $account_data ) {
+				$creds = $account_data['credentials'] ?? array();
+				if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
+					continue;
+				}
+				$account_email = strtolower( $account_data['name'] ?? '' );
+				if ( $account_email === $normalized ) {
+					$result['imap_provider']      = 'smtp_gmail';
+					$result['smtp_gmail_account'] = $account_id;
+					return $result;
+				}
 			}
-			$account_email = strtolower( $account_data['name'] ?? '' );
-			if ( $account_email === $normalized ) {
-				$result['imap_provider']      = 'smtp_gmail';
-				$result['smtp_gmail_account'] = $account_id;
-				return $result;
-			}
-		}
 
-		// 2. Check SMTP Outlook accounts.
-		$outlook_accounts = get_option( EmailOauth::mailer_settings_option_name( 'outlook' ), array() )['accounts'] ?? array();
-		foreach ( $outlook_accounts as $account_id => $account_data ) {
-			$creds = $account_data['credentials'] ?? array();
-			if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
-				continue;
-			}
-			$account_email = strtolower( $account_data['name'] ?? '' );
-			if ( $account_email === $normalized ) {
-				$result['imap_provider']        = 'smtp_outlook';
-				$result['smtp_outlook_account'] = $account_id;
-				return $result;
+			// 2. Check SMTP Outlook accounts.
+			$outlook_accounts = get_option( EmailOauth::mailer_settings_option_name( 'outlook' ), array() )['accounts'] ?? array();
+			foreach ( $outlook_accounts as $account_id => $account_data ) {
+				$creds = $account_data['credentials'] ?? array();
+				if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
+					continue;
+				}
+				$account_email = strtolower( $account_data['name'] ?? '' );
+				if ( $account_email === $normalized ) {
+					$result['imap_provider']        = 'smtp_outlook';
+					$result['smtp_outlook_account'] = $account_id;
+					return $result;
+				}
 			}
 		}
 

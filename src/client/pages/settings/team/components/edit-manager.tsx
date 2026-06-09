@@ -6,7 +6,7 @@ import { ManagerRole } from './types';
 interface EditManagerProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSuccess: (managerId: number, role: ManagerRole) => Promise<void>;
+	onSuccess: (managerId: number, roles: ManagerRole[]) => Promise<void>;
 	manager: CRMUser | null;
 }
 
@@ -19,8 +19,8 @@ const EditManager: React.FC<EditManagerProps> = ({
 	const handleSuccess = async (data: ManagerFormData) => {
 		if (!data.managerId) return;
 
-		// Use the first role from the form data
-		await onSuccess(data.managerId, data.roles[0]);
+		// Pass every selected role — a user can hold multiple CRM roles.
+		await onSuccess(data.managerId, data.roles);
 	};
 
 	return (

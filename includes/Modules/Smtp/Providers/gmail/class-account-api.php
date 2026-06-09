@@ -81,6 +81,48 @@ class Account_API {
 	}
 
 	/**
+	 * Flatten a stored Gmail OAuth credential payload for SMTP use.
+	 *
+	 * Mirrors {@see \DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth::normalize_gmail_oauth_credentials_for_smtp()}
+	 * so Gmail sending works on the free plugin when Pro is inactive. When the
+	 * token was saved as a nested array (`access_token => array( 'access_token' => '…' )`),
+	 * the inner payload is merged up so `access_token` is a plain string. Missing
+	 * `created` / `expires_in` / `token_type` / `scope` keys are backfilled.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $tokens Stored credentials.
+	 * @return array<string, mixed> Normalized credentials.
+	 */
+	private static function normalize_oauth_credentials( array $tokens ) {
+		$out = $tokens;
+
+		if ( isset( $out['access_token'] ) && is_array( $out['access_token'] ) ) {
+			$inner = $out['access_token'];
+			unset( $out['access_token'] );
+			$out = array_merge( $inner, $out );
+		}
+
+		if ( ! empty( $out['access_token'] ) && is_string( $out['access_token'] ) && empty( $out['created'] ) ) {
+			$out['created'] = time();
+		}
+
+		if ( empty( $out['expires_in'] ) ) {
+			$out['expires_in'] = 3600;
+		}
+
+		if ( empty( $out['token_type'] ) ) {
+			$out['token_type'] = 'Bearer';
+		}
+
+		if ( ! isset( $out['scope'] ) ) {
+			$out['scope'] = '';
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Valid access token for Gmail / userinfo REST calls.
 	 *
 	 * @since 1.0.0
@@ -89,8 +131,17 @@ class Account_API {
 	 */
 	public function get_access_token() {
 		try {
+			// Flatten the stored OAuth payload so `access_token` is always a
+			// string. Gmail accounts persisted via the Inbox OAuth flow nest the
+			// token under `credentials.access_token.access_token`; without
+			// flattening, `(string) $creds['access_token']` becomes the literal
+			// "Array" and Gmail rejects every send with "Invalid Credentials".
+			// This must work on free (Pro inactive) — Pro's EmailOauth helper is
+			// preferred when present but the local fallback covers the free case.
 			if ( class_exists( EmailOauth::class ) ) {
 				$this->credentials = EmailOauth::normalize_gmail_oauth_credentials_for_smtp( $this->credentials );
+			} else {
+				$this->credentials = self::normalize_oauth_credentials( $this->credentials );
 			}
 
 			$app_credentials = $this->app->get_app_credentials();

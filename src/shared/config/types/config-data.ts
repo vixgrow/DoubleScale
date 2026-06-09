@@ -42,6 +42,32 @@ export type ConfigData = Record<string, unknown> & {
 	storeNonce: string;
 	/** Whether AI credentials are configured (OpenAI etc.). */
 	aiConfigured: boolean;
+	/**
+	 * White-label settings. Pro-only: the free server never injects this, so it
+	 * stays `undefined` on a free install. Declared here so shared components
+	 * (e.g. notification preferences) can call `ConfigAPI.getWhiteLabel()`
+	 * without crashing when Pro is inactive.
+	 */
+	whiteLabel?: WhiteLabel;
+	/** Whether the white-label settings tab should be shown (Pro-only). */
+	whiteLabelShowSettings?: boolean;
+};
+
+/**
+ * White-label configuration. Populated by Pro only; on free this is always
+ * absent (so {@link ConfigApi.getWhiteLabel} returns `undefined`).
+ */
+export type WhiteLabel = {
+	enabled: boolean;
+	pluginName: string;
+	logoUrl: string;
+	menuIconUrl: string;
+	primaryColor: string;
+	accentColor: string;
+	hideLicense: boolean;
+	hideExtensions: boolean;
+	hideAiAssistant: boolean;
+	hideSettingsTab: boolean;
 };
 
 export type ModuleInfo = {

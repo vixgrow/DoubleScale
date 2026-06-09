@@ -82,6 +82,9 @@ final class Module extends AbstractModule {
 		return array(
 			array( 'doublescale_support', 'doublescale_support_email_inbound' ),
 			array( 'doublescale_support', 'doublescale_support_attachment_cleanup' ),
+			// Owned by Pro's auto-close runner ({@see \DoubleScale\Pro\Modules\Support\Services\AutoCloseRunner}),
+			// declared here so disabling Support unschedules it via clearScheduledTasksForModule().
+			array( 'doublescale_support', 'doublescale_support_auto_close' ),
 		);
 	}
 

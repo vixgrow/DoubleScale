@@ -25,7 +25,6 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 export const REST_PHANTOM_MODULE_SLUGS = [
 	'analytics',
 	'deals',
-	'forms',
 	'inbox',
 	'integrations',
 	'leadscoring',
@@ -39,7 +38,7 @@ const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
 ]);
 
 /** Pro marketing rows: feature ships in Pro; free install still shows toggle + install copy until Pro is active. */
-const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['deals', 'forms', 'tasks']);
+const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['deals', 'tasks']);
 
 export type OptionalMarketingModuleSlug =
 	(typeof OPTIONAL_MARKETING_MODULE_SLUGS)[number];

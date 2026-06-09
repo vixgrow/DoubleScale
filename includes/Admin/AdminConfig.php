@@ -118,9 +118,9 @@ final class AdminConfig {
 				/** Base URL for DoubleScale Pro plugin assets (optional; empty when Pro is not active). */
 				'proPluginDirUrl'     => defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ? DOUBLESCALE_PRO_PLUGIN_URL : '',
 				'siteUrl'             => site_url(),
-				'forms'               => class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-					? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_options()
-					: array(),
+			'forms'               => class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+				? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_options()
+				: array(),
 				'filtersGroups'       => FiltersManager::instance()->get_groups(),
 				'customFieldsTypes'   => class_exists( \DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager::class ) ? \DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager::instance()->get_options() : array(),
 				'contactFieldsGroups' => Utils::get_contact_fields(),

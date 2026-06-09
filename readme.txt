@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,19 @@ Multiple team members can work in DoubleScale at once. WordPress roles map to ac
 
 = Plus: a visual automation engine that connects all nine =
 
-Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened, email received, SMS received, WhatsApp received, lead score crossed, list/tag applied or removed — flow into **multi-step automations** with conditional branches, time delays, goal conditions, and webhook calls. Actions include: send email, send SMS, send WhatsApp, start or pause an email sequence, tag, score, move a deal to a new stage, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
+Underneath every module is one workflow builder. **100+ triggers** across contacts, deals, forms, booking, support, messaging, e-commerce, LMS, and membership plugins — flow into **multi-step automations** with conditional branches, time delays, goal conditions, and webhook calls. Actions include: send email, send SMS, send WhatsApp, start or pause an email sequence, tag, score, move a deal to a new stage, create a deal, assign a task, post to Slack, hit a webhook.
+
+**Automation integrations:**
+
+* **E-commerce** — WooCommerce (orders, subscriptions, memberships, cart abandonment, reviews, wishlists), Easy Digital Downloads, SureCart
+* **Forms** — Contact Form 7, WPForms, Fluent Forms, Quill Forms (free); Elementor Forms, Gravity Forms, Ninja Forms, Formidable, Forminator, MetForm, WS Form, Bit Form, SureForms, eForm, JetFormBuilder (Pro)
+* **LMS** — LearnDash, Tutor LMS, LifterLMS, LearnPress
+* **Membership** — MemberPress, Paid Memberships Pro
+* **Media** — Presto Player
+* **Messaging** — Email received, SMS received, WhatsApp received
+* **CRM** — Contact subscribed/unsubscribed, tags applied/removed, lists applied/removed, deal stage/status/owner/value changed, link trigger clicked, user login/register/role update, webhook received
+* **Booking** — Booking created, confirmed, completed, rescheduled, cancelled
+* **Support** — Ticket created, closed, reply added, note added, status changed, priority changed, agent assigned
 
 = Key capabilities =
 
@@ -64,7 +76,7 @@ Underneath every module is one workflow builder. **11+ trigger types** — form 
 * GDPR-friendly: per-contact exports, hard-delete workflows, consent tracking per channel, retention rules, and unsubscribe handling.
 * Benchmarked at 100,000+ contacts on a single-server install. Background processing keeps the frontend fast.
 * Deep WordPress integrations: WooCommerce, Easy Digital Downloads, SureCart, and LMS plugins (LearnDash, LifterLMS, LearnPress, Tutor LMS) feed the CRM natively.
-* 16 form-builder integrations, including Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, and WS Form.
+* **15 form-builder integrations** — Contact Form 7, WPForms, Fluent Forms, Quill Forms (free); Elementor Forms, Gravity Forms, Ninja Forms, Formidable, Forminator, MetForm, WS Form, Bit Form, SureForms, eForm, and JetFormBuilder (Pro).
 
 = Who DoubleScale is for =
 
@@ -170,7 +182,7 @@ WordPress roles map to access patterns inside DoubleScale: sales reps see only d
 
 = Which form plugins work? =
 
-16 form builders out of the box — Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and others. Form submissions create or update contacts with tags, lists, and field mapping.
+15 form builders. Four ship in the free plugin — Contact Form 7, WPForms, Fluent Forms, and Quill Forms. Eleven more are available with Pro — Elementor Forms, Gravity Forms, Ninja Forms, Formidable, Forminator, MetForm, WS Form, Bit Form, SureForms, eForm, and JetFormBuilder. Form submissions create or update contacts with tags, lists, and field mapping.
 
 = How do imports work? =
 
@@ -189,6 +201,16 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.1 = 10 Jun 2026
+- Add Forms module to free plugin with 4 integrations: Contact Form 7, WPForms, Fluent Forms, and Quill Forms
+- Add form type selector showing all 15 integrations with Pro badges and install-status hints
+- Add horizontal notification preference categories with module icons
+- Hide email channel for Booking notifications (uses its own email settings)
+- Fix contact field mapping order (contact field on left, form field on right)
+- Fix "Manage Custom Fields" button not redirecting to Settings → Custom Fields
+- Sort form type cards by active/installed status first
+- Update readme with detailed Forms and Automations integration lists
+
 = 1.0.2 = 3 Jun 2026
 - Fix booking issue
 - Fix assets issue
@@ -206,7 +228,7 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
   * Unified inbox for email, SMS, and WhatsApp
   * Analytics, reports, and dashboards
 * Visual automation engine with 11+ trigger types — including WhatsApp received, SMS received, deal stage changed, lead score crossed, link clicked — connecting every module
-* 50+ integrations across WooCommerce, EDD, SureCart, LMS plugins, 16 form builders, SMTP providers, Twilio, Meta WhatsApp, Slack, HubSpot, Pipedrive, ActiveCampaign, and more
+* 50+ integrations across WooCommerce, EDD, SureCart, LMS plugins (LearnDash, Tutor LMS, LifterLMS, LearnPress), membership plugins (MemberPress, Paid Memberships Pro), 15 form builders, 20+ SMTP providers, Twilio, Meta WhatsApp, Presto Player, Slack, HubSpot, Pipedrive, ActiveCampaign, GoHighLevel, and more
 
 == Upgrade Notice ==
 

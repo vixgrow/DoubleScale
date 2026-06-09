@@ -1,17 +1,23 @@
 <?php
 /**
- * Pro automation trigger (free plugin): Contact Form 7 — definition only.
+ * Free automation trigger: Contact Form 7.
  *
- * @package DoubleScale\Pro
+ * Ships in the free plugin — not locked behind Pro.
+ * The actual submission hook is handled by {@see \DoubleScale\Modules\Forms\Contactform7\Form}.
+ *
+ * @package DoubleScale
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Forms;
 
+use DoubleScale\Modules\Automations\Abstracts\Trigger;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Contactform7FormSubmitted extends AbstractFormSubmittedTrigger {
+final class Contactform7FormSubmitted extends Trigger {
+
+	public $source = 'forms';
 
 	public $name = 'Contact Form 7';
 
@@ -22,6 +28,12 @@ final class Contactform7FormSubmitted extends AbstractFormSubmittedTrigger {
 	public $attributes = array();
 
 	public $group = 'contactform7';
+
+	public function load_hooks() {}
+
+	public function get_fields() {
+		return array();
+	}
 }
 
 TriggersManager::instance()->register( new Contactform7FormSubmitted() );

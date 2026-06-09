@@ -1,17 +1,23 @@
 <?php
 /**
- * Pro automation trigger (free plugin): WPForms — definition only.
+ * Free automation trigger: WPForms.
  *
- * @package DoubleScale\Pro
+ * Ships in the free plugin — not locked behind Pro.
+ * The actual submission hook is handled by {@see \DoubleScale\Modules\Forms\Wpforms\Form}.
+ *
+ * @package DoubleScale
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Forms;
 
+use DoubleScale\Modules\Automations\Abstracts\Trigger;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 defined( 'ABSPATH' ) || exit;
 
-final class WpformsFormSubmitted extends AbstractFormSubmittedTrigger {
+final class WpformsFormSubmitted extends Trigger {
+
+	public $source = 'forms';
 
 	public $name = 'WPForms';
 
@@ -22,6 +28,12 @@ final class WpformsFormSubmitted extends AbstractFormSubmittedTrigger {
 	public $attributes = array();
 
 	public $group = 'wpforms';
+
+	public function load_hooks() {}
+
+	public function get_fields() {
+		return array();
+	}
 }
 
 TriggersManager::instance()->register( new WpformsFormSubmitted() );

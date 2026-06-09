@@ -1,17 +1,23 @@
 <?php
 /**
- * Pro automation trigger (free plugin): Quill Forms — definition only.
+ * Free automation trigger: Quill Forms.
  *
- * @package DoubleScale\Pro
+ * Ships in the free plugin — not locked behind Pro.
+ * The actual submission hook is handled by {@see \DoubleScale\Modules\Forms\Quillforms\Form}.
+ *
+ * @package DoubleScale
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Forms;
 
+use DoubleScale\Modules\Automations\Abstracts\Trigger;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 defined( 'ABSPATH' ) || exit;
 
-final class QuillformsFormSubmitted extends AbstractFormSubmittedTrigger {
+final class QuillformsFormSubmitted extends Trigger {
+
+	public $source = 'forms';
 
 	public $name = 'Quill Forms';
 
@@ -22,6 +28,12 @@ final class QuillformsFormSubmitted extends AbstractFormSubmittedTrigger {
 	public $attributes = array();
 
 	public $group = 'quillforms';
+
+	public function load_hooks() {}
+
+	public function get_fields() {
+		return array();
+	}
 }
 
 TriggersManager::instance()->register( new QuillformsFormSubmitted() );

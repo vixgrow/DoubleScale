@@ -374,11 +374,11 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 
 					<div className="grid grid-cols-1 mb-2 gap-4 sm:grid-cols-2 sm:gap-5">
 						<div className="text-sm font-semibold text-primaryText">
-							<span>{__('Field', 'doublescale')}</span>
+							<span>{__('Contact Field', 'doublescale')}</span>
 							<span className="text-destructive">*</span>
 						</div>
 						<div className="text-sm font-semibold text-primaryText">
-							<span>{__('Contact Field', 'doublescale')}</span>
+							<span>{__('Form Field', 'doublescale')}</span>
 							<span className="text-destructive">*</span>
 						</div>
 					</div>
@@ -389,6 +389,13 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 								key={key}
 								className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6"
 							>
+								<div className="min-w-0">
+									<Input
+										value={contactFields[key].label}
+										disabled
+										className={cn(readonlyContactClass)}
+									/>
+								</div>
 								<div className="min-w-0">
 									{key === 'email' ? (
 										<Select
@@ -438,13 +445,6 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 										</div>
 									)}
 								</div>
-								<div className="min-w-0">
-									<Input
-										value={contactFields[key].label}
-										disabled
-										className={cn(readonlyContactClass)}
-									/>
-								</div>
 							</div>
 						);
 					})}
@@ -469,10 +469,10 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 						<div className="mt-5 mb-2 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:gap-6">
 							
 							<div className="text-sm font-semibold text-primaryText sm:col-span-1">
-								{__('Field', 'doublescale')}
+								{__('Contact Field', 'doublescale')}
 							</div>
 							<div className="text-sm font-semibold text-primaryText sm:col-span-1">
-								{__('Contact Field', 'doublescale')}
+								{__('Form Field', 'doublescale')}
 							</div>
 							<span className="hidden w-10 sm:block" aria-hidden />
 						</div>
@@ -484,26 +484,6 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 								key={field.id}
 								className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[1fr_1fr_auto]  sm:gap-6"
 							>
-								<div className="min-w-0">
-									<MergeTagInput
-										value={field.fieldValue || ''}
-										onChange={(newValue) =>
-											updateOtherField(
-												field.id,
-												'fieldValue',
-												newValue
-											)
-										}
-										placeholder={__(
-											'Select a form field or type a value',
-											'doublescale'
-										)}
-										formFieldMergeTags={
-											formFieldMergeTags
-										}
-									/>
-								</div>
-								
 								<div className="min-w-0">
 									<Select
 										className="react-select-container w-full"
@@ -542,7 +522,25 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 									/>
 								</div>
 
-								
+								<div className="min-w-0">
+									<MergeTagInput
+										value={field.fieldValue || ''}
+										onChange={(newValue) =>
+											updateOtherField(
+												field.id,
+												'fieldValue',
+												newValue
+											)
+										}
+										placeholder={__(
+											'Select a form field or type a value',
+											'doublescale'
+										)}
+										formFieldMergeTags={
+											formFieldMergeTags
+										}
+									/>
+								</div>
 
 								<div className="flex justify-end sm:justify-center">
 									<Button

@@ -41,6 +41,13 @@ import {
 	type PendingAttachment,
 } from '@/components/support';
 import { Badge } from '@/components/ui/badge';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import { TagField } from '@doublescale/components';
@@ -457,17 +464,21 @@ const SupportTicketDetail: React.FC = () => {
 							{__('Mailbox', 'doublescale')}
 						</div>
 						<div className="text-gray-900">
-							<select
-								value={ticket.mailbox_id ?? ''}
-								onChange={(e) => handleMailboxChange(e.target.value)}
-								className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]"
+							<Select
+								value={ticket.mailbox_id ? String(ticket.mailbox_id) : undefined}
+								onValueChange={(v) => handleMailboxChange(v)}
 							>
-								{mailboxes.map((mailbox) => (
-									<option key={mailbox.id} value={mailbox.id}>
-										{mailbox.name || mailbox.slug}
-									</option>
-								))}
-							</select>
+								<SelectTrigger className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]">
+									<SelectValue placeholder={__('Select mailbox', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									{mailboxes.map((mailbox) => (
+										<SelectItem key={mailbox.id} value={String(mailbox.id)}>
+											{mailbox.name || mailbox.slug}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 					<div>
@@ -475,31 +486,35 @@ const SupportTicketDetail: React.FC = () => {
 							{__('Assigned to', 'doublescale')}
 						</div>
 						<div className="text-gray-900">
-							<select
-								value={ticket.agent_user_id ?? ''}
-								onChange={(e) => handleAssigneeChange(e.target.value)}
-								className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]"
+							<Select
+								value={ticket.agent_user_id ? String(ticket.agent_user_id) : 'unassigned'}
+								onValueChange={(v) => handleAssigneeChange(v === 'unassigned' ? '' : v)}
 							>
-								<option value="">
-									{__('Unassigned', 'doublescale')}
-								</option>
-								{/* Keep the current assignee selectable even if it's
-								    not in the assignable list (e.g. a manager-only
-								    user the API didn't return for an agent). */}
-								{ticket.agent &&
-									!assignableAgents.some(
-										(a) => a.id === ticket.agent?.id
-									) && (
-										<option value={ticket.agent.id}>
-											{ticket.agent.display_name}
-										</option>
-									)}
-								{assignableAgents.map((agent) => (
-									<option key={agent.id} value={agent.id}>
-										{agent.display_name}
-									</option>
-								))}
-							</select>
+								<SelectTrigger className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]">
+									<SelectValue placeholder={__('Unassigned', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="unassigned">
+										{__('Unassigned', 'doublescale')}
+									</SelectItem>
+									{/* Keep the current assignee selectable even if it's
+									    not in the assignable list (e.g. a manager-only
+									    user the API didn't return for an agent). */}
+									{ticket.agent &&
+										!assignableAgents.some(
+											(a) => a.id === ticket.agent?.id
+										) && (
+											<SelectItem value={String(ticket.agent.id)}>
+												{ticket.agent.display_name}
+											</SelectItem>
+										)}
+									{assignableAgents.map((agent) => (
+										<SelectItem key={agent.id} value={String(agent.id)}>
+											{agent.display_name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 				</div>
@@ -516,46 +531,50 @@ const SupportTicketDetail: React.FC = () => {
 
 				{/* Quick actions row */}
 				<div className="mt-4 flex gap-3 items-center text-sm">
-					<label className="flex items-center gap-1">
+					<div className="flex items-center gap-1">
 						<span className="text-gray-600">
 							{__('Status:', 'doublescale')}
 						</span>
-						<select
+						<Select
 							value={ticket.status}
-							onChange={(e) =>
-								handleStatusChange(
-									e.target.value as TicketStatus
-								)
+							onValueChange={(v) =>
+								handleStatusChange(v as TicketStatus)
 							}
-							className="border rounded px-2 py-1"
 						>
-							{TICKET_STATUSES.map((s) => (
-								<option key={s} value={s}>
-									{s}
-								</option>
-							))}
-						</select>
-					</label>
-					<label className="flex items-center gap-1">
+							<SelectTrigger className="border rounded px-2 py-1">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{TICKET_STATUSES.map((s) => (
+									<SelectItem key={s} value={s}>
+										{s}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+					<div className="flex items-center gap-1">
 						<span className="text-gray-600">
 							{__('Priority:', 'doublescale')}
 						</span>
-						<select
+						<Select
 							value={ticket.priority}
-							onChange={(e) =>
-								handlePriorityChange(
-									e.target.value as TicketPriority
-								)
+							onValueChange={(v) =>
+								handlePriorityChange(v as TicketPriority)
 							}
-							className="border rounded px-2 py-1"
 						>
-							{TICKET_PRIORITIES.map((p) => (
-								<option key={p} value={p}>
-									{p}
-								</option>
-							))}
-						</select>
-					</label>
+							<SelectTrigger className="border rounded px-2 py-1">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{TICKET_PRIORITIES.map((p) => (
+									<SelectItem key={p} value={p}>
+										{p}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 
 				{/* Accumulated CC participants across all replies on this ticket. */}

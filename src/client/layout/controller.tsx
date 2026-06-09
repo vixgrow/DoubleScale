@@ -83,19 +83,10 @@ const FORMS_PRO_FEATURE_LIST = [
 ];
 
 /**
- * The Forms editor and REST routes only exist when DoubleScale Pro is active.
- * Phantom `forms` rows (persisted toggles before Pro is installed) must not mount
- * the free Forms UI — same UX as Pipelines and Tasks, which always show the
- * upgrade notice until Pro replaces the page via navigation filters.
+ * Forms module ships in free with 4 integrations (CF7, WPForms, Fluent, Quill).
+ * Pro adds additional integrations via the `doublescale_forms` filter.
  */
 function isFormsModuleAvailableForEditor(): boolean {
-	const isProActive = applyFilters(
-		'doublescale_is_pro_active',
-		false
-	) as boolean;
-	if (!isProActive) {
-		return false;
-	}
 	return (
 		config.getModules().some((m) => m.slug === 'forms') &&
 		config.isModuleToggleEnabled('forms')

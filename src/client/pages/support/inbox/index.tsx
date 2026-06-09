@@ -17,6 +17,15 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import {
 	useTickets,
@@ -334,17 +343,17 @@ const SupportInbox: React.FC = () => {
 			{/* Filter row */}
 			<div className="mb-4 flex flex-wrap gap-3 items-end">
 				<div>
-					<label
+					<Label
 						htmlFor="ds-support-search"
 						className="block text-xs font-medium text-gray-700 mb-1"
 					>
 						{__('Search', 'doublescale')}
-					</label>
-					<input
+					</Label>
+					<Input
 						id="ds-support-search"
 						type="search"
 						placeholder={__('Title contains…', 'doublescale')}
-						className="border rounded px-2 py-1.5 text-sm w-64"
+						className="w-64"
 						defaultValue={filters.search ?? ''}
 						onKeyDown={(e) => {
 							if (e.key === 'Enter') {
@@ -354,104 +363,114 @@ const SupportInbox: React.FC = () => {
 					/>
 				</div>
 				<div>
-					<label
+					<Label
 						htmlFor="ds-support-status"
 						className="block text-xs font-medium text-gray-700 mb-1"
 					>
 						{__('Status', 'doublescale')}
-					</label>
-					<select
-						id="ds-support-status"
-						className="border rounded px-2 py-1.5 text-sm"
-						value={filters.status ?? ''}
-						onChange={(e) =>
-							updateFilter({ status: e.target.value || undefined })
+					</Label>
+					<Select
+						value={filters.status ?? 'all'}
+						onValueChange={(v) =>
+							updateFilter({ status: v === 'all' ? undefined : v })
 						}
 					>
-						<option value="">{__('All', 'doublescale')}</option>
-						{TICKET_STATUSES.map((s) => (
-							<option key={s} value={s}>
-								{s}
-							</option>
-						))}
-					</select>
+						<SelectTrigger className="w-[140px]">
+							<SelectValue placeholder={__('All', 'doublescale')} />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
+							{TICKET_STATUSES.map((s) => (
+								<SelectItem key={s} value={s}>
+									{s}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 				<div>
-					<label
+					<Label
 						htmlFor="ds-support-priority"
 						className="block text-xs font-medium text-gray-700 mb-1"
 					>
 						{__('Priority', 'doublescale')}
-					</label>
-					<select
-						id="ds-support-priority"
-						className="border rounded px-2 py-1.5 text-sm"
-						value={filters.priority ?? ''}
-						onChange={(e) =>
+					</Label>
+					<Select
+						value={filters.priority ?? 'all'}
+						onValueChange={(v) =>
 							updateFilter({
-								priority: (e.target.value as TicketPriority) || undefined,
+								priority: v === 'all' ? undefined : (v as TicketPriority),
 							})
 						}
 					>
-						<option value="">{__('All', 'doublescale')}</option>
-						{TICKET_PRIORITIES.map((p) => (
-							<option key={p} value={p}>
-								{p}
-							</option>
-						))}
-					</select>
+						<SelectTrigger className="w-[140px]">
+							<SelectValue placeholder={__('All', 'doublescale')} />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
+							{TICKET_PRIORITIES.map((p) => (
+								<SelectItem key={p} value={p}>
+									{p}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 				<div>
-					<label
+					<Label
 						htmlFor="ds-support-mailbox"
 						className="block text-xs font-medium text-gray-700 mb-1"
 					>
 						{__('Mailbox', 'doublescale')}
-					</label>
-					<select
-						id="ds-support-mailbox"
-						className="border rounded px-2 py-1.5 text-sm"
-						value={filters.mailbox_id ?? ''}
-						onChange={(e) =>
+					</Label>
+					<Select
+						value={filters.mailbox_id != null ? String(filters.mailbox_id) : 'all'}
+						onValueChange={(v) =>
 							updateFilter({
-								mailbox_id: e.target.value ? Number(e.target.value) : undefined,
+								mailbox_id: v === 'all' ? undefined : Number(v),
 							})
 						}
 					>
-						<option value="">{__('All', 'doublescale')}</option>
-						{mailboxes.map((m) => (
-							<option key={m.id} value={m.id}>
-								{m.name || m.slug}
-							</option>
-						))}
-					</select>
+						<SelectTrigger className="w-[140px]">
+							<SelectValue placeholder={__('All', 'doublescale')} />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
+							{mailboxes.map((m) => (
+								<SelectItem key={m.id} value={String(m.id)}>
+									{m.name || m.slug}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 				<div>
-					<label
+					<Label
 						htmlFor="ds-support-tag"
 						className="block text-xs font-medium text-gray-700 mb-1"
 					>
 						{__('Tag', 'doublescale')}
-					</label>
-					<select
-						id="ds-support-tag"
-						className="border rounded px-2 py-1.5 text-sm"
-						value={filters.tag_id ?? ''}
-						onChange={(e) =>
+					</Label>
+					<Select
+						value={filters.tag_id != null ? String(filters.tag_id) : 'all'}
+						onValueChange={(v) =>
 							updateFilter({
-								tag_id: e.target.value
-									? Number(e.target.value)
-									: undefined,
+								tag_id: v === 'all' ? undefined : Number(v),
 							})
 						}
 					>
-						<option value="">{__('All', 'doublescale')}</option>
-						{tags.map((tag) => (
-							<option key={tag.id} value={tag.id}>
-								{tag.name}
-							</option>
-						))}
-					</select>
+						<SelectTrigger className="w-[140px]">
+							<SelectValue placeholder={__('All', 'doublescale')} />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
+							{tags.map((tag) => (
+								<SelectItem key={tag.id} value={String(tag.id)}>
+									{tag.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 			</div>
 

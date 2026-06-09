@@ -73,7 +73,6 @@ function doublescale_phantom_module_toggle_slugs(): array {
 	$slugs = array(
 		'analytics',
 		'deals',
-		'forms',
 		'inbox',
 		'integrations',
 		'leadscoring',
@@ -107,11 +106,6 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Pipelines & Deals', 'doublescale' ),
 				'description' => __( 'Manage sales pipelines, deal stages, and track deal progress.', 'doublescale' ),
-			);
-		case 'forms':
-			return array(
-				'label'       => __( 'Forms', 'doublescale' ),
-				'description' => __( 'Build and embed contact-capture forms that sync with your CRM.', 'doublescale' ),
 			);
 		case 'inbox':
 			return array(

@@ -25,6 +25,15 @@ import apiFetch from '@wordpress/api-fetch';
 import { X, Search, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import {
@@ -275,14 +284,14 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
 					<div>
-						<label
+						<Label
 							htmlFor="ds-new-ticket-title"
 							className="block text-sm font-medium text-gray-700 mb-1"
 						>
 							{__('Title', 'doublescale')}{' '}
 							<span className="text-red-500">*</span>
-						</label>
-						<input
+						</Label>
+						<Input
 							id="ds-new-ticket-title"
 							type="text"
 							className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -299,10 +308,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 					{/* Customer — contact picker (Q1) */}
 					<div>
 						<div className="flex items-center justify-between mb-1">
-							<label className="block text-sm font-medium text-gray-700">
+							<Label className="block text-sm font-medium text-gray-700">
 								{__('Customer', 'doublescale')}{' '}
 								<span className="text-red-500">*</span>
-							</label>
+							</Label>
 							<button
 								type="button"
 								className="text-xs text-blue-600 hover:underline flex items-center gap-1"
@@ -348,7 +357,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 								</div>
 							) : (
 								<div className="relative">
-									<input
+									<Input
 										type="text"
 										className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 										value={query}
@@ -398,7 +407,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							)
 						) : (
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-								<input
+								<Input
 									type="text"
 									className="w-full border rounded px-3 py-2 text-sm"
 									value={firstName}
@@ -410,7 +419,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 										'doublescale'
 									)}
 								/>
-								<input
+								<Input
 									type="text"
 									className="w-full border rounded px-3 py-2 text-sm"
 									value={lastName}
@@ -419,7 +428,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 									}
 									placeholder={__('Last name', 'doublescale')}
 								/>
-								<input
+								<Input
 									type="email"
 									className="w-full border rounded px-3 py-2 text-sm"
 									value={email}
@@ -432,84 +441,85 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 
 					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						<div>
-							<label
+							<Label
 								htmlFor="ds-new-ticket-mailbox"
 								className="block text-sm font-medium text-gray-700 mb-1"
 							>
 								{__('Mailbox', 'doublescale')}
-							</label>
-							<select
-								id="ds-new-ticket-mailbox"
-								className="w-full border rounded px-3 py-2 text-sm"
-								value={mailboxId}
-								onChange={(e) =>
-									setMailboxId(
-										e.target.value === ''
-											? ''
-											: Number(e.target.value)
-									)
-								}
+							</Label>
+							<Select
+								value={mailboxId === '' ? undefined : String(mailboxId)}
+								onValueChange={(v) => setMailboxId(Number(v))}
 							>
-								{/* Mailbox is mandatory (Q4) — no "None" option. */}
-								{mailboxes.map((m) => (
-									<option key={m.id} value={m.id}>
-										{m.name || m.slug}
-									</option>
-								))}
-							</select>
+								<SelectTrigger id="ds-new-ticket-mailbox" className="w-full border rounded px-3 py-2 text-sm">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{/* Mailbox is mandatory (Q4) — no "None" option. */}
+									{mailboxes.map((m) => (
+										<SelectItem key={m.id} value={String(m.id)}>
+											{m.name || m.slug}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div>
-							<label
+							<Label
 								htmlFor="ds-new-ticket-assignee"
 								className="block text-sm font-medium text-gray-700 mb-1"
 							>
 								{__('Assignee', 'doublescale')}
-							</label>
-							<select
-								id="ds-new-ticket-assignee"
-								className="w-full border rounded px-3 py-2 text-sm"
-								value={agentUserId}
-								onChange={(e) =>
+							</Label>
+							<Select
+								value={agentUserId === '' ? 'unassigned' : String(agentUserId)}
+								onValueChange={(v) =>
 									setAgentUserId(
-										e.target.value === ''
+										v === 'unassigned'
 											? ''
-											: Number(e.target.value)
+											: Number(v)
 									)
 								}
 							>
-								<option value="">
-									{__('— Unassigned —', 'doublescale')}
-								</option>
-								{assignableAgents.map((agent) => (
-									<option key={agent.id} value={agent.id}>
-										{agent.display_name}
-									</option>
-								))}
-							</select>
+								<SelectTrigger id="ds-new-ticket-assignee" className="w-full border rounded px-3 py-2 text-sm">
+									<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="unassigned">
+										{__('— Unassigned —', 'doublescale')}
+									</SelectItem>
+									{assignableAgents.map((agent) => (
+										<SelectItem key={agent.id} value={String(agent.id)}>
+											{agent.display_name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div>
-							<label
+							<Label
 								htmlFor="ds-new-ticket-priority"
 								className="block text-sm font-medium text-gray-700 mb-1"
 							>
 								{__('Priority', 'doublescale')}
-							</label>
-							<select
-								id="ds-new-ticket-priority"
-								className="w-full border rounded px-3 py-2 text-sm"
+							</Label>
+							<Select
 								value={priority}
-								onChange={(e) =>
-									setPriority(
-										e.target.value as TicketPriority
-									)
+								onValueChange={(v) =>
+									setPriority(v as TicketPriority)
 								}
 							>
-								{TICKET_PRIORITIES.map((p) => (
-									<option key={p} value={p}>
-										{p}
-									</option>
-								))}
-							</select>
+								<SelectTrigger id="ds-new-ticket-priority" className="w-full border rounded px-3 py-2 text-sm">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{TICKET_PRIORITIES.map((p) => (
+										<SelectItem key={p} value={p}>
+											{p}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 
@@ -534,13 +544,13 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 					}
 
 					<div>
-						<label
+						<Label
 							htmlFor="ds-new-ticket-content"
 							className="block text-sm font-medium text-gray-700 mb-1"
 						>
 							{__('Opening message', 'doublescale')}{' '}
 							<span className="text-red-500">*</span>
-						</label>
+						</Label>
 						<SupportRichText
 							message={content}
 							onChange={setContent}

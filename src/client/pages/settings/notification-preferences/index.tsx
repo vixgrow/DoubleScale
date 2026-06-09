@@ -53,7 +53,28 @@ import {
 	showTestBrowserNotification,
 	type NotificationPermission,
 } from '@doublescale/utils/browser-notifications';
+import {
+	ContactsIcon,
+	CampaignsIcon,
+	AutomationsIcon,
+	PiplelinesIcon,
+	SettingsIcon as SystemIcon,
+	TaskDoneIcon as TasksIcon,
+} from '@doublescale/components';
+import { UpcomingCalendarIcon } from '@/components/booking';
+import { SupportIcon } from '@/components/support';
 import NotificationRetentionSettings from './notification-retention-settings';
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+	contacts: <ContactsIcon width={18} height={18} />,
+	deals: <PiplelinesIcon width={18} height={18} />,
+	campaigns: <CampaignsIcon width={18} height={18} />,
+	automations: <AutomationsIcon width={18} height={18} />,
+	tasks: <TasksIcon width={18} height={18} />,
+	system: <SystemIcon width={18} height={18} />,
+	booking: <UpcomingCalendarIcon width={18} height={18} />,
+	support: <SupportIcon width={18} height={18} />,
+};
 
 interface PushConfig {
 	enabled: boolean;
@@ -151,9 +172,11 @@ function ProChannelsUpsell() {
 // ──────────────────────────────────────────────────────
 function ChannelHeaderIcons({
 	showBell,
+	showEmail = true,
 	hasBrowser,
 }: {
 	showBell: boolean;
+	showEmail?: boolean;
 	hasBrowser: boolean;
 }) {
 	return (
@@ -163,9 +186,11 @@ function ChannelHeaderIcons({
 					<Bell className="w-4 h-4" />
 				</div>
 			)}
-			<div className="w-14 flex justify-center text-muted-foreground">
-				<Mail className="w-4 h-4" />
-			</div>
+			{showEmail && (
+				<div className="w-14 flex justify-center text-muted-foreground">
+					<Mail className="w-4 h-4" />
+				</div>
+			)}
 			{hasBrowser && (
 				<div className="w-14 flex justify-center text-muted-foreground">
 					<Monitor className="w-4 h-4" />
@@ -185,6 +210,7 @@ function ChannelSwitchRow({
 	updateSubcategory,
 	preferences,
 	showBell,
+	showEmail = true,
 	hasBrowser,
 	browserPermission,
 }: {
@@ -193,6 +219,7 @@ function ChannelSwitchRow({
 	updateSubcategory: ReturnType<typeof useNotificationPreferences>['updateSubcategory'];
 	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
 	showBell: boolean;
+	showEmail?: boolean;
 	hasBrowser: boolean;
 	browserPermission: NotificationPermission;
 }) {
@@ -209,15 +236,17 @@ function ChannelSwitchRow({
 					/>
 				</div>
 			)}
-			<div className="w-14 flex justify-center">
-				<Switch
-					checked={subPrefs.email}
-					onCheckedChange={(c) =>
-						updateSubcategory(subKey, 'email', c)
-					}
-					disabled={!preferences.channels.email}
-				/>
-			</div>
+			{showEmail && (
+				<div className="w-14 flex justify-center">
+					<Switch
+						checked={subPrefs.email}
+						onCheckedChange={(c) =>
+							updateSubcategory(subKey, 'email', c)
+						}
+						disabled={!preferences.channels.email}
+					/>
+				</div>
+			)}
 			{hasBrowser && (
 				<div className="w-14 flex justify-center">
 					<Switch
@@ -611,24 +640,23 @@ function EmailDesktopTab({
 						<Tabs
 							value={activeCategory}
 							onValueChange={setActiveCategory}
-							orientation="vertical"
-							className="flex flex-col gap-6 sm:flex-row sm:gap-8"
 						>
-							{/* Category rail */}
-							<TabsList className="h-auto shrink-0 flex-row flex-wrap gap-1 bg-transparent p-0 sm:w-56 sm:flex-col sm:flex-nowrap sm:items-stretch">
+							{/* Horizontal category tabs with icons */}
+							<TabsList className="h-auto flex-row flex-wrap gap-1 bg-transparent p-0 mb-6">
 								{categoryKeys.map((key) => (
 									<TabsTrigger
 										key={key}
 										value={key}
-										className="justify-start rounded-md px-3 py-2 text-left text-sm data-[state=active]:bg-muted data-[state=active]:shadow-none"
+										className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 									>
+										{CATEGORY_ICONS[key] || null}
 										{categories[key].label}
 									</TabsTrigger>
 								))}
 							</TabsList>
 
 							{/* Active category panel */}
-							<div className="min-w-0 flex-1">
+							<div>
 								{categoryKeys.map((key) => {
 									const category = categories[key];
 									const catSubs =
@@ -655,6 +683,7 @@ function EmailDesktopTab({
 											<div className="flex items-center justify-end gap-4 pb-3 border-b mb-3">
 												<ChannelHeaderIcons
 													showBell={showBell}
+													showEmail={key !== 'booking'}
 													hasBrowser={hasBrowser}
 												/>
 											</div>
@@ -706,6 +735,9 @@ function EmailDesktopTab({
 																	}
 																	showBell={
 																		showBell
+																	}
+																	showEmail={
+																		key !== 'booking'
 																	}
 																	hasBrowser={
 																		hasBrowser
@@ -1338,7 +1370,7 @@ export function NotificationPreferences({
 	const canManageRetentionSettings = !isSalesRep();
 	const hasLimitedAccess = isSalesRep() || (isSalesManager() && !isCrmManager());
 	const canManagePushSetup = !hasLimitedAccess;
-	const whiteLabel = ConfigAPI.getWhiteLabel();
+	const whiteLabel = typeof ConfigAPI.getWhiteLabel === 'function' ? ConfigAPI.getWhiteLabel() : undefined;
 
 	const [browserPermission, setBrowserPermission] =
 		useState<NotificationPermission>('default');

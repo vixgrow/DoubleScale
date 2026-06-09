@@ -478,7 +478,7 @@ const InfoCard: React.FC = () => {
 							</p>
 							<Button
 								onClick={() => {
-									navigate(getToLink('custom-fields'));
+									navigate(getToLink('settings') + '/custom_fields');
 								}}
 								className="shadow-none"
 								variant="secondary"

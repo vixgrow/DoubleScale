@@ -2951,7 +2951,6 @@
 								{
 									"key": "action",
 									"value": "doublescale_send_summary_email",
-									"value": "doublescale_send_summary_email",
 									"type": "text"
 								}
 							]
@@ -7767,6 +7766,1556 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Support",
+			"item": [
+				{
+					"name": "Tickets",
+					"item": [
+						{
+							"name": "List Tickets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "open,pending",
+											"disabled": true,
+											"description": "Filter by status (comma-separated)"
+										},
+										{
+											"key": "priority",
+											"value": "normal",
+											"disabled": true,
+											"description": "low | normal | high | urgent"
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "contact_id",
+											"value": "{{contactId}}",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "tag_id",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true,
+											"description": "Search ticket title"
+										},
+										{
+											"key": "sort_by",
+											"value": "updated_at",
+											"disabled": true,
+											"description": "created_at | updated_at | priority"
+										},
+										{
+											"key": "sort_order",
+											"value": "desc",
+											"disabled": true
+										},
+										{
+											"key": "per_page",
+											"value": "20",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Ticket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Need help with billing\",\r\n    \"content\": \"<p>I have a question about my last invoice.</p>\",\r\n    \"mailbox_id\": {{mailboxId}},\r\n    \"contact_id\": {{contactId}},\r\n    \"agent_user_id\": 1,\r\n    \"priority\": \"normal\",\r\n    \"status\": \"open\",\r\n    \"tag_ids\": [],\r\n    \"attachment_hashes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"description": "Manager-only. Creates ticket with opening message."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ticket",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Ticket",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"pending\",\r\n    \"priority\": \"high\",\r\n    \"agent_user_id\": 1,\r\n    \"tag_ids\": [1]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Ticket",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}"
+									]
+								},
+								"description": "Manager-only."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ticket by Hash",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/by-hash/{{ticketHash}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"by-hash",
+										"{{ticketHash}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Assignable Agents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/agents",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"agents"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Conversation",
+					"item": [
+						{
+							"name": "Get Conversation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}/conversation",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}",
+										"conversation"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "100",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "kinds",
+											"value": "reply,note,event",
+											"disabled": true,
+											"description": "Comma-separated: reply, note, event"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Reply",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}/replies",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}",
+										"replies"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"content\": \"<p>Thanks for reaching out. We are looking into this.</p>\",\r\n    \"cc\": [\"cc@example.com\"],\r\n    \"attachment_hashes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Internal Note",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}/notes",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}",
+										"notes"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"content\": \"<p>Internal note: escalate to billing team.</p>\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mailboxes",
+					"item": [
+						{
+							"name": "List Mailboxes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes"
+									],
+									"query": [
+										{
+											"key": "box_type",
+											"value": "web",
+											"disabled": true,
+											"description": "web | email"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "per_page",
+											"value": "50",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								},
+								"description": "Support settings access required."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Mailbox",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"slug\": \"general-support\",\r\n    \"box_type\": \"web\",\r\n    \"is_default\": false,\r\n    \"data\": {\r\n        \"name\": \"General Support\",\r\n        \"identity\": {\r\n            \"from_email\": \"support@example.com\"\r\n        }\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Mailbox",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/{{mailboxId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"{{mailboxId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Mailbox",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/{{mailboxId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"{{mailboxId}}"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"data\": {\r\n        \"name\": \"General Support — Updated\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Mailbox",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/{{mailboxId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"{{mailboxId}}"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fallback_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"description": "Requires fallback_id in body. Cannot delete default or last mailbox."
+							},
+							"response": []
+						},
+						{
+							"name": "Move Tickets",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/{{mailboxId}}/move-tickets",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"{{mailboxId}}",
+										"move-tickets"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"new_box_id\": 2,\r\n    \"ticket_ids\": [{{ticketId}}]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"description": "Omit ticket_ids to move all tickets from the source mailbox."
+							},
+							"response": []
+						},
+						{
+							"name": "Test IMAP Connection",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/test-imap",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"test-imap"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"host\": \"imap.example.com\",\r\n    \"port\": 993,\r\n    \"encryption\": \"ssl\",\r\n    \"username\": \"support@example.com\",\r\n    \"password\": \"your-password\",\r\n    \"id\": {{mailboxId}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"description": "Pro: tests custom IMAP credentials. Use password ******** with id to re-test saved mailbox."
+							},
+							"response": []
+						},
+						{
+							"name": "Save Attachment Settings",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/mailboxes/attachment-settings",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"mailboxes",
+										"attachment-settings"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"max_file_size_mb\": 10,\r\n    \"max_file_count\": 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Attachments",
+					"item": [
+						{
+							"name": "Upload Attachment (Ticket)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/tickets/{{ticketId}}/attachments",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"tickets",
+										"{{ticketId}}",
+										"attachments"
+									]
+								},
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": ""
+										},
+										{
+											"key": "pending_count",
+											"value": "0",
+											"type": "text",
+											"description": "Number of files already staged"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Attachment (New Ticket)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/attachments",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"attachments"
+									]
+								},
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": ""
+										},
+										{
+											"key": "pending_count",
+											"value": "0",
+											"type": "text"
+										}
+									]
+								},
+								"description": "Stages file before ticket exists; link via attachment_hashes on create."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Reports",
+					"item": [
+						{
+							"name": "Report Summary",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/reports/summary",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"reports",
+										"summary"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tickets Over Time",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/reports/tickets-over-time",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"reports",
+										"tickets-over-time"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "bucket",
+											"value": "auto",
+											"disabled": true,
+											"description": "auto | daily | weekly | monthly"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Report Breakdown",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/reports/breakdown",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"reports",
+										"breakdown"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Report Agents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/reports/agents",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"reports",
+										"agents"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Report Mailboxes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/reports/mailboxes",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"reports",
+										"mailboxes"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "agent_user_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Portal (Customer)",
+					"item": [
+						{
+							"name": "List Portal Mailboxes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/mailboxes",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"mailboxes"
+									]
+								},
+								"description": "Requires logged-in WP user."
+							},
+							"response": []
+						},
+						{
+							"name": "List Portal Tickets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "open",
+											"disabled": true
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}",
+											"disabled": true
+										},
+										{
+											"key": "per_page",
+											"value": "20",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Portal Ticket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Portal ticket subject\",\r\n    \"content\": \"<p>I need help with my account.</p>\",\r\n    \"mailbox_id\": {{mailboxId}},\r\n    \"priority\": \"normal\",\r\n    \"custom_data\": {},\r\n    \"attachment_hashes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Portal Ticket",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets/{{ticketId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets",
+										"{{ticketId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Portal Conversation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets/{{ticketId}}/conversation",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets",
+										"{{ticketId}}",
+										"conversation"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Portal Reply",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets/{{ticketId}}/replies",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets",
+										"{{ticketId}}",
+										"replies"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"content\": \"<p>Following up on my request.</p>\",\r\n    \"attachment_hashes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Portal Attachment (Ticket)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/tickets/{{ticketId}}/attachments",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"tickets",
+										"{{ticketId}}",
+										"attachments"
+									]
+								},
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": ""
+										},
+										{
+											"key": "pending_count",
+											"value": "0",
+											"type": "text"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Portal Attachment (New Ticket)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/attachments",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"attachments"
+									]
+								},
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": ""
+										},
+										{
+											"key": "pending_count",
+											"value": "0",
+											"type": "text"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Portal Custom Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/portal/custom-fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"portal",
+										"custom-fields"
+									]
+								},
+								"description": "Pro: field definitions for portal ticket form."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Public Guest",
+					"item": [
+						{
+							"name": "Get Public Ticket",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/public/tickets/{{ticketHash}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"public",
+										"tickets",
+										"{{ticketHash}}"
+									]
+								},
+								"description": "No auth. Rate-limited."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Public Conversation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/public/tickets/{{ticketHash}}/conversation",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"public",
+										"tickets",
+										"{{ticketHash}}",
+										"conversation"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Public Reply",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/public/tickets/{{ticketHash}}/replies",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"public",
+										"tickets",
+										"{{ticketHash}}",
+										"replies"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"content\": \"<p>Guest reply via ticket hash link.</p>\",\r\n    \"attachment_hashes\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Pro Settings",
+					"item": [
+						{
+							"name": "Get Custom Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/custom-fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"custom-fields"
+									],
+									"query": [
+										{
+											"key": "scope",
+											"value": "admin",
+											"disabled": true,
+											"description": "admin | portal"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Save Custom Fields",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/custom-fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"custom-fields"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"custom_fields\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Custom Fields Meta",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/custom-fields/meta",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"custom-fields",
+										"meta"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Auto-Close Settings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/auto-close-settings",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"auto-close-settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Save Auto-Close Settings",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/auto-close-settings",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"auto-close-settings"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"enabled\": true,\r\n        \"inactive_days\": 7,\r\n        \"include_tag_ids\": [],\r\n        \"exclude_tag_ids\": []\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Run Auto-Close Now",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/auto-close-settings/run-now",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"auto-close-settings",
+										"run-now"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Incoming Webhook Config",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/incoming-webhook?mailbox_id={{mailboxId}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"incoming-webhook"
+									],
+									"query": [
+										{
+											"key": "mailbox_id",
+											"value": "{{mailboxId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Regenerate Webhook Token",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/incoming-webhook/regenerate",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"incoming-webhook",
+										"regenerate"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"mailbox_id\": {{mailboxId}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ingest Incoming Webhook",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/doublescale/v1/support/webhook/{{mailboxId}}/{{webhookToken}}",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"doublescale",
+										"v1",
+										"support",
+										"webhook",
+										"{{mailboxId}}",
+										"{{webhookToken}}"
+									]
+								},
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"from_email\": \"customer@example.com\",\r\n    \"from_name\": \"Customer Name\",\r\n    \"subject\": \"Email subject\",\r\n    \"body\": \"<p>Email body</p>\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"description": "Public endpoint. Token in URL path. No auth."
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"auth": {
@@ -7890,6 +9439,22 @@
 		{
 			"key": "metaKey",
 			"value": "payments"
+		},
+		{
+			"key": "ticketId",
+			"value": "1"
+		},
+		{
+			"key": "mailboxId",
+			"value": "1"
+		},
+		{
+			"key": "ticketHash",
+			"value": "00000000000000000000000000000000"
+		},
+		{
+			"key": "webhookToken",
+			"value": "abc123"
 		}
 	]
 }

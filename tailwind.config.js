@@ -88,7 +88,10 @@ module.exports = {
 					ring: 'hsl(var(--sidebar-ring))',
 					header: 'hsl(var(--sidebar-header))',
 				},
-				brandPrimary: '#3A3A99',
+				// Defaults to #3A3A99; white-label addons recolor every variant
+				// (incl. opacity modifiers) by overriding --ds-brand-primary
+				// with an "R G B" triplet.
+				brandPrimary: 'rgb(var(--ds-brand-primary, 58 58 153) / <alpha-value>)',
 				'color-primary': '#953AE4',
 				'color-secondary': '#F1E0FF',
 				'color-tertiary': '#FBF9FC',

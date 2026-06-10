@@ -341,7 +341,10 @@ class AdminLoader {
 			?>
 		</div>
 
-		<div class="ds-wordmark">DoubleScale</div>
+		<?php
+		$default_wordmark = '<div class="ds-wordmark">DoubleScale</div>';
+		echo apply_filters( 'doublescale_loading_screen_wordmark', $default_wordmark ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Filterable branding markup, same contract as doublescale_loading_screen_logo above; filters must return pre-escaped HTML.
+		?>
 
 		<div class="ds-bar"></div>
 

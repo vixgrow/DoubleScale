@@ -288,7 +288,11 @@ registerAdminPage('dashboard', {
 	component: () => <Dashboard />,
 	label: __('Dashboard', 'doublescale'),
 	icon: <DashboardIcon />,
-	requiredCapability: ['doublescale_crm_manager'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('contacts', {

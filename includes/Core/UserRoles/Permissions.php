@@ -50,8 +50,7 @@ final class Permissions {
 	 * @return bool True if user is sales manager
 	 */
 	public static function is_sales_manager( $user_id = null ) {
-		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( UserRoles::SALES_MANAGER ) ) ? true : false;
+		return self::user_has_role( UserRoles::SALES_MANAGER, $user_id );
 	}
 
 	/**
@@ -63,8 +62,7 @@ final class Permissions {
 	 * @return bool True if user is sales rep
 	 */
 	public static function is_sales_rep( $user_id = null ) {
-		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( UserRoles::SALES_REP ) ) ? true : false;
+		return self::user_has_role( UserRoles::SALES_REP, $user_id );
 	}
 
 	/**
@@ -87,6 +85,56 @@ final class Permissions {
 	public static function is_support_agent( $user_id = null ) {
 		$user_role = self::get_user_role( $user_id );
 		return UserRoles::SUPPORT_AGENT === $user_role;
+	}
+
+	/**
+	 * Check if user is a Booking Manager
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_booking_manager( $user_id = null ) {
+		return self::user_has_role( UserRoles::BOOKING_MANAGER, $user_id );
+	}
+
+	/**
+	 * Check if user is a Booking Agent
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_booking_agent( $user_id = null ) {
+		return self::user_has_role( UserRoles::BOOKING_AGENT, $user_id );
+	}
+
+	/**
+	 * Check if the user can see and manage every booking (not just their own).
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function can_manage_all_bookings( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		return user_can( $user_id, 'doublescale_booking_manage_all_bookings' );
+	}
+
+	/**
+	 * Check if the user can access the booking module at all.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function has_booking_access( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( user_can( $user_id, 'manage_options' ) || self::is_crm_manager( $user_id ) ) {
+			return true;
+		}
+
+		return user_can( $user_id, 'doublescale_booking_read_own_bookings' )
+			|| user_can( $user_id, 'doublescale_booking_read_all_bookings' )
+			|| user_can( $user_id, 'doublescale_booking_manage_own_calendars' )
+			|| user_can( $user_id, 'doublescale_booking_read_all_calendars' );
 	}
 
 	/**
@@ -207,8 +255,51 @@ final class Permissions {
 			return false;
 		}
 
+		$booking_roles = array( UserRoles::BOOKING_MANAGER, UserRoles::BOOKING_AGENT );
+		if ( array_intersect( $booking_roles, $roles ) ) {
+			return false;
+		}
+
 		$support_roles = array( UserRoles::SUPPORT_MANAGER, UserRoles::SUPPORT_AGENT );
 		return (bool) array_intersect( $support_roles, $roles );
+	}
+
+	/**
+	 * Check if the user's ONLY DoubleScale roles are booking roles (no CRM /
+	 * Support / Administrator). Used to scope the admin menu down to only the
+	 * Booking submenu for dedicated booking staff.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_booking_only( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		$user    = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return false;
+		}
+
+		$roles             = (array) $user->roles;
+		$broader_crm_roles = array(
+			UserRoles::CRM_MANAGER,
+			UserRoles::SALES_MANAGER,
+			UserRoles::SALES_REP,
+		);
+		if ( array_intersect( $broader_crm_roles, $roles ) ) {
+			return false;
+		}
+
+		$support_roles = array( UserRoles::SUPPORT_MANAGER, UserRoles::SUPPORT_AGENT );
+		if ( array_intersect( $support_roles, $roles ) ) {
+			return false;
+		}
+
+		$booking_roles = array( UserRoles::BOOKING_MANAGER, UserRoles::BOOKING_AGENT );
+		return (bool) array_intersect( $booking_roles, $roles );
 	}
 
 
@@ -237,13 +328,21 @@ final class Permissions {
 	 * @return bool True if user has sales manager access
 	 */
 	public static function has_sales_manager_access( $user_id = null ) {
-		$user_role = self::get_user_role( $user_id );
-		// Check if user has one of the allowed roles
-		return in_array( $user_role, array( UserRoles::CRM_MANAGER, UserRoles::ADMINISTRATOR, UserRoles::SALES_MANAGER ) ) ? true : false;
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( self::has_crm_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::user_has_role( UserRoles::SALES_MANAGER, $user_id );
 	}
 
 	/**
 	 * Check if user has sales rep access
+	 *
+	 * Uses role membership (not single highest role) so a user who is e.g.
+	 * Booking Agent + Sales Rep still gets sales endpoints from the Sales Rep
+	 * role. CRM Manager / Administrator always included.
 	 *
 	 * @since 1.0.0
 	 *
@@ -251,9 +350,14 @@ final class Permissions {
 	 * @return bool True if user has sales rep access
 	 */
 	public static function has_sales_rep_access( $user_id = null ) {
-		$user_role = self::get_user_role( $user_id );
-		// Check if user has one of the allowed roles (includes Sales Manager)
-		return in_array( $user_role, array( UserRoles::CRM_MANAGER, UserRoles::ADMINISTRATOR, UserRoles::SALES_MANAGER, UserRoles::SALES_REP ) ) ? true : false;
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( self::has_crm_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::user_has_role( UserRoles::SALES_MANAGER, $user_id )
+			|| self::user_has_role( UserRoles::SALES_REP, $user_id );
 	}
 
 	/**
@@ -406,7 +510,8 @@ final class Permissions {
 
 		$roles = (array) $user->roles;
 
-		// Priority order: Administrator > CRM Manager > Sales Manager > Sales Rep > Support Manager > Support Agent
+		// Priority order: Administrator > CRM Manager > Sales Manager > Sales Rep
+		// > Support Manager > Support Agent > Booking Manager > Booking Agent.
 		$priority = array(
 			UserRoles::ADMINISTRATOR,
 			UserRoles::CRM_MANAGER,
@@ -414,6 +519,8 @@ final class Permissions {
 			UserRoles::SALES_REP,
 			UserRoles::SUPPORT_MANAGER,
 			UserRoles::SUPPORT_AGENT,
+			UserRoles::BOOKING_MANAGER,
+			UserRoles::BOOKING_AGENT,
 		);
 
 		foreach ( $priority as $role ) {

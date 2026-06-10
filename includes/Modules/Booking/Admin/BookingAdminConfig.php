@@ -119,11 +119,12 @@ final class BookingAdminConfig {
 				'id'           => (int) $wp_user->ID,
 				'display_name' => $wp_user->display_name,
 				'email'        => $wp_user->user_email,
-				// `is_admin` collapses Administrator into CRM Manager — same
-				// pattern as {@see Permissions::is_crm_manager()} in CRM core.
-				// Admins and CRM Managers both evaluate true; Sales Manager
-				// and Sales Rep evaluate false.
-				'is_admin'     => Permissions::is_crm_manager(),
+				// Booking-scoped "admin": can view every host's calendars /
+				// bookings / availability (CRM Manager, WP admin, or Booking
+				// Manager). Booking Agent evaluates false (own scope only).
+				'is_admin'     => Permissions::is_crm_manager()
+					|| current_user_can( 'doublescale_booking_read_all_calendars' )
+					|| current_user_can( 'doublescale_booking_manage_all_calendars' ),
 				'capabilities' => array(),
 			),
 		);

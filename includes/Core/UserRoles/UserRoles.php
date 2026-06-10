@@ -31,6 +31,8 @@ final class UserRoles {
 	public const SALES_REP       = self::PREFIX . 'sales_rep';
 	public const SUPPORT_MANAGER = self::PREFIX . 'support_manager';
 	public const SUPPORT_AGENT   = self::PREFIX . 'support_agent';
+	public const BOOKING_MANAGER = self::PREFIX . 'booking_manager';
+	public const BOOKING_AGENT   = self::PREFIX . 'booking_agent';
 	public const ADMINISTRATOR   = 'administrator';
 	public const NONE            = self::PREFIX . 'none';
 
@@ -174,6 +176,22 @@ final class UserRoles {
 	}
 
 	/**
+	 * @return void
+	 */
+	public static function provision_booking_roles(): void {
+		self::provision_role( self::BOOKING_MANAGER );
+		self::provision_role( self::BOOKING_AGENT );
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function deprovision_booking_roles(): void {
+		self::deprovision_role( self::BOOKING_MANAGER );
+		self::deprovision_role( self::BOOKING_AGENT );
+	}
+
+	/**
 	 * Provision Sales Rep + Sales Manager only. CRM Manager is org admin and
 	 * is not tied to the deals module toggle.
 	 *
@@ -201,6 +219,10 @@ final class UserRoles {
 	public static function get_role_slugs_for_module( string $module_slug ): array {
 		if ( 'support' === $module_slug ) {
 			return array( self::SUPPORT_MANAGER, self::SUPPORT_AGENT );
+		}
+
+		if ( 'booking' === $module_slug ) {
+			return array( self::BOOKING_MANAGER, self::BOOKING_AGENT );
 		}
 
 		if ( 'deals' === $module_slug ) {
@@ -345,6 +367,12 @@ final class UserRoles {
 		if ( $role === self::SUPPORT_AGENT ) {
 			return self::get_support_agent_capabilities();
 		}
+		if ( $role === self::BOOKING_MANAGER ) {
+			return self::get_booking_manager_capabilities();
+		}
+		if ( $role === self::BOOKING_AGENT ) {
+			return self::get_booking_agent_capabilities();
+		}
 
 		return null;
 	}
@@ -447,6 +475,11 @@ final class UserRoles {
 				'doublescale_manage_all_tickets', // See and manage every support ticket
 				'doublescale_reply_own_tickets',  // Reply on tickets assigned to self
 			),
+			// Booking caps (doublescale_booking_*) are assigned by
+			// {@see \DoubleScale\Modules\Booking\Capabilities}. These entries
+			// only grant admin-shell access (menu + REST bootstrap).
+			self::BOOKING_MANAGER => array(),
+			self::BOOKING_AGENT   => array(),
 		);
 	}
 
@@ -469,7 +502,9 @@ final class UserRoles {
 					$caps[ self::SALES_MANAGER ],
 					$caps[ self::SALES_REP ],
 					$caps[ self::SUPPORT_MANAGER ],
-					$caps[ self::SUPPORT_AGENT ]
+					$caps[ self::SUPPORT_AGENT ],
+					$caps[ self::BOOKING_MANAGER ],
+					$caps[ self::BOOKING_AGENT ]
 				)
 			)
 		);
@@ -490,6 +525,8 @@ final class UserRoles {
 			self::SALES_REP       => __( 'Sales Rep', 'doublescale' ),
 			self::SUPPORT_MANAGER => __( 'Support Manager', 'doublescale' ),
 			self::SUPPORT_AGENT   => __( 'Support Agent', 'doublescale' ),
+			self::BOOKING_MANAGER => __( 'Booking Manager', 'doublescale' ),
+			self::BOOKING_AGENT   => __( 'Booking Agent', 'doublescale' ),
 		);
 	}
 
@@ -506,13 +543,18 @@ final class UserRoles {
 
 		$pro_active    = self::is_pro_addon_active();
 		$is_support    = in_array( $role, array( self::SUPPORT_AGENT, self::SUPPORT_MANAGER ), true );
+		$is_booking    = in_array( $role, array( self::BOOKING_AGENT, self::BOOKING_MANAGER ), true );
 		$is_deals_role = in_array( $role, array( self::SALES_REP, self::SALES_MANAGER ), true );
 
-		if ( ! $pro_active && ! $is_support ) {
+		if ( ! $pro_active && ! $is_support && ! $is_booking ) {
 			return false;
 		}
 
 		if ( $is_support && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'support' ) ) {
+			return false;
+		}
+
+		if ( $is_booking && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'booking' ) ) {
 			return false;
 		}
 
@@ -587,6 +629,7 @@ final class UserRoles {
 		add_action( 'init', array( self::class, 'enforce_module_scoped_roles' ), 1 );
 		add_filter( 'editable_roles', array( self::class, 'filter_editable_roles' ) );
 		add_filter( 'user_has_cap', array( self::class, 'filter_capabilities_for_module_state' ), 99, 4 );
+		add_filter( 'user_has_cap', array( self::class, 'grant_shell_access_for_active_roles' ), 100, 4 );
 		add_action( 'activated_plugin', array( self::class, 'handle_pro_plugin_activated' ), 10, 1 );
 		add_action( 'deactivated_plugin', array( self::class, 'handle_pro_plugin_deactivated' ), 10, 1 );
 	}
@@ -636,13 +679,22 @@ final class UserRoles {
 				continue;
 			}
 
+			$shell_caps = array_flip( self::get_shell_capability_slugs() );
 			foreach ( $role_caps as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
 				unset( $allcaps[ $cap ] );
 			}
 		}
 
+		$shell_caps = array_flip( self::get_shell_capability_slugs() );
+
 		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'support' ) ) {
 			foreach ( self::get_support_capability_slugs() as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
 				unset( $allcaps[ $cap ] );
 			}
 		}
@@ -653,8 +705,66 @@ final class UserRoles {
 			&& ! in_array( self::CRM_MANAGER, $user_roles, true )
 		) {
 			foreach ( self::get_deals_capability_slugs() as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
 				unset( $allcaps[ $cap ] );
 			}
+		}
+
+		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'booking' ) ) {
+			foreach ( self::get_booking_capability_slugs() as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * Admin-shell caps that must never be stripped by module toggles.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function get_shell_capability_slugs(): array {
+		return array( 'doublescale_access', 'read', 'view_admin_dashboard' );
+	}
+
+	/**
+	 * Restore shell access for any user holding an active DoubleScale role.
+	 *
+	 * Runs after {@see filter_capabilities_for_module_state()} so a disabled
+	 * optional module (e.g. Booking) cannot revoke `doublescale_access` from
+	 * Sales / Support / CRM users.
+	 *
+	 * @param array<string, bool> $allcaps All capabilities for the user.
+	 * @param array<int, string>  $caps    Requested capabilities.
+	 * @param array<int, mixed>   $args    Capability check args.
+	 * @param \WP_User            $user    User object.
+	 * @return array<string, bool>
+	 */
+	public static function grant_shell_access_for_active_roles( $allcaps, $caps, $args, $user ) {
+		if ( ! $user instanceof \WP_User ) {
+			return $allcaps;
+		}
+
+		if ( in_array( self::ADMINISTRATOR, (array) $user->roles, true ) ) {
+			return $allcaps;
+		}
+
+		foreach ( (array) $user->roles as $role ) {
+			if ( ! isset( self::get_roles()[ $role ] ) || ! self::is_role_module_enabled( $role ) ) {
+				continue;
+			}
+
+			foreach ( self::get_shell_capability_slugs() as $cap ) {
+				$allcaps[ $cap ] = true;
+			}
+
+			return $allcaps;
 		}
 
 		return $allcaps;
@@ -698,7 +808,8 @@ final class UserRoles {
 	 * Pick the highest-priority assignable role from a set of role slugs.
 	 *
 	 * Priority follows {@see get_roles()} order (highest → lowest):
-	 * CRM Manager > Sales Manager > Sales Rep > Support Manager > Support Agent.
+	 * CRM Manager > Sales Manager > Sales Rep > Support Manager > Support Agent
+	 * > Booking Manager > Booking Agent.
 	 * When a user holds several DoubleScale roles (e.g. CRM Manager AND Sales
 	 * Rep), this returns the one that should drive their effective permissions
 	 * (CRM Manager). Administrator is intentionally NOT considered here — it is
@@ -834,6 +945,55 @@ final class UserRoles {
 	}
 
 	/**
+	 * Booking Manager: admin-shell access only; booking module caps are synced
+	 * separately by {@see \DoubleScale\Modules\Booking\Capabilities}.
+	 *
+	 * @return array
+	 */
+	public static function get_booking_manager_capabilities() {
+		$caps = self::get_capabilities();
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['common'],
+					$caps[ self::BOOKING_MANAGER ]
+				)
+			)
+		);
+	}
+
+	/**
+	 * Booking Agent: admin-shell access only; own-scope booking caps are synced
+	 * separately by {@see \DoubleScale\Modules\Booking\Capabilities}.
+	 *
+	 * @return array
+	 */
+	public static function get_booking_agent_capabilities() {
+		$caps = self::get_capabilities();
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['common'],
+					$caps[ self::BOOKING_AGENT ]
+				)
+			)
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private static function get_booking_capability_slugs(): array {
+		if ( ! class_exists( '\DoubleScale\Modules\Booking\Capabilities' ) ) {
+			return array();
+		}
+
+		// Only `doublescale_booking_*` slugs — never `doublescale_access`, which
+		// must stay available to Sales/Support/CRM roles when Booking is toggled off.
+		return \DoubleScale\Modules\Booking\Capabilities::get_booking_capability_slugs();
+	}
+
+	/**
 	 * Provision DoubleScale roles on existing installs without requiring a
 	 * plugin re-activation or version bump. Idempotent: stamps an option so
 	 * subsequent boots are a no-op. Bumping {@see ROLES_PROVISION_VERSION}
@@ -856,7 +1016,7 @@ final class UserRoles {
 	 * Bump this string when the role-to-capability map changes so existing
 	 * installs re-run {@see add_roles_and_capabilities()} on next boot.
 	 */
-	private const ROLES_PROVISION_VERSION = '2026-06-09-module-scoped-roles';
+	private const ROLES_PROVISION_VERSION = '2026-06-10-booking-roles';
 
 	/**
 	 * Allow logged-in users with any DoubleScale role to bypass WooCommerce's

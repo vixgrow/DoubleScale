@@ -59,7 +59,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	const [error, setError] = useState<string>('');
 
 	const availableRoles = ManagerRoleOptions;
-	const moduleFlags = useModulesEnabled( [ 'support', 'deals' ] );
+	const moduleFlags = useModulesEnabled( [ 'support', 'deals', 'booking' ] );
 	const isProActive = Boolean( Config.getProPluginData()?.is_active );
 
 	const getModuleLabel = useCallback( ( slug: string ) => {
@@ -324,7 +324,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 						</div>
 						<p className="text-xs text-gray-500 mb-2">
 							{__(
-								'Select one or more roles. The highest-priority role takes precedence (CRM Manager → Sales Manager → Sales Rep → Support Manager → Support Agent).',
+								'Select one or more roles. Capabilities merge across every assigned role; the highest-priority role is shown as the effective role (CRM Manager → Sales Manager → Sales Rep → Support Manager → Support Agent → Booking Manager → Booking Agent).',
 								'doublescale'
 							)}
 						</p>

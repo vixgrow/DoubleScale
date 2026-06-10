@@ -371,8 +371,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{
 							path: 'booking/settings',
 							label: __('Settings', 'doublescale'),
+							requiredCapability: [
+								'doublescale_crm_manager',
+								'doublescale_booking_manage_all_calendars',
+							],
 						},
-					];
+					].filter((sub) =>
+						hasRequiredCapability(sub.requiredCapability)
+					);
 				}
 
 				if (item.path === 'support') {

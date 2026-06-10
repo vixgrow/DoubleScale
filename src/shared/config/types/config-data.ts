@@ -122,6 +122,8 @@ export type UserCapabilities = {
 	doublescale_sales_rep: boolean;
 	doublescale_support_manager?: boolean;
 	doublescale_support_agent?: boolean;
+	doublescale_booking_manager?: boolean;
+	doublescale_booking_agent?: boolean;
 	doublescale_view_support?: boolean;
 	doublescale_manage_all_tickets?: boolean;
 	doublescale_manage_support_settings?: boolean;

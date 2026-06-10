@@ -18,6 +18,12 @@ use DoubleScale\Core\UserRoles\UserRoles;
 
 class Capabilities {
 
+	/**
+	 * Bump when the booking role-to-capability map changes so existing installs
+	 * re-run {@see sync_capabilities_for_user_roles()} on next boot.
+	 */
+	private const CAPS_SYNC_VERSION = '2026-06-10-booking-roles-v2';
+
 	public static function get_core_capabilities() {
 		return array(
 			'calendars'    => array(
@@ -75,22 +81,32 @@ class Capabilities {
 		return array_intersect_key( $capabilities, array_flip( $allowed_keys ) );
 	}
 
-	public static function get_all_capabilities() {
-		$capabilities     = self::get_core_capabilities();
-		$all_capabilities = array( 'doublescale_access' );
+	/**
+	 * Booking-module capability slugs only (`doublescale_booking_*`).
+	 *
+	 * `doublescale_access` is owned by {@see UserRoles} — never add/remove it
+	 * during booking cap sync or Sales/Support roles lose admin menu access.
+	 *
+	 * @return string[]
+	 */
+	public static function get_booking_capability_slugs(): array {
+		$slugs = array();
 
-		foreach ( $capabilities as $group ) {
-			$all_capabilities = array_merge( $all_capabilities, array_keys( $group['capabilities'] ) );
+		foreach ( self::get_core_capabilities() as $group ) {
+			$slugs = array_merge( $slugs, array_keys( $group['capabilities'] ) );
 		}
 
-		return $all_capabilities;
+		return $slugs;
+	}
+
+	public static function get_all_capabilities() {
+		return array_merge( array( 'doublescale_access' ), self::get_booking_capability_slugs() );
 	}
 
 	public static function get_basic_capabilities() {
-		$capabilities       = self::get_core_capabilities();
-		$basic_capabilities = array( 'doublescale_access' );
+		$basic_capabilities = array();
 
-		foreach ( $capabilities as $group ) {
+		foreach ( self::get_core_capabilities() as $group ) {
 			foreach ( $group['capabilities'] as $capability => $description ) {
 				if ( strpos( $capability, 'own' ) !== false ) {
 					$basic_capabilities[] = $capability;
@@ -104,9 +120,9 @@ class Capabilities {
 	/**
 	 * Capabilities granted to a single role per the matrix.
 	 *
-	 * - administrator + CRM Manager: full caps (own + all_*).
-	 * - Sales Manager: own caps + read_all_* (visibility into the team's calendars/bookings/availability, no edit).
-	 * - Sales Rep: own caps only.
+	 * - administrator + CRM Manager + Booking Manager: full caps (own + all_*).
+	 * - Booking Agent: own caps only.
+	 * - Sales Manager / Sales Rep: no booking access (exclusive to booking roles).
 	 *
 	 * @param string $role Role slug.
 	 * @return string[] Capability names.
@@ -115,20 +131,10 @@ class Capabilities {
 		switch ( $role ) {
 			case 'administrator':
 			case UserRoles::CRM_MANAGER:
+			case UserRoles::BOOKING_MANAGER:
 				return self::get_all_capabilities();
 
-			case UserRoles::SALES_MANAGER:
-				$caps = array( 'doublescale_access' );
-				foreach ( self::get_core_capabilities() as $group ) {
-					foreach ( $group['capabilities'] as $capability => $description ) {
-						if ( strpos( $capability, '_own_' ) !== false || strpos( $capability, '_read_all_' ) !== false ) {
-							$caps[] = $capability;
-						}
-					}
-				}
-				return $caps;
-
-			case UserRoles::SALES_REP:
+			case UserRoles::BOOKING_AGENT:
 				return self::get_basic_capabilities();
 		}
 
@@ -136,20 +142,27 @@ class Capabilities {
 	}
 
 	/**
-	 * Roles that receive booking caps.
+	 * Roles that may receive booking caps (including roles we must strip caps from).
 	 *
 	 * @return string[]
 	 */
-	private static function managed_roles(): array {
+	private static function sync_role_slugs(): array {
 		return array(
 			'administrator',
 			UserRoles::CRM_MANAGER,
 			UserRoles::SALES_MANAGER,
 			UserRoles::SALES_REP,
+			UserRoles::BOOKING_MANAGER,
+			UserRoles::BOOKING_AGENT,
 		);
 	}
 
-	public static function assign_capabilities_for_user_roles() {
+	/**
+	 * Idempotently sync booking caps onto every role that may hold them.
+	 *
+	 * @return void
+	 */
+	public static function sync_capabilities_for_user_roles() {
 		global $wp_roles;
 
 		if ( ! class_exists( 'WP_Roles' ) ) {
@@ -160,18 +173,59 @@ class Capabilities {
 			$wp_roles = new WP_Roles();
 		}
 
+		$all_caps = self::get_booking_capability_slugs();
+
 		// TODO: multisite — `$wp_roles->add_cap()` only affects the current blog. For multisite installs
 		// where non-super-admins should receive booking caps on sub-sites, wrap this loop in a
 		// `switch_to_blog()` over `get_sites()`. Single-site is the assumption for now.
-		foreach ( self::managed_roles() as $role_slug ) {
-			foreach ( self::get_caps_for_role( $role_slug ) as $capability ) {
-				$wp_roles->add_cap( $role_slug, $capability );
+		foreach ( self::sync_role_slugs() as $role_slug ) {
+			$role = get_role( $role_slug );
+			if ( ! $role ) {
+				continue;
+			}
+
+			$should_have = array_fill_keys( self::get_caps_for_role( $role_slug ), true );
+
+			foreach ( $all_caps as $capability ) {
+				if ( isset( $should_have[ $capability ] ) ) {
+					$wp_roles->add_cap( $role_slug, $capability );
+				} else {
+					$wp_roles->remove_cap( $role_slug, $capability );
+				}
 			}
 		}
 
 		if ( is_multisite() ) {
 			add_filter( 'user_has_cap', array( __CLASS__, 'grant_super_admin_capabilities' ), 10, 4 );
 		}
+
+		update_option( 'doublescale_booking_caps_version', self::CAPS_SYNC_VERSION, false );
+	}
+
+	/**
+	 * Re-sync booking caps when the role map changes.
+	 *
+	 * @return void
+	 */
+	public static function ensure_capabilities_synced(): void {
+		$current = (string) get_option( 'doublescale_booking_caps_version', '' );
+		if ( self::CAPS_SYNC_VERSION === $current ) {
+			return;
+		}
+
+		self::sync_capabilities_for_user_roles();
+
+		// The WP_User object may have been loaded before caps changed on the role.
+		if ( is_user_logged_in() ) {
+			wp_get_current_user()->get_role_caps();
+		}
+	}
+
+	/**
+	 * @deprecated Use {@see sync_capabilities_for_user_roles()} instead.
+	 */
+	public static function assign_capabilities_for_user_roles() {
+		self::sync_capabilities_for_user_roles();
 	}
 
 	public static function grant_super_admin_capabilities( $allcaps, $caps, $args, $user ) {
@@ -179,7 +233,7 @@ class Capabilities {
 			return $allcaps;
 		}
 
-		$plugin_capabilities = self::get_all_capabilities();
+		$plugin_capabilities = self::get_booking_capability_slugs();
 
 		foreach ( $caps as $cap ) {
 			if ( in_array( $cap, $plugin_capabilities, true ) ) {
@@ -322,13 +376,16 @@ class Capabilities {
 			$wp_roles = new WP_Roles();
 		}
 
-		$all_caps = self::get_all_capabilities();
+		$all_caps = self::get_booking_capability_slugs();
 
-		foreach ( self::managed_roles() as $role_slug ) {
+		foreach ( self::sync_role_slugs() as $role_slug ) {
 			foreach ( $all_caps as $capability ) {
 				$wp_roles->remove_cap( $role_slug, $capability );
 			}
 		}
+
+		delete_option( 'doublescale_booking_caps_version' );
+		delete_option( 'doublescale_booking_caps_assigned' );
 
 		remove_filter( 'user_has_cap', array( __CLASS__, 'grant_super_admin_capabilities' ), 10 );
 	}

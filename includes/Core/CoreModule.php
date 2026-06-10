@@ -108,28 +108,21 @@ final class CoreModule extends AbstractModule {
 	}
 
 	private function ensure_base_access_capability(): void {
-		if ( get_option( 'doublescale_base_access_assigned' ) ) {
-			return;
-		}
 		if ( ! function_exists( 'get_role' ) ) {
 			return;
 		}
 
-		$roles = array(
-			'administrator',
-			\DoubleScale\Core\UserRoles\UserRoles::CRM_MANAGER,
-			\DoubleScale\Core\UserRoles\UserRoles::SALES_MANAGER,
-			\DoubleScale\Core\UserRoles\UserRoles::SALES_REP,
+		$roles = array_merge(
+			array( 'administrator' ),
+			\DoubleScale\Core\UserRoles\UserRoles::get_known_role_slugs()
 		);
 
-		foreach ( $roles as $role_slug ) {
+		foreach ( array_unique( $roles ) as $role_slug ) {
 			$role = get_role( $role_slug );
 			if ( $role && ! $role->has_cap( 'doublescale_access' ) ) {
 				$role->add_cap( 'doublescale_access' );
 			}
 		}
-
-		update_option( 'doublescale_base_access_assigned', 1, false );
 	}
 
 	/**

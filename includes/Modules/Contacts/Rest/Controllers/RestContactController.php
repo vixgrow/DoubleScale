@@ -2702,7 +2702,7 @@ class RestContactController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function get_analytics_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_sales_rep_access();
 	}
 
 	/**

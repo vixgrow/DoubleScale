@@ -186,6 +186,9 @@ registerAdminPage('booking-settings', {
 	label: __('Booking Settings', 'doublescale'),
 	hidden: true,
 	icon: <SettingsIcon width={24} height={24} />,
-	requiredCapability: ['doublescale_crm_manager'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_booking_manage_all_calendars',
+	],
 	requiresModule: 'booking',
 });

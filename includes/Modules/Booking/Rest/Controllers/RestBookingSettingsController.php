@@ -19,6 +19,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Booking\PaymentGateway\PaymentValidator;
 
 /**
@@ -262,7 +263,7 @@ class RestBookingSettingsController extends RestController {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return $this->can_manage_booking_settings();
 	}
 
 	/**
@@ -289,6 +290,16 @@ class RestBookingSettingsController extends RestController {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return $this->can_manage_booking_settings();
+	}
+
+	/**
+	 * Global booking settings: CRM Manager / WP admin / Booking Manager.
+	 *
+	 * @return bool
+	 */
+	private function can_manage_booking_settings(): bool {
+		return Permissions::is_crm_manager()
+			|| current_user_can( 'doublescale_booking_manage_all_calendars' );
 	}
 }

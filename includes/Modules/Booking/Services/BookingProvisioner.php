@@ -253,8 +253,8 @@ final class BookingProvisioner {
 			array(
 				'administrator',
 				UserRoles::CRM_MANAGER,
-				UserRoles::SALES_MANAGER,
-				UserRoles::SALES_REP,
+				UserRoles::BOOKING_MANAGER,
+				UserRoles::BOOKING_AGENT,
 			),
 			true
 		);

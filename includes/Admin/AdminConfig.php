@@ -63,11 +63,14 @@ final class AdminConfig {
 		// still gets the Support Manager flags (settings access, manage-all
 		// tickets) on top of their sales permissions.
 		$user_capabilities = array(
+			'doublescale_access'                  => current_user_can( 'doublescale_access' ),
 			'doublescale_crm_manager'             => Permissions::is_crm_manager(),
-			'doublescale_sales_manager'           => Permissions::is_sales_manager(),
-			'doublescale_sales_rep'               => Permissions::is_sales_rep(),
+			'doublescale_sales_manager'           => Permissions::user_has_role( UserRoles::SALES_MANAGER ),
+			'doublescale_sales_rep'               => Permissions::user_has_role( UserRoles::SALES_REP ),
 			'doublescale_support_manager'         => Permissions::user_has_role( UserRoles::SUPPORT_MANAGER ),
 			'doublescale_support_agent'           => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
+			'doublescale_booking_manager'         => Permissions::user_has_role( UserRoles::BOOKING_MANAGER ),
+			'doublescale_booking_agent'           => Permissions::user_has_role( UserRoles::BOOKING_AGENT ),
 			'doublescale_view_support'            => Permissions::has_support_access(),
 			'doublescale_manage_all_tickets'      => Permissions::can_manage_all_tickets(),
 			// Mailbox/settings gate (manager-tier): admins, CRM Managers, and

@@ -40,6 +40,15 @@ final class Module extends AbstractModule {
 		return true;
 	}
 
+	public function onActivate(): void {
+		\DoubleScale\Core\UserRoles\UserRoles::provision_booking_roles();
+		Capabilities::sync_capabilities_for_user_roles();
+	}
+
+	public function onDeactivate(): void {
+		\DoubleScale\Core\UserRoles\UserRoles::deprovision_booking_roles();
+	}
+
 	public function dependencies(): array {
 		// Campaigns supplies the Emails class used by EmailNotifications to
 		// send booking confirmations/reschedule notices. Without this in the
@@ -211,15 +220,11 @@ final class Module extends AbstractModule {
 			}
 		}
 
-		if ( ! get_option( 'doublescale_booking_caps_assigned' ) ) {
-			Capabilities::assign_capabilities_for_user_roles();
-			update_option( 'doublescale_booking_caps_assigned', true );
-			// The WP_User object was loaded before these caps existed on the
-			// role; re-read role capabilities so current_user_can() returns
-			// true for booking caps on this very first request (AdminConfig
-			// emits userCapabilities to the SPA).
-			wp_get_current_user()->get_role_caps();
-		}
+		Capabilities::ensure_capabilities_synced();
+
+		// For users whose only DoubleScale role is Booking Agent / Booking
+		// Manager, strip every non-Booking submenu from the DoubleScale menu.
+		add_action( 'admin_menu', array( self::class, 'scope_menu_for_booking_only_users' ), 9999 );
 
 		$this->register_provisioner_hooks( $container );
 
@@ -244,7 +249,7 @@ final class Module extends AbstractModule {
 	 * granted or removed a CRM role through that UI. Auto-provisioning listens to those.
 	 *
 	 * Direct WordPress role assignment (wp-admin → Users) is intentionally NOT a
-	 * provisioning trigger for CRM Manager / Sales Manager / Sales Rep — admins must add
+	 * provisioning trigger for Booking Manager / Booking Agent — admins must add
 	 * those users through the CRM Team UI for them to become booking hosts. The single
 	 * exception is the `administrator` role, which auto-grants full CRM access by virtue
 	 * of `Capabilities::assign_capabilities_for_user_roles()`; an administrator added via
@@ -268,8 +273,8 @@ final class Module extends AbstractModule {
 					'role__in' => array(
 						'administrator',
 						\DoubleScale\Core\UserRoles\UserRoles::CRM_MANAGER,
-						\DoubleScale\Core\UserRoles\UserRoles::SALES_MANAGER,
-						\DoubleScale\Core\UserRoles\UserRoles::SALES_REP,
+						\DoubleScale\Core\UserRoles\UserRoles::BOOKING_MANAGER,
+						\DoubleScale\Core\UserRoles\UserRoles::BOOKING_AGENT,
 					),
 					'fields'   => array( 'ID' ),
 				)
@@ -364,5 +369,36 @@ final class Module extends AbstractModule {
 		add_action( 'delete_user', $purge, 10, 1 );
 		add_action( 'wpmu_delete_user', $purge, 10, 1 );
 		add_action( 'remove_user_from_blog', $purge, 10, 1 );
+	}
+
+	/**
+	 * Remove every DoubleScale submenu except Booking for users whose only
+	 * DoubleScale roles are the booking ones. Administrators and CRM roles
+	 * are untouched.
+	 *
+	 * @return void
+	 */
+	public static function scope_menu_for_booking_only_users(): void {
+		if ( ! \DoubleScale\Core\UserRoles\Permissions::is_booking_only() ) {
+			return;
+		}
+
+		$menu_slug = apply_filters( 'doublescale_admin_menu_slug', 'doublescale' );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- intentional submenu trimming
+		global $submenu;
+		if ( empty( $submenu[ $menu_slug ] ) || ! is_array( $submenu[ $menu_slug ] ) ) {
+			return;
+		}
+
+		foreach ( $submenu[ $menu_slug ] as $key => $item ) {
+			$slug = isset( $item[2] ) ? (string) $item[2] : '';
+			if ( false === strpos( $slug, 'path=booking' ) ) {
+				unset( $submenu[ $menu_slug ][ $key ] );
+			}
+		}
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- intentional submenu trimming (re-indexing the same global filtered above).
+		$submenu[ $menu_slug ] = array_values( $submenu[ $menu_slug ] );
 	}
 }

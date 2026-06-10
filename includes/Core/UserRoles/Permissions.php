@@ -449,6 +449,8 @@ final class Permissions {
 			'conversation_data' => true,
 			'campaign_data'     => true,
 			'activity_data'     => true,
+			'support_data'      => true,
+			'booking_data'      => true,
 		);
 	}
 

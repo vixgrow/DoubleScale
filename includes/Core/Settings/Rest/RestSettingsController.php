@@ -339,6 +339,8 @@ class RestSettingsController extends RestController {
 								'conversation_data' => true,
 								'campaign_data'     => true,
 								'activity_data'     => true,
+								'support_data'      => true,
+								'booking_data'      => true,
 							),
 						),
 						'data_sources' => array(
@@ -497,12 +499,16 @@ class RestSettingsController extends RestController {
 				UserRoles::ADMINISTRATOR,
 				UserRoles::SALES_MANAGER,
 				UserRoles::SALES_REP,
+				UserRoles::SUPPORT_MANAGER,
+				UserRoles::SUPPORT_AGENT,
+				UserRoles::BOOKING_MANAGER,
+				UserRoles::BOOKING_AGENT,
 			);
 			$settings['ai']['access']['allowed_roles'] = array_values( array_intersect( (array) $allowed, $valid_roles ) );
 		}
 
 		if ( isset( $settings['ai']['data_access'] ) ) {
-			foreach ( array( 'crm_data', 'conversation_data', 'campaign_data', 'activity_data' ) as $key ) {
+			foreach ( array( 'crm_data', 'conversation_data', 'campaign_data', 'activity_data', 'support_data', 'booking_data' ) as $key ) {
 				$settings['ai']['data_access'][ $key ] = (bool) ( $settings['ai']['data_access'][ $key ] ?? true );
 			}
 		}

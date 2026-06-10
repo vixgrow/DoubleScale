@@ -42,8 +42,8 @@ Create, assign, schedule, and track tasks. Link them to contacts and deals. Due 
 **6. SMTP — multi-provider email routing**
 A complete `wp_mail()` replacement built into the CRM — no separate SMTP plugin required. Connect one or more of **20+ providers**: SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, SMTP2GO, Gmail (OAuth), Outlook (OAuth), Zoho (OAuth), MailerSend, Mailjet, Mandrill, Brevo (Sendinblue), Elastic Email, SendLayer, SocketLabs, Loops, and generic SMTP relay. Set up multiple connections with routing rules so transactional mail goes through one provider while marketing campaigns use another. OAuth authentication for Gmail, Outlook, and Zoho — no app passwords needed. Includes full email delivery logs, bounce handling with soft/hard classification, provider health checks, email test sending, and automatic failover when a provider is down.
 
-**7. Inbox — unified helpdesk across email, SMS, and WhatsApp**
-A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox. Inbound WhatsApp and SMS messages can also fire automations — auto-tag, route to a teammate, open a deal, or kick off a follow-up sequence.
+**7. Support — ticket-based helpdesk with mailbox channels and customer portal**
+A complete helpdesk built into your CRM. Customers open tickets via a self-service portal or by emailing a connected mailbox; agents reply, assign, tag, and resolve — all without leaving WordPress. Features include: multiple mailbox channels (web and IMAP), configurable email notifications with threading and subject tagging, file attachments with signed secure downloads, ticket priority and status workflows, CC management, bulk actions (assign, close, merge, tag), per-ticket activity logging, custom fields, saved replies, and a built-in reports dashboard. IMAP polling brings inbound emails straight into the agent inbox. Every ticket links to the contact record and can trigger automations — auto-tag, route to an agent, create a deal, or start a follow-up sequence.
 
 **8. Analytics — dashboards & reports**
 A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
@@ -210,6 +210,32 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 - Fix "Manage Custom Fields" button not redirecting to Settings → Custom Fields
 - Sort form type cards by active/installed status first
 - Update readme with detailed Forms and Automations integration lists
+
+= 1.1.0 = 9 Jun 2026
+* New: Support helpdesk module â€” ticket-based customer support with mailbox channels, IMAP email piping, customer portal, and agent inbox
+* New: Ticket workflows with priority, status, tags, CC management, and bulk actions (assign, close, merge, tag)
+* New: Mailbox management â€” multiple mailbox channels (web and IMAP), default mailbox selection, and ticket movement between mailboxes
+* New: File attachments on support tickets with signed secure downloads and configurable size limits
+* New: Ticket custom fields and guest access for unauthenticated customers
+* New: Support reports dashboard for ticket volume and resolution metrics
+* New: Email notifications with threading and subject tagging for ticket replies
+* New: Support automation triggers â€” ticket created, ticket status changed â€” connect to the visual automation engine
+* New: Dedicated support roles (Support Agent, Support Manager) with scoped permissions
+* New: Saved replies and per-ticket activity logging
+* New: Automation workflow versioning
+* New: Module dependency checks and labels in automation builder
+* New: Module status endpoints for mobile app integration
+* Improvement: Booking host deduplication for team calendars
+* Improvement: Team calendar member validation
+* Improvement: IMAP client now counts recent unseen emails
+* Improvement: Step insertion logic maintains end_automation order in workflows
+* Improvement: Analytics menu and submenu items now visible in free version with Pro upgrade notices
+* Improvement: WhatsApp tab visible in contact details with Pro feature notice
+* Improvement: Export contacts gated as Pro feature
+* Fix: Settings SMTP tab removed (already available as dedicated sidebar item)
+* Fix: Mobile App settings tab hidden until feature is available
+* Fix: ProtectedRoute and navigation gate respect alwaysRegister flag
+
 
 = 1.0.2 = 3 Jun 2026
 - Fix booking issue

@@ -32,9 +32,9 @@ const modeLabel = (mode: string | null): string => {
 };
 
 const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => {
-	const go = (path: string) => {
+	const go = (path: string, queryParams?: Record<string, string | number | undefined>) => {
 		if (navigate) {
-			navigate(getToLink(path));
+			navigate(getToLink(path, queryParams));
 		}
 	};
 
@@ -66,7 +66,11 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
 					<h3 className="text-base font-semibold">{__('Proposals', 'doublescale')}</h3>
-					<Button size="sm" variant="outline" onClick={() => go('sales/proposals/new')}>
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => go('sales/proposals/new', { contact_id })}
+					>
 						<Plus className="h-4 w-4 mr-1" />
 						{__('New Proposal', 'doublescale')}
 					</Button>
@@ -123,7 +127,11 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
 					<h3 className="text-base font-semibold">{__('Invoices', 'doublescale')}</h3>
-					<Button size="sm" variant="outline" onClick={() => go('sales/invoices/new')}>
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => go('sales/invoices/new', { contact_id })}
+					>
 						<Plus className="h-4 w-4 mr-1" />
 						{__('New Invoice', 'doublescale')}
 					</Button>

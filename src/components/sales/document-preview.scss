@@ -1,0 +1,346 @@
+/**
+ * Sales document preview — Propovoice-inspired layout with self-contained styles
+ * so the public proposal renderer works without the admin Tailwind bundle.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.ds-sales-doc {
+	--ds-doc-primary: #4c6fff;
+	--ds-doc-primary-dark: #3b57e8;
+	--ds-doc-text: #1a202c;
+	--ds-doc-text-muted: #4a5568;
+	--ds-doc-text-light: #718096;
+	--ds-doc-border: #edf2f7;
+	--ds-doc-row-odd: #f7fafc;
+	--ds-doc-row-even: #edf2f7;
+	--ds-doc-white: #fff;
+
+	box-sizing: border-box;
+	color: var(--ds-doc-text);
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	max-width: 100%;
+	width: 100%;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	&__accent {
+		background: linear-gradient(90deg, var(--ds-doc-primary) 0%, var(--ds-doc-primary-dark) 100%);
+		border-radius: 6px;
+		height: 6px;
+		margin-bottom: 1.75rem;
+		width: 100%;
+	}
+
+	&__header {
+		align-items: flex-start;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		justify-content: space-between;
+		margin-bottom: 2rem;
+	}
+
+	&__title-block {
+		flex: 1;
+		min-width: 200px;
+	}
+
+	&__doc-type {
+		color: var(--ds-doc-primary);
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		margin: 0 0 4px;
+		text-transform: uppercase;
+	}
+
+	&__number {
+		color: var(--ds-doc-text);
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1.1;
+		margin: 0 0 6px;
+		text-transform: uppercase;
+	}
+
+	&__subject {
+		color: var(--ds-doc-text-muted);
+		font-size: 15px;
+		font-weight: 500;
+		margin: 0;
+	}
+
+	&__status-group {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	&__status {
+		border-radius: 999px;
+		display: inline-flex;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1;
+		padding: 0.45rem 0.85rem;
+		text-transform: capitalize;
+		white-space: nowrap;
+
+		&--draft {
+			background: #f1f5f9;
+			color: #475569;
+		}
+
+		&--sent,
+		&--open {
+			background: #e0f2fe;
+			color: #0369a1;
+		}
+
+		&--accepted,
+		&--paid {
+			background: #dcfce7;
+			color: #15803d;
+		}
+
+		&--declined,
+		&--unpaid {
+			background: #fee2e2;
+			color: #b91c1c;
+		}
+
+		&--partially_paid {
+			background: #fef3c7;
+			color: #b45309;
+		}
+
+		&--overdue {
+			background: #ffedd5;
+			color: #c2410c;
+		}
+
+		&--expired {
+			background: #fef3c7;
+			color: #b45309;
+		}
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2rem;
+		justify-content: space-between;
+		margin-bottom: 2rem;
+	}
+
+	&__party {
+		border: 1px solid var(--ds-doc-border);
+		border-radius: 8px;
+		max-width: 320px;
+		padding: 1.1rem 1.4rem;
+		width: 100%;
+	}
+
+	&__party-label {
+		color: var(--ds-doc-text);
+		font-size: 14px;
+		font-weight: 600;
+		margin: 0 0 0.65rem;
+	}
+
+	&__party-line {
+		color: var(--ds-doc-text-muted);
+		font-size: 12px;
+		line-height: 1.55;
+		margin: 0 0 2px;
+	}
+
+	&__dates {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		min-width: 200px;
+	}
+
+	&__date-row {
+		color: var(--ds-doc-text-muted);
+		font-size: 13px;
+	}
+
+	&__date-label {
+		color: var(--ds-doc-text-light);
+		font-weight: 500;
+		margin-right: 0.35rem;
+	}
+
+	&__items {
+		margin-bottom: 1.5rem;
+		overflow-x: auto;
+
+		table {
+			border-collapse: separate;
+			border-spacing: 0;
+			min-width: 100%;
+			width: 100%;
+		}
+
+		thead th {
+			background: var(--ds-doc-primary);
+			color: var(--ds-doc-white);
+			font-size: 12px;
+			font-weight: 600;
+			padding: 11px 14px;
+			text-align: left;
+			white-space: nowrap;
+
+			&:first-child {
+				border-radius: 6px 0 0 0;
+			}
+
+			&:last-child {
+				border-radius: 0 6px 0 0;
+			}
+
+			&.is-right {
+				text-align: right;
+			}
+		}
+
+		tbody tr:nth-child(odd) {
+			background: var(--ds-doc-row-odd);
+		}
+
+		tbody tr:nth-child(even) {
+			background: var(--ds-doc-row-even);
+		}
+
+		tbody td {
+			color: var(--ds-doc-text-muted);
+			font-size: 12px;
+			padding: 14px;
+			vertical-align: top;
+			word-break: break-word;
+
+			&.is-right {
+				text-align: right;
+				white-space: nowrap;
+			}
+		}
+
+		&-name {
+			color: var(--ds-doc-text);
+			font-size: 13px;
+			font-weight: 600;
+			margin-bottom: 2px;
+		}
+
+		&-desc {
+			color: var(--ds-doc-text-light);
+			font-size: 11px;
+			line-height: 1.45;
+			white-space: pre-wrap;
+		}
+
+		&-empty {
+			color: var(--ds-doc-text-light);
+			padding: 2rem 1rem !important;
+			text-align: center;
+		}
+	}
+
+	&__footer {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2rem;
+		justify-content: flex-end;
+	}
+
+	&__totals {
+		min-width: 240px;
+		width: 100%;
+		max-width: 320px;
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		th,
+		td {
+			font-size: 12px;
+			padding: 7px 0;
+		}
+
+		th {
+			color: var(--ds-doc-text);
+			font-weight: 600;
+			text-align: left;
+		}
+
+		td {
+			color: var(--ds-doc-text-light);
+			text-align: right;
+		}
+
+		.is-strong th,
+		.is-strong td {
+			color: var(--ds-doc-text);
+			font-size: 15px;
+			font-weight: 700;
+			padding-top: 12px;
+		}
+
+		.is-balance th,
+		.is-balance td {
+			color: #b91c1c;
+			font-weight: 700;
+		}
+
+		tr.is-total-bar {
+			background: var(--ds-doc-primary);
+
+			th,
+			td {
+				color: var(--ds-doc-white);
+				font-size: 14px;
+				font-weight: 700;
+				padding: 10px 14px;
+			}
+
+			th {
+				border-radius: 6px 0 0 6px;
+			}
+
+			td {
+				border-radius: 0 6px 6px 0;
+			}
+		}
+	}
+
+	&__section {
+		margin-top: 1.75rem;
+		width: 100%;
+	}
+
+	&__section-title {
+		color: var(--ds-doc-text);
+		font-size: 15px;
+		font-weight: 600;
+		margin: 0 0 0.5rem;
+	}
+
+	&__section-body {
+		color: var(--ds-doc-text-muted);
+		font-size: 13px;
+		line-height: 1.65;
+		margin: 0;
+		white-space: pre-wrap;
+	}
+}

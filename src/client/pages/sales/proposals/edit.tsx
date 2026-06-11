@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,7 @@ const weekFromToday = () => {
 
 const ProposalEdit: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const params = useParams();
 	const idParam = params?.id;
 	const isNew = !idParam || idParam === 'new';
@@ -97,6 +98,7 @@ const ProposalEdit: React.FC = () => {
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const hydratedContactIdRef = useRef<number | null>(null);
+	const prefilledContactFromUrlRef = useRef(false);
 
 	const applyContactFields = useCallback((raw: ContactSummary) => {
 		const fields = proposalFieldsFromContact(normalizeSalesContact(raw));
@@ -136,6 +138,31 @@ const ProposalEdit: React.FC = () => {
 		},
 		[applyContactFields]
 	);
+
+	useEffect(() => {
+		if (!isNew || prefilledContactFromUrlRef.current) {
+			return;
+		}
+		const contactIdParam = new URLSearchParams(location.search).get('contact_id');
+		if (!contactIdParam) {
+			return;
+		}
+		const contactId = Number(contactIdParam);
+		if (!contactId) {
+			return;
+		}
+		prefilledContactFromUrlRef.current = true;
+		void (async () => {
+			try {
+				const full = await apiFetch<ContactSummary>({
+					path: `/doublescale/v1/contacts/${contactId}`,
+				});
+				handleContactPick(String(contactId), normalizeSalesContact(full));
+			} catch {
+				prefilledContactFromUrlRef.current = false;
+			}
+		})();
+	}, [isNew, location.search, handleContactPick]);
 
 	useEffect(() => {
 		if (assignableUsers.length === 1 && assignedUserId === null) {

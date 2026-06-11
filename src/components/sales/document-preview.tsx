@@ -5,14 +5,32 @@
 import React from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
+import {
+	INVOICE_STATUS_LABELS,
+	PROPOSAL_STATUS_LABELS,
+	type InvoiceStatus,
+	type ProposalStatus,
+} from '@/constants/sales';
 import { computeLineItemsTotals } from './line-items-editor';
-import { InvoiceStatusPill, ProposalStatusPill } from './status-pill';
 import type { Invoice, LineItem, Proposal } from '@/types/sales';
+
+import './document-preview.scss';
 
 const formatMoney = (value: number, currency = 'USD') =>
 	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
-const formatAddress = (text: string | null | undefined): string => text?.trim() || '—';
+const proposalStatusClass = (status: ProposalStatus): string =>
+	`ds-sales-doc__status ds-sales-doc__status--${status}`;
+
+const invoiceStatusClass = (status: InvoiceStatus): string =>
+	`ds-sales-doc__status ds-sales-doc__status--${status}`;
+
+const DocumentShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+	<div className="ds-sales-doc">
+		<div className="ds-sales-doc__accent" aria-hidden="true" />
+		{children}
+	</div>
+);
 
 const LineItemsTable: React.FC<{
 	items: LineItem[];
@@ -20,56 +38,52 @@ const LineItemsTable: React.FC<{
 	showTax?: boolean;
 }> = ({ items, currency, showTax = false }) => {
 	const rows = items.filter((item) => !item.optional);
+	const colSpan = showTax ? 5 : 4;
 
 	return (
-		<div className="border rounded-lg overflow-hidden">
-			<table className="w-full text-sm">
-				<thead className="bg-slate-50 border-b">
+		<div className="ds-sales-doc__items">
+			<table>
+				<thead>
 					<tr>
-						<th className="text-left px-4 py-2">{__('Item', 'doublescale')}</th>
-						<th className="text-right px-4 py-2">{__('Qty', 'doublescale')}</th>
-						<th className="text-right px-4 py-2">{__('Rate', 'doublescale')}</th>
+						<th>{__('Item', 'doublescale')}</th>
+						<th className="is-right">{__('Qty', 'doublescale')}</th>
+						<th className="is-right">{__('Rate', 'doublescale')}</th>
 						{showTax ? (
-							<th className="text-right px-4 py-2">{__('Tax', 'doublescale')}</th>
+							<th className="is-right">{__('Tax', 'doublescale')}</th>
 						) : null}
-						<th className="text-right px-4 py-2">{__('Amount', 'doublescale')}</th>
+						<th className="is-right">{__('Amount', 'doublescale')}</th>
 					</tr>
 				</thead>
 				<tbody>
 					{rows.length === 0 ? (
 						<tr>
-							<td
-								colSpan={showTax ? 5 : 4}
-								className="px-4 py-6 text-center text-muted-foreground"
-							>
+							<td colSpan={colSpan} className="ds-sales-doc__items-empty">
 								{__('No line items.', 'doublescale')}
 							</td>
 						</tr>
 					) : (
 						rows.map((item, index) => (
-							<tr key={index} className="border-b">
-								<td className="px-4 py-2">
-									<div className="font-medium">{item.description || '—'}</div>
+							<tr key={index}>
+								<td>
+									<div className="ds-sales-doc__items-name">
+										{item.description || '—'}
+									</div>
 									{item.long_description ? (
-										<div className="text-xs text-muted-foreground whitespace-pre-wrap">
+										<div className="ds-sales-doc__items-desc">
 											{item.long_description}
 										</div>
 									) : null}
 								</td>
-								<td className="px-4 py-2 text-right">{item.qty}</td>
-								<td className="px-4 py-2 text-right">
-									{formatMoney(item.rate, currency)}
-								</td>
+								<td className="is-right">{item.qty}</td>
+								<td className="is-right">{formatMoney(item.rate, currency)}</td>
 								{showTax ? (
-									<td className="px-4 py-2 text-right text-xs text-muted-foreground">
+									<td className="is-right">
 										{(item.tax || [])
 											.map((t) => `${t.name} (${t.rate}%)`)
 											.join(', ') || '—'}
 									</td>
 								) : null}
-								<td className="px-4 py-2 text-right">
-									{formatMoney(item.amount, currency)}
-								</td>
+								<td className="is-right">{formatMoney(item.amount, currency)}</td>
 							</tr>
 						))
 					)}
@@ -105,50 +119,79 @@ const TotalsBlock: React.FC<{
 		amountPaid !== undefined ? Math.max(0, total - amountPaid) : undefined;
 
 	return (
-		<div className="flex justify-end">
-			<div className="w-full max-w-xs space-y-1 text-sm">
-				<div className="flex justify-between">
-					<span className="text-muted-foreground">{__('Subtotal', 'doublescale')}</span>
-					<span>{formatMoney(subtotal, currency)}</span>
-				</div>
-				{totalTax > 0 ? (
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">{__('Tax', 'doublescale')}</span>
-						<span>{formatMoney(totalTax, currency)}</span>
-					</div>
-				) : null}
-				{computed.discount > 0 ? (
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">{__('Discount', 'doublescale')}</span>
-						<span>-{formatMoney(computed.discount, currency)}</span>
-					</div>
-				) : null}
-				{adjustment !== 0 ? (
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">{__('Adjustment', 'doublescale')}</span>
-						<span>{formatMoney(adjustment, currency)}</span>
-					</div>
-				) : null}
-				<div className="flex justify-between font-semibold border-t pt-2">
-					<span>{__('Total', 'doublescale')}</span>
-					<span>{formatMoney(total, currency)}</span>
-				</div>
-				{amountPaid !== undefined ? (
-					<>
-						<div className="flex justify-between">
-							<span className="text-muted-foreground">{__('Amount Paid', 'doublescale')}</span>
-							<span>{formatMoney(amountPaid, currency)}</span>
-						</div>
-						<div className="flex justify-between font-semibold text-red-700">
-							<span>{__('Balance Due', 'doublescale')}</span>
-							<span>{formatMoney(balance ?? 0, currency)}</span>
-						</div>
-					</>
-				) : null}
+		<div className="ds-sales-doc__footer">
+			<div className="ds-sales-doc__totals">
+				<table>
+					<tbody>
+						<tr>
+							<th>{__('Subtotal', 'doublescale')}</th>
+							<td>{formatMoney(subtotal, currency)}</td>
+						</tr>
+						{totalTax > 0 ? (
+							<tr>
+								<th>{__('Tax', 'doublescale')}</th>
+								<td>{formatMoney(totalTax, currency)}</td>
+							</tr>
+						) : null}
+						{computed.discount > 0 ? (
+							<tr>
+								<th>{__('Discount', 'doublescale')}</th>
+								<td>-{formatMoney(computed.discount, currency)}</td>
+							</tr>
+						) : null}
+						{adjustment !== 0 ? (
+							<tr>
+								<th>{__('Adjustment', 'doublescale')}</th>
+								<td>{formatMoney(adjustment, currency)}</td>
+							</tr>
+						) : null}
+						<tr className="is-total-bar">
+							<th>{__('Total', 'doublescale')}</th>
+							<td>{formatMoney(total, currency)}</td>
+						</tr>
+						{amountPaid !== undefined ? (
+							<>
+								<tr>
+									<th>{__('Amount Paid', 'doublescale')}</th>
+									<td>{formatMoney(amountPaid, currency)}</td>
+								</tr>
+								<tr className="is-balance">
+									<th>{__('Balance Due', 'doublescale')}</th>
+									<td>{formatMoney(balance ?? 0, currency)}</td>
+								</tr>
+							</>
+						) : null}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	);
 };
+
+const PartyBlock: React.FC<{ label: string; lines: string[] }> = ({ label, lines }) => (
+	<div className="ds-sales-doc__party">
+		<h5 className="ds-sales-doc__party-label">{label}</h5>
+		{lines.length ? (
+			lines.map((line, index) => (
+				<p key={`${line}-${index}`} className="ds-sales-doc__party-line">
+					{line}
+				</p>
+			))
+		) : (
+			<p className="ds-sales-doc__party-line">—</p>
+		)}
+	</div>
+);
+
+const DateRow: React.FC<{ label: string; value: string | null | undefined }> = ({
+	label,
+	value,
+}) => (
+	<div className="ds-sales-doc__date-row">
+		<span className="ds-sales-doc__date-label">{label}:</span>
+		{value || '—'}
+	</div>
+);
 
 interface ProposalDocumentPreviewProps {
 	proposal: Proposal;
@@ -157,7 +200,7 @@ interface ProposalDocumentPreviewProps {
 export const ProposalDocumentPreview: React.FC<ProposalDocumentPreviewProps> = ({
 	proposal,
 }) => {
-	const addressLines = [
+	const partyLines = [
 		proposal.to_name,
 		proposal.address,
 		[proposal.city, proposal.state].filter(Boolean).join(', '),
@@ -165,40 +208,36 @@ export const ProposalDocumentPreview: React.FC<ProposalDocumentPreviewProps> = (
 		proposal.country,
 		proposal.email,
 		proposal.phone,
-	]
-		.filter(Boolean)
-		.join('\n');
+	].filter(Boolean) as string[];
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<h2 className="text-xl font-semibold">{proposal.proposal_number}</h2>
-					<p className="text-muted-foreground">{proposal.subject}</p>
+		<DocumentShell>
+			<div className="ds-sales-doc__header">
+				<div className="ds-sales-doc__title-block">
+					<p className="ds-sales-doc__doc-type">{__('Proposal', 'doublescale')}</p>
+					<h2 className="ds-sales-doc__number">{proposal.proposal_number}</h2>
+					{proposal.subject ? (
+						<p className="ds-sales-doc__subject">{proposal.subject}</p>
+					) : null}
 				</div>
-				<ProposalStatusPill status={proposal.status} expired={proposal.is_expired} />
+				<div className="ds-sales-doc__status-group">
+					<span className={proposalStatusClass(proposal.status)}>
+						{PROPOSAL_STATUS_LABELS[proposal.status] || proposal.status}
+					</span>
+					{proposal.is_expired ? (
+						<span className="ds-sales-doc__status ds-sales-doc__status--expired">
+							{__('Expired', 'doublescale')}
+						</span>
+					) : null}
+				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-				<div>
-					<div className="font-medium mb-1">{__('To', 'doublescale')}</div>
-					<pre className="whitespace-pre-wrap text-muted-foreground font-sans">
-						{formatAddress(addressLines)}
-					</pre>
-				</div>
-				<div className="space-y-1 text-right md:text-left md:ml-auto">
-					<div>
-						<span className="text-muted-foreground">{__('Date', 'doublescale')}: </span>
-						{proposal.date || '—'}
-					</div>
-					<div>
-						<span className="text-muted-foreground">{__('Open Till', 'doublescale')}: </span>
-						{proposal.open_till || '—'}
-					</div>
-					<div>
-						<span className="text-muted-foreground">{__('Currency', 'doublescale')}: </span>
-						{proposal.currency}
-					</div>
+			<div className="ds-sales-doc__meta">
+				<PartyBlock label={__('To', 'doublescale')} lines={partyLines} />
+				<div className="ds-sales-doc__dates">
+					<DateRow label={__('Date', 'doublescale')} value={proposal.date} />
+					<DateRow label={__('Open Till', 'doublescale')} value={proposal.open_till} />
+					<DateRow label={__('Currency', 'doublescale')} value={proposal.currency} />
 				</div>
 			</div>
 
@@ -213,7 +252,7 @@ export const ProposalDocumentPreview: React.FC<ProposalDocumentPreviewProps> = (
 				currency={proposal.currency}
 				lineItems={proposal.line_items}
 			/>
-		</div>
+		</DocumentShell>
 	);
 };
 
@@ -223,80 +262,82 @@ interface InvoiceDocumentPreviewProps {
 
 export const InvoiceDocumentPreview: React.FC<InvoiceDocumentPreviewProps> = ({
 	invoice,
-}) => (
-	<div className="space-y-6">
-		<div className="flex items-start justify-between gap-4">
-			<div>
-				<h2 className="text-xl font-semibold">{invoice.invoice_number}</h2>
-				<p className="text-muted-foreground">
-					{invoice.contact
-						? [invoice.contact.first_name, invoice.contact.last_name]
-								.filter(Boolean)
-								.join(' ') || invoice.contact.email
-						: null}
-				</p>
-			</div>
-			<InvoiceStatusPill status={invoice.status} />
-		</div>
+}) => {
+	const billingLines = (invoice.billing_address || '')
+		.split('\n')
+		.map((line) => line.trim())
+		.filter(Boolean);
+	const shippingLines = (invoice.shipping_address || '')
+		.split('\n')
+		.map((line) => line.trim())
+		.filter(Boolean);
+	const contactName = invoice.contact
+		? [invoice.contact.first_name, invoice.contact.last_name]
+				.filter(Boolean)
+				.join(' ') || invoice.contact.email
+		: null;
 
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-			<div>
-				<div className="font-medium mb-1">{__('Bill To', 'doublescale')}</div>
-				<pre className="whitespace-pre-wrap text-muted-foreground font-sans">
-					{formatAddress(invoice.billing_address)}
-				</pre>
-			</div>
-			<div className="space-y-1">
-				<div>
-					<span className="text-muted-foreground">{__('Invoice Date', 'doublescale')}: </span>
-					{invoice.invoice_date || '—'}
+	return (
+		<DocumentShell>
+			<div className="ds-sales-doc__header">
+				<div className="ds-sales-doc__title-block">
+					<p className="ds-sales-doc__doc-type">{__('Invoice', 'doublescale')}</p>
+					<h2 className="ds-sales-doc__number">{invoice.invoice_number}</h2>
+					{contactName ? (
+						<p className="ds-sales-doc__subject">{contactName}</p>
+					) : null}
 				</div>
-				<div>
-					<span className="text-muted-foreground">{__('Due Date', 'doublescale')}: </span>
-					{invoice.due_date || '—'}
-				</div>
-				<div>
-					<span className="text-muted-foreground">{__('Currency', 'doublescale')}: </span>
-					{invoice.currency}
+				<div className="ds-sales-doc__status-group">
+					<span className={invoiceStatusClass(invoice.status)}>
+						{INVOICE_STATUS_LABELS[invoice.status] || invoice.status}
+					</span>
 				</div>
 			</div>
-		</div>
 
-		{invoice.shipping_address ? (
-			<div className="text-sm">
-				<div className="font-medium mb-1">{__('Ship To', 'doublescale')}</div>
-				<pre className="whitespace-pre-wrap text-muted-foreground font-sans">
-					{formatAddress(invoice.shipping_address)}
-				</pre>
+			<div className="ds-sales-doc__meta">
+				<PartyBlock label={__('Bill To', 'doublescale')} lines={billingLines} />
+				<div className="ds-sales-doc__dates">
+					<DateRow label={__('Invoice Date', 'doublescale')} value={invoice.invoice_date} />
+					<DateRow label={__('Due Date', 'doublescale')} value={invoice.due_date} />
+					<DateRow label={__('Currency', 'doublescale')} value={invoice.currency} />
+				</div>
 			</div>
-		) : null}
 
-		<LineItemsTable items={invoice.line_items} currency={invoice.currency} showTax />
+			{shippingLines.length ? (
+				<div className="ds-sales-doc__meta">
+					<PartyBlock label={__('Ship To', 'doublescale')} lines={shippingLines} />
+				</div>
+			) : null}
 
-		<TotalsBlock
-			subtotal={invoice.subtotal}
-			totalTax={invoice.total_tax}
-			discountType={invoice.discount_type}
-			discountValue={invoice.discount_value}
-			adjustment={invoice.adjustment}
-			total={invoice.total}
-			amountPaid={invoice.amount_paid}
-			currency={invoice.currency}
-			lineItems={invoice.line_items}
-		/>
+			<LineItemsTable items={invoice.line_items} currency={invoice.currency} showTax />
 
-		{invoice.client_note ? (
-			<div className="text-sm">
-				<div className="font-medium mb-1">{__('Client Note', 'doublescale')}</div>
-				<p className="text-muted-foreground whitespace-pre-wrap">{invoice.client_note}</p>
-			</div>
-		) : null}
+			<TotalsBlock
+				subtotal={invoice.subtotal}
+				totalTax={invoice.total_tax}
+				discountType={invoice.discount_type}
+				discountValue={invoice.discount_value}
+				adjustment={invoice.adjustment}
+				total={invoice.total}
+				amountPaid={invoice.amount_paid}
+				currency={invoice.currency}
+				lineItems={invoice.line_items}
+			/>
 
-		{invoice.terms ? (
-			<div className="text-sm">
-				<div className="font-medium mb-1">{__('Terms', 'doublescale')}</div>
-				<p className="text-muted-foreground whitespace-pre-wrap">{invoice.terms}</p>
-			</div>
-		) : null}
-	</div>
-);
+			{invoice.client_note ? (
+				<div className="ds-sales-doc__section">
+					<h4 className="ds-sales-doc__section-title">
+						{__('Client Note', 'doublescale')}
+					</h4>
+					<p className="ds-sales-doc__section-body">{invoice.client_note}</p>
+				</div>
+			) : null}
+
+			{invoice.terms ? (
+				<div className="ds-sales-doc__section">
+					<h4 className="ds-sales-doc__section-title">{__('Terms', 'doublescale')}</h4>
+					<p className="ds-sales-doc__section-body">{invoice.terms}</p>
+				</div>
+			) : null}
+		</DocumentShell>
+	);
+};

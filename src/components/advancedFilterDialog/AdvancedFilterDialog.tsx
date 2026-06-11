@@ -79,8 +79,8 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-2xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-4 rounded-[16px] p-4 sm:mx-auto sm:w-full sm:p-6 max-sm:!top-4 max-sm:!translate-x-[-50%] max-sm:!translate-y-0">
-				<DialogHeader className="shrink-0">
-					<DialogTitle>
+			<DialogHeader className="shrink-0 items-start text-left">
+			 <DialogTitle className="text-left !mb-0">
 						<CustomDialogHeader
 							title={__('Filter', 'doublescale')}
 							subtitle={__(

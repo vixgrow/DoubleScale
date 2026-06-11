@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,13 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.4 = 11 Jun 2026
+- Fix campaign setup step subject and preview text not saving after editing and returning to the step
+- Rename Support to Helpdesk across modules and admin UI
+- Refine Control Modules settings with module cards and clearer grouping
+- Update booking Connect button styling to match secondary actions
+- Improve template save handling for legacy API subject fields
+
 = 1.1.3 = 11 Jun 2026
 - Auto-install and activate DoubleScale Pro after a valid license is activated
 - Show Pro plugin install and active status on the license settings page

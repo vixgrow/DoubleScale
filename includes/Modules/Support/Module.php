@@ -30,7 +30,6 @@ use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
-use DoubleScale\Modules\Support\Models\MailboxModel;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Support\Renderer\AttachmentServeHandler;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
@@ -188,14 +187,6 @@ final class Module extends AbstractModule {
 
 		add_action( 'init', array( $this, 'register_attachment_cleanup_schedule' ) );
 
-		// Ensure a single shared "General" mailbox exists so the agent inbox's
-		// "New ticket" action and the portal are usable the moment support is
-		// enabled. This now DEFERS until an SMTP connection exists (identity is
-		// mandatory): the boot call below is the "SMTP already configured" path,
-		// and the listener seeds the moment the first connection is saved.
-		$this->maybe_seed_default_mailbox();
-		add_action( 'doublescale_smtp_connections_updated', array( $this, 'maybe_seed_default_mailbox' ), 10, 0 );
-
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools
 		// cluster visually. `group: 'sales'` matches the existing agent-tool
@@ -256,24 +247,12 @@ final class Module extends AbstractModule {
 	}
 
 	/**
-	 * Seed a single shared "General" mailbox the first time support boots so
-	 * the agent inbox and customer portal are usable immediately.
+	 * Register and schedule the daily temp-attachment cleanup task.
 	 *
-	 * This is module-scoped (one row, site-wide) — NOT per-user. A support
-	 * mailbox is a shared routing channel; there is no per-agent mailbox.
-	 *
-	 * Idempotency mirrors {@see \\DoubleScale\\Modules\\Booking\\Module::register_provisioner_hooks()}:
-	 * the `doublescale_support_default_mailbox_seeded` option flag stops the
-	 * check on every boot, BUT we also re-seed when the table is empty even if
-	 * the flag is set. The flag lives in `wp_options` while mailboxes live in a
-	 * plugin table, so the "drop plugin tables + reactivate" dev workflow (and a
-	 * tester who deletes every mailbox) would otherwise leave the two out of
-	 * sync — flag set, zero rows, "New ticket" button stuck disabled.
-	 *
-	 * Public (not private) because it is also a `doublescale_smtp_connections_updated`
-	 * listener — WP invokes the callback from outside the class. Safe to call
-	 * repeatedly: it no-ops once a mailbox exists, and defers while no SMTP
-	 * connection is configured.
+	 * Runs on `init` (Action Scheduler's data store is ready by then). A short
+	 * transient lock keeps concurrent `init` fires from double-registering, and
+	 * the recurring schedule is only created when none is pending — so repeated
+	 * boots are idempotent.
 	 *
 	 * @return void
 	 */
@@ -293,82 +272,6 @@ final class Module extends AbstractModule {
 
 		if ( false === $tasks->get_next_timestamp( 'doublescale_support_attachment_cleanup' ) ) {
 			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_support_attachment_cleanup' );
-		}
-	}
-
-	public function maybe_seed_default_mailbox(): void {
-		$already_flagged = (bool) get_option( 'doublescale_support_default_mailbox_seeded' );
-
-		// Probe the table defensively. This runs on every `plugins_loaded`, so a
-		// transiently-missing table (mid-migration, partial install, a dev who
-		// dropped it) must NOT fatal the whole site — degrade to "defer" and let
-		// the next boot (after migrations run) try again.
-		try {
-			$has_mailbox = MailboxModel::query()->exists();
-		} catch ( \Throwable $e ) {
-			return;
-		}
-
-		// Nothing to do only when BOTH the flag is set AND a row exists.
-		if ( $already_flagged && $has_mailbox ) {
-			return;
-		}
-
-		// A mailbox already exists (admin created one via REST before this ran,
-		// or a prior seed succeeded): don't insert a duplicate, just flip the
-		// flag so we stop checking.
-		if ( $has_mailbox ) {
-			update_option( 'doublescale_support_default_mailbox_seeded', true );
-			return;
-		}
-
-		// Identity is mandatory on every mailbox (its from_email is the only From
-		// source), so a default mailbox can only be seeded once an SMTP connection
-		// with a From address exists. With none yet we DEFER: the settings UI shows
-		// an empty state, and the `doublescale_smtp_connections_updated` listener
-		// re-runs this the moment the first connection is saved. (Booting again
-		// later also retries via the guarded fallback in boot().)
-		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
-			return;
-		}
-		$default_connection_id = \DoubleScale\Modules\Smtp\Settings::get_default_connection();
-		if ( empty( $default_connection_id ) ) {
-			return;
-		}
-		$default_identity   = \DoubleScale\Modules\Smtp\Settings::get_identity_for_connection( $default_connection_id );
-		$default_from_email = is_array( $default_identity ) ? (string) ( $default_identity['from_email'] ?? '' ) : '';
-		if ( '' === $default_from_email ) {
-			// Connection exists but has no From address yet: nothing to send as.
-			return;
-		}
-
-		try {
-			// Seed the mailbox's sending identity from the default SMTP connection's
-			// From address. The `email` column is NOT set here: the model's `saving`
-			// event mirrors it from `data.identity.from_email`.
-			$mailbox             = new MailboxModel();
-			$mailbox->slug       = 'general';
-			$mailbox->box_type   = 'web';
-			$mailbox->is_default = true;
-			$mailbox->data       = array(
-				'name'     => __( 'General', 'doublescale' ),
-				'identity' => array( 'from_email' => $default_from_email ),
-			);
-			$mailbox->save();
-
-			update_option( 'doublescale_support_default_mailbox_seeded', true );
-		} catch ( \Throwable $e ) {
-			// A broken seed must never abort module boot. The inbox's existing
-			// "create a mailbox" empty state is the fallback UX.
-			doublescale_get_logger()->error(
-				'Failed to seed the default support mailbox.',
-				array(
-					'source' => 'support-module',
-					'error'  => $e->getMessage(),
-					'file'   => $e->getFile(),
-					'line'   => $e->getLine(),
-				)
-			);
 		}
 	}
 }

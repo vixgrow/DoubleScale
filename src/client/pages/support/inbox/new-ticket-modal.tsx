@@ -283,6 +283,15 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 				</div>
 
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
+					{mailboxes.length === 0 && (
+						<div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-700">
+							{__(
+								'Add a support mailbox before opening tickets.',
+								'doublescale'
+							)}
+						</div>
+					)}
+
 					<div>
 						<Label
 							htmlFor="ds-new-ticket-title"
@@ -592,7 +601,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 						>
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button type="submit" disabled={submitting}>
+						<Button
+							type="submit"
+							disabled={submitting || mailboxes.length === 0}
+						>
 							{submitting
 								? __('Creating…', 'doublescale')
 								: __('Create ticket', 'doublescale')}

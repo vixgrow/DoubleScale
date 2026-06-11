@@ -113,9 +113,9 @@ class TicketService {
 		}
 
 		// Mailbox is mandatory (NOT NULL). resolve_mailbox_id() falls back to the
-		// default mailbox, so 0 only happens if the install has no mailboxes at all
-		// (the seeder should prevent this) — surface that as a clear error rather
-		// than writing an invalid 0 FK.
+		// default mailbox, so 0 only happens on a fresh install that has no mailbox
+		// yet — there is no auto-created mailbox, the operator must create the first
+		// one. Surface that as a clear error rather than writing an invalid 0 FK.
 		$mailbox_id = $this->resolve_mailbox_id( $data );
 		if ( 0 === $mailbox_id ) {
 			return new WP_Error(
@@ -735,12 +735,12 @@ class TicketService {
 	 *   1. An explicit `mailbox_id` from the caller always wins (agent picked a
 	 *      channel, or the IMAP/portal path resolved one).
 	 *   2. Otherwise fall back to the default mailbox ({@see MailboxModel::get_default()}),
-	 *      then to the first mailbox if no default flag is set. The seeder
-	 *      guarantees a default mailbox exists, so this branch resolves on any
-	 *      normal install — a create that omits `mailbox_id` still lands in the
+	 *      then to the first mailbox if no default flag is set. As long as at least
+	 *      one mailbox exists, a create that omits `mailbox_id` still lands in the
 	 *      default channel rather than being channel-less.
-	 *   3. `0` only if the install somehow has zero mailboxes (seeder failed). The
-	 *      caller turns that into a clear error instead of writing a 0 FK.
+	 *   3. `0` when the install has zero mailboxes — the normal state of a fresh
+	 *      install, since no mailbox is auto-created. The caller turns that into a
+	 *      clear error instead of writing a 0 FK.
 	 *
 	 * @param array<string, mixed> $data Create payload.
 	 * @return int Mailbox id, or 0 when no mailbox exists at all.
@@ -761,8 +761,9 @@ class TicketService {
 			return (int) $first->id;
 		}
 
-		// Zero mailboxes on the install (seeder failed). Signal "unresolvable" — the
-		// caller rejects rather than violating the NOT NULL / FK constraint.
+		// Zero mailboxes on the install (fresh install, none created yet). Signal
+		// "unresolvable" — the caller rejects rather than violating the NOT NULL / FK
+		// constraint.
 		return 0;
 	}
 

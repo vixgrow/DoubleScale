@@ -517,8 +517,9 @@ final class EmailNotifications {
 
 	/**
 	 * The built-in default customer-email templates — the canonical copy that
-	 * seeds every mailbox and is the final fallback when a mailbox leaves a
-	 * subject/body blank. Subjects/bodies use {token} placeholders rendered by
+	 * supplies the default subject/body for every mailbox and is the final fallback
+	 * when a mailbox leaves a subject/body blank. Subjects/bodies use {token}
+	 * placeholders rendered by
 	 * {@see self::render()} ({@see self::tokens()} for the token set). This is also
 	 * the source the mailbox editor reads (via the REST list `meta`) so the default
 	 * copy is visible and editable in the UI.

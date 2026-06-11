@@ -144,6 +144,15 @@ class RestInvoicePaymentController extends RestController {
 			return new WP_Error( 'invalid_data', __( 'Payment amount must be greater than zero.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
+		$balance = round( (float) $invoice->total - (float) $invoice->amount_paid, 2 );
+		if ( $amount > $balance + 0.001 ) {
+			return new WP_Error(
+				'payment_exceeds_balance',
+				__( 'Payment amount exceeds the balance due on this invoice.', 'doublescale' ),
+				array( 'status' => 422 )
+			);
+		}
+
 		$payment_date = current_time( 'Y-m-d' );
 		if ( ! empty( $params['payment_date'] ) ) {
 			$payment_date = sanitize_text_field( (string) $params['payment_date'] );

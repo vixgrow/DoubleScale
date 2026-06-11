@@ -14,11 +14,11 @@ import {
 	Circle,
 	CircleDot,
 	Inbox,
-	LifeBuoy,
 	MessageSquareText,
 	Send,
 	StickyNote,
 } from 'lucide-react';
+import { HelpdeskIcon } from '@doublescale/components';
 
 import type { TicketPriority, TicketStatus } from '@/constants/support';
 import { PRIORITY_LABELS, STATUS_LABELS } from '@/constants/support';
@@ -33,7 +33,9 @@ export const SupportIcon: React.FC<IconProps> = ({
 	width = 24,
 	height = 24,
 	className,
-}) => <LifeBuoy width={width} height={height} className={className} />;
+}) => (
+	<HelpdeskIcon width={width} height={height} className={className} />
+);
 
 export const InboxIcon: React.FC<IconProps> = (props) => <Inbox {...props} />;
 export const ReplyIcon: React.FC<IconProps> = (props) => <Send {...props} />;

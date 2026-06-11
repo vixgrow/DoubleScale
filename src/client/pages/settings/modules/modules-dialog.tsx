@@ -21,6 +21,7 @@ import ModulesSettings, {
 	ModulesSaveFooter,
 	type ModulesFooterState,
 } from './index';
+import './modules-settings.scss';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import { ControlIcon, CustomDialogHeader } from '@doublescale/components';
 
@@ -73,7 +74,7 @@ export function ModulesDialogProvider({
 			>
 				<DialogContent
 					className={cn(
-						'z-[150000] gap-0 overflow-hidden p-0',
+						'doublescale-control-modules-dialog z-[150000] gap-0 overflow-hidden p-0',
 						'w-[calc(100vw-1rem)] max-w-[720px]',
 						'max-h-[min(94vh,900px)] rounded-xl border border-border/80',
 						'bg-card shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)]'
@@ -97,7 +98,7 @@ export function ModulesDialogProvider({
 								}
 							/>
 						</div>
-						<div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 lg:px-6 lg:py-5">
+						<div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 lg:px-6 lg:py-5 doublescale-control-modules">
 							<ModulesSettings
 								showHeader={false}
 								variant="dialog"

@@ -4,9 +4,9 @@
 
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Receipt } from 'lucide-react';
 
 import { registerAdminPage, useNavigate, getToLink } from '@doublescale/navigation';
+import { SalesIcon } from '@doublescale/components';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -76,7 +76,7 @@ registerAdminPage('sales', {
 	path: 'sales',
 	component: wrap(RedirectToProposals),
 	label: __('Sales', 'doublescale'),
-	icon: <Receipt size={24} />,
+	icon: <SalesIcon />,
 	...salesPageDefaults,
 });
 

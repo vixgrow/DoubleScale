@@ -3,29 +3,36 @@ import {
 	BookingIcon,
 	CampaignIcon,
 	FormsIcon,
+	HelpdeskIcon,
 	IntegrationsIcon,
 	PipelineIcon,
+	SalesIcon,
+	SmtpIcon,
 	TaskIcon,
 } from '@doublescale/components';
 
 const ICON_COLOR = '#0D9DFC';
-const ICON_BG = '#D9E9F3';
+const ICON_BG = '#E8F4FD';
+
+const SIZE_MAP = {
+	md: { className: 'doublescale-module-icon--md', icon: 20 },
+	sm: { className: 'doublescale-module-icon--sm', icon: 16 },
+} as const;
 
 type ModuleIconProps = {
 	slug: string;
-	size?: 'md' | 'sm';
+	size?: keyof typeof SIZE_MAP;
 };
 
 export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
-	const dim = size === 'sm' ? 20 : 28;
-	const padding = size === 'sm' ? 'p-0.5' : 'p-1';
+	const { className: sizeClass, icon: dim } = SIZE_MAP[size];
 
 	const icon = (() => {
 		switch (slug) {
 			case 'smtp':
-				return <IntegrationsIcon width={dim} height={dim} color={ICON_COLOR} />;
+				return <SmtpIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'sales':
-				return <PipelineIcon width={dim} height={dim} color={ICON_COLOR} />;
+				return <SalesIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'deals':
 				return <PipelineIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'forms':
@@ -39,7 +46,7 @@ export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
 			case 'booking':
 				return <BookingIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'support':
-				return <IntegrationsIcon width={dim} height={dim} color={ICON_COLOR} />;
+				return <HelpdeskIcon width={dim} height={dim} color={ICON_COLOR} />;
 			default:
 				return <IntegrationsIcon width={dim} height={dim} color={ICON_COLOR} />;
 		}
@@ -47,7 +54,7 @@ export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
 
 	return (
 		<span
-			className={`inline-flex shrink-0 items-center justify-center rounded-lg ${padding}`}
+			className={`doublescale-module-icon ${sizeClass}`}
 			style={{ backgroundColor: ICON_BG, color: ICON_COLOR }}
 		>
 			{icon}

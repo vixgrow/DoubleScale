@@ -15,8 +15,11 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import { Bell, Mail } from 'lucide-react';
 
+import {
+	ContactTotalEmailsIcon,
+	NotificationIcon,
+} from '@doublescale/components';
 import {
 	Popover,
 	PopoverContent,
@@ -119,16 +122,16 @@ const ProBellPopover: React.FC<ProBellPopoverProps> = ({
 
 export const HeaderProBells: React.FC = () => {
 	return (
-		<>
+		<div className="doublescale-header-pro-bells">
 			<ProBellPopover
 				featureName={__('Inbox', 'doublescale')}
 				description={__(
 					'Centralize incoming email, SMS and WhatsApp replies from your contacts in one inbox with DoubleScale Pro.',
 					'doublescale'
 				)}
-				icon={<Mail size={20} />}
+				icon={<ContactTotalEmailsIcon width={24} height={24} />}
 				ariaLabel={__('Inbox (Pro feature)', 'doublescale')}
-				buttonClassName="doublescale-header-pro-bell doublescale-header-pro-bell--inbox"
+				buttonClassName="doublescale-inbox-bell"
 			/>
 			<ProBellPopover
 				featureName={__('Notifications', 'doublescale')}
@@ -136,11 +139,11 @@ export const HeaderProBells: React.FC = () => {
 					'Get in-app notifications for automations, campaigns, contacts and pipeline activity with DoubleScale Pro.',
 					'doublescale'
 				)}
-				icon={<Bell size={20} />}
+				icon={<NotificationIcon width={24} height={24} />}
 				ariaLabel={__('Notifications (Pro feature)', 'doublescale')}
-				buttonClassName="doublescale-header-pro-bell doublescale-header-pro-bell--notifications"
+				buttonClassName="doublescale-notification-bell"
 			/>
-		</>
+		</div>
 	);
 };
 

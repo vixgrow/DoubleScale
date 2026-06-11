@@ -232,6 +232,11 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 					hidden: true, // Auto-save should be hidden from user templates
 				};
 
+				// Do not send legacy root subject/preview_text — they can overwrite settings.
+				delete (templateWithCampaignId as { subject?: string }).subject;
+				delete (templateWithCampaignId as { preview_text?: string })
+					.preview_text;
+
 				savedTemplate = await saveTemplate(templateWithCampaignId);
 			}
 

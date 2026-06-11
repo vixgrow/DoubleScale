@@ -29,6 +29,7 @@ import { map } from 'lodash';
 import { NavBar } from '@doublescale/components';
 import { Controller, HeaderBar } from './controller';
 import { ModulesDialogProvider } from '../pages/settings/modules/modules-dialog';
+import '../pages/settings/modules/modules-settings.scss';
 import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@doublescale/components';

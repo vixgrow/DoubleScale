@@ -46,11 +46,11 @@ final class Module extends AbstractModule {
 	}
 
 	public function label(): string {
-		return __( 'Support', 'doublescale' );
+		return __( 'Helpdesk', 'doublescale' );
 	}
 
 	public function description(): string {
-		return __( 'Ticket-based customer support with mailbox channels, email piping, and a customer portal.', 'doublescale' );
+		return __( 'Ticket-based customer helpdesk with mailbox channels, email piping, and a customer portal.', 'doublescale' );
 	}
 
 	public function version(): string {
@@ -195,8 +195,8 @@ final class Module extends AbstractModule {
 		// the moment the module is toggled off via Settings → Modules.
 		MenuRegistry::add(
 			array(
-				'page_title'      => __( 'Support', 'doublescale' ),
-				'menu_title'      => __( 'Support', 'doublescale' ),
+				'page_title'      => __( 'Helpdesk', 'doublescale' ),
+				'menu_title'      => __( 'Helpdesk', 'doublescale' ),
 				'capability'      => 'doublescale_view_support',
 				'slug'            => 'doublescale&path=support',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),

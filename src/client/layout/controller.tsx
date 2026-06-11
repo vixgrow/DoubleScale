@@ -27,6 +27,7 @@ import Tags from '../pages/contacts/tags';
 import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
 import Campaign from '../pages/campaign';
 import Integrations from '../pages/intergrations';
+import '../pages/extensions/register';
 import Templates from '../pages/templates';
 import Template from '../pages/template';
 import Automations from '../pages/automations';
@@ -55,9 +56,9 @@ import {
 	CustomFieldsIcon,
 	EmailSequenceIcon,
 	PiplelinesIcon,
+	SmtpIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
-import { Mail } from 'lucide-react';
 import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
@@ -254,7 +255,7 @@ export const HeaderBar = ({ page }: { page: any }) => {
 						<Button
 							type="button"
 							variant="outline"
-							className="border-[#CB5301] hover:bg-[#CB5301] bg-transparent text-[#CB5301] hover:text-white rounded-lg shadow-none"
+							className="doublescale-control-modules-trigger border-[#CB5301] bg-transparent text-[#CB5301] rounded-lg shadow-none"
 							onClick={openModulesDialog}
 						>
 							<ControlIcon />
@@ -557,7 +558,7 @@ registerAdminPage('smtp', {
 	path: 'smtp/:tab?',
 	component: () => <SmtpPage />,
 	label: __('SMTP', 'doublescale'),
-	icon: <Mail size={24} />,
+	icon: <SmtpIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'smtp',
 	alwaysRegister: true,

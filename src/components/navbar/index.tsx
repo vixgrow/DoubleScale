@@ -88,6 +88,24 @@ const SECTION_ORDER: Record<string, { label: string; order: number }> = {
 	system: { label: __('System', 'doublescale'), order: 4 },
 };
 
+/** Sidebar order within the CRM section (after Contacts). */
+const CRM_NAV_ITEM_ORDER: Record<string, number> = {
+	contacts: 0,
+	sales: 1,
+	booking: 2,
+	support: 3,
+	tasks: 4,
+};
+
+const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
+	crm: CRM_NAV_ITEM_ORDER,
+};
+
+const navItemSortIndex = (sectionKey: string, path: string): number => {
+	const normalized = path.replace(/^\//, '').split('/:')[0];
+	return SECTION_NAV_ITEM_ORDER[sectionKey]?.[normalized] ?? 999;
+};
+
 const PATH_TO_SECTION: Record<string, string> = {
 	'/': 'main',
 	contacts: 'crm',
@@ -119,6 +137,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'smtp',
 	'team-managers',
 	'integrations',
+	'extensions',
 	'analytics-and-reports',
 ]);
 
@@ -156,7 +175,6 @@ const PATH_TO_MODULE: Record<string, string> = {
 	support: 'support',
 	'support/ticket/:id': 'support',
 	'abandoned-carts': 'campaigns',
-	extensions: 'integrations',
 };
 
 /** Submenu routes gated by a Pro module (when Pro is active). */
@@ -422,7 +440,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							? [
 									{
 										path: 'sales-pipeline',
-										label: __('Pipeline', 'doublescale'),
+										label: __('Pipelines', 'doublescale'),
 										requiredCapability: [
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
@@ -517,7 +535,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			.map(([key, { label }]) => ({
 				key,
 				label,
-				items: grouped[key],
+				items: grouped[key].sort((a, b) => {
+					const orderDiff =
+						navItemSortIndex(key, a.path) -
+						navItemSortIndex(key, b.path);
+					if (orderDiff !== 0) {
+						return orderDiff;
+					}
+					return a.label.localeCompare(b.label);
+				}),
 			}));
 	}, [navigationItems]);
 

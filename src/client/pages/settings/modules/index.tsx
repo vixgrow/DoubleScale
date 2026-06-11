@@ -26,6 +26,7 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ModuleCard } from './module-card';
+import './modules-settings.scss';
 
 interface ModulesResponse {
 	success: boolean;
@@ -66,6 +67,34 @@ type ModulesSettingsProps = {
 	variant?: 'page' | 'dialog';
 	onFooterStateChange?: ( state: ModulesFooterState ) => void;
 };
+
+/** Logical groupings for the Control Modules dialog. */
+const MODULE_DIALOG_GROUPS: {
+	key: string;
+	label: string;
+	slugs: string[];
+}[] = [
+	{
+		key: 'email',
+		label: __( 'Email & delivery', 'doublescale' ),
+		slugs: [ 'smtp' ],
+	},
+	{
+		key: 'sales',
+		label: __( 'Sales', 'doublescale' ),
+		slugs: [ 'sales' ],
+	},
+	{
+		key: 'marketing',
+		label: __( 'Marketing', 'doublescale' ),
+		slugs: [ 'forms', 'automations', 'campaigns' ],
+	},
+	{
+		key: 'workspace',
+		label: __( 'Workspace', 'doublescale' ),
+		slugs: [ 'tasks', 'booking', 'support' ],
+	},
+];
 
 export default function ModulesSettings({
 	showHeader = true,
@@ -132,13 +161,19 @@ export default function ModulesSettings({
 			if ( pendingChanges[ slug ] !== false ) {
 				return false;
 			}
-			return getEffectiveMarketingModuleState(
-				{ slug } as ModuleInfo,
-				modules,
-				pendingChanges
-			) === false;
+			const row = displayRows.find( ( mod ) => mod.slug === slug );
+			if ( ! row ) {
+				return false;
+			}
+			return (
+				getEffectiveMarketingModuleState(
+					row,
+					modules,
+					pendingChanges
+				) === false
+			);
 		} );
-	}, [ modules, pendingChanges ] );
+	}, [ modules, pendingChanges, displayRows ] );
 
 	const affectedDisableModules = useMemo( () => {
 		return modulesPendingDisable.filter(
@@ -271,8 +306,83 @@ export default function ModulesSettings({
 	const isDialog = variant === 'dialog';
 	const showInlineFooter = ! isDialog;
 
+	const renderModuleCard = ( mod: ( typeof displayRows )[number] ) => {
+		const isEnabled = getEffectiveMarketingModuleState(
+			mod,
+			modules,
+			pendingChanges
+		);
+		const isPendingDisable =
+			isRoleImpactModule( mod.slug ) &&
+			pendingChanges[ mod.slug ] === false;
+		const impact = isRoleImpactModule( mod.slug )
+			? roleImpact[ mod.slug ]
+			: undefined;
+		const childRows = buildChildModuleRows(
+			mod.slug,
+			modules,
+			isProAddonActive
+		);
+		const hasChildren = childRows.length > 0;
+
+		return (
+			<div
+				key={mod.slug}
+				className={
+					hasChildren && ! isDialog ? 'md:col-span-2' : undefined
+				}
+			>
+				<ModuleCard
+					mod={mod}
+					isEnabled={isEnabled}
+					childRows={childRows}
+					isPendingDisable={isPendingDisable}
+					roleImpact={impact}
+					formatRoleImpactWarning={formatRoleImpactWarning}
+					onToggle={handleToggle}
+					getChildChecked={( child ) =>
+						getChildModuleToggleState( child, pendingChanges )
+					}
+					compact={isDialog}
+					embedded={isDialog}
+				/>
+				{mod.slug === 'sales' &&
+					pendingChanges[ 'sales' ] === false && (
+						<p className="mx-4 mb-3 mt-1 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-700">
+							{isSalesDocumentsReady()
+								? __(
+										'Disabling Sales also turns off Proposals, Invoices, and Pipelines.',
+										'doublescale'
+								  )
+								: __(
+										'Disabling Sales also turns off Pipelines.',
+										'doublescale'
+								  )}
+						</p>
+					)}
+			</div>
+		);
+	};
+
+	const dialogGroupedModules = useMemo( () => {
+		const bySlug = new Map(
+			displayRows.map( ( row ) => [ row.slug, row ] )
+		);
+		return MODULE_DIALOG_GROUPS.map( ( group ) => ( {
+			...group,
+			modules: group.slugs
+				.map( ( slug ) => bySlug.get( slug ) )
+				.filter(
+					( row ): row is ( typeof displayRows )[number] =>
+						row !== undefined
+				),
+		} ) ).filter( ( group ) => group.modules.length > 0 );
+	}, [ displayRows ] );
+
 	return (
-		<div className={`flex flex-col ${isDialog ? 'gap-4' : 'gap-8'}`}>
+		<div
+			className={`doublescale-control-modules flex flex-col ${isDialog ? 'gap-5' : 'gap-8'}`}
+		>
 			{showHeader && (
 				<div>
 					<h3 className="text-lg font-semibold text-foreground">
@@ -281,81 +391,42 @@ export default function ModulesSettings({
 					<p className="text-sm text-muted-foreground mt-1">
 						{isSalesDocumentsReady()
 							? __(
-									'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+									'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
 									'doublescale'
 							  )
 							: __(
-									'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+									'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
 									'doublescale'
 							  )}
 					</p>
 				</div>
 			)}
 
-			<div
-				className={`grid gap-3 ${
-					isDialog
-						? 'grid-cols-1'
-						: 'grid-cols-1 md:grid-cols-2'
-				}`}
-			>
-				{displayRows.map( ( mod ) => {
-					const isEnabled = getEffectiveMarketingModuleState(
-						mod,
-						modules,
-						pendingChanges
-					);
-					const isPendingDisable =
-						isRoleImpactModule( mod.slug ) &&
-						pendingChanges[ mod.slug ] === false;
-					const impact = isRoleImpactModule( mod.slug )
-						? roleImpact[ mod.slug ]
-						: undefined;
-					const childRows = buildChildModuleRows(
-						mod.slug,
-						modules,
-						isProAddonActive
-					);
-					const hasChildren = childRows.length > 0;
-
-					return (
-						<div
-							key={mod.slug}
-							className={
-								hasChildren && ! isDialog ? 'md:col-span-2' : undefined
-							}
+			{isDialog ? (
+				<div className="flex flex-col gap-4">
+					{dialogGroupedModules.map( ( group ) => (
+						<section
+							key={group.key}
+							className="doublescale-control-modules__section"
 						>
-							<ModuleCard
-								mod={mod}
-								isEnabled={isEnabled}
-								childRows={childRows}
-								isPendingDisable={isPendingDisable}
-								roleImpact={impact}
-								formatRoleImpactWarning={formatRoleImpactWarning}
-								onToggle={handleToggle}
-								getChildChecked={( child ) =>
-									getChildModuleToggleState( child, pendingChanges )
-								}
-								compact={isDialog}
-							/>
-							{mod.slug === 'sales' &&
-								pendingChanges[ 'sales' ] === false && (
-									<p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-700">
-										{isSalesDocumentsReady()
-											? __(
-													'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
-													'doublescale'
-											  )
-											: __(
-													'Disabling Sales also turns off the Sales Pipeline.',
-													'doublescale'
-											  )}
-									</p>
+							<div className="doublescale-control-modules__section-header">
+								<h4 className="doublescale-control-modules__section-title">
+									{group.label}
+								</h4>
+							</div>
+							<div className="doublescale-control-modules__section-body">
+								{group.modules.map( ( mod ) =>
+									renderModuleCard( mod )
 								)}
-						</div>
-					);
-				} )}
-			</div>
+							</div>
+						</section>
+					) ) }
+				</div>
+			) : (
+				<div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+					{displayRows.map( ( mod ) => renderModuleCard( mod ) )}
+				</div>
+			)}
 
 			{showInlineFooter && hasChanges && (
 				<div className="flex items-center justify-end">

@@ -687,16 +687,16 @@ class RestTemplateController extends RestController {
 		// Get settings from request, or initialize as empty array
 		$settings = $request->get_param( 'settings' ) ?? array();
 
-		// If subject or preview_text are passed as separate params (for backward compatibility),
-		// merge them into settings
+		// Legacy top-level subject/preview_text are merged only when missing from settings.
 		$subject      = $request->get_param( 'subject' );
 		$preview_text = $request->get_param( 'preview_text' );
 
-		if ( $subject !== null ) {
+		// Prefer nested settings; top-level fields are legacy only.
+		if ( $subject !== null && ! array_key_exists( 'subject', $settings ) ) {
 			$settings['subject'] = $subject;
 		}
 
-		if ( $preview_text !== null ) {
+		if ( $preview_text !== null && ! array_key_exists( 'preview_text', $settings ) ) {
 			$settings['preview_text'] = $preview_text;
 		}
 

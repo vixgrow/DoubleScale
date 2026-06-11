@@ -50,7 +50,13 @@ function isRoleImpactModule( slug: string ): slug is ModuleRoleImpactSlug {
 	return ( MODULES_WITH_ROLE_IMPACT as readonly string[] ).includes( slug );
 }
 
-export default function ModulesSettings() {
+type ModulesSettingsProps = {
+	showHeader?: boolean;
+};
+
+export default function ModulesSettings({
+	showHeader = true,
+}: ModulesSettingsProps = {}) {
 	const { createNotice } = useDispatch( 'doublescale/core' );
 	const [ modules, setModules ] = useState<ModuleInfo[]>( () =>
 		config.getModules()
@@ -241,17 +247,19 @@ export default function ModulesSettings() {
 
 	return (
 		<div className="flex flex-col gap-8">
-			<div>
-				<h3 className="text-lg font-semibold text-foreground">
-					{__( 'Modules', 'doublescale' )}
-				</h3>
-				<p className="text-sm text-muted-foreground mt-1">
-					{__(
-						'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
-						'doublescale'
-					)}
-				</p>
-			</div>
+			{showHeader && (
+				<div>
+					<h3 className="text-lg font-semibold text-foreground">
+						{__( 'Modules', 'doublescale' )}
+					</h3>
+					<p className="text-sm text-muted-foreground mt-1">
+						{__(
+							'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+							'doublescale'
+						)}
+					</p>
+				</div>
+			)}
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 				{displayRows.map( ( mod ) => {
@@ -333,7 +341,7 @@ export default function ModulesSettings() {
 			</div>
 
 			{hasChanges && (
-				<div className="flex items-center justify-end p-4 border border-border/40 rounded-xl">
+				<div className="flex items-center justify-end">
 					<Button
 						onClick={handleSave}
 						disabled={isSaving}

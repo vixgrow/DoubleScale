@@ -36,6 +36,7 @@ function readSmtpInfoFromConfig(): DoubleScaleInfo {
 }
 import { cn } from '@/lib/utils';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useModulesDialog } from '../../client/pages/settings/modules/modules-dialog';
 import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
 
 /**
@@ -96,6 +97,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 }) => {
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
+	const { openModulesDialog } = useModulesDialog();
 	const [liveSmtp, setLiveSmtp] = useState<DoubleScaleInfo | null>(null);
 	const modulesTick = useModulesConfigTick();
 	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
@@ -180,12 +182,12 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 			{!smtpModuleOn && (
 				<p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
 					{__(
-						'The SMTP module is turned off. Enable it under Settings → Modules to use saved mail connections and the sender account picker.',
+						'The SMTP module is turned off. Enable it from Control Modules to use saved mail connections and the sender account picker.',
 						'doublescale'
 					)}{' '}
 					<button
 						type="button"
-						onClick={() => navigate(getToLink('settings/modules'))}
+						onClick={openModulesDialog}
 						className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0 font-medium"
 					>
 						{__('Open Modules', 'doublescale')}

@@ -7,7 +7,7 @@ import type { FC } from 'react';
 /**
  * DoubleScale dependencies
  */
-import { getToLink, useNavigate } from '@doublescale/navigation';
+import { useModulesDialog } from '../client/pages/settings/modules/modules-dialog';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ const ModuleDisabledNotice: FC<ModuleDisabledNoticeProps> = ({
 	featureName,
 	className = '',
 }) => {
-	const navigate = useNavigate();
+	const { openModulesDialog } = useModulesDialog();
 
 	return (
 		<Card
@@ -43,7 +43,7 @@ const ModuleDisabledNotice: FC<ModuleDisabledNoticeProps> = ({
 				</p>
 				<p className="text-xs text-muted-foreground max-w-md leading-relaxed">
 					{__(
-						'Enable this module under Settings → Modules, then reload the page if needed.',
+						'Enable this module from Control Modules in the header, then reload the page if needed.',
 						'doublescale'
 					)}
 				</p>
@@ -51,7 +51,7 @@ const ModuleDisabledNotice: FC<ModuleDisabledNoticeProps> = ({
 					type="button"
 					variant="secondary"
 					size="sm"
-					onClick={() => navigate(getToLink('settings/modules'))}
+					onClick={openModulesDialog}
 				>
 					{__('Open Modules', 'doublescale')}
 				</Button>

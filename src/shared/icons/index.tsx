@@ -282,3 +282,4 @@ export { default as SureCartIcon } from './surcart';
 export { default as ConversionRateIcon } from './conversion-rate';
 export { default as TriggerIcon } from './trigger';
 export { default as ActionsIcon } from './actions';
+export { default as ControlIcon } from './control';

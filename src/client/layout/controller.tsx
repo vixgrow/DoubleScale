@@ -40,7 +40,7 @@ import { useDashboardData } from '../pages/home/use-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 // import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
-import { ProFeatureNotice } from '@doublescale/components';
+import { ControlIcon, ProFeatureNotice } from '@doublescale/components';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -74,6 +74,8 @@ import TeamManagersPage from '../pages/team-managers';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import Campaigns from '../pages/campaigns/campaigns';
 import EmailSequencesUpgradeNag from '../pages/email-sequences-upgrade';
+import { Button } from '@doublescale/shared/ui/button';
+import { useModulesDialog } from '../pages/settings/modules/modules-dialog';
 
 const FORMS_PRO_FEATURE_LIST = [
 	__('Drag-and-drop form builder', 'doublescale'),
@@ -139,6 +141,9 @@ const useOnboardingRedirect = () => {
 export const HeaderBar = ({ page }: { page: any }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const navigate = useNavigate();
+	const { isCrmManager } = useCapabilities();
+	const { openModulesDialog } = useModulesDialog();
+	const canControlModules = isCrmManager();
 
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
@@ -159,7 +164,8 @@ export const HeaderBar = ({ page }: { page: any }) => {
 				doublescaleData?: { currentUser?: any };
 				qcData?: { currentUser?: any };
 			};
-			const globalUser = w.doublescaleData?.currentUser ?? w.qcData?.currentUser;
+			const globalUser =
+				w.doublescaleData?.currentUser ?? w.qcData?.currentUser;
 			if (globalUser) {
 				setCurrentUser({
 					id: Number(globalUser.id),
@@ -243,7 +249,26 @@ export const HeaderBar = ({ page }: { page: any }) => {
 							{__('Activate License', 'doublescale')}
 						</a>
 					)}
-				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
+				{canControlModules && (
+					<div className="doublescale-layout__header-control-modules">
+						<Button
+							type="button"
+							variant="outline"
+							className="border-[#CB5301] hover:bg-[#CB5301] bg-transparent text-[#CB5301] hover:text-white rounded-lg shadow-none"
+							onClick={openModulesDialog}
+						>
+							<ControlIcon />
+							{__('Control Modules', 'doublescale')}
+						</Button>
+					</div>
+				)}
+				{
+					applyFilters(
+						'doublescale_header_before_avatar',
+						null
+					) as React.ReactNode
+				}
+
 				<div className="doublescale-layout__header-divider"></div>
 				<div className="doublescale-layout__header-user-info">
 					<Avatar className="doublescale-layout__header-avatar">
@@ -254,7 +279,9 @@ export const HeaderBar = ({ page }: { page: any }) => {
 							<AvatarIcon />
 						</AvatarFallback>
 					</Avatar>
-					<span className="doublescale-layout__header-user-name">{displayName}</span>
+					<span className="doublescale-layout__header-user-name">
+						{displayName}
+					</span>
 				</div>
 			</div>
 		</div>
@@ -279,11 +306,11 @@ export const Controller = ({ page }) => {
 	return (
 		<div className="doublescale-page-component-wrapper">
 			<page.component navigate={handleNavigate} params={params} />
-			{applyFilters(
-				'doublescale_layout_controller_after',
-				null,
-				{ page }
-			) as React.ReactNode}
+			{
+				applyFilters('doublescale_layout_controller_after', null, {
+					page,
+				}) as React.ReactNode
+			}
 		</div>
 	);
 };
@@ -305,7 +332,11 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'doublescale'),
 	icon: <ContactsIcon />,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('start', {
@@ -322,7 +353,11 @@ registerAdminPage('contact', {
 	component: () => <Contact />,
 	label: __('Contact', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('lists', {
@@ -415,7 +450,11 @@ registerAdminPage('sales-pipeline', {
 	), // Pro plugin overrides with actual pipeline
 	label: __('Pipelines', 'doublescale'),
 	icon: <PiplelinesIcon />,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 // Deal Detail - stub registration that Pro plugin will override
@@ -432,7 +471,11 @@ registerAdminPage('deal-detail', {
 	),
 	label: __('Deal Details', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('automations', {
@@ -580,7 +623,11 @@ registerAdminPage('tasks', {
 	),
 	label: __('Tasks', 'doublescale'),
 	icon: <TasksIcon />,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('analytics-and-reports', {
@@ -588,7 +635,11 @@ registerAdminPage('analytics-and-reports', {
 	component: (props) => <AnalyticsAndReports {...props} />,
 	label: __('Analytics', 'doublescale'),
 	icon: <AnalyticsReportsIcon />,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });
@@ -598,7 +649,10 @@ registerAdminPage('deals-analytics', {
 	component: (props) => <AnalyticsAndReports {...props} defaultTab="deals" />,
 	label: __('Deals Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });
@@ -610,7 +664,10 @@ registerAdminPage('sales-rep-analytics', {
 	),
 	label: __('Sales Rep Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });
@@ -622,7 +679,10 @@ registerAdminPage('pipeline-analytics', {
 	),
 	label: __('Pipeline Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });
@@ -634,7 +694,11 @@ registerAdminPage('my-reports', {
 	),
 	label: __('My Reports', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['doublescale_sales_rep', 'doublescale_sales_manager', 'doublescale_crm_manager'],
+	requiredCapability: [
+		'doublescale_sales_rep',
+		'doublescale_sales_manager',
+		'doublescale_crm_manager',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });
@@ -693,7 +757,11 @@ registerAdminPage('settings', {
 	component: () => <Setting />,
 	label: __('Settings', 'doublescale'),
 	icon: <SettingsIcon />,
-	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
 });
 
 registerAdminPage('debug', {

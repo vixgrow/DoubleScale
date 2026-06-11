@@ -38,7 +38,7 @@ import {
 	WhatsAppIcon,
 	WebsiteIcon,
 } from '@doublescale/components';
-import { Bell, Blocks, Inbox, Sparkles } from 'lucide-react';
+import { Bell, Inbox, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { NotificationPreferences } from './notification-preferences';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -49,8 +49,8 @@ import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
-import ModulesSettings from './modules';
 import SystemSettings from './system';
+import { useModulesDialog } from './modules/modules-dialog';
 import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
@@ -85,7 +85,6 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'debugging',
 	'notifications',
 	'mailbox',
-	'modules',
 ];
 
 const SETTINGS_DEPENDENT_TABS = new Set([
@@ -115,6 +114,7 @@ const SettingsPage: React.FC = () => {
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
+	const { openModulesDialog } = useModulesDialog();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
 		() => new Set(applyFilters('doublescale_settings_tabs_without_save', TABS_WITHOUT_SAVE_BUTTON_LIST) as string[]),
@@ -130,6 +130,13 @@ const SettingsPage: React.FC = () => {
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
+			if (urlTab === 'modules') {
+				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
+				if (isCrmManager()) {
+					openModulesDialog();
+				}
+				return;
+			}
 			if (urlTab === 'team') {
 				navigate(getToLink('team-managers'), { replace: true });
 				return;
@@ -144,7 +151,14 @@ const SettingsPage: React.FC = () => {
 			// If no valid tab in URL, redirect to default tab
 			navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 		}
-	}, [urlTab, navigate, hasLimitedSettingsAccess, defaultTab]);
+	}, [
+		urlTab,
+		navigate,
+		hasLimitedSettingsAccess,
+		defaultTab,
+		openModulesDialog,
+		isCrmManager,
+	]);
 
 	const fetchSettings = async () => {
 		try {
@@ -430,8 +444,6 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-	case 'modules':
-			return <ModulesSettings />;
 	case 'notifications':
 			// The notification engine + email channel now ship in Free, so the
 			// preferences UI is always available. Bell/desktop/push rows inside
@@ -502,11 +514,6 @@ const SettingsPage: React.FC = () => {
 			value: 'license',
 			label: 'License',
 			icon: <LicenseIcon />,
-		},
-		{
-			value: 'modules',
-			label: 'Modules',
-			icon: <Blocks size={24} />,
 		},
 		{
 			value: 'system',

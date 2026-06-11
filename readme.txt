@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,12 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.3 = 11 Jun 2026
+- Auto-install and activate DoubleScale Pro after a valid license is activated
+- Show Pro plugin install and active status on the license settings page
+- Add Install & Activate and Activate fallback buttons when auto-install does not complete
+- Fix license page action buttons that were permanently disabled
+
 = 1.1.2 = 11 Jun 2026
 - Add Booking Manager and Booking Agent roles with scoped permissions for dedicated booking staff
 - Extend team management UI with booking role assignment and module-aware gating

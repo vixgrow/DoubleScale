@@ -182,9 +182,7 @@ const HostCalendarIntegrationIcons: FC<
 				<DropdownMenuTrigger asChild>
 					<Button
 						type="button"
-						variant="default"
-						size="default"
-						className="h-10 shrink-0 gap-2 rounded-lg px-4 font-medium shadow-sm"
+						variant="secondaryDeepBlue"
 						aria-haspopup="menu"
 						aria-label={ __(
 							'Connect calendar and conferencing integrations',
@@ -192,7 +190,7 @@ const HostCalendarIntegrationIcons: FC<
 						) }
 					>
 						<Plug2 className="h-4 w-4 shrink-0" aria-hidden />
-						<span className="text-sm font-medium">
+						<span className="text-[14px] font-[500]">
 							{ __( 'Connect', 'doublescale' ) }
 						</span>
 						<ChevronDown className="h-4 w-4 shrink-0 opacity-80" aria-hidden />

@@ -279,30 +279,13 @@ final class AdminConfig {
 	 * @return array Pro plugin data including installation and activation status
 	 */
 	private static function get_pro_plugin_data() {
-		if ( ! function_exists( 'is_plugin_active' ) || ! function_exists( 'get_plugin_data' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		if ( function_exists( 'doublescale_get_pro_plugin_status' ) ) {
+			return doublescale_get_pro_plugin_status();
 		}
-
-		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
-		$plugins_dir = trailingslashit( dirname( dirname( \DOUBLESCALE_PLUGIN_FILE ) ) );
-		$candidates  = array(
-			'doublescale-pro/doublescale-pro.php',
-		);
-		$exists      = false;
-		foreach ( $candidates as $rel ) {
-			if ( is_file( $plugins_dir . $rel ) ) {
-				$exists = true;
-				break;
-			}
-		}
-
-		$is_active = function_exists( 'doublescale_is_pro_addon_active' )
-			? doublescale_is_pro_addon_active()
-			: ( function_exists( 'is_plugin_active' ) && is_plugin_active( $candidates[0] ) );
 
 		return array(
-			'is_installed' => $exists,
-			'is_active'    => $is_active,
+			'is_installed' => false,
+			'is_active'    => false,
 		);
 	}
 

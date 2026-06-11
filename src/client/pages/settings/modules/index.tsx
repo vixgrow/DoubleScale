@@ -3,6 +3,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import type { ModuleInfo } from '@doublescale/config';
 import {
 	buildMarketingModuleDisplayRows,
@@ -63,7 +64,7 @@ export default function ModulesSettings() {
 	>( {} );
 	const [ confirmDisableOpen, setConfirmDisableOpen ] = useState( false );
 
-	const isProAddonActive = Boolean( config.getProPluginData()?.is_active );
+	const isProAddonActive = isProActive();
 	const displayRows = useMemo(
 		() => buildMarketingModuleDisplayRows( modules, isProAddonActive ),
 		[ modules, isProAddonActive ]

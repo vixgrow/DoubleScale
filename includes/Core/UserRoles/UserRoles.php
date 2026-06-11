@@ -328,7 +328,7 @@ final class UserRoles {
 	 * @return void
 	 */
 	public static function handle_pro_plugin_activated( string $plugin ): void {
-		if ( 'doublescale-pro/doublescale-pro.php' !== $plugin ) {
+		if ( ! self::is_pro_plugin_basename( $plugin ) ) {
 			return;
 		}
 
@@ -340,11 +340,30 @@ final class UserRoles {
 	 * @return void
 	 */
 	public static function handle_pro_plugin_deactivated( string $plugin ): void {
-		if ( 'doublescale-pro/doublescale-pro.php' !== $plugin ) {
+		if ( ! self::is_pro_plugin_basename( $plugin ) ) {
 			return;
 		}
 
 		self::deprovision_pro_roles();
+	}
+
+	/**
+	 * Whether a plugin basename refers to the DoubleScale Pro main file (any folder name).
+	 *
+	 * @param string $plugin Plugin basename relative to wp-content/plugins.
+	 * @return bool
+	 */
+	private static function is_pro_plugin_basename( string $plugin ): bool {
+		if ( function_exists( 'doublescale_get_pro_plugin_basenames' ) ) {
+			$needle = strtolower( $plugin );
+			foreach ( doublescale_get_pro_plugin_basenames() as $basename ) {
+				if ( strtolower( $basename ) === $needle ) {
+					return true;
+				}
+			}
+		}
+
+		return (bool) preg_match( '#/doublescale-pro\.php$#i', $plugin );
 	}
 
 	/**

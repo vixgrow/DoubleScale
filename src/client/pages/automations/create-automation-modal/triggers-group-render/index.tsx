@@ -39,6 +39,7 @@ import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import type { TriggersGroup } from '@doublescale/config';
 import type { IconProps } from '@doublescale/config';
 import config from '@doublescale/config';
+import { isProActive as checkProActive } from '@doublescale/hooks/use-is-pro-active';
 import { cn } from '@/lib/utils';
 
 type GroupIconComponent = React.FC<IconProps>;
@@ -145,8 +146,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	} | null>(null);
 
 	// Check if Pro plugin is active once
-	const proPluginData = config.getProPluginData();
-	const isProActive = proPluginData.is_active;
+	const isProActive = checkProActive();
 
 	// Helper function to get tooltip message for disabled triggers
 	const getDisabledTooltip = (group: TriggersGroup) => {

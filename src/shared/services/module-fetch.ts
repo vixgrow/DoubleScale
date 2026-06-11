@@ -22,10 +22,7 @@ export type ModuleFetchMeta = {
 	requirePro?: boolean;
 };
 
-/** Returns true when DoubleScale Pro is installed and active. */
-export function isProActive(): boolean {
-	return Boolean(Config.getProPluginData()?.is_active);
-}
+export { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 /**
  * Human-readable module title for notices (uses PHP-provided label when present).

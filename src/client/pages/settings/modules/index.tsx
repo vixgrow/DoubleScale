@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@wordpress/element';
+import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -14,7 +14,6 @@ import {
 	pickToggleableModulePayload,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import {
 	AlertDialog,
@@ -26,6 +25,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ModuleCard } from './module-card';
 
 interface ModulesResponse {
 	success: boolean;
@@ -55,12 +55,22 @@ function isRoleImpactModule( slug: string ): slug is ModuleRoleImpactSlug {
 	return ( MODULES_WITH_ROLE_IMPACT as readonly string[] ).includes( slug );
 }
 
+export type ModulesFooterState = {
+	hasChanges: boolean;
+	isSaving: boolean;
+	onSave: () => void;
+};
+
 type ModulesSettingsProps = {
 	showHeader?: boolean;
+	variant?: 'page' | 'dialog';
+	onFooterStateChange?: ( state: ModulesFooterState ) => void;
 };
 
 export default function ModulesSettings({
 	showHeader = true,
+	variant = 'page',
+	onFooterStateChange,
 }: ModulesSettingsProps = {}) {
 	const { createNotice } = useDispatch( 'doublescale/core' );
 	const [ modules, setModules ] = useState<ModuleInfo[]>( () =>
@@ -191,6 +201,14 @@ export default function ModulesSettings({
 		void performSave();
 	}, [ hasChanges, affectedDisableModules, performSave ] );
 
+	useEffect( () => {
+		onFooterStateChange?.( {
+			hasChanges,
+			isSaving,
+			onSave: handleSave,
+		} );
+	}, [ hasChanges, isSaving, handleSave, onFooterStateChange ] );
+
 	const getModuleLabel = useCallback(
 		( slug: string ) => {
 			return (
@@ -250,8 +268,11 @@ export default function ModulesSettings({
 		[ getModuleLabel ]
 	);
 
+	const isDialog = variant === 'dialog';
+	const showInlineFooter = ! isDialog;
+
 	return (
-		<div className="flex flex-col gap-8">
+		<div className={`flex flex-col ${isDialog ? 'gap-4' : 'gap-8'}`}>
 			{showHeader && (
 				<div>
 					<h3 className="text-lg font-semibold text-foreground">
@@ -271,7 +292,13 @@ export default function ModulesSettings({
 				</div>
 			)}
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+			<div
+				className={`grid gap-3 ${
+					isDialog
+						? 'grid-cols-1'
+						: 'grid-cols-1 md:grid-cols-2'
+				}`}
+			>
 				{displayRows.map( ( mod ) => {
 					const isEnabled = getEffectiveMarketingModuleState(
 						mod,
@@ -289,150 +316,48 @@ export default function ModulesSettings({
 						modules,
 						isProAddonActive
 					);
+					const hasChildren = childRows.length > 0;
 
 					return (
 						<div
 							key={mod.slug}
-							className={`flex flex-col gap-3 p-4 border rounded-xl transition-colors ${
-								mod.unavailableUntilPro
-									? 'border-border/40 bg-muted/15'
-									: isEnabled
-										? 'border-border/60 bg-card'
-										: 'border-border/40 bg-muted/20'
-							}`}
+							className={
+								hasChildren && ! isDialog ? 'md:col-span-2' : undefined
+							}
 						>
-							<div className="flex items-center justify-between gap-4">
-								<div className="flex flex-col gap-1 flex-1 min-w-0">
-									<span
-										className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
-									>
-										{mod.label}
-									</span>
-									<p className="text-xs text-muted-foreground leading-relaxed">
-										{mod.description}
-									</p>
-									{mod.unavailableUntilPro && (
-										<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-											{__(
-												'Install and activate DoubleScale Pro to enable and use this module.',
-												'doublescale'
-											)}{' '}
-											<a
-												className="text-primary underline font-medium"
-												href={config.getUrlDoubleScalePro()}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												{__( 'View Pro plans', 'doublescale' )}
-											</a>
-										</p>
-									)}
-									{mod.slug === 'smtp' &&
-										! isEnabled &&
-										! mod.unavailableUntilPro && (
-											<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
-												{__(
-													'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+							<ModuleCard
+								mod={mod}
+								isEnabled={isEnabled}
+								childRows={childRows}
+								isPendingDisable={isPendingDisable}
+								roleImpact={impact}
+								formatRoleImpactWarning={formatRoleImpactWarning}
+								onToggle={handleToggle}
+								getChildChecked={( child ) =>
+									getChildModuleToggleState( child, pendingChanges )
+								}
+								compact={isDialog}
+							/>
+							{mod.slug === 'sales' &&
+								pendingChanges[ 'sales' ] === false && (
+									<p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-700">
+										{isSalesDocumentsReady()
+											? __(
+													'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
 													'doublescale'
-												)}
-											</p>
-										)}
-									{mod.slug === 'sales' &&
-										pendingChanges[ 'sales' ] === false && (
-											<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
-												{isSalesDocumentsReady()
-													? __(
-															'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
-															'doublescale'
-													  )
-													: __(
-															'Disabling Sales also turns off the Sales Pipeline.',
-															'doublescale'
-													  )}
-											</p>
-										)}
-									{isPendingDisable &&
-										impact &&
-										impact.user_count > 0 && (
-											<p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2 leading-relaxed">
-												{formatRoleImpactWarning( impact )}
-											</p>
-										)}
-								</div>
-								<Switch
-									checked={isEnabled}
-									onCheckedChange={( checked ) =>
-										handleToggle( mod.slug, checked )
-									}
-								/>
-							</div>
-							{childRows.map( ( child ) => {
-								const childChecked = getChildModuleToggleState(
-									child,
-									pendingChanges
-								);
-
-								return (
-									<div
-										key={child.slug}
-										className={`ml-3 flex items-center justify-between gap-4 border-l-2 pl-3 ${
-											isEnabled
-												? 'border-border/60'
-												: 'border-border/30 opacity-60'
-										}`}
-									>
-										<div className="flex flex-col gap-1 flex-1 min-w-0">
-											<span
-												className={`text-sm font-medium ${isEnabled && childChecked ? 'text-foreground' : 'text-muted-foreground'}`}
-											>
-												{child.label}
-											</span>
-											<p className="text-xs text-muted-foreground leading-relaxed">
-												{child.description}
-											</p>
-											{! isEnabled && (
-												<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-													{sprintf(
-														/* translators: 1: parent module label, 2: sub-feature label */
-														__( 'Enable %1$s to use %2$s.', 'doublescale' ),
-														mod.label,
-														child.label
-													)}
-												</p>
-											)}
-											{isEnabled && child.unavailableUntilPro && (
-												<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-													{__(
-														'Install and activate DoubleScale Pro to enable and use this module.',
-														'doublescale'
-													)}{' '}
-													<a
-														className="text-primary underline font-medium"
-														href={config.getUrlDoubleScalePro()}
-														target="_blank"
-														rel="noopener noreferrer"
-													>
-														{__( 'View Pro plans', 'doublescale' )}
-													</a>
-												</p>
-											)}
-										</div>
-										<Switch
-											checked={childChecked}
-											disabled={! isEnabled}
-											onCheckedChange={( checked ) =>
-												handleToggle( child.slug, checked )
-											}
-										/>
-									</div>
-								);
-							} )}
+											  )
+											: __(
+													'Disabling Sales also turns off the Sales Pipeline.',
+													'doublescale'
+											  )}
+									</p>
+								)}
 						</div>
 					);
 				} )}
 			</div>
 
-			{hasChanges && (
+			{showInlineFooter && hasChanges && (
 				<div className="flex items-center justify-end">
 					<Button
 						onClick={handleSave}
@@ -505,6 +430,39 @@ export default function ModulesSettings({
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+		</div>
+	);
+}
+
+export function ModulesSaveFooter({
+	hasChanges,
+	isSaving,
+	onSave,
+}: ModulesFooterState) {
+	if ( ! hasChanges ) {
+		return null;
+	}
+
+	return (
+		<div className="shrink-0 border-t border-border/60 bg-card px-4 py-3 lg:px-6">
+			<div className="flex items-center justify-between gap-4">
+				<p className="text-xs text-muted-foreground">
+					{__(
+						'You have unsaved module changes. Save to apply them.',
+						'doublescale'
+					)}
+				</p>
+				<Button
+					onClick={onSave}
+					disabled={isSaving}
+					variant="gradient"
+					className="min-w-[120px] shrink-0"
+				>
+					{isSaving
+						? __( 'Saving...', 'doublescale' )
+						: __( 'Save Changes', 'doublescale' )}
+				</Button>
+			</div>
 		</div>
 	);
 }

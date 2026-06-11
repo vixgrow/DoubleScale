@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import ModulesSettings from './index';
+import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import { ControlIcon, CustomDialogHeader } from '@doublescale/components';
 
 type ModulesDialogContextValue = {
@@ -62,10 +63,17 @@ export function ModulesDialogProvider({
 						<CustomDialogHeader
 							icon={<ControlIcon />}
 							title={__('Control Modules', 'doublescale')}
-							subtitle={__(
-								'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, Booking, and Support.',
-								'doublescale'
-								)}
+							subtitle={
+								isSalesDocumentsReady()
+									? __(
+											'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support.',
+											'doublescale'
+									  )
+									: __(
+											'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support.',
+											'doublescale'
+									  )
+							}
 							/>
 						</div>
 						<div className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">

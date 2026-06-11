@@ -10,6 +10,7 @@ import type { ModuleInfo } from '@doublescale/config';
 export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'smtp',
 	'deals',
+	'sales',
 	'forms',
 	'automations',
 	'tasks',
@@ -65,6 +66,14 @@ function placeholderFor(
 				label: __('Pipelines', 'doublescale'),
 				description: __(
 					'Manage deals, stages, and pipeline analytics for your sales process.',
+					'doublescale'
+				),
+			};
+		case 'sales':
+			return {
+				label: __('Sales', 'doublescale'),
+				description: __(
+					'Create proposals and invoices with line items, discounts, and customer billing.',
 					'doublescale'
 				),
 			};

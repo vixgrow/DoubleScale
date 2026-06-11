@@ -42,7 +42,7 @@ interface ModuleRoleImpact {
 	role_labels: string[];
 }
 
-const MODULES_WITH_ROLE_IMPACT = [ 'support', 'deals' ] as const;
+const MODULES_WITH_ROLE_IMPACT = [ 'support', 'deals', 'sales' ] as const;
 type ModuleRoleImpactSlug = ( typeof MODULES_WITH_ROLE_IMPACT )[number];
 
 function isRoleImpactModule( slug: string ): slug is ModuleRoleImpactSlug {
@@ -246,7 +246,7 @@ export default function ModulesSettings() {
 				</h3>
 				<p className="text-sm text-muted-foreground mt-1">
 					{__(
-						'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+						'Enable or disable optional features: SMTP, Pipelines, Sales, Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
 						'doublescale'
 					)}
 				</p>

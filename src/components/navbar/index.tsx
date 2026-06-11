@@ -91,6 +91,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	'/': 'main',
 	contacts: 'crm',
 	'sales-pipeline': 'crm',
+	sales: 'crm',
 	booking: 'crm',
 	support: 'crm',
 	tasks: 'crm',
@@ -127,6 +128,7 @@ const FREE_CORE_PAGE_IDS = new Set([
  */
 const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
+	sales: 'sales',
 	tasks: 'tasks',
 	forms: 'forms',
 	support: 'support',
@@ -140,6 +142,11 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
+	sales: 'sales',
+	'sales/proposals': 'sales',
+	'sales/proposals/:id': 'sales',
+	'sales/invoices': 'sales',
+	'sales/invoices/:id': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
@@ -380,6 +387,19 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					].filter((sub) =>
 						hasRequiredCapability(sub.requiredCapability)
 					);
+				}
+
+				if (item.path === 'sales') {
+					navItem.subMenu = [
+						{
+							path: 'sales/proposals',
+							label: __('Proposals', 'doublescale'),
+						},
+						{
+							path: 'sales/invoices',
+							label: __('Invoices', 'doublescale'),
+						},
+					];
 				}
 
 				if (item.path === 'support') {

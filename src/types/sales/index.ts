@@ -145,6 +145,11 @@ export interface Invoice {
 	shipping_address: string | null;
 	client_note: string | null;
 	terms: string | null;
+	sent_at?: string | null;
+	viewed_at?: string | null;
+	public_url?: string | null;
+	balance?: number;
+	is_overdue?: boolean;
 	created_at: string | null;
 	updated_at: string | null;
 	contact?: ContactSummary | null;

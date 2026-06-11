@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ArrowLeft, CreditCard, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, CreditCard, Pencil, Send, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -20,6 +20,7 @@ import {
 	deleteInvoice,
 	deleteInvoicePayment,
 	recordInvoicePayment,
+	sendInvoice,
 	useInvoice,
 	useInvoicePayments,
 	useSalesStripeStatus,
@@ -31,15 +32,17 @@ const InvoiceView: React.FC = () => {
 	const params = useParams();
 	const invoiceId = params?.id ? Number(params.id) : null;
 
-	const { data: fetched, loading, error } = useInvoice(invoiceId);
+	const { data: fetched, loading, error, refetch } = useInvoice(invoiceId);
 	const [invoice, setInvoice] = useState<Invoice | null>(null);
 	const { data: payments, loading: paymentsLoading, refetch: refetchPayments } =
 		useInvoicePayments(invoiceId);
 	const { data: stripeStatus } = useSalesStripeStatus();
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const [sendOpen, setSendOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
+	const [notice, setNotice] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (fetched) {
@@ -57,6 +60,43 @@ const InvoiceView: React.FC = () => {
 			navigate(getToLink('sales/invoices'));
 		} finally {
 			setBusy(false);
+		}
+	};
+
+	const handleSend = async () => {
+		if (!invoiceId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			const result = await sendInvoice(invoiceId);
+			setInvoice(result.invoice);
+			await refetch();
+			setNotice(__('Invoice sent to the customer.', 'doublescale'));
+			setSendOpen(false);
+		} catch (err: unknown) {
+			setNotice(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleCopyLink = async () => {
+		if (!invoice?.public_url) {
+			setNotice(
+				__(
+					'Add a WordPress page with the [doublescale_invoice] shortcode first.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+		try {
+			await navigator.clipboard.writeText(invoice.public_url);
+			setNotice(__('Public link copied.', 'doublescale'));
+		} catch {
+			setNotice(invoice.public_url);
 		}
 	};
 
@@ -103,6 +143,7 @@ const InvoiceView: React.FC = () => {
 	}
 
 	const isDraft = invoice.status === 'draft';
+	const showSend = invoice.status !== 'paid';
 	const balanceDue = Math.max(0, invoice.total - invoice.amount_paid);
 	const allowedModes = invoice.allowed_payment_modes?.filter(Boolean) ?? [];
 	const stripeAllowed =
@@ -122,15 +163,30 @@ const InvoiceView: React.FC = () => {
 
 	return (
 		<div className="p-6 space-y-6 max-w-5xl">
+			{notice ? (
+				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
+			) : null}
 			<div className="flex items-center justify-between gap-4">
 				<Button variant="ghost" onClick={() => navigate(getToLink('sales/invoices'))}>
 					<ArrowLeft className="h-4 w-4 mr-1" />
 					{__('Invoices', 'doublescale')}
 				</Button>
-				<div className="flex gap-2 items-center">
+				<div className="flex flex-wrap gap-2 items-center">
+					{invoice.public_url ? (
+						<Button variant="outline" onClick={() => void handleCopyLink()}>
+							<Copy className="h-4 w-4 mr-1" />
+							{__('Copy Link', 'doublescale')}
+						</Button>
+					) : null}
+					{showSend ? (
+						<Button variant="outline" onClick={() => setSendOpen(true)}>
+							<Send className="h-4 w-4 mr-1" />
+							{__('Send to Customer', 'doublescale')}
+						</Button>
+					) : null}
 					{isDraft ? (
 						<span className="text-xs text-muted-foreground mr-2">
-							{__('Change status from Draft to record payments.', 'doublescale')}
+							{__('Sending marks the invoice as Unpaid.', 'doublescale')}
 						</span>
 					) : null}
 					<Button
@@ -188,6 +244,19 @@ const InvoiceView: React.FC = () => {
 					onDelete={handleDeletePayment}
 				/>
 			</div>
+
+			<ConfirmDialog
+				open={sendOpen}
+				onOpenChange={setSendOpen}
+				title={__('Send Invoice', 'doublescale')}
+				description={__(
+					'Send this invoice to the customer by email? They will receive a link to view and pay online.',
+					'doublescale'
+				)}
+				confirmLabel={__('Send', 'doublescale')}
+				busy={busy}
+				onConfirm={handleSend}
+			/>
 
 			<ConfirmDialog
 				open={deleteOpen}

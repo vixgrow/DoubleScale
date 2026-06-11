@@ -18,8 +18,10 @@ use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
 use DoubleScale\Modules\Sales\Services\ConvertProposalToInvoice;
+use DoubleScale\Modules\Sales\Services\DocumentPdf;
 use DoubleScale\Modules\Sales\Services\ProposalNotifications;
 use DoubleScale\Modules\Sales\Services\ProposalUrl;
+use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
@@ -66,6 +68,18 @@ class RestProposalController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'send_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/pdf',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -333,7 +347,7 @@ class RestProposalController extends RestController {
 
 		$proposal = new ProposalModel();
 		$proposal->fill( $payload );
-		$proposal->save();
+		SalesNumbering::save_with_retry( $proposal );
 
 		return new WP_REST_Response( ProposalShaper::shape_admin( $proposal->fresh( array( 'contact', 'assigned_user' ) ), true ), 201 );
 	}
@@ -435,6 +449,39 @@ class RestProposalController extends RestController {
 			),
 			201
 		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_pdf( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::with( array( 'contact', 'assigned_user' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$shaped = ProposalShaper::shape_admin( $proposal, true );
+		$pdf    = DocumentPdf::render_pdf( $shaped, 'proposal' );
+		if ( is_wp_error( $pdf ) ) {
+			return $pdf;
+		}
+
+		$response = new WP_REST_Response( $pdf, 200 );
+		$response->header( 'Content-Type', 'application/pdf' );
+		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( (string) $proposal->proposal_number ) . '.pdf"' );
+
+		return $response;
 	}
 
 	/**

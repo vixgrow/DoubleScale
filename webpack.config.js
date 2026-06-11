@@ -366,9 +366,48 @@ const proposalRendererConfig = {
 	},
 };
 
+/**
+ * Public invoice renderer — lean bundle for `[doublescale_invoice]` pages.
+ */
+const invoiceRendererConfig = {
+	...defaultConfig,
+	name: 'invoice-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/invoice/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/invoice'),
+		filename: '[name].js',
+	},
+};
+
 module.exports = [
 	adminClientConfig,
 	bookingRendererConfig,
 	supportRendererConfig,
 	proposalRendererConfig,
+	invoiceRendererConfig,
 ];

@@ -19,6 +19,7 @@ use DoubleScale\Core\Container;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Sales\Renderer\InvoiceFrontendHandler;
 use DoubleScale\Modules\Sales\Renderer\ProposalFrontendHandler;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
 use DoubleScale\Modules\Sales\Services\ConvertProposalToInvoice;
@@ -70,6 +71,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
+			Rest\Controllers\RestPublicInvoiceController::class,
 		);
 	}
 
@@ -90,6 +92,7 @@ final class Module extends AbstractModule {
 		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
 
 		new ProposalFrontendHandler();
+		new InvoiceFrontendHandler();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
 

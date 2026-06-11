@@ -64,7 +64,7 @@ class ConvertProposalToInvoice {
 				),
 			)
 		);
-		$invoice->save();
+		SalesNumbering::save_with_retry( $invoice );
 
 		$proposal->status = ProposalStatus::ACCEPTED;
 		$proposal->save();

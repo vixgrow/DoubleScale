@@ -1,6 +1,5 @@
 // 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	Dialog,
@@ -79,8 +78,8 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 sm:mx-auto p-6 rounded-[16px] pipline-content">
-				<DialogHeader>
+			<DialogContent className="!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-2xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-4 rounded-[16px] p-4 sm:mx-auto sm:w-full sm:p-6 max-sm:!top-4 max-sm:!translate-x-[-50%] max-sm:!translate-y-0">
+				<DialogHeader className="shrink-0">
 					<DialogTitle>
 						<CustomDialogHeader
 							title={__('Filter', 'doublescale')}
@@ -92,8 +91,9 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						/>
 					</DialogTitle>
 				</DialogHeader>
-				<div className=" flex border flex-col border-[#1E3A8A] rounded-lg p-6  gap-6">
-					<div className=" w-full grid grid-cols-1 md:grid-cols-2 gap-6 ">
+				<div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+					<div className="flex flex-col gap-6 rounded-lg border border-[#1E3A8A] p-4 sm:p-6">
+					<div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1  font-normal text-foreground text-base">
 								{__('Deal Owner', 'doublescale')}
@@ -267,7 +267,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 												: null,
 										})
 									}
-									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
+									className="flex-1 !rounded-md !border-border !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
 									placeholder={__('Min', 'doublescale')}
 								/>
 								<Input
@@ -285,19 +285,19 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 												: null,
 										})
 									}
-									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
+									className="flex-1 !rounded-md !border-border !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
 									placeholder={__('Max', 'doublescale')}
 								/>
 							</div>
 						</div>
 					</div>
 					{/* Clear Filters */}
-					<div className=" flex justify-start">
+					<div className="flex justify-start">
 						<Button
-							className={`py-2 px-4 rounded-md border hover:bg-white !shadow-none font-sm text-base tracking-[-.5px] ${
+							className={`rounded-md border px-4 py-2 !shadow-none text-base tracking-[-.5px] hover:bg-white ${
 								hasActiveFilters
-									? '!text-[#E13B3B] !border-[#E13B3B] bg-white' 
-									: '!text-muted-foreground !border-[#777] bg-white'
+									? 'border-[#E13B3B] bg-white !text-[#E13B3B]'
+									: 'border-[#777] bg-white !text-muted-foreground'
 							}`}
 							onClick={clearFilters}
 							title={__('Clear all filters', 'doublescale')}
@@ -305,14 +305,13 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 							{__('Clear Filter', 'doublescale')}
 						</Button>
 					</div>
+					</div>
 				</div>
-				{/*Apply filter */}
-				<div className="my-2">
+				<div className="flex shrink-0 justify-end pt-2">
 					<Button
-						className=" w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 px-8  gap-1 rounded-md text-base font-normal tracking-tight"
+						variant="default"
 						onClick={() => {
 							onFiltersChange(filters);
-							// setIsFilterExpanded(false);
 							onOpenChange(false);
 						}}
 						title={__('Apply Filters', 'doublescale')}

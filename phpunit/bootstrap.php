@@ -219,6 +219,17 @@ if ( ! function_exists( 'number_format_i18n' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_multisite' ) ) {
+	/**
+	 * Tests run as a single site; pro-detection helpers branch on this.
+	 *
+	 * @return bool
+	 */
+	function is_multisite() {
+		return false;
+	}
+}
+
 $GLOBALS['__doublescale_phpunit_options'] = array();
 
 if ( ! function_exists( 'get_option' ) ) {

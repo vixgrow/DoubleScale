@@ -2,7 +2,9 @@ import { useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import config from '@doublescale/config';
 import {
+	buildChildModuleRows,
 	buildMarketingModuleDisplayRows,
+	getChildModuleToggleState,
 	getEffectiveMarketingModuleState,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
@@ -99,6 +101,7 @@ export default function ModulesStep({
 					{displayRows.map((mod) => {
 						const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingModuleChanges);
 						const requires = mod.dependencies?.length ? mod.dependencies.join(', ') : null;
+						const childRows = buildChildModuleRows(mod.slug, modules, isProAddonActive);
 
 						return (
 							<div
@@ -151,6 +154,45 @@ export default function ModulesStep({
 										</p>
 									)}
 								</div>
+								{childRows.map((child) => {
+									const childChecked = getChildModuleToggleState(
+										child,
+										pendingModuleChanges
+									);
+
+									return (
+										<div
+											key={child.slug}
+											className={`ml-3 mt-1 flex items-center justify-between gap-3 border-l-2 pl-3 ${
+												isEnabled ? 'border-border' : 'border-border/40 opacity-60'
+											}`}
+										>
+											<div className="flex min-w-0 flex-col gap-0.5">
+												<span className="text-base font-semibold leading-6 text-foreground">
+													{child.label}
+												</span>
+												<p className="text-sm leading-5 text-muted-foreground">
+													{child.description}
+												</p>
+												{isEnabled && child.unavailableUntilPro && (
+													<p className="text-sm leading-4 text-muted-foreground">
+														{__(
+															'Install and activate DoubleScale Pro to enable and use this module.',
+															'doublescale'
+														)}
+													</p>
+												)}
+											</div>
+											<Switch
+												checked={childChecked}
+												disabled={!isEnabled}
+												onCheckedChange={(checked) =>
+													handleToggle(child.slug, checked)
+												}
+											/>
+										</div>
+									);
+								})}
 							</div>
 						);
 					})}

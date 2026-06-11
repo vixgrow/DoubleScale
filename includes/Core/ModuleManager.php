@@ -45,8 +45,9 @@ final class ModuleManager {
 		self::$hooks_registered = true;
 
 		$sync = static function ( array $old, array $new ): void {
+			self::flushCache(); // Lifecycle hooks must evaluate module state against the NEW option value.
 			self::sync_lifecycle_from_option_delta( $old, $new );
-			self::flushCache();
+			self::flushCache(); // Drop anything cached mid-sync.
 		};
 
 		add_action(
@@ -82,7 +83,7 @@ final class ModuleManager {
 		$slugs = array_unique( array_merge( array_keys( $old_value ), array_keys( $new_value ) ) );
 		foreach ( $slugs as $slug ) {
 			$slug          = (string) $slug;
-			$missing_state = ! self::isToggleable( $slug );
+			$missing_state = ! self::isToggleable( $slug ) || self::is_enabled_by_default( $slug );
 			$was_on        = isset( $old_value[ $slug ] ) ? (bool) $old_value[ $slug ] : $missing_state;
 			$now_on        = isset( $new_value[ $slug ] ) ? (bool) $new_value[ $slug ] : $missing_state;
 			if ( $was_on && ! $now_on ) {
@@ -93,13 +94,44 @@ final class ModuleManager {
 		}
 	}
 
+	/**
+	 * Whether a missing option key means "on" for a toggleable module. Child
+	 * modules follow their parent by default, so their stored intent defaults
+	 * to enabled until the user opts out.
+	 */
+	public static function is_enabled_by_default( string $slug ): bool {
+		return function_exists( 'doublescale_child_module_parent_map' )
+			&& array_key_exists( $slug, doublescale_child_module_parent_map() );
+	}
+
 	public static function activateModule( string $slug ): void {
 		$module = self::getModule( $slug );
 		if ( ! $module instanceof ModuleInterface ) {
 			return;
 		}
-		MigrationRunner::run_for_module( $module );
+		// Force: explicit activation is an unambiguous signal. A child module's
+		// derived is_enabled() can be false while its parent is off, but the
+		// stored intent just flipped on — its schema must exist before the
+		// parent activates it.
+		MigrationRunner::run_for_module( $module, true );
 		$module->onActivate();
+
+		// Dependent modules can become effective when this module turns on
+		// without their own option key changing (child toggles default to the
+		// parent's state) — make sure their schema exists too. Idempotent via
+		// the doublescale_migrations tracking table.
+		foreach ( self::all() as $dep_slug => $dep_module ) {
+			if ( $dep_slug === $slug ) {
+				continue;
+			}
+			if ( ! in_array( $slug, $dep_module->dependencies(), true ) ) {
+				continue;
+			}
+			if ( ! $dep_module->is_enabled() ) {
+				continue;
+			}
+			MigrationRunner::run_for_module( $dep_module );
+		}
 	}
 
 	public static function deactivateModule( string $slug ): void {
@@ -175,10 +207,14 @@ final class ModuleManager {
 	}
 
 	/**
-	 * Clears Action Scheduler hooks owned by a module when it is disabled (Pro Tasks).
+	 * Clears Action Scheduler hooks owned by a module when it is disabled.
+	 *
+	 * Uses the free {@see \DoubleScale\Core\Tasks} wrapper so free-owned
+	 * modules (e.g. Sales' overdue-invoices schedule) are cleared even when
+	 * the Pro add-on is not installed.
 	 */
 	public static function clearScheduledTasksForModule( string $slug ): void {
-		if ( ! class_exists( \DoubleScale\Pro\Modules\Tasks\Tasks::class ) ) {
+		if ( ! class_exists( \DoubleScale\Core\Tasks::class ) ) {
 			return;
 		}
 
@@ -197,7 +233,7 @@ final class ModuleManager {
 			if ( ! isset( $pair[0], $pair[1] ) ) {
 				continue;
 			}
-			( new \DoubleScale\Pro\Modules\Tasks\Tasks( (string) $pair[0] ) )->unschedule_all( (string) $pair[1] );
+			( new \DoubleScale\Core\Tasks( (string) $pair[0] ) )->unschedule_all( (string) $pair[1] );
 		}
 	}
 }

@@ -47,11 +47,17 @@ final class Module extends AbstractModule {
 	}
 
 	public function onActivate(): void {
+		// Sales owns the shared SALES_REP / SALES_MANAGER roles (co-used by the
+		// Pro pipeline child module): create them on enable — the caps sync
+		// below only patches roles that already exist.
+		\DoubleScale\Core\UserRoles\UserRoles::provision_crm_roles();
 		Capabilities::sync_capabilities_for_user_roles();
 	}
 
 	public function onDeactivate(): void {
-		// Caps remain on roles; module toggle only hides routes/menu.
+		// Role definitions are removed only when no owning module still needs
+		// them; user assignments persist for re-enable.
+		\DoubleScale\Core\UserRoles\UserRoles::enforce_module_scoped_roles();
 	}
 
 	public function restControllers(): array {

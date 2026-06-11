@@ -62,11 +62,18 @@ class MigrationRunner {
 
 	/**
 	 * Run pending migrations for a single module (e.g. user toggled the module on).
+	 *
+	 * @param ModuleInterface $module Module whose migrations should run.
+	 * @param bool            $force  Run even when {@see ModuleInterface::is_enabled()} is false.
+	 *                                Used on explicit activation: a child module's derived state
+	 *                                can be off (parent disabled) while the user just stored the
+	 *                                intent to enable it — its schema must exist before the
+	 *                                parent turns it on.
 	 */
-	public static function run_for_module( ModuleInterface $module ): void {
+	public static function run_for_module( ModuleInterface $module, bool $force = false ): void {
 		self::ensure_tracking_table();
 
-		if ( ! $module->is_enabled() ) {
+		if ( ! $force && ! $module->is_enabled() ) {
 			return;
 		}
 

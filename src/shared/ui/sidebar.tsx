@@ -27,7 +27,6 @@ const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 /** Must match admin nav shell (see `.doublescale-navbar { --sidebar-width }`) so the flex spacer and fixed rail share one width. */
 const SIDEBAR_WIDTH = '260px';
-const SIDEBAR_WIDTH_MOBILE = '11rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
@@ -230,7 +229,7 @@ const Sidebar = React.forwardRef<
 						className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
 						style={
 							{
-								'--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+								'--sidebar-width': SIDEBAR_WIDTH,
 							} as React.CSSProperties
 						}
 						side={side}
@@ -252,7 +251,7 @@ const Sidebar = React.forwardRef<
 		return (
 			<div
 				ref={ref}
-				className="group peer hidden text-sidebar-foreground md:block md:shrink-0"
+				className="group peer hidden text-sidebar-foreground lg:block lg:shrink-0"
 				data-state={state}
 				data-collapsible={state === 'collapsed' ? collapsible : ''}
 				data-variant={variant}
@@ -271,7 +270,7 @@ const Sidebar = React.forwardRef<
 				/>
 				<div
 					className={cn(
-						'fixed z-10 pb-5 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex',
+						'fixed z-10 pb-5 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear lg:flex',
 						side === 'left'
 							? 'group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
 							: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',

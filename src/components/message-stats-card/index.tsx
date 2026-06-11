@@ -44,7 +44,7 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 				>
 					{icon}
 				</div>
-				<span className="whitespace-nowrap text-[16px] leading-5 text-[#6B6C76]">
+				<span className=" text-[16px] leading-5 text-[#6B6C76]">
 					{label}
 				</span>
 				<div className="flex items-baseline justify-center gap-2">

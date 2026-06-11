@@ -106,6 +106,19 @@ div#wpcontent {
 		min-width: 0;
 	}
 
+	.doublescale-layout__sidebar-trigger {
+		width: 36px !important;
+		height: 36px !important;
+		flex-shrink: 0;
+		border-radius: 8px;
+		color: #29292E;
+
+		&:hover {
+			background: #F5F6F8;
+			color: #29292E;
+		}
+	}
+
 	.doublescale-layout__page-title {
 		font-size: 20px;
 		font-weight: 600;

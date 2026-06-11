@@ -86,7 +86,7 @@ export const QuickLinks: FC = () => {
 							</div>
 							<ExternalLinkIcon/>
 						</div>
-						<span className="whitespace-nowrap text-sm font-medium text-primaryText">
+						<span className=" text-sm font-medium text-primaryText">
 							{label}
 						</span>
 					</button>

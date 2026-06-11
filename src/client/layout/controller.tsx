@@ -58,6 +58,7 @@ import {
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { Mail } from 'lucide-react';
+import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { RocketIcon } from '@/components/icons';
@@ -216,6 +217,10 @@ export const HeaderBar = ({ page }: { page: any }) => {
 	return (
 		<div className="doublescale-layout__header-bar">
 			<div className="doublescale-layout__header-left">
+				<SidebarTrigger
+					className="doublescale-layout__sidebar-trigger lg:hidden"
+					aria-label={__('Open navigation menu', 'doublescale')}
+				/>
 			</div>
 			<div className="doublescale-layout__header-right">
 				{!isProActive && <HeaderProBells />}

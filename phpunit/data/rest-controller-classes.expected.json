@@ -11,6 +11,7 @@
     "RestCampaignController",
     "RestContactController",
     "RestEventController",
+    "RestFormController",
     "RestGeneralController",
     "RestGuestController",
     "RestImportExportController",

@@ -96,53 +96,91 @@ final class ProposalNotifications {
 	 * @return string
 	 */
 	private function build_body( ProposalModel $proposal, string $customer_name, string $url, string $custom_message ): string {
-		$lines   = array();
-		$lines[] = sprintf(
-			/* translators: %s: customer name */
-			__( 'Hi %s,', 'doublescale' ),
-			esc_html( $customer_name )
+		$intro = '' !== trim( $custom_message )
+			? nl2br( esc_html( $custom_message ) )
+			: esc_html__( 'Please review the proposal below and let us know if you would like to accept or decline.', 'doublescale' );
+
+		$formatted_total = sprintf(
+			'%1$s %2$s',
+			number_format_i18n( (float) $proposal->total, 2 ),
+			(string) $proposal->currency
 		);
-		$lines[] = '';
 
-		if ( '' !== trim( $custom_message ) ) {
-			$lines[] = nl2br( esc_html( $custom_message ) );
-			$lines[] = '';
-		} else {
-			$lines[] = esc_html__( 'Please review the proposal below and let us know if you would like to accept or decline.', 'doublescale' );
-			$lines[] = '';
-		}
-
-		$lines[] = '<strong>' . esc_html( (string) $proposal->subject ) . '</strong>';
-		$lines[] = esc_html(
-			sprintf(
-				/* translators: 1: proposal number, 2: formatted total, 3: currency */
-				__( 'Reference: %1$s — Total: %2$s %3$s', 'doublescale' ),
-				(string) $proposal->proposal_number,
-				number_format_i18n( (float) $proposal->total, 2 ),
-				(string) $proposal->currency
-			)
+		$summary_rows = array(
+			array(
+				'label' => __( 'Subject', 'doublescale' ),
+				'value' => (string) $proposal->subject,
+			),
+			array(
+				'label' => __( 'Reference', 'doublescale' ),
+				'value' => (string) $proposal->proposal_number,
+			),
+			array(
+				'label' => __( 'Total', 'doublescale' ),
+				'value' => $formatted_total,
+			),
 		);
 
 		if ( $proposal->open_till ) {
-			$lines[] = esc_html(
-				sprintf(
-					/* translators: %s: open till date */
-					__( 'Valid until: %s', 'doublescale' ),
-					(string) $proposal->open_till
-				)
+			$summary_rows[] = array(
+				'label' => __( 'Valid until', 'doublescale' ),
+				'value' => (string) $proposal->open_till,
 			);
 		}
 
-		$lines[] = '';
-		$lines[] = sprintf(
-			'<a href="%1$s" style="display:inline-block;padding:10px 18px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">%2$s</a>',
+		$summary_html = '';
+		foreach ( $summary_rows as $row ) {
+			$summary_html .= sprintf(
+				'<tr>'
+				. '<td style="padding:8px 0;color:#718096;font-size:13px;font-family:Helvetica,Arial,sans-serif;width:34%%;vertical-align:top;">%1$s</td>'
+				. '<td style="padding:8px 0;color:#1a202c;font-size:13px;font-family:Helvetica,Arial,sans-serif;font-weight:600;vertical-align:top;">%2$s</td>'
+				. '</tr>',
+				esc_html( $row['label'] ),
+				esc_html( $row['value'] )
+			);
+		}
+
+		$html  = '<div style="font-family:Helvetica,Arial,sans-serif;color:#1a202c;">';
+		$html .= sprintf(
+			'<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1a202c;">%1$s <strong>%2$s</strong>,</p>',
+			esc_html__( 'Hi', 'doublescale' ),
+			esc_html( $customer_name )
+		);
+		$html .= sprintf(
+			'<p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#4a5568;">%s</p>',
+			$intro // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above or via esc_html__.
+		);
+
+		$html .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 28px;border-collapse:collapse;background-color:#f7fafc;border:1px solid #edf2f7;border-top:4px solid #4c6fff;border-radius:8px;">';
+		$html .= '<tr><td style="padding:18px 20px;">';
+		$html .= sprintf(
+			'<p style="margin:0 0 12px;font-size:12px;line-height:1.4;color:#4c6fff;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">%s</p>',
+			esc_html__( 'Proposal Summary', 'doublescale' )
+		);
+		$html .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">';
+		$html .= $summary_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with escaped values.
+		$html .= '</table>';
+		$html .= '</td></tr></table>';
+
+		$html .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 24px;border-collapse:collapse;">';
+		$html .= '<tr><td align="center" bgcolor="#4c6fff" style="border-radius:8px;background-color:#4c6fff;">';
+		$html .= sprintf(
+			'<a href="%1$s" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:600;line-height:1;color:#ffffff;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">%2$s</a>',
 			esc_url( $url ),
 			esc_html__( 'View Proposal', 'doublescale' )
 		);
-		$lines[] = '';
-		$lines[] = '<span style="color:#64748b;font-size:12px;">' . esc_html__( 'If the button does not work, copy and paste this link into your browser:', 'doublescale' ) . '</span><br />';
-		$lines[] = '<a href="' . esc_url( $url ) . '">' . esc_html( $url ) . '</a>';
+		$html .= '</td></tr></table>';
 
-		return '<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#0f172a;">' . implode( '<br />', $lines ) . '</div>';
+		$html .= sprintf(
+			'<p style="margin:0 0 8px;font-size:12px;line-height:1.6;color:#718096;">%s</p>',
+			esc_html__( 'If the button does not work, copy and paste this link into your browser:', 'doublescale' )
+		);
+		$html .= sprintf(
+			'<p style="margin:0;font-size:12px;line-height:1.6;word-break:break-all;"><a href="%1$s" style="color:#4c6fff;text-decoration:underline;">%1$s</a></p>',
+			esc_url( $url )
+		);
+		$html .= '</div>';
+
+		return $html;
 	}
 }

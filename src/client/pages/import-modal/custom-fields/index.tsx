@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { Switch } from '@/components/ui/switch';
 import { Field } from '@doublescale/components';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { useCustomFields } from '../../../hooks/use-customFields';
 
@@ -66,7 +67,7 @@ const CustomFieldsMapping: React.FC<CustomFieldsMapping> = ({
 	// Use the hook if available, otherwise provide empty defaults
 	const customFieldsData = useCustomFieldsHook;
 
-	if (!config.getProPluginData()?.is_active) {
+	if (!isProActive()) {
 		return (
 			<ProFeatureNotice
 				featureName={__('Custom Fields Import Mapping', 'doublescale')}

@@ -10,12 +10,18 @@ namespace DoubleScale\Modules\Sales\Rest\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\Constants\ActivityTypes;
+use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
-use DoubleScale\Modules\Sales\Services\SalesTags;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
+use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Sales\Services\InvoiceNotifications;
+use DoubleScale\Modules\Sales\Services\InvoiceUrl;
+use DoubleScale\Modules\Sales\Services\SalesNumbering;
+use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -49,6 +55,30 @@ class RestInvoiceController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/send',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/pdf',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -260,7 +290,7 @@ class RestInvoiceController extends RestController {
 
 		$invoice = new InvoiceModel();
 		$invoice->fill( $payload );
-		$invoice->save();
+		SalesNumbering::save_with_retry( $invoice );
 
 		return new WP_REST_Response( InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ), 201 );
 	}
@@ -323,6 +353,148 @@ class RestInvoiceController extends RestController {
 		$invoice->delete();
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_item( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$invoice = InvoiceModel::with( array( 'contact', 'sale_agent', 'proposal' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $invoice );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		if ( InvoiceStatus::PAID === (string) $invoice->status ) {
+			return new WP_Error( 'invalid_status', __( 'Paid invoices cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		if ( '' === InvoiceUrl::get_page_url() ) {
+			return new WP_Error(
+				'no_invoice_page',
+				__( 'Create a WordPress page with the [doublescale_invoice] shortcode before sending invoices.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+		$message = isset( $params['message'] ) ? sanitize_textarea_field( (string) $params['message'] ) : '';
+
+		$notifier = new InvoiceNotifications();
+		if ( ! $notifier->send_invoice( $invoice, $message ) ) {
+			return new WP_Error(
+				'email_failed',
+				__( 'Failed to send the invoice email. Check the customer email and SMTP settings.', 'doublescale' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
+			$invoice->status = InvoiceStatus::UNPAID;
+		}
+		$invoice->sent_at = current_time( 'mysql' );
+		$invoice->save();
+
+		$this->log_invoice_sent( $invoice, $message );
+
+		do_action( 'doublescale_sales_invoice_sent', $invoice, $message );
+
+		return new WP_REST_Response(
+			array(
+				'sent'    => true,
+				'invoice' => InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_pdf( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$invoice = InvoiceModel::with( array( 'contact', 'sale_agent', 'proposal' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $invoice );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		return $this->stream_pdf_response( InvoiceShaper::shape( $invoice, true ), 'invoice', (string) $invoice->invoice_number );
+	}
+
+	/**
+	 * @param array<string, mixed> $shaped Shaped document data.
+	 * @param string               $type Document type (invoice|proposal).
+	 * @param string               $filename Base filename without extension.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	private function stream_pdf_response( array $shaped, string $type, string $filename ) {
+		$pdf = DocumentPdf::render_pdf( $shaped, $type );
+		if ( is_wp_error( $pdf ) ) {
+			return $pdf;
+		}
+
+		$response = new WP_REST_Response( $pdf, 200 );
+		$response->header( 'Content-Type', 'application/pdf' );
+		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( $filename ) . '.pdf"' );
+
+		return $response;
+	}
+
+	/**
+	 * @param InvoiceModel $invoice Invoice.
+	 * @param string       $message Optional custom message.
+	 * @return void
+	 */
+	private function log_invoice_sent( InvoiceModel $invoice, string $message = '' ): void {
+		if ( ! class_exists( ActivityModel::class ) ) {
+			return;
+		}
+
+		$note = sprintf(
+			/* translators: %s: invoice number */
+			__( 'Invoice %s sent to customer.', 'doublescale' ),
+			(string) $invoice->invoice_number
+		);
+		if ( '' !== trim( $message ) ) {
+			$note .= ' — ' . $message;
+		}
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => (int) $invoice->contact_id,
+				'activity_type' => ActivityTypes::EMAIL_SENT,
+				'data'          => array(
+					'title'      => __( 'Invoice sent', 'doublescale' ),
+					'type'       => 'system',
+					'note'       => $note,
+					'invoice_id' => (int) $invoice->id,
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
 	}
 
 	/**

@@ -2,12 +2,12 @@
  * Invoice create/edit form.
  */
 
-import React, { useCallback, useEffect, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,6 +58,7 @@ const contactOptionLabel = (contact: ContactSummary): string => {
 
 const InvoiceEdit: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const params = useParams();
 	const idParam = params?.id;
 	const isNew = !idParam || idParam === 'new';
@@ -95,6 +96,7 @@ const InvoiceEdit: React.FC = () => {
 	]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const prefilledContactFromUrlRef = useRef(false);
 
 	useEffect(() => {
 		if (!existing) {
@@ -165,6 +167,31 @@ const InvoiceEdit: React.FC = () => {
 		},
 		[applyContactFields]
 	);
+
+	useEffect(() => {
+		if (!isNew || prefilledContactFromUrlRef.current) {
+			return;
+		}
+		const contactIdParam = new URLSearchParams(location.search).get('contact_id');
+		if (!contactIdParam) {
+			return;
+		}
+		const contactId = Number(contactIdParam);
+		if (!contactId) {
+			return;
+		}
+		prefilledContactFromUrlRef.current = true;
+		void (async () => {
+			try {
+				const full = await apiFetch<ContactSummary>({
+					path: `/doublescale/v1/contacts/${contactId}`,
+				});
+				handleContactPick(String(contactId), normalizeSalesContact(full));
+			} catch {
+				prefilledContactFromUrlRef.current = false;
+			}
+		})();
+	}, [isNew, location.search, handleContactPick]);
 
 	useEffect(() => {
 		if (assignableUsers.length === 1 && saleAgentUserId === null) {

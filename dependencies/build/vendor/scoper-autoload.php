@@ -6,8 +6,8 @@ $loader = require_once __DIR__.'/autoload.php';
 
 // Exposed classes. For more information see:
 // https://github.com/humbug/php-scoper/blob/master/docs/configuration.md#exposing-classes
-if (!class_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false) && !interface_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false) && !trait_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false)) {
-    spl_autoload_call('DoubleScale\Vendor\ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da');
+if (!class_exists('ComposerAutoloaderInitc76ffa71df276f67f33e39a1d22da86d', false) && !interface_exists('ComposerAutoloaderInitc76ffa71df276f67f33e39a1d22da86d', false) && !trait_exists('ComposerAutoloaderInitc76ffa71df276f67f33e39a1d22da86d', false)) {
+    spl_autoload_call('DoubleScale\Vendor\ComposerAutoloaderInitc76ffa71df276f67f33e39a1d22da86d');
 }
 if (!class_exists('SendGrid\Stats\Stats', false) && !interface_exists('SendGrid\Stats\Stats', false) && !trait_exists('SendGrid\Stats\Stats', false)) {
     spl_autoload_call('DoubleScale\Vendor\SendGrid\Stats\Stats');

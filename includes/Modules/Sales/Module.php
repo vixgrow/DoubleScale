@@ -14,8 +14,15 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
+use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
+use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Sales\Constants\ProposalStatus;
+use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Sales\Renderer\InvoiceFrontendHandler;
 use DoubleScale\Modules\Sales\Renderer\ProposalFrontendHandler;
+use DoubleScale\Modules\Sales\Rest\ProposalShaper;
+use DoubleScale\Modules\Sales\Services\ConvertProposalToInvoice;
 
 /**
  * Sales module.
@@ -70,6 +77,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
+			Rest\Controllers\RestPublicInvoiceController::class,
 		);
 	}
 
@@ -90,6 +98,9 @@ final class Module extends AbstractModule {
 		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
 
 		new ProposalFrontendHandler();
+		new InvoiceFrontendHandler();
+
+		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
 
 		MenuRegistry::add(
 			array(
@@ -140,5 +151,60 @@ final class Module extends AbstractModule {
 		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_overdue_invoices' ) ) {
 			$tasks->schedule_recurring( time(), HOUR_IN_SECONDS, 'doublescale_sales_overdue_invoices' );
 		}
+	}
+
+	/**
+	 * When a customer accepts a proposal, create a draft invoice automatically.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @return void
+	 */
+	public function auto_convert_accepted_proposal( ProposalModel $proposal ): void {
+		if ( ProposalStatus::ACCEPTED !== (string) $proposal->status ) {
+			return;
+		}
+
+		if ( ProposalShaper::get_linked_invoice_id( $proposal ) ) {
+			return;
+		}
+
+		$invoice = ( new ConvertProposalToInvoice() )->convert( $proposal );
+		if ( is_wp_error( $invoice ) ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Auto invoice conversion failed after proposal acceptance',
+					array(
+						'source'      => 'sales-proposal-accept',
+						'proposal_id' => (int) $proposal->id,
+						'error'       => $invoice->get_error_message(),
+					)
+				);
+			}
+			return;
+		}
+
+		if ( class_exists( ActivityModel::class ) ) {
+			ActivityModel::create(
+				array(
+					'contact_id'    => (int) $proposal->contact_id,
+					'activity_type' => ActivityTypes::STATUS_CHANGED,
+					'data'          => array(
+						'title'       => __( 'Invoice created from proposal', 'doublescale' ),
+						'type'        => 'system',
+						'note'        => sprintf(
+							/* translators: 1: proposal number, 2: invoice number */
+							__( 'Proposal %1$s was accepted and converted to invoice %2$s.', 'doublescale' ),
+							(string) $proposal->proposal_number,
+							(string) $invoice->invoice_number
+						),
+						'proposal_id' => (int) $proposal->id,
+						'invoice_id'  => (int) $invoice->id,
+					),
+					'user_id'       => null,
+				)
+			);
+		}
+
+		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );
 	}
 }

@@ -28,6 +28,7 @@
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
     "RestPortalController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestPortalController",
     "RestProposalController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestProposalController",
+    "RestPublicInvoiceController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestPublicInvoiceController",
     "RestPublicProposalController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestPublicProposalController",
     "RestReplyController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestReplyController",
     "RestReportController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestReportController",

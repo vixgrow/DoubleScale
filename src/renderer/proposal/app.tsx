@@ -57,7 +57,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 
 	if (loading) {
 		return (
-			<div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+			<div className="doublescale-proposal-renderer">
 				<p className="text-sm text-muted-foreground">{__('Loading proposal…', 'doublescale')}</p>
 			</div>
 		);
@@ -65,8 +65,8 @@ const PublicProposalApp = ({ hash }: Props) => {
 
 	if (error || !data) {
 		return (
-			<div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-				<div className="rounded border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+			<div className="doublescale-proposal-renderer">
+				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--error">
 					{error || __('Proposal not found.', 'doublescale')}
 				</div>
 			</div>
@@ -77,21 +77,26 @@ const PublicProposalApp = ({ hash }: Props) => {
 	const showActions = data.can_accept || data.can_decline;
 
 	return (
-		<div className="rounded-lg border border-border bg-card p-6 shadow-sm space-y-6">
+		<div className="doublescale-proposal-renderer">
 			{data.is_expired ? (
-				<div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--warning">
 					{__('This proposal has expired.', 'doublescale')}
 				</div>
 			) : null}
 
 			{data.status === 'accepted' ? (
-				<div className="rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
-					{__('You accepted this proposal. Thank you!', 'doublescale')}
+				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--success">
+					{data.invoice_id
+						? __(
+								'You accepted this proposal. A draft invoice has been created. Thank you!',
+								'doublescale'
+							)
+						: __('You accepted this proposal. Thank you!', 'doublescale')}
 				</div>
 			) : null}
 
 			{data.status === 'declined' ? (
-				<div className="rounded border border-slate-300 bg-slate-50 p-3 text-sm text-slate-800">
+				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--info">
 					{__('You declined this proposal.', 'doublescale')}
 					{data.decline_reason ? (
 						<p className="mt-2 text-muted-foreground">{data.decline_reason}</p>
@@ -102,11 +107,13 @@ const PublicProposalApp = ({ hash }: Props) => {
 			<ProposalDocumentPreview proposal={previewProposal} />
 
 			{actionError ? (
-				<div className="text-sm text-destructive">{actionError}</div>
+				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--error mt-4">
+					{actionError}
+				</div>
 			) : null}
 
 			{showActions ? (
-				<div className="flex flex-wrap gap-2 justify-end border-t pt-4">
+				<div className="doublescale-proposal-renderer__actions">
 					{data.can_decline ? (
 						<Button
 							variant="outline"
@@ -127,8 +134,8 @@ const PublicProposalApp = ({ hash }: Props) => {
 			) : null}
 
 			{showDecline ? (
-				<div className="space-y-3 border rounded-lg p-4 bg-slate-50">
-					<label className="text-sm font-medium" htmlFor="decline-reason">
+				<div className="doublescale-proposal-renderer__decline">
+					<label className="text-sm font-medium block mb-2" htmlFor="decline-reason">
 						{__('Reason for declining (optional)', 'doublescale')}
 					</label>
 					<Textarea
@@ -137,7 +144,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 						onChange={(e) => setDeclineReason(e.target.value)}
 						rows={3}
 					/>
-					<div className="flex justify-end gap-2">
+					<div className="flex justify-end gap-2 mt-3">
 						<Button variant="ghost" onClick={() => setShowDecline(false)} disabled={busy}>
 							{__('Cancel', 'doublescale')}
 						</Button>

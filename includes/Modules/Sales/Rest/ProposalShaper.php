@@ -121,6 +121,7 @@ final class ProposalShaper {
 			'accepted_at'     => $proposal->accepted_at ? (string) $proposal->accepted_at : null,
 			'declined_at'     => $proposal->declined_at ? (string) $proposal->declined_at : null,
 			'decline_reason'  => $proposal->decline_reason ? (string) $proposal->decline_reason : null,
+			'invoice_id'      => self::get_linked_invoice_id( $proposal ),
 		);
 	}
 

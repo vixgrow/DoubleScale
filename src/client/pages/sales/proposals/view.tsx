@@ -87,9 +87,14 @@ const ProposalView: React.FC = () => {
 			return;
 		}
 		setBusy(true);
+		setNotice(null);
 		try {
 			const result = await convertProposalToInvoice(proposalId);
-			navigate(getToLink(`sales/invoices/${result.invoice.id}/edit`));
+			navigate(getToLink(`sales/invoices/${result.invoice.id}`));
+		} catch (err: unknown) {
+			setNotice(
+				err instanceof Error ? err.message : __('Convert to invoice failed.', 'doublescale')
+			);
 		} finally {
 			setBusy(false);
 			setConvertOpen(false);

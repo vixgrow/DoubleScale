@@ -1,0 +1,308 @@
+<?php
+/**
+ * Public guest access to invoices via hash.
+ *
+ * @package DoubleScale\Modules\Sales
+ */
+
+namespace DoubleScale\Modules\Sales\Rest\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\Constants\ActivityTypes;
+use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
+use DoubleScale\Modules\Sales\Models\InvoiceModel;
+use DoubleScale\Modules\Sales\Models\PaymentModel;
+use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
+use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Sales\Services\InvoicePayable;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+/**
+ * RestPublicInvoiceController class.
+ */
+class RestPublicInvoiceController extends RestController {
+
+	/**
+	 * @var string
+	 */
+	protected $rest_base = 'sales/public/invoices';
+
+	/**
+	 * @return void
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/pdf',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/stripe/init',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'stripe_init' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/stripe/confirm',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'stripe_confirm' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$invoice = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $invoice ) ) {
+			return $invoice;
+		}
+
+		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		if ( empty( $invoice->viewed_at ) ) {
+			$invoice->viewed_at = current_time( 'mysql' );
+			$invoice->save();
+			$this->log_viewed_activity( $invoice );
+		}
+
+		return new WP_REST_Response( $this->shape_public_payload( $invoice ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_pdf( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$invoice = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $invoice ) ) {
+			return $invoice;
+		}
+
+		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$invoice->load( array( 'contact' ) );
+		$shaped = InvoiceShaper::shape_public( $invoice );
+		$pdf    = DocumentPdf::render_pdf( $shaped, 'invoice' );
+		if ( is_wp_error( $pdf ) ) {
+			return $pdf;
+		}
+
+		$response = new WP_REST_Response( $pdf, 200 );
+		$response->header( 'Content-Type', 'application/pdf' );
+		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( (string) $invoice->invoice_number ) . '.pdf"' );
+
+		return $response;
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function stripe_init( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$invoice = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $invoice ) ) {
+			return $invoice;
+		}
+
+		$guard = InvoicePayable::guard( $invoice );
+		if ( is_wp_error( $guard ) ) {
+			return $guard;
+		}
+
+		$result = apply_filters( 'doublescale_sales_invoice_stripe_init', null, $invoice );
+		if ( null === $result ) {
+			return new WP_Error(
+				'stripe_unavailable',
+				__( 'Stripe payments require DoubleScale Pro with Stripe configured.', 'doublescale' ),
+				array( 'status' => 503 )
+			);
+		}
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function stripe_confirm( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$invoice = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $invoice ) ) {
+			return $invoice;
+		}
+
+		$result = apply_filters( 'doublescale_sales_invoice_stripe_confirm', null, $invoice );
+		if ( null === $result ) {
+			return new WP_Error(
+				'stripe_unavailable',
+				__( 'Stripe payments require DoubleScale Pro with Stripe configured.', 'doublescale' ),
+				array( 'status' => 503 )
+			);
+		}
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		if ( is_array( $result ) && isset( $result['invoice'] ) && $result['invoice'] instanceof InvoiceModel ) {
+			$result['invoice'] = InvoiceShaper::shape_public( $result['invoice'] );
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return array<string, mixed>
+	 */
+	private function shape_public_payload( InvoiceModel $invoice ): array {
+		$invoice->load( array( 'contact' ) );
+
+		$payments = PaymentModel::query()
+			->where( 'invoice_id', (int) $invoice->id )
+			->orderBy( 'payment_date', 'desc' )
+			->orderBy( 'id', 'desc' )
+			->get();
+
+		$payload = InvoiceShaper::shape_public( $invoice );
+		$payload['payments'] = array();
+		foreach ( $payments as $payment ) {
+			$payload['payments'][] = InvoiceShaper::shape_public_payment( $payment );
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return InvoiceModel|WP_Error
+	 */
+	private function resolve_by_hash( WP_REST_Request $request ) {
+		$hash    = (string) $request->get_param( 'hash' );
+		$invoice = InvoiceModel::get_by_hash( $hash );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+		return $invoice;
+	}
+
+	/**
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return void
+	 */
+	private function log_viewed_activity( InvoiceModel $invoice ): void {
+		if ( ! class_exists( ActivityModel::class ) ) {
+			return;
+		}
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => (int) $invoice->contact_id,
+				'activity_type' => ActivityTypes::STATUS_CHANGED,
+				'data'          => array(
+					'title'      => __( 'Invoice viewed', 'doublescale' ),
+					'type'       => 'system',
+					'note'       => sprintf(
+						/* translators: %s: invoice number */
+						__( 'Customer opened invoice %s.', 'doublescale' ),
+						(string) $invoice->invoice_number
+					),
+					'invoice_id' => (int) $invoice->id,
+				),
+				'user_id'       => null,
+			)
+		);
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function check_rate_limit(): bool {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP used only for rate-limit key.
+		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
+		$key   = 'ds_sales_inv_pub_' . md5( $ip );
+		$count = (int) get_transient( $key );
+		if ( $count > 120 ) {
+			return false;
+		}
+		set_transient( $key, $count + 1, MINUTE_IN_SECONDS );
+		return true;
+	}
+}

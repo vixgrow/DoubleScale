@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import ConfigAPI from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { AddonCard } from '@/client/pages/intergrations/addon-card';
 // @ts-ignore
 import smtpImage from '@doublescale/assets/images/smtp/smtp.svg';
@@ -24,7 +25,7 @@ const ProSMTPSettings: React.FC = () => {
 	const addons = ConfigAPI.getAddons();
 	const smtpAddon = addons['smtp'];
 	const smtpModuleOn = ConfigAPI.isModuleEnabled('smtp');
-	const isProActive = !!ConfigAPI.getProPluginData()?.is_active;
+	const isProActiveFlag = isProActive();
 	const [connectionsView, setConnectionsView] = useState<'table' | 'card'>(
 		'table'
 	);
@@ -61,7 +62,7 @@ const ProSMTPSettings: React.FC = () => {
 				/>
 			)}
 
-			{isProActive && (
+			{isProActiveFlag && (
 				<div className="mt-8 pt-8 border-t border-gray-200">
 					<BounceHandler />
 				</div>

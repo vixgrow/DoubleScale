@@ -15,6 +15,7 @@ import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
  */
 import type { ActionsGroup } from '@doublescale/config';
 import config from '@doublescale/config';
+import { isProActive as checkProActive } from '@doublescale/hooks/use-is-pro-active';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,8 +49,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 	} | null>(null);
 
 	// Check if Pro plugin is active once
-	const proPluginData = config.getProPluginData();
-	const isProActive = proPluginData.is_active;
+	const isProActive = checkProActive();
 
 	// Helper function to get tooltip message for disabled actions
 	const getDisabledTooltip = (groupLabel: string) => {

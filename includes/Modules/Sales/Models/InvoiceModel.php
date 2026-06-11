@@ -60,6 +60,8 @@ class InvoiceModel extends Model {
 		'shipping_address',
 		'client_note',
 		'terms',
+		'sent_at',
+		'viewed_at',
 	);
 
 	/**
@@ -163,6 +165,18 @@ class InvoiceModel extends Model {
 				$invoice->total     = $totals['total'];
 			}
 		);
+	}
+
+	/**
+	 * @param string $hash Invoice hash.
+	 * @return InvoiceModel|null
+	 */
+	public static function get_by_hash( $hash ) {
+		$hash = trim( (string) $hash );
+		if ( '' === $hash || ! preg_match( '/^[a-f0-9]{32}$/', $hash ) ) {
+			return null;
+		}
+		return self::query()->where( 'hash', $hash )->first();
 	}
 
 	/**

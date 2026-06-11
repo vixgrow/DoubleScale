@@ -14,10 +14,9 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Constants\PaymentMode;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
+use DoubleScale\Modules\Sales\Services\InvoicePayable;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -120,7 +119,7 @@ class RestInvoiceStripeController extends RestController {
 			return $invoice;
 		}
 
-		$guard = $this->validate_payable( $invoice );
+		$guard = InvoicePayable::guard( $invoice );
 		if ( is_wp_error( $guard ) ) {
 			return $guard;
 		}
@@ -189,31 +188,5 @@ class RestInvoiceStripeController extends RestController {
 		}
 
 		return $invoice;
-	}
-
-	/**
-	 * @param InvoiceModel $invoice Invoice.
-	 * @return true|WP_Error
-	 */
-	private function validate_payable( InvoiceModel $invoice ) {
-		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
-			return new WP_Error( 'invalid_status', __( 'Draft invoices cannot be paid online.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		if ( InvoiceStatus::PAID === (string) $invoice->status ) {
-			return new WP_Error( 'invalid_status', __( 'This invoice is already paid.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		$balance = round( (float) $invoice->total - (float) $invoice->amount_paid, 2 );
-		if ( $balance <= 0 ) {
-			return new WP_Error( 'invalid_data', __( 'Nothing is due on this invoice.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		$modes = PaymentMode::normalize_list( $invoice->allowed_payment_modes );
-		if ( ! empty( $modes ) && ! in_array( PaymentMode::STRIPE, $modes, true ) ) {
-			return new WP_Error( 'invalid_data', __( 'Stripe is not an allowed payment mode for this invoice.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		return true;
 	}
 }

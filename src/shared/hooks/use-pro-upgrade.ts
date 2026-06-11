@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 /**
  * Hook to handle Pro upgrade/install/activate logic
@@ -21,7 +22,7 @@ export const useProUpgrade = () => {
 
 	// Determine button state
 	const isProInstalled = pluginData?.is_installed || false;
-	const isProActive = pluginData?.is_active || false;
+	const isProActiveFlag = isProActive();
 	const isLicenseObject = (value: typeof license): value is typeof license & { status: string } =>
 		!!value && typeof value === 'object' && 'status' in value;
 
@@ -125,7 +126,7 @@ export const useProUpgrade = () => {
 
 	// Handle primary button click
 	const handleUpgradeClick = (upgradeUrl?: string) => {
-		if (isProInstalled && !isProActive) {
+		if (isProInstalled && !isProActiveFlag) {
 			// Redirect to plugins page to activate
 			window.location.href = getPluginsPageUrl();
 			return;
@@ -151,7 +152,7 @@ export const useProUpgrade = () => {
 
 	// Get primary button text
 	const getUpgradeButtonText = () => {
-		if (isProInstalled && !isProActive) {
+		if (isProInstalled && !isProActiveFlag) {
 			return __('Activate Pro Addon', 'doublescale');
 		}
 
@@ -169,7 +170,7 @@ export const useProUpgrade = () => {
 
 	return {
 		isProInstalled,
-		isProActive,
+		isProActive: isProActiveFlag,
 		hasValidLicense,
 		licenseStatus,
 		isLicenseExpired,

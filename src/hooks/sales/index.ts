@@ -393,6 +393,18 @@ export const sendProposal = (proposalId: number, message = '') =>
 		data: message ? { message } : {},
 	});
 
+export interface SendInvoiceResponse {
+	sent: boolean;
+	invoice: Invoice;
+}
+
+export const sendInvoice = (invoiceId: number, message = '') =>
+	apiFetch<SendInvoiceResponse>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/send`,
+		method: 'POST',
+		data: message ? { message } : {},
+	});
+
 export const useSalesTaxes = () => {
 	const [data, setData] = useState<SalesTax[]>([]);
 	const [loading, setLoading] = useState(true);

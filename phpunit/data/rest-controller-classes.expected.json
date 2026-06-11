@@ -28,6 +28,7 @@
     "RestPluginsController",
     "RestPortalController",
     "RestProposalController",
+    "RestPublicInvoiceController",
     "RestPublicProposalController",
     "RestReplyController",
     "RestReportController",

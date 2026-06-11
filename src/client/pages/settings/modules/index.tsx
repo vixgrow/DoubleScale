@@ -10,6 +10,7 @@ import {
 	buildMarketingModuleDisplayRows,
 	getChildModuleToggleState,
 	getEffectiveMarketingModuleState,
+	isSalesDocumentsReady,
 	pickToggleableModulePayload,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
@@ -257,10 +258,15 @@ export default function ModulesSettings({
 						{__( 'Modules', 'doublescale' )}
 					</h3>
 					<p className="text-sm text-muted-foreground mt-1">
-						{__(
-							'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
-							'doublescale'
-						)}
+						{isSalesDocumentsReady()
+							? __(
+									'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+									'doublescale'
+							  )
+							: __(
+									'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+									'doublescale'
+							  )}
 					</p>
 				</div>
 			)}
@@ -334,10 +340,15 @@ export default function ModulesSettings({
 									{mod.slug === 'sales' &&
 										pendingChanges[ 'sales' ] === false && (
 											<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
-												{__(
-													'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
-													'doublescale'
-												)}
+												{isSalesDocumentsReady()
+													? __(
+															'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
+															'doublescale'
+													  )
+													: __(
+															'Disabling Sales also turns off the Sales Pipeline.',
+															'doublescale'
+													  )}
 											</p>
 										)}
 									{isPendingDisable &&

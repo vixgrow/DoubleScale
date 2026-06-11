@@ -49,6 +49,7 @@ import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
 import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
+import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 
 interface SubMenuItem {
 	path: string;
@@ -224,6 +225,16 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				);
 			})
 			.filter(([pageId, item]) => {
+				// While Sales documents (proposals/invoices) are gated, the
+				// pipeline is the only destination under Sales — drop the
+				// whole group when the pipeline toggle is off too.
+				if (
+					pageId === 'sales' &&
+					!isSalesDocumentsReady() &&
+					!config.isModuleToggleEnabled('deals')
+				) {
+					return false;
+				}
 				const optionalGate = FREE_OPTIONAL_SIDEBAR_PAGE_MODULE[pageId];
 				const defaultSidebar =
 					isProActive ||
@@ -389,14 +400,20 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						{
-							path: 'sales/proposals',
-							label: __('Proposals', 'doublescale'),
-						},
-						{
-							path: 'sales/invoices',
-							label: __('Invoices', 'doublescale'),
-						},
+						// Proposals/Invoices stay hidden until the documents
+						// feature ships — see isSalesDocumentsReady().
+						...(isSalesDocumentsReady()
+							? [
+									{
+										path: 'sales/proposals',
+										label: __('Proposals', 'doublescale'),
+									},
+									{
+										path: 'sales/invoices',
+										label: __('Invoices', 'doublescale'),
+									},
+							  ]
+							: []),
 						// Pipeline nests under Sales: with Pro, `enabled` is the
 						// derived effective state (Sales is already on here, so it
 						// reduces to the child flag); without Pro it is the stored

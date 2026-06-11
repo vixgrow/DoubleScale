@@ -39,6 +39,7 @@ import {
 	WebsiteIcon,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
+import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import Courses from '../courses';
 import ContactSales from '../sales';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -65,7 +66,10 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const isDealsModuleEnabled = ConfigAPI.isModuleEnabled('deals');
 	const isTasksModuleEnabled = ConfigAPI.isModuleEnabled('tasks');
 	const isAutomationsModuleEnabled = ConfigAPI.isModuleEnabled('automations');
-	const isSalesModuleEnabled = ConfigAPI.isModuleEnabled('sales');
+	// The contact Sales tab lists proposals/invoices — hidden while the
+	// documents feature is gated (see isSalesDocumentsReady()).
+	const isSalesModuleEnabled =
+		ConfigAPI.isModuleEnabled('sales') && isSalesDocumentsReady();
 	if (!contact) {
 		return null;
 	}

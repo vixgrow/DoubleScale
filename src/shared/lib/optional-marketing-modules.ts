@@ -7,6 +7,23 @@
 import { __ } from '@wordpress/i18n';
 import type { ModuleInfo } from '@doublescale/config';
 
+/**
+ * TEMPORARY release gate for Sales proposals/invoices. Mirrors PHP
+ * `doublescale_sales_documents_ready()` via the admin config payload; while
+ * false the Sales module surfaces only as the pipeline's parent toggle (no
+ * Proposals/Invoices nav, pages, or contact tab). Remove together with the
+ * PHP gate when the documents feature ships.
+ */
+export function isSalesDocumentsReady(): boolean {
+	if (typeof window === 'undefined') {
+		return false;
+	}
+	const cfg = (
+		window as { doublescaleConfig?: { salesDocumentsReady?: boolean } }
+	).doublescaleConfig;
+	return Boolean(cfg?.salesDocumentsReady);
+}
+
 export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'smtp',
 	'sales',
@@ -81,10 +98,15 @@ function placeholderFor(
 		case 'sales':
 			return {
 				label: __('Sales', 'doublescale'),
-				description: __(
-					'Create proposals and invoices with line items, discounts, and customer billing.',
-					'doublescale'
-				),
+				description: isSalesDocumentsReady()
+					? __(
+							'Create proposals and invoices with line items, discounts, and customer billing.',
+							'doublescale'
+					  )
+					: __(
+							'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.',
+							'doublescale'
+					  ),
 			};
 		case 'forms':
 			return {

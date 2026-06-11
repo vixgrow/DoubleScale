@@ -40,13 +40,14 @@ import {
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
 import Courses from '../courses';
+import ContactSales from '../sales';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
-import { Trophy } from 'lucide-react';
+import { Receipt, Trophy } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components';
 
 interface DataCardProps {
@@ -64,6 +65,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const isDealsModuleEnabled = ConfigAPI.isModuleEnabled('deals');
 	const isTasksModuleEnabled = ConfigAPI.isModuleEnabled('tasks');
 	const isAutomationsModuleEnabled = ConfigAPI.isModuleEnabled('automations');
+	const isSalesModuleEnabled = ConfigAPI.isModuleEnabled('sales');
 	if (!contact) {
 		return null;
 	}
@@ -140,6 +142,9 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		},
 		...(isDealsModuleEnabled
 			? [{ value: 'deals', label: 'Deals', icon: <DealsIcon /> }]
+			: []),
+		...(isSalesModuleEnabled
+			? [{ value: 'sales', label: 'Sales', icon: <Receipt width={24} height={24} /> }]
 			: []),
 		{
 			value: 'lead-score',
@@ -266,6 +271,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 						children: (
 							<CardContent className="pt-6">
 								<Deals
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
+		...(isSalesModuleEnabled
+			? [
+					{
+						value: 'sales',
+						children: (
+							<CardContent className="pt-6">
+								<ContactSales
 									contact_id={contact.id}
 									navigate={navigate}
 								/>

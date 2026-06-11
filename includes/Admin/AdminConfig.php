@@ -84,6 +84,12 @@ final class AdminConfig {
 			}
 		}
 
+		if ( class_exists( \DoubleScale\Modules\Sales\Capabilities::class ) ) {
+			foreach ( \DoubleScale\Modules\Sales\Capabilities::get_sales_capability_slugs() as $sales_cap ) {
+				$user_capabilities[ $sales_cap ] = current_user_can( $sales_cap );
+			}
+		}
+
 		$current_wp_user = wp_get_current_user();
 		$current_user    = array(
 			'id'           => $current_wp_user->ID,

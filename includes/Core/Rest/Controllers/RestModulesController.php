@@ -40,7 +40,7 @@ class RestModulesController extends RestController {
 						'slug' => array(
 							'required' => true,
 							'type'     => 'string',
-							'enum'     => array( 'support', 'deals' ),
+							'enum'     => array( 'support', 'deals', 'sales' ),
 						),
 					),
 				),

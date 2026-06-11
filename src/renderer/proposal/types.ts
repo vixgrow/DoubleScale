@@ -37,6 +37,7 @@ export interface PublicProposal {
 	accepted_at: string | null;
 	declined_at: string | null;
 	decline_reason: string | null;
+	invoice_id?: number | null;
 }
 
 declare global {

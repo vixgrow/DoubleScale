@@ -86,7 +86,12 @@ const PublicProposalApp = ({ hash }: Props) => {
 
 			{data.status === 'accepted' ? (
 				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--success">
-					{__('You accepted this proposal. Thank you!', 'doublescale')}
+					{data.invoice_id
+						? __(
+								'You accepted this proposal. A draft invoice has been created. Thank you!',
+								'doublescale'
+							)
+						: __('You accepted this proposal. Thank you!', 'doublescale')}
 				</div>
 			) : null}
 

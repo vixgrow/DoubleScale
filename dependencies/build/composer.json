@@ -16,7 +16,8 @@
         "sendgrid/sendgrid": "~8.1",
         "getbrevo/brevo-php": "2.0.0",
         "wildbit/postmark-php": "^4.0",
-        "doctrine/cache": "^1.10"
+        "doctrine/cache": "^1.10",
+        "dompdf/dompdf": "^2.0"
     },
     "config": {
         "allow-plugins": {

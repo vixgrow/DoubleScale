@@ -430,8 +430,11 @@ registerAdminPage('email-sequence', {
 // Sales Pipeline - stub registration that Pro plugin will override via filter
 // The Pro plugin uses addFilter('DoubleScale.Navigation.PageSettings') to replace the component
 // If Pro is not active, shows upgrade notice instead of blank page
+// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds
+// it from the `sales` item); the route itself stays registered.
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
+	hidden: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Sales Pipeline', 'doublescale')}

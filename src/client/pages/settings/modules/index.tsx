@@ -6,7 +6,9 @@ import config from '@doublescale/config';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import type { ModuleInfo } from '@doublescale/config';
 import {
+	buildChildModuleRows,
 	buildMarketingModuleDisplayRows,
+	getChildModuleToggleState,
 	getEffectiveMarketingModuleState,
 	pickToggleableModulePayload,
 	reduceMarketingModulePending,
@@ -43,7 +45,9 @@ interface ModuleRoleImpact {
 	role_labels: string[];
 }
 
-const MODULES_WITH_ROLE_IMPACT = [ 'support', 'deals' ] as const;
+// `deals` (pipeline) is a child of Sales and no longer owns roles — disabling
+// only the pipeline keeps the sales roles, so it carries no role impact.
+const MODULES_WITH_ROLE_IMPACT = [ 'support', 'sales' ] as const;
 type ModuleRoleImpactSlug = ( typeof MODULES_WITH_ROLE_IMPACT )[number];
 
 function isRoleImpactModule( slug: string ): slug is ModuleRoleImpactSlug {
@@ -254,7 +258,7 @@ export default function ModulesSettings({
 					</h3>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
+							'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Support. Other CRM capabilities are always available and are not listed here.',
 							'doublescale'
 						)}
 					</p>
@@ -274,11 +278,16 @@ export default function ModulesSettings({
 					const impact = isRoleImpactModule( mod.slug )
 						? roleImpact[ mod.slug ]
 						: undefined;
+					const childRows = buildChildModuleRows(
+						mod.slug,
+						modules,
+						isProAddonActive
+					);
 
 					return (
 						<div
 							key={mod.slug}
-							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
+							className={`flex flex-col gap-3 p-4 border rounded-xl transition-colors ${
 								mod.unavailableUntilPro
 									? 'border-border/40 bg-muted/15'
 									: isEnabled
@@ -286,55 +295,127 @@ export default function ModulesSettings({
 										: 'border-border/40 bg-muted/20'
 							}`}
 						>
-							<div className="flex flex-col gap-1 flex-1 min-w-0">
-								<span
-									className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
-								>
-									{mod.label}
-								</span>
-								<p className="text-xs text-muted-foreground leading-relaxed">
-									{mod.description}
-								</p>
-								{mod.unavailableUntilPro && (
-									<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-										{__(
-											'Install and activate DoubleScale Pro to enable and use this module.',
-											'doublescale'
-										)}{' '}
-										<a
-											className="text-primary underline font-medium"
-											href={config.getUrlDoubleScalePro()}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											{__( 'View Pro plans', 'doublescale' )}
-										</a>
+							<div className="flex items-center justify-between gap-4">
+								<div className="flex flex-col gap-1 flex-1 min-w-0">
+									<span
+										className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
+									>
+										{mod.label}
+									</span>
+									<p className="text-xs text-muted-foreground leading-relaxed">
+										{mod.description}
 									</p>
-								)}
-								{mod.slug === 'smtp' &&
-									! isEnabled &&
-									! mod.unavailableUntilPro && (
-										<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+									{mod.unavailableUntilPro && (
+										<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
 											{__(
-												'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+												'Install and activate DoubleScale Pro to enable and use this module.',
 												'doublescale'
-											)}
+											)}{' '}
+											<a
+												className="text-primary underline font-medium"
+												href={config.getUrlDoubleScalePro()}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												{__( 'View Pro plans', 'doublescale' )}
+											</a>
 										</p>
 									)}
-								{isPendingDisable &&
-									impact &&
-									impact.user_count > 0 && (
-										<p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2 leading-relaxed">
-											{formatRoleImpactWarning( impact )}
-										</p>
-									)}
+									{mod.slug === 'smtp' &&
+										! isEnabled &&
+										! mod.unavailableUntilPro && (
+											<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+												{__(
+													'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+													'doublescale'
+												)}
+											</p>
+										)}
+									{mod.slug === 'sales' &&
+										pendingChanges[ 'sales' ] === false && (
+											<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+												{__(
+													'Disabling Sales also turns off Proposals, Invoices, and the Sales Pipeline.',
+													'doublescale'
+												)}
+											</p>
+										)}
+									{isPendingDisable &&
+										impact &&
+										impact.user_count > 0 && (
+											<p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2 leading-relaxed">
+												{formatRoleImpactWarning( impact )}
+											</p>
+										)}
+								</div>
+								<Switch
+									checked={isEnabled}
+									onCheckedChange={( checked ) =>
+										handleToggle( mod.slug, checked )
+									}
+								/>
 							</div>
-							<Switch
-								checked={isEnabled}
-								onCheckedChange={( checked ) =>
-									handleToggle( mod.slug, checked )
-								}
-							/>
+							{childRows.map( ( child ) => {
+								const childChecked = getChildModuleToggleState(
+									child,
+									pendingChanges
+								);
+
+								return (
+									<div
+										key={child.slug}
+										className={`ml-3 flex items-center justify-between gap-4 border-l-2 pl-3 ${
+											isEnabled
+												? 'border-border/60'
+												: 'border-border/30 opacity-60'
+										}`}
+									>
+										<div className="flex flex-col gap-1 flex-1 min-w-0">
+											<span
+												className={`text-sm font-medium ${isEnabled && childChecked ? 'text-foreground' : 'text-muted-foreground'}`}
+											>
+												{child.label}
+											</span>
+											<p className="text-xs text-muted-foreground leading-relaxed">
+												{child.description}
+											</p>
+											{! isEnabled && (
+												<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+													{sprintf(
+														/* translators: 1: parent module label, 2: sub-feature label */
+														__( 'Enable %1$s to use %2$s.', 'doublescale' ),
+														mod.label,
+														child.label
+													)}
+												</p>
+											)}
+											{isEnabled && child.unavailableUntilPro && (
+												<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+													{__(
+														'Install and activate DoubleScale Pro to enable and use this module.',
+														'doublescale'
+													)}{' '}
+													<a
+														className="text-primary underline font-medium"
+														href={config.getUrlDoubleScalePro()}
+														target="_blank"
+														rel="noopener noreferrer"
+													>
+														{__( 'View Pro plans', 'doublescale' )}
+													</a>
+												</p>
+											)}
+										</div>
+										<Switch
+											checked={childChecked}
+											disabled={! isEnabled}
+											onCheckedChange={( checked ) =>
+												handleToggle( child.slug, checked )
+											}
+										/>
+									</div>
+								);
+							} )}
 						</div>
 					);
 				} )}

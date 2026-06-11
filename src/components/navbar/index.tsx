@@ -90,7 +90,7 @@ const SECTION_ORDER: Record<string, { label: string; order: number }> = {
 const PATH_TO_SECTION: Record<string, string> = {
 	'/': 'main',
 	contacts: 'crm',
-	'sales-pipeline': 'crm',
+	sales: 'crm',
 	booking: 'crm',
 	support: 'crm',
 	tasks: 'crm',
@@ -126,7 +126,7 @@ const FREE_CORE_PAGE_IDS = new Set([
  * (or when DoubleScale Pro is active — full Pro shell handles visibility there).
  */
 const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
-	'sales-pipeline': 'deals',
+	sales: 'sales',
 	tasks: 'tasks',
 	forms: 'forms',
 	support: 'support',
@@ -140,6 +140,11 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
+	sales: 'sales',
+	'sales/proposals': 'sales',
+	'sales/proposals/:id': 'sales',
+	'sales/invoices': 'sales',
+	'sales/invoices/:id': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
@@ -377,6 +382,38 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								'doublescale_booking_manage_all_calendars',
 							],
 						},
+					].filter((sub) =>
+						hasRequiredCapability(sub.requiredCapability)
+					);
+				}
+
+				if (item.path === 'sales') {
+					navItem.subMenu = [
+						{
+							path: 'sales/proposals',
+							label: __('Proposals', 'doublescale'),
+						},
+						{
+							path: 'sales/invoices',
+							label: __('Invoices', 'doublescale'),
+						},
+						// Pipeline nests under Sales: with Pro, `enabled` is the
+						// derived effective state (Sales is already on here, so it
+						// reduces to the child flag); without Pro it is the stored
+						// phantom preference and the entry leads to the upsell stub.
+						...(config.isModuleToggleEnabled('deals')
+							? [
+									{
+										path: 'sales-pipeline',
+										label: __('Pipeline', 'doublescale'),
+										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
 					].filter((sub) =>
 						hasRequiredCapability(sub.requiredCapability)
 					);

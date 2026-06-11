@@ -56,6 +56,12 @@ const sharedAlias = {
 	'@/components/support': path.resolve(__dirname, 'src/components/support'),
 	'@/constants/support': path.resolve(__dirname, 'src/constants/support.ts'),
 
+	// Sales-scoped aliases — same ordering rule as support/booking.
+	'@/types/sales': path.resolve(__dirname, 'src/types/sales'),
+	'@/hooks/sales': path.resolve(__dirname, 'src/hooks/sales'),
+	'@/components/sales': path.resolve(__dirname, 'src/components/sales'),
+	'@/constants/sales': path.resolve(__dirname, 'src/constants/sales.ts'),
+
 	'@doublescale/email-sequences-page': path.resolve(
 		__dirname,
 		'src/client/pages/email-sequences-upgrade/index.tsx'
@@ -322,4 +328,86 @@ const supportRendererConfig = {
 	},
 };
 
-module.exports = [adminClientConfig, bookingRendererConfig, supportRendererConfig];
+/**
+ * Public proposal renderer — lean bundle for `[doublescale_proposal]` pages.
+ */
+const proposalRendererConfig = {
+	...defaultConfig,
+	name: 'proposal-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/proposal/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/proposal'),
+		filename: '[name].js',
+	},
+};
+
+/**
+ * Public invoice renderer — lean bundle for `[doublescale_invoice]` pages.
+ */
+const invoiceRendererConfig = {
+	...defaultConfig,
+	name: 'invoice-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/invoice/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/invoice'),
+		filename: '[name].js',
+	},
+};
+
+module.exports = [
+	adminClientConfig,
+	bookingRendererConfig,
+	supportRendererConfig,
+	proposalRendererConfig,
+	invoiceRendererConfig,
+];

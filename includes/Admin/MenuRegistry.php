@@ -80,7 +80,9 @@ class MenuRegistry {
 				'capability'      => 'doublescale_access',
 				'slug'            => $menu_slug . '&path=sales-pipeline',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
-				'position'        => 40,
+				// After Proposals (41) and Invoices (42): the pipeline is a
+				// child feature of the Sales module.
+				'position'        => 43,
 				'group'           => 'sales',
 				'requires_module' => 'deals',
 			),

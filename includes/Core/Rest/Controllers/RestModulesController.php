@@ -40,7 +40,9 @@ class RestModulesController extends RestController {
 						'slug' => array(
 							'required' => true,
 							'type'     => 'string',
-							'enum'     => array( 'support', 'deals' ),
+							// `deals` (pipeline) is a child of Sales and no longer
+							// owns roles, so it has no role impact of its own.
+							'enum'     => array( 'support', 'sales' ),
 						),
 					),
 				),

@@ -9,7 +9,7 @@ import type { ModuleInfo } from '@doublescale/config';
 
 export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'smtp',
-	'deals',
+	'sales',
 	'forms',
 	'automations',
 	'tasks',
@@ -17,6 +17,23 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'booking',
 	'support',
 ] as const;
+
+/**
+ * Child sub-features rendered as a nested toggle inside their parent's card.
+ * Effective state = parent on AND child intent; the child intent DEFAULTS TO ON
+ * (`setting_enabled` from the REST payload) until the user opts out.
+ * Keep aligned with {@see doublescale_child_module_parent_map()} in PHP.
+ */
+export const CHILD_MODULES_BY_PARENT: Readonly<Record<string, readonly string[]>> = {
+	sales: ['deals'],
+};
+
+const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
+	Object.values(CHILD_MODULES_BY_PARENT).flat()
+);
+
+/** Child sub-features that only function with the Pro add-on installed. */
+const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals']);
 
 /**
  * Pro-only toggles the PHP REST layer persists even when the module class is not loaded yet.
@@ -35,10 +52,11 @@ export const REST_PHANTOM_MODULE_SLUGS = [
 const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
 	...OPTIONAL_MARKETING_MODULE_SLUGS,
 	...REST_PHANTOM_MODULE_SLUGS,
+	...CHILD_MODULE_SLUGS,
 ]);
 
 /** Pro marketing rows: feature ships in Pro; free install still shows toggle + install copy until Pro is active. */
-const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['deals', 'tasks']);
+const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['tasks']);
 
 export type OptionalMarketingModuleSlug =
 	(typeof OPTIONAL_MARKETING_MODULE_SLUGS)[number];
@@ -60,11 +78,11 @@ function placeholderFor(
 					'doublescale'
 				),
 			};
-		case 'deals':
+		case 'sales':
 			return {
-				label: __('Pipelines', 'doublescale'),
+				label: __('Sales', 'doublescale'),
 				description: __(
-					'Manage deals, stages, and pipeline analytics for your sales process.',
+					'Create proposals and invoices with line items, discounts, and customer billing.',
 					'doublescale'
 				),
 			};
@@ -173,11 +191,68 @@ export function getEffectiveMarketingModuleState(
 
 const OPTIONAL_SLUG_SET: ReadonlySet<string> = new Set(OPTIONAL_MARKETING_MODULE_SLUGS);
 
+export type ChildModuleRow = {
+	slug: string;
+	label: string;
+	description: string;
+	/** Stored intent (`setting_enabled`) ignoring the parent gate; children default on. */
+	settingEnabled: boolean;
+	/** True when the sub-feature needs the Pro add-on to actually run. */
+	unavailableUntilPro: boolean;
+};
+
+function childPlaceholderFor(slug: string): Pick<ModuleInfo, 'label' | 'description'> {
+	if (slug === 'deals') {
+		return {
+			label: __('Pipeline', 'doublescale'),
+			description: __(
+				'Manage deals, stages, and pipeline analytics for your sales process.',
+				'doublescale'
+			),
+		};
+	}
+	return { label: slug, description: '' };
+}
+
+/**
+ * Nested toggle rows for a parent's card. The API row is present both with Pro
+ * (real module) and without (phantom row persisted for upsell), so the label /
+ * description / stored intent come from the payload whenever possible.
+ */
+export function buildChildModuleRows(
+	parentSlug: string,
+	modules: ModuleInfo[],
+	isProAddonActive = false
+): ChildModuleRow[] {
+	return (CHILD_MODULES_BY_PARENT[parentSlug] ?? []).map((slug) => {
+		const m = modules.find((x) => x.slug === slug);
+		const placeholder = childPlaceholderFor(slug);
+		return {
+			slug,
+			label: m?.label || placeholder.label,
+			description: m?.description || placeholder.description,
+			settingEnabled: m?.setting_enabled ?? true,
+			unavailableUntilPro:
+				PRO_ONLY_CHILD_MODULE_SLUGS.has(slug) && !isProAddonActive,
+		};
+	});
+}
+
+/** Displayed position of a child toggle: pending change wins over stored intent. */
+export function getChildModuleToggleState(
+	row: ChildModuleRow,
+	pending: Record<string, boolean>
+): boolean {
+	return pending[row.slug] !== undefined ? pending[row.slug] : row.settingEnabled;
+}
+
 /**
  * Normalizes pending toggles: real modules when the user has not yet expressed
  * an explicit opinion (so first-run wizard always commits its defaults) or when
  * the value differs from the API; Pro placeholders only when turned on (visual
- * preference until Pro is installed).
+ * preference until Pro is installed). Child sub-features persist both
+ * directions even without an API row — they default ON, so an explicit off is
+ * as meaningful as an explicit on.
  */
 export function reduceMarketingModulePending(
 	next: Record<string, boolean>,
@@ -190,6 +265,8 @@ export function reduceMarketingModulePending(
 			if (!original.is_explicit || original.enabled !== v) {
 				out[s] = v;
 			}
+		} else if (CHILD_MODULE_SLUGS.has(s)) {
+			out[s] = v;
 		} else if (OPTIONAL_SLUG_SET.has(s) && v) {
 			out[s] = true;
 		}

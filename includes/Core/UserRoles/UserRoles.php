@@ -225,7 +225,10 @@ final class UserRoles {
 			return array( self::BOOKING_MANAGER, self::BOOKING_AGENT );
 		}
 
-		if ( 'deals' === $module_slug ) {
+		// The pipeline (`deals`) is a child of Sales and no longer owns roles:
+		// disabling only the pipeline keeps SALES_REP / SALES_MANAGER alive,
+		// so it must not trigger the role-loss warning.
+		if ( 'sales' === $module_slug ) {
 			return array( self::SALES_REP, self::SALES_MANAGER );
 		}
 
@@ -284,8 +287,10 @@ final class UserRoles {
 	}
 
 	/**
-	 * Provision every Pro-gated role. Sales roles are skipped when the deals
-	 * module is toggled off.
+	 * Provision every Pro-gated role. Sales roles are provisioned when either
+	 * owning module (Sales parent or its pipeline child) is active, keeping
+	 * the invariant "role definitions exist iff is_role_module_enabled()"
+	 * coherent from every entry point.
 	 *
 	 * @return void
 	 */
@@ -296,7 +301,9 @@ final class UserRoles {
 
 		self::provision_role( self::CRM_MANAGER );
 
-		if ( ! function_exists( 'doublescale_is_module_active' ) || doublescale_is_module_active( 'deals' ) ) {
+		if ( ! function_exists( 'doublescale_is_module_active' )
+			|| doublescale_is_module_active( 'deals' )
+			|| doublescale_is_module_active( 'sales' ) ) {
 			self::provision_crm_roles();
 		}
 	}
@@ -455,6 +462,8 @@ final class UserRoles {
 				'doublescale_edit_own_contacts',  // Edit own contacts
 				'doublescale_create_contacts',    // Create new contacts
 				'doublescale_create_activities',  // Create activities
+				'doublescale_view_sales',         // View proposals and invoices
+				'doublescale_manage_own_sales',   // Manage own proposals/invoices
 				// Support caps removed — granted only by support roles.
 			),
 			self::SALES_MANAGER   => array(
@@ -464,6 +473,8 @@ final class UserRoles {
 				'doublescale_manage_contacts',    // Manage all contacts (create, edit, delete)
 				'doublescale_import_data',        // Import data
 				'doublescale_export_data',        // Export data
+				'doublescale_view_sales',         // View proposals and invoices
+				'doublescale_manage_all_sales',   // Manage all proposals/invoices
 				// Support caps removed — granted only by support roles.
 			),
 			self::CRM_MANAGER     => array(
@@ -485,6 +496,8 @@ final class UserRoles {
 				'doublescale_view_support',       // See the Support module
 				'doublescale_manage_all_tickets', // See and manage every ticket
 				'doublescale_reply_own_tickets',  // Reply on tickets
+				'doublescale_view_sales',         // View proposals and invoices
+				'doublescale_manage_all_sales',   // Manage all proposals/invoices
 				'list_users',                  // For Wordpress List users
 			),
 			self::SUPPORT_AGENT   => array(
@@ -564,8 +577,9 @@ final class UserRoles {
 		$is_support    = in_array( $role, array( self::SUPPORT_AGENT, self::SUPPORT_MANAGER ), true );
 		$is_booking    = in_array( $role, array( self::BOOKING_AGENT, self::BOOKING_MANAGER ), true );
 		$is_deals_role = in_array( $role, array( self::SALES_REP, self::SALES_MANAGER ), true );
+		$sales_on      = function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' );
 
-		if ( ! $pro_active && ! $is_support && ! $is_booking ) {
+		if ( ! $pro_active && ! $is_support && ! $is_booking && ! ( $is_deals_role && $sales_on ) ) {
 			return false;
 		}
 
@@ -577,8 +591,12 @@ final class UserRoles {
 			return false;
 		}
 
-		if ( $is_deals_role && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'deals' ) ) {
-			return false;
+		if ( $is_deals_role && function_exists( 'doublescale_is_module_active' ) ) {
+			$deals_on = doublescale_is_module_active( 'deals' );
+			$sales_on = doublescale_is_module_active( 'sales' );
+			if ( ! $deals_on && ! $sales_on ) {
+				return false;
+			}
 		}
 
 		return true;
@@ -718,12 +736,29 @@ final class UserRoles {
 			}
 		}
 
+		// Pipeline off (Sales may still be on): strip only the deal/pipeline
+		// caps — proposals/invoices and contact caps stay with the Sales roles.
 		if (
 			function_exists( 'doublescale_is_module_active' )
 			&& ! doublescale_is_module_active( 'deals' )
 			&& ! in_array( self::CRM_MANAGER, $user_roles, true )
 		) {
-			foreach ( self::get_deals_capability_slugs() as $cap ) {
+			foreach ( self::get_pipeline_capability_slugs() as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		// Sales off: the whole sales-role cap set goes (the pipeline is also
+		// off by derivation, so this is a superset of the strip above).
+		if (
+			function_exists( 'doublescale_is_module_active' )
+			&& ! doublescale_is_module_active( 'sales' )
+			&& ! in_array( self::CRM_MANAGER, $user_roles, true )
+		) {
+			foreach ( self::get_sales_role_capability_slugs() as $cap ) {
 				if ( isset( $shell_caps[ $cap ] ) ) {
 					continue;
 				}
@@ -807,9 +842,30 @@ final class UserRoles {
 	}
 
 	/**
+	 * Deal/pipeline-specific caps — owned by the `deals` (pipeline) child
+	 * module. Excludes proposals/invoices and contact caps, which belong to
+	 * the Sales roles and survive a pipeline-only disable.
+	 *
 	 * @return array<int, string>
 	 */
-	private static function get_deals_capability_slugs(): array {
+	private static function get_pipeline_capability_slugs(): array {
+		return array(
+			'doublescale_view_deals',
+			'doublescale_edit_own_deals',
+			'doublescale_create_deals',
+			'doublescale_manage_deals',
+			'doublescale_view_all_deals',
+			'doublescale_manage_pipelines',
+		);
+	}
+
+	/**
+	 * Every cap the sales roles carry (deal, sales, and contact caps) — the
+	 * full strip set when the Sales parent module is off.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function get_sales_role_capability_slugs(): array {
 		$caps = self::get_capabilities();
 
 		return array_values(

@@ -5,7 +5,10 @@ export * from './api';
 export { getHistory } from './history';
 export { NavLink, setForceReload } from './nav-link';
 
-export const getToLink = (routeTemplate: string) => {
+export const getToLink = (
+	routeTemplate: string,
+	queryParams?: Record<string, string | number | undefined>
+) => {
 	const pathname = document.location.pathname;
 	const basename = pathname.substring(0, pathname.lastIndexOf('/'));
 	const menuSlug =
@@ -20,6 +23,14 @@ export const getToLink = (routeTemplate: string) => {
 	});
 
 	to += `&path=${route}`;
+
+	if (queryParams) {
+		for (const [key, value] of Object.entries(queryParams)) {
+			if (value !== undefined && value !== null && value !== '') {
+				to += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+			}
+		}
+	}
 
 	return to;
 };

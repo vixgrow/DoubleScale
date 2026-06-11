@@ -130,6 +130,51 @@ if ( ! class_exists( 'WP_REST_Controller', false ) ) {
 	}
 }
 
+if ( ! function_exists( 'current_time' ) ) {
+	/**
+	 * @param string $type
+	 * @param bool   $gmt
+	 * @return int|string
+	 */
+	function current_time( $type = 'mysql', $gmt = false ) {
+		$timestamp = time();
+		if ( 'timestamp' === $type ) {
+			return $timestamp;
+		}
+		if ( 'Y-m-d' === $type ) {
+			return gmdate( 'Y-m-d', $timestamp );
+		}
+		unset( $gmt );
+		return gmdate( 'Y-m-d H:i:s', $timestamp );
+	}
+}
+
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	/**
+	 * @param string $show
+	 * @return string
+	 */
+	function get_bloginfo( $show = '' ) {
+		if ( 'name' === $show ) {
+			return 'DoubleScale Test Site';
+		}
+		if ( 'url' === $show ) {
+			return 'http://example.test';
+		}
+		return '';
+	}
+}
+
+if ( ! function_exists( 'home_url' ) ) {
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	function home_url( $path = '' ) {
+		return 'http://example.test' . $path;
+	}
+}
+
 if ( ! function_exists( '__' ) ) {
 	/**
 	 * @param string $text
@@ -139,6 +184,49 @@ if ( ! function_exists( '__' ) ) {
 	function __( $text, $domain = 'default' ) {
 		unset( $domain );
 		return $text;
+	}
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+	/**
+	 * @param string $text
+	 * @return string
+	 */
+	function esc_html( $text ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_html_e' ) ) {
+	/**
+	 * @param string $text
+	 * @param string $domain
+	 * @return void
+	 */
+	function esc_html_e( $text, $domain = 'default' ) {
+		echo esc_html( __( $text, $domain ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
+
+if ( ! function_exists( 'number_format_i18n' ) ) {
+	/**
+	 * @param float|int $number
+	 * @param int       $decimals
+	 * @return string
+	 */
+	function number_format_i18n( $number, $decimals = 0 ) {
+		return number_format( (float) $number, (int) $decimals, '.', ',' );
+	}
+}
+
+if ( ! function_exists( 'is_multisite' ) ) {
+	/**
+	 * Tests run as a single site; pro-detection helpers branch on this.
+	 *
+	 * @return bool
+	 */
+	function is_multisite() {
+		return false;
 	}
 }
 

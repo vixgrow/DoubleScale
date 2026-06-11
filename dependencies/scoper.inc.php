@@ -50,7 +50,7 @@ return [
 		Finder::create()
 			->files()
 			->ignoreVCS( true )
-			->notName( '/.*\\.md|.*\\.dist|Makefile|composer\\.json|composer\\.lock/' )
+			->notName( '/.*\\.md|.*\\.dist$|Makefile|composer\\.json|composer\\.lock/' )
 			->exclude(
 				array(
 					'doc',
@@ -85,6 +85,53 @@ return [
 			$contents = str_replace(
 				'\'\\\\SendGrid\\\\Mail\\\\',
 				'\'' . $p . '\\\\SendGrid\\\\Mail\\\\',
+				$contents
+			);
+
+			// Dompdf builds decorator/reflower/positioner class names at runtime.
+			$contents = str_replace(
+				'"Dompdf\\\\FrameDecorator\\\\$decorator"',
+				'"' . $p . '\\\\Dompdf\\\\FrameDecorator\\\\$decorator"',
+				$contents
+			);
+			$contents = str_replace(
+				'"Dompdf\\\\FrameReflower\\\\$reflower"',
+				'"' . $p . '\\\\Dompdf\\\\FrameReflower\\\\$reflower"',
+				$contents
+			);
+			$contents = str_replace(
+				"'\\Dompdf\\Positioner\\' . \$type",
+				"'\\" . $p . "\\Dompdf\\Positioner\\' . \$type",
+				$contents
+			);
+			$contents = str_replace(
+				"'\\Dompdf\\Positioner\\'.\$type",
+				"'\\" . $p . "\\Dompdf\\Positioner\\'.\$type",
+				$contents
+			);
+
+			// php-font-lib: keep relative class names; scope hardcoded FontLib\ prefixes.
+			$contents = str_replace(
+				array(
+					'"' . $p . '\\\\TrueType\\\\File"',
+					'"' . $p . '\\\\OpenType\\\\File"',
+					'"' . $p . '\\\\WOFF\\\\File"',
+					'"' . $p . '\\\\TrueType\\\\Collection"',
+					'"' . $p . '\\\\EOT\\\\File"',
+				),
+				array(
+					'"TrueType\\\\File"',
+					'"OpenType\\\\File"',
+					'"WOFF\\\\File"',
+					'"TrueType\\\\Collection"',
+					'"EOT\\\\File"',
+				),
+				$contents
+			);
+			$contents = str_replace( '"FontLib\\\\', '"' . $p . '\\\\FontLib\\\\', $contents );
+			$contents = str_replace(
+				'return $class_parts[1];',
+				'return $class_parts[ \\count( $class_parts ) - 2 ];',
 				$contents
 			);
 

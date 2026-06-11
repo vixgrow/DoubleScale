@@ -21,6 +21,7 @@ import {
 	NewFormIcon,
 } from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
+import config from '@doublescale/config';
 import { cn } from '@/lib/utils';
 
 
@@ -39,11 +40,17 @@ export const QuickLinks: FC = () => {
 			to: getToLink('contacts'),
 			icon: <AddContactIcon color='#0D9DFC' width={27} height={27} />,
 		},
-		{
-			label: __('Create Deal', 'doublescale'),
-			to: getToLink('sales-pipeline'),
-			icon: <NewDealIcon color='#0D9DFC' width={27} height={27} />,
-		},
+		// Pipeline is a child feature of Sales — hide the deal shortcut when it
+		// is toggled off (same gate as the sidebar entry).
+		...(config.isModuleToggleEnabled('deals')
+			? [
+					{
+						label: __('Create Deal', 'doublescale'),
+						to: getToLink('sales-pipeline'),
+						icon: <NewDealIcon color='#0D9DFC' width={27} height={27} />,
+					},
+			  ]
+			: []),
 		{
 			label: __('Create Campaign', 'doublescale'),
 			to: getToLink('campaigns'),

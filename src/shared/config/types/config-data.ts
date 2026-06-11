@@ -77,6 +77,12 @@ export type ModuleInfo = {
 	enabled: boolean;
 	/** Same as `enabled` when present (REST 1.13+). */
 	active?: boolean;
+	/**
+	 * Stored toggle intent without the parent gate: a child module (e.g. the
+	 * pipeline under Sales) keeps its remembered position here while its
+	 * parent is off. Children default to true when no key is stored.
+	 */
+	setting_enabled?: boolean;
 	is_toggleable: boolean;
 	/** True when doublescale_enabled_modules contains an explicit entry for this slug. */
 	is_explicit?: boolean;

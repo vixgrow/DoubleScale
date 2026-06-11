@@ -102,7 +102,7 @@ class License {
 
 		$install = $this->install();
 		if ( $install['success'] ) {
-			wp_send_json_success( $install['message'], 200 );
+			wp_send_json_success( $this->get_pro_plugin_status(), 200 );
 		} else {
 			wp_send_json_error( $install['message'] );
 		}
@@ -135,15 +135,12 @@ class License {
 		try {
 			$result = activate_plugin( $this->plugin_data['plugin_file'] );
 			if ( is_wp_error( $result ) ) {
-				// doublescale_get_logger()->error(
-				// esc_html__( 'Cannot activate Plugin Pro', 'doublescale'),
-				// array(
-				// 'code'  => 'cannot_activate_pro',
-				// 'error' => $result,
-				// )
-				// );
+				wp_send_json_error( esc_html__( 'Cannot activate Plugin Pro, check log for details', 'doublescale' ) );
+				return;
 			}
-			wp_send_json_success( esc_html__( 'Double Scale Pro activated successfully', 'doublescale' ), 200 );
+
+			$this->define_plugin();
+			wp_send_json_success( $this->get_pro_plugin_status(), 200 );
 		} catch ( \Exception $e ) {
 			// doublescale_get_logger()->error(
 			// esc_html__( 'Cannot activate Plugin Pro', 'doublescale'),
@@ -634,8 +631,52 @@ class License {
 		// update option.
 		update_option( 'doublescale_license', $license );
 
-		// return new license info.
-		wp_send_json_success( $this->get_license_info(), 200 );
+		$this->maybe_install_and_activate_pro();
+
+		$license_info                      = $this->get_license_info();
+		$license_info['pro_plugin_data'] = $this->get_pro_plugin_status();
+		wp_send_json_success( $license_info, 200 );
+	}
+
+	/**
+	 * Install and activate the Pro plugin when a valid license is present.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return void
+	 */
+	private function maybe_install_and_activate_pro() {
+		$this->define_plugin();
+
+		if ( ! $this->plugin_data['is_installed'] ) {
+			$this->install();
+			$this->define_plugin();
+		}
+
+		if ( $this->plugin_data['is_installed'] && ! $this->plugin_data['is_active'] ) {
+			if ( ! function_exists( 'activate_plugin' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			activate_plugin( $this->plugin_data['plugin_file'] );
+			$this->define_plugin();
+		}
+	}
+
+	/**
+	 * Get Pro plugin installation and activation status.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array{is_installed: bool, is_active: bool}
+	 */
+	private function get_pro_plugin_status() {
+		$this->define_plugin();
+
+		return array(
+			'is_installed' => (bool) $this->plugin_data['is_installed'],
+			'is_active'    => (bool) $this->plugin_data['is_active'],
+		);
 	}
 
 	/**

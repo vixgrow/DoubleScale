@@ -16,10 +16,24 @@ import {
     PlanIcon,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
+import type { ProPluginData } from '@doublescale/config/types/config-data';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const applyProPluginData = (data: ProPluginData) => {
+    ConfigAPI.setProPluginData(data);
+    return data;
+};
+
+const reloadIfProActive = (data: ProPluginData) => {
+    if (data.is_active) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+};
 
 const License: React.FC = () => {
     const license = ConfigAPI.getLicense();
@@ -28,6 +42,11 @@ const License: React.FC = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeactivating, setIsDeactivating] = useState(false);
     const [isActivating, setIsActivating] = useState(false);
+    const [isInstallingPro, setIsInstallingPro] = useState(false);
+    const [isActivatingPro, setIsActivatingPro] = useState(false);
+    const [proPluginData, setProPluginData] = useState<ProPluginData>(
+        ConfigAPI.getProPluginData()
+    );
     const [loading, setLoading] = useState(true);
     const ajaxUrl = ConfigAPI.getAjaxUrl();
 
@@ -37,6 +56,146 @@ const License: React.FC = () => {
 
     // dispatch notices.
     const { createNotice } = useDispatch('doublescale/core');
+
+    const handleProPluginResponse = (data: ProPluginData) => {
+        setProPluginData(applyProPluginData(data));
+        setCount((prev) => prev + 1);
+    };
+
+    const notifyProPluginStatus = (data: ProPluginData) => {
+        if (data.is_active) {
+            createNotice({
+                type: 'success',
+                message: __(
+                    'DoubleScale Pro is installed and active.',
+                    'doublescale'
+                ),
+            });
+            return;
+        }
+
+        if (data.is_installed) {
+            createNotice({
+                type: 'warning',
+                message: __(
+                    'DoubleScale Pro is installed but not active. Use the Activate button below.',
+                    'doublescale'
+                ),
+            });
+            return;
+        }
+
+        createNotice({
+            type: 'warning',
+            message: __(
+                'DoubleScale Pro could not be installed automatically. Use the Install button below.',
+                'doublescale'
+            ),
+        });
+    };
+
+    const activatePro = () => {
+        if (isActivatingPro || isInstallingPro) {
+            return;
+        }
+
+        setIsActivatingPro(true);
+        const data = new FormData();
+        data.append('action', 'doublescale_activate_pro');
+        data.append('_nonce', ConfigAPI.getNonce());
+
+        fetch(ajaxUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: data,
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (res.success) {
+                    handleProPluginResponse(res.data);
+                    createNotice({
+                        type: 'success',
+                        message: __(
+                            'DoubleScale Pro activated successfully.',
+                            'doublescale'
+                        ),
+                    });
+                    reloadIfProActive(res.data);
+                } else {
+                    createNotice({
+                        type: 'error',
+                        message: res.data,
+                    });
+                }
+                setIsActivatingPro(false);
+            })
+            .catch(() => {
+                setIsActivatingPro(false);
+                createNotice({
+                    type: 'error',
+                    message: __('Something went wrong', 'doublescale'),
+                });
+            });
+    };
+
+    const installPro = () => {
+        if (isInstallingPro || isActivatingPro) {
+            return;
+        }
+
+        setIsInstallingPro(true);
+        const data = new FormData();
+        data.append('action', 'doublescale_install_pro');
+        data.append('_nonce', ConfigAPI.getNonce());
+
+        fetch(ajaxUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: data,
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (res.success) {
+                    handleProPluginResponse(res.data);
+                    if (res.data.is_active) {
+                        createNotice({
+                            type: 'success',
+                            message: __(
+                                'DoubleScale Pro installed and activated successfully.',
+                                'doublescale'
+                            ),
+                        });
+                        reloadIfProActive(res.data);
+                        setIsInstallingPro(false);
+                        return;
+                    }
+
+                    createNotice({
+                        type: 'success',
+                        message: __(
+                            'DoubleScale Pro installed successfully.',
+                            'doublescale'
+                        ),
+                    });
+                    setIsInstallingPro(false);
+                    activatePro();
+                    return;
+                }
+
+                createNotice({
+                    type: 'error',
+                    message: res.data,
+                });
+                setIsInstallingPro(false);
+            })
+            .catch(() => {
+                setIsInstallingPro(false);
+                createNotice({
+                    type: 'error',
+                    message: __('Something went wrong', 'doublescale'),
+                });
+            });
+    };
 
     const activate = () => {
         if (isDeactivating || isUpdating || isActivating) return;
@@ -54,8 +213,10 @@ const License: React.FC = () => {
             .then((res) => res.json())
             .then((res) => {
                 if (res.success) {
-                    ConfigAPI.setLicense(res.data);
-                    setCount(count + 1);
+                    const { pro_plugin_data: proData, ...licenseData } = res.data;
+
+                    ConfigAPI.setLicense(licenseData);
+                    setCount((prev) => prev + 1);
                     createNotice({
                         type: 'success',
                         message: __(
@@ -63,6 +224,12 @@ const License: React.FC = () => {
                             'doublescale'
                         ),
                     });
+
+                    if (proData) {
+                        handleProPluginResponse(proData);
+                        notifyProPluginStatus(proData);
+                        reloadIfProActive(proData);
+                    }
                 } else {
                     createNotice({
                         type: 'error',
@@ -96,7 +263,7 @@ const License: React.FC = () => {
             .then((res) => {
                 if (res.success) {
                     ConfigAPI.setLicense(res.data);
-                    setCount(count + 1);
+                    setCount((prev) => prev + 1);
                     createNotice({
                         type: 'success',
                         message: __(
@@ -137,7 +304,7 @@ const License: React.FC = () => {
             .then((res) => {
                 if (res.success) {
                     ConfigAPI.setLicense(false);
-                    setCount(count + 1);
+                    setCount((prev) => prev + 1);
                     createNotice({
                         type: 'success',
                         message: __(
@@ -172,6 +339,54 @@ const License: React.FC = () => {
 
         return () => clearTimeout(timer);
     }, []);
+
+    const renderProPluginStatus = () => {
+        if (!status) {
+            return null;
+        }
+
+        if (proPluginData.is_active) {
+            return (
+                <div className="text-xl font-bold text-[#34C759]">
+                    {__('Active', 'doublescale')}
+                </div>
+            );
+        }
+
+        if (proPluginData.is_installed) {
+            return (
+                <div className="flex items-center gap-3">
+                    <div className="text-xl font-bold text-[#F59E0B]">
+                        {__('Installed', 'doublescale')}
+                    </div>
+                    <Button
+                        className="h-9 px-4"
+                        onClick={activatePro}
+                        disabled={isActivatingPro || isInstallingPro}
+                        variant="default"
+                    >
+                        {__('Activate', 'doublescale')}
+                    </Button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex items-center gap-3">
+                <div className="text-xl font-bold text-[#EF4444]">
+                    {__('Not Installed', 'doublescale')}
+                </div>
+                <Button
+                    className="h-9 px-4"
+                    onClick={installPro}
+                    disabled={isInstallingPro || isActivatingPro}
+                    variant="default"
+                >
+                    {__('Install & Activate', 'doublescale')}
+                </Button>
+            </div>
+        );
+    };
 
     if (loading) {
         return (
@@ -218,7 +433,6 @@ const License: React.FC = () => {
                         <Button
                             className="bg-primary hover:bg-primary/90 px-7 h-10"
                             onClick={activate}
-                            disabled
                             disabled={isActivating || !licenseKey.trim()}
                             variant='default'
                         >
@@ -265,7 +479,7 @@ const License: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Left Column - Start Date */}
+                        {/* Left Column - Last Update */}
                         <div className="flex justify-between items-center py-6 pl-6 border-r pr-10">
                             <div className="flex gap-2 items-center">
                                 <div className="flex items-center justify-center">
@@ -316,7 +530,20 @@ const License: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="py-6 pr-6 pl-10" />
+                        {/* Right Column - Pro Plugin */}
+                        <div className="flex justify-between items-center py-6 pr-6 pl-10">
+                            <div className="flex gap-2 items-center">
+                                <div className="flex items-center justify-center">
+                                    <PlanIcon />
+                                </div>
+                                <div>
+                                    <div className="text-lg font-medium text-muted-foreground">
+                                        {__('Pro Plugin', 'doublescale')}
+                                    </div>
+                                </div>
+                            </div>
+                            {renderProPluginStatus()}
+                        </div>
                     </div>
 
                     {/* Upgrade Links Section */}
@@ -346,7 +573,6 @@ const License: React.FC = () => {
                         <Button
                             className="bg-primary hover:bg-primary/90 px-7 h-10"
                             onClick={update}
-                            disabled
                             disabled={isDeactivating || isUpdating || isActivating}
                             variant='default'
                         >
@@ -355,7 +581,6 @@ const License: React.FC = () => {
                         <Button
                             className="px-7 h-10"
                             onClick={deactivate}
-                            disabled
                             disabled={isDeactivating || isUpdating || isActivating}
                             variant='destructive'
                         >

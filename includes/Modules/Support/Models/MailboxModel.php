@@ -187,7 +187,7 @@ class MailboxModel extends Model {
 		/*
 		 * Mirror the `email` column from the mailbox's own sending identity
 		 * (`data.identity.from_email`) — the single chokepoint that keeps `email`
-		 * in sync across every caller (REST, seeder, IMAP, WP-CLI), for EVERY box
+		 * in sync across every caller (REST, IMAP, WP-CLI), for EVERY box
 		 * type. The from_email is the box identity used to send (From/Reply-To) and
 		 * — for `email` boxes — to match inbound mail. Runs on insert AND update
 		 * (the `saving` event precedes both `creating` and `updating`). Re-saves are

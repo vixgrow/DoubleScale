@@ -237,23 +237,9 @@ class AdminLoader {
 	 * @return bool
 	 */
 	private static function admin_context_is_pro_plugin(): bool {
-		if ( defined( 'DOUBLESCALE_PRO_VERSION' ) ) {
-			return true;
-		}
-		if ( function_exists( 'is_plugin_active' ) ) {
-			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) ) {
-				return true;
-			}
-			return \is_plugin_active( 'doublescale-pro/doublescale-pro.php' );
-		}
-		if ( function_exists( 'doublescale_is_plugin_active' ) ) {
-			return doublescale_is_plugin_active( 'doublescale-pro/doublescale-pro.php' )
-				|| (
-					defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
-					&& doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH )
-				);
-		}
-		return false;
+		return function_exists( 'doublescale_is_pro_addon_active' )
+			? doublescale_is_pro_addon_active()
+			: defined( 'DOUBLESCALE_PRO_VERSION' );
 	}
 
 	/**
@@ -341,7 +327,10 @@ class AdminLoader {
 			?>
 		</div>
 
-		<div class="ds-wordmark">DoubleScale</div>
+		<?php
+		$default_wordmark = '<div class="ds-wordmark">DoubleScale</div>';
+		echo apply_filters( 'doublescale_loading_screen_wordmark', $default_wordmark ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Filterable branding markup, same contract as doublescale_loading_screen_logo above; filters must return pre-escaped HTML.
+		?>
 
 		<div class="ds-bar"></div>
 

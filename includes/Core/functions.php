@@ -145,8 +145,114 @@ if ( ! function_exists( 'doublescale_decode_string' ) ) {
 
 if ( ! function_exists( 'doublescale_is_plugin_active' ) ) {
 	function doublescale_is_plugin_active( $plugin_name ) {
-		$active_plugins = get_option( 'active_plugins', array() );
-		return in_array( $plugin_name, (array) $active_plugins, true );
+		return doublescale_is_plugin_active_basename( (string) $plugin_name );
+	}
+}
+
+if ( ! function_exists( 'doublescale_is_plugin_active_basename' ) ) {
+	/**
+	 * Whether a plugin basename is active (case-insensitive; folder name may vary).
+	 *
+	 * @param string $basename Plugin path relative to wp-content/plugins.
+	 */
+	function doublescale_is_plugin_active_basename( string $basename ): bool {
+		$needle = strtolower( $basename );
+		if ( '' === $needle ) {
+			return false;
+		}
+
+		foreach ( (array) get_option( 'active_plugins', array() ) as $active ) {
+			if ( is_string( $active ) && strtolower( $active ) === $needle ) {
+				return true;
+			}
+		}
+
+		if ( is_multisite() ) {
+			$network = (array) get_site_option( 'active_sitewide_plugins', array() );
+			foreach ( array_keys( $network ) as $active ) {
+				if ( is_string( $active ) && strtolower( $active ) === $needle ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+}
+
+if ( ! function_exists( 'doublescale_get_pro_plugin_basenames' ) ) {
+	/**
+	 * Known Pro plugin basenames (any folder name; main file doublescale-pro.php).
+	 *
+	 * @return string[]
+	 */
+	function doublescale_get_pro_plugin_basenames(): array {
+		$basenames = array( 'doublescale-pro/doublescale-pro.php' );
+
+		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_FILE' ) ) {
+			$basenames[] = plugin_basename( \DOUBLESCALE_PRO_PLUGIN_FILE );
+		}
+		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \DOUBLESCALE_PRO_PLUGIN_PATH ) {
+			$basenames[] = (string) \DOUBLESCALE_PRO_PLUGIN_PATH;
+		}
+
+		$plugin_lists = array( (array) get_option( 'active_plugins', array() ) );
+		if ( is_multisite() ) {
+			$plugin_lists[] = array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) );
+		}
+		foreach ( $plugin_lists as $plugins ) {
+			foreach ( $plugins as $plugin ) {
+				if ( is_string( $plugin ) && preg_match( '#/doublescale-pro\.php$#i', $plugin ) ) {
+					$basenames[] = $plugin;
+				}
+			}
+		}
+
+		$plugins_root = defined( 'WP_PLUGIN_DIR' ) ? \WP_PLUGIN_DIR : '';
+		if ( $plugins_root && is_dir( $plugins_root ) ) {
+			foreach ( (array) glob( $plugins_root . '/*/doublescale-pro.php' ) as $main_file ) {
+				if ( is_readable( $main_file ) ) {
+					$basenames[] = plugin_basename( $main_file );
+				}
+			}
+		}
+
+		$basenames = array_values( array_unique( array_filter( $basenames ) ) );
+
+		/**
+		 * Filter the list of Pro plugin basenames used for install/active detection.
+		 *
+		 * @param string[] $basenames Plugin paths relative to wp-content/plugins.
+		 */
+		return apply_filters( 'doublescale_pro_plugin_basenames', $basenames );
+	}
+}
+
+if ( ! function_exists( 'doublescale_get_pro_plugin_status' ) ) {
+	/**
+	 * Pro plugin install/active flags for admin config and license UI.
+	 *
+	 * @return array{is_installed: bool, is_active: bool}
+	 */
+	function doublescale_get_pro_plugin_status(): array {
+		$installed = false;
+
+		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_FILE' ) && is_readable( \DOUBLESCALE_PRO_PLUGIN_FILE ) ) {
+			$installed = true;
+		} else {
+			foreach ( doublescale_get_pro_plugin_basenames() as $basename ) {
+				$path = ( defined( 'WP_PLUGIN_DIR' ) ? \WP_PLUGIN_DIR : '' ) . '/' . $basename;
+				if ( is_readable( $path ) ) {
+					$installed = true;
+					break;
+				}
+			}
+		}
+
+		return array(
+			'is_installed' => $installed,
+			'is_active'    => doublescale_is_pro_addon_active(),
+		);
 	}
 }
 
@@ -154,29 +260,29 @@ if ( ! function_exists( 'doublescale_is_pro_addon_active' ) ) {
 	/**
 	 * Whether the DoubleScale Pro add-on is active for this site.
 	 *
-	 * Does not rely on {@see DOUBLESCALE_PRO_PLUGIN_PATH} being defined first: the free
-	 * plugin may boot before Pro, so that constant can be missing until Pro loads.
+	 * Detection is folder-agnostic: uses Pro constants, active-plugin scan, and
+	 * {@see 'doublescale_is_pro_addon_active'} filter (Pro registers true when loaded).
 	 */
 	function doublescale_is_pro_addon_active(): bool {
+		$active = false;
+
 		if ( defined( 'DOUBLESCALE_PRO_VERSION' ) ) {
-			return true;
-		}
-
-		$candidates = array(
-			'doublescale-pro/doublescale-pro.php',
-		);
-		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \DOUBLESCALE_PRO_PLUGIN_PATH ) {
-			array_unshift( $candidates, (string) \DOUBLESCALE_PRO_PLUGIN_PATH );
-		}
-		$candidates = array_values( array_unique( array_filter( $candidates ) ) );
-
-		foreach ( $candidates as $basename ) {
-			if ( doublescale_is_plugin_active( $basename ) ) {
-				return true;
+			$active = true;
+		} else {
+			foreach ( doublescale_get_pro_plugin_basenames() as $basename ) {
+				if ( doublescale_is_plugin_active_basename( $basename ) ) {
+					$active = true;
+					break;
+				}
 			}
 		}
 
-		return false;
+		/**
+		 * Whether DoubleScale Pro is active for this request.
+		 *
+		 * @param bool $active Detected active state before filtering.
+		 */
+		return (bool) apply_filters( 'doublescale_is_pro_addon_active', $active );
 	}
 }
 

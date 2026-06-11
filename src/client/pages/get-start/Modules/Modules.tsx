@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	buildMarketingModuleDisplayRows,
 	getEffectiveMarketingModuleState,
@@ -59,7 +60,7 @@ export default function ModulesStep({
 	onPendingModuleChange,
 }: ModulesStepProps) {
 	const modules = useMemo(() => config.getModules(), []);
-	const isProAddonActive = Boolean(config.getProPluginData()?.is_active);
+	const isProAddonActive = isProActive();
 	const displayRows = useMemo(
 		() => buildMarketingModuleDisplayRows(modules, isProAddonActive),
 		[modules, isProAddonActive]

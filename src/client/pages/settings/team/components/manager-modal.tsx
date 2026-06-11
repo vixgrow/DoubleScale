@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { CRMUser } from '@doublescale/services/user-management';
 import Config from '@doublescale/config';
 import { useModulesEnabled } from '@doublescale/hooks/use-module-enabled';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	ManagerRole,
 	ManagerRoleModuleRequirements,
@@ -60,7 +61,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 	const availableRoles = ManagerRoleOptions;
 	const moduleFlags = useModulesEnabled( [ 'support', 'deals', 'booking' ] );
-	const isProActive = Boolean( Config.getProPluginData()?.is_active );
+	const isProActiveFlag = isProActive();
 
 	const getModuleLabel = useCallback( ( slug: string ) => {
 		return (
@@ -73,7 +74,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 		( roleId: ManagerRole ) => {
 			if (
 				ManagerRoleProRequirements.includes( roleId ) &&
-				! isProActive
+				! isProActiveFlag
 			) {
 				return false;
 			}
@@ -85,7 +86,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 			return moduleFlags[ moduleSlug ] ?? false;
 		},
-		[ isProActive, moduleFlags ]
+		[ isProActiveFlag, moduleFlags ]
 	);
 
 	const isEditMode = mode === 'edit';
@@ -372,7 +373,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 												{__( role.label, 'doublescale' )}
 											</Label>
 										</div>
-										{ requiresPro && ! isProActive && (
+										{ requiresPro && ! isProActiveFlag && (
 											<p className="text-xs text-amber-700 pl-8">
 												{__(
 													'Activate DoubleScale Pro to assign this role.',
@@ -382,7 +383,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 										) }
 										{ roleAssignable === false &&
 											moduleSlug &&
-											( requiresPro ? isProActive : true ) && (
+											( requiresPro ? isProActiveFlag : true ) && (
 												<p className="text-xs text-amber-700 pl-8">
 													{sprintf(
 														/* translators: %s: module label from Settings → Modules */

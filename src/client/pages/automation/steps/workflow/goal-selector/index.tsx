@@ -19,6 +19,7 @@ import { AutomationsIcon, SureCartIcon } from '@doublescale/components';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { cn } from '@/lib/utils';
 import config from '@doublescale/config';
+import { isProActive as checkProActive } from '@doublescale/hooks/use-is-pro-active';
 import { getFilteredGoalsByTrigger } from '@doublescale/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -85,8 +86,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	} | null>(null);
 
 	// Check if Pro plugin is active once
-	const proPluginData = config.getProPluginData();
-	const isProActive = proPluginData.is_active;
+	const isProActive = checkProActive();
 
 	// Get current trigger from store
 	const currentTrigger = useSelect((select: any) => {

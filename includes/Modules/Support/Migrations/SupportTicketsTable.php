@@ -36,9 +36,11 @@ class SupportTicketsTable extends Migration {
 	 * - `contact_id`     — FK to `doublescale_contacts` (the customer).
 	 * - `agent_user_id`  — FK to `wp_users.ID` (the assigned agent). No agent persons table.
 	 * - `mailbox_id`     — FK to `doublescale_support_mailboxes`. NOT NULL: every ticket
-	 *                      belongs to a mailbox. The seeder guarantees a default mailbox
-	 *                      exists, and `TicketService::resolve_mailbox_id()` falls back to
-	 *                      it when a create omits one, so there is no "no channel" state.
+	 *                      belongs to a mailbox. `TicketService::resolve_mailbox_id()`
+	 *                      falls back to the default mailbox when a create omits one, so
+	 *                      there is no "no channel" state — but a fresh install has no
+	 *                      mailbox until the operator creates one, and ticket creation is
+	 *                      rejected with a clear error until then.
 	 * - `message_id`     — Email Message-ID of the thread root; indexed for inbound matching.
 	 *                      Inbound dedup is done on this (InboundTicketFactory) plus IMAP
 	 *                      seen-tracking — there is no content-hash column.

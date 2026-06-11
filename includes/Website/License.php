@@ -102,7 +102,7 @@ class License {
 
 		$install = $this->install();
 		if ( $install['success'] ) {
-			wp_send_json_success( $install['message'], 200 );
+			wp_send_json_success( $this->get_pro_plugin_status(), 200 );
 		} else {
 			wp_send_json_error( $install['message'] );
 		}
@@ -135,15 +135,12 @@ class License {
 		try {
 			$result = activate_plugin( $this->plugin_data['plugin_file'] );
 			if ( is_wp_error( $result ) ) {
-				// doublescale_get_logger()->error(
-				// esc_html__( 'Cannot activate Plugin Pro', 'doublescale'),
-				// array(
-				// 'code'  => 'cannot_activate_pro',
-				// 'error' => $result,
-				// )
-				// );
+				wp_send_json_error( esc_html__( 'Cannot activate Plugin Pro, check log for details', 'doublescale' ) );
+				return;
 			}
-			wp_send_json_success( esc_html__( 'Double Scale Pro activated successfully', 'doublescale' ), 200 );
+
+			$this->define_plugin();
+			wp_send_json_success( $this->get_pro_plugin_status(), 200 );
 		} catch ( \Exception $e ) {
 			// doublescale_get_logger()->error(
 			// esc_html__( 'Cannot activate Plugin Pro', 'doublescale'),
@@ -168,24 +165,36 @@ class License {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
-		$plugins_dir = trailingslashit( dirname( dirname( DOUBLESCALE_PLUGIN_FILE ) ) );
-
-		// get plugin data.
 		$plugin_file      = 'doublescale-pro/doublescale-pro.php';
-		$full_plugin_file = $plugins_dir . $plugin_file;
-		$plugin_exists    = file_exists( $full_plugin_file );
-		$plugin_data      = $plugin_exists ? get_plugin_data( $full_plugin_file, true, false ) : array();
+		$full_plugin_file = '';
+		$plugin_exists    = false;
+		$plugin_data      = array();
 
-		$data                     = array();
-		$data['plugin_file']      = $plugin_file;
-		$data['full_plugin_file'] = $full_plugin_file;
-		$data['is_installed']     = $plugin_exists;
-		$data['is_active']        = is_plugin_active( $plugin_file );
-		$data['version']          = $plugin_data['Version'] ?? null;
-		$data['slug']             = 'doublescale-pro';
+		if ( function_exists( 'doublescale_get_pro_plugin_basenames' ) ) {
+			foreach ( doublescale_get_pro_plugin_basenames() as $basename ) {
+				$path = WP_PLUGIN_DIR . '/' . $basename;
+				if ( is_readable( $path ) ) {
+					$plugin_file      = $basename;
+					$full_plugin_file = $path;
+					$plugin_exists    = true;
+					$plugin_data      = get_plugin_data( $full_plugin_file, true, false );
+					break;
+				}
+			}
+		}
 
-		$this->plugin_data = $data;
+		$is_active = function_exists( 'doublescale_is_pro_addon_active' )
+			? doublescale_is_pro_addon_active()
+			: ( $plugin_exists && is_plugin_active( $plugin_file ) );
+
+		$this->plugin_data = array(
+			'plugin_file'      => $plugin_file,
+			'full_plugin_file' => $full_plugin_file,
+			'is_installed'     => $plugin_exists,
+			'is_active'        => $is_active,
+			'version'          => $plugin_data['Version'] ?? null,
+			'slug'             => 'doublescale-pro',
+		);
 	}
 
 	/**
@@ -292,7 +301,21 @@ class License {
 		}
 
 		// check the installed plugin.
-		if ( $installer->plugin_info() !== $this->plugin_data['plugin_file'] ) {
+		$installed_basename = $installer->plugin_info();
+		$expected_basenames = function_exists( 'doublescale_get_pro_plugin_basenames' )
+			? doublescale_get_pro_plugin_basenames()
+			: array( $this->plugin_data['plugin_file'] );
+		$basename_match     = false;
+		if ( is_string( $installed_basename ) ) {
+			foreach ( $expected_basenames as $expected ) {
+				if ( strtolower( $installed_basename ) === strtolower( $expected ) ) {
+					$basename_match = true;
+					break;
+				}
+			}
+		}
+
+		if ( ! $basename_match ) {
 
 			if ( ! function_exists( 'delete_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -634,8 +657,56 @@ class License {
 		// update option.
 		update_option( 'doublescale_license', $license );
 
-		// return new license info.
-		wp_send_json_success( $this->get_license_info(), 200 );
+		$this->maybe_install_and_activate_pro();
+
+		$license_info                      = $this->get_license_info();
+		$license_info['pro_plugin_data'] = $this->get_pro_plugin_status();
+		wp_send_json_success( $license_info, 200 );
+	}
+
+	/**
+	 * Install and activate the Pro plugin when a valid license is present.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return void
+	 */
+	private function maybe_install_and_activate_pro() {
+		$this->define_plugin();
+
+		if ( ! $this->plugin_data['is_installed'] ) {
+			$this->install();
+			$this->define_plugin();
+		}
+
+		if ( $this->plugin_data['is_installed'] && ! $this->plugin_data['is_active'] ) {
+			if ( ! function_exists( 'activate_plugin' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			activate_plugin( $this->plugin_data['plugin_file'] );
+			$this->define_plugin();
+		}
+	}
+
+	/**
+	 * Get Pro plugin installation and activation status.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array{is_installed: bool, is_active: bool}
+	 */
+	private function get_pro_plugin_status() {
+		if ( function_exists( 'doublescale_get_pro_plugin_status' ) ) {
+			return doublescale_get_pro_plugin_status();
+		}
+
+		$this->define_plugin();
+
+		return array(
+			'is_installed' => (bool) $this->plugin_data['is_installed'],
+			'is_active'    => (bool) $this->plugin_data['is_active'],
+		);
 	}
 
 	/**

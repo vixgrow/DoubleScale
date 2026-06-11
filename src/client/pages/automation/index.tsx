@@ -41,6 +41,7 @@ import {
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
 import Config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
@@ -163,7 +164,7 @@ const Automation: React.FC = () => {
 				// Pro is inactive: funnel data is simply unavailable — no toast,
 				// the Reports tab already renders an upgrade prompt.
 				// If automations module itself is off (different issue), show a notice.
-				if (Config.getProPluginData()?.is_active) {
+				if (isProActive()) {
 					createNotice({
 						type: 'error',
 						message: getModuleFetchBlockedNotice('automations'),

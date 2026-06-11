@@ -41,6 +41,7 @@ import {
 	Info,
 	FolderCheck,
 	Bell,
+	AlertTriangle,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -1295,11 +1296,16 @@ const SupportMailboxes: React.FC = () => {
 				<Card>
 					<CardContent className="p-0">
 						{mailboxes.length === 0 ? (
-							<div className="p-8 text-center text-gray-500">
-								{__(
-									'No mailboxes yet. Add one to start routing tickets.',
-									'doublescale'
-								)}
+							<div className="p-8">
+								<Alert className="border-amber-200 bg-amber-50 text-amber-800">
+									<AlertTriangle className="h-4 w-4" />
+									<AlertDescription>
+										{__(
+											'No mailbox is configured yet. Ticket creation is blocked until you add one — use “Add mailbox” above to set up a routing channel.',
+											'doublescale'
+										)}
+									</AlertDescription>
+								</Alert>
 							</div>
 						) : (
 							<ul className="divide-y">

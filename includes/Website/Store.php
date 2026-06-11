@@ -65,16 +65,16 @@ class Store {
 		$plugins_dir = trailingslashit( dirname( dirname( DOUBLESCALE_PLUGIN_FILE ) ) );
 
 		$addons = array(
-			'zapier'       => array(
-				'name'        => 'Zapier',
-				'slug'        => 'zapier',
-				'description' => __( 'Connect Plugin with Zapier to automate your CRM with 5000+ apps.', 'doublescale' ),
-				'plugin_file' => file_exists( $plugins_dir . 'DoubleScale-Zapier/doublescale-zapier.php' )
-					? 'DoubleScale-Zapier/doublescale-zapier.php'
-					: 'DS-Zapier/ds-zapier.php',
-				'image'       => 'zapier/zapier.svg',
-				'plan'        => 'plus',
-			),
+			// 'zapier'       => array(
+			// 	'name'        => 'Zapier',
+			// 	'slug'        => 'zapier',
+			// 	'description' => __( 'Connect Plugin with Zapier to automate your CRM with 5000+ apps.', 'doublescale' ),
+			// 	'plugin_file' => file_exists( $plugins_dir . 'DoubleScale-Zapier/doublescale-zapier.php' )
+			// 		? 'DoubleScale-Zapier/doublescale-zapier.php'
+			// 		: 'DS-Zapier/ds-zapier.php',
+			// 	'image'       => 'zapier/zapier.svg',
+			// 	'plan'        => 'plus',
+			// ),
 			// 'make'   => array(
 			// 'name'        => 'Make',
 			// 'slug'        => 'make',
@@ -87,20 +87,20 @@ class Store {
 				'name'        => 'White Labeling',
 				'slug'        => 'white-label',
 				'description' => __( 'Remove Plugin branding and replace with your own plugin name, logo, menu icon, and brand colors.', 'doublescale' ),
-				'plugin_file' => file_exists( $plugins_dir . 'doublescale-white-label/doublescale-white-label.php' )
-					? 'doublescale-white-label/doublescale-white-label.php'
-					: 'ds-white-label/ds-white-label.php',
+				'plugin_file' => file_exists( $plugins_dir . 'doublescale-whitelabeling/doublescale-white-labeling.php' )
+					? 'doublescale-whitelabeling/doublescale-white-labeling.php'
+					: 'doublescale-whitelabeling/doublescale-white-labeling.php',
 				'image'       => 'white-label/white-label.svg',
 				'plan'        => 'enterprise',
 			),
-			'ai-assistant' => array(
-				'name'        => 'AI Assistant',
-				'slug'        => 'ai-assistant',
-				'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
-				'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
-				'image'       => 'ai-assistant/ai-assistant.svg',
-				'plan'        => 'plus',
-			),
+			// 'ai-assistant' => array(
+			// 	'name'        => 'AI Assistant',
+			// 	'slug'        => 'ai-assistant',
+			// 	'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
+			// 	'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
+			// 	'image'       => 'ai-assistant/ai-assistant.svg',
+			// 	'plan'        => 'plus',
+			// ),
 		);
 
 		$this->addons = apply_filters( 'doublescale_store_addons', $addons );

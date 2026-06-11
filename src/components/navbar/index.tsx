@@ -176,8 +176,9 @@ const SUB_PATH_TO_MODULE: Record<string, string> = {
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { state: sidebarState, toggleSidebar } = useSidebar();
-	const isCollapsed = sidebarState === 'collapsed';
+	const { state: sidebarState, toggleSidebar, isMobile, setOpenMobile } =
+		useSidebar();
+	const isCollapsed = sidebarState === 'collapsed' && !isMobile;
 
 	const getCurrentPathFromLocation = useCallback(() => {
 		const pathname = location.pathname;
@@ -490,6 +491,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		setSelectedKey(path);
 		const cleanPath = path.replace(/\/:[^/]+\?/g, '');
 		navigate(getToLink(cleanPath));
+		if (isMobile) {
+			setOpenMobile(false);
+		}
 	};
 
 	const toggleSubMenu = (path: string) => {
@@ -808,22 +812,24 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							</span>
 						</div>
 					) as React.ReactNode}
-					<button
-						type="button"
-						className="doublescale-navbar__collapse-btn"
-						onClick={toggleSidebar}
-						aria-label={
-							isCollapsed
-								? __('Expand sidebar', 'doublescale')
-								: __('Collapse sidebar', 'doublescale')
-						}
-					>
-						{isCollapsed ? (
-							<PanelLeftOpen size={16} />
-						) : (
-							<PanelLeftClose size={16} />
-						)}
-					</button>
+					{!isMobile && (
+						<button
+							type="button"
+							className="doublescale-navbar__collapse-btn"
+							onClick={toggleSidebar}
+							aria-label={
+								isCollapsed
+									? __('Expand sidebar', 'doublescale')
+									: __('Collapse sidebar', 'doublescale')
+							}
+						>
+							{isCollapsed ? (
+								<PanelLeftOpen size={16} />
+							) : (
+								<PanelLeftClose size={16} />
+							)}
+						</button>
+					)}
 				</SidebarHeader>
 
 				<SidebarContent className="doublescale-navbar__content">

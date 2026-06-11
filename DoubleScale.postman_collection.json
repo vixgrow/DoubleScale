@@ -7935,7 +7935,8 @@
 											"language": "json"
 										}
 									}
-								}
+								},
+								"description": "Accepts **PUT**, **PATCH**, or **POST** (WP_REST_Server::EDITABLE) — all route to the same update handler. The DoubleScale admin app uses PUT. Send only the fields you want to change."
 							},
 							"response": []
 						},
@@ -8246,7 +8247,8 @@
 											"language": "json"
 										}
 									}
-								}
+								},
+								"description": "Accepts **PUT**, **PATCH**, or **POST** (WP_REST_Server::EDITABLE) — all route to the same update handler. The DoubleScale admin app uses PUT. Send only the fields you want to change."
 							},
 							"response": []
 						},
@@ -9123,7 +9125,8 @@
 											"language": "json"
 										}
 									}
-								}
+								},
+								"description": "Accepts **PUT**, **PATCH**, or **POST** (WP_REST_Server::EDITABLE) — all route to the same update handler. The DoubleScale admin app uses PUT. Send only the fields you want to change."
 							},
 							"response": []
 						},

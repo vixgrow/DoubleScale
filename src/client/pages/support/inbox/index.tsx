@@ -10,7 +10,12 @@ import React, { useState, useEffect, useCallback, useMemo } from '@wordpress/ele
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { Plus, RefreshCw, Inbox as InboxEmptyIcon } from 'lucide-react';
+import {
+	Plus,
+	RefreshCw,
+	Inbox as InboxEmptyIcon,
+	AlertTriangle,
+} from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -27,6 +32,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import DataTablePagination from '@/components/ui/data-table-pagination';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
 	useTickets,
 	useMailboxes,
@@ -88,7 +94,7 @@ const SupportInbox: React.FC = () => {
 		sort_order: 'desc',
 	});
 	const { data, loading, error, refetch } = useTickets(filters);
-	const { data: mailboxes } = useMailboxes();
+	const { data: mailboxes, loading: mailboxesLoading } = useMailboxes();
 	const { data: assignableAgents } = useAssignableAgents();
 	const [showNewModal, setShowNewModal] = useState(false);
 	const [tags, setTags] = useState<Array<{ id: number; name: string }>>([]);
@@ -301,6 +307,25 @@ const SupportInbox: React.FC = () => {
 				busy={bulkBusy}
 				canDelete={canManageAllTickets}
 			/>
+
+			{!mailboxesLoading && hasNoMailboxes && (
+				<Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
+					<AlertTriangle className="h-4 w-4" />
+					<AlertDescription>
+						{__(
+							'No support mailbox is configured. New tickets can’t be opened until you add one.',
+							'doublescale'
+						)}{' '}
+						<button
+							type="button"
+							onClick={() => navigate(getToLink('support/mailboxes'))}
+							className="font-medium underline underline-offset-2 hover:no-underline"
+						>
+							{__('Add a mailbox', 'doublescale')}
+						</button>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			<div className="mb-6 flex items-center justify-between">
 				<div>

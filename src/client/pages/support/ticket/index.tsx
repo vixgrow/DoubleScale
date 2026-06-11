@@ -9,8 +9,10 @@
 import React, { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { Trash2 } from 'lucide-react';
+import apiFetch from '@wordpress/api-fetch';
+import { Trash2, Sparkles, Loader2 } from 'lucide-react';
 
+import ConfigAPI from '@doublescale/config';
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { Button } from '@/components/ui/button';
@@ -206,6 +208,13 @@ const SupportTicketDetail: React.FC = () => {
 	const [showCc, setShowCc] = useState(false);
 	const [sending, setSending] = useState(false);
 	const [uploading, setUploading] = useState(false);
+	// AI reply drafting — gate on Free's own config API (mirrors how this file's
+	// siblings call e.g. ConfigAPI.isModuleEnabled).
+	const aiConfigured = ConfigAPI.isAiConfigured();
+	const [aiPanelOpen, setAiPanelOpen] = useState(false);
+	const [aiInstruction, setAiInstruction] = useState('');
+	const [aiDrafting, setAiDrafting] = useState(false);
+	const [aiError, setAiError] = useState<string | null>(null);
 	const [pendingAttachments, setPendingAttachments] = useState<
 		PendingAttachment[]
 	>([]);
@@ -240,6 +249,41 @@ const SupportTicketDetail: React.FC = () => {
 			.trim() ||
 		ticket.contact?.email ||
 		__('Customer', 'doublescale');
+
+	// One-click AI draft: reads the ticket conversation server-side and drops a
+	// suggested reply into the editor for the agent to review/edit/send. An
+	// optional instruction steers the draft. Never sends — that stays manual.
+	const handleDraftWithAI = async () => {
+		setAiDrafting(true);
+		setAiError(null);
+		try {
+			const response = (await apiFetch({
+				path: '/doublescale/v1/ai/draft-ticket-reply',
+				method: 'POST',
+				data: {
+					ticket_id: ticketId,
+					instruction: aiInstruction.trim(),
+					tone: 'professional',
+				},
+			})) as { success: boolean; text: string };
+			if (response.text) {
+				setContent(response.text);
+				setTab('reply');
+				setAiPanelOpen(false);
+				setAiInstruction('');
+			}
+		} catch (err) {
+			setAiError(
+				(err as { message?: string })?.message ||
+					__(
+						'Failed to draft a reply. Please try again.',
+						'doublescale'
+					)
+			);
+		} finally {
+			setAiDrafting(false);
+		}
+	};
 
 	const handleSend = async () => {
 		if (!htmlEditorHasMeaningfulContent(content)) {
@@ -679,6 +723,62 @@ const SupportTicketDetail: React.FC = () => {
 									)
 						}
 					/>
+					{tab === 'reply' && aiConfigured && (
+						<div className="mt-3 rounded border border-violet-200 bg-violet-50/60 p-3">
+							<div className="flex items-center justify-between gap-2">
+								<button
+									type="button"
+									onClick={handleDraftWithAI}
+									disabled={aiDrafting}
+									className="inline-flex items-center gap-2 rounded bg-violet-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50"
+								>
+									{aiDrafting ? (
+										<Loader2
+											width={14}
+											height={14}
+											className="animate-spin"
+										/>
+									) : (
+										<Sparkles width={14} height={14} />
+									)}
+									{aiDrafting
+										? __('Drafting…', 'doublescale')
+										: __('Draft with AI', 'doublescale')}
+								</button>
+								<button
+									type="button"
+									onClick={() => setAiPanelOpen((v) => !v)}
+									className="text-xs font-medium text-violet-700 hover:underline"
+								>
+									{aiPanelOpen
+										? __('Hide instruction', 'doublescale')
+										: __(
+												'Add instruction',
+												'doublescale'
+											)}
+								</button>
+							</div>
+							{aiPanelOpen && (
+								<input
+									type="text"
+									value={aiInstruction}
+									onChange={(e) =>
+										setAiInstruction(e.target.value)
+									}
+									placeholder={__(
+										'Optional: steer the reply (e.g. "offer a 10% discount")',
+										'doublescale'
+									)}
+									className="mt-2 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+								/>
+							)}
+							{aiError && (
+								<div className="mt-2 text-sm text-red-600">
+									{aiError}
+								</div>
+							)}
+						</div>
+					)}
 					{tab === 'reply' && (
 						<div className="mt-3">
 							{showCc ? (

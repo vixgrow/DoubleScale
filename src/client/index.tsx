@@ -43,6 +43,9 @@ addFilter(
 		if (active) {
 			return active;
 		}
+		if (config.getProPluginData()?.is_active) {
+			return true;
+		}
 		const cfg = (window as { doublescalePro?: { isPro?: boolean } })
 			.doublescalePro;
 		return Boolean(cfg?.isPro);

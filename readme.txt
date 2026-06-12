@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.6 = 12 Jun 2026
+- Remove Signature block from the email builder block registry
+- Add autosave for text blocks in the email builder
+
 = 1.1.5 = 11 Jun 2026
 - Fix email builder font size input only accepting extreme values while typing
 - Always show Generate With AI on the campaign templates step

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,12 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.8 = 13 Jun 2026
+- Fix intermittent fatal error when activating the plugin
+- Fix loading splash screen flashing unstyled content on first paint
+- Fix contact import list and tag assignment
+- Improve WordPress user import first and last name mapping
+
 = 1.1.7 = 12 Jun 2026
 - Fix custom fields type dropdown showing no options when adding fields
 - Fix email builder font size input clamping while typing

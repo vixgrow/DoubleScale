@@ -220,9 +220,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 				const template = await getTemplate(templateId);
 
 				// Save template with updated builder body + campaign_id
-				const templateWithCampaignId: typeof template & {
-					campaign_id: number;
-				} = {
+				const templateWithCampaignId: typeof template = {
 					...template,
 					body: JSON.stringify({
 						type: 'builder',

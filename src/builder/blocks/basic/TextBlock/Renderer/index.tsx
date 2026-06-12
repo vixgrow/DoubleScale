@@ -39,6 +39,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 }) => {
 	const editRef = useRef<HTMLDivElement>(null);
 	const editingRef = useRef(false);
+	const commitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const rendererIdRef = useRef<string | null>(null);
 	if (!rendererIdRef.current) {
 		rendererIdRef.current = `text-block-renderer-${generateRandomString()}`;
@@ -131,6 +132,35 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		}
 		return `<p style="color:${textColor}">${escapeHtml(raw)}</p>`;
 	};
+
+	// Commit the current contentEditable HTML to the store.
+	// Used by both the debounced onInput path and the immediate onBlur flush so
+	// the store (and therefore autosave's getFreshState snapshot) always reflects
+	// what the user has typed — not just the last blurred value.
+	const commitContent = () => {
+		if (!onCanvasContentChange) return;
+		const html = editRef.current?.innerHTML ?? '';
+		onCanvasContentChange(
+			stripRichTextChromeColors(html, {
+				blockColor: textColor,
+			})
+		);
+	};
+
+	const flushPendingCommit = () => {
+		if (commitTimerRef.current) {
+			clearTimeout(commitTimerRef.current);
+			commitTimerRef.current = null;
+		}
+	};
+
+	// Clear any pending debounced commit when the editor unmounts so it does not
+	// fire against a detached node.
+	useLayoutEffect(() => {
+		return () => {
+			flushPendingCommit();
+		};
+	}, []);
 
 	const syncCanvasEditorColors = (root: HTMLElement) => {
 		root.style.color = textColor;
@@ -340,14 +370,23 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 								syncCanvasEditorColors(editRef.current);
 							}
 						}}
+						onInput={() => {
+							// Persist edits to the store as the user types (debounced)
+							// so autosave never snapshots stale, pre-edit content.
+							// The store→canvas sync bails while editingRef is true,
+							// so this does not disturb the caret.
+							flushPendingCommit();
+							commitTimerRef.current = setTimeout(() => {
+								commitTimerRef.current = null;
+								commitContent();
+							}, 400);
+						}}
 						onBlur={() => {
 							editingRef.current = false;
-							const html = editRef.current?.innerHTML ?? '';
-							onCanvasContentChange(
-								stripRichTextChromeColors(html, {
-									blockColor: textColor,
-								})
-							);
+							// Final flush: cancel any pending debounce and commit
+							// the latest content immediately.
+							flushPendingCommit();
+							commitContent();
 						}}
 						onKeyDown={(e) => {
 							if (e.key === 'Escape') {

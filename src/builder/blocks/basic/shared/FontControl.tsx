@@ -3,6 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
+ * external dependencies
+ */
+import { useEffect, useState } from 'react';
+/**
  * internal dependencies
  */
 import { cn } from '@/lib/utils';
@@ -34,11 +38,17 @@ const FONT_FAMILIES = [
     },
 ];
 
+const MIN_FONT_SIZE = 8;
+const MAX_FONT_SIZE = 72;
+
 const labelClass = 'text-white';
 const triggerClass =
     'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
 const sizeInputClass =
     'h-10 !rounded-lg !border-none !ring-0 !ring-offset-0 !text-white pr-8 shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
+
+const clampFontSize = (value: number) =>
+    Math.min(Math.max(value, MIN_FONT_SIZE), MAX_FONT_SIZE);
 
 export const FontControl: React.FC<FontControlProps> = ({
     fontFamily,
@@ -47,6 +57,26 @@ export const FontControl: React.FC<FontControlProps> = ({
     onFontSizeChange,
     className,
 }) => {
+    const [fontSizeDraft, setFontSizeDraft] = useState(String(fontSize));
+
+    useEffect(() => {
+        setFontSizeDraft(String(fontSize));
+    }, [fontSize]);
+
+    const commitFontSize = (raw: string) => {
+        const parsed = parseInt(raw, 10);
+        if (Number.isNaN(parsed)) {
+            setFontSizeDraft(String(fontSize));
+            return;
+        }
+
+        const clampedValue = clampFontSize(parsed);
+        setFontSizeDraft(String(clampedValue));
+        if (clampedValue !== fontSize) {
+            onFontSizeChange(clampedValue);
+        }
+    };
+
     const fontList =
         !fontFamily || FONT_FAMILIES.some((f) => f.value === fontFamily)
             ? FONT_FAMILIES
@@ -80,16 +110,28 @@ export const FontControl: React.FC<FontControlProps> = ({
                     </label>
                     <Input
                         type="number"
-                        value={fontSize}
+                        value={fontSizeDraft}
                         onChange={(e) => {
-                            const value = parseInt(e.target.value) || 8;
-                            const clampedValue = Math.min(Math.max(value, 8), 72);
-                            onFontSizeChange(clampedValue);
+                            setFontSizeDraft(e.target.value);
+                            if (
+                                e.target.value !== '' &&
+                                e.target.validity.valid
+                            ) {
+                                commitFontSize(e.target.value);
+                            }
+                        }}
+                        onBlur={() => commitFontSize(fontSizeDraft)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                commitFontSize(fontSizeDraft);
+                                e.currentTarget.blur();
+                            }
                         }}
                         className={sizeInputClass}
                         style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                        min={8}
-                        max={72}
+                        min={MIN_FONT_SIZE}
+                        max={MAX_FONT_SIZE}
+                        step={1}
                     />
                 </div>
             </div>

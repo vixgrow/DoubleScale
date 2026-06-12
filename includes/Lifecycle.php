@@ -38,7 +38,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.1.6',
+			'DOUBLESCALE_VERSION'       => '1.1.7',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),

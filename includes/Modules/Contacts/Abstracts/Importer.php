@@ -330,9 +330,9 @@ abstract class Importer {
 
 					if ( $auto_create ) {
 						$list = ListModel::getOrCreate( $name );
-						$contact->lists()->syncWithPivotValues( array( $list->id ), array( 'taxonomy_type' => 'list' ), false );
+						$this->attach_contact_terms( $contact, 'lists', array( $list->id ), 'list' );
 					} elseif ( ! empty( $assign_to ) ) {
-							$contact->lists()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'list' ), false );
+						$this->attach_contact_terms( $contact, 'lists', $assign_to, 'list' );
 					}
 				}
 
@@ -348,18 +348,18 @@ abstract class Importer {
 
 					if ( $auto_create ) {
 						$tag = TagModel::getOrCreate( $name );
-						$contact->tags()->syncWithPivotValues( array( $tag->id ), array( 'taxonomy_type' => 'tag' ), false );
+						$this->attach_contact_terms( $contact, 'tags', array( $tag->id ), 'tag' );
 					} elseif ( ! empty( $assign_to ) ) {
-							$contact->tags()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'tag' ), false );
+						$this->attach_contact_terms( $contact, 'tags', $assign_to, 'tag' );
 					}
 				}
 
 				if ( ! empty( $this->tags ) ) {
-					$contact->tags()->syncWithPivotValues( $this->tags, array( 'taxonomy_type' => 'tag' ), false );
+					$this->attach_contact_terms( $contact, 'tags', $this->tags, 'tag' );
 				}
 
 				if ( ! empty( $this->lists ) ) {
-					$contact->lists()->syncWithPivotValues( $this->lists, array( 'taxonomy_type' => 'list' ), false );
+					$this->attach_contact_terms( $contact, 'lists', $this->lists, 'list' );
 				}
 
 				// Handle custom fields mapping (Pro feature)
@@ -390,6 +390,43 @@ abstract class Importer {
 			// Don't return WP_Error here as it stops the import process
 			// Just log the error and continue with the next contact
 			return false;
+		}
+	}
+
+	/**
+	 * Attach lists/tags to a contact without detaching existing terms.
+	 *
+	 * Uses attach() — the same pivot primitive the ContactModel list/tag
+	 * helpers use — because the bundled Eloquent port does not implement
+	 * syncWithPivotValues(); calling it threw and silently aborted the
+	 * assignment (and everything after it) for every imported contact.
+	 *
+	 * Assignment is additive and silent: it dedupes against the contact's
+	 * current terms to avoid duplicate pivot rows, and intentionally does NOT
+	 * fire the doublescale_contact_{list,tag}_apply hooks, so a bulk import
+	 * does not mass-trigger list/tag automations.
+	 *
+	 * @param ContactModel $contact  Contact (already saved, has an id).
+	 * @param string       $relation Relation name: 'lists' or 'tags'.
+	 * @param array        $ids      Term IDs to attach.
+	 * @param string       $type     Pivot taxonomy_type: 'list' or 'tag'.
+	 *
+	 * @return void
+	 */
+	protected function attach_contact_terms( $contact, $relation, $ids, $type ) {
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $ids ) ) ) );
+		if ( empty( $ids ) ) {
+			return;
+		}
+
+		$existing = array_map( 'intval', $contact->{$relation}->pluck( 'id' )->all() );
+		$to_add   = array_values( array_diff( $ids, $existing ) );
+
+		if ( ! empty( $to_add ) ) {
+			$contact->{$relation}()->attach( $to_add, array( 'taxonomy_type' => $type ) );
+			// Drop the cached relation so a later attach in the same run
+			// dedupes against the rows we just inserted.
+			$contact->unsetRelation( $relation );
 		}
 	}
 

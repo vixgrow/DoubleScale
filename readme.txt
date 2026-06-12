@@ -207,6 +207,7 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 - Refine Control Modules settings with module cards and clearer grouping
 - Update booking Connect button styling to match secondary actions
 - Improve template save handling for legacy API subject fields
+- Re-enable AI Assistant in the extensions store
 
 = 1.1.3 = 11 Jun 2026
 - Auto-install and activate DoubleScale Pro after a valid license is activated

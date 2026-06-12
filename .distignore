@@ -10,6 +10,16 @@
 /docs
 /phpunit
 /tools
+/bin
+/dependencies/vendor
+/vendor
+/dist
+
+# Runtime-only assets (webpack bundles UI images into build/client/images/).
+# When syncing for release, use build-zip.sh / bin/build-zip.sh rsync filters:
+#   --include="/assets/images/templates-images/***" --exclude="/assets/images/**"
+# booking-icons/ live in DoubleScale Pro and are loaded from Pro at runtime.
+/assets/booking-icons
 
 # Files
 .DS_Store
@@ -23,6 +33,7 @@
 .stylelintrc.json
 .nvmrc
 .phpunit.result.cache
+.wp-env.json
 CLAUDE.md
 moduleenabled_active.md
 DoubleScale.postman_collection.json
@@ -36,10 +47,14 @@ phpcs.xml.dist
 phpunit.xml
 phpunit.xml.dist
 postcss.config.js
+php-scoper.phar
 webpack.config.js
 Gruntfile.js
 gulpfile.js
 tsconfig.json
+tsconfig.tsbuildinfo
+tailwind.config.js
+phpcs.security.xml.dist
 *.map
 *.ts
 *.tsx

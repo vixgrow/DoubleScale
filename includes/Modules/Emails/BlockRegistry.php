@@ -131,7 +131,7 @@ class BlockRegistry {
 
 		/**
 		 * Pro registers its 12 blocks here (Banner, Divider, Html, Image, Menu,
-		 * Preheader, Product, Signature, SocialMedia, Table, Timer, Video).
+		 * Preheader, Product, SocialMedia, Table, Timer, Video).
 		 * Unregistered types fall back to an empty string in render_block(), so
 		 * email templates that reference Pro blocks while Pro is inactive simply
 		 * skip those blocks rather than fataling.

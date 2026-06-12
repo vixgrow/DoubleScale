@@ -102,7 +102,7 @@ final class CoreModule extends AbstractModule {
 
 		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
 
-		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Fields/Types/*.php' ) ?: array() as $f ) {
+		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Core/Fields/Types/*.php' ) ?: array() as $f ) {
 			require_once $f;
 		}
 	}

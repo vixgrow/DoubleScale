@@ -112,12 +112,21 @@ export const FontControl: React.FC<FontControlProps> = ({
                         type="number"
                         value={fontSizeDraft}
                         onChange={(e) => {
-                            setFontSizeDraft(e.target.value);
+                            const raw = e.target.value;
+                            setFontSizeDraft(raw);
+                            // Live-apply only a complete, in-range value. Do NOT
+                            // clamp while typing: clamping rewrites the field
+                            // mid-edit (e.g. typing "1" toward "12" snaps to the
+                            // min of 8), which makes the input impossible to
+                            // edit. Clamping happens on blur/Enter instead.
+                            if (raw === '') return;
+                            const parsed = parseInt(raw, 10);
                             if (
-                                e.target.value !== '' &&
-                                e.target.validity.valid
+                                !Number.isNaN(parsed) &&
+                                parsed >= MIN_FONT_SIZE &&
+                                parsed <= MAX_FONT_SIZE
                             ) {
-                                commitFontSize(e.target.value);
+                                onFontSizeChange(parsed);
                             }
                         }}
                         onBlur={() => commitFontSize(fontSizeDraft)}

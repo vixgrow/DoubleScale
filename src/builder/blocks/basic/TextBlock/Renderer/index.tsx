@@ -139,7 +139,12 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	// what the user has typed — not just the last blurred value.
 	const commitContent = () => {
 		if (!onCanvasContentChange) return;
-		const html = editRef.current?.innerHTML ?? '';
+		// Guard against committing during teardown: when the block is
+		// deselected the contentEditable unmounts and a blur fires with the ref
+		// already detached. Reading `?? ''` there would persist an empty string
+		// and wipe the block's text. Only commit when the live node exists.
+		if (!editRef.current) return;
+		const html = editRef.current.innerHTML;
 		onCanvasContentChange(
 			stripRichTextChromeColors(html, {
 				blockColor: textColor,

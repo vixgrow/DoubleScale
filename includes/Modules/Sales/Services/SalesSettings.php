@@ -38,6 +38,7 @@ final class SalesSettings {
 			'default_online_payment_gateways' => array(
 				PaymentMode::STRIPE,
 			),
+			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
 		);
 	}
 
@@ -51,6 +52,35 @@ final class SalesSettings {
 		}
 		$merged = array_merge( self::defaults(), $stored );
 		$merged['enabled_online_gateways'] = self::get_resolved_enabled_online_gateways();
+		$merged['rep_notification_templates'] = self::merge_rep_notification_templates(
+			$merged['rep_notification_templates'] ?? array()
+		);
+
+		return $merged;
+	}
+
+	/**
+	 * @param mixed $stored Stored templates.
+	 * @return array<string, array{title: string, message: string}>
+	 */
+	private static function merge_rep_notification_templates( $stored ): array {
+		$defaults = SalesRepNotificationTemplates::defaults();
+		if ( ! is_array( $stored ) ) {
+			return $defaults;
+		}
+
+		$merged = array();
+		foreach ( $defaults as $key => $default ) {
+			$custom = isset( $stored[ $key ] ) && is_array( $stored[ $key ] ) ? $stored[ $key ] : array();
+			$merged[ $key ] = array(
+				'title'   => '' !== trim( (string) ( $custom['title'] ?? '' ) )
+					? (string) $custom['title']
+					: (string) $default['title'],
+				'message' => '' !== trim( (string) ( $custom['message'] ?? '' ) )
+					? (string) $custom['message']
+					: (string) $default['message'],
+			);
+		}
 
 		return $merged;
 	}
@@ -134,6 +164,12 @@ final class SalesSettings {
 
 		if ( array_key_exists( 'proposal_expiry_reminder_days', $merged ) ) {
 			$clean['proposal_expiry_reminder_days'] = max( 0, min( 30, (int) $merged['proposal_expiry_reminder_days'] ) );
+		}
+
+		if ( array_key_exists( 'rep_notification_templates', $merged ) ) {
+			$clean['rep_notification_templates'] = SalesRepNotificationTemplates::sanitize_templates(
+				$merged['rep_notification_templates']
+			);
 		}
 
 		$mode_list_keys = array(

@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
 use DoubleScale\Modules\Notifications\Services\NotificationService;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 
@@ -36,34 +35,18 @@ final class SalesRepNotifications {
 			return;
 		}
 
-		$labels = array(
-			'sent'     => __( 'Proposal sent to customer', 'doublescale' ),
-			'accepted' => __( 'Proposal accepted by customer', 'doublescale' ),
-			'declined' => __( 'Proposal declined by customer', 'doublescale' ),
+		$rendered = SalesRepNotificationTemplates::render(
+			$subcategory,
+			array(
+				'proposal' => $proposal,
+				'event'    => $event,
+			)
 		);
-
-		$title = sprintf(
-			/* translators: 1: event label, 2: proposal number */
-			__( '%1$s: %2$s', 'doublescale' ),
-			$labels[ $event ] ?? __( 'Proposal update', 'doublescale' ),
-			(string) $proposal->proposal_number
-		);
-
-		$message = sprintf(
-			/* translators: 1: proposal number, 2: subject */
-			__( '%1$s — %2$s', 'doublescale' ),
-			(string) $proposal->proposal_number,
-			(string) $proposal->subject
-		);
-
-		if ( ProposalStatus::DECLINED === (string) $proposal->status && $proposal->decline_reason ) {
-			$message .= ' — ' . (string) $proposal->decline_reason;
-		}
 
 		$this->notify_rep(
 			$user_id,
-			$title,
-			$message,
+			$rendered['title'],
+			$rendered['message'],
 			$this->proposal_links( $proposal ),
 			$subcategory,
 			array(
@@ -83,22 +66,15 @@ final class SalesRepNotifications {
 			return;
 		}
 
-		$title = sprintf(
-			/* translators: %s: invoice number */
-			__( 'Invoice paid: %s', 'doublescale' ),
-			(string) $invoice->invoice_number
-		);
-
-		$message = sprintf(
-			/* translators: %s: invoice number */
-			__( 'Invoice %s has been paid in full.', 'doublescale' ),
-			(string) $invoice->invoice_number
+		$rendered = SalesRepNotificationTemplates::render(
+			NotificationCategories::SALES_INVOICE_PAID,
+			array( 'invoice' => $invoice )
 		);
 
 		$this->notify_rep(
 			$user_id,
-			$title,
-			$message,
+			$rendered['title'],
+			$rendered['message'],
 			$this->invoice_links( $invoice ),
 			NotificationCategories::SALES_INVOICE_PAID,
 			array(

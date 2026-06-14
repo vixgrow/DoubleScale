@@ -279,6 +279,11 @@ export type CreateInvoicePayload = Partial<
 	Omit<Invoice, 'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'>
 > & { contact_id: number };
 
+export interface SalesRepNotificationTemplate {
+	title: string;
+	message: string;
+}
+
 export interface SalesSettings {
 	proposal_email_subject: string;
 	proposal_email_intro: string;
@@ -289,4 +294,5 @@ export interface SalesSettings {
 	enabled_online_gateways: string[];
 	default_offline_payment_modes: string[];
 	default_online_payment_gateways: string[];
+	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
 }

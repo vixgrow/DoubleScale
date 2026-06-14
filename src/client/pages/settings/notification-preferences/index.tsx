@@ -34,7 +34,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Loader2, Bell, Mail, Save, Monitor, Smartphone, CheckCircle2, AlertCircle, XCircle, Wifi, Receipt } from 'lucide-react';
+import { Loader2, Bell, Mail, Save, Monitor, Smartphone, CheckCircle2, AlertCircle, XCircle, Wifi, Receipt, Pencil } from 'lucide-react';
 import {
 	isBrowserNotificationSupported,
 	getBrowserNotificationPermission,
@@ -53,6 +53,8 @@ import {
 import { UpcomingCalendarIcon } from '@/components/booking';
 import { SupportIcon } from '@/components/support';
 import NotificationRetentionSettings from './notification-retention-settings';
+import { SalesNotificationTemplateDialog } from './sales-notification-template-dialog';
+import config from '@doublescale/config';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 	contacts: <ContactsIcon width={18} height={18} />,
@@ -275,6 +277,7 @@ function EmailDesktopTab({
 	onRequestPermission,
 	onTestNotification,
 	initialCategory,
+	canEditSalesTemplates,
 }: {
 	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
 	categories: ReturnType<typeof useNotificationPreferences>['categories'];
@@ -292,7 +295,12 @@ function EmailDesktopTab({
 	onRequestPermission: () => void;
 	onTestNotification: () => void;
 	initialCategory?: string;
+	canEditSalesTemplates: boolean;
 }) {
+	const [editingSalesTemplate, setEditingSalesTemplate] = useState<{
+		subKey: string;
+		label: string;
+	} | null>(null);
 	// Bell/browser are Pro channels: only present when Pro unlocked them
 	// server-side (reflected in the preferences payload's channel keys). Browser
 	// additionally requires the runtime Notification API.
@@ -710,7 +718,31 @@ function EmailDesktopTab({
 																		}
 																	</div>
 																</div>
-																<ChannelSwitchRow
+																<div className="flex items-center gap-2 shrink-0">
+																	{canEditSalesTemplates &&
+																	key === 'sales' ? (
+																		<Button
+																			type="button"
+																			variant="outline"
+																			size="sm"
+																			className="h-8"
+																			onClick={() =>
+																				setEditingSalesTemplate(
+																					{
+																						subKey,
+																						label: subInfo.label,
+																					}
+																				)
+																			}
+																		>
+																			<Pencil className="h-3.5 w-3.5 mr-1" />
+																			{__(
+																				'Edit',
+																				'doublescale'
+																			)}
+																		</Button>
+																	) : null}
+																	<ChannelSwitchRow
 																	subPrefs={
 																		subPrefs
 																	}
@@ -736,6 +768,7 @@ function EmailDesktopTab({
 																		browserPermission
 																	}
 																/>
+																</div>
 															</div>
 														);
 													}
@@ -758,6 +791,17 @@ function EmailDesktopTab({
 			</div>
 
 			{canManageRetentionSettings && <NotificationRetentionSettings />}
+
+			<SalesNotificationTemplateDialog
+				open={editingSalesTemplate !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditingSalesTemplate(null);
+					}
+				}}
+				subKey={editingSalesTemplate?.subKey ?? null}
+				label={editingSalesTemplate?.label ?? ''}
+			/>
 
 			<SaveButton hasChanges={hasChanges} isSaving={isSaving} onSave={onSave} />
 		</div>
@@ -1341,7 +1385,7 @@ export function NotificationPreferences({
 		hasChanges,
 	} = useNotificationPreferences();
 
-	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
+	const { isSalesRep, isSalesManager, isCrmManager, hasRequiredCapability } = useCapabilities();
 
 	// Which channels are available on this install. The preferences payload only
 	// contains keys for allowed channels (free = email only; Pro unlocks the
@@ -1358,6 +1402,11 @@ export function NotificationPreferences({
 	}, [preferences.channels]);
 
 	const canManageRetentionSettings = !isSalesRep();
+	const canEditSalesTemplates =
+		hasRequiredCapability([
+			'doublescale_manage_all_sales',
+			'doublescale_crm_manager',
+		]) && config.isModuleToggleEnabled('sales');
 	const hasLimitedAccess = isSalesRep() || (isSalesManager() && !isCrmManager());
 	const canManagePushSetup = !hasLimitedAccess;
 	const whiteLabel = typeof ConfigAPI.getWhiteLabel === 'function' ? ConfigAPI.getWhiteLabel() : undefined;
@@ -1602,6 +1651,7 @@ export function NotificationPreferences({
 							onRequestPermission={handleRequestPermission}
 							onTestNotification={handleTestNotification}
 							initialCategory={initialCategory}
+							canEditSalesTemplates={canEditSalesTemplates}
 						/>
 					</TabsContent>
 
@@ -1650,6 +1700,7 @@ export function NotificationPreferences({
 					onRequestPermission={handleRequestPermission}
 					onTestNotification={handleTestNotification}
 					initialCategory={initialCategory}
+					canEditSalesTemplates={canEditSalesTemplates}
 				/>
 			)}
 		</div>

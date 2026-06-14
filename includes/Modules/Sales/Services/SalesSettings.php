@@ -28,10 +28,6 @@ final class SalesSettings {
 			'proposal_email_intro'          => __( 'Please review the proposal below and let us know if you would like to accept or decline.', 'doublescale' ),
 			'invoice_email_subject'         => __( 'Invoice: {invoice_number}', 'doublescale' ),
 			'invoice_email_intro'           => __( 'Please review your invoice and pay the balance due when ready.', 'doublescale' ),
-			'notify_rep_proposal_sent'      => true,
-			'notify_rep_proposal_accepted'  => true,
-			'notify_rep_proposal_declined'  => true,
-			'notify_rep_invoice_paid'       => true,
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
 			'default_offline_payment_modes' => array(
@@ -128,10 +124,6 @@ final class SalesSettings {
 		}
 
 		$bool_keys = array(
-			'notify_rep_proposal_sent',
-			'notify_rep_proposal_accepted',
-			'notify_rep_proposal_declined',
-			'notify_rep_invoice_paid',
 			'require_signature_on_accept',
 		);
 		foreach ( $bool_keys as $key ) {

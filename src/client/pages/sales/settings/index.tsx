@@ -150,48 +150,6 @@ const SalesSettingsPage: React.FC = () => {
 					</section>
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">
-						<h2 className="font-medium">{__('Notifications', 'doublescale')}</h2>
-						<div className="flex items-center justify-between">
-							<Label htmlFor="notify-rep-sent">
-								{__('Notify rep when proposal is sent', 'doublescale')}
-							</Label>
-							<Switch
-								id="notify-rep-sent"
-								checked={form.notify_rep_proposal_sent}
-								onCheckedChange={(v) => patch('notify_rep_proposal_sent', v)}
-							/>
-						</div>
-						<div className="flex items-center justify-between">
-							<Label htmlFor="notify-rep-accepted">
-								{__('Notify rep when proposal is accepted', 'doublescale')}
-							</Label>
-							<Switch
-								id="notify-rep-accepted"
-								checked={form.notify_rep_proposal_accepted}
-								onCheckedChange={(v) => patch('notify_rep_proposal_accepted', v)}
-							/>
-						</div>
-						<div className="flex items-center justify-between">
-							<Label htmlFor="notify-rep-declined">
-								{__('Notify rep when proposal is declined', 'doublescale')}
-							</Label>
-							<Switch
-								id="notify-rep-declined"
-								checked={form.notify_rep_proposal_declined}
-								onCheckedChange={(v) => patch('notify_rep_proposal_declined', v)}
-							/>
-						</div>
-						<div className="flex items-center justify-between">
-							<Label htmlFor="notify-rep-paid">{__('Notify rep when invoice is paid', 'doublescale')}</Label>
-							<Switch
-								id="notify-rep-paid"
-								checked={form.notify_rep_invoice_paid}
-								onCheckedChange={(v) => patch('notify_rep_invoice_paid', v)}
-							/>
-						</div>
-					</section>
-
-					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Customer experience', 'doublescale')}</h2>
 						<div className="flex items-center justify-between">
 							<Label htmlFor="require-signature">

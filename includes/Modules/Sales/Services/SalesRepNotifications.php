@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal notifications to assigned sales reps.
+ * In-app / email / push notifications to assigned sales reps.
  *
  * @package DoubleScale\Modules\Sales
  */
@@ -9,7 +9,8 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Emails\Emails;
+use DoubleScale\Modules\Notifications\Services\NotificationCategories;
+use DoubleScale\Modules\Notifications\Services\NotificationService;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
@@ -25,18 +26,13 @@ final class SalesRepNotifications {
 	 * @return void
 	 */
 	public function notify_proposal_event( ProposalModel $proposal, string $event ): void {
-		$setting_key = 'notify_rep_proposal_' . $event;
-		if ( ! SalesSettings::get( $setting_key, false ) ) {
-			return;
-		}
-
 		$user_id = $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : 0;
 		if ( $user_id <= 0 ) {
 			return;
 		}
 
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user || ! is_email( $user->user_email ) ) {
+		$subcategory = $this->proposal_subcategory_for_event( $event );
+		if ( ! $subcategory ) {
 			return;
 		}
 
@@ -46,25 +42,35 @@ final class SalesRepNotifications {
 			'declined' => __( 'Proposal declined by customer', 'doublescale' ),
 		);
 
-		$subject = sprintf(
+		$title = sprintf(
 			/* translators: 1: event label, 2: proposal number */
 			__( '%1$s: %2$s', 'doublescale' ),
 			$labels[ $event ] ?? __( 'Proposal update', 'doublescale' ),
 			(string) $proposal->proposal_number
 		);
 
-		$body = sprintf(
-			'<p>%s</p><p><strong>%s</strong><br/>%s</p>',
-			esc_html( $labels[ $event ] ?? '' ),
-			esc_html( (string) $proposal->proposal_number ),
-			esc_html( (string) $proposal->subject )
+		$message = sprintf(
+			/* translators: 1: proposal number, 2: subject */
+			__( '%1$s — %2$s', 'doublescale' ),
+			(string) $proposal->proposal_number,
+			(string) $proposal->subject
 		);
 
 		if ( ProposalStatus::DECLINED === (string) $proposal->status && $proposal->decline_reason ) {
-			$body .= '<p>' . esc_html( (string) $proposal->decline_reason ) . '</p>';
+			$message .= ' — ' . (string) $proposal->decline_reason;
 		}
 
-		$this->send_to_rep( $user->user_email, $subject, $body, $user_id );
+		$this->notify_rep(
+			$user_id,
+			$title,
+			$message,
+			$this->proposal_links( $proposal ),
+			$subcategory,
+			array(
+				'proposal_id' => (int) $proposal->id,
+				'event'       => $event,
+			)
+		);
 	}
 
 	/**
@@ -72,61 +78,101 @@ final class SalesRepNotifications {
 	 * @return void
 	 */
 	public function notify_invoice_paid( InvoiceModel $invoice ): void {
-		if ( ! SalesSettings::get( 'notify_rep_invoice_paid', true ) ) {
-			return;
-		}
-
 		$user_id = $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : 0;
 		if ( $user_id <= 0 ) {
 			return;
 		}
 
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user || ! is_email( $user->user_email ) ) {
-			return;
-		}
-
-		$subject = sprintf(
+		$title = sprintf(
 			/* translators: %s: invoice number */
 			__( 'Invoice paid: %s', 'doublescale' ),
 			(string) $invoice->invoice_number
 		);
 
-		$body = sprintf(
-			'<p>%s</p><p><strong>%s</strong></p>',
-			esc_html__( 'An invoice has been paid in full.', 'doublescale' ),
-			esc_html( (string) $invoice->invoice_number )
+		$message = sprintf(
+			/* translators: %s: invoice number */
+			__( 'Invoice %s has been paid in full.', 'doublescale' ),
+			(string) $invoice->invoice_number
 		);
 
-		$this->send_to_rep( $user->user_email, $subject, $body, $user_id );
+		$this->notify_rep(
+			$user_id,
+			$title,
+			$message,
+			$this->invoice_links( $invoice ),
+			NotificationCategories::SALES_INVOICE_PAID,
+			array(
+				'invoice_id' => (int) $invoice->id,
+			)
+		);
 	}
 
 	/**
-	 * @param string $to Recipient email.
-	 * @param string $subject Subject.
-	 * @param string $body HTML body.
-	 * @param int    $host_user_id Rep user ID.
+	 * @param string $event Proposal event key.
+	 * @return string|null
+	 */
+	private function proposal_subcategory_for_event( string $event ): ?string {
+		$map = array(
+			'sent'     => NotificationCategories::SALES_PROPOSAL_SENT,
+			'accepted' => NotificationCategories::SALES_PROPOSAL_ACCEPTED,
+			'declined' => NotificationCategories::SALES_PROPOSAL_DECLINED,
+		);
+
+		return $map[ $event ] ?? null;
+	}
+
+	/**
+	 * @param int    $user_id Rep user ID.
+	 * @param string $title Notification title.
+	 * @param string $message Notification body.
+	 * @param array  $links Link payload.
+	 * @param string $subcategory Notification subcategory.
+	 * @param array  $metadata Optional metadata.
 	 * @return void
 	 */
-	private function send_to_rep( string $to, string $subject, string $body, int $host_user_id ): void {
-		$identity = \DoubleScale\Core\Communication\EmailIdentityResolver::resolve( $host_user_id );
-		$emails   = new Emails();
-		$emails->from_address = $identity['from_address'];
-		$emails->from_name    = $identity['from_name'];
-		$emails->reply_to     = $identity['reply_to'];
+	private function notify_rep( int $user_id, string $title, string $message, array $links, string $subcategory, array $metadata = array() ): void {
+		if ( ! class_exists( NotificationService::class ) ) {
+			return;
+		}
 
 		try {
-			$emails->send( $to, $subject, $body );
+			NotificationService::create( $user_id, $title, $message, $links, $subcategory, $metadata );
 		} catch ( \Throwable $e ) {
 			if ( function_exists( 'doublescale_get_logger' ) ) {
 				doublescale_get_logger()->error(
 					'Sales rep notification failed',
 					array(
-						'source' => 'sales-rep-notifications',
-						'error'  => $e->getMessage(),
+						'source'      => 'sales-rep-notifications',
+						'user_id'     => $user_id,
+						'subcategory' => $subcategory,
+						'error'       => $e->getMessage(),
 					)
 				);
 			}
 		}
+	}
+
+	/**
+	 * @param ProposalModel $proposal Proposal.
+	 * @return array{web:string,mobile:string}
+	 */
+	private function proposal_links( ProposalModel $proposal ): array {
+		$id = (int) $proposal->id;
+		return array(
+			'web'    => admin_url( 'admin.php?page=doublescale&path=sales/proposals/' . $id ),
+			'mobile' => '/sales/proposals/' . $id,
+		);
+	}
+
+	/**
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return array{web:string,mobile:string}
+	 */
+	private function invoice_links( InvoiceModel $invoice ): array {
+		$id = (int) $invoice->id;
+		return array(
+			'web'    => admin_url( 'admin.php?page=doublescale&path=sales/invoices/' . $id ),
+			'mobile' => '/sales/invoices/' . $id,
+		);
 	}
 }

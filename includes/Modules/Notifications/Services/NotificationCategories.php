@@ -102,6 +102,13 @@ class NotificationCategories {
 	const SUPPORT = 'support';
 
 	/**
+	 * Sales-related notifications (proposals, invoices) — rep-facing.
+	 *
+	 * @var string
+	 */
+	const SALES = 'sales';
+
+	/**
 	 * Pipeline subcategory: Deal won or lost
 	 *
 	 * @var string
@@ -393,6 +400,34 @@ class NotificationCategories {
 	const SUPPORT_TICKET_REOPENED = 'support_ticket_reopened';
 
 	/**
+	 * Sales subcategory: Proposal sent to customer.
+	 *
+	 * @var string
+	 */
+	const SALES_PROPOSAL_SENT = 'sales_proposal_sent';
+
+	/**
+	 * Sales subcategory: Proposal accepted by customer.
+	 *
+	 * @var string
+	 */
+	const SALES_PROPOSAL_ACCEPTED = 'sales_proposal_accepted';
+
+	/**
+	 * Sales subcategory: Proposal declined by customer.
+	 *
+	 * @var string
+	 */
+	const SALES_PROPOSAL_DECLINED = 'sales_proposal_declined';
+
+	/**
+	 * Sales subcategory: Invoice paid in full.
+	 *
+	 * @var string
+	 */
+	const SALES_INVOICE_PAID = 'sales_invoice_paid';
+
+	/**
 	 * Get all available notification categories
 	 *
 	 * Returns basic category info (label, description). For UI display with
@@ -443,6 +478,10 @@ class NotificationCategories {
 			self::SUPPORT        => array(
 				'label'       => __( 'Support', 'doublescale' ),
 				'description' => __( 'Ticket lifecycle notifications for agents (new ticket, customer reply, assignment, resolved, reopened).', 'doublescale' ),
+			),
+			self::SALES          => array(
+				'label'       => __( 'Sales', 'doublescale' ),
+				'description' => __( 'Proposal and invoice notifications for assigned sales reps.', 'doublescale' ),
 			),
 				// self::SYSTEM         => array(
 				// 'label'       => __( 'System', 'doublescale'),
@@ -721,6 +760,24 @@ class NotificationCategories {
 					'description' => __( 'A resolved or closed ticket was reopened.', 'doublescale' ),
 				),
 			),
+			self::SALES          => array(
+				self::SALES_PROPOSAL_SENT     => array(
+					'label'       => __( 'Proposal Sent', 'doublescale' ),
+					'description' => __( 'Notifications when a proposal is sent to a customer.', 'doublescale' ),
+				),
+				self::SALES_PROPOSAL_ACCEPTED => array(
+					'label'       => __( 'Proposal Accepted', 'doublescale' ),
+					'description' => __( 'Notifications when a customer accepts a proposal.', 'doublescale' ),
+				),
+				self::SALES_PROPOSAL_DECLINED => array(
+					'label'       => __( 'Proposal Declined', 'doublescale' ),
+					'description' => __( 'Notifications when a customer declines a proposal.', 'doublescale' ),
+				),
+				self::SALES_INVOICE_PAID      => array(
+					'label'       => __( 'Invoice Paid', 'doublescale' ),
+					'description' => __( 'Notifications when an invoice is paid in full.', 'doublescale' ),
+				),
+			),
 			self::SYSTEM         => array(
 				self::SYSTEM_GENERAL          => array(
 					'label'       => __( 'System Alerts', 'doublescale' ),
@@ -818,6 +875,7 @@ class NotificationCategories {
 			self::FORMS,
 			self::BOOKING,
 			self::SUPPORT,
+			self::SALES,
 		);
 	}
 
@@ -873,6 +931,7 @@ class NotificationCategories {
 			self::FORMS          => 'forms',
 			self::BOOKING        => 'booking',
 			self::SUPPORT        => 'support',
+			self::SALES          => 'sales',
 			self::TASKS          => 'tasks',
 			self::PIPELINE       => 'deals',
 			self::EMAIL_TRACKING => 'tracking',

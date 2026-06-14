@@ -284,10 +284,6 @@ export interface SalesSettings {
 	proposal_email_intro: string;
 	invoice_email_subject: string;
 	invoice_email_intro: string;
-	notify_rep_proposal_sent: boolean;
-	notify_rep_proposal_accepted: boolean;
-	notify_rep_proposal_declined: boolean;
-	notify_rep_invoice_paid: boolean;
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
 	enabled_online_gateways: string[];

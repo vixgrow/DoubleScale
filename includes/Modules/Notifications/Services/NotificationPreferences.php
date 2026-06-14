@@ -304,6 +304,31 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
+				// Sales — personal, actionable; push supported.
+				NotificationCategories::SALES_PROPOSAL_SENT     => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_PROPOSAL_ACCEPTED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_PROPOSAL_DECLINED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_INVOICE_PAID      => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
 				// System.
 				// NotificationCategories::SYSTEM_GENERAL               => array(
 				// 'bell'    => true,

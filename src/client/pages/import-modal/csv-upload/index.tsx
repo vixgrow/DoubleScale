@@ -199,12 +199,12 @@ const CsvUpload: React.FC = () => {
 			: '';
 
 		return (
-			<div className="import-modal-csv-file">
-				<div className="import-modal-csv-file__row">
+			<div className="import-modal-csv-file max-sm:p-4">
+				<div className="import-modal-csv-file__row max-sm:flex-col max-sm:gap-3 max-sm:justify-center max-sm:items-center">
 					<img
 						src={csvIcon}
 						alt=""
-						className="import-modal-csv-file__icon"
+						className="import-modal-csv-file__icon max-sm:hidden"
 					/>
 					<div className="import-modal-csv-file__info">
 						<p className="import-modal-csv-file__name-row">
@@ -213,8 +213,7 @@ const CsvUpload: React.FC = () => {
 							</span>
 							{sizeLabel ? (
 								<>
-									<span
-										className="import-modal-csv-file__separator"
+									<span className="import-modal-csv-file__separator max-[1200px]:hidden"
 										aria-hidden
 									>
 										{' - '}
@@ -270,7 +269,7 @@ const CsvUpload: React.FC = () => {
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col gap-3 bg-[#F7F8FA] rounded-xl p-6 border border-border">
-				<div className=" flex items-center gap-6 justify-between">
+				<div className=" flex max-sm:flex-col max-sm:gap-3 items-center gap-6 justify-between">
 					<div className='min-w-0 space-y-3'>
 						<CardTitle className="text-xl font-semibold leading-8 text-foreground">
 							{__('Upload CSV file', 'doublescale')}

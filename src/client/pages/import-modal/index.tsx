@@ -100,11 +100,11 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 
 	return (
 		<>
-			<DialogHeader className="shrink-0 border-b border-border/50 bg-white pb-0">
+			<DialogHeader className="shrink-0 border-b border-border/50 bg-white p-3">
 				<DialogTitle className="sr-only">
 					{__('Import contacts', 'doublescale')}
 				</DialogTitle>
-				<div className="mx-auto w-full max-w-[1680px] px-6 pt-3 pb-3">
+				<div className="mx-auto w-full max-w-[1680px] py-3 sm:pl-5">
 					<Breadcrumb
 						items={breadcrumbItems}
 						handleNavigate={handleBreadcrumbNavigate}
@@ -128,14 +128,14 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 					{wizardStep === 1 ? (
 						<>
 							<div className="shrink-0 space-y-2.5">
-								<h2 className="text-left text-2xl font-bold leading-9 tracking-tight text-foreground">
+								<h2 className="text-left text-xl lg:text-2xl font-bold leading-9 tracking-tight text-foreground">
 									{__('Import contacts', 'doublescale')}
 								</h2>
 								<p className="text-left text-base leading-6 text-muted-foreground">
 									{headerSubtitle}
 								</p>
 							</div>
-							<div className="import-modal__body mt-6 shrink-0">
+							<div className="import-modal__body lg:mt-6 mt-4 shrink-0">
 								<SourceGrid />
 							</div>
 							<div className="import-modal__footer">

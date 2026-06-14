@@ -35,9 +35,10 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 	};
 
 	return (
-		<div className="w-full">
+		<div className="w-full min-w-0 max-sm:overflow-x-auto">
+			<div className="w-full max-sm:min-w-[600px]">
 			{/* Header */}
-			<div className="grid grid-cols-3 gap-4 p-4 border-b font-medium bg-gray-50">
+			<div className="grid grid-cols-3 gap-4 border-b bg-gray-50 p-4 font-medium">
 				<div className="text-sm font-semibold">
 					{__('Source List', 'doublescale')}
 				</div>
@@ -60,13 +61,13 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 					return (
 						<div
 							key={record.list}
-							className="grid grid-cols-3 gap-4 p-4 items-center"
+							className="grid grid-cols-3 items-center gap-4 p-4"
 						>
 							{/* Source List */}
-							<div className="text-sm">{record.list}</div>
+							<div className="text-sm break-words">{record.list}</div>
 
 							{/* Assign to DoubleScale */}
-							<div>
+							<div className="min-w-[180px]">
 								{assigned?.auto ? (
 									<div className="text-sm text-gray-600">
 										{__(
@@ -131,6 +132,7 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 						</div>
 					);
 				})}
+			</div>
 			</div>
 		</div>
 	);

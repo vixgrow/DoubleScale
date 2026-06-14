@@ -17,13 +17,13 @@ const ExportProgress: React.FC = () => {
 
 	return (
 		<Card className="shadow-none rounded-2xl border-2 border-dashed">
-			<CardContent className="px-20 py-7">
+			<CardContent className="lg:px-20 lg:py-7 p-4">
 				<div className="flex flex-col gap-[10px] items-center justify-center">
 					<img src={csvIcon} alt="Default" className="w-16 h-16" />
-					<div className="text-2xl font-normal text-[#09090B]">
+					<div className="lg:text-2xl text-xl font-normal text-[#09090B]">
 						{__('Exporting Contacts...', 'doublescale')}
 					</div>
-					<div className="flex justify-center gap-2 items-center text-lg text-[#71717A]">
+					<div className="flex justify-center gap-2 items-center lg:text-lg text-base text-[#71717A]">
 						<div className="flex justify-center">
 							<LoadingSpinner size={24} />
 						</div>

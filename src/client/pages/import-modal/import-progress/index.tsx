@@ -63,9 +63,9 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 				)}
 			</span>
 
-			<Card className="w-full p-6 mt-6 shadow-none">
+			<Card className="w-full lg:p-6 p-0 lg:mt-6 mt-4 shadow-none">
 				<CardHeader className="text-center">
-					<div className="flex items-center justify-center mx-auto mb-6">
+					<div className="flex items-center justify-center mx-auto lg:mb-6 mb-4">
 						{source === 'csv' ? (
 							<img
 								src={csvIcon}
@@ -108,7 +108,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 								<LoadingSpinner size={24} />
 							</div>
 						)}
-						<span>
+						<span className="text-center">
 							{importing && progressPercentage < 100
 								? __('In Progress', 'doublescale')
 								: __('Completed Successfully!', 'doublescale')}

@@ -1,0 +1,79 @@
+// Tailwind utilities for the public Client Portal. `@tailwind base` is skipped
+// on purpose — the renderer mounts inline on host pages (via the
+// [doublescale_client_portal] shortcode) and preflight would reset the host
+// theme's typography. Matches the support/booking renderers.
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind components;
+@tailwind utilities;
+
+// shadcn design tokens, scoped to the portal mount node + :root so any Radix
+// portals escaping into <body> still resolve the CSS custom properties. Kept in
+// sync with src/renderer/support/style.scss so reused ticket views look right.
+#doublescale-client-portal,
+:root {
+	--background: 228 25% 97%;
+	--foreground: 240 6% 17%;
+	--card: 0 0% 100%;
+	--card-foreground: 240 6% 17%;
+	--popover: 0 0% 100%;
+	--popover-foreground: 240 6% 17%;
+	--primary: 240 45% 41%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 254 76% 94%;
+	--secondary-foreground: 240 45% 41%;
+	--secondary-background: 220 23% 97%;
+	--muted: 220 23% 97%;
+	--muted-foreground: 233 5% 44%;
+	--accent: 220 23% 97%;
+	--accent-foreground: 240 6% 17%;
+	--tertiary: 220 23% 97%;
+	--tertiary-foreground: 240 6% 17%;
+	--destructive: 0 84.2% 60.2%;
+	--destructive-foreground: 0 0% 98%;
+	--border: 0 0% 82%;
+	--input: 0 0% 82%;
+	--ring: 240 45% 41%;
+	--radius: 0.5rem;
+
+	font-family: theme('fontFamily.sans');
+	color: hsl(var(--foreground));
+	-webkit-font-smoothing: antialiased;
+}
+
+#doublescale-client-portal {
+	box-sizing: border-box;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	// The renderer omits Tailwind preflight (so it never resets the host
+	// theme's typography), which means host-theme list bullets and link
+	// underlines leak into the SPA's <ul> nav and link-styled cards. Re-apply
+	// just the resets the portal UI needs, scoped to the mount node so the
+	// surrounding theme is untouched.
+	ul,
+	ol {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		margin: 0;
+	}
+
+	a,
+	a:hover,
+	a:focus {
+		text-decoration: none;
+		box-shadow: none;
+	}
+
+	button {
+		font-family: inherit;
+	}
+}

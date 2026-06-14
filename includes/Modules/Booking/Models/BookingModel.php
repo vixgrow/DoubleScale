@@ -338,7 +338,18 @@ class BookingModel extends Model {
 	}
 
 	public function getDetailsUrl() {
-		return admin_url( 'admin.php?page=doublescale&path=booking/bookings&id=' . $this->id );
+		$admin_url = admin_url( 'admin.php?page=doublescale&path=booking/bookings&id=' . $this->id );
+
+		/**
+		 * Filter the booking "details" URL used by the {{booking.details_url}}
+		 * merge tag. The Client Portal module re-points this to the
+		 * customer-facing portal booking detail when a portal page exists,
+		 * falling back to this admin URL otherwise.
+		 *
+		 * @param string       $admin_url Default admin SPA URL.
+		 * @param BookingModel $booking   Booking instance.
+		 */
+		return (string) apply_filters( 'doublescale_booking_details_url', $admin_url, $this );
 	}
 
 	public function getConfirmUrl() {

@@ -1,0 +1,118 @@
+/**
+ * Client Portal renderer types. The renderer config is a superset of the
+ * support PortalConfig: the Portal handler localizes the shared REST root +
+ * nonce and the portal namespace, and the Support module injects the support
+ * REST bases + uploader settings via the `doublescale_client_portal_config`
+ * filter (so the reused ticket views work unchanged).
+ */
+
+export interface PortalUser {
+	id: number;
+	email: string;
+	display_name: string;
+	avatar?: string;
+}
+
+export interface PortalRendererConfig {
+	rest_root: string;
+	nonce: string;
+	portal_rest_url: string;
+	user: PortalUser;
+	lang: string;
+	mount_id: string;
+	is_guest?: boolean;
+	guest_hash?: string;
+	/** Mailbox scope for the Tickets section (from the shortcode `box_id`). */
+	box_id?: number;
+	/** Injected by the Support module for the reused ticket views. */
+	rest_url?: string;
+	public_rest_url?: string;
+	custom_fields_enabled?: boolean;
+	attachment_limits?: unknown;
+}
+
+export interface PortalSection {
+	slug: string;
+	label: string;
+	icon: string;
+	order: number;
+	badge: number;
+}
+
+export interface PortalIdentity {
+	name: string;
+	email: string;
+	avatar: string;
+	has_contact: boolean;
+}
+
+export interface PortalSummaryCard {
+	key: string;
+	label: string;
+	value: string | number;
+	route?: string;
+}
+
+export interface PortalBootstrap {
+	identity: PortalIdentity;
+	sections: PortalSection[];
+	summary: {
+		cards: PortalSummaryCard[];
+	};
+}
+
+export interface PortalTimelineItem {
+	id: string | number;
+	kind: 'activity' | 'booking';
+	type: string;
+	date: string | null;
+	title?: string;
+	author?: string;
+	is_self?: boolean;
+	status?: string;
+	ticket_id?: number;
+	booking_id?: number;
+	start_time?: string;
+	timezone?: string;
+}
+
+export interface PortalTimelineResponse {
+	data: PortalTimelineItem[];
+	page: number;
+	per_page: number;
+	total: number;
+}
+
+export interface PortalBookingLocation {
+	label: string;
+	value: string;
+}
+
+export interface PortalBookingPayment {
+	total: string | number | null;
+	currency: string | null;
+	status: string;
+}
+
+export interface PortalBooking {
+	id: number;
+	hash_id: string;
+	status: string;
+	event: {
+		name: string;
+		duration: number | null;
+	};
+	start_time: string;
+	end_time: string;
+	timezone: string;
+	location: PortalBookingLocation | null;
+	payment: PortalBookingPayment | null;
+	can_cancel: boolean;
+	can_reschedule: boolean;
+}
+
+declare global {
+	interface Window {
+		doublescale_client_portal_config?: PortalRendererConfig;
+	}
+}

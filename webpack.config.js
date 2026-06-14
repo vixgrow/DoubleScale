@@ -48,6 +48,7 @@ const sharedAlias = {
 	'@/config/booking': path.resolve(__dirname, 'src/config/booking'),
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
+	'@/renderer/portal': path.resolve(__dirname, 'src/renderer/portal'),
 
 	// Support-scoped aliases — same ordering rule as booking (must precede the
 	// generic `@/<type>/*` fallbacks below).
@@ -404,10 +405,61 @@ const invoiceRendererConfig = {
 	},
 };
 
+/**
+ * Public Client Portal renderer — unified logged-in customer shell
+ * ([doublescale_client_portal]). Mirrors the lean proposal/invoice configs.
+ */
+const portalRendererConfig = {
+	...defaultConfig,
+	name: 'portal-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/portal/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+			// The Tickets section reuses the support ticket views, which import
+			// the Pro custom-fields block through this alias (free stub when Pro
+			// is absent). Mirror the support renderer config so it resolves here
+			// — including `@pro/client`, which the Pro custom-fields file pulls in
+			// when Pro is installed.
+			'@doublescale-pro/support-portal-custom-fields':
+				supportPortalCustomFieldsAlias,
+			'@pro/client': path.resolve(
+				__dirname,
+				'../doublescale-pro/src/client'
+			),
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/portal'),
+		filename: '[name].js',
+	},
+};
+
 module.exports = [
 	adminClientConfig,
 	bookingRendererConfig,
 	supportRendererConfig,
 	proposalRendererConfig,
 	invoiceRendererConfig,
+	portalRendererConfig,
 ];

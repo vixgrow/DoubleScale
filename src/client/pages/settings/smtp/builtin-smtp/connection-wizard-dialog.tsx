@@ -427,7 +427,7 @@ export function ConnectionWizardDialog({
 
 											{/* Step 3 – Provider account */}
 											{wizardStep === 3 && (
-												<div className="flex flex-col gap-6 bg-background border border-border rounded-xl p-6">
+												<div className="flex flex-col gap-6 bg-white border border-border rounded-xl p-6">
 													<div>
 														<h3 className="text-lg font-semibold tracking-tight">
 															{__('Configure provider account', 'doublescale')}
@@ -960,7 +960,7 @@ export function ConnectionWizardDialog({
 
 											{/* Step 4 – Sender identity */}
 											{wizardStep === 4 && (
-												<div className="flex flex-col gap-6 bg-background border border-border rounded-xl p-6">
+												<div className="flex flex-col gap-6 bg-white border border-border rounded-xl p-6">
 													<div>
 														<h3 className="text-lg font-semibold tracking-tight">
 															{__('Sender identity', 'doublescale')}
@@ -1190,7 +1190,7 @@ export function ConnectionWizardDialog({
 					}
 				}}
 			>
-				<DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-3">
+				<DialogContent className="'!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-hidden  rounded-xl p-4 sm:mx-auto sm:w-full sm:p-8 !translate-x-[-50%] !translate-y-[-50%]' gap-3">
 					<DialogHeader>
 						<DialogTitle
 							className={
@@ -1219,9 +1219,10 @@ export function ConnectionWizardDialog({
 							))}
 						</ul>
 					</div>
-					<DialogFooter>
+					<DialogFooter className='flex flex-row justify-end mt-2'>
 						<Button
 							type="button"
+							variant='default'
 							onClick={() => dismissConnectionSaveFeedback()}
 						>
 							{connectionSaveFeedback?.variant === 'success'

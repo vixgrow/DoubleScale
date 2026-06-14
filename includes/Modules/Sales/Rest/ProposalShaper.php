@@ -13,6 +13,7 @@ use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Services\ProposalUrl;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 
 /**
  * ProposalShaper class.
@@ -56,6 +57,8 @@ final class ProposalShaper {
 			'accepted_at'      => $proposal->accepted_at ? (string) $proposal->accepted_at : null,
 			'declined_at'      => $proposal->declined_at ? (string) $proposal->declined_at : null,
 			'decline_reason'   => $proposal->decline_reason ? (string) $proposal->decline_reason : null,
+			'signed_name'      => $proposal->signed_name ? (string) $proposal->signed_name : null,
+			'has_signature'    => ! empty( $proposal->signature ),
 			'is_expired'       => self::is_expired( $proposal ),
 			'invoice_id'       => self::get_linked_invoice_id( $proposal ),
 			'public_url'       => ProposalUrl::get_public_url( $proposal ),
@@ -122,6 +125,10 @@ final class ProposalShaper {
 			'declined_at'     => $proposal->declined_at ? (string) $proposal->declined_at : null,
 			'decline_reason'  => $proposal->decline_reason ? (string) $proposal->decline_reason : null,
 			'invoice_id'      => self::get_linked_invoice_id( $proposal ),
+			'allow_comments'  => (bool) $proposal->allow_comments,
+			'require_signature' => (bool) SalesSettings::get( 'require_signature_on_accept', true ),
+			'signed_name'     => $proposal->signed_name ? (string) $proposal->signed_name : null,
+			'has_signature'   => ! empty( $proposal->signature ),
 		);
 	}
 

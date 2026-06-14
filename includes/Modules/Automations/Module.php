@@ -108,6 +108,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Forms/*.php',
 				'includes/Modules/Automations/Triggers/Booking/*.php',
 				'includes/Modules/Automations/Triggers/Support/*.php',
+				'includes/Modules/Automations/Triggers/Sales/*.php',
 				'includes/Modules/Automations/Triggers/Surecart/*/*.php',
 				'includes/Modules/Automations/Triggers/Prestoplayer/*.php',
 				'includes/Modules/Automations/Actions/*.php',

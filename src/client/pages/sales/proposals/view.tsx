@@ -4,7 +4,7 @@
 
 import React, { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ArrowLeft, Copy, FileOutput, Pencil, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, Download, FileOutput, Files, Pencil, Send, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -16,6 +16,8 @@ import {
 import {
 	convertProposalToInvoice,
 	deleteProposal,
+	duplicateProposal,
+	downloadProposalPdf,
 	sendProposal,
 	useProposal,
 } from '@/hooks/sales';
@@ -101,6 +103,37 @@ const ProposalView: React.FC = () => {
 		}
 	};
 
+	const handleDuplicate = async () => {
+		if (!proposalId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			const copy = await duplicateProposal(proposalId);
+			navigate(getToLink(`sales/proposals/${copy.id}/edit`));
+		} catch (err: unknown) {
+			setNotice(err instanceof Error ? err.message : __('Duplicate failed.', 'doublescale'));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleDownloadPdf = async () => {
+		if (!proposalId || !proposal) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await downloadProposalPdf(proposalId, proposal.proposal_number);
+		} catch (err: unknown) {
+			setNotice(err instanceof Error ? err.message : __('PDF download failed.', 'doublescale'));
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	if (loading) {
 		return (
 			<div className="p-6 text-muted-foreground">{__('Loading…', 'doublescale')}</div>
@@ -137,6 +170,14 @@ const ProposalView: React.FC = () => {
 					{__('Proposals', 'doublescale')}
 				</Button>
 				<div className="flex flex-wrap gap-2">
+					<Button variant="outline" onClick={() => void handleDownloadPdf()} disabled={busy}>
+						<Download className="h-4 w-4 mr-1" />
+						{__('Download PDF', 'doublescale')}
+					</Button>
+					<Button variant="outline" onClick={() => void handleDuplicate()} disabled={busy}>
+						<Files className="h-4 w-4 mr-1" />
+						{__('Duplicate', 'doublescale')}
+					</Button>
 					{proposal.public_url ? (
 						<Button variant="outline" onClick={() => void handleCopyLink()}>
 							<Copy className="h-4 w-4 mr-1" />

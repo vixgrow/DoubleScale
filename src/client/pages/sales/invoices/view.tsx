@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ArrowLeft, Copy, CreditCard, Pencil, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, CreditCard, Download, Pencil, Send, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -19,6 +19,7 @@ import {
 import {
 	deleteInvoice,
 	deleteInvoicePayment,
+	downloadInvoicePdf,
 	recordInvoicePayment,
 	sendInvoice,
 	useInvoice,
@@ -161,6 +162,21 @@ const InvoiceView: React.FC = () => {
 		await refetchPayments();
 	};
 
+	const handleDownloadPdf = async () => {
+		if (!invoiceId || !invoice) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await downloadInvoicePdf(invoiceId, invoice.invoice_number);
+		} catch (err: unknown) {
+			setNotice(err instanceof Error ? err.message : __('PDF download failed.', 'doublescale'));
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	return (
 		<div className="p-6 space-y-6 max-w-5xl">
 			{notice ? (
@@ -172,6 +188,10 @@ const InvoiceView: React.FC = () => {
 					{__('Invoices', 'doublescale')}
 				</Button>
 				<div className="flex flex-wrap gap-2 items-center">
+					<Button variant="outline" onClick={() => void handleDownloadPdf()} disabled={busy}>
+						<Download className="h-4 w-4 mr-1" />
+						{__('Download PDF', 'doublescale')}
+					</Button>
 					{invoice.public_url ? (
 						<Button variant="outline" onClick={() => void handleCopyLink()}>
 							<Copy className="h-4 w-4 mr-1" />

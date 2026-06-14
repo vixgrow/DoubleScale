@@ -80,4 +80,59 @@ final class DocumentPdf {
 			);
 		}
 	}
+
+	/**
+	 * Stream a generated PDF to the browser as raw bytes from a REST callback.
+	 *
+	 * WordPress JSON-encodes any value returned from a REST callback, which
+	 * corrupts binary output. We hook `rest_pre_serve_request` to emit the raw
+	 * bytes ourselves and short-circuit the default JSON serialization.
+	 *
+	 * @param array<string, mixed> $shaped   Shaped proposal or invoice data.
+	 * @param string               $type     Document type: proposal|invoice.
+	 * @param string               $filename Download filename (without extension is fine).
+	 * @return \WP_REST_Response|WP_Error Response to return from the callback, or error.
+	 */
+	public static function rest_response( array $shaped, string $type, string $filename ) {
+		$pdf = self::render_pdf( $shaped, $type );
+		if ( \is_wp_error( $pdf ) ) {
+			return $pdf;
+		}
+
+		$download_name = \sanitize_file_name( $filename );
+		if ( '' === $download_name ) {
+			$download_name = 'document';
+		}
+		if ( '.pdf' !== strtolower( substr( $download_name, -4 ) ) ) {
+			$download_name .= '.pdf';
+		}
+
+		\add_filter(
+			'rest_pre_serve_request',
+			static function ( $served ) use ( $pdf, $download_name ) {
+				if ( $served ) {
+					return $served;
+				}
+
+				if ( ! headers_sent() ) {
+					header( 'Content-Type: application/pdf' );
+					header( 'Content-Disposition: attachment; filename="' . $download_name . '"' );
+					header( 'Content-Length: ' . strlen( $pdf ) );
+					header( 'X-Content-Type-Options: nosniff' );
+					header( 'Cache-Control: private, no-store, max-age=0' );
+				}
+
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw PDF bytes.
+				echo $pdf;
+
+				return true;
+			},
+			10,
+			1
+		);
+
+		// Body is ignored because the filter above already emitted the bytes,
+		// but we return a 200 response so the REST server proceeds to serve.
+		return new \WP_REST_Response( null, 200 );
+	}
 }

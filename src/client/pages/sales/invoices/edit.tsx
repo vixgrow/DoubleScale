@@ -28,6 +28,7 @@ import {
 } from '@/components/sales/contact-sales-fields';
 import {
 	createInvoice,
+	sendInvoice,
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
@@ -205,7 +206,7 @@ const InvoiceEdit: React.FC = () => {
 		);
 	};
 
-	const handleSave = async () => {
+	const handleSave = async (andSend = false) => {
 		if (!contact) {
 			setError(__('Please select a customer.', 'doublescale'));
 			return;
@@ -234,13 +235,19 @@ const InvoiceEdit: React.FC = () => {
 		};
 
 		try {
+			let id = invoiceId;
 			if (isNew) {
 				const created = await createInvoice(payload);
-				navigate(getToLink(`sales/invoices/${created.id}`));
+				id = created.id;
 			} else if (invoiceId) {
 				await updateInvoice(invoiceId, payload);
-				navigate(getToLink(`sales/invoices/${invoiceId}`));
 			}
+
+			if (andSend && id) {
+				await sendInvoice(id);
+			}
+
+			navigate(getToLink(`sales/invoices/${id}`));
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
 		} finally {
@@ -471,8 +478,11 @@ const InvoiceEdit: React.FC = () => {
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/invoices'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button onClick={() => void handleSave()} disabled={saving}>
+				<Button variant="outline" onClick={() => void handleSave(false)} disabled={saving}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
+				</Button>
+				<Button onClick={() => void handleSave(true)} disabled={saving || status === 'paid'}>
+					{saving ? __('Sending…', 'doublescale') : __('Save & Send', 'doublescale')}
 				</Button>
 			</div>
 		</div>

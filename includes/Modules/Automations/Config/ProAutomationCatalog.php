@@ -113,6 +113,11 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\Support\TicketPriorityChanged::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Support\TicketAgentAssigned::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Support\TicketClosed::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ProposalSent::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ProposalAccepted::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ProposalDeclined::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\InvoiceSent::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\InvoicePaid::class,
 	),
 	'actions'  => array(
 		\DoubleScale\Pro\Modules\Automations\Actions\Crm\Slack\SendToChannel::class,

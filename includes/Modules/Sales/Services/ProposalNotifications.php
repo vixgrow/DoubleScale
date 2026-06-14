@@ -36,17 +36,28 @@ final class ProposalNotifications {
 			return false;
 		}
 
+		$tokens = SalesEmailTokens::for_proposal( $proposal, $url );
+
 		$host_user_id = $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : null;
 		$identity     = EmailIdentityResolver::resolve( $host_user_id );
 
 		$customer_name = $proposal->to_name ? (string) $proposal->to_name : __( 'there', 'doublescale' );
-		$subject       = sprintf(
-			/* translators: %s: proposal subject */
-			__( 'Proposal: %s', 'doublescale' ),
-			(string) $proposal->subject
-		);
+		$subject_tpl   = (string) SalesSettings::get( 'proposal_email_subject', '' );
+		$subject       = SalesEmailTokens::replace( $subject_tpl, $tokens );
+		if ( '' === trim( $subject ) ) {
+			$subject = sprintf(
+				/* translators: %s: proposal subject */
+				__( 'Proposal: %s', 'doublescale' ),
+				(string) $proposal->subject
+			);
+		}
 
-		$body = $this->build_body( $proposal, $customer_name, $url, $custom_message );
+		$intro_tpl = (string) SalesSettings::get( 'proposal_email_intro', '' );
+		$intro     = '' !== trim( $custom_message )
+			? $custom_message
+			: SalesEmailTokens::replace( $intro_tpl, $tokens );
+
+		$body = $this->build_body( $proposal, $customer_name, $url, $intro );
 
 		$emails = new Emails();
 		$emails->from_address = $identity['from_address'];

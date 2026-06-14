@@ -78,6 +78,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
 			Rest\Controllers\RestPublicInvoiceController::class,
+			Rest\Controllers\RestSalesSettingsController::class,
 		);
 	}
 
@@ -87,6 +88,7 @@ final class Module extends AbstractModule {
 	public function scheduledHooks(): array {
 		return array(
 			array( 'doublescale_sales', 'doublescale_sales_overdue_invoices' ),
+			array( 'doublescale_sales', 'doublescale_sales_expiring_proposals' ),
 		);
 	}
 
@@ -101,6 +103,7 @@ final class Module extends AbstractModule {
 		new InvoiceFrontendHandler();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
+		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
 
 		MenuRegistry::add(
 			array(
@@ -151,6 +154,30 @@ final class Module extends AbstractModule {
 		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_overdue_invoices' ) ) {
 			$tasks->schedule_recurring( time(), HOUR_IN_SECONDS, 'doublescale_sales_overdue_invoices' );
 		}
+
+		$tasks->register_callback(
+			'doublescale_sales_expiring_proposals',
+			static function () {
+				( new Services\ExpiringProposals() )->run();
+			}
+		);
+
+		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_proposals' ) ) {
+			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_proposals' );
+		}
+	}
+
+	/**
+	 * Notify sales rep when an invoice is paid.
+	 *
+	 * @param \DoubleScale\Modules\Sales\Models\InvoiceModel $invoice Invoice.
+	 * @return void
+	 */
+	public function on_invoice_paid( $invoice ): void {
+		if ( ! $invoice instanceof \DoubleScale\Modules\Sales\Models\InvoiceModel ) {
+			return;
+		}
+		( new Services\SalesRepNotifications() )->notify_invoice_paid( $invoice );
 	}
 
 	/**

@@ -87,6 +87,8 @@ export interface Proposal {
 	public_url?: string | null;
 	is_expired?: boolean;
 	invoice_id?: number | null;
+	signed_name?: string | null;
+	has_signature?: boolean;
 	created_at: string | null;
 	updated_at: string | null;
 	contact?: ContactSummary | null;
@@ -209,3 +211,16 @@ export type CreateProposalPayload = Partial<
 export type CreateInvoicePayload = Partial<
 	Omit<Invoice, 'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'>
 > & { contact_id: number };
+
+export interface SalesSettings {
+	proposal_email_subject: string;
+	proposal_email_intro: string;
+	invoice_email_subject: string;
+	invoice_email_intro: string;
+	notify_rep_proposal_sent: boolean;
+	notify_rep_proposal_accepted: boolean;
+	notify_rep_proposal_declined: boolean;
+	notify_rep_invoice_paid: boolean;
+	proposal_expiry_reminder_days: number;
+	require_signature_on_accept: boolean;
+}

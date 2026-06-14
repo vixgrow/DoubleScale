@@ -13,8 +13,12 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
+use DoubleScale\Modules\Sales\Models\ProposalCommentModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
+use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -69,6 +73,35 @@ class RestPublicProposalController extends RestController {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/pdf',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/comments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_comments' ),
+					'permission_callback' => '__return_true',
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_comment' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
 	}
 
 	/**
@@ -119,8 +152,33 @@ class RestPublicProposalController extends RestController {
 			return new WP_Error( 'invalid_status', __( 'This proposal can no longer be accepted.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$signed_name = isset( $params['signed_name'] ) ? sanitize_text_field( (string) $params['signed_name'] ) : '';
+		$signature   = isset( $params['signature'] ) ? (string) $params['signature'] : '';
+
+		if ( SalesSettings::get( 'require_signature_on_accept', true ) ) {
+			if ( '' === trim( $signed_name ) ) {
+				return new WP_Error( 'invalid_data', __( 'Please enter your name to accept.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+			if ( '' === trim( $signature ) ) {
+				return new WP_Error( 'invalid_data', __( 'Please provide your signature to accept.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+		}
+
 		$proposal->status      = ProposalStatus::ACCEPTED;
 		$proposal->accepted_at = current_time( 'mysql' );
+		if ( '' !== trim( $signed_name ) ) {
+			$proposal->signed_name = $signed_name;
+		}
+		if ( '' !== trim( $signature ) ) {
+			$proposal->signature = $this->sanitize_signature( $signature );
+		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP for audit only.
+		$proposal->signed_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$proposal->save();
 
 		$this->log_status_activity(
@@ -131,7 +189,127 @@ class RestPublicProposalController extends RestController {
 
 		do_action( 'doublescale_sales_proposal_accepted', $proposal );
 
+		( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'accepted' );
+
 		return new WP_REST_Response( ProposalShaper::shape_public( $proposal ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_pdf( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$proposal = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $proposal ) ) {
+			return $proposal;
+		}
+
+		$shaped = ProposalShaper::shape_public( $proposal );
+
+		return DocumentPdf::rest_response( $shaped, 'proposal', (string) $proposal->proposal_number );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_comments( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$proposal = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $proposal ) ) {
+			return $proposal;
+		}
+
+		$comments = ProposalCommentModel::query()
+			->where( 'proposal_id', (int) $proposal->id )
+			->orderBy( 'id' )
+			->get();
+
+		$data = array();
+		foreach ( $comments as $comment ) {
+			$data[] = array(
+				'id'          => (int) $comment->id,
+				'author_name' => (string) $comment->author_name,
+				'content'     => (string) $comment->content,
+				'is_customer' => (bool) $comment->is_customer,
+				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function add_comment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$proposal = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $proposal ) ) {
+			return $proposal;
+		}
+
+		if ( ! $proposal->allow_comments ) {
+			return new WP_Error( 'not_allowed', __( 'Comments are not allowed on this proposal.', 'doublescale' ), array( 'status' => 403 ) );
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$content = isset( $params['content'] ) ? sanitize_textarea_field( (string) $params['content'] ) : '';
+		$name    = isset( $params['author_name'] ) ? sanitize_text_field( (string) $params['author_name'] ) : '';
+
+		if ( '' === trim( $content ) ) {
+			return new WP_Error( 'invalid_data', __( 'Comment cannot be empty.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+		if ( '' === trim( $name ) ) {
+			$name = $proposal->to_name ? (string) $proposal->to_name : __( 'Customer', 'doublescale' );
+		}
+
+		$comment = ProposalCommentModel::create(
+			array(
+				'proposal_id' => (int) $proposal->id,
+				'author_name' => $name,
+				'content'     => $content,
+				'is_customer' => true,
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'id'          => (int) $comment->id,
+				'author_name' => (string) $comment->author_name,
+				'content'     => (string) $comment->content,
+				'is_customer' => true,
+				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
+			),
+			201
+		);
 	}
 
 	/**
@@ -180,7 +358,24 @@ class RestPublicProposalController extends RestController {
 
 		do_action( 'doublescale_sales_proposal_declined', $proposal, $reason );
 
+		( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'declined' );
+
 		return new WP_REST_Response( ProposalShaper::shape_public( $proposal ), 200 );
+	}
+
+	/**
+	 * @param string $signature Raw signature payload.
+	 * @return string
+	 */
+	private function sanitize_signature( string $signature ): string {
+		$signature = trim( $signature );
+		if ( strlen( $signature ) > 500000 ) {
+			return '';
+		}
+		if ( preg_match( '/^data:image\/(png|jpeg|jpg|gif);base64,/', $signature ) ) {
+			return $signature;
+		}
+		return sanitize_text_field( $signature );
 	}
 
 	/**

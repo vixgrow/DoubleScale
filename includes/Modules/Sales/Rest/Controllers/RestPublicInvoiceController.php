@@ -141,16 +141,8 @@ class RestPublicInvoiceController extends RestController {
 
 		$invoice->load( array( 'contact' ) );
 		$shaped = InvoiceShaper::shape_public( $invoice );
-		$pdf    = DocumentPdf::render_pdf( $shaped, 'invoice' );
-		if ( is_wp_error( $pdf ) ) {
-			return $pdf;
-		}
 
-		$response = new WP_REST_Response( $pdf, 200 );
-		$response->header( 'Content-Type', 'application/pdf' );
-		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( (string) $invoice->invoice_number ) . '.pdf"' );
-
-		return $response;
+		return DocumentPdf::rest_response( $shaped, 'invoice', (string) $invoice->invoice_number );
 	}
 
 	/**

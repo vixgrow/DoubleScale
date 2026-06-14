@@ -451,16 +451,7 @@ class RestInvoiceController extends RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	private function stream_pdf_response( array $shaped, string $type, string $filename ) {
-		$pdf = DocumentPdf::render_pdf( $shaped, $type );
-		if ( is_wp_error( $pdf ) ) {
-			return $pdf;
-		}
-
-		$response = new WP_REST_Response( $pdf, 200 );
-		$response->header( 'Content-Type', 'application/pdf' );
-		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( $filename ) . '.pdf"' );
-
-		return $response;
+		return DocumentPdf::rest_response( $shaped, $type, $filename );
 	}
 
 	/**

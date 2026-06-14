@@ -8,6 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
 import { NAMESPACE } from '@/constants/sales';
+import { downloadAdminPdf } from '@/utils/download-admin-pdf';
 import type {
 	ContactInvoicePayment,
 	ConvertProposalResponse,
@@ -22,6 +23,7 @@ import type {
 	ProposalFilters,
 	RecordPaymentPayload,
 	SalesAssignableUser,
+	SalesSettings,
 	SalesTax,
 } from '@/types/sales';
 
@@ -403,6 +405,53 @@ export const sendInvoice = (invoiceId: number, message = '') =>
 		path: `${NAMESPACE}/invoices/${invoiceId}/send`,
 		method: 'POST',
 		data: message ? { message } : {},
+	});
+
+export const duplicateProposal = (proposalId: number) =>
+	apiFetch<Proposal>({
+		path: `${NAMESPACE}/proposals/${proposalId}/duplicate`,
+		method: 'POST',
+	});
+
+export const downloadProposalPdf = (proposalId: number, filename: string) =>
+	downloadAdminPdf(`${NAMESPACE}/proposals/${proposalId}/pdf`, filename);
+
+export const downloadInvoicePdf = (invoiceId: number, filename: string) =>
+	downloadAdminPdf(`${NAMESPACE}/invoices/${invoiceId}/pdf`, filename);
+
+export const useSalesSettings = () => {
+	const [data, setData] = useState<SalesSettings | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		return apiFetch<SalesSettings>({ path: `${NAMESPACE}/settings` })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, []);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const updateSalesSettings = (payload: Partial<SalesSettings>) =>
+	apiFetch<SalesSettings>({
+		path: `${NAMESPACE}/settings`,
+		method: 'PUT',
+		data: payload,
 	});
 
 export const useSalesTaxes = () => {

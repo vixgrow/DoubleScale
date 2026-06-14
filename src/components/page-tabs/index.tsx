@@ -32,6 +32,8 @@ interface PageTabsProps {
 	tabsTriggerClassName?: string;
 	scrollThreshold?: number;
 	scrollArrowBg?: string;
+	/** When true, always use a horizontal scroll container and show arrows on overflow. */
+	enableHorizontalScroll?: boolean;
 }
 
 const pillTabsTriggerClassName =
@@ -56,11 +58,13 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	tabsTriggerClassName,
 	scrollThreshold = 10,
 	scrollArrowBg = 'bg-card',
+	enableHorizontalScroll = false,
 }) => {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [showLeftChevron, setShowLeftChevron] = useState(false);
 	const [showRightChevron, setShowRightChevron] = useState(false);
-	const hasManyTabs = tabsList.length > scrollThreshold;
+	const usesHorizontalScroll =
+		enableHorizontalScroll || tabsList.length > scrollThreshold;
 
 	const resolvedTabsListClassName =
 		tabsVariant === 'underline'
@@ -69,18 +73,24 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				tabsListClassName,
 				'gap-[24px]',
 			)
-			: tabsListClassName;
+			: cn(
+				tabsListClassName,
+				usesHorizontalScroll && 'w-max min-w-full flex-nowrap justify-start',
+			);
 
 	const checkScrollButtons = () => {
 		if (!scrollContainerRef.current) return;
 		const { scrollLeft, scrollWidth, clientWidth } =
 			scrollContainerRef.current;
-		setShowLeftChevron(scrollLeft > 0);
-		setShowRightChevron(scrollLeft < scrollWidth - clientWidth - 1);
+		const hasOverflow = scrollWidth > clientWidth + 1;
+		setShowLeftChevron(hasOverflow && scrollLeft > 0);
+		setShowRightChevron(
+			hasOverflow && scrollLeft < scrollWidth - clientWidth - 1
+		);
 	};
 
 	useEffect(() => {
-		if (!hasManyTabs) return;
+		if (!usesHorizontalScroll) return;
 
 		checkScrollButtons();
 		const container = scrollContainerRef.current;
@@ -89,11 +99,15 @@ const PageTabs: React.FC<PageTabsProps> = ({
 		container.addEventListener('scroll', checkScrollButtons);
 		window.addEventListener('resize', checkScrollButtons);
 
+		const resizeObserver = new ResizeObserver(checkScrollButtons);
+		resizeObserver.observe(container);
+
 		return () => {
 			container.removeEventListener('scroll', checkScrollButtons);
 			window.removeEventListener('resize', checkScrollButtons);
+			resizeObserver.disconnect();
 		};
-	}, [hasManyTabs, tabsList.length]);
+	}, [usesHorizontalScroll, tabsList.length]);
 
 	const scroll = (direction: 'left' | 'right') => {
 		if (!scrollContainerRef.current) return;
@@ -117,9 +131,12 @@ const PageTabs: React.FC<PageTabsProps> = ({
 			onValueChange={onValueChange}
 		>
 			<div
-				className={`${tabsListWrapperClassName} ${hasManyTabs ? 'relative' : ''}`}
+				className={cn(
+					tabsListWrapperClassName,
+					usesHorizontalScroll && 'relative min-w-0'
+				)}
 			>
-				{hasManyTabs && showLeftChevron && (
+				{usesHorizontalScroll && showLeftChevron && (
 					<button
 						onClick={() => scroll('left')}
 						className={`absolute left-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-r-lg transition-colors flex items-center justify-center px-1`}
@@ -130,7 +147,9 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				)}
 				<div
 					ref={scrollContainerRef}
-					className={`${hasManyTabs ? 'overflow-x-auto hide-scrollbar' : ''}`}
+					className={cn(
+						usesHorizontalScroll && 'min-w-0 overflow-x-auto hide-scrollbar'
+					)}
 				>
 					<TabsList className={resolvedTabsListClassName}>
 						{tabsList.map((tab) => (
@@ -162,7 +181,7 @@ const PageTabs: React.FC<PageTabsProps> = ({
 						))}
 					</TabsList>
 				</div>
-				{hasManyTabs && showRightChevron && (
+				{usesHorizontalScroll && showRightChevron && (
 					<button
 						onClick={() => scroll('right')}
 						className={`absolute right-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-l-lg transition-colors flex items-center justify-center px-1`}

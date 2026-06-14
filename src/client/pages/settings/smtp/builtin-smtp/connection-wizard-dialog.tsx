@@ -172,10 +172,12 @@ export function ConnectionWizardDialog({
 		{ step: 3, num: 3, label: __('Provider account', 'doublescale') },
 		{ step: 4, num: 4, label: __('Sender identity', 'doublescale') },
 	];
+	const currentStepMeta = STEPS.find((item) => item.step === wizardStep);
+	const mobileStepProgress = (wizardStep / WIZARD_LAST_STEP) * 100;
 
 	return (
 		<>
-			{/* Main Wizard Dialog                                                  */}	
+			{/* Main Wizard Dialog                                                  */}
 			<Dialog open={open} onOpenChange={onOpenChange}>
 				<DialogContent
 					className={cn(
@@ -205,13 +207,55 @@ export function ConnectionWizardDialog({
 						<div
 							className={cn(
 								'mx-6 mb-6 mt-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl',
-								'border border-border bg-background',
+
 								'shadow-[0px_8px_30px_0px_rgba(59,130,246,0.12)]'
 							)}
 						>
-							<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:items-stretch sm:gap-5 sm:p-6">
+							<div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+								{/* Mobile step header */}
+								<div className="shrink-0 sm:hidden">
+									<div className="flex items-center gap-3 px-4 pb-3 pt-4">
+										<div
+											className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brandPrimary text-sm font-semibold text-white"
+											aria-current="step"
+										>
+											{wizardStep}
+										</div>
+										<div className="min-w-0">
+											<p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+												{sprintf(
+													__('Step %1$d/%2$d', 'doublescale'),
+													wizardStep,
+													WIZARD_LAST_STEP
+												)}
+											</p>
+											<p className="truncate text-base font-semibold text-foreground">
+												{currentStepMeta?.label ?? ''}
+											</p>
+										</div>
+									</div>
+									<div
+										className="h-1 w-full bg-border"
+										role="progressbar"
+										aria-valuenow={wizardStep}
+										aria-valuemin={1}
+										aria-valuemax={WIZARD_LAST_STEP}
+										aria-label={sprintf(
+											__('Step %1$d of %2$d', 'doublescale'),
+											wizardStep,
+											WIZARD_LAST_STEP
+										)}
+									>
+										<div
+											className="h-full bg-brandPrimary transition-all duration-300"
+											style={{ width: `${mobileStepProgress}%` }}
+										/>
+									</div>
+								</div>
+
+								<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:items-stretch sm:gap-5 sm:p-6">
 								{/* Left Stepper */}
-								<aside className="flex w-full shrink-0 flex-col self-start rounded-2xl border border-border bg-muted p-6 sm:w-[240px] sm:max-w-[280px]">
+								<aside className="hidden w-full shrink-0 flex-col self-start rounded-2xl border border-border bg-muted p-6 sm:flex sm:w-[240px] sm:max-w-[280px]">
 									<div className="flex flex-col gap-0">
 										{STEPS.map((item, idx, arr) => {
 											const isActive = wizardStep === item.step;
@@ -278,13 +322,6 @@ export function ConnectionWizardDialog({
 								{/* Right Content Panel */}
 								<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-muted shadow-sm sm:min-h-0 sm:self-stretch">
 									<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-										<p className="mb-4 text-xs text-muted-foreground sm:hidden">
-											{sprintf(
-												__('Step %1$d of %2$d', 'doublescale'),
-												wizardStep,
-												WIZARD_LAST_STEP
-											)}
-										</p>
 										<div className="space-y-5">
 											{/* Step 1 – Connection name */}
 											{wizardStep === 1 && (
@@ -1094,18 +1131,19 @@ export function ConnectionWizardDialog({
 										</div>
 									</div>
 								</div>
+								</div>
 							</div>
 
-							<DialogFooter className="mt-0 shrink-0 gap-3 px-4 py-3 pt-4 sm:flex-row sm:justify-between sm:space-x-0 sm:px-6">
+							<DialogFooter className="mt-0 shrink-0 flex-row items-center justify-between gap-3 bg-white px-4 py-3 pt-4 sm:justify-between sm:space-x-0 sm:px-6">
 								<Button
 									type="button"
 									variant="outline"
-									className="sm:mr-auto bg-background border-border"
+									className="shrink-0 bg-background border-border"
 									onClick={() => onOpenChange(false)}
 								>
 									{__('Cancel', 'doublescale')}
 								</Button>
-								<div className="flex flex-wrap justify-end gap-6">
+								<div className="flex shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6">
 									{wizardStep > 1 && (
 										<Button
 											type="button"

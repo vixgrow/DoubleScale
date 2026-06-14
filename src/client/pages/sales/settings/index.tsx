@@ -1,5 +1,5 @@
 /**
- * Sales module settings (email templates, notifications).
+ * Sales module settings (emails, payments, taxes).
  */
 
 import React, { useEffect, useState } from '@wordpress/element';
@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import { TaxesManager } from './taxes-manager';
+import { PaymentGatewaysSettings } from './payment-gateways-settings';
 
 const SalesSettingsPage: React.FC = () => {
 	const navigate = useNavigate();
@@ -23,6 +25,7 @@ const SalesSettingsPage: React.FC = () => {
 	const [form, setForm] = useState<SalesSettings | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [tab, setTab] = useState('general');
 
 	useEffect(() => {
 		if (data) {
@@ -80,7 +83,7 @@ const SalesSettingsPage: React.FC = () => {
 					<h1 className="text-2xl font-semibold">{__('Sales Settings', 'doublescale')}</h1>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Customize customer emails and internal notifications for proposals and invoices.',
+							'Emails, payment gateways, taxes, and customer experience for proposals and invoices.',
 							'doublescale'
 						)}
 					</p>
@@ -95,118 +98,136 @@ const SalesSettingsPage: React.FC = () => {
 				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
 			) : null}
 
-			<section className="space-y-4 border rounded-lg bg-white p-6">
-				<h2 className="font-medium">{__('Proposal emails', 'doublescale')}</h2>
-				<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
-					<Input
-						value={form.proposal_email_subject}
-						onChange={(e) => patch('proposal_email_subject', e.target.value)}
-					/>
-				</FormField>
-				<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-					<Textarea
-						value={form.proposal_email_intro}
-						onChange={(e) => patch('proposal_email_intro', e.target.value)}
-						rows={3}
-					/>
-				</FormField>
-				<p className="text-xs text-muted-foreground">
-					{__('Tokens: {subject}, {proposal_number}, {customer_name}, {public_url}', 'doublescale')}
-				</p>
-			</section>
+			<Tabs value={tab} onValueChange={setTab}>
+				<TabsList>
+					<TabsTrigger value="general">{__('General', 'doublescale')}</TabsTrigger>
+					<TabsTrigger value="payments">{__('Payments', 'doublescale')}</TabsTrigger>
+					<TabsTrigger value="taxes">{__('Taxes', 'doublescale')}</TabsTrigger>
+				</TabsList>
 
-			<section className="space-y-4 border rounded-lg bg-white p-6">
-				<h2 className="font-medium">{__('Invoice emails', 'doublescale')}</h2>
-				<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
-					<Input
-						value={form.invoice_email_subject}
-						onChange={(e) => patch('invoice_email_subject', e.target.value)}
-					/>
-				</FormField>
-				<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-					<Textarea
-						value={form.invoice_email_intro}
-						onChange={(e) => patch('invoice_email_intro', e.target.value)}
-						rows={3}
-					/>
-				</FormField>
-				<p className="text-xs text-muted-foreground">
-					{__(
-						'Tokens: {invoice_number}, {customer_name}, {total}, {balance}, {public_url}',
-						'doublescale'
-					)}
-				</p>
-			</section>
+				<TabsContent value="general" className="space-y-6 mt-6">
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Proposal emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.proposal_email_subject}
+								onChange={(e) => patch('proposal_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<Textarea
+								value={form.proposal_email_intro}
+								onChange={(e) => patch('proposal_email_intro', e.target.value)}
+								rows={3}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__('Tokens: {subject}, {proposal_number}, {customer_name}, {public_url}', 'doublescale')}
+						</p>
+					</section>
 
-			<section className="space-y-4 border rounded-lg bg-white p-6">
-				<h2 className="font-medium">{__('Notifications', 'doublescale')}</h2>
-				<div className="flex items-center justify-between">
-					<Label htmlFor="notify-rep-sent">{__('Notify rep when proposal is sent', 'doublescale')}</Label>
-					<Switch
-						id="notify-rep-sent"
-						checked={form.notify_rep_proposal_sent}
-						onCheckedChange={(v) => patch('notify_rep_proposal_sent', v)}
-					/>
-				</div>
-				<div className="flex items-center justify-between">
-					<Label htmlFor="notify-rep-accepted">
-						{__('Notify rep when proposal is accepted', 'doublescale')}
-					</Label>
-					<Switch
-						id="notify-rep-accepted"
-						checked={form.notify_rep_proposal_accepted}
-						onCheckedChange={(v) => patch('notify_rep_proposal_accepted', v)}
-					/>
-				</div>
-				<div className="flex items-center justify-between">
-					<Label htmlFor="notify-rep-declined">
-						{__('Notify rep when proposal is declined', 'doublescale')}
-					</Label>
-					<Switch
-						id="notify-rep-declined"
-						checked={form.notify_rep_proposal_declined}
-						onCheckedChange={(v) => patch('notify_rep_proposal_declined', v)}
-					/>
-				</div>
-				<div className="flex items-center justify-between">
-					<Label htmlFor="notify-rep-paid">{__('Notify rep when invoice is paid', 'doublescale')}</Label>
-					<Switch
-						id="notify-rep-paid"
-						checked={form.notify_rep_invoice_paid}
-						onCheckedChange={(v) => patch('notify_rep_invoice_paid', v)}
-					/>
-				</div>
-			</section>
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Invoice emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.invoice_email_subject}
+								onChange={(e) => patch('invoice_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<Textarea
+								value={form.invoice_email_intro}
+								onChange={(e) => patch('invoice_email_intro', e.target.value)}
+								rows={3}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Tokens: {invoice_number}, {customer_name}, {total}, {balance}, {public_url}',
+								'doublescale'
+							)}
+						</p>
+					</section>
 
-			<section className="space-y-4 border rounded-lg bg-white p-6">
-				<h2 className="font-medium">{__('Customer experience', 'doublescale')}</h2>
-				<div className="flex items-center justify-between">
-					<Label htmlFor="require-signature">
-						{__('Require signature when accepting proposals', 'doublescale')}
-					</Label>
-					<Switch
-						id="require-signature"
-						checked={form.require_signature_on_accept}
-						onCheckedChange={(v) => patch('require_signature_on_accept', v)}
-					/>
-				</div>
-				<FormField
-					label={__('Expiry reminder (days before open till)', 'doublescale')}
-					className="!mb-0"
-				>
-					<Input
-						type="number"
-						min={0}
-						max={30}
-						value={form.proposal_expiry_reminder_days}
-						onChange={(e) =>
-							patch('proposal_expiry_reminder_days', Number(e.target.value) || 0)
-						}
-					/>
-				</FormField>
-			</section>
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Notifications', 'doublescale')}</h2>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="notify-rep-sent">
+								{__('Notify rep when proposal is sent', 'doublescale')}
+							</Label>
+							<Switch
+								id="notify-rep-sent"
+								checked={form.notify_rep_proposal_sent}
+								onCheckedChange={(v) => patch('notify_rep_proposal_sent', v)}
+							/>
+						</div>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="notify-rep-accepted">
+								{__('Notify rep when proposal is accepted', 'doublescale')}
+							</Label>
+							<Switch
+								id="notify-rep-accepted"
+								checked={form.notify_rep_proposal_accepted}
+								onCheckedChange={(v) => patch('notify_rep_proposal_accepted', v)}
+							/>
+						</div>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="notify-rep-declined">
+								{__('Notify rep when proposal is declined', 'doublescale')}
+							</Label>
+							<Switch
+								id="notify-rep-declined"
+								checked={form.notify_rep_proposal_declined}
+								onCheckedChange={(v) => patch('notify_rep_proposal_declined', v)}
+							/>
+						</div>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="notify-rep-paid">{__('Notify rep when invoice is paid', 'doublescale')}</Label>
+							<Switch
+								id="notify-rep-paid"
+								checked={form.notify_rep_invoice_paid}
+								onCheckedChange={(v) => patch('notify_rep_invoice_paid', v)}
+							/>
+						</div>
+					</section>
 
-			<TaxesManager />
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Customer experience', 'doublescale')}</h2>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="require-signature">
+								{__('Require signature when accepting proposals', 'doublescale')}
+							</Label>
+							<Switch
+								id="require-signature"
+								checked={form.require_signature_on_accept}
+								onCheckedChange={(v) => patch('require_signature_on_accept', v)}
+							/>
+						</div>
+						<FormField
+							label={__('Expiry reminder (days before open till)', 'doublescale')}
+							className="!mb-0"
+						>
+							<Input
+								type="number"
+								min={0}
+								max={30}
+								value={form.proposal_expiry_reminder_days}
+								onChange={(e) =>
+									patch('proposal_expiry_reminder_days', Number(e.target.value) || 0)
+								}
+							/>
+						</FormField>
+					</section>
+				</TabsContent>
+
+				<TabsContent value="payments" className="mt-6">
+					<PaymentGatewaysSettings form={form} patch={patch} />
+				</TabsContent>
+
+				<TabsContent value="taxes" className="mt-6">
+					<TaxesManager />
+				</TabsContent>
+			</Tabs>
 
 			<div className="flex justify-end">
 				<Button onClick={() => void handleSave()} disabled={saving}>

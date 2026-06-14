@@ -1,5 +1,5 @@
 /**
- * Stripe card payment for an invoice balance (admin invoice view).
+ * Online payment UI for an invoice (gateway-agnostic; Stripe implementation today).
  */
 
 import React, { useEffect, useMemo, useState } from '@wordpress/element';
@@ -9,13 +9,19 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js';
 
 import { Button } from '@/components/ui/button';
 import {
-	confirmInvoiceStripePayment,
-	initInvoiceStripePayment,
+	confirmInvoiceOnlinePayment,
+	initInvoiceOnlinePayment,
 } from '@/hooks/sales';
-import type { Invoice } from '@/types/sales';
+import type { Invoice, OnlinePaymentGatewayStatus } from '@/types/sales';
+import {
+	clearStripeRedirectParams,
+	getStripePaymentReturnUrl,
+	getStripeRedirectStatus,
+} from '@doublescale/utils/stripe-payment';
 
-interface InvoiceStripePaymentProps {
+interface InvoiceOnlinePaymentProps {
 	invoice: Invoice;
+	gateway: OnlinePaymentGatewayStatus;
 	onPaid: (invoice: Invoice) => void;
 }
 
@@ -24,8 +30,9 @@ const formatMoney = (value: number, currency: string) =>
 
 const StripePayForm: React.FC<{
 	invoiceId: number;
+	gatewaySlug: string;
 	onPaid: (invoice: Invoice) => void;
-}> = ({ invoiceId, onPaid }) => {
+}> = ({ invoiceId, gatewaySlug, onPaid }) => {
 	const stripe = useStripe();
 	const elements = useElements();
 	const [busy, setBusy] = useState(false);
@@ -39,6 +46,9 @@ const StripePayForm: React.FC<{
 		setError(null);
 		const { error: stripeError } = await stripe.confirmPayment({
 			elements,
+			confirmParams: {
+				return_url: getStripePaymentReturnUrl(),
+			},
 			redirect: 'if_required',
 		});
 		if (stripeError) {
@@ -47,7 +57,7 @@ const StripePayForm: React.FC<{
 			return;
 		}
 		try {
-			const result = await confirmInvoiceStripePayment(invoiceId);
+			const result = await confirmInvoiceOnlinePayment(invoiceId, gatewaySlug);
 			onPaid(result.invoice);
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale'));
@@ -61,14 +71,15 @@ const StripePayForm: React.FC<{
 			<PaymentElement />
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 			<Button onClick={() => void handlePay()} disabled={busy || !stripe || !elements}>
-				{busy ? __('Processing…', 'doublescale') : __('Pay with Stripe', 'doublescale')}
+				{busy ? __('Processing…', 'doublescale') : __('Pay Now', 'doublescale')}
 			</Button>
 		</div>
 	);
 };
 
-export const InvoiceStripePayment: React.FC<InvoiceStripePaymentProps> = ({
+export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	invoice,
+	gateway,
 	onPaid,
 }) => {
 	const balanceDue = Math.max(0, invoice.total - invoice.amount_paid);
@@ -78,15 +89,64 @@ export const InvoiceStripePayment: React.FC<InvoiceStripePaymentProps> = ({
 	const [error, setError] = useState<string | null>(null);
 
 	const stripePromise = useMemo(
-		() => (publishableKey ? loadStripe(publishableKey) : null),
-		[publishableKey]
+		() => (gateway.slug === 'stripe' && publishableKey ? loadStripe(publishableKey) : null),
+		[gateway.slug, publishableKey]
 	);
 
 	useEffect(() => {
+		const redirectStatus = getStripeRedirectStatus();
+		if (!redirectStatus) {
+			return;
+		}
+		if (redirectStatus === 'failed') {
+			setError(__('Payment was not completed. Please try again.', 'doublescale'));
+			clearStripeRedirectParams();
+			setLoading(false);
+			return;
+		}
+		if (redirectStatus !== 'succeeded') {
+			return;
+		}
+
 		let cancelled = false;
 		setLoading(true);
 		setError(null);
-		void initInvoiceStripePayment(invoice.id)
+		void confirmInvoiceOnlinePayment(invoice.id, gateway.slug)
+			.then((result) => {
+				if (cancelled) {
+					return;
+				}
+				clearStripeRedirectParams();
+				if (result.invoice) {
+					onPaid(result.invoice);
+				}
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) {
+					setError(
+						err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale')
+					);
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [invoice.id, gateway.slug, onPaid]);
+
+	useEffect(() => {
+		if (getStripeRedirectStatus()) {
+			return;
+		}
+		let cancelled = false;
+		setLoading(true);
+		setError(null);
+		void initInvoiceOnlinePayment(invoice.id, gateway.slug)
 			.then((response) => {
 				if (cancelled) {
 					return;
@@ -101,7 +161,7 @@ export const InvoiceStripePayment: React.FC<InvoiceStripePaymentProps> = ({
 			.catch((err: unknown) => {
 				if (!cancelled) {
 					setError(
-						err instanceof Error ? err.message : __('Could not start Stripe payment.', 'doublescale')
+						err instanceof Error ? err.message : __('Could not start online payment.', 'doublescale')
 					);
 				}
 			})
@@ -113,11 +173,11 @@ export const InvoiceStripePayment: React.FC<InvoiceStripePaymentProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [invoice.id, onPaid]);
+	}, [invoice.id, gateway.slug, onPaid]);
 
 	if (loading) {
 		return (
-			<div className="text-sm text-muted-foreground">{__('Loading Stripe…', 'doublescale')}</div>
+			<div className="text-sm text-muted-foreground">{__('Loading payment options…', 'doublescale')}</div>
 		);
 	}
 
@@ -125,22 +185,31 @@ export const InvoiceStripePayment: React.FC<InvoiceStripePaymentProps> = ({
 		return <div className="text-sm text-red-600">{error}</div>;
 	}
 
-	if (!clientSecret || !stripePromise) {
-		return null;
+	if (gateway.slug !== 'stripe' || !clientSecret || !stripePromise) {
+		return (
+			<div className="text-sm text-muted-foreground">
+				{__('This payment gateway is not supported in the admin view yet.', 'doublescale')}
+			</div>
+		);
 	}
 
 	return (
 		<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
 			<div>
-				<h4 className="font-medium">{__('Pay with Stripe', 'doublescale')}</h4>
+				<h4 className="font-medium">
+					{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}
+				</h4>
 				<p className="text-sm text-muted-foreground">
 					{__('Balance due:', 'doublescale')}{' '}
 					{formatMoney(balanceDue, invoice.currency)}
 				</p>
 			</div>
 			<Elements stripe={stripePromise as Promise<Stripe | null>} options={{ clientSecret }}>
-				<StripePayForm invoiceId={invoice.id} onPaid={onPaid} />
+				<StripePayForm invoiceId={invoice.id} gatewaySlug={gateway.slug} onPaid={onPaid} />
 			</Elements>
 		</div>
 	);
 };
+
+/** @deprecated Use InvoiceOnlinePayment */
+export const InvoiceStripePayment = InvoiceOnlinePayment;

@@ -13,6 +13,7 @@ use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\PaymentModel;
+use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
 use DoubleScale\Modules\Sales\Services\InvoicePayable;
 use DoubleScale\Modules\Sales\Services\InvoiceUrl;
 
@@ -116,7 +117,8 @@ class InvoiceShaper {
 			'amount_paid'           => (float) $invoice->amount_paid,
 			'balance'               => self::balance( $invoice ),
 			'is_overdue'            => self::is_overdue( $invoice ),
-			'can_pay'               => self::can_pay( $invoice ),
+			'can_pay'                 => self::can_pay( $invoice ),
+			'online_payment_gateways' => InvoiceOnlineGatewaysManager::instance()->shape_for_invoice( $invoice ),
 			'billing_address'       => $invoice->billing_address,
 			'shipping_address'      => $invoice->shipping_address,
 			'client_note'           => $invoice->client_note,
@@ -170,6 +172,6 @@ class InvoiceShaper {
 	 * @return bool
 	 */
 	public static function can_pay( InvoiceModel $invoice ): bool {
-		return true === InvoicePayable::guard( $invoice );
+		return InvoicePayable::can_pay_online( $invoice );
 	}
 }

@@ -2,6 +2,9 @@
 /**
  * Canonical invoice payment mode values.
  *
+ * Offline modes are recorded manually by staff. Online gateway slugs (e.g.
+ * stripe) route through InvoiceOnlineGatewaysManager.
+ *
  * @package DoubleScale\Modules\Sales
  */
 
@@ -18,22 +21,86 @@ class PaymentMode {
 	const CASH          = 'cash';
 	const CHECK         = 'check';
 	const CREDIT_CARD   = 'credit_card';
-	const PAYPAL        = 'paypal';
 	const STRIPE        = 'stripe';
 	const OTHER         = 'other';
 
 	/**
+	 * Modes recorded manually (offline).
+	 *
 	 * @return string[]
 	 */
-	public static function all(): array {
+	public static function offline_modes(): array {
 		return array(
 			self::BANK_TRANSFER,
 			self::CASH,
 			self::CHECK,
-			self::CREDIT_CARD,
-			self::PAYPAL,
-			self::STRIPE,
 			self::OTHER,
+		);
+	}
+
+	/**
+	 * Known online gateway slugs. Pro/modules register implementations.
+	 *
+	 * @return string[]
+	 */
+	public static function online_gateway_slugs(): array {
+		$slugs = array( self::STRIPE );
+
+		/**
+		 * Register additional online payment gateway slugs for invoices.
+		 *
+		 * @param string[] $slugs Gateway slugs.
+		 */
+		return array_values( array_unique( apply_filters( 'doublescale_sales_online_payment_gateway_slugs', $slugs ) ) );
+	}
+
+	/**
+	 * All selectable modes on an invoice (offline + online gateways).
+	 *
+	 * @return string[]
+	 */
+	public static function all(): array {
+		return array_values( array_unique( array_merge( self::offline_modes(), self::online_gateway_slugs() ) ) );
+	}
+
+	/**
+	 * @param string $mode Mode slug.
+	 * @return bool
+	 */
+	public static function is_offline( string $mode ): bool {
+		$normalized = self::normalize( $mode );
+		return null !== $normalized && in_array( $normalized, self::offline_modes(), true );
+	}
+
+	/**
+	 * @param string $mode Mode slug.
+	 * @return bool
+	 */
+	public static function is_online_gateway( string $mode ): bool {
+		$normalized = self::normalize( $mode );
+		return null !== $normalized && in_array( $normalized, self::online_gateway_slugs(), true );
+	}
+
+	/**
+	 * @param mixed $modes Mode list.
+	 * @return array{offline: string[], online: string[]}
+	 */
+	public static function split_modes( $modes ): array {
+		$normalized = self::normalize_list( $modes );
+		$offline    = array();
+		$online     = array();
+
+		foreach ( $normalized as $mode ) {
+			if ( self::is_online_gateway( $mode ) ) {
+				$online[] = $mode;
+			} else {
+				$offline[] = $mode;
+			}
+		}
+
+		return array(
+			'offline' => $offline,
+			'online'  => $online,
 		);
 	}
 
@@ -42,8 +109,9 @@ class PaymentMode {
 	 * @return string|null Canonical slug or null when empty/unknown.
 	 */
 	public static function normalize( string $mode ): ?string {
-		$mode = sanitize_title( trim( $mode ), '', 'display' );
+		$mode = strtolower( trim( $mode ) );
 		$mode = str_replace( '-', '_', $mode );
+		$mode = preg_replace( '/[^a-z0-9_]/', '', $mode );
 
 		if ( '' === $mode ) {
 			return null;
@@ -54,9 +122,10 @@ class PaymentMode {
 		}
 
 		$legacy = array(
-			'bank'             => self::BANK_TRANSFER,
-			'stripe_checkout'  => self::STRIPE,
-			'credit_card'      => self::CREDIT_CARD,
+			'bank'            => self::BANK_TRANSFER,
+			'stripe_checkout' => self::STRIPE,
+			'credit_card'     => self::CREDIT_CARD,
+			'paypal'          => self::OTHER,
 		);
 
 		return $legacy[ $mode ] ?? self::OTHER;

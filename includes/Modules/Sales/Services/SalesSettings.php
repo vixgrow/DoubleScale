@@ -9,6 +9,9 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Sales\Constants\PaymentMode;
+use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
+
 /**
  * SalesSettings service.
  */
@@ -31,6 +34,14 @@ final class SalesSettings {
 			'notify_rep_invoice_paid'       => true,
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
+			'default_offline_payment_modes' => array(
+				PaymentMode::BANK_TRANSFER,
+				PaymentMode::CASH,
+				PaymentMode::CHECK,
+			),
+			'default_online_payment_gateways' => array(
+				PaymentMode::STRIPE,
+			),
 		);
 	}
 
@@ -42,7 +53,40 @@ final class SalesSettings {
 		if ( ! is_array( $stored ) ) {
 			$stored = array();
 		}
-		return array_merge( self::defaults(), $stored );
+		$merged = array_merge( self::defaults(), $stored );
+		$merged['enabled_online_gateways'] = self::get_resolved_enabled_online_gateways();
+
+		return $merged;
+	}
+
+	/**
+	 * Explicit enabled gateway slugs from storage, or null when unset (all registered).
+	 *
+	 * @return string[]|null
+	 */
+	public static function get_enabled_online_gateways(): ?array {
+		$stored = get_option( self::OPTION_KEY, array() );
+		if ( ! is_array( $stored ) || ! array_key_exists( 'enabled_online_gateways', $stored ) ) {
+			return null;
+		}
+
+		return PaymentMode::normalize_list( $stored['enabled_online_gateways'] );
+	}
+
+	/**
+	 * Gateways enabled for sales invoices (intersected with registered implementations).
+	 *
+	 * @return string[]
+	 */
+	public static function get_resolved_enabled_online_gateways(): array {
+		$registered = InvoiceOnlineGatewaysManager::instance()->slugs();
+		$explicit   = self::get_enabled_online_gateways();
+
+		if ( null === $explicit ) {
+			return $registered;
+		}
+
+		return array_values( array_intersect( $explicit, $registered ) );
 	}
 
 	/**
@@ -63,7 +107,12 @@ final class SalesSettings {
 	 * @return void
 	 */
 	public static function update( array $settings ): void {
-		$merged = array_merge( self::defaults(), self::get_all(), $settings );
+		$stored = get_option( self::OPTION_KEY, array() );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+
+		$merged = array_merge( self::defaults(), $stored, $settings );
 		$clean  = array();
 
 		$string_keys = array(
@@ -95,6 +144,43 @@ final class SalesSettings {
 			$clean['proposal_expiry_reminder_days'] = max( 0, min( 30, (int) $merged['proposal_expiry_reminder_days'] ) );
 		}
 
-		update_option( self::OPTION_KEY, array_merge( self::get_all(), $clean ) );
+		$mode_list_keys = array(
+			'enabled_online_gateways',
+			'default_offline_payment_modes',
+			'default_online_payment_gateways',
+		);
+		foreach ( $mode_list_keys as $key ) {
+			if ( ! array_key_exists( $key, $merged ) ) {
+				continue;
+			}
+
+			$list = PaymentMode::normalize_list( $merged[ $key ] );
+
+			if ( 'enabled_online_gateways' === $key ) {
+				$list = array_values( array_intersect( $list, InvoiceOnlineGatewaysManager::instance()->slugs() ) );
+			} elseif ( 'default_offline_payment_modes' === $key ) {
+				$list = array_values(
+					array_filter(
+						$list,
+						static function ( string $mode ): bool {
+							return PaymentMode::is_offline( $mode );
+						}
+					)
+				);
+			} elseif ( 'default_online_payment_gateways' === $key ) {
+				$list = array_values(
+					array_filter(
+						$list,
+						static function ( string $mode ): bool {
+							return PaymentMode::is_online_gateway( $mode );
+						}
+					)
+				);
+			}
+
+			$clean[ $key ] = $list;
+		}
+
+		update_option( self::OPTION_KEY, array_merge( $stored, $clean ) );
 	}
 }

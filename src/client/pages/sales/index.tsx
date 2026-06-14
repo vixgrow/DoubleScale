@@ -15,6 +15,8 @@ const ProposalEdit = lazy(() => import('./proposals/edit'));
 const InvoicesList = lazy(() => import('./invoices'));
 const InvoiceView = lazy(() => import('./invoices/view'));
 const InvoiceEdit = lazy(() => import('./invoices/edit'));
+const PaymentsList = lazy(() => import('./payments'));
+const PaymentView = lazy(() => import('./payments/view'));
 const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
@@ -132,6 +134,22 @@ registerAdminPage('sales-invoice-edit', {
 	path: 'sales/invoices/:id/edit',
 	component: wrap(InvoiceEdit),
 	label: __('Edit Invoice', 'doublescale'),
+	hidden: true,
+	...salesPageDefaults,
+});
+
+registerAdminPage('sales-payments', {
+	path: 'sales/payments',
+	component: wrap(PaymentsList),
+	label: __('Payments', 'doublescale'),
+	hidden: true,
+	...salesPageDefaults,
+});
+
+registerAdminPage('sales-payment', {
+	path: 'sales/payments/:id',
+	component: wrap(PaymentView),
+	label: __('Payment', 'doublescale'),
 	hidden: true,
 	...salesPageDefaults,
 });

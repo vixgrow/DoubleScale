@@ -137,6 +137,29 @@ export interface ConvertProposalResponse {
 	proposal: Proposal;
 }
 
+export interface OnlinePaymentGatewayStatus {
+	slug: string;
+	name: string;
+	description?: string;
+	available: boolean;
+	configured: boolean;
+	enabled_for_sales?: boolean;
+	ready?: boolean;
+	integration_url?: string;
+	can_pay?: boolean;
+}
+
+export interface InvoiceOnlineInitResponse {
+	gateway?: string;
+	publishable_key: string;
+	client_secret?: string;
+	already_paid?: boolean;
+	invoice?: Invoice;
+	amount?: number;
+	currency?: string;
+	pi_status?: string;
+}
+
 export interface Invoice {
 	id: number;
 	invoice_number: string;
@@ -184,6 +207,35 @@ export interface ContactInvoicePayment extends InvoicePayment {
 		invoice_number: string;
 		currency: string;
 	};
+}
+
+export interface PaymentListItem extends ContactInvoicePayment {
+	contact?: ContactSummary | null;
+}
+
+export interface PaymentDetail extends PaymentListItem {
+	company?: {
+		name: string;
+		url: string;
+		address: string;
+	};
+	invoice?: {
+		id: number;
+		invoice_number: string;
+		currency: string;
+		invoice_date?: string | null;
+		total?: number;
+		amount_paid?: number;
+		billing_address?: string | null;
+	};
+}
+
+export interface PaymentFilters {
+	search?: string;
+	sort_by?: string;
+	sort_order?: 'asc' | 'desc';
+	per_page?: number;
+	page?: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -238,4 +290,7 @@ export interface SalesSettings {
 	notify_rep_invoice_paid: boolean;
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
+	enabled_online_gateways: string[];
+	default_offline_payment_modes: string[];
+	default_online_payment_gateways: string[];
 }

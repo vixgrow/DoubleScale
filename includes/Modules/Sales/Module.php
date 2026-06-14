@@ -72,8 +72,9 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestProposalController::class,
 			Rest\Controllers\RestInvoiceController::class,
 			Rest\Controllers\RestInvoicePaymentController::class,
+			Rest\Controllers\RestPaymentController::class,
 			Rest\Controllers\RestContactSalesController::class,
-			Rest\Controllers\RestInvoiceStripeController::class,
+			Rest\Controllers\RestInvoiceOnlinePaymentController::class,
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
@@ -126,6 +127,19 @@ final class Module extends AbstractModule {
 				'slug'            => 'doublescale&path=sales/invoices',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
 				'position'        => 42,
+				'group'           => 'sales',
+				'requires_module' => 'sales',
+			)
+		);
+
+		MenuRegistry::add(
+			array(
+				'page_title'      => __( 'Payments', 'doublescale' ),
+				'menu_title'      => __( 'Payments', 'doublescale' ),
+				'capability'      => 'doublescale_access',
+				'slug'            => 'doublescale&path=sales/payments',
+				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
+				'position'        => 43,
 				'group'           => 'sales',
 				'requires_module' => 'sales',
 			)

@@ -17,7 +17,7 @@ use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\PaymentModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use DoubleScale\Modules\Sales\Services\DocumentPdf;
-use DoubleScale\Modules\Sales\Services\InvoicePayable;
+use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -56,6 +56,30 @@ class RestPublicInvoiceController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/pay/(?P<gateway>[a-z0-9_\-]+)/init',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'gateway_init' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/pay/(?P<gateway>[a-z0-9_\-]+)/confirm',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'gateway_confirm' ),
 					'permission_callback' => '__return_true',
 				),
 			)
@@ -149,7 +173,7 @@ class RestPublicInvoiceController extends RestController {
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function stripe_init( $request ) {
+	public function gateway_init( $request ) {
 		$disabled = $this->require_module( 'sales' );
 		if ( $disabled ) {
 			return $disabled;
@@ -163,21 +187,10 @@ class RestPublicInvoiceController extends RestController {
 			return $invoice;
 		}
 
-		$guard = InvoicePayable::guard( $invoice );
-		if ( is_wp_error( $guard ) ) {
-			return $guard;
-		}
-
-		$result = apply_filters( 'doublescale_sales_invoice_stripe_init', null, $invoice );
-		if ( null === $result ) {
-			return new WP_Error(
-				'stripe_unavailable',
-				__( 'Stripe payments require DoubleScale Pro with Stripe configured.', 'doublescale' ),
-				array( 'status' => 503 )
-			);
-		}
+		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
+		$result  = InvoiceOnlineGatewaysManager::instance()->init_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return $this->normalize_public_gateway_error( $result, $gateway );
 		}
 
 		return new WP_REST_Response( $result, 200 );
@@ -187,7 +200,7 @@ class RestPublicInvoiceController extends RestController {
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function stripe_confirm( $request ) {
+	public function gateway_confirm( $request ) {
 		$disabled = $this->require_module( 'sales' );
 		if ( $disabled ) {
 			return $disabled;
@@ -201,16 +214,10 @@ class RestPublicInvoiceController extends RestController {
 			return $invoice;
 		}
 
-		$result = apply_filters( 'doublescale_sales_invoice_stripe_confirm', null, $invoice );
-		if ( null === $result ) {
-			return new WP_Error(
-				'stripe_unavailable',
-				__( 'Stripe payments require DoubleScale Pro with Stripe configured.', 'doublescale' ),
-				array( 'status' => 503 )
-			);
-		}
+		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
+		$result  = InvoiceOnlineGatewaysManager::instance()->confirm_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
-			return $result;
+			return $this->normalize_public_gateway_error( $result, $gateway );
 		}
 
 		if ( is_array( $result ) && isset( $result['invoice'] ) && $result['invoice'] instanceof InvoiceModel ) {
@@ -218,6 +225,40 @@ class RestPublicInvoiceController extends RestController {
 		}
 
 		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function stripe_init( $request ) {
+		$request->set_param( 'gateway', 'stripe' );
+		return $this->gateway_init( $request );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function stripe_confirm( $request ) {
+		$request->set_param( 'gateway', 'stripe' );
+		return $this->gateway_confirm( $request );
+	}
+
+	/**
+	 * @param WP_Error $error   Error.
+	 * @param string   $gateway Gateway slug.
+	 * @return WP_Error
+	 */
+	private function normalize_public_gateway_error( WP_Error $error, string $gateway ): WP_Error {
+		if ( 'stripe' === $gateway && in_array( $error->get_error_code(), array( 'gateway_unavailable', 'gateway_not_configured', 'gateway_not_found' ), true ) ) {
+			return new WP_Error(
+				'stripe_unavailable',
+				__( 'Stripe payments require DoubleScale Pro with Stripe configured.', 'doublescale' ),
+				array( 'status' => 503 )
+			);
+		}
+		return $error;
 	}
 
 	/**

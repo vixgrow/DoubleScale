@@ -2,7 +2,7 @@
  * Invoice read-only detail view with payments.
  */
 
-import React, { useEffect, useState } from '@wordpress/element';
+import React, { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ArrowLeft, Copy, CreditCard, Download, Pencil, Send, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
 	ConfirmDialog,
 	InvoiceDocumentPreview,
-	InvoiceStripePayment,
+	InvoiceOnlinePayment,
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
@@ -25,7 +25,7 @@ import {
 	sendInvoice,
 	useInvoice,
 	useInvoicePayments,
-	useSalesStripeStatus,
+	useSalesOnlinePaymentGateways,
 } from '@/hooks/sales';
 import type { Invoice } from '@/types/sales';
 
@@ -38,7 +38,7 @@ const InvoiceView: React.FC = () => {
 	const [invoice, setInvoice] = useState<Invoice | null>(null);
 	const { data: payments, loading: paymentsLoading, refetch: refetchPayments } =
 		useInvoicePayments(invoiceId);
-	const { data: stripeStatus } = useSalesStripeStatus();
+	const { data: onlineGateways, loading: gatewaysLoading } = useSalesOnlinePaymentGateways();
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
@@ -51,6 +51,27 @@ const InvoiceView: React.FC = () => {
 			setInvoice(fetched);
 		}
 	}, [fetched]);
+
+	const allowedModes = invoice?.allowed_payment_modes?.filter(Boolean) ?? [];
+	const payableGateways = useMemo(
+		() =>
+			onlineGateways.filter(
+				(gateway) =>
+					gateway.available &&
+					gateway.configured &&
+					gateway.enabled_for_sales !== false &&
+					(allowedModes.length === 0 || allowedModes.includes(gateway.slug))
+			),
+		[onlineGateways, allowedModes]
+	);
+	const balanceDue = invoice ? Math.max(0, invoice.total - invoice.amount_paid) : 0;
+	const isDraft = invoice?.status === 'draft';
+	const showOnlinePay =
+		!!invoice &&
+		!isDraft &&
+		balanceDue > 0 &&
+		invoice.status !== 'paid' &&
+		payableGateways.length > 0;
 
 	const handleDelete = async () => {
 		if (!invoiceId) {
@@ -144,21 +165,9 @@ const InvoiceView: React.FC = () => {
 		);
 	}
 
-	const isDraft = invoice.status === 'draft';
 	const showSend = invoice.status !== 'paid';
-	const balanceDue = Math.max(0, invoice.total - invoice.amount_paid);
-	const allowedModes = invoice.allowed_payment_modes?.filter(Boolean) ?? [];
-	const stripeAllowed =
-		allowedModes.length === 0 || allowedModes.includes('stripe');
-	const showStripePay =
-		!isDraft &&
-		balanceDue > 0 &&
-		invoice.status !== 'paid' &&
-		stripeAllowed &&
-		stripeStatus?.available &&
-		stripeStatus?.configured;
 
-	const handleStripePaid = async (updated: Invoice) => {
+	const handleOnlinePaid = async (updated: Invoice) => {
 		setInvoice(updated);
 		await refetchPayments();
 	};
@@ -251,9 +260,21 @@ const InvoiceView: React.FC = () => {
 				<InvoiceDocumentPreview invoice={invoice} />
 			</div>
 
-			{showStripePay ? (
-				<div className="border rounded-lg bg-white p-6">
-					<InvoiceStripePayment invoice={invoice} onPaid={handleStripePaid} />
+			{showOnlinePay ? (
+				<div className="border rounded-lg bg-white p-6 space-y-4">
+					<h2 className="font-medium">{__('Online Payment', 'doublescale')}</h2>
+					{gatewaysLoading ? (
+						<p className="text-sm text-muted-foreground">{__('Loading gateways…', 'doublescale')}</p>
+					) : (
+						payableGateways.map((gateway) => (
+							<InvoiceOnlinePayment
+								key={gateway.slug}
+								invoice={invoice}
+								gateway={gateway}
+								onPaid={handleOnlinePaid}
+							/>
+						))
+					)}
 				</div>
 			) : null}
 

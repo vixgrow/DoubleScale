@@ -32,14 +32,17 @@ import {
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary, LineItem } from '@/types/sales';
 import {
 	CURRENCIES,
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
-	PAYMENT_MODES,
-	PAYMENT_MODE_LABELS,
+	OFFLINE_PAYMENT_MODES,
+	OFFLINE_PAYMENT_MODE_LABELS,
+	ONLINE_PAYMENT_GATEWAYS,
+	ONLINE_PAYMENT_GATEWAY_LABELS,
 } from '@/constants/sales';
 
 const selectClass =
@@ -66,6 +69,7 @@ const InvoiceEdit: React.FC = () => {
 	const invoiceId = !isNew && idParam ? Number(idParam) : null;
 
 	const { data: existing, loading } = useInvoice(invoiceId);
+	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 
 	const [status, setStatus] = useState('draft');
@@ -199,6 +203,22 @@ const InvoiceEdit: React.FC = () => {
 			setSaleAgentUserId(assignableUsers[0].id);
 		}
 	}, [assignableUsers, saleAgentUserId]);
+
+	useEffect(() => {
+		if (!isNew || existing || !salesSettings) {
+			return;
+		}
+		if (allowedPaymentModes.length > 0) {
+			return;
+		}
+		const defaults = [
+			...(salesSettings.default_offline_payment_modes ?? []),
+			...(salesSettings.default_online_payment_gateways ?? []),
+		];
+		if (defaults.length > 0) {
+			setAllowedPaymentModes(defaults);
+		}
+	}, [isNew, existing, salesSettings, allowedPaymentModes.length]);
 
 	const togglePaymentMode = (mode: string) => {
 		setAllowedPaymentModes((prev) =>
@@ -427,9 +447,12 @@ const InvoiceEdit: React.FC = () => {
 						</FormField>
 					) : null}
 					<div className="space-y-2">
-						<Label>{__('Allowed payment modes', 'doublescale')}</Label>
+						<Label>{__('Offline payment methods', 'doublescale')}</Label>
+						<p className="text-xs text-muted-foreground">
+							{__('Recorded manually by staff when the customer pays offline.', 'doublescale')}
+						</p>
 						<div className="flex flex-wrap gap-2">
-							{PAYMENT_MODES.map((mode) => (
+							{OFFLINE_PAYMENT_MODES.map((mode) => (
 								<button
 									key={mode}
 									type="button"
@@ -440,7 +463,32 @@ const InvoiceEdit: React.FC = () => {
 									}`}
 									onClick={() => togglePaymentMode(mode)}
 								>
-									{PAYMENT_MODE_LABELS[mode]}
+									{OFFLINE_PAYMENT_MODE_LABELS[mode]}
+								</button>
+							))}
+						</div>
+					</div>
+					<div className="space-y-2">
+						<Label>{__('Online payment gateways', 'doublescale')}</Label>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Customers can pay automatically on the public invoice page. Stripe uses Integrations → Stripe.',
+								'doublescale'
+							)}
+						</p>
+						<div className="flex flex-wrap gap-2">
+							{ONLINE_PAYMENT_GATEWAYS.map((mode) => (
+								<button
+									key={mode}
+									type="button"
+									className={`px-3 py-1 rounded border text-sm ${
+										allowedPaymentModes.includes(mode)
+											? 'bg-primary text-white border-primary'
+											: 'bg-white'
+									}`}
+									onClick={() => togglePaymentMode(mode)}
+								>
+									{ONLINE_PAYMENT_GATEWAY_LABELS[mode]}
 								</button>
 							))}
 						</div>

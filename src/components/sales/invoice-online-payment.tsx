@@ -2,7 +2,7 @@
  * Online payment UI for an invoice (gateway-agnostic; Stripe implementation today).
  */
 
-import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import React, { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
@@ -87,6 +87,11 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const onPaidRef = useRef(onPaid);
+
+	useEffect(() => {
+		onPaidRef.current = onPaid;
+	}, [onPaid]);
 
 	const stripePromise = useMemo(
 		() => (gateway.slug === 'stripe' && publishableKey ? loadStripe(publishableKey) : null),
@@ -118,7 +123,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 				}
 				clearStripeRedirectParams();
 				if (result.invoice) {
-					onPaid(result.invoice);
+					onPaidRef.current(result.invoice);
 				}
 			})
 			.catch((err: unknown) => {
@@ -137,7 +142,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [invoice.id, gateway.slug, onPaid]);
+	}, [invoice.id, gateway.slug]);
 
 	useEffect(() => {
 		if (getStripeRedirectStatus()) {
@@ -152,7 +157,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 					return;
 				}
 				if (response.already_paid && response.invoice) {
-					onPaid(response.invoice);
+					onPaidRef.current(response.invoice);
 					return;
 				}
 				setPublishableKey(response.publishable_key);
@@ -173,7 +178,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [invoice.id, gateway.slug, onPaid]);
+	}, [invoice.id, gateway.slug]);
 
 	if (loading) {
 		return (

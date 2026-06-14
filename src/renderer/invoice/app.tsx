@@ -2,7 +2,7 @@
  * Public invoice view with payment history and online gateway checkout.
  */
 
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
@@ -92,6 +92,11 @@ const PublicOnlinePayment: React.FC<{
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const onPaidRef = useRef(onPaid);
+
+	useEffect(() => {
+		onPaidRef.current = onPaid;
+	}, [onPaid]);
 
 	const stripePromise = useMemo(
 		() => (gateway.slug === 'stripe' && publishableKey ? loadStripe(publishableKey) : null),
@@ -123,7 +128,7 @@ const PublicOnlinePayment: React.FC<{
 					return;
 				}
 				clearStripeRedirectParams();
-				onPaid();
+				onPaidRef.current();
 			})
 			.catch((err: unknown) => {
 				if (!cancelled) {
@@ -141,7 +146,7 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug, onPaid]);
+	}, [hash, gateway.slug]);
 
 	useEffect(() => {
 		if (getStripeRedirectStatus()) {
@@ -156,7 +161,7 @@ const PublicOnlinePayment: React.FC<{
 					return;
 				}
 				if (response.already_paid && response.invoice) {
-					onPaid();
+					onPaidRef.current();
 					return;
 				}
 				setPublishableKey(response.publishable_key);
@@ -177,7 +182,7 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug, onPaid]);
+	}, [hash, gateway.slug]);
 
 	if (loading) {
 		return (

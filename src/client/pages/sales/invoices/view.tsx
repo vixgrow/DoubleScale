@@ -2,7 +2,7 @@
  * Invoice read-only detail view with payments.
  */
 
-import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ArrowLeft, Copy, CreditCard, Download, Pencil, Send, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
@@ -39,6 +39,14 @@ const InvoiceView: React.FC = () => {
 	const { data: payments, loading: paymentsLoading, refetch: refetchPayments } =
 		useInvoicePayments(invoiceId);
 	const { data: onlineGateways, loading: gatewaysLoading } = useSalesOnlinePaymentGateways();
+
+	const handleOnlinePaid = useCallback(
+		async (updated: Invoice) => {
+			setInvoice(updated);
+			await refetchPayments();
+		},
+		[refetchPayments]
+	);
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
@@ -166,11 +174,6 @@ const InvoiceView: React.FC = () => {
 	}
 
 	const showSend = invoice.status !== 'paid';
-
-	const handleOnlinePaid = async (updated: Invoice) => {
-		setInvoice(updated);
-		await refetchPayments();
-	};
 
 	const handleDownloadPdf = async () => {
 		if (!invoiceId || !invoice) {

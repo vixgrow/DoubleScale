@@ -15,6 +15,7 @@ import {
 	InvoiceStripePayment,
 	PaymentsList,
 	RecordPaymentDialog,
+	SendDocumentDialog,
 } from '@/components/sales';
 import {
 	deleteInvoice,
@@ -64,14 +65,14 @@ const InvoiceView: React.FC = () => {
 		}
 	};
 
-	const handleSend = async () => {
+	const handleSend = async (message: string) => {
 		if (!invoiceId) {
 			return;
 		}
 		setBusy(true);
 		setNotice(null);
 		try {
-			const result = await sendInvoice(invoiceId);
+			const result = await sendInvoice(invoiceId, message);
 			setInvoice(result.invoice);
 			await refetch();
 			setNotice(__('Invoice sent to the customer.', 'doublescale'));
@@ -265,7 +266,7 @@ const InvoiceView: React.FC = () => {
 				/>
 			</div>
 
-			<ConfirmDialog
+			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
 				title={__('Send Invoice', 'doublescale')}

@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
+import { TaxesManager } from './taxes-manager';
 
 const SalesSettingsPage: React.FC = () => {
 	const navigate = useNavigate();
@@ -204,6 +205,8 @@ const SalesSettingsPage: React.FC = () => {
 					/>
 				</FormField>
 			</section>
+
+			<TaxesManager />
 
 			<div className="flex justify-end">
 				<Button onClick={() => void handleSave()} disabled={saving}>

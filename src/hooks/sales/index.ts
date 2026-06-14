@@ -20,7 +20,9 @@ import type {
 	InvoiceSummary,
 	PaginatedResponse,
 	Proposal,
+	ProposalComment,
 	ProposalFilters,
+	ProposalSignature,
 	RecordPaymentPayload,
 	SalesAssignableUser,
 	SalesSettings,
@@ -459,19 +461,90 @@ export const useSalesTaxes = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
+	const refetch = useCallback(() => {
 		setLoading(true);
-		apiFetch<SalesTax[]>({ path: `${NAMESPACE}/taxes` })
+		setError(null);
+		return apiFetch<SalesTax[]>({ path: `${NAMESPACE}/taxes` })
 			.then((response) => {
-				setData(Array.isArray(response) ? response : []);
+				const items = Array.isArray(response) ? response : [];
+				setData(items);
+				return items;
 			})
 			.catch((err: unknown) => {
-				setError(formatRestError(err));
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
 			})
 			.finally(() => {
 				setLoading(false);
 			});
 	}, []);
 
-	return { data, loading, error };
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
 };
+
+export const createSalesTax = (payload: Pick<SalesTax, 'name' | 'rate'>) =>
+	apiFetch<SalesTax>({
+		path: `${NAMESPACE}/taxes`,
+		method: 'POST',
+		data: payload,
+	});
+
+export const updateSalesTax = (taxId: number, payload: Partial<Pick<SalesTax, 'name' | 'rate'>>) =>
+	apiFetch<SalesTax>({
+		path: `${NAMESPACE}/taxes/${taxId}`,
+		method: 'PUT',
+		data: payload,
+	});
+
+export const deleteSalesTax = (taxId: number) =>
+	apiFetch<{ deleted: boolean }>({
+		path: `${NAMESPACE}/taxes/${taxId}`,
+		method: 'DELETE',
+	});
+
+export const useProposalComments = (proposalId: number | null, enabled = true) => {
+	const [data, setData] = useState<ProposalComment[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		if (!proposalId || !enabled) {
+			setData([]);
+			return Promise.resolve([]);
+		}
+		setLoading(true);
+		setError(null);
+		return apiFetch<{ data: ProposalComment[] }>({
+			path: `${NAMESPACE}/proposals/${proposalId}/comments`,
+		})
+			.then((response) => {
+				const items = Array.isArray(response?.data) ? response.data : [];
+				setData(items);
+				return items;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, [proposalId, enabled]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const fetchProposalSignature = (proposalId: number) =>
+	apiFetch<ProposalSignature>({
+		path: `${NAMESPACE}/proposals/${proposalId}/signature`,
+	});

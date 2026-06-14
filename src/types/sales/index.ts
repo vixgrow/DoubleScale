@@ -36,6 +36,21 @@ export interface SalesTax {
 	rate: number;
 }
 
+export interface ProposalComment {
+	id: number;
+	author_name: string;
+	content: string;
+	is_customer: boolean;
+	created_at: string | null;
+}
+
+export interface ProposalSignature {
+	signed_name: string | null;
+	signature: string;
+	accepted_at: string | null;
+	signed_ip: string | null;
+}
+
 export interface LineItemTax {
 	id?: number;
 	name: string;

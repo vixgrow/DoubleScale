@@ -19,10 +19,10 @@ const CustomDialogHeader: React.FC<CustomDialogHeaderProps> = ({
 			</span>
 
 			<div className="min-w-0 flex-1 pt-0.5">
-				<p className="text-lg font-semibold leading-tight text-foreground">
+				<p className="text-lg text-left font-semibold leading-tight text-foreground">
 					{title}
 				</p>
-				<p className="mt-0.5 text-sm font-normal leading-snug text-muted-foreground">
+				<p className="mt-0.5 text-sm text-left font-normal leading-snug text-muted-foreground">
 					{subtitle}
 				</p>
 			</div>

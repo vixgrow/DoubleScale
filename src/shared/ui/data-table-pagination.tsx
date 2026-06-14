@@ -106,7 +106,7 @@ export default function DataTablePagination<TData>({
 
 	const visiblePages = getVisiblePages();
 	return (
-		<div className="flex items-center justify-between border-t border-[#DEE1E6] px-4 pt-3">
+		<div className="flex max-sm:flex-col max-sm:gap-3 items-center justify-between border-t border-[#DEE1E6] px-4 pt-3">
 			{/* Left side - Results info */}
 			<div className="flex items-center text-sm text-gray-700 space-x-2">
 				<span className="text-[#3F3F46]">
@@ -124,7 +124,7 @@ export default function DataTablePagination<TData>({
 							table.setPageSize(Number(value))
 						}
 					>
-						<SelectTrigger className="w-20 outline-none border-none ml-0 pr-4">
+						<SelectTrigger className="w-20 !bg-transparent outline-none border-none ml-0 pr-4">
 							<SelectValue placeholder="Page Size" />
 						</SelectTrigger>
 						<SelectContent>

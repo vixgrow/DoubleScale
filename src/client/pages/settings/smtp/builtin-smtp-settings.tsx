@@ -2195,7 +2195,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 					}
 				}}
 			>
-				<AlertDialogContent>
+				<AlertDialogContent className='!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-3 rounded-xl p-4 sm:mx-auto sm:w-full sm:p-8 !translate-x-[-50%] !translate-y-[-50%]'>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
 							{__('Delete stored provider account?', 'doublescale')}
@@ -2224,7 +2224,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
-					<AlertDialogFooter>
+					<AlertDialogFooter className='flex flex-row justify-between mt-2'>
 						<AlertDialogCancel disabled={deletingProviderAccount}>
 							{__('Cancel', 'doublescale')}
 						</AlertDialogCancel>

@@ -204,6 +204,7 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 = 1.1.9 = 15 Jun 2026
 - Fix Pro form integrations (Gravity Forms, Elementor, Ninja Forms, etc.) staying locked when DoubleScale Pro is active
 - Fix Outlook OAuth scope for consumer Microsoft accounts so IMAP/SMTP connections are not rejected
+- Fix email builder text blocks losing content when clicking columns or sections before typing
 - Add module storage readiness checks for automation rules (completed/entered automation, lead score level) and sales merge tags so queries are skipped when a module or its database table is not ready
 - Add mobile step progress indicator to the SMTP connection wizard
 - Improve admin layout and responsiveness across contacts, forms, campaigns, SMTP, support, integrations, license, import/export, and debugging screens

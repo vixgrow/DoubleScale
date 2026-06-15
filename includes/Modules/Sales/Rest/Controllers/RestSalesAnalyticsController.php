@@ -55,6 +55,17 @@ class RestSalesAnalyticsController extends RestController {
 							'required'          => false,
 							'sanitize_callback' => 'absint',
 						),
+						'owner_id'   => array(
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+						'currencies' => array(
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => 'Comma-separated currency codes (e.g. USD,EUR).',
+						),
 					),
 				),
 			)
@@ -86,6 +97,8 @@ class RestSalesAnalyticsController extends RestController {
 		$start_date = sanitize_text_field( (string) $request->get_param( 'start_date' ) );
 		$end_date   = sanitize_text_field( (string) $request->get_param( 'end_date' ) );
 		$year       = (int) $request->get_param( 'year' );
+		$owner_id   = absint( $request->get_param( 'owner_id' ) );
+		$currencies = sanitize_text_field( (string) $request->get_param( 'currencies' ) );
 
 		if ( '' === $start_date ) {
 			$start_date = gmdate( 'Y-m-01', strtotime( $today . ' UTC' ) );
@@ -97,12 +110,32 @@ class RestSalesAnalyticsController extends RestController {
 			$year = (int) gmdate( 'Y', strtotime( $today . ' UTC' ) );
 		}
 
+		$filters = array();
+		if ( $owner_id > 0 ) {
+			if ( ! Capabilities::can_manage_all_sales() && $owner_id !== get_current_user_id() ) {
+				return new WP_Error(
+					'rest_forbidden',
+					__( 'You can only view your own invoice analytics.', 'doublescale' ),
+					array( 'status' => 403 )
+				);
+			}
+			$filters['sale_agent_user_id'] = $owner_id;
+		} elseif ( ! Capabilities::can_manage_all_sales() ) {
+			$filters['sale_agent_user_id'] = get_current_user_id();
+		}
+
+		if ( '' !== $currencies ) {
+			$filters['currencies'] = $currencies;
+		}
+
 		$service = new InvoiceAnalyticsService();
 
 		return new WP_REST_Response(
 			array(
-				'summary' => $service->get_revenue_summary( $start_date, $end_date ),
-				'monthly' => $service->get_monthly_revenue( $year ),
+				'summary'              => $service->get_revenue_summary( $start_date, $end_date, $filters ),
+				'monthly'              => $service->get_monthly_revenue( $year, $filters ),
+				'available_currencies' => $service->get_available_currencies(),
+				'filters'              => $filters,
 			),
 			200
 		);

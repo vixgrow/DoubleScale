@@ -114,8 +114,12 @@ final class PortalFrontendHandler {
 
 		$box_id = max( 0, (int) $atts['box_id'] );
 
+		// `alignwide` opts the portal into the block theme's wider content
+		// measure. Block themes constrain `.entry-content` children to the
+		// (narrow) content size by default; the portal is a full app surface and
+		// reads cramped at that width, so request the wide size where supported.
 		return sprintf(
-			'<div id="%s" data-box-id="%d"></div>',
+			'<div id="%s" class="alignwide" data-box-id="%d"></div>',
 			esc_attr( self::MOUNT_ID ),
 			$box_id
 		);

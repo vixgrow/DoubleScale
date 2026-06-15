@@ -452,6 +452,13 @@ const portalRendererConfig = {
 		...defaultConfig.output,
 		path: path.resolve(__dirname, 'build/renderer/portal'),
 		filename: '[name].js',
+		// Lazy section chunks (React.lazy → import()) are emitted as bare
+		// `[id].js` by default, which the browser caches indefinitely with no
+		// cache-buster — so returning customers keep a stale section bundle
+		// after a plugin update (the entry `index.js` busts via its asset.php
+		// `?ver` hash, but async chunks do not). Content-hash the async chunk
+		// names so they invalidate whenever their contents change.
+		chunkFilename: '[name].[contenthash].js',
 	},
 };
 

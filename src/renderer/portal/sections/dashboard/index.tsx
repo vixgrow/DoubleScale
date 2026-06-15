@@ -9,20 +9,51 @@ import { Link } from 'react-router-dom';
 import { fetchTimeline, useAsync } from '../../api';
 import type { PortalSummaryCard, PortalTimelineItem } from '../../types';
 import { formatDate } from '../../shared/format';
-import { CalendarIcon, TicketIcon } from '../../shared/icons';
+import { CalendarIcon, SectionIcon, TicketIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
+
+/** Pick a portal icon slug from a card's route/key (no icon arrives from PHP). */
+const cardIcon = (card: PortalSummaryCard): string => {
+	const hint = `${card.route || ''} ${card.key || ''}`.toLowerCase();
+	if (hint.includes('book')) {
+		return 'calendar';
+	}
+	if (hint.includes('ticket') || hint.includes('support')) {
+		return 'ticket';
+	}
+	if (
+		hint.includes('doc') ||
+		hint.includes('invoice') ||
+		hint.includes('sale')
+	) {
+		return 'document';
+	}
+	return 'home';
+};
 
 const SummaryCard = ({ card }: { card: PortalSummaryCard }) => {
 	const body = (
 		<>
-			<p className="text-sm text-muted-foreground">{card.label}</p>
-			<p className="mt-1 text-2xl font-bold text-foreground">{card.value}</p>
+			<span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+				<SectionIcon icon={cardIcon(card)} className="h-5 w-5" />
+			</span>
+			<div className="min-w-0">
+				<p className="text-2xl font-bold leading-none text-foreground">
+					{card.value}
+				</p>
+				<p className="mt-1 text-sm leading-snug text-muted-foreground">
+					{card.label}
+				</p>
+			</div>
 		</>
 	);
 	const cls =
-		'rounded-xl border border-border bg-card p-4 shadow-sm transition-colors';
+		'flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition-all';
 	return card.route ? (
-		<Link to={`/${card.route}`} className={`${cls} hover:border-primary`}>
+		<Link
+			to={`/${card.route}`}
+			className={`${cls} hover:border-primary hover:shadow-md`}
+		>
 			{body}
 		</Link>
 	) : (

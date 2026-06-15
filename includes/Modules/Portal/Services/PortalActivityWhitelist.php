@@ -61,23 +61,53 @@ final class PortalActivityWhitelist {
 	}
 
 	/**
+	 * Whether an activity was authored by the contact themselves (vs a support agent).
+	 *
+	 * The author is the contact when EITHER:
+	 *   - the row carries no WP `user_id` — portal/email replies are deliberately
+	 *     written NULL ({@see \DoubleScale\Modules\Support\Rest\Controllers\RestPortalController::add_reply}); or
+	 *   - the `user_id` is the contact's own WP account — which is what the *opening*
+	 *     message of a web-created ticket carries, because TicketService credits the
+	 *     logged-in customer (source `web`, no explicit author).
+	 *
+	 * An agent reply (or an agent filing on the customer's behalf) carries a
+	 * different `user_id` and is therefore NOT self. Testing only `empty(user_id)`
+	 * mislabels the customer's own opening message as "Support team".
+	 *
+	 * @param ActivityModel $activity        Activity row.
+	 * @param int|null      $contact_user_id The contact's own WP account id, or null.
+	 * @return bool
+	 */
+	public static function is_self_authored( ActivityModel $activity, ?int $contact_user_id ): bool {
+		$uid = (int) $activity->user_id;
+		if ( 0 === $uid ) {
+			return true;
+		}
+		return null !== $contact_user_id && $uid === $contact_user_id;
+	}
+
+	/**
 	 * Shape a whitelisted activity row into a safe timeline item.
 	 *
 	 * Emits only safe fields and a generic author label — never the agent's
 	 * user id / name. Returns null for any row whose type is not whitelisted
 	 * (defence-in-depth: the query already filters, this is a second gate).
 	 *
-	 * @param ActivityModel $activity Activity row (already scoped to the contact).
+	 * @param ActivityModel $activity        Activity row (already scoped to the contact).
+	 * @param int|null      $contact_user_id The contact's own WP account id (matched by
+	 *                                       email), so a message they authored while
+	 *                                       logged in is recognised as "self". Null when
+	 *                                       the contact has no WP account.
 	 * @return array<string, mixed>|null
 	 */
-	public static function shape( ActivityModel $activity ): ?array {
+	public static function shape( ActivityModel $activity, ?int $contact_user_id = null ): ?array {
 		$type = (string) $activity->activity_type;
 		if ( ! self::is_allowed( $type ) ) {
 			return null;
 		}
 
 		$data    = is_array( $activity->data ) ? $activity->data : array();
-		$is_self = empty( $activity->user_id );
+		$is_self = self::is_self_authored( $activity, $contact_user_id );
 
 		$item = array(
 			'id'      => (int) $activity->id,

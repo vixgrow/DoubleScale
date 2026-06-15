@@ -9,6 +9,8 @@ import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Link, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
+
 import {
 	cancelBooking,
 	fetchBooking,
@@ -227,24 +229,22 @@ const BookingDetail = () => {
 			{(booking.can_cancel || booking.can_reschedule) && (
 				<div className="flex flex-wrap gap-3">
 					{booking.can_reschedule && (
-						<button
-							type="button"
+						<Button
+							variant="outline"
 							onClick={onReschedule}
 							disabled={working}
-							className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-50"
 						>
 							{__('Reschedule', 'doublescale')}
-						</button>
+						</Button>
 					)}
 					{booking.can_cancel && !confirming && (
-						<button
-							type="button"
+						<Button
+							variant="destructive"
 							onClick={() => setConfirming(true)}
 							disabled={working}
-							className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
 						>
 							{__('Cancel booking', 'doublescale')}
-						</button>
+						</Button>
 					)}
 				</div>
 			)}
@@ -257,32 +257,28 @@ const BookingDetail = () => {
 					<textarea
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
-						placeholder={__(
-							'Reason (optional)',
-							'doublescale'
-						)}
+						placeholder={__('Reason (optional)', 'doublescale')}
 						rows={3}
-						className="mt-3 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+						className="mt-3 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
 					/>
 					<div className="mt-3 flex gap-3">
-						<button
-							type="button"
+						<Button
+							variant="destructive"
+							className="border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							onClick={onCancel}
 							disabled={working}
-							className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
 						>
 							{working
 								? __('Cancelling…', 'doublescale')
 								: __('Yes, cancel', 'doublescale')}
-						</button>
-						<button
-							type="button"
+						</Button>
+						<Button
+							variant="ghost"
 							onClick={() => setConfirming(false)}
 							disabled={working}
-							className="rounded-lg border border-border px-4 py-2 text-sm font-medium"
 						>
 							{__('Keep booking', 'doublescale')}
-						</button>
+						</Button>
 					</div>
 				</div>
 			)}

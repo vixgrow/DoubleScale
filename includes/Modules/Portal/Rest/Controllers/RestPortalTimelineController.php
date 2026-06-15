@@ -95,7 +95,7 @@ class RestPortalTimelineController extends RestController {
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$per_page = min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) );
 
-		$items = $this->collect_activity_items( (int) $contact->id );
+		$items = $this->collect_activity_items( (int) $contact->id, self::resolve_contact_user_id( $contact ) );
 
 		/**
 		 * Filter the merged portal timeline items before sort/paging.
@@ -136,10 +136,11 @@ class RestPortalTimelineController extends RestController {
 	/**
 	 * Fetch + shape the whitelisted activity rows for a contact.
 	 *
-	 * @param int $contact_id Contact id.
+	 * @param int      $contact_id      Contact id.
+	 * @param int|null $contact_user_id The contact's own WP account id (for self-author detection).
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function collect_activity_items( int $contact_id ): array {
+	private function collect_activity_items( int $contact_id, ?int $contact_user_id ): array {
 		$rows = ActivityModel::where( 'contact_id', $contact_id )
 			->whereIn( 'activity_type', PortalActivityWhitelist::allowed_types() )
 			->orderBy( 'id', 'desc' )
@@ -148,12 +149,31 @@ class RestPortalTimelineController extends RestController {
 
 		$items = array();
 		foreach ( $rows as $row ) {
-			$shaped = PortalActivityWhitelist::shape( $row );
+			$shaped = PortalActivityWhitelist::shape( $row, $contact_user_id );
 			if ( null !== $shaped ) {
 				$items[] = $shaped;
 			}
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Resolve the contact's own WordPress account id (matched by email).
+	 *
+	 * The portal is login-only, so the viewing user IS this contact — their
+	 * own messages (replies written NULL, and the opening message credited to
+	 * their WP id) must read as "self" in the timeline.
+	 *
+	 * @param \DoubleScale\Modules\Contacts\Models\ContactModel $contact Resolved contact.
+	 * @return int|null
+	 */
+	private static function resolve_contact_user_id( $contact ): ?int {
+		$email = strtolower( trim( (string) $contact->email ) );
+		if ( '' === $email ) {
+			return null;
+		}
+		$user = get_user_by( 'email', $email );
+		return $user ? (int) $user->ID : null;
 	}
 }

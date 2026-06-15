@@ -68,11 +68,14 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 		].join(' ');
 
 	return (
-		<div className="doublescale-client-portal text-base text-foreground">
-			<div className="mx-auto max-w-5xl px-4 py-6">
-				<header className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+		<div className="doublescale-client-portal rounded-2xl bg-background text-base text-foreground">
+			<div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+				<header className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
 					<Avatar identity={identity} />
 					<div className="min-w-0">
+						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+							{__('Welcome back', 'doublescale')}
+						</p>
 						<p className="truncate text-lg font-semibold leading-tight">
 							{identity.name || __('Welcome', 'doublescale')}
 						</p>
@@ -86,7 +89,7 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 
 				<div className="flex flex-col gap-6 md:flex-row">
 					<nav className="md:w-56 md:shrink-0">
-						<ul className="flex gap-2 overflow-x-auto md:flex-col md:overflow-visible">
+						<ul className="flex gap-1 overflow-x-auto rounded-xl border border-border bg-card p-2 shadow-sm md:flex-col md:overflow-visible">
 							{navItems.map((item) => (
 								<li key={item.slug} className="shrink-0">
 									<NavLink

@@ -119,13 +119,14 @@ class MigrationRunner {
 		// (the migration never re-runs to finish the job). We snapshot the wpdb
 		// error state, run, then refuse to record the migration if it errored so
 		// the next install attempt retries it (every migration is idempotent).
-		$wpdb->last_error  = '';
-		$wpdb->suppress_errors( false );
-		$migration_error   = '';
+		$migration_error = '';
+		if ( property_exists( $wpdb, 'last_error' ) ) {
+			$wpdb->last_error = '';
+		}
 
 		try {
 			$instance->run();
-			$migration_error = (string) $wpdb->last_error;
+			$migration_error = property_exists( $wpdb, 'last_error' ) ? (string) $wpdb->last_error : '';
 		} catch ( \Throwable $e ) {
 			$migration_error = $e->getMessage();
 		}

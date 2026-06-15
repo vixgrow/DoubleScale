@@ -11,7 +11,7 @@ import {
 	type InvoiceStatus,
 	type ProposalStatus,
 } from '@/constants/sales';
-import { computeLineItemsTotals } from './line-items-editor';
+import { computeAmount, computeLineItemsTotals } from './line-items-editor';
 import type { Invoice, LineItem, Proposal } from '@/types/sales';
 
 import './document-preview.scss';
@@ -83,7 +83,9 @@ const LineItemsTable: React.FC<{
 											.join(', ') || '—'}
 									</td>
 								) : null}
-								<td className="is-right">{formatMoney(item.amount, currency)}</td>
+								<td className="is-right">
+									{formatMoney(computeAmount(item), currency)}
+								</td>
 							</tr>
 						))
 					)}

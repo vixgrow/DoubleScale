@@ -64,7 +64,9 @@ export interface LineItem {
 	unit?: string;
 	rate: number;
 	tax?: LineItemTax[];
-	amount: number;
+	// Derived (qty * rate) for display; not persisted on the stored line item.
+	// Use computeAmount() rather than reading this directly.
+	amount?: number;
 	optional?: boolean;
 }
 

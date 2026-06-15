@@ -19,7 +19,7 @@ interface EmailStatsCardsProps {
 
 export const EmailStatsCards: React.FC<EmailStatsCardsProps> = ({ data }) => {
 	return (
-		<div className="flex gap-5">
+		<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 			<MessageStatsCard
 				icon={<EmailActivityIcon width={40} height={40} />}
 				value={data.total_sent || 0}

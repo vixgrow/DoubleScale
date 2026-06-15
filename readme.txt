@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,16 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.9 = 15 Jun 2026
+- Fix Pro form integrations (Gravity Forms, Elementor, Ninja Forms, etc.) staying locked when DoubleScale Pro is active
+- Fix Outlook OAuth scope for consumer Microsoft accounts so IMAP/SMTP connections are not rejected
+- Add module storage readiness checks for automation rules (completed/entered automation, lead score level) and sales merge tags so queries are skipped when a module or its database table is not ready
+- Add mobile step progress indicator to the SMTP connection wizard
+- Improve admin layout and responsiveness across contacts, forms, campaigns, SMTP, support, integrations, license, import/export, and debugging screens
+- Refine PageHeader, HeaderBar, DataTableActions, DialogFooter, and dashboard card components for consistent spacing and accessibility
+- Update Mailbox settings to use PageTabs for clearer channel management
+- Improve Contact Analytics, Email Stats, and Support Reports layouts
+
 = 1.1.8 = 13 Jun 2026
 - Fix intermittent fatal error when activating the plugin
 - Fix loading splash screen flashing unstyled content on first paint

@@ -81,6 +81,11 @@ final class BookingPortalProvider {
 			return $items;
 		}
 
+		// Cap at the 50 most recent bookings. Combined with the timeline
+		// controller's 200-activity cap, the merged feed maxes out at ~250 rows
+		// before paging — fine for a customer's recent-activity glance (the
+		// dashboard only ever shows the first page). Bump both caps together if
+		// the timeline ever grows a "load more".
 		$bookings = BookingModel::with( array( 'event' ) )
 			->where( 'contact_id', (int) $contact->id )
 			->orderBy( 'id', 'desc' )
@@ -127,7 +132,11 @@ final class BookingPortalProvider {
 	}
 
 	/**
-	 * Count a contact's upcoming (active, not-yet-ended) bookings.
+	 * Count a contact's upcoming (not-cancelled, not-yet-ended) bookings.
+	 *
+	 * Mirrors the Upcoming tab in {@see \DoubleScale\Modules\Booking\Rest\Controllers\RestPortalBookingController::get_bookings}:
+	 * excludes only `cancelled` (not `active()`) so waitlisted bookings are
+	 * counted here too and the nav badge / summary card match the tab content.
 	 *
 	 * @param ContactModel|null $contact Resolved contact.
 	 * @return int
@@ -138,7 +147,7 @@ final class BookingPortalProvider {
 		}
 
 		return (int) BookingModel::where( 'contact_id', (int) $contact->id )
-			->active()
+			->whereNotIn( 'status', array( 'cancelled' ) )
 			->where( 'end_time', '>=', gmdate( 'Y-m-d H:i:s' ) )
 			->count();
 	}

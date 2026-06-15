@@ -126,16 +126,21 @@ class RestPortalBookingController extends RestController {
 		$query = BookingModel::with( array( 'event', 'order' ) )
 			->where( 'contact_id', (int) $contact->id );
 
+		// `active()` excludes BOTH `cancelled` and `waiting` (see
+		// BookingModel::NON_ACTIVE_STATUSES), which previously left waitlisted
+		// bookings invisible in every tab. Fold them in by excluding only
+		// `cancelled`, so a waiting booking surfaces in Upcoming (future slot)
+		// or Past (slot already elapsed) with its own "Waiting" status badge.
 		switch ( $filter ) {
 			case 'cancelled':
 				$query->where( 'status', 'cancelled' )->orderBy( 'start_time', 'desc' );
 				break;
 			case 'past':
-				$query->active()->where( 'end_time', '<', $now )->orderBy( 'start_time', 'desc' );
+				$query->whereNotIn( 'status', array( 'cancelled' ) )->where( 'end_time', '<', $now )->orderBy( 'start_time', 'desc' );
 				break;
 			case 'upcoming':
 			default:
-				$query->active()->where( 'end_time', '>=', $now )->orderBy( 'start_time', 'asc' );
+				$query->whereNotIn( 'status', array( 'cancelled' ) )->where( 'end_time', '>=', $now )->orderBy( 'start_time', 'asc' );
 				break;
 		}
 

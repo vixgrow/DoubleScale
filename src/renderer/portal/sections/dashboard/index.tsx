@@ -9,7 +9,12 @@ import { Link } from 'react-router-dom';
 import { fetchTimeline, useAsync } from '../../api';
 import type { PortalSummaryCard, PortalTimelineItem } from '../../types';
 import { formatDate } from '../../shared/format';
-import { CalendarIcon, SectionIcon, TicketIcon } from '../../shared/icons';
+import {
+	CalendarIcon,
+	ChevronRightIcon,
+	SectionIcon,
+	TicketIcon,
+} from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
 
 /** Pick a portal icon slug from a card's route/key (no icon arrives from PHP). */
@@ -87,10 +92,23 @@ const timelineCopy = (item: PortalTimelineItem): string => {
 	return item.title || item.type;
 };
 
+/** Where a timeline row navigates, or null if it isn't actionable. */
+const timelineTarget = (item: PortalTimelineItem): string | null => {
+	if (item.kind === 'booking' && item.booking_id) {
+		return `/bookings/${item.booking_id}`;
+	}
+	if (item.type === 'support_reply' && item.ticket_id) {
+		return `/tickets/${item.ticket_id}`;
+	}
+	return null;
+};
+
 const TimelineRow = ({ item }: { item: PortalTimelineItem }) => {
 	const Icon = item.kind === 'booking' ? CalendarIcon : TicketIcon;
-	return (
-		<li className="flex items-start gap-3 py-3">
+	const target = timelineTarget(item);
+
+	const body = (
+		<>
 			<span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
 				<Icon className="w-4 h-4" />
 			</span>
@@ -103,11 +121,35 @@ const TimelineRow = ({ item }: { item: PortalTimelineItem }) => {
 					)}
 				</div>
 			</div>
-		</li>
+			{target && (
+				<ChevronRightIcon className="mt-1 h-4 w-4 shrink-0 self-center text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+			)}
+		</>
 	);
+
+	if (target) {
+		return (
+			<li>
+				<Link
+					to={target}
+					className="group -mx-4 flex items-start gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-accent"
+				>
+					{body}
+				</Link>
+			</li>
+		);
+	}
+
+	return <li className="flex items-start gap-3 py-3">{body}</li>;
 };
 
 const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
+	// "Recent activity" is intentionally a fixed first-page preview (15 rows),
+	// NOT an infinite-scroll feed. /portal/timeline does support page/per_page,
+	// but nothing requests page 2+, and the server merges at most ~250 rows
+	// (200 activities + 50 bookings) before paging — ample for a customer's
+	// at-a-glance recent activity. Revisit (add "load more") only if customers
+	// need to browse their full history here.
 	const { data, loading, error } = useAsync(() => fetchTimeline(1, 15), []);
 	const items = data?.data || [];
 

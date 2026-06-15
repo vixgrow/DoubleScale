@@ -119,10 +119,15 @@
 		color: inherit;
 	}
 
+	// The `[type='…']` attribute selectors must be wrapped in `:where()` too.
+	// Unlike the bare `button` element (specificity 0,0,1), an attribute selector
+	// weighs 0,1,0 — exactly equal to a Tailwind utility like `.bg-primary`. With
+	// the tie, source order decides, and this reset is emitted AFTER the utilities
+	// layer, so `background-color: transparent` would clobber `.bg-primary` on any
+	// `<button type="button">` (e.g. the portal's status-filter pills rendered
+	// white-on-white). `:where()` zeroes their specificity so utilities win.
 	button,
-	[type='button'],
-	[type='reset'],
-	[type='submit'] {
+	:where([type='button'], [type='reset'], [type='submit']) {
 		-webkit-appearance: button;
 		appearance: button;
 		background-color: transparent;

@@ -8,12 +8,15 @@
  * injected into the portal config.
  */
 
+import { Route, Routes, useParams } from 'react-router-dom';
+
 import SupportPortalApp from '../../../support/app';
 import type { PortalConfig as SupportPortalConfig } from '../../../support/types';
 import { getPortalConfig } from '../../config';
 import { EmptyState } from '../../shared/ui';
 
-const Tickets = () => {
+const TicketsApp = () => {
+	const { ticketId } = useParams();
 	const cfg = getPortalConfig();
 	if (!cfg) {
 		return <EmptyState title="Support unavailable" />;
@@ -34,7 +37,26 @@ const Tickets = () => {
 		attachment_limits: cfg.attachment_limits,
 	} as unknown as SupportPortalConfig;
 
-	return <SupportPortalApp config={supportConfig} />;
+	const parsed = ticketId ? Number.parseInt(ticketId, 10) : 0;
+
+	return (
+		<SupportPortalApp
+			config={supportConfig}
+			initialTicketId={parsed > 0 ? parsed : undefined}
+		/>
+	);
 };
+
+/**
+ * Mounts at `/tickets/*`. The optional `:ticketId` child route lets the
+ * dashboard timeline deep-link straight into a ticket (`/tickets/123`); the
+ * bare route opens the ticket list.
+ */
+const Tickets = () => (
+	<Routes>
+		<Route index element={<TicketsApp />} />
+		<Route path=":ticketId" element={<TicketsApp />} />
+	</Routes>
+);
 
 export default Tickets;

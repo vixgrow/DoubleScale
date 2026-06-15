@@ -81,6 +81,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestPublicProposalController::class,
 			Rest\Controllers\RestPublicInvoiceController::class,
 			Rest\Controllers\RestSalesSettingsController::class,
+			Rest\Controllers\RestPortalDocumentsController::class,
 		);
 	}
 
@@ -105,6 +106,11 @@ final class Module extends AbstractModule {
 
 		new ProposalFrontendHandler();
 		new InvoiceFrontendHandler();
+
+		// Client Portal bridge: contributes the Documents section, the outstanding
+		// balance summary card, and document-lifecycle timeline rows. Each
+		// contribution is gated on doublescale_sales_documents_ready().
+		new Services\SalesPortalProvider();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
 		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );

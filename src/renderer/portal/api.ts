@@ -16,6 +16,7 @@ import { getPortalConfig } from './config';
 import type {
 	PortalBooking,
 	PortalBootstrap,
+	PortalDocument,
 	PortalTimelineResponse,
 } from './types';
 
@@ -75,6 +76,15 @@ export const cancelBooking = (
 export const fetchRescheduleUrl = (id: number): Promise<{ url: string }> =>
 	apiFetch<{ url: string }>({
 		path: `${PORTAL}/bookings/${id}/reschedule-url`,
+	});
+
+export type DocumentFilter = 'all' | 'invoice' | 'proposal';
+
+export const fetchDocuments = (
+	type: DocumentFilter = 'all'
+): Promise<{ data: PortalDocument[] }> =>
+	apiFetch<{ data: PortalDocument[] }>({
+		path: addQueryArgs(`${PORTAL}/documents`, { type }),
 	});
 
 /**

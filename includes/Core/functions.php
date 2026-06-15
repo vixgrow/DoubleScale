@@ -312,6 +312,30 @@ if ( ! function_exists( 'doublescale_resolve_deal_model_class' ) ) {
 	}
 }
 
+if ( ! function_exists( 'doublescale_sales_documents_ready' ) ) {
+	/**
+	 * Whether the customer-facing Sales "Documents" portal surface is live.
+	 *
+	 * Invoices/proposals live in Free Sales, so this is Free + release-gated
+	 * (NOT Pro-presence — online card payment is the only Pro-gated piece and it
+	 * is handled on the public page the portal links out to). Flip the
+	 * `doublescale_sales_documents_ready` filter to false to ship the Sales admin
+	 * while the customer Documents surface is still baking.
+	 *
+	 * @return bool
+	 */
+	function doublescale_sales_documents_ready(): bool {
+		$ready = doublescale_is_module_active( 'sales' );
+
+		/**
+		 * Filter whether the Client Portal Documents surface is available.
+		 *
+		 * @param bool $ready Default readiness (Sales module active).
+		 */
+		return (bool) apply_filters( 'doublescale_sales_documents_ready', $ready );
+	}
+}
+
 if ( ! function_exists( 'doublescale_get_countries' ) ) {
 	function doublescale_get_countries() {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {

@@ -12,6 +12,7 @@ import { formatDate } from '../../shared/format';
 import {
 	CalendarIcon,
 	ChevronRightIcon,
+	DocumentIcon,
 	SectionIcon,
 	TicketIcon,
 } from '../../shared/icons';
@@ -84,6 +85,26 @@ const timelineCopy = (item: PortalTimelineItem): string => {
 				return sprintf(__('Booked: %s', 'doublescale'), name);
 		}
 	}
+	if (item.kind === 'document') {
+		const name = item.title || __('Document', 'doublescale');
+		switch (item.type) {
+			case 'invoice_paid':
+				// translators: %s is the invoice number.
+				return sprintf(__('Invoice paid: %s', 'doublescale'), name);
+			case 'invoice_sent':
+				// translators: %s is the invoice number.
+				return sprintf(__('Invoice: %s', 'doublescale'), name);
+			case 'proposal_accepted':
+				// translators: %s is the proposal subject.
+				return sprintf(__('Proposal accepted: %s', 'doublescale'), name);
+			case 'proposal_declined':
+				// translators: %s is the proposal subject.
+				return sprintf(__('Proposal declined: %s', 'doublescale'), name);
+			default:
+				// translators: %s is the proposal subject.
+				return sprintf(__('Proposal: %s', 'doublescale'), name);
+		}
+	}
 	if (item.type === 'support_reply') {
 		return item.is_self
 			? __('You replied to a support ticket', 'doublescale')
@@ -97,14 +118,29 @@ const timelineTarget = (item: PortalTimelineItem): string | null => {
 	if (item.kind === 'booking' && item.booking_id) {
 		return `/bookings/${item.booking_id}`;
 	}
+	if (item.kind === 'document') {
+		// Phase 1 is link-out: the doc itself opens on its public hash page from
+		// the Documents list, so the timeline row just lands the customer there.
+		return '/documents';
+	}
 	if (item.type === 'support_reply' && item.ticket_id) {
 		return `/tickets/${item.ticket_id}`;
 	}
 	return null;
 };
 
+const timelineIcon = (kind: PortalTimelineItem['kind']) => {
+	if (kind === 'booking') {
+		return CalendarIcon;
+	}
+	if (kind === 'document') {
+		return DocumentIcon;
+	}
+	return TicketIcon;
+};
+
 const TimelineRow = ({ item }: { item: PortalTimelineItem }) => {
-	const Icon = item.kind === 'booking' ? CalendarIcon : TicketIcon;
+	const Icon = timelineIcon(item.kind);
 	const target = timelineTarget(item);
 
 	const body = (
@@ -116,9 +152,8 @@ const TimelineRow = ({ item }: { item: PortalTimelineItem }) => {
 				<p className="text-sm text-foreground">{timelineCopy(item)}</p>
 				<div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 					{item.date && <span>{formatDate(item.date, item.timezone)}</span>}
-					{item.kind === 'booking' && item.status && (
-						<StatusBadge status={item.status} />
-					)}
+					{(item.kind === 'booking' || item.kind === 'document') &&
+						item.status && <StatusBadge status={item.status} />}
 				</div>
 			</div>
 			{target && (
@@ -178,7 +213,7 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 						<EmptyState
 							title={__('Nothing here yet', 'doublescale')}
 							description={__(
-								'Your recent bookings and support replies will appear here.',
+								'Your recent bookings, documents, and support replies will appear here.',
 								'doublescale'
 							)}
 						/>

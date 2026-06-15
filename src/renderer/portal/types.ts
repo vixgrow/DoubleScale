@@ -63,7 +63,7 @@ export interface PortalBootstrap {
 
 export interface PortalTimelineItem {
 	id: string | number;
-	kind: 'activity' | 'booking';
+	kind: 'activity' | 'booking' | 'document';
 	type: string;
 	date: string | null;
 	title?: string;
@@ -72,8 +72,30 @@ export interface PortalTimelineItem {
 	status?: string;
 	ticket_id?: number;
 	booking_id?: number;
+	document_type?: PortalDocumentType;
+	public_url?: string;
 	start_time?: string;
 	timezone?: string;
+}
+
+export type PortalDocumentType = 'invoice' | 'proposal';
+
+export interface PortalDocument {
+	id: number;
+	type: PortalDocumentType;
+	number: string;
+	subject: string | null;
+	status: string;
+	date: string | null;
+	due_date: string | null;
+	open_till: string | null;
+	currency: string;
+	total: number;
+	balance: number | null;
+	is_overdue: boolean;
+	is_expired: boolean;
+	invoice_id: number | null;
+	public_url: string;
 }
 
 export interface PortalTimelineResponse {

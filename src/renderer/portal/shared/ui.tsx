@@ -45,6 +45,13 @@ const STATUS_TONES: Record<string, string> = {
 	open: 'bg-blue-100 text-blue-600',
 	closed: 'bg-gray-200 text-gray-700',
 	resolved: 'bg-green-100 text-green-600',
+	// Sales document statuses (invoices + proposals).
+	unpaid: 'bg-amber-100 text-amber-600',
+	partially_paid: 'bg-amber-100 text-amber-600',
+	overdue: 'bg-red-100 text-red-600',
+	sent: 'bg-blue-100 text-blue-600',
+	accepted: 'bg-green-100 text-green-600',
+	declined: 'bg-red-100 text-red-600',
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {

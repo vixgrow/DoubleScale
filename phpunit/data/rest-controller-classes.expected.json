@@ -30,6 +30,7 @@
     "RestPortalBookingController",
     "RestPortalBootstrapController",
     "RestPortalController",
+    "RestPortalDocumentsController",
     "RestPortalTimelineController",
     "RestProposalController",
     "RestPublicInvoiceController",

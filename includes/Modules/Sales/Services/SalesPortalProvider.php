@@ -1,0 +1,248 @@
+<?php
+/**
+ * Sales ⇄ Client Portal bridge.
+ *
+ * Contributes the Documents section (invoices + proposals), the "outstanding
+ * balance" dashboard summary card, and recent document-lifecycle timeline rows
+ * to the portal. Document lifecycle is projected straight from the Sales models
+ * here (the `invoice_*` / `proposal_*` activity types are not written to
+ * `doublescale_activities`), mirroring {@see \DoubleScale\Modules\Booking\Services\BookingPortalProvider}.
+ *
+ * Phase 1 is link-out only: rows carry the existing public hash-page URL
+ * (`InvoiceUrl` / `ProposalUrl`) — viewing, paying (Pro), accepting and signing
+ * all happen on that page, never inside the portal renderer.
+ *
+ * Every contribution is additionally gated on {@see doublescale_sales_documents_ready()}
+ * so the release filter can hide the whole surface while Sales admin stays live.
+ * Resolved in {@see \DoubleScale\Modules\Sales\Module::boot()}.
+ *
+ * @package DoubleScale\Modules\Sales
+ */
+
+namespace DoubleScale\Modules\Sales\Services;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
+use DoubleScale\Modules\Sales\Constants\ProposalStatus;
+use DoubleScale\Modules\Sales\Models\InvoiceModel;
+use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
+use DoubleScale\Modules\Sales\Rest\ProposalShaper;
+
+/**
+ * SalesPortalProvider.
+ */
+final class SalesPortalProvider {
+
+	/**
+	 * Cap on each doc type projected into the timeline (mirrors Booking's 50).
+	 */
+	private const TIMELINE_CAP = 50;
+
+	/**
+	 * Invoice statuses that count as "needs attention" (and as outstanding).
+	 */
+	private const OUTSTANDING_INVOICE_STATUSES = array(
+		InvoiceStatus::UNPAID,
+		InvoiceStatus::PARTIALLY_PAID,
+		InvoiceStatus::OVERDUE,
+	);
+
+	/**
+	 * Proposal statuses that count as "needs attention".
+	 */
+	private const OPEN_PROPOSAL_STATUSES = array(
+		ProposalStatus::SENT,
+		ProposalStatus::OPEN,
+	);
+
+	public function __construct() {
+		add_filter( 'doublescale_portal_sections', array( $this, 'register_section' ) );
+		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_summary_card' ), 10, 2 );
+		add_filter( 'doublescale_portal_timeline_items', array( $this, 'add_timeline_items' ), 10, 2 );
+	}
+
+	/**
+	 * Contribute the Documents section descriptor.
+	 *
+	 * @param array<int, array<string, mixed>> $sections Section descriptors.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function register_section( array $sections ): array {
+		$sections[] = array(
+			'slug'         => 'documents',
+			'label'        => __( 'Documents', 'doublescale' ),
+			'icon'         => 'document',
+			'order'        => 30,
+			'is_available' => static fn() => doublescale_sales_documents_ready(),
+			'badge'        => static fn( $contact ) => self::count_actionable( $contact ),
+		);
+
+		return $sections;
+	}
+
+	/**
+	 * Add the "outstanding balance" summary card.
+	 *
+	 * @param array<int, array<string, mixed>> $cards   Summary cards.
+	 * @param ContactModel|null                $contact Resolved contact.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function add_summary_card( array $cards, $contact ): array {
+		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+			return $cards;
+		}
+
+		$cards[] = array(
+			'key'   => 'outstanding_balance',
+			'label' => __( 'Outstanding balance', 'doublescale' ),
+			'value' => self::outstanding_balance_value( $contact ),
+			'route' => 'documents',
+		);
+
+		return $cards;
+	}
+
+	/**
+	 * Project recent document lifecycle rows into the timeline.
+	 *
+	 * @param array<int, array<string, mixed>> $items   Timeline items.
+	 * @param ContactModel|null                $contact Resolved contact.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function add_timeline_items( array $items, $contact ): array {
+		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+			return $items;
+		}
+
+		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
+			->where( 'status', '!=', InvoiceStatus::DRAFT )
+			->orderBy( 'id', 'desc' )
+			->limit( self::TIMELINE_CAP )
+			->get();
+
+		foreach ( $invoices as $invoice ) {
+			$items[] = array(
+				// `date` is the timeline sort key and is compared as a string
+				// descending — it must be a full datetime, so use created_at (the
+				// doc's invoice_date is Y-m-d only and would mis-sort).
+				'id'            => 'invoice-' . (int) $invoice->id,
+				'kind'          => 'document',
+				'document_type' => 'invoice',
+				'type'          => self::invoice_lifecycle_type( $invoice ),
+				'date'          => (string) $invoice->created_at,
+				'title'         => (string) $invoice->invoice_number,
+				'status'        => (string) $invoice->status,
+				'public_url'    => (string) InvoiceUrl::get_public_url( $invoice ),
+			);
+		}
+
+		$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
+			->where( 'status', '!=', ProposalStatus::DRAFT )
+			->orderBy( 'id', 'desc' )
+			->limit( self::TIMELINE_CAP )
+			->get();
+
+		foreach ( $proposals as $proposal ) {
+			$title   = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
+			$items[] = array(
+				'id'            => 'proposal-' . (int) $proposal->id,
+				'kind'          => 'document',
+				'document_type' => 'proposal',
+				'type'          => self::proposal_lifecycle_type( $proposal ),
+				'date'          => (string) $proposal->created_at,
+				'title'         => $title,
+				'status'        => (string) $proposal->status,
+				'public_url'    => (string) ProposalUrl::get_public_url( $proposal ),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Count a contact's actionable documents: outstanding invoices + open
+	 * proposals. Drives the nav badge.
+	 *
+	 * @param ContactModel|null $contact Resolved contact.
+	 * @return int
+	 */
+	private static function count_actionable( $contact ): int {
+		if ( ! $contact instanceof ContactModel ) {
+			return 0;
+		}
+
+		$invoices = (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
+			->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
+			->count();
+
+		$proposals = (int) ProposalModel::where( 'contact_id', (int) $contact->id )
+			->whereIn( 'status', self::OPEN_PROPOSAL_STATUSES )
+			->count();
+
+		return $invoices + $proposals;
+	}
+
+	/**
+	 * Formatted outstanding-balance string for the summary card.
+	 *
+	 * Sales has no global store currency (currency is per-document), so we sum
+	 * outstanding balances grouped by currency and present the dominant one. A
+	 * mixed-currency account is rare; this is a documented MVP simplification.
+	 *
+	 * @param ContactModel $contact Resolved contact.
+	 * @return string e.g. "1,250.00 USD", or "0" when nothing is outstanding.
+	 */
+	private static function outstanding_balance_value( ContactModel $contact ): string {
+		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
+			->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
+			->get();
+
+		$by_currency = array();
+		foreach ( $invoices as $invoice ) {
+			$currency                 = (string) $invoice->currency;
+			$by_currency[ $currency ] = ( $by_currency[ $currency ] ?? 0.0 ) + InvoiceShaper::balance( $invoice );
+		}
+
+		if ( array() === $by_currency ) {
+			return '0';
+		}
+
+		arsort( $by_currency );
+		$currency = (string) array_key_first( $by_currency );
+		$sum      = (float) $by_currency[ $currency ];
+
+		$amount = function_exists( 'number_format_i18n' ) ? number_format_i18n( $sum, 2 ) : number_format( $sum, 2 );
+
+		return '' !== $currency ? $amount . ' ' . $currency : $amount;
+	}
+
+	/**
+	 * Map an invoice to a projected lifecycle activity-type slug.
+	 *
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return string
+	 */
+	private static function invoice_lifecycle_type( InvoiceModel $invoice ): string {
+		return InvoiceStatus::PAID === (string) $invoice->status ? 'invoice_paid' : 'invoice_sent';
+	}
+
+	/**
+	 * Map a proposal to a projected lifecycle activity-type slug.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @return string
+	 */
+	private static function proposal_lifecycle_type( ProposalModel $proposal ): string {
+		switch ( (string) $proposal->status ) {
+			case ProposalStatus::ACCEPTED:
+				return 'proposal_accepted';
+			case ProposalStatus::DECLINED:
+				return 'proposal_declined';
+			default:
+				return 'proposal_sent';
+		}
+	}
+}

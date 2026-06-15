@@ -384,13 +384,24 @@ class RestPublicProposalController extends RestController {
 	}
 
 	/**
-	 * @param WP_REST_Request $request Request.
+	 * Resolve a proposal from the public hash.
+	 *
+	 * Drafts are treated as non-existent on the public surface (404, mirroring
+	 * {@see RestPublicInvoiceController}) so a work-in-progress proposal the
+	 * agent has not sent yet can't be viewed, downloaded, commented on, or have
+	 * its `viewed_at` stamped by anyone who guesses/obtains the hash early.
+	 *
+	 * @param WP_REST_Request $request     Request.
+	 * @param bool            $block_draft Return 404 for draft proposals (default true).
 	 * @return ProposalModel|WP_Error
 	 */
-	private function resolve_by_hash( WP_REST_Request $request ) {
+	private function resolve_by_hash( WP_REST_Request $request, bool $block_draft = true ) {
 		$hash     = (string) $request->get_param( 'hash' );
 		$proposal = ProposalModel::get_by_hash( $hash );
 		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+		if ( $block_draft && ProposalStatus::DRAFT === (string) $proposal->status ) {
 			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 		return $proposal;

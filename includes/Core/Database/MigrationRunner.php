@@ -108,8 +108,41 @@ class MigrationRunner {
 		}
 
 		$instance = new $class();
-		if ( method_exists( $instance, 'run' ) ) {
+		if ( ! method_exists( $instance, 'run' ) ) {
+			return;
+		}
+
+		// Detect a silent SQL failure inside the migration. Migration `run()`
+		// methods return void and call `$wpdb->query()` directly (swallowing the
+		// boolean result), so a failed ALTER/CREATE would otherwise still be
+		// recorded as "ran" — making the partial failure permanent and invisible
+		// (the migration never re-runs to finish the job). We snapshot the wpdb
+		// error state, run, then refuse to record the migration if it errored so
+		// the next install attempt retries it (every migration is idempotent).
+		$wpdb->last_error  = '';
+		$wpdb->suppress_errors( false );
+		$migration_error   = '';
+
+		try {
 			$instance->run();
+			$migration_error = (string) $wpdb->last_error;
+		} catch ( \Throwable $e ) {
+			$migration_error = $e->getMessage();
+		}
+
+		if ( '' !== $migration_error ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Migration failed; not recorded as ran (will retry next install).',
+					array(
+						'source'    => 'migration-runner',
+						'module'    => $module_slug,
+						'migration' => $migration_name,
+						'error'     => $migration_error,
+					)
+				);
+			}
+			return;
 		}
 
 		$wpdb->insert(

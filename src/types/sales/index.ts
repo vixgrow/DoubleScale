@@ -36,6 +36,21 @@ export interface SalesTax {
 	rate: number;
 }
 
+export interface ProposalComment {
+	id: number;
+	author_name: string;
+	content: string;
+	is_customer: boolean;
+	created_at: string | null;
+}
+
+export interface ProposalSignature {
+	signed_name: string | null;
+	signature: string;
+	accepted_at: string | null;
+	signed_ip: string | null;
+}
+
 export interface LineItemTax {
 	id?: number;
 	name: string;
@@ -87,6 +102,8 @@ export interface Proposal {
 	public_url?: string | null;
 	is_expired?: boolean;
 	invoice_id?: number | null;
+	signed_name?: string | null;
+	has_signature?: boolean;
 	created_at: string | null;
 	updated_at: string | null;
 	contact?: ContactSummary | null;
@@ -118,6 +135,29 @@ export interface RecordPaymentPayload {
 export interface ConvertProposalResponse {
 	invoice: Invoice;
 	proposal: Proposal;
+}
+
+export interface OnlinePaymentGatewayStatus {
+	slug: string;
+	name: string;
+	description?: string;
+	available: boolean;
+	configured: boolean;
+	enabled_for_sales?: boolean;
+	ready?: boolean;
+	integration_url?: string;
+	can_pay?: boolean;
+}
+
+export interface InvoiceOnlineInitResponse {
+	gateway?: string;
+	publishable_key: string;
+	client_secret?: string;
+	already_paid?: boolean;
+	invoice?: Invoice;
+	amount?: number;
+	currency?: string;
+	pi_status?: string;
 }
 
 export interface Invoice {
@@ -169,6 +209,35 @@ export interface ContactInvoicePayment extends InvoicePayment {
 	};
 }
 
+export interface PaymentListItem extends ContactInvoicePayment {
+	contact?: ContactSummary | null;
+}
+
+export interface PaymentDetail extends PaymentListItem {
+	company?: {
+		name: string;
+		url: string;
+		address: string;
+	};
+	invoice?: {
+		id: number;
+		invoice_number: string;
+		currency: string;
+		invoice_date?: string | null;
+		total?: number;
+		amount_paid?: number;
+		billing_address?: string | null;
+	};
+}
+
+export interface PaymentFilters {
+	search?: string;
+	sort_by?: string;
+	sort_order?: 'asc' | 'desc';
+	per_page?: number;
+	page?: number;
+}
+
 export interface PaginatedResponse<T> {
 	data: T[];
 	meta: {
@@ -209,3 +278,21 @@ export type CreateProposalPayload = Partial<
 export type CreateInvoicePayload = Partial<
 	Omit<Invoice, 'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'>
 > & { contact_id: number };
+
+export interface SalesRepNotificationTemplate {
+	title: string;
+	message: string;
+}
+
+export interface SalesSettings {
+	proposal_email_subject: string;
+	proposal_email_intro: string;
+	invoice_email_subject: string;
+	invoice_email_intro: string;
+	proposal_expiry_reminder_days: number;
+	require_signature_on_accept: boolean;
+	enabled_online_gateways: string[];
+	default_offline_payment_modes: string[];
+	default_online_payment_gateways: string[];
+	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
+}

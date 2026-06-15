@@ -50,24 +50,49 @@ export const DISCOUNT_TYPES = [
 	{ value: 'after_tax', label: 'After Tax' },
 ] as const;
 
-export const PAYMENT_MODES = [
+export const OFFLINE_PAYMENT_MODES = [
 	'bank_transfer',
 	'cash',
 	'check',
-	'credit_card',
-	'paypal',
-	'stripe',
 	'other',
+] as const;
+
+export type OfflinePaymentMode = (typeof OFFLINE_PAYMENT_MODES)[number];
+
+/** Online gateway slugs — implementations register via Pro/modules. */
+export const ONLINE_PAYMENT_GATEWAYS = ['stripe'] as const;
+
+export type OnlinePaymentGatewaySlug = (typeof ONLINE_PAYMENT_GATEWAYS)[number];
+
+/** All modes selectable on an invoice (offline + online). */
+export const PAYMENT_MODES = [
+	...OFFLINE_PAYMENT_MODES,
+	...ONLINE_PAYMENT_GATEWAYS,
 ] as const;
 
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
 
-export const PAYMENT_MODE_LABELS: Record<PaymentMode, string> = {
+export const OFFLINE_PAYMENT_MODE_LABELS: Record<OfflinePaymentMode, string> = {
 	bank_transfer: 'Bank Transfer',
 	cash: 'Cash',
 	check: 'Check',
-	credit_card: 'Credit Card',
-	paypal: 'PayPal',
-	stripe: 'Stripe',
 	other: 'Other',
+};
+
+/** Legacy/offline modes kept for display on existing records. */
+const LEGACY_PAYMENT_MODE_LABELS = {
+	credit_card: 'Credit Card',
+} as const;
+
+export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, string> = {
+	stripe: 'Stripe (online)',
+};
+
+export const PAYMENT_MODE_LABELS: Record<
+	PaymentMode | keyof typeof LEGACY_PAYMENT_MODE_LABELS,
+	string
+> = {
+	...OFFLINE_PAYMENT_MODE_LABELS,
+	...ONLINE_PAYMENT_GATEWAY_LABELS,
+	...LEGACY_PAYMENT_MODE_LABELS,
 };

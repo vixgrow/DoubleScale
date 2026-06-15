@@ -145,6 +145,9 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/proposals/:id': 'sales',
 	'sales/invoices': 'sales',
 	'sales/invoices/:id': 'sales',
+	'sales/payments': 'sales',
+	'sales/payments/:id': 'sales',
+	'sales/settings': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
@@ -396,6 +399,18 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{
 							path: 'sales/invoices',
 							label: __('Invoices', 'doublescale'),
+						},
+						{
+							path: 'sales/payments',
+							label: __('Payments', 'doublescale'),
+						},
+						{
+							path: 'sales/settings',
+							label: __('Settings', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_all_sales',
+								'doublescale_crm_manager',
+							],
 						},
 						// Pipeline nests under Sales: with Pro, `enabled` is the
 						// derived effective state (Sales is already on here, so it

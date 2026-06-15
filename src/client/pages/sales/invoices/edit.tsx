@@ -28,17 +28,21 @@ import {
 } from '@/components/sales/contact-sales-fields';
 import {
 	createInvoice,
+	sendInvoice,
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary, LineItem } from '@/types/sales';
 import {
 	CURRENCIES,
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
-	PAYMENT_MODES,
-	PAYMENT_MODE_LABELS,
+	OFFLINE_PAYMENT_MODES,
+	OFFLINE_PAYMENT_MODE_LABELS,
+	ONLINE_PAYMENT_GATEWAYS,
+	ONLINE_PAYMENT_GATEWAY_LABELS,
 } from '@/constants/sales';
 
 const selectClass =
@@ -65,6 +69,7 @@ const InvoiceEdit: React.FC = () => {
 	const invoiceId = !isNew && idParam ? Number(idParam) : null;
 
 	const { data: existing, loading } = useInvoice(invoiceId);
+	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 
 	const [status, setStatus] = useState('draft');
@@ -199,13 +204,29 @@ const InvoiceEdit: React.FC = () => {
 		}
 	}, [assignableUsers, saleAgentUserId]);
 
+	useEffect(() => {
+		if (!isNew || existing || !salesSettings) {
+			return;
+		}
+		if (allowedPaymentModes.length > 0) {
+			return;
+		}
+		const defaults = [
+			...(salesSettings.default_offline_payment_modes ?? []),
+			...(salesSettings.default_online_payment_gateways ?? []),
+		];
+		if (defaults.length > 0) {
+			setAllowedPaymentModes(defaults);
+		}
+	}, [isNew, existing, salesSettings, allowedPaymentModes.length]);
+
 	const togglePaymentMode = (mode: string) => {
 		setAllowedPaymentModes((prev) =>
 			prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]
 		);
 	};
 
-	const handleSave = async () => {
+	const handleSave = async (andSend = false) => {
 		if (!contact) {
 			setError(__('Please select a customer.', 'doublescale'));
 			return;
@@ -234,13 +255,19 @@ const InvoiceEdit: React.FC = () => {
 		};
 
 		try {
+			let id = invoiceId;
 			if (isNew) {
 				const created = await createInvoice(payload);
-				navigate(getToLink(`sales/invoices/${created.id}`));
+				id = created.id;
 			} else if (invoiceId) {
 				await updateInvoice(invoiceId, payload);
-				navigate(getToLink(`sales/invoices/${invoiceId}`));
 			}
+
+			if (andSend && id) {
+				await sendInvoice(id);
+			}
+
+			navigate(getToLink(`sales/invoices/${id}`));
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
 		} finally {
@@ -420,9 +447,12 @@ const InvoiceEdit: React.FC = () => {
 						</FormField>
 					) : null}
 					<div className="space-y-2">
-						<Label>{__('Allowed payment modes', 'doublescale')}</Label>
+						<Label>{__('Offline payment methods', 'doublescale')}</Label>
+						<p className="text-xs text-muted-foreground">
+							{__('Recorded manually by staff when the customer pays offline.', 'doublescale')}
+						</p>
 						<div className="flex flex-wrap gap-2">
-							{PAYMENT_MODES.map((mode) => (
+							{OFFLINE_PAYMENT_MODES.map((mode) => (
 								<button
 									key={mode}
 									type="button"
@@ -433,7 +463,32 @@ const InvoiceEdit: React.FC = () => {
 									}`}
 									onClick={() => togglePaymentMode(mode)}
 								>
-									{PAYMENT_MODE_LABELS[mode]}
+									{OFFLINE_PAYMENT_MODE_LABELS[mode]}
+								</button>
+							))}
+						</div>
+					</div>
+					<div className="space-y-2">
+						<Label>{__('Online payment gateways', 'doublescale')}</Label>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Customers can pay automatically on the public invoice page. Stripe uses Integrations → Stripe.',
+								'doublescale'
+							)}
+						</p>
+						<div className="flex flex-wrap gap-2">
+							{ONLINE_PAYMENT_GATEWAYS.map((mode) => (
+								<button
+									key={mode}
+									type="button"
+									className={`px-3 py-1 rounded border text-sm ${
+										allowedPaymentModes.includes(mode)
+											? 'bg-primary text-white border-primary'
+											: 'bg-white'
+									}`}
+									onClick={() => togglePaymentMode(mode)}
+								>
+									{ONLINE_PAYMENT_GATEWAY_LABELS[mode]}
 								</button>
 							))}
 						</div>
@@ -471,8 +526,11 @@ const InvoiceEdit: React.FC = () => {
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/invoices'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button onClick={() => void handleSave()} disabled={saving}>
+				<Button variant="outline" onClick={() => void handleSave(false)} disabled={saving}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
+				</Button>
+				<Button onClick={() => void handleSave(true)} disabled={saving || status === 'paid'}>
+					{saving ? __('Sending…', 'doublescale') : __('Save & Send', 'doublescale')}
 				</Button>
 			</div>
 		</div>

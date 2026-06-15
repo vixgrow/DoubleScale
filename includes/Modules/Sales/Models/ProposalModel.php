@@ -65,6 +65,9 @@ class ProposalModel extends Model {
 		'accepted_at',
 		'declined_at',
 		'decline_reason',
+		'signed_name',
+		'signature',
+		'signed_ip',
 	);
 
 	/**

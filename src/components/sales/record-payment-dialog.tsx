@@ -24,7 +24,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { PAYMENT_MODES, PAYMENT_MODE_LABELS } from '@/constants/sales';
+import { OFFLINE_PAYMENT_MODES, OFFLINE_PAYMENT_MODE_LABELS } from '@/constants/sales';
 import type { Invoice, RecordPaymentPayload } from '@/types/sales';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -48,16 +48,17 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 
 	const modeOptions = useMemo(() => {
 		const allowed = invoice.allowed_payment_modes?.filter(Boolean) ?? [];
-		if (allowed.length > 0) {
-			return allowed.map((mode) => ({
-				value: mode,
-				label:
-					PAYMENT_MODE_LABELS[mode as keyof typeof PAYMENT_MODE_LABELS] ?? mode,
-			}));
-		}
-		return PAYMENT_MODES.map((mode) => ({
+		const offlineAllowed = allowed.filter(
+			(mode) => OFFLINE_PAYMENT_MODES.includes(mode as (typeof OFFLINE_PAYMENT_MODES)[number])
+		);
+		const modes =
+			offlineAllowed.length > 0
+				? offlineAllowed
+				: [...OFFLINE_PAYMENT_MODES];
+		return modes.map((mode) => ({
 			value: mode,
-			label: PAYMENT_MODE_LABELS[mode],
+			label:
+				OFFLINE_PAYMENT_MODE_LABELS[mode as keyof typeof OFFLINE_PAYMENT_MODE_LABELS] ?? mode,
 		}));
 	}, [invoice.allowed_payment_modes]);
 

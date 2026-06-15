@@ -14,14 +14,17 @@ use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Sales\Models\ProposalCommentModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
 use DoubleScale\Modules\Sales\Services\ConvertProposalToInvoice;
 use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Sales\Services\DuplicateProposal;
 use DoubleScale\Modules\Sales\Services\ProposalNotifications;
 use DoubleScale\Modules\Sales\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
+use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
 use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
@@ -79,6 +82,42 @@ class RestProposalController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/comments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_comments' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/signature',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_signature' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
@@ -317,6 +356,8 @@ class RestProposalController extends RestController {
 
 		do_action( 'doublescale_sales_proposal_sent', $proposal, $message );
 
+		( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'sent' );
+
 		return new WP_REST_Response(
 			array(
 				'sent'     => true,
@@ -472,16 +513,33 @@ class RestProposalController extends RestController {
 		}
 
 		$shaped = ProposalShaper::shape_admin( $proposal, true );
-		$pdf    = DocumentPdf::render_pdf( $shaped, 'proposal' );
-		if ( is_wp_error( $pdf ) ) {
-			return $pdf;
+
+		return DocumentPdf::rest_response( $shaped, 'proposal', (string) $proposal->proposal_number );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_item( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
 		}
 
-		$response = new WP_REST_Response( $pdf, 200 );
-		$response->header( 'Content-Type', 'application/pdf' );
-		$response->header( 'Content-Disposition', 'attachment; filename="' . sanitize_file_name( (string) $proposal->proposal_number ) . '.pdf"' );
+		$proposal = ProposalModel::with( array( 'contact', 'assigned_user' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
 
-		return $response;
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$copy = ( new DuplicateProposal() )->duplicate( $proposal );
+
+		return new WP_REST_Response( ProposalShaper::shape_admin( $copy, true ), 201 );
 	}
 
 	/**
@@ -516,6 +574,80 @@ class RestProposalController extends RestController {
 				),
 				'user_id'       => get_current_user_id() ?: null,
 			)
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_comments( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$comments = ProposalCommentModel::query()
+			->where( 'proposal_id', (int) $proposal->id )
+			->orderBy( 'id' )
+			->get();
+
+		$data = array();
+		foreach ( $comments as $comment ) {
+			$data[] = array(
+				'id'          => (int) $comment->id,
+				'author_name' => (string) $comment->author_name,
+				'content'     => (string) $comment->content,
+				'is_customer' => (bool) $comment->is_customer,
+				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_signature( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		if ( empty( $proposal->signature ) ) {
+			return new WP_Error( 'no_signature', __( 'This proposal has no signature.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'signed_name' => $proposal->signed_name ? (string) $proposal->signed_name : null,
+				'signature'   => (string) $proposal->signature,
+				'accepted_at' => $proposal->accepted_at ? (string) $proposal->accepted_at : null,
+				'signed_ip'   => $proposal->signed_ip ? (string) $proposal->signed_ip : null,
+			),
+			200
 		);
 	}
 

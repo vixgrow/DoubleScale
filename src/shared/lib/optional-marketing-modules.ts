@@ -150,9 +150,9 @@ function placeholderFor(
 			};
 		case 'support':
 			return {
-				label: __('Support', 'doublescale'),
+				label: __('Helpdesk', 'doublescale'),
 				description: __(
-					'Ticket-based customer support with mailbox channels, email piping, and a customer portal.',
+					'Ticket-based customer helpdesk with mailbox channels, email piping, and a customer portal.',
 					'doublescale'
 				),
 			};
@@ -226,14 +226,26 @@ export type ChildModuleRow = {
 function childPlaceholderFor(slug: string): Pick<ModuleInfo, 'label' | 'description'> {
 	if (slug === 'deals') {
 		return {
-			label: __('Pipeline', 'doublescale'),
+			label: __('Pipelines', 'doublescale'),
 			description: __(
-				'Manage deals, stages, and pipeline analytics for your sales process.',
+				'Manage deals, stages, and pipeline analytics within Sales.',
 				'doublescale'
 			),
 		};
 	}
 	return { label: slug, description: '' };
+}
+
+/** User-facing label for a child row under a parent module card. */
+export function getChildModuleDisplayLabel(
+	slug: string,
+	parentSlug: string,
+	fallbackLabel: string
+): string {
+	if (slug === 'deals' && parentSlug === 'sales') {
+		return __('Pipelines', 'doublescale');
+	}
+	return fallbackLabel;
 }
 
 /**
@@ -249,9 +261,10 @@ export function buildChildModuleRows(
 	return (CHILD_MODULES_BY_PARENT[parentSlug] ?? []).map((slug) => {
 		const m = modules.find((x) => x.slug === slug);
 		const placeholder = childPlaceholderFor(slug);
+		const rawLabel = m?.label || placeholder.label;
 		return {
 			slug,
-			label: m?.label || placeholder.label,
+			label: getChildModuleDisplayLabel(slug, parentSlug, rawLabel),
 			description: m?.description || placeholder.description,
 			settingEnabled: m?.setting_enabled ?? true,
 			unavailableUntilPro:

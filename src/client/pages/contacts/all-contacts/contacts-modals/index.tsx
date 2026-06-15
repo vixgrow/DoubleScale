@@ -69,7 +69,7 @@ export const CreateContactModal: React.FC = () => {
 					'sm:max-w-[520px]'
 				)}
 			>
-				<div className="border-b border-border/70 bg-gradient-to-br from-muted/30 via-background to-background px-8 pb-6 pt-8">
+				<div className="border-b border-border/70 bg-gradient-to-br from-muted/30 via-background to-background sm:px-8 sm:pb-6 sm:pt-8 p-4">
 					<div className="flex gap-4 pr-8">
 						<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-sm">
 							<span className="text-primary [&>svg]:h-6 [&>svg]:w-6">
@@ -90,7 +90,7 @@ export const CreateContactModal: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="max-h-[min(52vh,420px)] space-y-6 overflow-y-auto px-8 py-7">
+				<div className="max-h-[min(52vh,420px)] space-y-6 overflow-y-auto sm:px-8 sm:py-7 p-4">
 					<div>
 						<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
 							{__('Identity', 'doublescale')}
@@ -217,7 +217,7 @@ export const CreateContactModal: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="flex flex-col-reverse gap-3 border-t border-border/70 bg-muted/25 px-8 py-5 sm:flex-row sm:items-center sm:justify-end">
+				<div className="flex flex-col-reverse gap-3 border-t border-border/70 bg-muted/25 sm:px-8 sm:py-5 p-4 sm:flex-row sm:items-center sm:justify-end">
 					<Button
 						type="button"
 						variant="outline"

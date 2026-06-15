@@ -35,10 +35,12 @@ import {
 	TotalSMSIcon,
 	LicenseIcon,
 	LinkTriggersIcon,
+	MailboxIcon,
+	NotificationIcon,
 	WhatsAppIcon,
 	WebsiteIcon,
+	AiIcon,
 } from '@doublescale/components';
-import { Bell, Inbox, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { NotificationPreferences } from './notification-preferences';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -50,7 +52,6 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 import SystemSettings from './system';
-import { useModulesDialog } from './modules/modules-dialog';
 import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
@@ -114,7 +115,6 @@ const SettingsPage: React.FC = () => {
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
-	const { openModulesDialog } = useModulesDialog();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
 		() => new Set(applyFilters('doublescale_settings_tabs_without_save', TABS_WITHOUT_SAVE_BUTTON_LIST) as string[]),
@@ -132,9 +132,6 @@ const SettingsPage: React.FC = () => {
 		if (urlTab && urlTab !== 'tab?') {
 			if (urlTab === 'modules') {
 				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
-				if (isCrmManager()) {
-					openModulesDialog();
-				}
 				return;
 			}
 			if (urlTab === 'team') {
@@ -156,8 +153,6 @@ const SettingsPage: React.FC = () => {
 		navigate,
 		hasLimitedSettingsAccess,
 		defaultTab,
-		openModulesDialog,
-		isCrmManager,
 	]);
 
 	const fetchSettings = async () => {
@@ -483,7 +478,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'mailbox',
 			label: 'Mailbox',
-			icon: <Inbox size={24} />,
+			icon: <MailboxIcon width={24} height={24} />,
 		},
 		{
 			value: 'sms',
@@ -533,12 +528,12 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'ai',
 			label: 'AI',
-			icon: <Sparkles size={24} />,
+			icon: <AiIcon width={24} height={24} />,
 		},
 		{
 			value: 'notifications',
 			label: 'Notifications',
-			icon: <Bell size={24} />,
+			icon: <NotificationIcon width={24} height={24} />,
 		},
 	];
 

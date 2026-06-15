@@ -16,8 +16,11 @@ import {
 	BookingIcon,
 	CampaignIcon,
 	FormsIcon,
+	HelpdeskIcon,
 	IntegrationsIcon,
 	PipelineIcon,
+	SalesIcon,
+	SmtpIcon,
 	TaskIcon,
 } from '@doublescale/components';
 
@@ -33,10 +36,12 @@ function getModuleIcon(slug: string) {
 	switch (slug) {
 		case 'smtp':
 		case 'email':
-			return <IntegrationsIcon width={32} height={32} color="#0D9DFC" />;
+			return <SmtpIcon width={32} height={32} color="#0D9DFC" />;
 		case 'deals':
 		case 'pipelines':
 			return <PipelineIcon width={32} height={32} color="#0D9DFC" />;
+		case 'sales':
+			return <SalesIcon width={32} height={32} color="#0D9DFC" />;
 		case 'forms':
 			return <FormsIcon width={32} height={32} color="#0D9DFC" />;
 		case 'automations':
@@ -47,7 +52,8 @@ function getModuleIcon(slug: string) {
 			return <CampaignIcon width={32} height={32} color="#0D9DFC" />;
 		case 'booking':
 			return <BookingIcon width={32} height={32} color="#0D9DFC" />;
-
+		case 'support':
+			return <HelpdeskIcon width={32} height={32} color="#0D9DFC" />;
 
 		default:
 			return <IntegrationsIcon width={32} height={32} color="#0D9DFC" />;

@@ -175,21 +175,15 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 					</>
 				)}
 
-				<div className="flex gap-3 items-center">
-					<Field
-						type="switch"
-						value={updateExisting}
-						onChange={(value) =>
+				<div className="flex justify-start gap-3 items-center">
+					<Switch
+						checked={updateExisting}
+						onCheckedChange={(value) =>
 							dispatch({
 								type: 'SET_UPDATE_EXISTING',
 								payload: value,
 							})
 						}
-						required={false}
-						tooltip={__(
-							'When enabled, existing contacts with matching emails will be updated with new data. When disabled, duplicate contacts will be skipped during import.',
-							'doublescale'
-						)}
 					/>
 					<div className="text-[#09090B] font-normal text-base">
 						{__('Update Existing Contacts', 'doublescale')}

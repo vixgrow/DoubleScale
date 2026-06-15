@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,33 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.1.8 = 13 Jun 2026
+- Fix intermittent fatal error when activating the plugin
+- Fix loading splash screen flashing unstyled content on first paint
+- Fix contact import list and tag assignment
+- Improve WordPress user import first and last name mapping
+
+= 1.1.7 = 12 Jun 2026
+- Fix custom fields type dropdown showing no options when adding fields
+- Fix email builder font size input clamping while typing
+- Prevent text block content loss when selecting columns or sections in the email builder
+
+= 1.1.6 = 12 Jun 2026
+- Remove Signature block from the email builder block registry
+- Add autosave for text blocks in the email builder
+
+= 1.1.5 = 11 Jun 2026
+- Fix email builder font size input only accepting extreme values while typing
+- Always show Generate With AI on the campaign templates step
+
+= 1.1.4 = 11 Jun 2026
+- Fix campaign setup step subject and preview text not saving after editing and returning to the step
+- Rename Support to Helpdesk across modules and admin UI
+- Refine Control Modules settings with module cards and clearer grouping
+- Update booking Connect button styling to match secondary actions
+- Improve template save handling for legacy API subject fields
+- Re-enable AI Assistant in the extensions store
+
 = 1.1.3 = 11 Jun 2026
 - Auto-install and activate DoubleScale Pro after a valid license is activated
 - Show Pro plugin install and active status on the license settings page

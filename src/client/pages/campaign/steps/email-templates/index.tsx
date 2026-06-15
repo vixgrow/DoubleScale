@@ -503,16 +503,14 @@ const EmailTemplatesStep: React.FC = () => {
 							</div>
 						</div>
 					<div className="flex gap-4 flex-shrink-0">
-						{configApi.isAiConfigured() && (
-							<Button
-								variant="secondary"
-								onClick={() => setAiBuilderVisible(true)}
-								className="rounded-md"
-							>
-								<AiIcon width={32} height={32} />
-								{__('Generate With AI', 'doublescale')}
-							</Button>
-						)}
+						<Button
+							variant="secondary"
+							onClick={() => setAiBuilderVisible(true)}
+							className="rounded-md"
+						>
+							<AiIcon width={32} height={32} />
+							{__('Generate With AI', 'doublescale')}
+						</Button>
 						<Button
 								variant="default"
 								onClick={handleStartFromScratch}

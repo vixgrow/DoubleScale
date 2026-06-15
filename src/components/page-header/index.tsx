@@ -21,6 +21,8 @@ interface PageHeaderProps {
 	className?: string;
 	/** Merged onto the outer wrapper (e.g. `mb-0` when the title sits in a toolbar row). */
 	wrapperClassName?: string;
+	/** Merged onto the title + actions row (e.g. `flex-row justify-between` on mobile). */
+	rowClassName?: string;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -29,6 +31,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 	actions = [],
 	className,
 	wrapperClassName,
+	rowClassName,
 }) => {
 	return (
 		<div
@@ -40,14 +43,24 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 				</span>
 			)}
 
-			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+			<div
+				className={cn(
+					'flex gap-4',
+					rowClassName ??
+						'flex-col sm:flex-row sm:justify-between sm:items-center'
+				)}
+			>
 				<h1 className="text-2xl font-bold text-foreground tracking-tight">
 					{title}
 				</h1>
 
 				{actions.length > 0 && (
 					<div
-						className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-6 ${className || ''}`}
+						className={cn(
+							'flex gap-6',
+							className ??
+								'flex-col sm:flex-row items-stretch sm:items-center'
+						)}
 					>
 						{actions.map((action, index) => {
 							const {

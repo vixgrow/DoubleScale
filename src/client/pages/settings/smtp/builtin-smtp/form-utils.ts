@@ -15,10 +15,10 @@ import config from '@doublescale/config';
 
 
 export const SMTP_CONNECTION_INPUT_CLASS =
-	'h-10 w-full rounded-lg border border-border bg-background text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:border-brandPrimary focus-visible:ring-2 focus-visible:ring-brandPrimary/20';
+	'h-10 w-full !rounded-lg border !border-border !bg-background text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:border-brandPrimary focus-visible:ring-2 focus-visible:ring-brandPrimary/20';
 
 export const SMTP_CONNECTION_SELECT_TRIGGER_CLASS =
-	'h-10 w-full rounded-lg border border-border bg-background text-foreground focus:ring-brandPrimary/20 focus:border-brandPrimary';
+	'h-10 w-full !rounded-lg border !border-border bg-background text-foreground focus:ring-brandPrimary/20 focus:border-brandPrimary';
 
 export const WIZARD_LAST_STEP = 4;
 

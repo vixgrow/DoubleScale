@@ -182,7 +182,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 			{!smtpModuleOn && (
 				<p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
 					{__(
-						'The SMTP module is turned off. Enable it from Control Modules to use saved mail connections and the sender account picker.',
+						'The SMTP module is turned off. Enable it from Control Modules in the header to use saved mail connections and the sender account picker.',
 						'doublescale'
 					)}{' '}
 					<button

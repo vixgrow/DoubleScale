@@ -1264,7 +1264,7 @@ class RestAutomationController extends RestController {
 			'support'     => array(
 				'support' => array(
 					'module' => 'support',
-					'label'  => 'Support',
+					'label'  => 'Helpdesk',
 				),
 			),
 			'pmpro'       => array(
@@ -1542,7 +1542,7 @@ class RestAutomationController extends RestController {
 	 */
 	private function get_action_module_label( $module ) {
 		$labels = array(
-			'support' => __( 'Support', 'doublescale' ),
+			'support' => __( 'Helpdesk', 'doublescale' ),
 			'deals'   => __( 'Pipelines & Deals', 'doublescale' ),
 			'booking' => __( 'Booking', 'doublescale' ),
 			'forms'   => __( 'Forms', 'doublescale' ),

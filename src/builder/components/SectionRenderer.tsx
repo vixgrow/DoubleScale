@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
+import { hasActiveTextSelection } from '../utils/selectionGuards';
 import { ContactsIcon, CopyIcon, DeleteIcon, FiltersIcon } from '@doublescale/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { DropIndicator } from './DropIndicator';
@@ -61,6 +62,11 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		// See ColumnRenderer: a text-selection drag can end over the section and
+		// fire this click, which would deselect the block and wipe its editor.
+		if (hasActiveTextSelection()) {
+			return;
+		}
 		dispatch(STORE_KEY).selectSection(section.id);
 	};
 

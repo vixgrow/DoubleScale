@@ -26,6 +26,7 @@ interface RuleProps {
 	rule: RuleType;
 	onChange: (key: string, value: string) => void;
 	onRemove?: () => void;
+	hideRemoveButton?: boolean;
 }
 
 const Rule: React.FC<RuleProps> = ({
@@ -33,6 +34,7 @@ const Rule: React.FC<RuleProps> = ({
 	rule,
 	onChange,
 	onRemove,
+	hideRemoveButton = false,
 }) => {
 	const hasOperators =
 		ruleSettings.operators &&
@@ -40,9 +42,9 @@ const Rule: React.FC<RuleProps> = ({
 
 	return (
 		<div className="doublescale-rule flex min-w-0 w-full flex-1">
-			<div className="doublescale-rule-row flex min-w-0 w-full flex-1 items-center gap-3">
+			<div className="doublescale-rule-row flex min-w-0 w-full flex-1 max-sm:flex-col max-sm:items-stretch gap-3 sm:flex-row sm:items-center">
 				{hasOperators && (
-					<div className="min-w-0 flex-1 basis-0">
+					<div className="min-w-0 flex-1 max-sm:w-full sm:basis-0">
 						<Select
 							value={rule.operator}
 							onValueChange={(value) =>
@@ -67,8 +69,8 @@ const Rule: React.FC<RuleProps> = ({
 				)}
 				<div
 					className={cn(
-						'min-w-0 [&_.react-select-container]:w-full',
-						hasOperators ? 'flex-1 basis-0' : 'flex-1'
+						'min-w-0 max-sm:w-full [&_.react-select-container]:w-full',
+						hasOperators ? 'flex-1 sm:basis-0' : 'flex-1'
 					)}
 				>
 					<Field
@@ -86,11 +88,11 @@ const Rule: React.FC<RuleProps> = ({
 						className="w-full min-w-0 h-12 !border-border !rounded-lg [&_input]:w-full [&_textarea]:w-full"
 					/>
 				</div>
-				{onRemove && (
+				{onRemove && !hideRemoveButton && (
 					<Button
 						type="button"
 						onClick={onRemove}
-						className="h-12 w-12 shrink-0 bg-transparent px-0 shadow-none hover:bg-transparent hover:text-destructive text-destructive [&_svg]:size-6"
+						className="h-12 w-12 shrink-0 self-end bg-transparent px-0 shadow-none hover:bg-transparent hover:text-destructive text-destructive sm:self-auto [&_svg]:size-6"
 					>
 						<TrashIcon width={24} height={24} />
 					</Button>

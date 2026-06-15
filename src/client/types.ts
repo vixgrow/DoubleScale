@@ -255,6 +255,8 @@ export type EmailTemplate = {
 	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
 	thumbnail?: string;
 	hidden?: boolean;
+	/** Campaign to link this template to; consumed by /templates/save. */
+	campaign_id?: number;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;

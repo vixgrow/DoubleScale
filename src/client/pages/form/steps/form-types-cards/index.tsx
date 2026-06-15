@@ -21,6 +21,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 //@ts-ignore
 import contact from '../../../../../../assets/images/form-types/contact.png';
 //@ts-ignore
@@ -106,6 +107,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 }) => {
 	const [showProModal, setShowProModal] = useState(false);
 	const [selectedProFeature, setSelectedProFeature] = useState<string>('');
+	const proAddonActive = isProActive();
 
 	const mergedForms = { ...forms };
 	for (const [slug, defaults] of Object.entries(ALL_FORM_TYPES)) {
@@ -132,10 +134,10 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 	});
 
 	const handleCardClick = (key: string, formType: any) => {
-		const isPro = formType.is_pro || false;
+		const isProLocked = ( formType.is_pro || false ) && !proAddonActive;
 		const isEnabled = formType.is_enabled;
 
-		if (isPro) {
+		if ( isProLocked ) {
 			setSelectedProFeature(formType.label);
 			setShowProModal(true);
 			return;
@@ -159,9 +161,10 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 						{sortedKeys.map((key) => {
 							const formType = mergedForms[key];
 							const isSelected = selectedType === key;
-							const isPro = formType.is_pro || false;
+							const isProLocked =
+								( formType.is_pro || false ) && !proAddonActive;
 							const isEnabled = formType.is_enabled;
-							const isClickable = !isPro && isEnabled;
+							const isClickable = !isProLocked && isEnabled;
 
 							const card = (
 								<Card
@@ -185,7 +188,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 											`}
 											>
 												{formType.label}
-												{isPro && (
+												{isProLocked && (
 													<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 border-orange-200">
 														{__('Pro', 'doublescale')}
 													</Badge>
@@ -201,7 +204,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 													'doublescale'
 												)}
 											</p>
-											{!isPro && !isEnabled && (
+											{!isProLocked && !isEnabled && (
 												<p className="text-[10px] text-amber-600 flex items-center gap-1 mt-1">
 													<Info className="w-3 h-3" />
 													{__('Plugin not installed or inactive', 'doublescale')}
@@ -212,7 +215,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 								</Card>
 							);
 
-							if (!isEnabled && !isPro) {
+							if (!isEnabled && !isProLocked) {
 								return (
 									<Tooltip key={key}>
 										<TooltipTrigger asChild>
@@ -228,7 +231,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 								);
 							}
 
-							if (isPro && !isEnabled) {
+							if (isProLocked && !isEnabled) {
 								return (
 									<Tooltip key={key}>
 										<TooltipTrigger asChild>

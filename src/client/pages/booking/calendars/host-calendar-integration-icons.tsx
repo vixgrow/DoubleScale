@@ -14,7 +14,7 @@ import googleIcon from '@doublescale/assets/booking-icons/google/icon.svg';
 import zoomIcon from '@doublescale/assets/booking-icons/zoom/icon.svg';
 import appleIcon from '@doublescale/assets/booking-icons/apple/icon.svg';
 import outlookIcon from '@doublescale/assets/booking-icons/outlook/icon.svg';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Plug2 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -182,17 +182,18 @@ const HostCalendarIntegrationIcons: FC<
 				<DropdownMenuTrigger asChild>
 					<Button
 						type="button"
-						variant="outline"
-						size="sm"
-						className="h-10 shrink-0 gap-2 border-[#EDEBEB] bg-white px-3 font-medium text-foreground shadow-sm hover:bg-[#F4F5FA]"
+						variant="secondaryDeepBlue"
 						aria-haspopup="menu"
 						aria-label={ __(
 							'Connect calendar and conferencing integrations',
 							'doublescale'
 						) }
 					>
-						<span>{ __( 'Connect', 'doublescale' ) }</span>
-						<ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
+						<Plug2 className="h-4 w-4 shrink-0" aria-hidden />
+						<span className="text-[14px] font-[500]">
+							{ __( 'Connect', 'doublescale' ) }
+						</span>
+						<ChevronDown className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end" className="w-80 p-1.5">

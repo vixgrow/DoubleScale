@@ -1,28 +1,35 @@
-.doublescale-header-pro-bell {
+.doublescale-header-pro-bells {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.doublescale-inbox-bell,
+.doublescale-notification-bell {
 	position: relative;
-	display: inline-flex;
+	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 36px;
-	height: 36px;
+	padding: 0;
 	border: none;
 	background: transparent;
 	color: #29292e;
-	border-radius: 8px;
 	cursor: pointer;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: opacity 0.15s ease;
 
 	&:hover,
 	&:focus-visible {
-		background: hsl(var(--accent) / 0.6);
-		color: hsl(var(--foreground));
+		opacity: 0.85;
 	}
 
 	&:focus-visible {
 		outline: 2px solid hsl(var(--ring));
 		outline-offset: 2px;
+		border-radius: 4px;
 	}
+}
 
+.doublescale-header-pro-bell {
 	&__popover {
 		width: 320px !important;
 		padding: 16px !important;

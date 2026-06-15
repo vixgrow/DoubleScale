@@ -253,6 +253,11 @@ class Fields extends Rule {
 
 if ( class_exists( CustomFieldModel::class ) ) {
 	( static function () {
+		if ( function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready( 'custom-fields', CustomFieldModel::class ) ) {
+			return;
+		}
+
 		$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
 
 		if ( ! empty( $custom_fields ) ) {

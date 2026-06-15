@@ -27,7 +27,7 @@ final class DocumentPdf {
 		$company = array(
 			'name'    => (string) \get_bloginfo( 'name' ),
 			'url'     => (string) \home_url( '/' ),
-			'address' => (string) \apply_filters( 'doublescale_sales_pdf_company_address', '' ),
+			'address' => self::resolved_company_address(),
 		);
 
 		ob_start();
@@ -35,6 +35,18 @@ final class DocumentPdf {
 		$doc_type = $type;
 		include __DIR__ . '/templates/document-pdf.php';
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Company address for PDF/receipt headers (settings + filter).
+	 *
+	 * @return string
+	 */
+	public static function resolved_company_address(): string {
+		$from_settings = trim( (string) SalesSettings::get( 'pdf_company_address', '' ) );
+		$address       = '' !== $from_settings ? $from_settings : '';
+
+		return (string) \apply_filters( 'doublescale_sales_pdf_company_address', $address );
 	}
 
 	/**

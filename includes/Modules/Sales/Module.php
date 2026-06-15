@@ -81,6 +81,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestPublicProposalController::class,
 			Rest\Controllers\RestPublicInvoiceController::class,
 			Rest\Controllers\RestSalesSettingsController::class,
+			Rest\Controllers\RestSalesAnalyticsController::class,
 		);
 	}
 
@@ -108,6 +109,11 @@ final class Module extends AbstractModule {
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
 		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
+
+		add_filter( 'doublescale_mail_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
+
+		require_once $this->module_dir() . '/MergeTags/AbstractSalesMergeTag.php';
+		$this->loadModuleMergeTagFiles();
 
 		MenuRegistry::add(
 			array(
@@ -250,5 +256,32 @@ final class Module extends AbstractModule {
 		}
 
 		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );
+	}
+
+	/**
+	 * Restrict the Sales merge-tag group to sales lifecycle triggers.
+	 *
+	 * @param array<string, array<string, mixed>> $groups Merge tag groups.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function register_merge_tag_groups( array $groups ): array {
+		$disabled = ! function_exists( 'doublescale_is_module_active' )
+			|| ! doublescale_is_module_active( 'sales' );
+
+		$groups['sales'] = array(
+			'name'        => __( 'Sales', 'doublescale' ),
+			'mergeTags'   => isset( $groups['sales']['mergeTags'] ) ? $groups['sales']['mergeTags'] : array(),
+			'triggers'    => array(
+				'proposal_sent',
+				'proposal_declined',
+				'proposal_accepted',
+				'proposal_converted_to_invoice',
+				'invoice_sent',
+				'invoice_paid',
+			),
+			'is_disabled' => $disabled,
+		);
+
+		return $groups;
 	}
 }

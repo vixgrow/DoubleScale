@@ -21,7 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { LineItemsEditor } from '@/components/sales';
+import { LineItemsEditor, SendDocumentDialog } from '@/components/sales';
 import {
 	formatContactAddressBlock,
 	normalizeSalesContact,
@@ -226,52 +226,76 @@ const InvoiceEdit: React.FC = () => {
 		);
 	};
 
-	const handleSave = async (andSend = false) => {
+	const [sendOpen, setSendOpen] = useState(false);
+
+	const buildPayload = () => ({
+		status,
+		contact_id: contact!.id,
+		invoice_date: invoiceDate,
+		due_date: dueDate,
+		currency,
+		discount_type: discountType,
+		discount_value: discountValue,
+		adjustment,
+		allowed_payment_modes: allowedPaymentModes,
+		billing_address: billingAddress,
+		shipping_address: shippingAddress,
+		client_note: clientNote,
+		terms,
+		sale_agent_user_id: saleAgentUserId,
+		tag_ids: tagIds,
+		line_items: lineItems,
+	});
+
+	const persistInvoice = async (): Promise<number | null> => {
 		if (!contact) {
 			setError(__('Please select a customer.', 'doublescale'));
-			return;
+			return null;
 		}
 
 		setSaving(true);
 		setError(null);
 
-		const payload = {
-			status,
-			contact_id: contact.id,
-			invoice_date: invoiceDate,
-			due_date: dueDate,
-			currency,
-			discount_type: discountType,
-			discount_value: discountValue,
-			adjustment,
-			allowed_payment_modes: allowedPaymentModes,
-			billing_address: billingAddress,
-			shipping_address: shippingAddress,
-			client_note: clientNote,
-			terms,
-			sale_agent_user_id: saleAgentUserId,
-			tag_ids: tagIds,
-			line_items: lineItems,
-		};
-
 		try {
 			let id = invoiceId;
 			if (isNew) {
-				const created = await createInvoice(payload);
+				const created = await createInvoice(buildPayload());
 				id = created.id;
 			} else if (invoiceId) {
-				await updateInvoice(invoiceId, payload);
+				await updateInvoice(invoiceId, buildPayload());
 			}
-
-			if (andSend && id) {
-				await sendInvoice(id);
-			}
-
-			navigate(getToLink(`sales/invoices/${id}`));
+			return id ?? null;
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			return null;
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const handleSave = async () => {
+		const id = await persistInvoice();
+		if (id) {
+			navigate(getToLink(`sales/invoices/${id}`));
+		}
+	};
+
+	const handleSaveAndSend = async (message: string) => {
+		const id = await persistInvoice();
+		if (!id) {
+			return;
+		}
+
+		setSaving(true);
+		setError(null);
+		try {
+			await sendInvoice(id, message);
+			navigate(getToLink(`sales/invoices/${id}`));
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+		} finally {
+			setSaving(false);
+			setSendOpen(false);
 		}
 	};
 
@@ -526,13 +550,26 @@ const InvoiceEdit: React.FC = () => {
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/invoices'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave(false)} disabled={saving}>
+				<Button variant="outline" onClick={() => void handleSave()} disabled={saving}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 				</Button>
-				<Button onClick={() => void handleSave(true)} disabled={saving || status === 'paid'}>
-					{saving ? __('Sending…', 'doublescale') : __('Save & Send', 'doublescale')}
+				<Button onClick={() => setSendOpen(true)} disabled={saving || status === 'paid'}>
+					{__('Save & Send', 'doublescale')}
 				</Button>
 			</div>
+
+			<SendDocumentDialog
+				open={sendOpen}
+				onOpenChange={setSendOpen}
+				title={__('Save & Send Invoice', 'doublescale')}
+				description={__(
+					'Save this invoice and email it to the customer. Add an optional personal note below.',
+					'doublescale'
+				)}
+				confirmLabel={__('Save & Send', 'doublescale')}
+				busy={saving}
+				onConfirm={handleSaveAndSend}
+			/>
 		</div>
 	);
 };

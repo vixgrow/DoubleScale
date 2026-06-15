@@ -150,6 +150,24 @@ const SalesSettingsPage: React.FC = () => {
 					</section>
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Documents & receipts', 'doublescale')}</h2>
+						<FormField
+							label={__('Company address on PDFs and receipts', 'doublescale')}
+							className="!mb-0"
+						>
+							<Textarea
+								value={form.pdf_company_address ?? ''}
+								onChange={(e) => patch('pdf_company_address', e.target.value)}
+								rows={4}
+								placeholder={__(
+									'Street, city, country — shown on proposal/invoice PDFs and payment receipts.',
+									'doublescale'
+								)}
+							/>
+						</FormField>
+					</section>
+
+					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Customer experience', 'doublescale')}</h2>
 						<div className="flex items-center justify-between">
 							<Label htmlFor="require-signature">

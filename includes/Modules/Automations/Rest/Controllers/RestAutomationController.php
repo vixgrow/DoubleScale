@@ -1267,6 +1267,13 @@ class RestAutomationController extends RestController {
 					'label'  => 'Support',
 				),
 			),
+			'sales'       => array(
+				'sales' => array(
+					'plugin' => '',
+					'module' => 'sales',
+					'label'  => 'Double Scale Pro',
+				),
+			),
 			'pmpro'       => array(
 				'pmpro' => array(
 					'plugin' => 'paid-memberships-pro/paid-memberships-pro.php',
@@ -1361,6 +1368,30 @@ class RestAutomationController extends RestController {
 			}
 		}
 
+		if ( 'sales' === ( $trigger->source ?? '' ) ) {
+			if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'sales' ) ) {
+				$module_label = $this->get_action_module_label( 'sales' );
+				return array(
+					'is_active'    => false,
+					'is_pro'       => false,
+					'message'      => sprintf(
+						/* translators: %s: module name (e.g. Sales) */
+						__( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
+						$module_label
+					),
+					'plugin_label' => $module_label,
+				);
+			}
+			if ( ! empty( $trigger->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
+				return array(
+					'is_active'    => false,
+					'is_pro'       => true,
+					'message'      => __( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
+					'plugin_label' => __( 'Double Scale Pro', 'doublescale' ),
+				);
+			}
+		}
+
 		// No dependency or plugin is active
 		return array(
 			'is_active'    => true,
@@ -1398,6 +1429,13 @@ class RestAutomationController extends RestController {
 				'support' => array(
 					'plugin' => '',
 					'module' => 'support',
+					'label'  => 'Double Scale Pro',
+				),
+			),
+			'sales'       => array(
+				'sales' => array(
+					'plugin' => '',
+					'module' => 'sales',
 					'label'  => 'Double Scale Pro',
 				),
 			),
@@ -1480,15 +1518,16 @@ class RestAutomationController extends RestController {
 					$module_active = function_exists( 'doublescale_is_module_active' )
 						&& doublescale_is_module_active( (string) $dependency['module'] );
 					if ( ! $module_active ) {
+						$module_label = $this->get_action_module_label( (string) $dependency['module'] );
 						return array(
 							'is_active'    => false,
 							'is_pro'       => false,
 							'message'      => sprintf(
 								/* translators: %s: module name (e.g. Support, Deals) */
 								__( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
-								$this->get_action_module_label( (string) $dependency['module'] )
+								$module_label
 							),
-							'plugin_label' => $dependency['label'],
+							'plugin_label' => $module_label,
 						);
 					}
 				}
@@ -1523,6 +1562,30 @@ class RestAutomationController extends RestController {
 			}
 		}
 
+		if ( 'sales' === ( $action->source ?? '' ) ) {
+			if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'sales' ) ) {
+				$module_label = $this->get_action_module_label( 'sales' );
+				return array(
+					'is_active'    => false,
+					'is_pro'       => false,
+					'message'      => sprintf(
+						/* translators: %s: module name (e.g. Sales) */
+						__( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
+						$module_label
+					),
+					'plugin_label' => $module_label,
+				);
+			}
+			if ( ! empty( $action->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
+				return array(
+					'is_active'    => false,
+					'is_pro'       => true,
+					'message'      => __( 'This action requires Plugin Pro to be installed and activated.', 'doublescale' ),
+					'plugin_label' => __( 'Double Scale Pro', 'doublescale' ),
+				);
+			}
+		}
+
 		// No dependency or plugin is active
 		return array(
 			'is_active'    => true,
@@ -1546,6 +1609,7 @@ class RestAutomationController extends RestController {
 			'deals'   => __( 'Pipelines & Deals', 'doublescale' ),
 			'booking' => __( 'Booking', 'doublescale' ),
 			'forms'   => __( 'Forms', 'doublescale' ),
+			'sales'   => __( 'Sales', 'doublescale' ),
 		);
 
 		return $labels[ $module ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $module ) );

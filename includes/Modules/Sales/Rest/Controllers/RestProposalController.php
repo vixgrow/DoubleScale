@@ -108,6 +108,11 @@ class RestProposalController extends RestController {
 					'callback'            => array( $this, 'get_comments' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_comment' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
 			)
 		);
 
@@ -483,6 +488,8 @@ class RestProposalController extends RestController {
 		}
 		$proposal->refresh();
 
+		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );
+
 		return new WP_REST_Response(
 			array(
 				'invoice'  => InvoiceShaper::shape( $invoice, true ),
@@ -614,6 +621,66 @@ class RestProposalController extends RestController {
 		}
 
 		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * Staff reply to customer comments on a proposal.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function add_comment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		if ( ! $proposal->allow_comments ) {
+			return new WP_Error( 'not_allowed', __( 'Comments are not allowed on this proposal.', 'doublescale' ), array( 'status' => 403 ) );
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$content = isset( $params['content'] ) ? sanitize_textarea_field( (string) $params['content'] ) : '';
+		if ( '' === trim( $content ) ) {
+			return new WP_Error( 'invalid_data', __( 'Comment cannot be empty.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$user = wp_get_current_user();
+		$name = $user && $user->exists() ? (string) $user->display_name : __( 'Staff', 'doublescale' );
+
+		$comment = ProposalCommentModel::create(
+			array(
+				'proposal_id' => (int) $proposal->id,
+				'author_name' => $name,
+				'content'     => $content,
+				'is_customer' => false,
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'id'          => (int) $comment->id,
+				'author_name' => (string) $comment->author_name,
+				'content'     => (string) $comment->content,
+				'is_customer' => false,
+				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
+			),
+			201
+		);
 	}
 
 	/**

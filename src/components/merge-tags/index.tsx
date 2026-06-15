@@ -7,8 +7,8 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useState } from 'react';
-import { filter, map } from 'lodash';
+import { useState, useEffect } from 'react';
+import { map } from 'lodash';
 
 /**
  * shadcn/ui components
@@ -31,6 +31,10 @@ import ConfigAPI from '@doublescale/config';
 import type { MergeTags } from '@doublescale/config';
 import CustomDialogHeader from '../dialog-header';
 import EnhancedMergeTagsSelector from './enhanced-selector';
+import {
+	filterMergeTagGroups,
+	getVisibleMergeTagsForTrigger,
+} from './utils';
 
 interface MergeTagsSelectorProps {
 	visible: boolean;
@@ -60,6 +64,18 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 		formContext: select('doublescale/core').getFormContext(),
 	}));
 
+	const automationMergeTags = ConfigAPI.getMergeTags();
+	const automationMergeTagsWithTrigger = filterMergeTagGroups(
+		automationMergeTags,
+		currentTrigger
+	);
+
+	useEffect(() => {
+		if (selectedTabIndex >= automationMergeTagsWithTrigger.length) {
+			setSelectedTabIndex(0);
+		}
+	}, [automationMergeTagsWithTrigger.length, selectedTabIndex]);
+
 	// If we have form context (from props or store), use the enhanced selector
 	if (
 		(formContext && formContext.formId && formContext.triggerId) ||
@@ -77,19 +93,6 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 			/>
 		);
 	}
-
-	// Otherwise, use the original static selector
-	const automationMergeTags = ConfigAPI.getMergeTags();
-	const automationMergeTagsWithTrigger = filter(
-		automationMergeTags,
-		(group) => {
-			// Filter out disabled groups
-			if (group.is_disabled) {
-				return false;
-			}
-			return !group.triggers || group.triggers.includes(currentTrigger);
-		}
-	);
 
 	const selectedGroup = automationMergeTagsWithTrigger[selectedTabIndex];
 
@@ -151,19 +154,10 @@ const MergeTagsGroupRender: React.FC<{
 }> = ({ mergeTags, onInsertTag, activeTrigger }) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('doublescale/core');
 
-	// Filter merge tags based on required_triggers
-	const filteredMergeTags = filter(mergeTags, (tag) => {
-		// If tag has no required_triggers, show it
-		if (!tag.required_triggers || tag.required_triggers.length === 0) {
-			return true;
-		}
-		// If no active trigger, hide tags with required_triggers
-		if (!activeTrigger) {
-			return false;
-		}
-		// Show tag only if current trigger is in required_triggers
-		return tag.required_triggers.includes(activeTrigger);
-	});
+	const filteredMergeTags = getVisibleMergeTagsForTrigger(
+		mergeTags,
+		activeTrigger
+	);
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {

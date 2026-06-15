@@ -88,6 +88,14 @@ class LeadScoreLevel extends Rule {
 		// env where Pro's migrations haven't run yet) the table doesn't exist and the SELECT
 		// fatals the whole site. Catch the QueryException so the rule stays registered with
 		// empty options instead of taking down WordPress.
+		if ( function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready(
+				'leadscoring',
+				\DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::class
+			) ) {
+			return $options;
+		}
+
 		try {
 			$levels = \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::orderBy( 'points', 'asc' )->get();
 		} catch ( \Throwable $e ) {

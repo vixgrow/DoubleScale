@@ -227,6 +227,17 @@ final class ActionsManager {
 					),
 				),
 			),
+			'sales'       => array(
+				'label'  => __( 'Sales', 'doublescale' ),
+				'groups' => array(
+					'sales' => array(
+						'label'       => __( 'Proposals & Invoices', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'sales' ),
+					),
+				),
+			),
 			'woocommerce' => array(
 				'label'  => __( 'WooCommerce', 'doublescale' ),
 				'groups' => array(

@@ -62,6 +62,7 @@ class ProposalModel extends Model {
 		'phone',
 		'allow_comments',
 		'sent_at',
+		'viewed_at',
 		'accepted_at',
 		'declined_at',
 		'decline_reason',

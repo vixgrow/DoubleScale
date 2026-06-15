@@ -636,6 +636,13 @@ export const useProposalComments = (proposalId: number | null, enabled = true) =
 	return { data, loading, error, refetch };
 };
 
+export const addProposalComment = (proposalId: number, content: string) =>
+	apiFetch<ProposalComment>({
+		path: `${NAMESPACE}/proposals/${proposalId}/comments`,
+		method: 'POST',
+		data: { content },
+	});
+
 export const fetchProposalSignature = (proposalId: number) =>
 	apiFetch<ProposalSignature>({
 		path: `${NAMESPACE}/proposals/${proposalId}/signature`,

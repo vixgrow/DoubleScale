@@ -166,6 +166,7 @@ const SUB_PATH_TO_MODULE: Record<string, string> = {
 	campaigns: 'campaigns',
 	'email-sequences': 'campaigns',
 	'deals-analytics': 'analytics',
+	'invoices-analytics': 'analytics',
 	'sales-rep-analytics': 'analytics',
 	'pipeline-analytics': 'analytics',
 	'my-reports': 'analytics',
@@ -268,6 +269,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
+							},
+							{
 								path: 'sales-rep-analytics',
 								label: __('Sales Rep Analytics', 'doublescale'),
 							},
@@ -282,6 +287,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'deals-analytics',
 								label: __('Deals Analytics', 'doublescale'),
+							},
+							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',

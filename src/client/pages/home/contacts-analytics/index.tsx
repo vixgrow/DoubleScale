@@ -99,47 +99,39 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 				actions={[]}
 			/>
 			<div className="flex flex-col gap-5">
-
-				<div className=' grid grid-cols-1 md:grid-cols-3 gap-5'>
-					{/* <div className=' h-full col-span-1'>
-				  <ContactStatsCards data={data} />
-				</div> */}
-					<DashboardContentCard
-						title={__('Cart Analytics Overview', 'doublescale')}
-						cardClassName='h-full col-span-1'
-					>
-						<ContactStatsCards data={data} />
-					</DashboardContentCard>
-					<div className=' h-full col-span-2'>
+				<div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch">
+					<div className="flex h-full min-h-0 flex-col lg:col-span-1">
+						<DashboardContentCard
+							title={__('Contacts Analytics Overview', 'doublescale')}
+							cardClassName="h-full"
+						>
+							<ContactStatsCards data={data} />
+						</DashboardContentCard>
+					</div>
+					<div className="flex h-full min-h-0 min-w-0 flex-col overflow-x-auto lg:col-span-2">
 						<UnsubscribedContactsTable
 							contacts={dashboardData.recent_unsubscribed_contacts}
 						/>
 					</div>
-
-				</div>
-				{/* <ContactStatsCards data={data} /> */}
-
-				<div className="flex gap-5">
-					<RecentContactsList
-						contacts={dashboardData.recent_contacts}
-						cardClassName="w-1/2 min-h-0 max-w-[50%] shrink-0"
-					/>
-					<ContactAnalyticsChart
-						data={data}
-						interval={interval}
-						startDate={startDate}
-						endDate={endDate}
-						onIntervalChange={setInterval}
-						onChangeFromDate={setStartDate}
-						onChangeToDate={setEndDate}
-						onSubmit={refetch}
-						cardClassName="w-1/2 min-h-0 max-w-[50%] shrink-0"
-					/>
 				</div>
 
-				{/* <UnsubscribedContactsTable
-				contacts={dashboardData.recent_unsubscribed_contacts}
-			/> */}
+				<div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-stretch">
+					<div className="flex h-full min-h-0 flex-col">
+						<RecentContactsList contacts={dashboardData.recent_contacts} />
+					</div>
+					<div className="flex h-full min-h-0 flex-col">
+						<ContactAnalyticsChart
+							data={data}
+							interval={interval}
+							startDate={startDate}
+							endDate={endDate}
+							onIntervalChange={setInterval}
+							onChangeFromDate={setStartDate}
+							onChangeToDate={setEndDate}
+							onSubmit={refetch}
+						/>
+					</div>
+				</div>
 			</div>
 		</>
 	);

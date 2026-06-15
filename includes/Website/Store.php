@@ -93,14 +93,14 @@ class Store {
 				'image'       => 'white-label/white-label.svg',
 				'plan'        => 'enterprise',
 			),
-			// 'ai-assistant' => array(
-			// 	'name'        => 'AI Assistant',
-			// 	'slug'        => 'ai-assistant',
-			// 	'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
-			// 	'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
-			// 	'image'       => 'ai-assistant/ai-assistant.svg',
-			// 	'plan'        => 'plus',
-			// ),
+			'ai-assistant' => array(
+				'name'        => 'AI Assistant',
+				'slug'        => 'ai-assistant',
+				'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
+				'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
+				'image'       => 'ai-assistant/ai-assistant.svg',
+				'plan'        => 'plus',
+			),
 		);
 
 		$this->addons = apply_filters( 'doublescale_store_addons', $addons );

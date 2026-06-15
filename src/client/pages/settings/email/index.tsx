@@ -56,11 +56,11 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
 
     return (
         <div className="email-settings doublescale-fields">
-            <div className="text-[#09090B] font-semibold text-2xl">
+            <div className="text-foreground font-semibold text-2xl">
                 {__('Email', 'doublescale')}
             </div>
-            <div className="flex gap-5 items-start w-full">
-                <div className="w-full flex flex-col gap-5">
+            <div className="flex flex-col sm:flex-row gap-5 items-start pb-5 border-b">
+                <div className="w-full flex flex-row sm:flex-col gap-5">
                     <Field
                         label={__('Max Emails in Second', 'doublescale')}
                         value={max_in_second}
@@ -96,11 +96,11 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
             </div>
 
             {/* Double Opt-In */}
-            <div className="text-[#09090B] font-semibold text-2xl mt-8">
+            <div className="text-foreground font-semibold text-2xl ">
                 {__('Double Opt-In', 'doublescale')}
             </div>
-            <div className="flex gap-5 items-start pb-5 border-b">
-                <div className="w-full">
+            <div className="flex gap-5 flex-col sm:flex-row items-start pb-5 border-b">
+                <div className="w-full flex flex-row sm:flex-col gap-5">
                     <Field
                         label={__('Email Subject', 'doublescale')}
                         value={email_subject}
@@ -124,10 +124,10 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
                     </div>
                 </div>
             </div>
-            <div className="flex gap-5 items-start w-full">
-                <div className="w-full">
+            <div className="flex gap-5 flex-col sm:flex-row items-start w-full">
+                <div className="w-full flex flex-row sm:flex-col gap-5">
                     <div className="doublescale-field">
-                        <div className="doublescale-field-label text-[#09090B] font-normal text-base">
+                        <div className="doublescale-field-label text-foreground font-semibold text-2xl">
                             {__('After Confirmation', 'doublescale')}
                         </div>
                         <RadioGroup

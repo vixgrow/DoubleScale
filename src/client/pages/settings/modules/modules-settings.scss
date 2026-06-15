@@ -1,0 +1,227 @@
+/**
+ * Control Modules — isolated from `.doublescale-layout * { width: 100% }` and
+ * WP / shadcn hover color overrides.
+ */
+
+.doublescale-control-modules-dialog,
+.doublescale-control-modules {
+	color: #323338;
+
+	/* Reset layout leak for portaled or nested content */
+	.doublescale-module-icon {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		flex: 0 0 auto !important;
+		align-self: flex-start !important;
+		width: 40px !important;
+		height: 40px !important;
+		min-width: 40px !important;
+		max-width: 40px !important;
+		min-height: 40px !important;
+		max-height: 40px !important;
+		border-radius: 8px !important;
+		box-sizing: border-box !important;
+
+		svg {
+			display: block !important;
+			width: 20px !important;
+			height: 20px !important;
+			min-width: 20px !important;
+			min-height: 20px !important;
+			max-width: 20px !important;
+			max-height: 20px !important;
+			flex: none !important;
+		}
+
+		&--sm {
+			width: 32px !important;
+			height: 32px !important;
+			min-width: 32px !important;
+			max-width: 32px !important;
+			min-height: 32px !important;
+			max-height: 32px !important;
+
+			svg {
+				width: 16px !important;
+				height: 16px !important;
+				min-width: 16px !important;
+				min-height: 16px !important;
+				max-width: 16px !important;
+				max-height: 16px !important;
+			}
+		}
+	}
+
+	.doublescale-control-modules-dialog-header-icon {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		flex: 0 0 auto !important;
+		width: 40px !important;
+		height: 40px !important;
+		min-width: 40px !important;
+		max-width: 40px !important;
+		min-height: 40px !important;
+		max-height: 40px !important;
+		border-radius: 8px !important;
+		background-color: #e8f4fd !important;
+		color: #0d9dfc !important;
+		box-sizing: border-box !important;
+
+		svg {
+			display: block !important;
+			width: 20px !important;
+			height: 20px !important;
+			flex: none !important;
+		}
+	}
+
+	&__row {
+		align-items: flex-start !important;
+
+		&:hover,
+		&:focus-within {
+			background-color: #f4f6f8 !important;
+
+			.doublescale-control-modules__title {
+				color: #323338 !important;
+			}
+
+			.doublescale-control-modules__description,
+			.doublescale-control-modules__hint {
+				color: #6b7280 !important;
+			}
+
+			.doublescale-control-modules__link {
+				color: #0a85d9 !important;
+			}
+		}
+	}
+
+	&__title {
+		color: #323338 !important;
+
+		&--muted {
+			color: #9ca3af !important;
+		}
+	}
+
+	&__description,
+	&__hint {
+		color: #6b7280 !important;
+	}
+
+	&__link {
+		color: #0d9dfc !important;
+
+		&:hover,
+		&:focus {
+			color: #0a85d9 !important;
+		}
+	}
+
+	&__section {
+		overflow: hidden;
+		border-radius: 0.75rem;
+		border: 1px solid hsl(var(--border) / 0.55);
+		background: hsl(var(--card));
+	}
+
+	&__section-header {
+		border-bottom: 1px solid hsl(var(--border) / 0.4);
+		background: hsl(var(--muted) / 0.35);
+		padding: 0.5rem 1rem;
+	}
+
+	&__section-title {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #6b7280 !important;
+	}
+
+	&__section-body {
+		> .doublescale-control-modules__module:not(:last-child) {
+			border-bottom: 1px solid hsl(var(--border) / 0.35);
+		}
+	}
+
+	&__submodules {
+		margin: 0 1rem 0.75rem;
+		border: 1px solid #dbeafe;
+		border-radius: 0.5rem;
+		background: #f8fbff;
+		overflow: hidden;
+	}
+
+	&__submodules-header {
+		padding: 0.45rem 0.75rem;
+		border-bottom: 1px solid #dbeafe;
+		background: #eef6ff;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #0d9dfc !important;
+	}
+
+	&__submodules-list {
+		.doublescale-control-modules__row--submodule {
+			padding-left: 0.75rem;
+			padding-right: 0.75rem;
+			background: transparent !important;
+
+			&:not(:last-child) {
+				border-bottom: 1px solid #e5eef8;
+			}
+
+			&:hover,
+			&:focus-within {
+				background-color: #eef6ff !important;
+			}
+		}
+	}
+
+	&__submodule-of {
+		display: block;
+		width: 100%;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: #0d9dfc !important;
+	}
+
+	&__submodule-tree {
+		display: flex;
+		align-items: center;
+		flex: 0 0 12px;
+		width: 12px !important;
+		min-width: 12px !important;
+		max-width: 12px !important;
+		align-self: stretch;
+		padding-top: 1.1rem;
+	}
+
+	&__submodule-tree-line {
+		display: block;
+		width: 10px;
+		height: 10px;
+		border-left: 2px solid #0d9dfc;
+		border-bottom: 2px solid #0d9dfc;
+		border-radius: 0 0 0 4px;
+		opacity: 0.45;
+	}
+}
+
+/* Header trigger — outline variant was winning over custom hover colors */
+.doublescale-control-modules-trigger {
+	&.doublescale-control-modules-trigger:hover,
+	&.doublescale-control-modules-trigger:focus-visible {
+		background-color: #cb5301 !important;
+		border-color: #cb5301 !important;
+		color: #ffffff !important;
+	}
+}

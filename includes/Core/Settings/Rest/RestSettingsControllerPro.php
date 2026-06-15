@@ -1642,7 +1642,9 @@ class RestSettingsControllerPro {
 								'refresh_token' => $refresh_token,
 								'client_id'     => $client_id,
 								'client_secret' => $client_secret,
-								'scope'         => 'https://outlook.office365.com/IMAP.AccessAsUser.All offline_access openid email',
+								// FQDN must be outlook.office.com (NOT office365) for consumer accounts;
+									// the office365 host is rejected and yields a token IMAP refuses.
+									'scope'         => 'https://outlook.office.com/IMAP.AccessAsUser.All https://outlook.office.com/SMTP.Send offline_access',
 							)
 						),
 						'timeout' => 30,

@@ -28,6 +28,8 @@ interface DashboardContentProps {
 	viewAllLinkUrl?: string;
 	dateFilter?: boolean;
 	dateFilterComponent?: React.ReactNode;
+	cardHeaderClassName?: string;
+	headerContentClassName?: string;
 }
 
 const DashboardContentCard: React.FC<DashboardContentProps> = ({
@@ -40,6 +42,8 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 	viewAllLinkUrl,
 	dateFilter,
 	dateFilterComponent,
+	cardHeaderClassName,
+	headerContentClassName,
 }) => {
 	return (
 		<Card
@@ -48,12 +52,12 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 				cardClassName
 			)}
 		>
-			<CardHeader className="flex flex-row items-center justify-between gap-3 p-0">
+			<CardHeader className={cn('flex flex-row items-center justify-between gap-3 p-0', cardHeaderClassName)}>
 				<CardTitle className="text-xl font-semibold tracking-tight text-[#29292E]">
 					{title}
 				</CardTitle>
 				{headerContent && (
-					<div className="text-sm font-medium text-muted-foreground">
+					<div className={cn('text-sm font-medium text-muted-foreground', headerContentClassName)}>
 						{headerContent}
 					</div>
 				)}

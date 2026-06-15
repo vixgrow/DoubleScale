@@ -90,6 +90,25 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
 }
 
 /**
+ * Whether the Sales documents feature set (proposals + invoices) is released.
+ *
+ * TEMPORARY GATE — proposals/invoices are still in development on the `sales`
+ * branch and their DB schema may change. On this branch the Sales module ships
+ * only as the parent toggle for the pipeline child: no document REST routes,
+ * no document migrations, no Proposals/Invoices menus or pages.
+ *
+ * Remove this gate (revert the commit that introduced it) when the documents
+ * feature is finished and merged from the `sales` branch. The `sales` branch
+ * can flip it early via the filter:
+ * `add_filter( 'doublescale_sales_documents_ready', '__return_true' );`
+ *
+ * @return bool
+ */
+function doublescale_sales_documents_ready(): bool {
+	return (bool) apply_filters( 'doublescale_sales_documents_ready', false );
+}
+
+/**
  * Child module slug => parent module slug.
  *
  * A child is a sub-feature with its own toggle nested inside the parent's:

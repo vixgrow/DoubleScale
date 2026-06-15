@@ -3,6 +3,26 @@
 	height: 100%;
 }
 
+/* Hide WP admin chrome while the splash is visible (main bundle CSS loads later). */
+body.js.is-fullscreen-mode #adminmenumain,
+body.js.is-fullscreen-mode #wpadminbar {
+	display: none;
+}
+
+body.js.is-fullscreen-mode #wpcontent,
+body.js.is-fullscreen-mode #wpfooter {
+	margin-left: 0;
+	padding-left: 0;
+}
+
+body.js.is-fullscreen-mode #wpfooter {
+	display: none;
+}
+
+body.js.is-fullscreen-mode div#wpbody-content {
+	padding-bottom: 0;
+}
+
 #doublescale-admin-root__loader-container {
 	display: flex;
 	flex-direction: column;

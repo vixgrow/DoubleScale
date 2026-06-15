@@ -21,6 +21,7 @@ import {
 	CurrencyIcon,
 	DealsIcon,
 	FormsIcon,
+	HelpdeskIcon,
 	IntegrationsIcon,
 	LinkTriggersIcon,
 	OrdersIcon,
@@ -65,6 +66,9 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	}
 	if (l.includes('booking')) {
 		return BookingIcon;
+	}
+	if (l.includes('helpdesk') || l.includes('support') || l.includes('ticket')) {
+		return HelpdeskIcon;
 	}
 	if (l.includes('form')) {
 		return FormsIcon;
@@ -175,9 +179,9 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
-		if (groupLabel === 'Support') {
+		if (groupLabel === 'Helpdesk') {
 			return __(
-				'The Support module is turned off. Enable it under Settings → Modules to use these triggers.',
+				'The Helpdesk module is turned off. Enable it under Settings → Modules to use these triggers.',
 				'doublescale'
 			);
 		}

@@ -38,7 +38,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.1.3',
+			'DOUBLESCALE_VERSION'       => '1.1.8',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -135,6 +135,12 @@ final class Lifecycle {
 		if ( file_exists( $dir . 'includes/Autoload.php' ) ) {
 			require_once $dir . 'includes/Autoload.php';
 		}
+
+		// Gate helpers (e.g. doublescale_sales_documents_ready) must exist before
+		// activation migrations — Install::install() runs on register_activation_hook,
+		// which fires before PluginKernel loads includes/Core/functions.php.
+		require_once $dir . 'includes/Core/ModuleRequestCache.php';
+		require_once $dir . 'includes/Core/ModuleFeatureGate.php';
 	}
 
 	/**

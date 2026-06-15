@@ -7,6 +7,23 @@
 import { __ } from '@wordpress/i18n';
 import type { ModuleInfo } from '@doublescale/config';
 
+/**
+ * TEMPORARY release gate for Sales proposals/invoices. Mirrors PHP
+ * `doublescale_sales_documents_ready()` via the admin config payload; while
+ * false the Sales module surfaces only as the pipeline's parent toggle (no
+ * Proposals/Invoices nav, pages, or contact tab). Remove together with the
+ * PHP gate when the documents feature ships.
+ */
+export function isSalesDocumentsReady(): boolean {
+	if (typeof window === 'undefined') {
+		return false;
+	}
+	const cfg = (
+		window as { doublescaleConfig?: { salesDocumentsReady?: boolean } }
+	).doublescaleConfig;
+	return Boolean(cfg?.salesDocumentsReady);
+}
+
 export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'smtp',
 	'sales',
@@ -81,10 +98,15 @@ function placeholderFor(
 		case 'sales':
 			return {
 				label: __('Sales', 'doublescale'),
-				description: __(
-					'Create proposals and invoices with line items, discounts, and customer billing.',
-					'doublescale'
-				),
+				description: isSalesDocumentsReady()
+					? __(
+							'Create proposals and invoices with line items, discounts, and customer billing.',
+							'doublescale'
+					  )
+					: __(
+							'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.',
+							'doublescale'
+					  ),
 			};
 		case 'forms':
 			return {
@@ -128,9 +150,9 @@ function placeholderFor(
 			};
 		case 'support':
 			return {
-				label: __('Support', 'doublescale'),
+				label: __('Helpdesk', 'doublescale'),
 				description: __(
-					'Ticket-based customer support with mailbox channels, email piping, and a customer portal.',
+					'Ticket-based customer helpdesk with mailbox channels, email piping, and a customer portal.',
 					'doublescale'
 				),
 			};
@@ -204,14 +226,26 @@ export type ChildModuleRow = {
 function childPlaceholderFor(slug: string): Pick<ModuleInfo, 'label' | 'description'> {
 	if (slug === 'deals') {
 		return {
-			label: __('Pipeline', 'doublescale'),
+			label: __('Pipelines', 'doublescale'),
 			description: __(
-				'Manage deals, stages, and pipeline analytics for your sales process.',
+				'Manage deals, stages, and pipeline analytics within Sales.',
 				'doublescale'
 			),
 		};
 	}
 	return { label: slug, description: '' };
+}
+
+/** User-facing label for a child row under a parent module card. */
+export function getChildModuleDisplayLabel(
+	slug: string,
+	parentSlug: string,
+	fallbackLabel: string
+): string {
+	if (slug === 'deals' && parentSlug === 'sales') {
+		return __('Pipelines', 'doublescale');
+	}
+	return fallbackLabel;
 }
 
 /**
@@ -227,9 +261,10 @@ export function buildChildModuleRows(
 	return (CHILD_MODULES_BY_PARENT[parentSlug] ?? []).map((slug) => {
 		const m = modules.find((x) => x.slug === slug);
 		const placeholder = childPlaceholderFor(slug);
+		const rawLabel = m?.label || placeholder.label;
 		return {
 			slug,
-			label: m?.label || placeholder.label,
+			label: getChildModuleDisplayLabel(slug, parentSlug, rawLabel),
 			description: m?.description || placeholder.description,
 			settingEnabled: m?.setting_enabled ?? true,
 			unavailableUntilPro:

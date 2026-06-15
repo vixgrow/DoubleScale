@@ -4,9 +4,10 @@
 
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Receipt } from 'lucide-react';
 
 import { registerAdminPage, useNavigate, getToLink } from '@doublescale/navigation';
+import { SalesIcon } from '@doublescale/components';
+import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProposalsList = lazy(() => import('./proposals'));
@@ -36,11 +37,19 @@ const SALES_MENU_CAPS = [
 	'doublescale_sales_rep',
 ];
 
-/** `/sales` → Proposals list (Perfex-style Sales parent). */
+/**
+ * `/sales` → Proposals list (Perfex-style Sales parent). While the documents
+ * feature is gated, the only destination under Sales is the pipeline.
+ */
 const RedirectToProposals = () => {
 	const navigate = useNavigate();
 	useEffect(() => {
-		navigate(getToLink('sales/proposals'), { replace: true });
+		navigate(
+			getToLink(
+				isSalesDocumentsReady() ? 'sales/proposals' : 'sales-pipeline'
+			),
+			{ replace: true }
+		);
 	}, [navigate]);
 	return null;
 };
@@ -70,65 +79,69 @@ registerAdminPage('sales', {
 	path: 'sales',
 	component: wrap(RedirectToProposals),
 	label: __('Sales', 'doublescale'),
-	icon: <Receipt size={24} />,
+	icon: <SalesIcon />,
 	...salesPageDefaults,
 });
 
-registerAdminPage('sales-proposals', {
-	path: 'sales/proposals',
-	component: wrap(ProposalsList),
-	label: __('Proposals', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+// Document routes (proposals/invoices) only exist once the feature is
+// released — see isSalesDocumentsReady(). Until then deep links fall through
+// to the 404/redirect handling like any unknown path.
+if (isSalesDocumentsReady()) {
+	registerAdminPage('sales-proposals', {
+		path: 'sales/proposals',
+		component: wrap(ProposalsList),
+		label: __('Proposals', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-proposal-new', {
-	path: 'sales/proposals/new',
-	component: wrap(ProposalEdit),
-	label: __('New Proposal', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-proposal-new', {
+		path: 'sales/proposals/new',
+		component: wrap(ProposalEdit),
+		label: __('New Proposal', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-proposal', {
-	path: 'sales/proposals/:id',
-	component: wrap(ProposalView),
-	label: __('Proposal', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-proposal', {
+		path: 'sales/proposals/:id',
+		component: wrap(ProposalView),
+		label: __('Proposal', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-proposal-edit', {
-	path: 'sales/proposals/:id/edit',
-	component: wrap(ProposalEdit),
-	label: __('Edit Proposal', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-proposal-edit', {
+		path: 'sales/proposals/:id/edit',
+		component: wrap(ProposalEdit),
+		label: __('Edit Proposal', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-invoices', {
-	path: 'sales/invoices',
-	component: wrap(InvoicesList),
-	label: __('Invoices', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-invoices', {
+		path: 'sales/invoices',
+		component: wrap(InvoicesList),
+		label: __('Invoices', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-invoice-new', {
-	path: 'sales/invoices/new',
-	component: wrap(InvoiceEdit),
-	label: __('New Invoice', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-invoice-new', {
+		path: 'sales/invoices/new',
+		component: wrap(InvoiceEdit),
+		label: __('New Invoice', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-invoice', {
-	path: 'sales/invoices/:id',
-	component: wrap(InvoiceView),
-	label: __('Invoice', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-invoice', {
+		path: 'sales/invoices/:id',
+		component: wrap(InvoiceView),
+		label: __('Invoice', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
 registerAdminPage('sales-invoice-edit', {
 	path: 'sales/invoices/:id/edit',

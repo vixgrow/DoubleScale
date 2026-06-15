@@ -301,10 +301,10 @@ final class TriggersManager {
 				),
 			),
 			'support'     => array(
-				'label'  => __( 'Support', 'doublescale' ),
+				'label'  => __( 'Helpdesk', 'doublescale' ),
 				'groups' => array(
 					'support' => array(
-						'label'       => __( 'Support', 'doublescale' ),
+						'label'       => __( 'Helpdesk', 'doublescale' ),
 						'triggers'    => array(),
 						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
 							|| ! doublescale_is_module_active( 'support' ),

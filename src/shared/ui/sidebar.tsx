@@ -226,7 +226,14 @@ const Sidebar = React.forwardRef<
 					<SheetContent
 						data-sidebar="sidebar"
 						data-mobile="true"
-						className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+						className={cn(
+							'w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden',
+							// Apply the consumer className (e.g. `doublescale-navbar`)
+							// on mobile too, matching the desktop branch. Without it
+							// the mobile sheet kept only `bg-sidebar`, so white-label
+							// styles targeting `.doublescale-navbar` never reached it.
+							className
+						)}
 						style={
 							{
 								'--sidebar-width': SIDEBAR_WIDTH,

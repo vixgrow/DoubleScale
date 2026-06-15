@@ -38,6 +38,22 @@ const formatShort = (date: Date) =>
 		year: 'numeric',
 	});
 
+const SM_BREAKPOINT = 640;
+
+function useIsSmallScreen() {
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+	useEffect(() => {
+		const mql = window.matchMedia(`(max-width: ${SM_BREAKPOINT - 1}px)`);
+		const onChange = () => setIsSmallScreen(mql.matches);
+		mql.addEventListener('change', onChange);
+		setIsSmallScreen(mql.matches);
+		return () => mql.removeEventListener('change', onChange);
+	}, []);
+
+	return isSmallScreen;
+}
+
 export function DateRangePicker({
 	value,
 	onChange,
@@ -173,15 +189,17 @@ export function DateRangePicker({
 	};
 
 	const hasSelection = Boolean(internalRange.from);
+	const isSmallScreen = useIsSmallScreen();
+	const numberOfMonths = isSmallScreen ? 1 : 2;
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover open={open} onOpenChange={setOpen} modal={false}>
 			<PopoverTrigger asChild>
 				<Button
 					variant="outline"
 					className={cn(
-						// Base layout
-						'group relative h-10 w-auto justify-start gap-2.5 rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150',
+						// Base layout — fixed width so selection does not resize the trigger
+						'group relative h-10 w-[220px] max-w-[220px] shrink-0 justify-start gap-2.5 overflow-hidden rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150 max-sm:w-full max-sm:max-w-full',
 						// Empty state
 						!hasSelection &&
 							'border-input bg-white text-muted-foreground shadow-sm hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.02]',
@@ -208,9 +226,9 @@ export function DateRangePicker({
 					</span>
 
 					{/* Label */}
-					<span className="flex flex-1 flex-col items-start overflow-hidden text-left">
+					<span className="flex min-w-0 flex-1 flex-col items-start overflow-hidden text-left">
 						{hasSelection && (
-							<span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 leading-none">
+							<span className="w-full truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 leading-none">
 								{__('Date range', 'doublescale')}
 							</span>
 						)}
@@ -240,7 +258,7 @@ export function DateRangePicker({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="z-[9999] w-auto overflow-hidden rounded-xl border border-border bg-white p-0 shadow-xl"
+				className="z-[9999] flex max-h-[min(85dvh,640px)] w-auto flex-col overflow-y-auto rounded-xl border border-border bg-white p-0 shadow-xl max-sm:max-w-[calc(100vw-2rem)]"
 				align="start"
 				side="bottom"
 				sideOffset={8}
@@ -265,7 +283,7 @@ export function DateRangePicker({
 
 					{/* Calendar + footer */}
 					<div className="flex flex-col">
-						<div className="p-3">
+						<div className="pointer-events-auto p-3">
 							<Calendar
 								mode="range"
 								selected={{
@@ -273,7 +291,8 @@ export function DateRangePicker({
 									to: internalRange.to ?? undefined,
 								}}
 								onSelect={handleDateSelect}
-								numberOfMonths={2}
+								numberOfMonths={numberOfMonths}
+								pagedNavigation={numberOfMonths > 1}
 								autoFocus
 							/>
 						</div>

@@ -67,7 +67,7 @@ const wrap = (Page: React.ComponentType): (() => JSX.Element) => {
 registerAdminPage('support', {
 	path: 'support',
 	component: wrap(Inbox),
-	label: __('Support', 'doublescale'),
+	label: __('Helpdesk', 'doublescale'),
 	icon: <SupportIcon width={24} height={24} />,
 	// Support is decoupled from CRM roles: only users with `view_support`
 	// (the dedicated support roles + admins) reach the inbox. A CRM Manager /

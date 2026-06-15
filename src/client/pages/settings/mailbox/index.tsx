@@ -16,14 +16,21 @@ import { __ } from '@wordpress/i18n';
 import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
-import { Mail, UserCircle, ShieldCheck, Loader2, CheckCircle, XCircle } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+	Mail,
+	UserCircle,
+	ShieldCheck,
+	Loader2,
+	CheckCircle,
+	XCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import { PageTabs } from '@doublescale/components';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 
 interface SharedIdentity {
@@ -45,7 +52,10 @@ const SharedEmailFreeIdentity: React.FC = () => {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
-	const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+	const [notice, setNotice] = useState<{
+		type: 'success' | 'error';
+		message: string;
+	} | null>(null);
 
 	const fetchSettings = useCallback(async () => {
 		setIsLoading(true);
@@ -68,7 +78,9 @@ const SharedEmailFreeIdentity: React.FC = () => {
 		} catch (err: any) {
 			setNotice({
 				type: 'error',
-				message: err?.message || __('Failed to load settings', 'doublescale'),
+				message:
+					err?.message ||
+					__('Failed to load settings', 'doublescale'),
 			});
 		} finally {
 			setIsLoading(false);
@@ -95,7 +107,9 @@ const SharedEmailFreeIdentity: React.FC = () => {
 		} catch (err: any) {
 			setNotice({
 				type: 'error',
-				message: err?.message || __('Failed to save settings', 'doublescale'),
+				message:
+					err?.message ||
+					__('Failed to save settings', 'doublescale'),
 			});
 		} finally {
 			setIsSaving(false);
@@ -224,10 +238,7 @@ const SharedEmailFreeIdentity: React.FC = () => {
 const MailboxSettings: React.FC = () => {
 	const { isCrmManager } = useCapabilities();
 
-	const canManage = useMemo(
-		() => isCrmManager(),
-		[isCrmManager]
-	);
+	const canManage = useMemo(() => isCrmManager(), [isCrmManager]);
 
 	const defaultTab = canManage ? 'shared' : 'personal';
 	const [activeTab, setActiveTab] = useState(defaultTab);
@@ -243,18 +254,15 @@ const MailboxSettings: React.FC = () => {
 
 	const PersonalEmailComponent = useMemo(
 		() =>
-			applyFilters(
-				'doublescale_mailbox_personal_email_settings',
-				() => (
-					<ProFeatureNotice
-						featureName={__('Personal Email', 'doublescale')}
-						description={__(
-							'Connect your personal Gmail or Outlook account via OAuth to send and receive emails as yourself in the CRM. Auto-create contacts from unknown senders and sync your Sent folder with DoubleScale Pro.',
-							'doublescale'
-						)}
-					/>
-				)
-			) as React.ComponentType,
+			applyFilters('doublescale_mailbox_personal_email_settings', () => (
+				<ProFeatureNotice
+					featureName={__('Personal Email', 'doublescale')}
+					description={__(
+						'Connect your personal Gmail or Outlook account via OAuth to send and receive emails as yourself in the CRM. Auto-create contacts from unknown senders and sync your Sent folder with DoubleScale Pro.',
+						'doublescale'
+					)}
+				/>
+			)) as React.ComponentType,
 		[]
 	);
 
@@ -275,51 +283,74 @@ const MailboxSettings: React.FC = () => {
 		[]
 	);
 
+	const mailboxTabsList = useMemo(() => {
+		const tabs: Array<{
+			value: string;
+			label: string;
+			icon: React.ReactNode;
+		}> = [];
+
+		if (canManage) {
+			tabs.push({
+				value: 'shared',
+				label: 'Shared Email',
+				icon: <Mail size={18} />,
+			});
+		}
+
+		tabs.push({
+			value: 'personal',
+			label: 'Personal Email',
+			icon: <UserCircle size={18} />,
+		});
+
+		if (canManage) {
+			tabs.push({
+				value: 'provider-setup',
+				label: 'Email Provider Setup',
+				icon: <ShieldCheck size={18} />,
+			});
+		}
+
+		return tabs;
+	}, [canManage]);
+
+	const mailboxTabsContent = useMemo(
+		() => [
+			...(canManage
+				? [{ value: 'shared', children: <SharedEmailComponent /> }]
+				: []),
+			{ value: 'personal', children: <PersonalEmailComponent /> },
+			...(canManage
+				? [
+						{
+							value: 'provider-setup',
+							children: <EmailProviderSetupComponent />,
+						},
+					]
+				: []),
+		],
+		[
+			canManage,
+			SharedEmailComponent,
+			PersonalEmailComponent,
+			EmailProviderSetupComponent,
+		]
+	);
+
 	return (
 		<div className="space-y-6">
-			<Tabs value={activeTab} onValueChange={setActiveTab}>
-				<TabsList className="bg-transparent gap-2">
-					{canManage && (
-						<TabsTrigger
-							value="shared"
-							className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-						>
-							<Mail size={18} />
-							{__('Shared Email', 'doublescale')}
-						</TabsTrigger>
-					)}
-					<TabsTrigger
-						value="personal"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						<UserCircle size={18} />
-						{__('Personal Email', 'doublescale')}
-					</TabsTrigger>
-					{canManage && (
-						<TabsTrigger
-							value="provider-setup"
-							className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-						>
-							<ShieldCheck size={18} />
-							{__('Email Provider Setup', 'doublescale')}
-						</TabsTrigger>
-					)}
-				</TabsList>
-
-				{canManage && (
-					<TabsContent value="shared">
-						<SharedEmailComponent />
-					</TabsContent>
-				)}
-				<TabsContent value="personal">
-					<PersonalEmailComponent />
-				</TabsContent>
-				{canManage && (
-					<TabsContent value="provider-setup">
-						<EmailProviderSetupComponent />
-					</TabsContent>
-				)}
-			</Tabs>
+			<PageTabs
+				defaultValue={defaultTab}
+				value={activeTab}
+				onValueChange={setActiveTab}
+				tabsList={mailboxTabsList}
+				tabsContent={mailboxTabsContent}
+				enableHorizontalScroll
+				tabsListWrapperClassName=""
+				tabsListClassName="gap-2 bg-transparent text-foreground"
+				scrollArrowBg="bg-white"
+			/>
 		</div>
 	);
 };

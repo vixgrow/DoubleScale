@@ -75,9 +75,13 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 
 	return (
 		<Card
-			className={`shadow-none bg-[#F7F8FA] border-border overflow-visible ${rules.length > 1 ? 'ml-[2.2rem]' : 'w-full'}`}
+			className={`shadow-none bg-[#F7F8FA] border-border min-w-0 max-w-full overflow-x-auto overflow-y-hidden ${
+				rules.length > 1
+					? 'ml-[2.2rem] w-[calc(100%-2.2rem)]'
+					: 'w-full'
+			}`}
 		>
-			<CardContent className="pt-6">
+			<CardContent className="min-w-0 pt-6">
 				<div ref={wrapperRef} className="relative">
 					<LogicConnector
 						label={__('AND', 'doublescale')}
@@ -98,7 +102,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											? lastRowRef
 											: undefined
 								}
-								className="flex w-full min-w-0 items-center gap-3"
+								className="flex w-full min-w-0 gap-3 max-sm:flex-col max-sm:items-stretch sm:flex-row sm:items-center sm:max-lg:w-max sm:max-lg:[&_.doublescale-rule]:w-auto sm:max-lg:[&_.doublescale-rule]:flex-none sm:max-lg:[&_.doublescale-rule-row]:w-auto sm:max-lg:[&_.doublescale-rule-row]:flex-none sm:max-lg:[&_.doublescale-rule-row>div]:flex-none sm:max-lg:[&_.doublescale-rule-row>div]:basis-auto"
 							>
 								<Select
 									value={rule.selectedGroup}
@@ -120,7 +124,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										onRulesChange(newRules);
 									}}
 								>
-									<SelectTrigger className="w-[150px] h-12 border-[#D3D4D6] rounded-lg">
+									<SelectTrigger className="h-12 w-full rounded-lg border-[#D3D4D6] sm:w-[150px] sm:max-lg:shrink-0">
 										<SelectValue
 											placeholder={__(
 												'Select a group',
@@ -151,7 +155,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											onRulesChange(newRules);
 										}}
 									>
-										<SelectTrigger className="w-[200px] h-12 border-[#D3D4D6] rounded-lg">
+										<SelectTrigger className="h-12 w-full rounded-lg border-[#D3D4D6] sm:w-[200px] sm:max-lg:shrink-0">
 											<SelectValue
 												placeholder={__(
 													'Select a rule',

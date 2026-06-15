@@ -171,7 +171,7 @@ const Integration: React.FC<IntegrationProps> = ({
 				}}
 			>
 				<DialogHeader className="pb-0 border-b border-[#E4E7EC] h-14">
-					<DialogTitle className="px-12 pb-4 pt-2">
+					<DialogTitle className="px-6 pb-4 pt-2">
 						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
 							{__('Integrations', 'doublescale')}
 							<ChevronRight className="w-4 h-4 text-[#667085]" />
@@ -181,12 +181,12 @@ const Integration: React.FC<IntegrationProps> = ({
 				</DialogHeader>
 
 				{notice && (
-					<div className="px-12">
+					<div className="px-6">
 						<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 					</div>
 				)}
 
-				<div className="px-12 pb-12 h-screen pt-4">
+				<div className="px-6 pt-4 pb-6 h-auto lg:h-[calc(100vh-3.5rem)]">
 					{isProFeature ? (
 						<ProFeatureNotice
 							featureName={label}
@@ -197,10 +197,10 @@ const Integration: React.FC<IntegrationProps> = ({
 							<Loader2 className="w-8 h-8 animate-spin text-gray-400" />
 						</div>
 					) : (
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-6">
 							{/* Instructions Card */}
-							<Card className="shadow-none bg-muted/50 h-screen">
-								<CardContent className="p-6">
+							<Card className="h-auto min-h-0 bg-muted/50 shadow-none lg:max-h-[calc(100vh-5rem)] lg:overflow-hidden">
+								<CardContent className="max-h-none overflow-y-auto lg:max-h-[calc(100vh-5rem)]">
 									<Instructions
 										slug={slug}
 										label={label}
@@ -210,8 +210,8 @@ const Integration: React.FC<IntegrationProps> = ({
 							</Card>
 
 							{/* Credentials/App Card */}
-							<Card className="flex shadow-none bg-muted/50 flex-col h-screen">
-								<CardContent className="flex-1 overflow-y-auto p-6">
+							<Card className="flex h-auto min-h-0 flex-col bg-muted/50 shadow-none lg:max-h-[calc(100vh-5rem)]">
+								<CardContent className="flex-1 overflow-y-auto ">
 								{!isAppBased ? (
 									(() => {
 										// Allow Pro plugin to override credentials component
@@ -243,12 +243,12 @@ const Integration: React.FC<IntegrationProps> = ({
 										/>
 									)}
 								</CardContent>
-								<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
+								<CardFooter className="mt-auto justify-end rounded-b-xl border-t bg-white p-4">
 								<Button
 									onClick={save}
 									disabled={isSaving || isLoading}
-									className="min-w-[120px] rounded-lg px-4"
-									variant="gradient"
+
+									variant="default"
 								>
 										{isSaving
 											? __('Connecting...', 'doublescale')

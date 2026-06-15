@@ -142,7 +142,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 
 	return (
 		// <div className="space-y-6">
-			<Card className=" p-6 flex flex-col gap-6 border border-border bg-[#F7F8FA] shadow-none rounded-xl">
+			<Card className="flex min-w-0 w-full flex-col gap-6 rounded-xl border border-border bg-[#F7F8FA] p-6 shadow-none">
 				<CardHeader className="p-0 ">
 					<CardTitle className="text-xl font-semibold leading-8 text-foreground">
 						{importer.name} {__('Data Import Tool', 'doublescale')}
@@ -259,7 +259,7 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
 	const helpText = getFieldHelpText();
 
 	return (
-		<div className="import-modal-credentials__field flex flex-col gap-2">
+		<div className="import-modal-credentials__field flex min-w-0 w-full flex-col gap-2">
 			<Field
 				label={field.label}
 				type={field.type}
@@ -268,7 +268,7 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
 				placeholder={field.label}
 			/>
 			{helpText && (
-				<p className="mt-1 text-sm leading-6 text-muted-foreground">
+				<p className="mt-1 max-w-full text-sm leading-6 text-muted-foreground break-words">
 					{helpText}
 				</p>
 			)}
@@ -428,9 +428,9 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 		: instructions || getDefaultInstructions();
 
 	return (
-		<Card className="bg-white rounded-xl shadow-none border border-border">
-			<CardContent className="p-6 space-y-3">
-				<CardTitle className="text-base font-semibold leading-8 text-foreground">
+		<Card className="min-w-0 w-full rounded-xl border border-border bg-white shadow-none">
+			<CardContent className="min-w-0 space-y-3 p-6">
+				<CardTitle className="max-w-full text-base font-semibold leading-8 text-foreground break-words">
 					{infoField?.title ||
 						__(
 							`Find your ${importer.name} credentials`,
@@ -440,16 +440,18 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 
 				{infoField ? (
 					<div
-						className="text-sm text-muted-foreground leading-6 space-y-2"
+						className="max-w-full text-sm leading-6 text-muted-foreground break-words space-y-2"
 						dangerouslySetInnerHTML={{
 							__html: infoField.description || '',
 						}}
 					/>
 				) : (
-					<ul className="list-decimal list-inside text-sm text-muted-foreground leading-6 space-y-2">
+					<ul className="max-w-full list-inside list-decimal space-y-2 text-sm leading-6 text-muted-foreground break-words">
 						{currentInstructions.steps.map(
 							(step: string, index: number) => (
-								<li key={index}>{step}</li>
+								<li key={index} className="break-words">
+									{step}
+								</li>
 							)
 						)}
 					</ul>
@@ -460,9 +462,9 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 						href={currentInstructions.docUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center text-base text-primary hover:underline"
+						className="inline-flex max-w-full items-center text-base text-primary break-words hover:underline"
 					>
-						<ArrowUpLeft className="w-4 h-4 mr-1" />
+						<ArrowUpLeft className="mr-1 h-4 w-4 shrink-0" />
 						{currentInstructions.docText}
 					</a>
 				)}

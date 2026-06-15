@@ -39,6 +39,12 @@ final class Module extends AbstractModule {
 	}
 
 	public function description(): string {
+		if ( ! \doublescale_sales_documents_ready() ) {
+			// Documents (proposals/invoices) are gated until released — see
+			// doublescale_sales_documents_ready().
+			return __( 'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.', 'doublescale' );
+		}
+
 		return __( 'Create proposals and invoices with line items, discounts, and customer billing.', 'doublescale' );
 	}
 
@@ -95,7 +101,31 @@ final class Module extends AbstractModule {
 		);
 	}
 
+	/**
+	 * Document tables (proposals, invoices, payments, taxes) are not created
+	 * while the feature is gated — their schema may still change.
+	 *
+	 * @return array<int, string>
+	 */
+	public function migrations(): array {
+		if ( ! \doublescale_sales_documents_ready() ) {
+			return array();
+		}
+
+		return parent::migrations();
+	}
+
 	public function boot( Container $container ): void {
+		if ( ! \doublescale_sales_documents_ready() ) {
+			// Parent-toggle-only mode while the documents feature is gated:
+			// roles/capabilities stay (the pipeline child shares them), but
+			// no REST routes (skip parent::boot), schedules, public pages,
+			// menus, or proposal→invoice automation. All controllers in
+			// restControllers() serve the documents feature.
+			Capabilities::ensure_capabilities_synced();
+			return;
+		}
+
 		parent::boot( $container );
 
 		Capabilities::ensure_capabilities_synced();

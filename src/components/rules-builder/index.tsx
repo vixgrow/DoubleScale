@@ -71,7 +71,10 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 
 	return (
 		<div className={className}>
-			<div ref={containerRef} className="flex flex-col gap-4 relative">
+			<div
+				ref={containerRef}
+				className="relative flex min-w-0 w-full flex-col gap-4"
+			>
 				<LogicConnector
 					label={__('OR', 'doublescale')}
 					style={orBracketStyle}
@@ -81,6 +84,7 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 					<div
 						key={groupIndex}
 						ref={(el) => (cardRefs.current[groupIndex] = el)}
+						className="min-w-0 w-full"
 					>
 						<RuleGroupCard
 							ruleGroup={ruleGroup}

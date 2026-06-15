@@ -5,6 +5,17 @@ export interface LogicBracketStyle {
 	height: number;
 }
 
+function observeElements(
+	observer: ResizeObserver,
+	...elements: (HTMLElement | null | undefined)[]
+) {
+	elements.forEach((element) => {
+		if (element) {
+			observer.observe(element);
+		}
+	});
+}
+
 /**
  * Vertical bracket between the first and last child inside a container (AND/OR connectors).
  */
@@ -48,10 +59,23 @@ export function useLogicBracketStyle(
 		const id2 = window.setTimeout(update, 50);
 		window.addEventListener('resize', update);
 
+		const resizeObserver = new ResizeObserver(update);
+		observeElements(
+			resizeObserver,
+			containerRef.current,
+			firstRef.current,
+			lastRef.current
+		);
+
+		const mobileQuery = window.matchMedia('(max-width: 639px)');
+		mobileQuery.addEventListener('change', update);
+
 		return () => {
 			window.clearTimeout(id1);
 			window.clearTimeout(id2);
 			window.removeEventListener('resize', update);
+			mobileQuery.removeEventListener('change', update);
+			resizeObserver.disconnect();
 		};
 	}, [active, containerRef, firstRef, lastRef, ...deps]);
 
@@ -108,10 +132,23 @@ export function useLogicBracketStyleFromList(
 		const id2 = window.setTimeout(update, 50);
 		window.addEventListener('resize', update);
 
+		const resizeObserver = new ResizeObserver(update);
+		observeElements(
+			resizeObserver,
+			containerRef.current,
+			itemRefs.current?.[0],
+			itemRefs.current?.[itemCount - 1]
+		);
+
+		const mobileQuery = window.matchMedia('(max-width: 639px)');
+		mobileQuery.addEventListener('change', update);
+
 		return () => {
 			window.clearTimeout(id1);
 			window.clearTimeout(id2);
 			window.removeEventListener('resize', update);
+			mobileQuery.removeEventListener('change', update);
+			resizeObserver.disconnect();
 		};
 	}, [active, itemCount, containerRef, itemRefs]);
 

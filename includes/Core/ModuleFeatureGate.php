@@ -323,6 +323,30 @@ function doublescale_is_module_active( string $slug ): bool {
 	return $v;
 }
 
+/**
+ * Whether a module is active and its representative DB table exists.
+ *
+ * Use before eager automation catalog queries (get_fields / get_options / rule
+ * registration) so missing migrations do not fatal the admin bootstrap.
+ *
+ * @param string $slug        Module slug.
+ * @param string $model_class Eloquent model class that maps to the table name.
+ */
+function doublescale_is_module_storage_ready( string $slug, string $model_class ): bool {
+	if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( $slug ) ) {
+		return false;
+	}
+
+	if ( ! class_exists( $model_class ) ) {
+		return false;
+	}
+
+	global $wpdb;
+	$table = ( new $model_class() )->getTable();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+}
+
 if ( ! function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
 	/**
 	 * Clears request-level module caches (slug map + enabled flags).

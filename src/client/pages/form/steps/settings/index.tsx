@@ -133,7 +133,7 @@ const Settings: React.FC = () => {
 						</div>
 						<div className="doublescale-field-input">
 							<div className="flex flex-col gap-5">
-								<div className="flex justify-between gap-[10px]">
+								<div className="flex flex-col sm:flex-row justify-between gap-[10px]">
 									<div className="flex flex-col gap-[10px] flex-1">
 										<div className="flex text-[#09090B] font-normal text-base">
 											{__('Lists', 'doublescale')}

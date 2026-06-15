@@ -245,9 +245,12 @@ export const HeaderBar = ({ page }: { page: any }) => {
 								navigate(getToLink('settings/license'));
 							}}
 							className="doublescale-layout__license-link"
+							aria-label={__('Activate License', 'doublescale')}
 						>
 							<RocketIcon />
-							{__('Activate License', 'doublescale')}
+							<span className="doublescale-layout__header-label">
+								{__('Activate License', 'doublescale')}
+							</span>
 						</a>
 					)}
 				{canControlModules && (
@@ -255,11 +258,14 @@ export const HeaderBar = ({ page }: { page: any }) => {
 						<Button
 							type="button"
 							variant="outline"
-							className="doublescale-control-modules-trigger border-[#CB5301] bg-transparent text-[#CB5301] rounded-lg shadow-none"
+							className="doublescale-control-modules-trigger border-[rgb(203,83,1)] bg-transparent text-[#CB5301] rounded-md shadow-none"
 							onClick={openModulesDialog}
+							aria-label={__('Control Modules', 'doublescale')}
 						>
 							<ControlIcon />
-							{__('Control Modules', 'doublescale')}
+							<span className="doublescale-layout__header-label">
+								{__('Control Modules', 'doublescale')}
+							</span>
 						</Button>
 					</div>
 				)}
@@ -280,7 +286,7 @@ export const HeaderBar = ({ page }: { page: any }) => {
 							<AvatarIcon />
 						</AvatarFallback>
 					</Avatar>
-					<span className="doublescale-layout__header-user-name">
+					<span className="doublescale-layout__header-user-name doublescale-layout__header-label">
 						{displayName}
 					</span>
 				</div>

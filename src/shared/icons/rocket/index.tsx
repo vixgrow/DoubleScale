@@ -1,6 +1,6 @@
 import { IconProps } from '@doublescale/config';
 
-const RocketIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
+const RocketIcon: React.FC<IconProps> = ({ width = 24, height = 24}) => {
 	return (
 		<svg
 			width={width}

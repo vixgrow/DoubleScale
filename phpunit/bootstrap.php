@@ -219,6 +219,58 @@ if ( ! function_exists( 'number_format_i18n' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_multisite' ) ) {
+	function is_multisite() {
+		return false;
+	}
+}
+
+if ( ! function_exists( 'get_site_option' ) ) {
+	/**
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	function get_site_option( $option, $default = false ) {
+		unset( $option );
+		return $default;
+	}
+}
+
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	/**
+	 * @param string $str
+	 * @return string
+	 */
+	function sanitize_text_field( $str ) {
+		return trim( (string) $str );
+	}
+}
+
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	/**
+	 * @param string $str
+	 * @return string
+	 */
+	function sanitize_textarea_field( $str ) {
+		return trim( (string) $str );
+	}
+}
+
+if ( ! function_exists( 'plugin_basename' ) ) {
+	/**
+	 * @param string $file
+	 * @return string
+	 */
+	function plugin_basename( $file ) {
+		$file = str_replace( '\\', '/', (string) $file );
+		$plugins_pos = strpos( $file, '/plugins/' );
+		if ( false !== $plugins_pos ) {
+			return substr( $file, $plugins_pos + strlen( '/plugins/' ) );
+		}
+		return basename( $file );
+	}
+}
+
 $GLOBALS['__doublescale_phpunit_options'] = array();
 
 if ( ! function_exists( 'get_option' ) ) {

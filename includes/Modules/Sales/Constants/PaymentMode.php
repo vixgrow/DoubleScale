@@ -3,7 +3,7 @@
  * Canonical invoice payment mode values.
  *
  * Offline modes are recorded manually by staff. Online gateway slugs (e.g.
- * stripe) route through InvoiceOnlineGatewaysManager.
+ * stripe) route through GatewayManager.
  *
  * @package DoubleScale\Modules\Sales
  */

@@ -7,8 +7,8 @@
 
 namespace DoubleScale\Tests\Modules\Sales;
 
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
-use DoubleScale\Modules\Sales\PaymentGateway\InvoiceOnlineGateway;
+use DoubleScale\Core\Payment\Gateway;
+use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use PHPUnit\Framework\TestCase;
 
@@ -19,16 +19,20 @@ defined( 'ABSPATH' ) || exit;
  */
 final class SalesSettingsPaymentGatewaysTest extends TestCase {
 
-	/** @var InvoiceOnlineGateway */
+	/** @var Gateway */
 	private $test_gateway;
 
 	protected function setUp(): void {
 		parent::setUp();
 		delete_option( 'doublescale_sales_settings' );
-		$this->test_gateway = new class() extends InvoiceOnlineGateway {
+		$this->test_gateway = new class() extends Gateway {
 			public $slug = 'stripe';
 			public $name = 'Stripe';
 			public $description = 'Test';
+
+			protected function register(): void {
+				GatewayManager::instance()->register( GatewayManager::CONTEXT_INVOICE, $this );
+			}
 
 			public function is_available(): bool {
 				return true;
@@ -38,15 +42,19 @@ final class SalesSettingsPaymentGatewaysTest extends TestCase {
 				return true;
 			}
 
-			public function init_payment( $invoice ) {
+			public function init( $subject ) {
 				return array();
 			}
 
-			public function confirm_payment( $invoice ) {
+			public function confirm( $subject ) {
 				return array();
 			}
+
+			public function record_paid( $subject, $charge ): void {
+				unset( $subject, $charge );
+			}
 		};
-		InvoiceOnlineGatewaysManager::instance()->register( $this->test_gateway );
+		GatewayManager::instance()->register( GatewayManager::CONTEXT_INVOICE, $this->test_gateway );
 	}
 
 	protected function tearDown(): void {
@@ -56,7 +64,7 @@ final class SalesSettingsPaymentGatewaysTest extends TestCase {
 
 	public function test_resolved_enabled_gateways_default_to_all_registered(): void {
 		$this->assertSame( array( 'stripe' ), SalesSettings::get_resolved_enabled_online_gateways() );
-		$this->assertTrue( InvoiceOnlineGatewaysManager::instance()->is_enabled_for_sales( 'stripe' ) );
+		$this->assertTrue( GatewayManager::instance()->is_enabled_for_sales( 'stripe' ) );
 	}
 
 	public function test_explicit_enabled_gateway_list_is_respected(): void {
@@ -67,6 +75,6 @@ final class SalesSettingsPaymentGatewaysTest extends TestCase {
 		);
 
 		$this->assertSame( array(), SalesSettings::get_resolved_enabled_online_gateways() );
-		$this->assertFalse( InvoiceOnlineGatewaysManager::instance()->is_enabled_for_sales( 'stripe' ) );
+		$this->assertFalse( GatewayManager::instance()->is_enabled_for_sales( 'stripe' ) );
 	}
 }

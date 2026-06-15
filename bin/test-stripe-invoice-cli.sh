@@ -53,7 +53,7 @@ if ((float)\$inv->amount_paid < 14.60) {
     \$pi = \$evt->data->object->id ?? '';
     if (\$pi === '${PI_ID}') {
       delete_transient('ds_stripe_evt_'.md5(\$evt->id));
-      DoubleScale\Pro\Modules\Sales\PaymentGateways\Stripe\StripeInvoiceGateway::instance()->handle_webhook_event(\$evt, ${INVOICE_ID});
+      DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler::instance()->handle_webhook_event(\$evt, ${INVOICE_ID});
       break;
     }
   }
@@ -81,7 +81,7 @@ if ((float)\$inv->amount_paid > 0) {
     \$pi = \$evt->data->object->payment_intent ?? '';
     if (\$pi === '${PI_ID}') {
       delete_transient('ds_stripe_evt_'.md5(\$evt->id));
-      DoubleScale\Pro\Modules\Sales\PaymentGateways\Stripe\StripeInvoiceGateway::instance()->handle_webhook_event(\$evt, ${INVOICE_ID});
+      DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler::instance()->handle_webhook_event(\$evt, ${INVOICE_ID});
       break;
     }
   }

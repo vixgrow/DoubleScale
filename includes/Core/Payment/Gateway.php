@@ -1,26 +1,20 @@
 <?php
 /**
- * Abstract online payment gateway for sales invoices.
+ * Unified abstract payment gateway.
  *
- * Offline modes (bank transfer, cash, etc.) are recorded manually via
- * RestInvoicePaymentController. Online gateways (Stripe today; extensible)
- * implement init/confirm flows against the shared integrations layer.
- *
- * @package DoubleScale\Modules\Sales
+ * @package DoubleScale\Core\Payment
  */
 
-namespace DoubleScale\Modules\Sales\PaymentGateway;
+namespace DoubleScale\Core\Payment;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use WP_Error;
 
 /**
- * InvoiceOnlineGateway class.
+ * Gateway abstract class.
  */
-abstract class InvoiceOnlineGateway {
+abstract class Gateway {
 
 	/**
 	 * Human-readable gateway name.
@@ -30,7 +24,7 @@ abstract class InvoiceOnlineGateway {
 	public $name = '';
 
 	/**
-	 * Gateway slug — must match PaymentMode constant when applicable.
+	 * Gateway slug.
 	 *
 	 * @var string
 	 */
@@ -62,11 +56,11 @@ abstract class InvoiceOnlineGateway {
 	}
 
 	/**
+	 * Register this gateway with {@see GatewayManager} for the appropriate context(s).
+	 *
 	 * @return void
 	 */
-	protected function register(): void {
-		InvoiceOnlineGatewaysManager::instance()->register( $this );
-	}
+	abstract protected function register(): void;
 
 	/**
 	 * Whether the gateway implementation is present (e.g. Pro module active).
@@ -83,20 +77,29 @@ abstract class InvoiceOnlineGateway {
 	abstract public function is_configured(): bool;
 
 	/**
-	 * Start an online payment session for the invoice balance.
+	 * Start an online payment session.
 	 *
-	 * @param InvoiceModel $invoice Invoice.
+	 * @param PayableSubject $subject Payable subject.
 	 * @return array|WP_Error
 	 */
-	abstract public function init_payment( InvoiceModel $invoice );
+	abstract public function init( PayableSubject $subject );
 
 	/**
-	 * Confirm / poll payment status after the customer completes checkout.
+	 * Confirm / poll payment status after checkout.
 	 *
-	 * @param InvoiceModel $invoice Invoice.
+	 * @param PayableSubject $subject Payable subject.
 	 * @return array|WP_Error
 	 */
-	abstract public function confirm_payment( InvoiceModel $invoice );
+	abstract public function confirm( PayableSubject $subject );
+
+	/**
+	 * Record a successful charge idempotently (by transaction id).
+	 *
+	 * @param PayableSubject $subject Payable subject.
+	 * @param object         $charge  Stripe charge or payment intent.
+	 * @return void
+	 */
+	abstract public function record_paid( PayableSubject $subject, object $charge ): void;
 
 	/**
 	 * Payment mode slug stored on recorded payment rows.

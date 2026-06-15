@@ -16,6 +16,7 @@ use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
+use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
@@ -97,6 +98,8 @@ final class Module extends AbstractModule {
 		parent::boot( $container );
 
 		Capabilities::ensure_capabilities_synced();
+
+		GatewayManager::instance();
 
 		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
 

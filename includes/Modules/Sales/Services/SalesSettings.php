@@ -10,7 +10,7 @@ namespace DoubleScale\Modules\Sales\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
+use DoubleScale\Core\Payment\GatewayManager;
 
 /**
  * SalesSettings service.
@@ -105,7 +105,7 @@ final class SalesSettings {
 	 * @return string[]
 	 */
 	public static function get_resolved_enabled_online_gateways(): array {
-		$registered = InvoiceOnlineGatewaysManager::instance()->slugs();
+		$registered = GatewayManager::instance()->invoice_slugs();
 		$explicit   = self::get_enabled_online_gateways();
 
 		if ( null === $explicit ) {
@@ -185,7 +185,7 @@ final class SalesSettings {
 			$list = PaymentMode::normalize_list( $merged[ $key ] );
 
 			if ( 'enabled_online_gateways' === $key ) {
-				$list = array_values( array_intersect( $list, InvoiceOnlineGatewaysManager::instance()->slugs() ) );
+				$list = array_values( array_intersect( $list, GatewayManager::instance()->invoice_slugs() ) );
 			} elseif ( 'default_offline_payment_modes' === $key ) {
 				$list = array_values(
 					array_filter(

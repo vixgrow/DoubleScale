@@ -17,7 +17,7 @@ use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\PaymentModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use DoubleScale\Modules\Sales\Services\DocumentPdf;
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
+use DoubleScale\Core\Payment\GatewayManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -188,7 +188,7 @@ class RestPublicInvoiceController extends RestController {
 		}
 
 		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
-		$result  = InvoiceOnlineGatewaysManager::instance()->init_payment( $gateway, $invoice );
+		$result  = GatewayManager::instance()->init_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
 			return $this->normalize_public_gateway_error( $result, $gateway );
 		}
@@ -215,7 +215,7 @@ class RestPublicInvoiceController extends RestController {
 		}
 
 		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
-		$result  = InvoiceOnlineGatewaysManager::instance()->confirm_payment( $gateway, $invoice );
+		$result  = GatewayManager::instance()->confirm_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
 			return $this->normalize_public_gateway_error( $result, $gateway );
 		}

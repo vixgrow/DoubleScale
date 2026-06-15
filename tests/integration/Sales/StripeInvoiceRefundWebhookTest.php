@@ -12,7 +12,7 @@ use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\PaymentModel;
-use DoubleScale\Pro\Modules\Sales\PaymentGateways\Stripe\StripeInvoiceGateway;
+use DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +22,7 @@ final class StripeInvoiceRefundWebhookTest extends IntegrationTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		if ( ! class_exists( StripeInvoiceGateway::class ) ) {
+		if ( ! class_exists( StripeInvoiceWebhookHandler::class ) ) {
 			$this->markTestSkipped( 'Requires doublescale-pro with Stripe invoice gateway.' );
 		}
 
@@ -33,8 +33,8 @@ final class StripeInvoiceRefundWebhookTest extends IntegrationTestCase {
 		$pi_id   = 'pi_test_refund_full';
 		$invoice = $this->make_paid_stripe_invoice( $pi_id, 100.0 );
 
-		$gateway = StripeInvoiceGateway::instance();
-		$gateway->handle_webhook_event( $this->refund_event( $pi_id, 10000, 10000 ), (int) $invoice->id );
+		$handler = StripeInvoiceWebhookHandler::instance();
+		$handler->handle_webhook_event( $this->refund_event( $pi_id, 10000, 10000 ), (int) $invoice->id );
 
 		$invoice->refresh();
 		$this->assertSame( InvoiceStatus::UNPAID, (string) $invoice->status );
@@ -50,8 +50,8 @@ final class StripeInvoiceRefundWebhookTest extends IntegrationTestCase {
 		$pi_id   = 'pi_test_refund_partial';
 		$invoice = $this->make_paid_stripe_invoice( $pi_id, 100.0 );
 
-		$gateway = StripeInvoiceGateway::instance();
-		$gateway->handle_webhook_event( $this->refund_event( $pi_id, 10000, 4000 ), (int) $invoice->id );
+		$handler = StripeInvoiceWebhookHandler::instance();
+		$handler->handle_webhook_event( $this->refund_event( $pi_id, 10000, 4000 ), (int) $invoice->id );
 
 		$invoice->refresh();
 		$this->assertSame( InvoiceStatus::PARTIALLY_PAID, (string) $invoice->status );

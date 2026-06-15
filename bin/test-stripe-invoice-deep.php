@@ -123,7 +123,7 @@ function replay_event_for_pi( string $event_type, string $pi_id, int $invoice_id
 		if ( '' !== $event_id ) {
 			delete_transient( 'ds_stripe_evt_' . md5( $event_id ) );
 		}
-		\DoubleScale\Pro\Modules\Sales\PaymentGateways\Stripe\StripeInvoiceGateway::instance()->handle_webhook_event( $evt, $invoice_id );
+		\DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler::instance()->handle_webhook_event( $evt, $invoice_id );
 		return true;
 	}
 	return false;
@@ -165,7 +165,8 @@ echo str_repeat( '-', 52 ) . "\n";
 // --- 1. Prerequisites ---
 section( '1) Prerequisites' );
 t_assert( \DoubleScale\Pro\Modules\Integrations\Stripe\Integration::instance()->is_configured(), 'Stripe integration configured' );
-$gateway = \DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager::instance()->get( 'stripe' );
+$manager = \DoubleScale\Core\Payment\GatewayManager::instance();
+$gateway = $manager->get( \DoubleScale\Core\Payment\GatewayManager::CONTEXT_INVOICE, 'stripe' );
 t_assert( $gateway && $gateway->is_configured(), 'Stripe invoice gateway configured' );
 $listen = shell_exec( 'pgrep -f "stripe listen" 2>/dev/null' );
 t_assert( is_string( $listen ) && '' !== trim( $listen ), 'stripe listen is running', 'run ./bin/stripe-listen.sh' );
@@ -190,7 +191,7 @@ t_assert( 0 === payment_count( $invoice_id ), 'No payment rows' );
 
 // --- 3. Gateway init_payment ---
 section( '3) init_payment (gateway)' );
-$init = $gateway->init_payment( $inv_model->fresh( array( 'contact' ) ) );
+$init = $manager->init_payment( 'stripe', $inv_model->fresh( array( 'contact' ) ) );
 t_assert( ! is_wp_error( $init ), 'init_payment succeeds', is_wp_error( $init ) ? $init->get_error_message() : '' );
 $client_secret_1 = '';
 $pi_from_init    = '';
@@ -205,7 +206,7 @@ if ( ! is_wp_error( $init ) ) {
 
 // --- 4. PI reuse ---
 section( '4) PI reuse (same amount)' );
-$init2 = $gateway->init_payment( $inv_model->fresh( array( 'contact' ) ) );
+$init2 = $manager->init_payment( 'stripe', $inv_model->fresh( array( 'contact' ) ) );
 if ( ! is_wp_error( $init2 ) && '' !== $pi_from_init ) {
 	t_assert( (string) $inv_model->fresh()->stripe_payment_intent_id === $pi_from_init, 'Second init reuses same PI' );
 	t_assert( (string) ( $init2['client_secret'] ?? '' ) === $client_secret_1, 'Same client_secret returned' );
@@ -256,7 +257,7 @@ if ( $fail_pi && ! empty( $fail_pi->id ) ) {
 		'data' => (object) array( 'object' => $fail_pi ),
 	);
 	delete_transient( 'ds_stripe_evt_' . md5( $evt->id ) );
-	\DoubleScale\Pro\Modules\Sales\PaymentGateways\Stripe\StripeInvoiceGateway::instance()->handle_webhook_event( $evt, $invoice_id );
+	\DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler::instance()->handle_webhook_event( $evt, $invoice_id );
 	t_assert( 0 === payment_count( $invoice_id ), 'Failed webhook does not create payment' );
 }
 

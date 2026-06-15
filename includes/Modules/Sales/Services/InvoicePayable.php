@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
+use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use WP_Error;
 
@@ -79,6 +79,6 @@ final class InvoicePayable {
 	 * @return bool
 	 */
 	public static function can_pay_online( InvoiceModel $invoice ): bool {
-		return ! empty( InvoiceOnlineGatewaysManager::instance()->get_payable_for_invoice( $invoice ) );
+		return ! empty( GatewayManager::instance()->get_payable_for_invoice( $invoice ) );
 	}
 }

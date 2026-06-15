@@ -3,7 +3,7 @@
  * REST controller for online invoice payment gateways.
  *
  * Gateway SDK logic lives in Pro adapters; this controller validates the
- * invoice and delegates to InvoiceOnlineGatewaysManager.
+ * invoice and delegates to GatewayManager.
  *
  * @package DoubleScale\Modules\Sales
  */
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Managers\InvoiceOnlineGatewaysManager;
+use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use WP_Error;
@@ -134,7 +134,7 @@ class RestInvoiceOnlinePaymentController extends RestController {
 
 		return new WP_REST_Response(
 			array(
-				'gateways' => InvoiceOnlineGatewaysManager::instance()->shape_status_list(),
+				'gateways' => GatewayManager::instance()->shape_status_list(),
 			),
 			200
 		);
@@ -151,8 +151,8 @@ class RestInvoiceOnlinePaymentController extends RestController {
 			return $disabled;
 		}
 
-		$manager = InvoiceOnlineGatewaysManager::instance();
-		$stripe  = $manager->get( 'stripe' );
+		$manager = GatewayManager::instance();
+		$stripe  = $manager->get( GatewayManager::CONTEXT_INVOICE, 'stripe' );
 
 		return new WP_REST_Response(
 			array(
@@ -179,7 +179,7 @@ class RestInvoiceOnlinePaymentController extends RestController {
 		}
 
 		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
-		$result  = InvoiceOnlineGatewaysManager::instance()->init_payment( $gateway, $invoice );
+		$result  = GatewayManager::instance()->init_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
 			return $this->normalize_gateway_error( $result, $gateway );
 		}
@@ -203,7 +203,7 @@ class RestInvoiceOnlinePaymentController extends RestController {
 		}
 
 		$gateway = sanitize_key( (string) $request->get_param( 'gateway' ) );
-		$result  = InvoiceOnlineGatewaysManager::instance()->confirm_payment( $gateway, $invoice );
+		$result  = GatewayManager::instance()->confirm_payment( $gateway, $invoice );
 		if ( is_wp_error( $result ) ) {
 			return $this->normalize_gateway_error( $result, $gateway );
 		}

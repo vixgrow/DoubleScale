@@ -105,7 +105,13 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
  * @return bool
  */
 function doublescale_sales_documents_ready(): bool {
-	return (bool) apply_filters( 'doublescale_sales_documents_ready', false );
+	// Local dev (WP_DEBUG) enables documents so Sales routes/REST stay testable;
+	// production stays gated until the feature ships. Override via filter or
+	// `define( 'DOUBLESCALE_SALES_DOCUMENTS_READY', true );` in wp-config.php.
+	$default = defined( 'DOUBLESCALE_SALES_DOCUMENTS_READY' )
+		? (bool) DOUBLESCALE_SALES_DOCUMENTS_READY
+		: ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+	return (bool) apply_filters( 'doublescale_sales_documents_ready', $default );
 }
 
 /**

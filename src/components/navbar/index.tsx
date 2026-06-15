@@ -430,26 +430,30 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						{
-							path: 'sales/proposals',
-							label: __('Proposals', 'doublescale'),
-						},
-						{
-							path: 'sales/invoices',
-							label: __('Invoices', 'doublescale'),
-						},
-						{
-							path: 'sales/payments',
-							label: __('Payments', 'doublescale'),
-						},
-						{
-							path: 'sales/settings',
-							label: __('Settings', 'doublescale'),
-							requiredCapability: [
-								'doublescale_manage_all_sales',
-								'doublescale_crm_manager',
-							],
-						},
+						...(isSalesDocumentsReady()
+							? [
+									{
+										path: 'sales/proposals',
+										label: __('Proposals', 'doublescale'),
+									},
+									{
+										path: 'sales/invoices',
+										label: __('Invoices', 'doublescale'),
+									},
+									{
+										path: 'sales/payments',
+										label: __('Payments', 'doublescale'),
+									},
+									{
+										path: 'sales/settings',
+										label: __('Settings', 'doublescale'),
+										requiredCapability: [
+											'doublescale_manage_all_sales',
+											'doublescale_crm_manager',
+										],
+									},
+							  ]
+							: []),
 						// Pipeline nests under Sales: with Pro, `enabled` is the
 						// derived effective state (Sales is already on here, so it
 						// reduces to the child flag); without Pro it is the stored

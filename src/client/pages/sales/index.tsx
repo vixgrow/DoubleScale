@@ -5,9 +5,15 @@
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { registerAdminPage, useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	registerAdminPage,
+	useNavigate,
+	getToLink,
+	getAdminPages,
+} from '@doublescale/navigation';
 import { SalesIcon } from '@doublescale/components';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
+import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProposalsList = lazy(() => import('./proposals'));
@@ -41,15 +47,29 @@ const SALES_MENU_CAPS = [
  * `/sales` → Proposals list (Perfex-style Sales parent). While the documents
  * feature is gated, the only destination under Sales is the pipeline.
  */
+const resolveSalesLandingPath = (): string | null => {
+	if (isSalesDocumentsReady()) {
+		return 'sales/proposals';
+	}
+	if (config.isModuleToggleEnabled('deals')) {
+		return 'sales-pipeline';
+	}
+	const registeredPaths = new Set(
+		Object.values(getAdminPages()).map((page) => page.path)
+	);
+	if (registeredPaths.has('sales-pipeline')) {
+		return 'sales-pipeline';
+	}
+	return null;
+};
+
 const RedirectToProposals = () => {
 	const navigate = useNavigate();
 	useEffect(() => {
-		navigate(
-			getToLink(
-				isSalesDocumentsReady() ? 'sales/proposals' : 'sales-pipeline'
-			),
-			{ replace: true }
-		);
+		const target = resolveSalesLandingPath();
+		if (target) {
+			navigate(getToLink(target), { replace: true });
+		}
 	}, [navigate]);
 	return null;
 };

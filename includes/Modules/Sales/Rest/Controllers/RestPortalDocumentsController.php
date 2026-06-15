@@ -166,22 +166,26 @@ class RestPortalDocumentsController extends RestController {
 	 */
 	private function shape_invoice( InvoiceModel $invoice ): array {
 		return array(
-			'id'         => (int) $invoice->id,
-			'type'       => 'invoice',
-			'number'     => (string) $invoice->invoice_number,
-			'subject'    => null,
-			'status'     => (string) $invoice->status,
-			'date'       => $invoice->invoice_date,
-			'due_date'   => $invoice->due_date,
-			'open_till'  => null,
-			'currency'   => (string) $invoice->currency,
-			'total'      => (float) $invoice->total,
-			'balance'    => InvoiceShaper::balance( $invoice ),
-			'is_overdue' => InvoiceShaper::is_overdue( $invoice ),
-			'is_expired' => false,
-			'invoice_id' => null,
-			'public_url' => InvoiceUrl::get_public_url( $invoice ),
-			'_sort'      => (string) $invoice->created_at,
+			'id'          => (int) $invoice->id,
+			'type'        => 'invoice',
+			'number'      => (string) $invoice->invoice_number,
+			'subject'     => null,
+			'status'      => (string) $invoice->status,
+			'date'        => $invoice->invoice_date,
+			'due_date'    => $invoice->due_date,
+			'open_till'   => null,
+			'currency'    => (string) $invoice->currency,
+			'total'       => (float) $invoice->total,
+			'amount_paid' => (float) $invoice->amount_paid,
+			'balance'     => InvoiceShaper::balance( $invoice ),
+			'is_overdue'  => InvoiceShaper::is_overdue( $invoice ),
+			'is_expired'  => false,
+			'invoice_id'  => null,
+			// Raw hash drives the in-portal detail view (which mounts the public
+			// invoice renderer); `public_url` already embeds the same hash.
+			'hash'        => (string) $invoice->hash,
+			'public_url'  => InvoiceUrl::get_public_url( $invoice ),
+			'_sort'       => (string) $invoice->created_at,
 		);
 	}
 
@@ -193,22 +197,26 @@ class RestPortalDocumentsController extends RestController {
 	 */
 	private function shape_proposal( ProposalModel $proposal ): array {
 		return array(
-			'id'         => (int) $proposal->id,
-			'type'       => 'proposal',
-			'number'     => (string) $proposal->proposal_number,
-			'subject'    => (string) $proposal->subject,
-			'status'     => (string) $proposal->status,
-			'date'       => $proposal->date,
-			'due_date'   => null,
-			'open_till'  => $proposal->open_till,
-			'currency'   => (string) $proposal->currency,
-			'total'      => (float) $proposal->total,
-			'balance'    => null,
-			'is_overdue' => false,
-			'is_expired' => ProposalShaper::is_expired( $proposal ),
-			'invoice_id' => ProposalShaper::get_linked_invoice_id( $proposal ),
-			'public_url' => ProposalUrl::get_public_url( $proposal ),
-			'_sort'      => (string) $proposal->created_at,
+			'id'          => (int) $proposal->id,
+			'type'        => 'proposal',
+			'number'      => (string) $proposal->proposal_number,
+			'subject'     => (string) $proposal->subject,
+			'status'      => (string) $proposal->status,
+			'date'        => $proposal->date,
+			'due_date'    => null,
+			'open_till'   => $proposal->open_till,
+			'currency'    => (string) $proposal->currency,
+			'total'       => (float) $proposal->total,
+			'amount_paid' => null,
+			'balance'     => null,
+			'is_overdue'  => false,
+			'is_expired'  => ProposalShaper::is_expired( $proposal ),
+			'invoice_id'  => ProposalShaper::get_linked_invoice_id( $proposal ),
+			// Raw hash drives the in-portal detail view (mounts the public
+			// proposal renderer for accept / decline / sign).
+			'hash'        => (string) $proposal->hash,
+			'public_url'  => ProposalUrl::get_public_url( $proposal ),
+			'_sort'       => (string) $proposal->created_at,
 		);
 	}
 }

@@ -91,11 +91,33 @@ export interface PortalDocument {
 	open_till: string | null;
 	currency: string;
 	total: number;
+	amount_paid: number | null;
 	balance: number | null;
 	is_overdue: boolean;
 	is_expired: boolean;
 	invoice_id: number | null;
+	/** Raw 32-char hash — drives the in-portal detail view (mounts the public renderer). */
+	hash: string;
 	public_url: string;
+}
+
+export interface PortalPayment {
+	id: number;
+	amount: number;
+	currency: string;
+	payment_mode: string;
+	payment_date: string | null;
+	transaction_id: string;
+	invoice_id: number;
+	invoice_number: string;
+	invoice_hash: string;
+	invoice_public_url: string;
+}
+
+export interface PortalPaymentsResponse {
+	data: PortalPayment[];
+	total_paid: number;
+	currency: string;
 }
 
 export interface PortalTimelineResponse {

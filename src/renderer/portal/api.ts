@@ -17,6 +17,7 @@ import type {
 	PortalBooking,
 	PortalBootstrap,
 	PortalDocument,
+	PortalPaymentsResponse,
 	PortalTimelineResponse,
 } from './types';
 
@@ -86,6 +87,9 @@ export const fetchDocuments = (
 	apiFetch<{ data: PortalDocument[] }>({
 		path: addQueryArgs(`${PORTAL}/documents`, { type }),
 	});
+
+export const fetchPayments = (): Promise<PortalPaymentsResponse> =>
+	apiFetch<PortalPaymentsResponse>({ path: `${PORTAL}/payments` });
 
 /**
  * Generic data hook for the read endpoints.

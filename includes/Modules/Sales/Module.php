@@ -88,6 +88,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestPublicInvoiceController::class,
 			Rest\Controllers\RestSalesSettingsController::class,
 			Rest\Controllers\RestPortalDocumentsController::class,
+			Rest\Controllers\RestPortalPaymentsController::class,
 			Rest\Controllers\RestSalesAnalyticsController::class,
 		);
 	}

@@ -1,26 +1,41 @@
 /**
- * Documents section — the customer's invoices and proposals (All / Invoices /
- * Proposals tabs). Phase 1 is link-out: each row opens the existing public hash
- * page (`public_url`) in a new tab for the heavy actions (view / pay / accept /
- * decline / sign / download PDF). The portal never reimplements those flows, so
- * the Free→Pro payment seam stays on the public page (see docs/portal-documents-plan.md).
+ * Documents section — the customer's invoices, proposals, and payment history.
+ *
+ * Tabs: All / Invoices / Proposals / Payments. Clicking a document opens it
+ * INLINE: the Free public renderer (PublicInvoiceApp / PublicProposalApp) is
+ * mounted inside the portal, so view / pay (Stripe) / accept / decline / sign /
+ * download all happen in the portal — no link-out. The payment UI is Free; the
+ * Free→Pro seam stays in the backend gateway (see docs/portal-payments-plan.md).
  */
 
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import {
+	Link,
+	Navigate,
+	Route,
+	Routes,
+	useNavigate,
+	useParams,
+} from 'react-router-dom';
 
-import { Button } from '@/components/ui/button';
+import PublicInvoiceApp from '../../../invoice/app';
+import PublicProposalApp from '../../../proposal/app';
 
-import { fetchDocuments, useAsync, type DocumentFilter } from '../../api';
+import { fetchDocuments, fetchPayments, useAsync, type DocumentFilter } from '../../api';
 import type { PortalDocument } from '../../types';
 import { formatDate, formatMoney } from '../../shared/format';
-import { DocumentIcon } from '../../shared/icons';
+import { ChevronLeftIcon, DocumentIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
 
-const TABS: Array<{ key: DocumentFilter; label: string }> = [
+/** Document filter tabs plus the consolidated payment-history view. */
+type DocTab = DocumentFilter | 'payments';
+
+const TABS: Array<{ key: DocTab; label: string }> = [
 	{ key: 'all', label: __('All', 'doublescale') },
 	{ key: 'invoice', label: __('Invoices', 'doublescale') },
 	{ key: 'proposal', label: __('Proposals', 'doublescale') },
+	{ key: 'payments', label: __('Payments', 'doublescale') },
 ];
 
 const isPayable = (doc: PortalDocument): boolean =>
@@ -32,7 +47,10 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 	const dueValue = isInvoice ? doc.due_date : doc.open_till;
 
 	return (
-		<div className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+		<Link
+			to={`${doc.type}/${doc.hash}`}
+			className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary"
+		>
 			<div className="flex min-w-0 items-start gap-3">
 				<span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
 					<DocumentIcon className="h-5 w-5" />
@@ -56,6 +74,15 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 						<span className="font-medium text-foreground">
 							{formatMoney(doc.total, doc.currency)}
 						</span>
+						{isInvoice && doc.amount_paid !== null && doc.amount_paid > 0 && (
+							<span className="text-green-600">
+								{sprintf(
+									// translators: %s is the amount paid so far.
+									__('Paid: %s', 'doublescale'),
+									formatMoney(doc.amount_paid, doc.currency)
+								)}
+							</span>
+						)}
 						{isInvoice && doc.balance !== null && doc.balance > 0 && (
 							<span className={doc.is_overdue ? 'font-medium text-red-600' : ''}>
 								{sprintf(
@@ -77,34 +104,124 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 				</div>
 			</div>
 
-			<div className="shrink-0">
-				{doc.public_url ? (
-					<Button
-						variant="outline"
-						onClick={() =>
-							window.open(doc.public_url, '_blank', 'noopener,noreferrer')
-						}
-					>
-						{isPayable(doc)
-							? __('View & pay', 'doublescale')
-							: __('View', 'doublescale')}
-					</Button>
-				) : (
-					<span className="text-xs text-muted-foreground">
-						{__('Unavailable', 'doublescale')}
-					</span>
+			<span className="shrink-0 text-sm font-medium text-primary">
+				{isPayable(doc)
+					? __('View & pay', 'doublescale')
+					: __('View', 'doublescale')}
+			</span>
+		</Link>
+	);
+};
+
+const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
+	const { data, loading, error } = useAsync(() => fetchDocuments(filter), [
+		filter,
+	]);
+	const docs = data?.data || [];
+
+	if (loading) {
+		return <Spinner />;
+	}
+	if (error) {
+		return <ErrorState message={error} />;
+	}
+	if (docs.length === 0) {
+		return (
+			<EmptyState
+				title={__('No documents yet', 'doublescale')}
+				description={__(
+					'Your invoices and proposals will appear here.',
+					'doublescale'
 				)}
+			/>
+		);
+	}
+
+	return (
+		<div className="space-y-3">
+			{docs.map((doc) => (
+				<DocumentRow key={`${doc.type}-${doc.id}`} doc={doc} />
+			))}
+		</div>
+	);
+};
+
+const PaymentsList = () => {
+	const { data, loading, error } = useAsync(() => fetchPayments(), []);
+	const payments = data?.data || [];
+
+	if (loading) {
+		return <Spinner />;
+	}
+	if (error) {
+		return <ErrorState message={error} />;
+	}
+	if (payments.length === 0) {
+		return (
+			<EmptyState
+				title={__('No payments yet', 'doublescale')}
+				description={__(
+					'Payments you make on your invoices will appear here.',
+					'doublescale'
+				)}
+			/>
+		);
+	}
+
+	return (
+		<div className="space-y-4">
+			{data && data.total_paid > 0 && (
+				<div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+					<p className="text-xs uppercase tracking-wide text-muted-foreground">
+						{__('Total paid', 'doublescale')}
+					</p>
+					<p className="mt-1 text-2xl font-bold text-foreground">
+						{formatMoney(data.total_paid, data.currency)}
+					</p>
+				</div>
+			)}
+
+			<div className="space-y-3">
+				{payments.map((payment) => (
+					<Link
+						key={payment.id}
+						to={`invoice/${payment.invoice_hash}`}
+						className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary"
+					>
+						<div className="min-w-0">
+							<p className="font-semibold text-foreground">
+								{formatMoney(payment.amount, payment.currency)}
+							</p>
+							<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+								{payment.payment_date && (
+									<span>{formatDate(payment.payment_date)}</span>
+								)}
+								{payment.payment_mode && (
+									<span className="capitalize">
+										{payment.payment_mode.replace(/_/g, ' ')}
+									</span>
+								)}
+								<span>
+									{sprintf(
+										// translators: %s is the invoice number.
+										__('Invoice %s', 'doublescale'),
+										payment.invoice_number
+									)}
+								</span>
+							</div>
+						</div>
+						<span className="shrink-0 text-sm font-medium text-primary">
+							{__('View invoice', 'doublescale')}
+						</span>
+					</Link>
+				))}
 			</div>
 		</div>
 	);
 };
 
-const Documents = () => {
-	const [filter, setFilter] = useState<DocumentFilter>('all');
-	const { data, loading, error } = useAsync(() => fetchDocuments(filter), [
-		filter,
-	]);
-	const docs = data?.data || [];
+const DocumentsHome = () => {
+	const [tab, setTab] = useState<DocTab>('all');
 
 	return (
 		<section>
@@ -113,42 +230,80 @@ const Documents = () => {
 			</h2>
 
 			<div className="mb-4 inline-flex rounded-lg border border-border bg-card p-1">
-				{TABS.map((tab) => (
+				{TABS.map((t) => (
 					<button
-						key={tab.key}
+						key={t.key}
 						type="button"
-						onClick={() => setFilter(tab.key)}
+						onClick={() => setTab(t.key)}
 						className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-							filter === tab.key
+							tab === t.key
 								? 'bg-primary text-primary-foreground'
 								: 'text-muted-foreground hover:text-foreground'
 						}`}
 					>
-						{tab.label}
+						{t.label}
 					</button>
 				))}
 			</div>
 
-			{loading && <Spinner />}
-			{!loading && error && <ErrorState message={error} />}
-			{!loading && !error && docs.length === 0 && (
-				<EmptyState
-					title={__('No documents yet', 'doublescale')}
-					description={__(
-						'Your invoices and proposals will appear here.',
-						'doublescale'
-					)}
-				/>
-			)}
-			{!loading && !error && docs.length > 0 && (
-				<div className="space-y-3">
-					{docs.map((doc) => (
-						<DocumentRow key={`${doc.type}-${doc.id}`} doc={doc} />
-					))}
-				</div>
+			{tab === 'payments' ? (
+				<PaymentsList />
+			) : (
+				<DocumentsList filter={tab} />
 			)}
 		</section>
 	);
 };
+
+const BackLink = () => {
+	const navigate = useNavigate();
+	return (
+		<button
+			type="button"
+			onClick={() => navigate('/documents')}
+			className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
+		>
+			<ChevronLeftIcon className="h-4 w-4" />
+			{__('Back to documents', 'doublescale')}
+		</button>
+	);
+};
+
+const InvoiceDetail = () => {
+	const { hash } = useParams();
+	return (
+		<section className="space-y-4">
+			<BackLink />
+			{hash ? (
+				<PublicInvoiceApp hash={hash} />
+			) : (
+				<ErrorState message={__('Invoice not found.', 'doublescale')} />
+			)}
+		</section>
+	);
+};
+
+const ProposalDetail = () => {
+	const { hash } = useParams();
+	return (
+		<section className="space-y-4">
+			<BackLink />
+			{hash ? (
+				<PublicProposalApp hash={hash} />
+			) : (
+				<ErrorState message={__('Proposal not found.', 'doublescale')} />
+			)}
+		</section>
+	);
+};
+
+const Documents = () => (
+	<Routes>
+		<Route index element={<DocumentsHome />} />
+		<Route path="invoice/:hash" element={<InvoiceDetail />} />
+		<Route path="proposal/:hash" element={<ProposalDetail />} />
+		<Route path="*" element={<Navigate to="" replace />} />
+	</Routes>
+);
 
 export default Documents;

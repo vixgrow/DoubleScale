@@ -89,30 +89,10 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
 	return in_array( $slug, doublescale_phantom_module_toggle_slugs(), true );
 }
 
-/**
- * Whether the Sales documents feature set (proposals + invoices) is released.
- *
- * TEMPORARY GATE — proposals/invoices are still in development on the `sales`
- * branch and their DB schema may change. On this branch the Sales module ships
- * only as the parent toggle for the pipeline child: no document REST routes,
- * no document migrations, no Proposals/Invoices menus or pages.
- *
- * Remove this gate (revert the commit that introduced it) when the documents
- * feature is finished and merged from the `sales` branch. The `sales` branch
- * can flip it early via the filter:
- * `add_filter( 'doublescale_sales_documents_ready', '__return_true' );`
- *
- * @return bool
- */
-function doublescale_sales_documents_ready(): bool {
-	// Local dev (WP_DEBUG) enables documents so Sales routes/REST stay testable;
-	// production stays gated until the feature ships. Override via filter or
-	// `define( 'DOUBLESCALE_SALES_DOCUMENTS_READY', true );` in wp-config.php.
-	$default = defined( 'DOUBLESCALE_SALES_DOCUMENTS_READY' )
-		? (bool) DOUBLESCALE_SALES_DOCUMENTS_READY
-		: ( defined( 'WP_DEBUG' ) && WP_DEBUG );
-	return (bool) apply_filters( 'doublescale_sales_documents_ready', $default );
-}
+// `doublescale_sales_documents_ready()` lives in includes/Core/functions.php and
+// returns true whenever the Sales module is active (the Documents/Portal feature
+// has shipped). The temporary WP_DEBUG release-gate that previously lived here was
+// removed on merge to avoid a duplicate definition; do not re-add it here.
 
 /**
  * Child module slug => parent module slug.

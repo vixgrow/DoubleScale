@@ -156,3 +156,133 @@
 		height: auto;
 	}
 }
+
+// Embedded public invoice / proposal renderers.
+//
+// The Documents section mounts the Free public renderers (PublicInvoiceApp /
+// PublicProposalApp) inline so the customer can view / pay / accept / decline
+// inside the portal. Those components carry their own document-preview.scss via
+// JS import, but their BEM wrapper classes live in the renderer style.scss files
+// — which also re-run `@tailwind` and redefine `:root`. To avoid duplicating
+// Tailwind in this bundle we copy only the presentational rules here.
+.doublescale-invoice-renderer,
+.doublescale-proposal-renderer {
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	overflow: hidden;
+	padding: 1.5rem;
+}
+
+.doublescale-invoice-renderer__toolbar,
+.doublescale-proposal-renderer__toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 1rem;
+}
+
+.doublescale-invoice-renderer__download {
+	align-items: center;
+	color: #4c6fff;
+	display: inline-flex;
+	font-size: 14px;
+	font-weight: 500;
+	gap: 0.35rem;
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.doublescale-proposal-renderer__download {
+	align-items: center;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	color: #334155;
+	display: inline-flex;
+	font-size: 14px;
+	font-weight: 500;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	text-decoration: none;
+
+	&:hover {
+		background: #f8fafc;
+	}
+}
+
+.doublescale-invoice-renderer__notice,
+.doublescale-proposal-renderer__notice {
+	border-radius: 8px;
+	font-size: 14px;
+	margin-bottom: 1rem;
+	padding: 0.75rem 1rem;
+
+	&--info {
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		color: #334155;
+	}
+
+	&--success {
+		background: #ecfdf5;
+		border: 1px solid #a7f3d0;
+		color: #065f46;
+	}
+
+	&--warning {
+		background: #fffbeb;
+		border: 1px solid #fde68a;
+		color: #92400e;
+	}
+
+	&--error {
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		color: #b91c1c;
+	}
+}
+
+.doublescale-invoice-renderer__payments,
+.doublescale-proposal-renderer__comments {
+	border-top: 1px solid #edf2f7;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-invoice-renderer__pay {
+	border-top: 1px solid #edf2f7;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__actions {
+	border-top: 1px solid #edf2f7;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__accept,
+.doublescale-proposal-renderer__decline {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	margin-top: 1rem;
+	padding: 1rem;
+}
+
+.doublescale-proposal-renderer__signature-canvas {
+	background: #fff;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	cursor: crosshair;
+	display: block;
+	height: 160px;
+	touch-action: none;
+	width: 100%;
+}

@@ -143,35 +143,36 @@ if (isSalesDocumentsReady()) {
 		...salesPageDefaults,
 	});
 
-registerAdminPage('sales-invoice-edit', {
-	path: 'sales/invoices/:id/edit',
-	component: wrap(InvoiceEdit),
-	label: __('Edit Invoice', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-invoice-edit', {
+		path: 'sales/invoices/:id/edit',
+		component: wrap(InvoiceEdit),
+		label: __('Edit Invoice', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-payments', {
-	path: 'sales/payments',
-	component: wrap(PaymentsList),
-	label: __('Payments', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-payments', {
+		path: 'sales/payments',
+		component: wrap(PaymentsList),
+		label: __('Payments', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-payment', {
-	path: 'sales/payments/:id',
-	component: wrap(PaymentView),
-	label: __('Payment', 'doublescale'),
-	hidden: true,
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-payment', {
+		path: 'sales/payments/:id',
+		component: wrap(PaymentView),
+		label: __('Payment', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
 
-registerAdminPage('sales-settings', {
-	path: 'sales/settings',
-	component: wrap(SalesSettings),
-	label: __('Sales Settings', 'doublescale'),
-	hidden: true,
-	requiredCapability: ['doublescale_manage_all_sales', 'doublescale_crm_manager'],
-	...salesPageDefaults,
-});
+	registerAdminPage('sales-settings', {
+		path: 'sales/settings',
+		component: wrap(SalesSettings),
+		label: __('Sales Settings', 'doublescale'),
+		hidden: true,
+		requiredCapability: ['doublescale_manage_all_sales', 'doublescale_crm_manager'],
+		...salesPageDefaults,
+	});
+}

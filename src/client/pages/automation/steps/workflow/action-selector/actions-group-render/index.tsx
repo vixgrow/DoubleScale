@@ -65,9 +65,9 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
-		if (groupLabel === 'Ticket' || groupLabel === 'Support') {
+		if (groupLabel === 'Ticket' || groupLabel === 'Helpdesk') {
 			return __(
-				'The Support module is turned off. Enable it under Settings → Modules to use these actions.',
+				'The Helpdesk module is turned off. Enable it under Settings → Modules to use these actions.',
 				'doublescale'
 			);
 		}

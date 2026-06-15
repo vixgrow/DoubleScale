@@ -226,6 +226,19 @@ class AdminLoader {
 		// Enqueue WordPress media library for admin pages that need it.
 		if ( self::is_admin_page() ) {
 			wp_enqueue_media();
+
+			if ( ! wp_style_is( 'doublescale-admin-loader', 'registered' ) ) {
+				wp_register_style(
+					'doublescale-admin-loader',
+					DOUBLESCALE_PLUGIN_URL . 'assets/css/admin/loader.css',
+					array(),
+					DOUBLESCALE_VERSION
+				);
+			}
+			// Splash styles must load in <head>. page_wrapper() runs after head is
+			// printed, so enqueuing there lands loader.css in the footer and causes
+			// a brief unstyled flash of the loading screen.
+			wp_enqueue_style( 'doublescale-admin-loader' );
 		}
 	}
 
@@ -300,22 +313,16 @@ class AdminLoader {
 		// Ensure media library is available for the page
 		wp_enqueue_media();
 
-		if ( ! wp_style_is( 'doublescale-admin-loader', 'registered' ) ) {
-			wp_register_style(
-				'doublescale-admin-loader',
-				DOUBLESCALE_PLUGIN_URL . 'assets/css/admin/loader.css',
-				array(),
-				DOUBLESCALE_VERSION
-			);
+		if ( ! wp_style_is( 'doublescale-admin-loader', 'enqueued' ) ) {
+			wp_enqueue_style( 'doublescale-admin-loader' );
 		}
-		wp_enqueue_style( 'doublescale-admin-loader' );
 
 		?>
 </head>
 <body>
 	<div class="doublescale-wrap">
 	<div id="doublescale-admin-root">
-		<div id="doublescale-admin-root__loader-container">
+		<div id="doublescale-admin-root__loader-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;width:100%;min-height:100vh;background:linear-gradient(160deg,#1B1145 0%,#2D1B69 55%,#1B1145 100%);position:relative;overflow:hidden;">
 
 		<div class="ds-logo-mark">
 			<?php

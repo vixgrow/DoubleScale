@@ -24,8 +24,8 @@ const ExportContent: React.FC = () => {
 		useExportContext();
 
 	return (
-		<Card className="my-5 px-4 shadow-none rounded-2xl">
-			<CardHeader>
+		<Card className="lg:my-5 my-3 p-4 shadow-none rounded-2xl">
+			<CardHeader className="max-lg:p-0 max-lg:pb-4">
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
 					{loading
 						? __('Exporting Contacts File', 'doublescale')
@@ -43,29 +43,29 @@ const ExportContent: React.FC = () => {
 							)}
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="max-lg:p-0">
 				{loading ? (
 					<ExportProgress />
 				) : (
 					<>
 						<Card className="shadow-none rounded-2xl border-2 border-dashed">
-							<CardContent className="px-20 py-4">
+							<CardContent className="lg:px-20 lg:py-4 p-4">
 								<div className="flex flex-col gap-[10px]">
-									<div className="flex items-center justify-between">
-										<div className="font-bold text-[#09090B] text-3xl">
+									<div className="flex max-sm:flex-col max-sm:gap-3 items-center justify-between">
+										<div className="font-bold text-[#09090B] text-xl lg:text-3xl">
 											{__(
 												'Select Exporting Filters',
 												'doublescale'
 											)}
 										</div>
-										<div className="doublescale-contacts-total flex gap-[10px] text-[#09090B] text-xl font-medium">
+										<div className="doublescale-contacts-total flex gap-[10px] text-[#09090B] lg:text-xl text-base font-medium">
 											{__(
 												'Total Contacts based on filters',
 												'doublescale'
 											)}
 											:{' '}
 											{!isFiltering && (
-												<div>{totalContact}</div>
+												<>{totalContact}</>
 											)}
 											{isFiltering && (
 												<LoadingSpinner size={24} />
@@ -77,7 +77,7 @@ const ExportContent: React.FC = () => {
 										onChange={setRules}
 										rulesGroups={rulesGroups}
 									/>
-									<div className="font-bold text-[#09090B] text-3xl">
+									<div className="font-bold text-[#09090B] text-xl lg:text-3xl">
 										{__(
 											'Select Exporting Fields',
 											'doublescale'

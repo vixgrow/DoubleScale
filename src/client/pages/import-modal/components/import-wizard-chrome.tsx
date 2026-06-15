@@ -100,7 +100,7 @@ export const ImportSourceFlowBar: React.FC = () => {
 
 	return (
 		<div
-			className="import-modal__flow-bar flex w-full items-center justify-center gap-3 rounded-xl border border-border/60 bg-[#F7F8FA] px-8 py-3.5"
+			className="import-modal__flow-bar flex w-full items-center justify-center gap-3 rounded-xl border border-border/60 bg-[#F7F8FA] px-4 lg:px-8 py-3.5"
 			aria-label={__('Data flow', 'doublescale')}
 		>
 			<span className="inline-flex items-center gap-2 text-base font-semibold text-foreground">
@@ -112,7 +112,7 @@ export const ImportSourceFlowBar: React.FC = () => {
 						aria-hidden
 					/>
 				)}
-				{sourceName}
+				{source === 'csv' && sourceName}
 			</span>
 			<ChevronRight
 				className="h-5 w-5 shrink-0 text-muted-foreground"
@@ -139,7 +139,7 @@ export const ImportWizardSidebar: React.FC = () => {
 
 	return (
 		<aside
-			className="import-modal__wizard-sidebar shrink-0"
+			className="import-modal__wizard-sidebar shrink-0 max-lg:hidden"
 			aria-label={__('Import steps', 'doublescale')}
 		>
 			<ol className="import-modal__wizard-steps">

@@ -15,6 +15,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  navLayout = "around",
   formatters,
   components,
   ...props
@@ -26,13 +27,14 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      captionLayout={captionLayout}
+      navLayout={navLayout}
       className={cn(
         "bg-background group/calendar p-2 [--cell-size:2.25rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
       )}
-      captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString("default", { month: "short" }),
@@ -44,23 +46,19 @@ function Calendar({
           "relative flex flex-col gap-6 md:flex-row md:gap-8",
           defaultClassNames.months
         ),
-        month: cn("flex w-full flex-col gap-3", defaultClassNames.month),
-        nav: cn(
-          "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
-          defaultClassNames.nav
-        ),
+        month: cn("relative flex w-full flex-col gap-3", defaultClassNames.month),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-8 w-8 select-none rounded-md p-0 text-muted-foreground hover:bg-brandPrimary/10 hover:text-brandPrimary aria-disabled:opacity-50",
+          "absolute left-0 top-0 z-30 inline-flex h-9 w-8 select-none items-center justify-center rounded-md p-0 text-muted-foreground hover:bg-brandPrimary/10 hover:text-brandPrimary aria-disabled:opacity-50",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-8 w-8 select-none rounded-md p-0 text-muted-foreground hover:bg-brandPrimary/10 hover:text-brandPrimary aria-disabled:opacity-50",
+          "absolute right-0 top-0 z-30 inline-flex h-9 w-8 select-none items-center justify-center rounded-md p-0 text-muted-foreground hover:bg-brandPrimary/10 hover:text-brandPrimary aria-disabled:opacity-50",
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          "flex h-9 w-full items-center justify-center px-9 text-sm font-semibold text-foreground",
+          "relative z-0 flex h-9 w-full items-center justify-center px-9 text-sm font-semibold text-foreground",
           defaultClassNames.month_caption
         ),
         dropdowns: cn(

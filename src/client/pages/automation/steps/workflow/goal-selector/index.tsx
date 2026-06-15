@@ -99,9 +99,9 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 
 	// Helper function to get tooltip message for disabled goals
 	const getDisabledTooltip = (groupLabel: string) => {
-		if (groupLabel === 'Support') {
+		if (groupLabel === 'Helpdesk') {
 			return __(
-				'The Support module is turned off. Enable it under Settings → Modules to use these goals.',
+				'The Helpdesk module is turned off. Enable it under Settings → Modules to use these goals.',
 				'doublescale'
 			);
 		}

@@ -23,7 +23,7 @@ const ExportActions: React.FC = () => {
 	} = useExportContext();
 
 	return (
-		<div className="mt-8 flex justify-between items-center">
+		<div className="lg:mt-8 mt-4 flex justify-between items-center">
 			<Button
 				variant="outline"
 				onClick={handleClose}

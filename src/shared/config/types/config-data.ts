@@ -32,6 +32,8 @@ export type ConfigData = Record<string, unknown> & {
 	dealPriorities: Record<string, DealPriority>;
 	doublescaleInfo: DoubleScaleInfo;
 	license: License | false;
+	/** License plan hierarchy for the extensions store. */
+	planLevels: PlanLevels;
 	proPluginData: ProPluginData;
 	currency: string;
 	urlDoubleScalePro: string;
@@ -102,6 +104,15 @@ export type Upgrade = {
 export type ProPluginData = {
 	is_installed: boolean;
 	is_active: boolean;
+};
+
+export type PlanLevel = {
+	label: string;
+	level: number;
+};
+
+export type PlanLevels = {
+	[key: string]: PlanLevel;
 };
 
 /**

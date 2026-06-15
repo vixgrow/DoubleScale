@@ -28,6 +28,8 @@ import { map } from 'lodash';
  */
 import { NavBar } from '@doublescale/components';
 import { Controller, HeaderBar } from './controller';
+import { ModulesDialogProvider } from '../pages/settings/modules/modules-dialog';
+import '../pages/settings/modules/modules-settings.scss';
 import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@doublescale/components';
@@ -110,26 +112,28 @@ export const Layout = (props) => {
 
 	return (
 		<SlotFillProvider>
-			<SidebarProvider>
-				<Notices />
-				<MergeTagsModal
-					visible={mergeTagsVisible}
-					onClose={handleCloseMergeTags}
-					onInsertTag={mergeTagCallback || undefined}
-					triggerId={formContext?.triggerId}
-					formId={formContext?.formId}
-					automationId={formContext?.automationId}
-				/>
-				<div className="doublescale-layout__main">
-					<NavBar />
-					<div className="doublescale-layout__workspace">
-						<HeaderBar page={props.page} />
-						<ProtectedRoute page={props.page}>
-							<Controller {...props} />
-						</ProtectedRoute>
+			<ModulesDialogProvider>
+				<SidebarProvider>
+					<Notices />
+					<MergeTagsModal
+						visible={mergeTagsVisible}
+						onClose={handleCloseMergeTags}
+						onInsertTag={mergeTagCallback || undefined}
+						triggerId={formContext?.triggerId}
+						formId={formContext?.formId}
+						automationId={formContext?.automationId}
+					/>
+					<div className="doublescale-layout__main">
+						<NavBar />
+						<div className="doublescale-layout__workspace">
+							<HeaderBar page={props.page} />
+							<ProtectedRoute page={props.page}>
+								<Controller {...props} />
+							</ProtectedRoute>
+						</div>
 					</div>
-				</div>
-			</SidebarProvider>
+				</SidebarProvider>
+			</ModulesDialogProvider>
 		</SlotFillProvider>
 	);
 };

@@ -68,6 +68,16 @@ div#wpcontent {
 	width: 100%;
 }
 
+/* Icons must stay fixed-size squares — the universal width rule above breaks them. */
+.doublescale-layout .doublescale-module-icon,
+.doublescale-layout .doublescale-control-modules-dialog-header-icon,
+.doublescale-layout .doublescale-control-modules__submodule-tree,
+.doublescale-control-modules-dialog .doublescale-module-icon,
+.doublescale-control-modules-dialog .doublescale-control-modules-dialog-header-icon,
+.doublescale-control-modules-dialog .doublescale-control-modules__submodule-tree {
+	width: auto;
+}
+
 .doublescale-layout__main {
 	display: flex;
 	box-sizing: border-box;

@@ -70,7 +70,7 @@ const SourceGrid: React.FC = () => {
 
 	return (
 		<div className="import-modal__sources-panel shrink-0">
-			<div className="import-modal__sources-grid">
+			<div className="import-modal__sources-grid max-sm:grid-cols-1 max-lg:grid-cols-3">
 					{sources.map((s: ImporterSourceItem) => {
 						const isSelected = source === s.value;
 						const isLocked = importing && !isSelected;

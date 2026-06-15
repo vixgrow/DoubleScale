@@ -45,6 +45,7 @@ class SalesInvoicesTable extends Migration {
 			adjustment DECIMAL(15,2) NOT NULL DEFAULT 0.00,
 			total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
 			amount_paid DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+			external_payment_ref VARCHAR(191) NULL,
 			stripe_payment_intent_id VARCHAR(191) NULL,
 			billing_address TEXT NULL,
 			shipping_address TEXT NULL,

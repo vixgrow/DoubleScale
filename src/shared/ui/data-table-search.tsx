@@ -15,7 +15,7 @@ interface DataTableSearchProps {
 
 export function DataTableSearch({ value, onChange, placeholder = "Search..." }: DataTableSearchProps) {
 	return (
-		<div className="relative w-1/2 max-w-sm">
+		<div className="relative w-full sm:w-1/2 sm:max-w-sm">
 			<Input
 				placeholder={placeholder}
 				value={value}

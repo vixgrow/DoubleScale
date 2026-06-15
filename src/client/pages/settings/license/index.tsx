@@ -419,9 +419,9 @@ const License: React.FC = () => {
                     </div>
                     <div className="text-base text-[#818181] flex items-center gap-1 mt-2">
                         {__('By Activating this license, you agree to the', 'doublescale')}
-                        <a 
-                            href="https://doublescale.io/terms" 
-                            target="_blank" 
+                        <a
+                            href="https://doublescale.io/terms"
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="font-semibold text-[#CB5301] underline"
                         >
@@ -431,7 +431,7 @@ const License: React.FC = () => {
                     </div>
                     <div className="flex justify-end mt-4">
                         <Button
-                            className="bg-primary hover:bg-primary/90 px-7 h-10"
+                           
                             onClick={activate}
                             disabled={isActivating || !licenseKey.trim()}
                             variant='default'

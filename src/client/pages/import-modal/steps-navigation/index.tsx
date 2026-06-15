@@ -82,7 +82,7 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 	);
 
 	const renderFooter = (rightActions: React.ReactNode) => (
-		<div className="import-modal__footer-actions">
+		<div className="import-modal__footer-actions max-sm:flex-col max-sm:gap-3 max-sm:justify-end max-sm:items-end">
 			<div className="import-modal__footer-actions-left shrink-0">
 				{chooseAnotherBtn}
 			</div>

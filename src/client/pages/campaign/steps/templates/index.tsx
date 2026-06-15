@@ -28,9 +28,45 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { saveTemplate } from '@/builder/api/templates';
+import { saveTemplate, getTemplate } from '@/builder/api/templates';
 import { campaignSteps, automatedCampaignSteps } from '../shared/stepsConfig';
 import { FromEmailSelector } from '@doublescale/components/from-email-selector';
+
+const defaultTemplateSettings = (): EmailTemplate['settings'] => ({
+	subject: '',
+	preview_text: '',
+	from_name: '',
+	from_email: '',
+	reply_to: '',
+	enable_utm: false,
+	utm_source: '',
+	utm_medium: '',
+	utm_name: '',
+	utm_term: '',
+	utm_content: '',
+});
+
+/** API responses include legacy root subject/preview_text; keep values in settings only. */
+const normalizeEmailTemplate = (
+	tpl: EmailTemplate
+): Partial<EmailTemplate> => {
+	const legacy = tpl as EmailTemplate & {
+		subject?: string;
+		preview_text?: string;
+	};
+	const { subject: _subject, preview_text: _previewText, ...rest } = legacy;
+
+	return {
+		...rest,
+		settings: {
+			...defaultTemplateSettings(),
+			...tpl.settings,
+			subject: tpl.settings?.subject ?? legacy.subject ?? '',
+			preview_text:
+				tpl.settings?.preview_text ?? legacy.preview_text ?? '',
+		} as EmailTemplate['settings'],
+	};
+};
 
 const templateSchema = z
 	.object({
@@ -117,27 +153,45 @@ const Templates: React.FC = () => {
 		name: campaign?.name || __('Email Template', 'doublescale'),
 		type: CAMPAIGN_CHANNEL.EMAIL,
 		body: '',
-		settings: {
-			subject: '',
-			preview_text: '',
-			from_name: '',
-			from_email: '',
-			reply_to: '',
-			enable_utm: false,
-			utm_source: '',
-			utm_medium: '',
-			utm_name: '',
-			utm_term: '',
-			utm_content: '',
-		},
+		settings: defaultTemplateSettings(),
 	});
 
-	// Load template from campaign.settings.templates (attached by backend)
+	// Load the latest template from the API (authoritative) when entering this step.
 	useEffect(() => {
-		if (campaign?.settings?.templates?.[0]) {
-			setTemplate(campaign.settings.templates[0] as EmailTemplate);
+		let cancelled = false;
+
+		const loadTemplate = async () => {
+			const templateId = campaign?.settings?.template_ids?.[0];
+
+			if (templateId) {
+				try {
+					const tpl = await getTemplate(templateId);
+					if (!cancelled) {
+						setTemplate(normalizeEmailTemplate(tpl));
+					}
+					return;
+				} catch {
+					// Fall back to the attached campaign template below.
+				}
+			}
+
+			if (!cancelled && campaign?.settings?.templates?.[0]) {
+				setTemplate(
+					normalizeEmailTemplate(
+						campaign.settings.templates[0] as EmailTemplate
+					)
+				);
+			}
+		};
+
+		if (campaign) {
+			void loadTemplate();
 		}
-	}, [campaign?.settings?.templates]);
+
+		return () => {
+			cancelled = true;
+		};
+	}, [campaign?.id, campaign?.settings?.template_ids?.[0]]);
 
 	// Helper to update settings fields
 	const updateSettings = (
@@ -232,10 +286,15 @@ const Templates: React.FC = () => {
 			campaign_id?: number;
 		} = {
 			...template,
+			id: template.id ?? campaign?.settings?.template_ids?.[0],
 			body: bodyStr,
 			campaign_id: campaign?.id,
 			hidden: true,
 		};
+
+			// Root subject/preview_text from API loads are stale after editing settings.
+			delete (templateData as { subject?: string }).subject;
+			delete (templateData as { preview_text?: string }).preview_text;
 
 			const savedTemplate = await saveTemplate(templateData);
 
@@ -245,6 +304,7 @@ const Templates: React.FC = () => {
 					settings: {
 						...campaign.settings,
 						template_ids: [savedTemplate.id],
+						templates: [savedTemplate],
 					} as ExtendedCampaignSettings,
 				});
 			}

@@ -22,6 +22,7 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
 import { isSectionTemplate } from '@doublescale/utils/templateUtils';
+import { hasActiveTextSelection } from '../utils/selectionGuards';
 import TextBlock from '../blocks/basic/TextBlock';
 
 interface ColumnRendererProps {
@@ -56,6 +57,11 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 
 	const handleColumnClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		// Don't hijack a text-selection drag (whose mouseup can land here) into a
+		// layout selection — that would deselect the block and wipe its editor.
+		if (hasActiveTextSelection()) {
+			return;
+		}
 		dispatch(STORE_KEY).selectColumn(sectionId, column.id);
 	};
 

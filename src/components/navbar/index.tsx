@@ -49,6 +49,7 @@ import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
 import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
+import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 
 interface SubMenuItem {
 	path: string;
@@ -87,6 +88,24 @@ const SECTION_ORDER: Record<string, { label: string; order: number }> = {
 	system: { label: __('System', 'doublescale'), order: 4 },
 };
 
+/** Sidebar order within the CRM section (after Contacts). */
+const CRM_NAV_ITEM_ORDER: Record<string, number> = {
+	contacts: 0,
+	sales: 1,
+	booking: 2,
+	support: 3,
+	tasks: 4,
+};
+
+const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
+	crm: CRM_NAV_ITEM_ORDER,
+};
+
+const navItemSortIndex = (sectionKey: string, path: string): number => {
+	const normalized = path.replace(/^\//, '').split('/:')[0];
+	return SECTION_NAV_ITEM_ORDER[sectionKey]?.[normalized] ?? 999;
+};
+
 const PATH_TO_SECTION: Record<string, string> = {
 	'/': 'main',
 	contacts: 'crm',
@@ -118,6 +137,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'smtp',
 	'team-managers',
 	'integrations',
+	'extensions',
 	'analytics-and-reports',
 ]);
 
@@ -158,7 +178,6 @@ const PATH_TO_MODULE: Record<string, string> = {
 	support: 'support',
 	'support/ticket/:id': 'support',
 	'abandoned-carts': 'campaigns',
-	extensions: 'integrations',
 };
 
 /** Submenu routes gated by a Pro module (when Pro is active). */
@@ -228,6 +247,16 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				);
 			})
 			.filter(([pageId, item]) => {
+				// While Sales documents (proposals/invoices) are gated, the
+				// pipeline is the only destination under Sales — drop the
+				// whole group when the pipeline toggle is off too.
+				if (
+					pageId === 'sales' &&
+					!isSalesDocumentsReady() &&
+					!config.isModuleToggleEnabled('deals')
+				) {
+					return false;
+				}
 				const optionalGate = FREE_OPTIONAL_SIDEBAR_PAGE_MODULE[pageId];
 				const defaultSidebar =
 					isProActive ||
@@ -401,26 +430,30 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						{
-							path: 'sales/proposals',
-							label: __('Proposals', 'doublescale'),
-						},
-						{
-							path: 'sales/invoices',
-							label: __('Invoices', 'doublescale'),
-						},
-						{
-							path: 'sales/payments',
-							label: __('Payments', 'doublescale'),
-						},
-						{
-							path: 'sales/settings',
-							label: __('Settings', 'doublescale'),
-							requiredCapability: [
-								'doublescale_manage_all_sales',
-								'doublescale_crm_manager',
-							],
-						},
+						...(isSalesDocumentsReady()
+							? [
+									{
+										path: 'sales/proposals',
+										label: __('Proposals', 'doublescale'),
+									},
+									{
+										path: 'sales/invoices',
+										label: __('Invoices', 'doublescale'),
+									},
+									{
+										path: 'sales/payments',
+										label: __('Payments', 'doublescale'),
+									},
+									{
+										path: 'sales/settings',
+										label: __('Settings', 'doublescale'),
+										requiredCapability: [
+											'doublescale_manage_all_sales',
+											'doublescale_crm_manager',
+										],
+									},
+							  ]
+							: []),
 						// Pipeline nests under Sales: with Pro, `enabled` is the
 						// derived effective state (Sales is already on here, so it
 						// reduces to the child flag); without Pro it is the stored
@@ -429,7 +462,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							? [
 									{
 										path: 'sales-pipeline',
-										label: __('Pipeline', 'doublescale'),
+										label: __('Pipelines', 'doublescale'),
 										requiredCapability: [
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
@@ -524,7 +557,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			.map(([key, { label }]) => ({
 				key,
 				label,
-				items: grouped[key],
+				items: grouped[key].sort((a, b) => {
+					const orderDiff =
+						navItemSortIndex(key, a.path) -
+						navItemSortIndex(key, b.path);
+					if (orderDiff !== 0) {
+						return orderDiff;
+					}
+					return a.label.localeCompare(b.label);
+				}),
 			}));
 	}, [navigationItems]);
 

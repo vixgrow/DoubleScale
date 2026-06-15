@@ -296,7 +296,7 @@ const DebuggingLogs: React.FC = () => {
 
 			{/* Log Management */}
 			<div className="mb-6">
-				<div className="flex items-center justify-between mb-4">
+				<div className="flex sm:flex-row flex-col items-start gap-3 sm:items-center justify-between mb-4">
 					<h3 className="text-[#09090B] font-semibold text-lg">
 						{__('Log Management', 'doublescale')}
 					</h3>

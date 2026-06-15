@@ -476,7 +476,7 @@ class NotificationCategories {
 				'description' => __( 'Booking lifecycle notifications (created, cancelled, rescheduled).', 'doublescale' ),
 			),
 			self::SUPPORT        => array(
-				'label'       => __( 'Support', 'doublescale' ),
+				'label'       => __( 'Helpdesk', 'doublescale' ),
 				'description' => __( 'Ticket lifecycle notifications for agents (new ticket, customer reply, assignment, resolved, reopened).', 'doublescale' ),
 			),
 			self::SALES          => array(

@@ -55,6 +55,7 @@ class InvoiceModel extends Model {
 		'adjustment',
 		'total',
 		'amount_paid',
+		'external_payment_ref',
 		'stripe_payment_intent_id',
 		'billing_address',
 		'shipping_address',
@@ -177,6 +178,73 @@ class InvoiceModel extends Model {
 			return null;
 		}
 		return self::query()->where( 'hash', $hash )->first();
+	}
+
+	/**
+	 * Find an invoice by in-progress gateway payment reference.
+	 *
+	 * @param string $ref External payment reference (e.g. Stripe PI id).
+	 * @return InvoiceModel|null
+	 */
+	public static function find_by_external_payment_ref( string $ref ): ?self {
+		$ref = trim( $ref );
+		if ( '' === $ref ) {
+			return null;
+		}
+
+		$invoice = self::query()->where( 'external_payment_ref', $ref )->first();
+		if ( $invoice ) {
+			return $invoice;
+		}
+
+		// Legacy rows may only have stripe_payment_intent_id populated.
+		return self::query()->where( 'stripe_payment_intent_id', $ref )->first();
+	}
+
+	/**
+	 * Persist an in-progress payment reference from a gateway.
+	 *
+	 * @param string $ref           Gateway payment reference.
+	 * @param bool   $is_stripe_pi  When true, also store in stripe_payment_intent_id.
+	 * @return void
+	 */
+	public function set_in_progress_payment_ref( string $ref, bool $is_stripe_pi = true ): void {
+		$ref = trim( $ref );
+		if ( '' === $ref ) {
+			return;
+		}
+
+		$this->external_payment_ref = $ref;
+		if ( $is_stripe_pi ) {
+			$this->stripe_payment_intent_id = $ref;
+		}
+		$this->save();
+	}
+
+	/**
+	 * Clear in-progress payment references after completion, cancel, or full refund.
+	 *
+	 * @return void
+	 */
+	public function clear_in_progress_payment_refs(): void {
+		$this->external_payment_ref       = null;
+		$this->stripe_payment_intent_id = null;
+		$this->save();
+	}
+
+	/**
+	 * Active in-progress payment reference (external column preferred).
+	 *
+	 * @return string|null
+	 */
+	public function in_progress_payment_ref(): ?string {
+		$ref = trim( (string) ( $this->external_payment_ref ?? '' ) );
+		if ( '' !== $ref ) {
+			return $ref;
+		}
+
+		$legacy = trim( (string) ( $this->stripe_payment_intent_id ?? '' ) );
+		return '' !== $legacy ? $legacy : null;
 	}
 
 	/**

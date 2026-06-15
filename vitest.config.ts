@@ -19,6 +19,9 @@ export default defineConfig({
 			'@doublescale/config': path.join(srcDir, 'shared/config'),
 			'@/lib': path.join(srcDir, 'shared/lib'),
 			'@/components/ui': path.join(srcDir, 'shared/ui'),
+			// General catch-all mirroring tsconfig's "@/*" -> "src/*". Keep this
+			// last so the more specific "@/..." entries above win first.
+			'@': srcDir,
 		},
 	},
 	test: {

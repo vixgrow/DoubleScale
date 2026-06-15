@@ -35,10 +35,12 @@ import {
 	TotalSMSIcon,
 	LicenseIcon,
 	LinkTriggersIcon,
+	MailboxIcon,
+	NotificationIcon,
 	WhatsAppIcon,
 	WebsiteIcon,
+	AiIcon,
 } from '@doublescale/components';
-import { Bell, Blocks, Inbox, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { NotificationPreferences } from './notification-preferences';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -49,7 +51,6 @@ import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
-import ModulesSettings from './modules';
 import SystemSettings from './system';
 import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
@@ -85,7 +86,6 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'debugging',
 	'notifications',
 	'mailbox',
-	'modules',
 ];
 
 const SETTINGS_DEPENDENT_TABS = new Set([
@@ -130,6 +130,10 @@ const SettingsPage: React.FC = () => {
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
+			if (urlTab === 'modules') {
+				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
+				return;
+			}
 			if (urlTab === 'team') {
 				navigate(getToLink('team-managers'), { replace: true });
 				return;
@@ -144,7 +148,12 @@ const SettingsPage: React.FC = () => {
 			// If no valid tab in URL, redirect to default tab
 			navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 		}
-	}, [urlTab, navigate, hasLimitedSettingsAccess, defaultTab]);
+	}, [
+		urlTab,
+		navigate,
+		hasLimitedSettingsAccess,
+		defaultTab,
+	]);
 
 	const fetchSettings = async () => {
 		try {
@@ -430,8 +439,6 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-	case 'modules':
-			return <ModulesSettings />;
 	case 'notifications':
 			// The notification engine + email channel now ship in Free, so the
 			// preferences UI is always available. Bell/desktop/push rows inside
@@ -471,7 +478,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'mailbox',
 			label: 'Mailbox',
-			icon: <Inbox size={24} />,
+			icon: <MailboxIcon width={24} height={24} />,
 		},
 		{
 			value: 'sms',
@@ -504,11 +511,6 @@ const SettingsPage: React.FC = () => {
 			icon: <LicenseIcon />,
 		},
 		{
-			value: 'modules',
-			label: 'Modules',
-			icon: <Blocks size={24} />,
-		},
-		{
 			value: 'system',
 			label: 'System',
 			icon: <ToolsIcon width={24} height={24} />,
@@ -526,12 +528,12 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'ai',
 			label: 'AI',
-			icon: <Sparkles size={24} />,
+			icon: <AiIcon width={24} height={24} />,
 		},
 		{
 			value: 'notifications',
 			label: 'Notifications',
-			icon: <Bell size={24} />,
+			icon: <NotificationIcon width={24} height={24} />,
 		},
 	];
 

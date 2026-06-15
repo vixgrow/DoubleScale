@@ -217,7 +217,7 @@ final class ActionsManager {
 				),
 			),
 			'support'     => array(
-				'label'  => __( 'Support', 'doublescale' ),
+				'label'  => __( 'Helpdesk', 'doublescale' ),
 				'groups' => array(
 					'support' => array(
 						'label'       => __( 'Ticket', 'doublescale' ),

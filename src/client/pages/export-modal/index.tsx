@@ -56,7 +56,7 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 							aria-hidden
 						/>
 
-						<header className="relative shrink-0 border-b border-border/50 bg-card px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-7 pr-14 sm:pr-16">
+						<header className="relative shrink-0 border-b border-border/50 bg-card p-4 lg:px-8 lg:pb-6 lg:pt-7 pr-14 sm:pr-16">
 							<div className="min-w-0 space-y-1.5">
 								<DialogTitle className="text-left text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
 									{__('Export contacts', 'doublescale')}
@@ -70,7 +70,7 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 							</div>
 						</header>
 
-						<div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
+						<div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 lg:px-8 lg:py-6">
 							<ExportContent />
 						</div>
 					</div>

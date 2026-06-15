@@ -17,6 +17,7 @@ import type {
 	Integrations,
 	License,
 	ModuleInfo,
+	PlanLevels,
 	ProPluginData,
 	DoubleScaleInfo,
 	UserCapabilities,
@@ -123,6 +124,7 @@ const configData: ConfigData = {
 		},
 	currency: (serverData.currency as string | undefined) ?? 'USD',
 	urlDoubleScalePro: (serverData.urlDoubleScalePro as string | undefined) ?? '',
+	planLevels: (serverData.planLevels as PlanLevels | undefined) ?? {},
 	proPluginData:
 		(serverData.proPluginData as ProPluginData | undefined) ?? {
 			is_installed: false,
@@ -822,6 +824,31 @@ export const getLicense = (data: ConfigData) => (): License | false => {
 	return data.license;
 };
 
+export const getPlanLevels = (data: ConfigData) => (): PlanLevels => {
+	return data.planLevels;
+};
+
+export const isPlanAccessible =
+	(data: ConfigData) =>
+		(requiredPlan: string | null | undefined): boolean => {
+			if (!requiredPlan) {
+				return true;
+			}
+			const license = data.license;
+			if (!license || typeof license !== 'object') {
+				return false;
+			}
+			const status = (license as { status?: string }).status;
+			const currentPlan = (license as { plan?: string }).plan;
+			if (status !== 'valid' || !currentPlan) {
+				return false;
+			}
+			const levels = data.planLevels;
+			const currentLevel = levels[currentPlan]?.level ?? 0;
+			const requiredLevel = levels[requiredPlan]?.level ?? 0;
+			return currentLevel >= requiredLevel;
+		};
+
 /**
  * Set pro plugin data
  * 
@@ -924,6 +951,8 @@ export interface ConfigApi {
 	setCurrency: (value: string) => void;
 	getUrlDoubleScalePro: () => string;
 	setUrlDoubleScalePro: (value: string) => void;
+	getPlanLevels: () => PlanLevels;
+	isPlanAccessible: (requiredPlan: string | null | undefined) => boolean;
 	getProPluginData: () => ProPluginData;
 	setProPluginData: (value: ProPluginData) => void;
 	getAddons: () => Addons;
@@ -985,6 +1014,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setIsWoocommerceActive = setIsWoocommerceActive(data);
 	configApi.getLicense = getLicense(data);
 	configApi.setLicense = setLicense(data);
+	configApi.getPlanLevels = getPlanLevels(data);
+	configApi.isPlanAccessible = isPlanAccessible(data);
 	configApi.getProPluginData = getProPluginData(data);
 	configApi.setProPluginData = setProPluginData(data);
 	configApi.getAddons = getAddons(data);

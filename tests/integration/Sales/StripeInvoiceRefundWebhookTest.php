@@ -40,6 +40,7 @@ final class StripeInvoiceRefundWebhookTest extends IntegrationTestCase {
 		$this->assertSame( InvoiceStatus::UNPAID, (string) $invoice->status );
 		$this->assertSame( 0.0, (float) $invoice->amount_paid );
 		$this->assertNull( $invoice->stripe_payment_intent_id );
+		$this->assertNull( $invoice->external_payment_ref );
 		$this->assertSame(
 			0,
 			PaymentModel::query()->where( 'invoice_id', (int) $invoice->id )->count()
@@ -72,6 +73,7 @@ final class StripeInvoiceRefundWebhookTest extends IntegrationTestCase {
 			array(
 				'status'                   => InvoiceStatus::PAID,
 				'amount_paid'              => $amount,
+				'external_payment_ref'     => $pi_id,
 				'stripe_payment_intent_id' => $pi_id,
 			)
 		);

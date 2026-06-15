@@ -260,7 +260,7 @@ final class RulesManager {
 				'triggers' => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
 			'support'                   => array(
-				'name'        => __( 'Support', 'doublescale' ),
+				'name'        => __( 'Helpdesk', 'doublescale' ),
 				'key'         => 'support',
 				'rules'       => array(),
 				'triggers'    => array(

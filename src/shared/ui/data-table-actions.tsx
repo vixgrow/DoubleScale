@@ -180,8 +180,11 @@ export function DataTableActions<TData>({
 		setIsAdvancedFiltersOpen(false);
 	};
 
+	const actionButtonClassName =
+		'group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
+
 	return (
-		<div className="flex flex-wrap items-center gap-3">
+		<div className="flex flex-wrap justify-center items-center gap-3 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
 			{config.dateRange?.enabled && (
 				<DateRangePicker
 					value={config.dateRange?.value}
@@ -192,11 +195,12 @@ export function DataTableActions<TData>({
 						}
 					}}
 					placeholder={config.dateRange?.placeholder}
-					className="ml-2"
+					className="ml-2 max-sm:ml-0 max-sm:w-full"
 				/>
 			)}
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
 			{config.bulkActions?.enabled && (
+				<div className="max-sm:w-full max-sm:[&_button]:w-full">
 				<BulkActionSelect
 					bulkAction={config.bulkActions?.currentAction}
 					setBulkAction={config.bulkActions?.onActionChange}
@@ -218,6 +222,7 @@ export function DataTableActions<TData>({
 					selectedTags={config.bulkActions.tags?.selected || []}
 					activeTab={activeTab}
 				/>
+				</div>
 			)}
 
 			{/* Campaign Filters Button */}
@@ -237,7 +242,7 @@ export function DataTableActions<TData>({
 							<Button
 								variant="outline"
 								onClick={handleCampaignFiltersDialogOpen}
-								className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
+								className={actionButtonClassName}
 							>
 								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
 									<FiltersIcon
@@ -310,7 +315,7 @@ export function DataTableActions<TData>({
 							<Button
 								variant="outline"
 								onClick={handleAdvancedFiltersDialogOpen}
-								className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
+								className={actionButtonClassName}
 							>
 								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
 									<FiltersIcon
@@ -326,7 +331,7 @@ export function DataTableActions<TData>({
 								)}
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="max-w-[1100px] max-h-[90vh] overflow-y-auto">
+						<DialogContent className="max-w-[1100px] max-h-[90vh] min-w-0 overflow-x-hidden overflow-y-auto">
 							<DialogHeader>
 								<DialogTitle>
 									<CustomDialogHeader
@@ -344,6 +349,7 @@ export function DataTableActions<TData>({
 							</DialogHeader>
 							{tempRules.length > 0 && (
 								<RulesBuilder
+									className="min-w-0 w-full"
 									rules={tempRules}
 									onChange={setTempRules}
 									rulesGroups={rulesGroups}
@@ -387,7 +393,7 @@ export function DataTableActions<TData>({
 						<Button
 							variant="outline"
 							onClick={handleDialogOpen}
-							className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
+							className={actionButtonClassName}
 						>
 							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
 								<ColumnsIcon

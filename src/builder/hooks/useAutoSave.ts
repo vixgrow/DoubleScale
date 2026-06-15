@@ -220,9 +220,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 				const template = await getTemplate(templateId);
 
 				// Save template with updated builder body + campaign_id
-				const templateWithCampaignId: typeof template & {
-					campaign_id: number;
-				} = {
+				const templateWithCampaignId: typeof template = {
 					...template,
 					body: JSON.stringify({
 						type: 'builder',
@@ -231,6 +229,11 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 					campaign_id: campaign.id,
 					hidden: true, // Auto-save should be hidden from user templates
 				};
+
+				// Do not send legacy root subject/preview_text — they can overwrite settings.
+				delete (templateWithCampaignId as { subject?: string }).subject;
+				delete (templateWithCampaignId as { preview_text?: string })
+					.preview_text;
 
 				savedTemplate = await saveTemplate(templateWithCampaignId);
 			}

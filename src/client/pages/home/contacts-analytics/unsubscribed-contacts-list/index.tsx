@@ -39,7 +39,7 @@ export const UnsubscribedContactsTable: React.FC<
 			{isEmpty(contacts) ? (
 				<EmptyState />
 			) : (
-				<div className='h-full'>
+				<div className="h-full overflow-x-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>

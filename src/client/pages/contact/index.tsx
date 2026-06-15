@@ -247,7 +247,7 @@ const Contact: React.FC<ContactProps> = ({
 					</div>
 				</DialogHeader>
 				{loading ? (
-					<div className="doublescale-contact-page-column-scroll mx-auto min-h-0 w-full max-w-[1680px] flex-1 overflow-y-scroll px-6 py-8 sm:px-10">
+					<div className="doublescale-contact-page-column-scroll mx-auto min-h-0 w-full max-w-[1680px] flex-1 overflow-y-auto px-6 py-8 sm:px-10">
 						<ContactShimmer />
 					</div>
 				) : contact ? (
@@ -261,7 +261,7 @@ const Contact: React.FC<ContactProps> = ({
 							showNotice: setNotice,
 						}}
 					>
-						<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col px-6 py-8 sm:px-10">
+						<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-y-auto px-6 py-8 sm:px-10 lg:overflow-hidden">
 							{notice && (
 								<div className="mb-4 shrink-0">
 									<NoticeBanner
@@ -271,11 +271,11 @@ const Contact: React.FC<ContactProps> = ({
 									/>
 								</div>
 							)}
-							<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden lg:flex-row lg:items-stretch lg:gap-6">
-								<div className="doublescale-contact-page-column-scroll min-h-0 w-full shrink-0 overflow-y-scroll lg:max-w-[400px] lg:w-[min(100%,400px)]">
+							<div className="flex flex-col gap-6 lg:min-h-0 lg:flex-1 lg:flex-row lg:items-stretch lg:gap-6 lg:overflow-hidden">
+								<div className="doublescale-contact-page-column-scroll w-full shrink-0 lg:min-h-0 lg:max-w-[400px] lg:w-[min(100%,400px)] lg:overflow-y-auto">
 									<ContactInformation />
 								</div>
-								<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 min-w-0 overflow-y-scroll">
+								<div className="doublescale-contact-page-column-scroll min-w-0 flex-1 lg:min-h-0 lg:overflow-y-auto">
 									<DataCard
 										navigate={navigate}
 										initialTab={urlTab}

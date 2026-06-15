@@ -199,10 +199,10 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 				const isInbound =
 					row.original.direction_slug === 'inbound';
 				return (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center">
 						<Button
 							size="sm"
-							className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+							className="bg-transparent border-y-0 border-l-0 border-r rounded-none shadow-none text-primary hover:bg-transparent hover:text-primary/80"
 							onClick={() => onViewTemplate(row.original)}
 						>
 							<ViewIcon />
@@ -211,7 +211,7 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 					{!isInbound && (
 						<Button
 							size="sm"
-							className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+							className="bg-transparent border-0 shadow-none text-primary hover:bg-transparent hover:text-primary/80"
 							onClick={() => onViewTemplate(row.original)}
 						>
 							<ResendIcon />
@@ -221,7 +221,7 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 					{isInbound && (
 						<Button
 							size="sm"
-							className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+							className="bg-transparent border-0 shadow-none text-primary hover:bg-transparent hover:text-primary/80"
 							onClick={() => onReply?.(row.original)}
 						>
 							<Reply className="w-4 h-4 scale-x-[-1]" />

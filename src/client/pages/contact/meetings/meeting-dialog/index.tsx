@@ -357,7 +357,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                         </DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col gap-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Related Contact */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
@@ -405,7 +405,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Duration */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
@@ -464,7 +464,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Date & Time */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">

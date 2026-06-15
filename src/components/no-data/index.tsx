@@ -24,7 +24,7 @@ export const NoData: React.FC<NoDataProps> = ({
 	return (
 		<div className="flex flex-col items-center justify-center py-20 px-4">
 			<div className="flex flex-col items-center max-w-sm text-center">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5 mb-5">
+				<div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5">
 					{icon}
 				</div>
 				<h3 className="text-lg font-semibold text-foreground mb-1.5">

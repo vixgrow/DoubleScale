@@ -392,7 +392,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				tabsContent={tabsContent}
 				className="w-full min-w-0"
 				tabsListWrapperClassName="border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-5"
-				tabsListClassName="w-full justify-start gap-1 rounded-xl bg-background/85 p-1 text-foreground shadow-sm ring-1 ring-border/40"
+				tabsListClassName="w-full justify-start gap-1 rounded-xl bg-white border-0 p-1 text-foreground"
 				scrollThreshold={6}
 				scrollArrowBg="bg-background/95 backdrop-blur-sm"
 			/>

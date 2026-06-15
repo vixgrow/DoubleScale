@@ -22,6 +22,19 @@ final class DocumentPdf {
 	 * @return string
 	 */
 	public static function render_html( array $shaped, string $type ): string {
+		if ( 'contract' === $type ) {
+			$company = array(
+				'name'    => (string) \get_bloginfo( 'name' ),
+				'url'     => (string) \home_url( '/' ),
+				'address' => self::resolved_company_address(),
+			);
+
+			ob_start();
+			$document = $shaped;
+			include __DIR__ . '/templates/contract-pdf.php';
+			return (string) ob_get_clean();
+		}
+
 		$type = 'invoice' === $type ? 'invoice' : 'proposal';
 
 		$company = array(

@@ -56,6 +56,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'invoice_total',
 		'invoice_balance',
 		'invoice_url',
+		'contract_number',
+		'contract_subject',
+		'contract_value',
+		'contract_url',
+		'contract_end_date',
 	);
 
 	protected function setUp(): void {

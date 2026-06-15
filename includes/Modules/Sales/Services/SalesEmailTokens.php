@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 
@@ -68,6 +69,32 @@ final class SalesEmailTokens {
 			'due_date'       => $invoice->due_date ? (string) $invoice->due_date : '',
 			'invoice_link'   => $url,
 			'company_name'   => (string) get_bloginfo( 'name' ),
+		);
+	}
+
+	/**
+	 * @param ContractModel $contract Contract.
+	 * @param string        $url Public URL.
+	 * @return array<string, string>
+	 */
+	public static function for_contract( ContractModel $contract, string $url ): array {
+		$name = __( 'there', 'doublescale' );
+		$contract->loadMissing( 'contact' );
+		if ( $contract->contact ) {
+			$full = trim( (string) $contract->contact->first_name . ' ' . (string) $contract->contact->last_name );
+			if ( '' !== $full ) {
+				$name = $full;
+			}
+		}
+
+		return array(
+			'contact_name'      => $name,
+			'subject'           => (string) $contract->subject,
+			'contract_number'   => (string) $contract->contract_number,
+			'contract_value'    => number_format_i18n( (float) $contract->contract_value, 2 ) . ' ' . (string) $contract->currency,
+			'end_date'          => $contract->end_date ? (string) $contract->end_date : '',
+			'contract_link'     => $url,
+			'company_name'      => (string) get_bloginfo( 'name' ),
 		);
 	}
 }

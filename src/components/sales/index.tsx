@@ -1,5 +1,5 @@
 export { LineItemsEditor, computeLineItemsTotals } from './line-items-editor';
-export { ProposalStatusPill, InvoiceStatusPill } from './status-pill';
+export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';
 export { ProposalDocumentPreview, InvoiceDocumentPreview } from './document-preview';

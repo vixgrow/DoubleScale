@@ -16,6 +16,7 @@ import type {
 	PaymentListItem,
 	ConvertProposalResponse,
 	CreateInvoicePayload,
+	CreateContractPayload,
 	CreateProposalPayload,
 	Invoice,
 	InvoiceFilters,
@@ -28,6 +29,11 @@ import type {
 	ProposalComment,
 	ProposalFilters,
 	ProposalSignature,
+	Contract,
+	ContractFilters,
+	ContractSignature,
+	ContractSummary,
+	ContractType,
 	RecordPaymentPayload,
 	SalesAssignableUser,
 	SalesSettings,
@@ -126,6 +132,181 @@ export const updateProposal = (id: number, payload: Partial<CreateProposalPayloa
 export const deleteProposal = (id: number) =>
 	apiFetch<{ deleted: boolean }>({
 		path: `${NAMESPACE}/proposals/${id}`,
+		method: 'DELETE',
+	});
+
+export const useContracts = (filters: ContractFilters = {}) => {
+	const [data, setData] = useState<PaginatedResponse<Contract> | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const filterKey = JSON.stringify(filters);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		const url = addQueryArgs(`${NAMESPACE}/contracts`, filters as Record<string, unknown>);
+		return apiFetch<PaginatedResponse<Contract>>({ path: url })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, [filterKey]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const useContract = (id: number | null) => {
+	const [data, setData] = useState<Contract | null>(null);
+	const [loading, setLoading] = useState(Boolean(id));
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		if (!id) {
+			return Promise.resolve(null);
+		}
+		setLoading(true);
+		setError(null);
+		return apiFetch<Contract>({ path: `${NAMESPACE}/contracts/${id}` })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, [id]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const useContractSummary = () => {
+	const [data, setData] = useState<ContractSummary | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		return apiFetch<ContractSummary>({ path: `${NAMESPACE}/contracts/summary` })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, []);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const createContract = (payload: CreateContractPayload) =>
+	apiFetch<Contract>({
+		path: `${NAMESPACE}/contracts`,
+		method: 'POST',
+		data: payload,
+	});
+
+export const updateContract = (id: number, payload: Partial<CreateContractPayload>) =>
+	apiFetch<Contract>({
+		path: `${NAMESPACE}/contracts/${id}`,
+		method: 'PUT',
+		data: payload,
+	});
+
+export const deleteContract = (id: number) =>
+	apiFetch<{ deleted: boolean }>({
+		path: `${NAMESPACE}/contracts/${id}`,
+		method: 'DELETE',
+	});
+
+export const sendContract = (contractId: number, message = '') =>
+	apiFetch<{ sent: boolean; contract: Contract }>({
+		path: `${NAMESPACE}/contracts/${contractId}/send`,
+		method: 'POST',
+		data: { message },
+	});
+
+export const fetchContractSignature = (contractId: number) =>
+	apiFetch<ContractSignature>({
+		path: `${NAMESPACE}/contracts/${contractId}/signature`,
+	});
+
+export const downloadContractPdf = (contractId: number, filename: string) =>
+	downloadAdminPdf(`${NAMESPACE}/contracts/${contractId}/pdf`, filename);
+
+export const useContractTypes = () => {
+	const [data, setData] = useState<ContractType[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		return apiFetch<ContractType[]>({ path: `${NAMESPACE}/contract-types` })
+			.then((response) => {
+				const items = Array.isArray(response) ? response : [];
+				setData(items);
+				return items;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, []);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const createContractType = (payload: Pick<ContractType, 'name'>) =>
+	apiFetch<ContractType>({
+		path: `${NAMESPACE}/contract-types`,
+		method: 'POST',
+		data: payload,
+	});
+
+export const updateContractType = (typeId: number, payload: Partial<Pick<ContractType, 'name'>>) =>
+	apiFetch<ContractType>({
+		path: `${NAMESPACE}/contract-types/${typeId}`,
+		method: 'PUT',
+		data: payload,
+	});
+
+export const deleteContractType = (typeId: number) =>
+	apiFetch<{ deleted: boolean }>({
+		path: `${NAMESPACE}/contract-types/${typeId}`,
 		method: 'DELETE',
 	});
 

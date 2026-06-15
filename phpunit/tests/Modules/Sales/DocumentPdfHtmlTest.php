@@ -72,4 +72,34 @@ final class DocumentPdfHtmlTest extends TestCase {
 		$this->assertStringContainsString( 'Website redesign', $html );
 		$this->assertStringContainsString( 'Jane Doe', $html );
 	}
+
+	public function test_render_html_includes_contract_subject_and_value(): void {
+		$html = DocumentPdf::render_html(
+			array(
+				'contract_number' => 'CON-000007',
+				'subject'         => 'Annual retainer',
+				'currency'        => 'USD',
+				'contract_value'  => 2400.0,
+				'start_date'      => '2026-01-01',
+				'end_date'        => '2026-12-31',
+				'description'     => '<p>Service level agreement terms.</p>',
+				'contract_type'   => array(
+					'id'   => 1,
+					'name' => 'Retainer',
+				),
+				'contact'         => array(
+					'first_name' => 'Jane',
+					'last_name'  => 'Doe',
+					'email'      => 'jane@example.com',
+				),
+			),
+			'contract'
+		);
+
+		$this->assertStringContainsString( 'CON-000007', $html );
+		$this->assertStringContainsString( 'Annual retainer', $html );
+		$this->assertStringContainsString( '2,400.00 USD', $html );
+		$this->assertStringContainsString( 'Retainer', $html );
+		$this->assertStringContainsString( 'Service level agreement terms.', $html );
+	}
 }

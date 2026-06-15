@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use Illuminate\Database\QueryException;
@@ -33,6 +34,14 @@ class SalesNumbering {
 	 */
 	public static function next_invoice_number( string $prefix = 'INV' ): string {
 		return self::next_number( $prefix, InvoiceModel::class, 'invoice_number' );
+	}
+
+	/**
+	 * @param string $prefix Prefix such as CON.
+	 * @return string
+	 */
+	public static function next_contract_number( string $prefix = 'CON' ): string {
+		return self::next_number( $prefix, ContractModel::class, 'contract_number' );
 	}
 
 	/**
@@ -104,7 +113,8 @@ class SalesNumbering {
 		}
 
 		return false !== stripos( $message, 'invoice_number' )
-			|| false !== stripos( $message, 'proposal_number' );
+			|| false !== stripos( $message, 'proposal_number' )
+			|| false !== stripos( $message, 'contract_number' );
 	}
 
 	/**
@@ -118,6 +128,10 @@ class SalesNumbering {
 		}
 		if ( $model instanceof InvoiceModel ) {
 			$model->invoice_number = null;
+			return;
+		}
+		if ( $model instanceof ContractModel ) {
+			$model->contract_number = null;
 		}
 	}
 }

@@ -20,6 +20,7 @@ use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Sales\Renderer\ContractFrontendHandler;
 use DoubleScale\Modules\Sales\Renderer\InvoiceFrontendHandler;
 use DoubleScale\Modules\Sales\Renderer\ProposalFrontendHandler;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
@@ -77,6 +78,8 @@ final class Module extends AbstractModule {
 	public function restControllers(): array {
 		return array(
 			Rest\Controllers\RestProposalController::class,
+			Rest\Controllers\RestContractController::class,
+			Rest\Controllers\RestContractTypeController::class,
 			Rest\Controllers\RestInvoiceController::class,
 			Rest\Controllers\RestInvoicePaymentController::class,
 			Rest\Controllers\RestPaymentController::class,
@@ -85,6 +88,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
+			Rest\Controllers\RestPublicContractController::class,
 			Rest\Controllers\RestPublicInvoiceController::class,
 			Rest\Controllers\RestSalesSettingsController::class,
 			Rest\Controllers\RestSalesAnalyticsController::class,
@@ -98,6 +102,7 @@ final class Module extends AbstractModule {
 		return array(
 			array( 'doublescale_sales', 'doublescale_sales_overdue_invoices' ),
 			array( 'doublescale_sales', 'doublescale_sales_expiring_proposals' ),
+			array( 'doublescale_sales', 'doublescale_sales_expiring_contracts' ),
 		);
 	}
 
@@ -135,6 +140,7 @@ final class Module extends AbstractModule {
 		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
 
 		new ProposalFrontendHandler();
+		new ContractFrontendHandler();
 		new InvoiceFrontendHandler();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
@@ -166,6 +172,19 @@ final class Module extends AbstractModule {
 				'slug'            => 'doublescale&path=sales/invoices',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
 				'position'        => 42,
+				'group'           => 'sales',
+				'requires_module' => 'sales',
+			)
+		);
+
+		MenuRegistry::add(
+			array(
+				'page_title'      => __( 'Contracts', 'doublescale' ),
+				'menu_title'      => __( 'Contracts', 'doublescale' ),
+				'capability'      => 'doublescale_access',
+				'slug'            => 'doublescale&path=sales/contracts',
+				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
+				'position'        => 44,
 				'group'           => 'sales',
 				'requires_module' => 'sales',
 			)
@@ -217,6 +236,17 @@ final class Module extends AbstractModule {
 
 		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_proposals' ) ) {
 			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_proposals' );
+		}
+
+		$tasks->register_callback(
+			'doublescale_sales_expiring_contracts',
+			static function () {
+				( new Services\ExpiringContracts() )->run();
+			}
+		);
+
+		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_contracts' ) ) {
+			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_contracts' );
 		}
 	}
 
@@ -306,6 +336,8 @@ final class Module extends AbstractModule {
 				'proposal_declined',
 				'proposal_accepted',
 				'proposal_converted_to_invoice',
+				'contract_sent',
+				'contract_signed',
 				'invoice_sent',
 				'invoice_paid',
 			),

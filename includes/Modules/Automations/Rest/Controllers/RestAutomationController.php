@@ -1678,6 +1678,18 @@ class RestAutomationController extends RestController {
 				'label'      => 'Paid Memberships Pro',
 				'is_enabled' => doublescale_is_plugin_active( 'paid-memberships-pro/paid-memberships-pro.php' ),
 			),
+			'proposal'                  => array(
+				'label'      => __( 'Sales', 'doublescale' ),
+				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' ),
+			),
+			'invoice'                   => array(
+				'label'      => __( 'Sales', 'doublescale' ),
+				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' ),
+			),
+			'support'                   => array(
+				'label'      => __( 'Support', 'doublescale' ),
+				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'support' ),
+			),
 		);
 
 		// set forms

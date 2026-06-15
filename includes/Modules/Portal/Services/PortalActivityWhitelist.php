@@ -14,6 +14,15 @@
  * `contact_id`) is `support_reply`. This whitelist therefore exists to *drop*
  * the internal rows, not to surface booking data.
  *
+ * The default whitelist is intentionally EMPTY (deny-by-default). Each owning
+ * module opts its own customer-safe type in from its `boot()` via the
+ * `doublescale_portal_timeline_activity_types` filter — Support adds
+ * `support_reply` in {@see \DoubleScale\Modules\Support\Module::boot()}. This
+ * keeps the timeline in lock-step with the section/summary-card seam: when a
+ * module is disabled its `boot()` never runs, so its rows disappear from the
+ * timeline too (instead of lingering as orphaned entries that link to a section
+ * that no longer exists).
+ *
  * @package DoubleScale\Modules\Portal
  */
 
@@ -39,15 +48,17 @@ final class PortalActivityWhitelist {
 		/**
 		 * Filter the customer-safe activity types shown in the portal timeline.
 		 *
-		 * Operators can opt-in extra types (e.g. `email_sent`) but the default
-		 * is intentionally minimal.
+		 * Deny-by-default: the base list is EMPTY. Owning modules opt their own
+		 * type in from `boot()` (Support adds `support_reply`), so a disabled
+		 * module contributes nothing — keeping the timeline consistent with the
+		 * section/summary-card gating. Operators can still opt-in extra types
+		 * (e.g. `email_sent`) via this filter.
 		 *
 		 * @param array<int, string> $types Allowed activity_type strings.
 		 */
-		return (array) apply_filters(
-			'doublescale_portal_timeline_activity_types',
-			array( ActivityTypes::SUPPORT_REPLY )
-		);
+		$types = (array) apply_filters( 'doublescale_portal_timeline_activity_types', array() );
+
+		return array_values( array_unique( array_filter( array_map( 'strval', $types ) ) ) );
 	}
 
 	/**

@@ -29,6 +29,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
+use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Support\Renderer\AttachmentServeHandler;
@@ -200,6 +201,11 @@ final class Module extends AbstractModule {
 		add_filter( 'doublescale_client_portal_config', array( $this, 'inject_portal_config' ), 10, 2 );
 		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_portal_summary_card' ), 10, 2 );
 
+		// Opt `support_reply` into the portal timeline whitelist. Registered here
+		// (enabled-only) so a disabled Support module drops its conversation rows
+		// from the dashboard timeline too — the whitelist itself is deny-by-default.
+		add_filter( 'doublescale_portal_timeline_activity_types', array( $this, 'allow_portal_timeline_types' ) );
+
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools
 		// cluster visually. `group: 'sales'` matches the existing agent-tool
@@ -340,6 +346,24 @@ final class Module extends AbstractModule {
 		);
 
 		return $cards;
+	}
+
+	/**
+	 * Opt the `support_reply` activity type into the portal timeline whitelist.
+	 *
+	 * The whitelist is deny-by-default and lives in the Portal module; Support
+	 * is the owner of the only customer-safe activity row written to
+	 * `doublescale_activities`, so it contributes the type here. Because this
+	 * runs from {@see boot()} (enabled-only), disabling Support removes its
+	 * timeline rows in lock-step with the Tickets section + summary card.
+	 *
+	 * @param array<int, string> $types Allowed activity_type slugs.
+	 * @return array<int, string>
+	 */
+	public function allow_portal_timeline_types( array $types ): array {
+		$types[] = ActivityTypes::SUPPORT_REPLY;
+
+		return $types;
 	}
 
 	/**

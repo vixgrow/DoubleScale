@@ -30,8 +30,13 @@ class InvoicePayments {
 			->sum( 'amount' );
 
 		$invoice->amount_paid = round( $amount_paid, 2 );
+		$previous_status      = (string) $invoice->status;
 		$invoice->status      = self::derive_status( $invoice );
 		$invoice->save();
+
+		if ( InvoiceStatus::PAID === (string) $invoice->status && InvoiceStatus::PAID !== $previous_status ) {
+			do_action( 'doublescale_sales_invoice_paid', $invoice->fresh() );
+		}
 
 		return $invoice->fresh();
 	}

@@ -8,20 +8,29 @@ import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
 import { NAMESPACE } from '@/constants/sales';
+import { downloadAdminPdf } from '@/utils/download-admin-pdf';
 import type {
 	ContactInvoicePayment,
+	PaymentFilters,
+	PaymentDetail,
+	PaymentListItem,
 	ConvertProposalResponse,
 	CreateInvoicePayload,
 	CreateProposalPayload,
 	Invoice,
 	InvoiceFilters,
+	InvoiceOnlineInitResponse,
 	InvoicePayment,
 	InvoiceSummary,
+	OnlinePaymentGatewayStatus,
 	PaginatedResponse,
 	Proposal,
+	ProposalComment,
 	ProposalFilters,
+	ProposalSignature,
 	RecordPaymentPayload,
 	SalesAssignableUser,
+	SalesSettings,
 	SalesTax,
 } from '@/types/sales';
 
@@ -298,6 +307,83 @@ export const deleteInvoicePayment = (invoiceId: number, paymentId: number) =>
 		method: 'DELETE',
 	});
 
+export const usePayments = (filters: PaymentFilters = {}) => {
+	const [data, setData] = useState<PaginatedResponse<PaymentListItem> | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const filterKey = JSON.stringify(filters);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		const url = addQueryArgs(`${NAMESPACE}/payments`, filters as Record<string, unknown>);
+		return apiFetch<PaginatedResponse<PaymentListItem>>({ path: url })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, [filterKey]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const usePayment = (paymentId: number | null) => {
+	const [data, setData] = useState<PaymentDetail | null>(null);
+	const [loading, setLoading] = useState(Boolean(paymentId));
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		if (!paymentId) {
+			return Promise.resolve(null);
+		}
+		setLoading(true);
+		setError(null);
+		return apiFetch<{ payment: PaymentDetail }>({
+			path: `${NAMESPACE}/payments/${paymentId}`,
+		})
+			.then((response) => {
+				const payment = response?.payment ?? null;
+				setData(payment);
+				return payment;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, [paymentId]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const deletePayment = (paymentId: number) =>
+	apiFetch<{ deleted: boolean; invoice_id: number }>({
+		path: `${NAMESPACE}/payments/${paymentId}`,
+		method: 'DELETE',
+	});
+
+export const updatePayment = (paymentId: number, payload: RecordPaymentPayload) =>
+	apiFetch<{ payment: PaymentDetail }>({
+		path: `${NAMESPACE}/payments/${paymentId}`,
+		method: 'PUT',
+		data: payload,
+	});
+
 export const useContactSalesPayments = (contactId: number | null, page = 1, perPage = 10) => {
 	const [data, setData] = useState<PaginatedResponse<ContactInvoicePayment> | null>(null);
 	const [loading, setLoading] = useState(Boolean(contactId));
@@ -333,47 +419,57 @@ export const useContactSalesPayments = (contactId: number | null, page = 1, perP
 	return { data, loading, error, refetch };
 };
 
-export interface InvoiceStripeInitResponse {
-	client_secret?: string;
-	publishable_key: string;
-	amount: number;
-	currency: string;
-	already_paid?: boolean;
-	pi_status?: string;
-	invoice?: Invoice;
-}
+export interface InvoiceStripeInitResponse extends InvoiceOnlineInitResponse {}
 
 export interface SalesStripeStatus {
 	available: boolean;
 	configured: boolean;
 }
 
-export const useSalesStripeStatus = () => {
-	const [data, setData] = useState<SalesStripeStatus | null>(null);
+export const useSalesOnlinePaymentGateways = () => {
+	const [data, setData] = useState<OnlinePaymentGatewayStatus[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		setLoading(true);
-		apiFetch<SalesStripeStatus>({ path: `${NAMESPACE}/stripe/status` })
-			.then((response) => setData(response))
-			.catch(() => setData({ available: false, configured: false }))
+		apiFetch<{ gateways: OnlinePaymentGatewayStatus[] }>({ path: `${NAMESPACE}/payment-gateways` })
+			.then((response) => setData(Array.isArray(response?.gateways) ? response.gateways : []))
+			.catch(() => setData([]))
 			.finally(() => setLoading(false));
 	}, []);
 
 	return { data, loading };
 };
 
-export const initInvoiceStripePayment = (invoiceId: number) =>
-	apiFetch<InvoiceStripeInitResponse>({
-		path: `${NAMESPACE}/invoices/${invoiceId}/stripe/init`,
+/** @deprecated Use useSalesOnlinePaymentGateways */
+export const useSalesStripeStatus = () => {
+	const { data: gateways, loading } = useSalesOnlinePaymentGateways();
+	const stripe = gateways.find((g) => g.slug === 'stripe');
+	return {
+		data: stripe
+			? { available: stripe.available, configured: stripe.configured }
+			: ({ available: false, configured: false } as SalesStripeStatus),
+		loading,
+	};
+};
+
+export const initInvoiceOnlinePayment = (invoiceId: number, gateway: string) =>
+	apiFetch<InvoiceOnlineInitResponse>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/pay/${gateway}/init`,
 		method: 'POST',
 	});
 
-export const confirmInvoiceStripePayment = (invoiceId: number) =>
-	apiFetch<{ pi_status: string; invoice: Invoice }>({
-		path: `${NAMESPACE}/invoices/${invoiceId}/stripe/confirm`,
+export const confirmInvoiceOnlinePayment = (invoiceId: number, gateway: string) =>
+	apiFetch<{ pi_status: string; invoice: Invoice; gateway?: string }>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/pay/${gateway}/confirm`,
 		method: 'POST',
 	});
+
+export const initInvoiceStripePayment = (invoiceId: number) =>
+	initInvoiceOnlinePayment(invoiceId, 'stripe');
+
+export const confirmInvoiceStripePayment = (invoiceId: number) =>
+	confirmInvoiceOnlinePayment(invoiceId, 'stripe');
 
 export const convertProposalToInvoice = (proposalId: number) =>
 	apiFetch<ConvertProposalResponse>({
@@ -405,24 +501,149 @@ export const sendInvoice = (invoiceId: number, message = '') =>
 		data: message ? { message } : {},
 	});
 
+export const duplicateProposal = (proposalId: number) =>
+	apiFetch<Proposal>({
+		path: `${NAMESPACE}/proposals/${proposalId}/duplicate`,
+		method: 'POST',
+	});
+
+export const downloadProposalPdf = (proposalId: number, filename: string) =>
+	downloadAdminPdf(`${NAMESPACE}/proposals/${proposalId}/pdf`, filename);
+
+export const downloadInvoicePdf = (invoiceId: number, filename: string) =>
+	downloadAdminPdf(`${NAMESPACE}/invoices/${invoiceId}/pdf`, filename);
+
+export const useSalesSettings = () => {
+	const [data, setData] = useState<SalesSettings | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		return apiFetch<SalesSettings>({ path: `${NAMESPACE}/settings` })
+			.then((response) => {
+				setData(response);
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, []);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const updateSalesSettings = (payload: Partial<SalesSettings>) =>
+	apiFetch<SalesSettings>({
+		path: `${NAMESPACE}/settings`,
+		method: 'PUT',
+		data: payload,
+	});
+
 export const useSalesTaxes = () => {
 	const [data, setData] = useState<SalesTax[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
+	const refetch = useCallback(() => {
 		setLoading(true);
-		apiFetch<SalesTax[]>({ path: `${NAMESPACE}/taxes` })
+		setError(null);
+		return apiFetch<SalesTax[]>({ path: `${NAMESPACE}/taxes` })
 			.then((response) => {
-				setData(Array.isArray(response) ? response : []);
+				const items = Array.isArray(response) ? response : [];
+				setData(items);
+				return items;
 			})
 			.catch((err: unknown) => {
-				setError(formatRestError(err));
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
 			})
 			.finally(() => {
 				setLoading(false);
 			});
 	}, []);
 
-	return { data, loading, error };
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
 };
+
+export const createSalesTax = (payload: Pick<SalesTax, 'name' | 'rate'>) =>
+	apiFetch<SalesTax>({
+		path: `${NAMESPACE}/taxes`,
+		method: 'POST',
+		data: payload,
+	});
+
+export const updateSalesTax = (taxId: number, payload: Partial<Pick<SalesTax, 'name' | 'rate'>>) =>
+	apiFetch<SalesTax>({
+		path: `${NAMESPACE}/taxes/${taxId}`,
+		method: 'PUT',
+		data: payload,
+	});
+
+export const deleteSalesTax = (taxId: number) =>
+	apiFetch<{ deleted: boolean }>({
+		path: `${NAMESPACE}/taxes/${taxId}`,
+		method: 'DELETE',
+	});
+
+export const useProposalComments = (proposalId: number | null, enabled = true) => {
+	const [data, setData] = useState<ProposalComment[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		if (!proposalId || !enabled) {
+			setData([]);
+			return Promise.resolve([]);
+		}
+		setLoading(true);
+		setError(null);
+		return apiFetch<{ data: ProposalComment[] }>({
+			path: `${NAMESPACE}/proposals/${proposalId}/comments`,
+		})
+			.then((response) => {
+				const items = Array.isArray(response?.data) ? response.data : [];
+				setData(items);
+				return items;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, [proposalId, enabled]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const addProposalComment = (proposalId: number, content: string) =>
+	apiFetch<ProposalComment>({
+		path: `${NAMESPACE}/proposals/${proposalId}/comments`,
+		method: 'POST',
+		data: { content },
+	});
+
+export const fetchProposalSignature = (proposalId: number) =>
+	apiFetch<ProposalSignature>({
+		path: `${NAMESPACE}/proposals/${proposalId}/signature`,
+	});

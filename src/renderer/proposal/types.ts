@@ -10,6 +10,14 @@ export interface ProposalRendererConfig {
 	mount_id: string;
 }
 
+export interface PublicProposalComment {
+	id: number;
+	author_name: string;
+	content: string;
+	is_customer: boolean;
+	created_at: string | null;
+}
+
 export interface PublicProposal {
 	proposal_number: string;
 	subject: string;
@@ -31,6 +39,10 @@ export interface PublicProposal {
 	zip: string | null;
 	email: string | null;
 	phone: string | null;
+	allow_comments: boolean;
+	require_signature: boolean;
+	signed_name: string | null;
+	has_signature: boolean;
 	is_expired?: boolean;
 	can_accept: boolean;
 	can_decline: boolean;

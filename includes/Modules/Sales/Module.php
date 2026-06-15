@@ -16,6 +16,7 @@ use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
+use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
@@ -72,12 +73,15 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestProposalController::class,
 			Rest\Controllers\RestInvoiceController::class,
 			Rest\Controllers\RestInvoicePaymentController::class,
+			Rest\Controllers\RestPaymentController::class,
 			Rest\Controllers\RestContactSalesController::class,
-			Rest\Controllers\RestInvoiceStripeController::class,
+			Rest\Controllers\RestInvoiceOnlinePaymentController::class,
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
 			Rest\Controllers\RestPublicProposalController::class,
 			Rest\Controllers\RestPublicInvoiceController::class,
+			Rest\Controllers\RestSalesSettingsController::class,
+			Rest\Controllers\RestSalesAnalyticsController::class,
 		);
 	}
 
@@ -87,6 +91,7 @@ final class Module extends AbstractModule {
 	public function scheduledHooks(): array {
 		return array(
 			array( 'doublescale_sales', 'doublescale_sales_overdue_invoices' ),
+			array( 'doublescale_sales', 'doublescale_sales_expiring_proposals' ),
 		);
 	}
 
@@ -95,12 +100,20 @@ final class Module extends AbstractModule {
 
 		Capabilities::ensure_capabilities_synced();
 
+		GatewayManager::instance();
+
 		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
 
 		new ProposalFrontendHandler();
 		new InvoiceFrontendHandler();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
+		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
+
+		add_filter( 'doublescale_mail_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
+
+		require_once $this->module_dir() . '/MergeTags/AbstractSalesMergeTag.php';
+		$this->loadModuleMergeTagFiles();
 
 		MenuRegistry::add(
 			array(
@@ -123,6 +136,19 @@ final class Module extends AbstractModule {
 				'slug'            => 'doublescale&path=sales/invoices',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
 				'position'        => 42,
+				'group'           => 'sales',
+				'requires_module' => 'sales',
+			)
+		);
+
+		MenuRegistry::add(
+			array(
+				'page_title'      => __( 'Payments', 'doublescale' ),
+				'menu_title'      => __( 'Payments', 'doublescale' ),
+				'capability'      => 'doublescale_access',
+				'slug'            => 'doublescale&path=sales/payments',
+				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
+				'position'        => 43,
 				'group'           => 'sales',
 				'requires_module' => 'sales',
 			)
@@ -151,6 +177,30 @@ final class Module extends AbstractModule {
 		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_overdue_invoices' ) ) {
 			$tasks->schedule_recurring( time(), HOUR_IN_SECONDS, 'doublescale_sales_overdue_invoices' );
 		}
+
+		$tasks->register_callback(
+			'doublescale_sales_expiring_proposals',
+			static function () {
+				( new Services\ExpiringProposals() )->run();
+			}
+		);
+
+		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_proposals' ) ) {
+			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_proposals' );
+		}
+	}
+
+	/**
+	 * Notify sales rep when an invoice is paid.
+	 *
+	 * @param \DoubleScale\Modules\Sales\Models\InvoiceModel $invoice Invoice.
+	 * @return void
+	 */
+	public function on_invoice_paid( $invoice ): void {
+		if ( ! $invoice instanceof \DoubleScale\Modules\Sales\Models\InvoiceModel ) {
+			return;
+		}
+		( new Services\SalesRepNotifications() )->notify_invoice_paid( $invoice );
 	}
 
 	/**
@@ -206,5 +256,32 @@ final class Module extends AbstractModule {
 		}
 
 		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );
+	}
+
+	/**
+	 * Restrict the Sales merge-tag group to sales lifecycle triggers.
+	 *
+	 * @param array<string, array<string, mixed>> $groups Merge tag groups.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function register_merge_tag_groups( array $groups ): array {
+		$disabled = ! function_exists( 'doublescale_is_module_active' )
+			|| ! doublescale_is_module_active( 'sales' );
+
+		$groups['sales'] = array(
+			'name'        => __( 'Sales', 'doublescale' ),
+			'mergeTags'   => isset( $groups['sales']['mergeTags'] ) ? $groups['sales']['mergeTags'] : array(),
+			'triggers'    => array(
+				'proposal_sent',
+				'proposal_declined',
+				'proposal_accepted',
+				'proposal_converted_to_invoice',
+				'invoice_sent',
+				'invoice_paid',
+			),
+			'is_disabled' => $disabled,
+		);
+
+		return $groups;
 	}
 }

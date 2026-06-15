@@ -10,7 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  * External dependencies
  */
 import { useState, useEffect } from 'react';
-import { filter, map } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * shadcn/ui components
@@ -32,6 +32,10 @@ import './style.scss';
 import ConfigAPI from '@doublescale/config';
 import type { MergeTags, AutomationMergeTags } from '@doublescale/config';
 import CustomDialogHeader from '../dialog-header';
+import {
+	filterMergeTagGroups,
+	getVisibleMergeTagsForTrigger,
+} from './utils';
 
 interface EnhancedMergeTagsSelectorProps {
 	visible: boolean;
@@ -115,13 +119,16 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	// Use dynamic merge tags if available, otherwise fallback to config
 	const mergeTags = dynamicMergeTags || ConfigAPI.getMergeTags();
 
-	const automationMergeTagsWithTrigger = filter(mergeTags, (group) => {
-		// Filter out disabled groups
-		if (group.is_disabled) {
-			return false;
+	const automationMergeTagsWithTrigger = filterMergeTagGroups(
+		mergeTags,
+		activeTrigger
+	);
+
+	useEffect(() => {
+		if (selectedTabIndex >= automationMergeTagsWithTrigger.length) {
+			setSelectedTabIndex(0);
 		}
-		return !group.triggers || group.triggers.includes(activeTrigger);
-	});
+	}, [automationMergeTagsWithTrigger.length, selectedTabIndex]);
 
 	const selectedGroup = automationMergeTagsWithTrigger[selectedTabIndex];
 
@@ -239,19 +246,10 @@ const MergeTagsGroupRender: React.FC<{
 }> = ({ mergeTags, onInsertTag, isDynamic, activeTrigger }) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('doublescale/core');
 
-	// Filter merge tags based on required_triggers
-	const filteredMergeTags = filter(mergeTags, (tag) => {
-		// If tag has no required_triggers, show it
-		if (!tag.required_triggers || tag.required_triggers.length === 0) {
-			return true;
-		}
-		// If no active trigger, hide tags with required_triggers
-		if (!activeTrigger) {
-			return false;
-		}
-		// Show tag only if current trigger is in required_triggers
-		return tag.required_triggers.includes(activeTrigger);
-	});
+	const filteredMergeTags = getVisibleMergeTagsForTrigger(
+		mergeTags,
+		activeTrigger
+	);
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {

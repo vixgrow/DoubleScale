@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import type { PublicInvoice, StripeInitResponse } from './types';
+import type { PublicInvoice, OnlinePaymentInitResponse } from './types';
 
 const formatError = (err: unknown): string => {
 	if (err instanceof Error && err.message) {
@@ -56,19 +56,19 @@ export const usePublicInvoice = (hash: string | null) => {
 	return { data, loading, error, refetch };
 };
 
-export const initPublicInvoiceStripe = (hash: string) =>
-	fetch(`${getPublicBase()}/${hash}/stripe/init`, {
+export const initPublicInvoicePayment = (hash: string, gateway: string) =>
+	fetch(`${getPublicBase()}/${hash}/pay/${gateway}/init`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 	}).then(async (res) => {
 		if (!res.ok) {
 			return parseError(res);
 		}
-		return res.json() as Promise<StripeInitResponse>;
+		return res.json() as Promise<OnlinePaymentInitResponse>;
 	});
 
-export const confirmPublicInvoiceStripe = (hash: string) =>
-	fetch(`${getPublicBase()}/${hash}/stripe/confirm`, {
+export const confirmPublicInvoicePayment = (hash: string, gateway: string) =>
+	fetch(`${getPublicBase()}/${hash}/pay/${gateway}/confirm`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 	}).then(async (res) => {
@@ -77,5 +77,11 @@ export const confirmPublicInvoiceStripe = (hash: string) =>
 		}
 		return res.json() as Promise<{ invoice?: PublicInvoice }>;
 	});
+
+/** @deprecated Use initPublicInvoicePayment */
+export const initPublicInvoiceStripe = (hash: string) => initPublicInvoicePayment(hash, 'stripe');
+
+/** @deprecated Use confirmPublicInvoicePayment */
+export const confirmPublicInvoiceStripe = (hash: string) => confirmPublicInvoicePayment(hash, 'stripe');
 
 export const getPublicInvoicePdfUrl = (hash: string) => `${getPublicBase()}/${hash}/pdf`;

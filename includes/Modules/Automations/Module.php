@@ -108,6 +108,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Forms/*.php',
 				'includes/Modules/Automations/Triggers/Booking/*.php',
 				'includes/Modules/Automations/Triggers/Support/*.php',
+				'includes/Modules/Automations/Triggers/Sales/*.php',
 				'includes/Modules/Automations/Triggers/Surecart/*/*.php',
 				'includes/Modules/Automations/Triggers/Prestoplayer/*.php',
 				'includes/Modules/Automations/Actions/*.php',
@@ -124,6 +125,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Pmpro/*.php',
 				'includes/Modules/Automations/Actions/Deal/*.php',
 				'includes/Modules/Automations/Actions/Support/*.php',
+				'includes/Modules/Automations/Actions/Sales/*.php',
 				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/Email/*.php',
 				'includes/Modules/Automations/Actions/Prestoplayer/*.php',
@@ -185,7 +187,7 @@ final class Module extends AbstractModule {
 		$groups['messaging'] = array(
 			'name'      => __( 'Messaging', 'doublescale' ),
 			'mergeTags' => array(),
-			'triggers'  => array(),
+			'triggers'  => array( 'whatsapp_received', 'sms_received', 'email_received' ),
 		);
 
 		$acf_disabled = ! doublescale_is_plugin_active( 'advanced-custom-fields/acf.php' )

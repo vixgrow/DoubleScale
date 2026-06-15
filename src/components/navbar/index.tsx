@@ -145,6 +145,9 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/proposals/:id': 'sales',
 	'sales/invoices': 'sales',
 	'sales/invoices/:id': 'sales',
+	'sales/payments': 'sales',
+	'sales/payments/:id': 'sales',
+	'sales/settings': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
@@ -163,6 +166,7 @@ const SUB_PATH_TO_MODULE: Record<string, string> = {
 	campaigns: 'campaigns',
 	'email-sequences': 'campaigns',
 	'deals-analytics': 'analytics',
+	'invoices-analytics': 'analytics',
 	'sales-rep-analytics': 'analytics',
 	'pipeline-analytics': 'analytics',
 	'my-reports': 'analytics',
@@ -265,6 +269,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
+							},
+							{
 								path: 'sales-rep-analytics',
 								label: __('Sales Rep Analytics', 'doublescale'),
 							},
@@ -279,6 +287,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'deals-analytics',
 								label: __('Deals Analytics', 'doublescale'),
+							},
+							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',
@@ -396,6 +408,18 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{
 							path: 'sales/invoices',
 							label: __('Invoices', 'doublescale'),
+						},
+						{
+							path: 'sales/payments',
+							label: __('Payments', 'doublescale'),
+						},
+						{
+							path: 'sales/settings',
+							label: __('Settings', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_all_sales',
+								'doublescale_crm_manager',
+							],
 						},
 						// Pipeline nests under Sales: with Pro, `enabled` is the
 						// derived effective state (Sales is already on here, so it

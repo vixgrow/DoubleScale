@@ -36,17 +36,28 @@ final class InvoiceNotifications {
 			return false;
 		}
 
+		$tokens = SalesEmailTokens::for_invoice( $invoice, $url );
+
 		$host_user_id = $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : null;
 		$identity     = EmailIdentityResolver::resolve( $host_user_id );
 
 		$customer_name = $this->resolve_customer_name( $invoice );
-		$subject       = sprintf(
-			/* translators: %s: invoice number */
-			__( 'Invoice: %s', 'doublescale' ),
-			(string) $invoice->invoice_number
-		);
+		$subject_tpl   = (string) SalesSettings::get( 'invoice_email_subject', '' );
+		$subject       = SalesEmailTokens::replace( $subject_tpl, $tokens );
+		if ( '' === trim( $subject ) ) {
+			$subject = sprintf(
+				/* translators: %s: invoice number */
+				__( 'Invoice: %s', 'doublescale' ),
+				(string) $invoice->invoice_number
+			);
+		}
 
-		$body = $this->build_body( $invoice, $customer_name, $url, $custom_message );
+		$intro_tpl = (string) SalesSettings::get( 'invoice_email_intro', '' );
+		$intro     = '' !== trim( $custom_message )
+			? $custom_message
+			: SalesEmailTokens::replace( $intro_tpl, $tokens );
+
+		$body = $this->build_body( $invoice, $customer_name, $url, $intro );
 
 		$emails = new Emails();
 		$emails->from_address = $identity['from_address'];

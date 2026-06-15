@@ -21,7 +21,7 @@ const StatsCardSkeleton = () => (
 
 // Chart Skeleton
 const ChartSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 w-1/2">
+  <div className="flex h-full min-h-0 flex-col rounded-lg bg-white p-6 w-full">
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
@@ -50,7 +50,7 @@ const ChartSkeleton = () => (
 
 // Recent Contacts Skeleton
 const RecentContactsSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 w-1/2">
+  <div className="flex h-full min-h-0 flex-col rounded-lg bg-white p-6 w-full">
     <Skeleton className="h-6 w-40 mb-6" />
     <div className="space-y-4">
       {[...Array(5)].map((_, i) => (
@@ -69,7 +69,7 @@ const RecentContactsSkeleton = () => (
 
 // Unsubscribed Table Skeleton
 const UnsubscribedTableSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 col-span-2">
+  <div className="min-w-0 w-full rounded-lg bg-white p-6 lg:col-span-2">
     <Skeleton className="h-6 w-56 mb-6" />
     <div className="space-y-4">
       {/* Table Header */}
@@ -104,37 +104,30 @@ const UnsubscribedTableSkeleton = () => (
 // Main Component
 const ContactAnalyticsSkeleton = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      {/* Page Header */}
-      <div className="mb-8">
+    <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
+      <div className="mb-2">
         <Skeleton className="h-8 w-64 mb-2" />
-        <Skeleton className="h-4 w-96" />
+        <Skeleton className="h-4 w-96 max-w-full" />
       </div>
 
-      <div className="space-y-6">
-        {/* Top Section: Stats + Unsubscribed Table */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Stats Cards */}
-          <div className="col-span-1 space-y-5">
-            <div className="bg-white rounded-lg p-4">
-              <Skeleton className="h-6 w-48 mb-6" />
-              <div className="space-y-5">
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-              </div>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch">
+        <div className="col-span-1 space-y-5">
+          <div className="rounded-lg bg-white p-4">
+            <Skeleton className="h-6 w-48 mb-6" />
+            <div className="space-y-5">
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
             </div>
           </div>
-
-          {/* Unsubscribed Table */}
-          <UnsubscribedTableSkeleton />
         </div>
 
-        {/* Bottom Section: Recent Contacts + Chart */}
-        <div className="flex gap-6">
-          <RecentContactsSkeleton />
-          <ChartSkeleton />
-        </div>
+        <UnsubscribedTableSkeleton />
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-stretch">
+        <RecentContactsSkeleton />
+        <ChartSkeleton />
       </div>
     </div>
   );

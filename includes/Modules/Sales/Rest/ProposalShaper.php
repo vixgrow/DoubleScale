@@ -54,6 +54,7 @@ final class ProposalShaper {
 			'phone'            => $proposal->phone,
 			'allow_comments'   => (bool) $proposal->allow_comments,
 			'sent_at'          => $proposal->sent_at ? (string) $proposal->sent_at : null,
+			'viewed_at'        => $proposal->viewed_at ? (string) $proposal->viewed_at : null,
 			'accepted_at'      => $proposal->accepted_at ? (string) $proposal->accepted_at : null,
 			'declined_at'      => $proposal->declined_at ? (string) $proposal->declined_at : null,
 			'decline_reason'   => $proposal->decline_reason ? (string) $proposal->decline_reason : null,

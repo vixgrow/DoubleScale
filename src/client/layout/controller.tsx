@@ -606,6 +606,18 @@ registerAdminPage('deals-analytics', {
 	alwaysRegister: true,
 });
 
+registerAdminPage('invoices-analytics', {
+	path: 'invoices-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="invoices-analytics" />
+	),
+	label: __('Invoice Revenue', 'doublescale'),
+	hidden: true,
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_view_sales'],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
 registerAdminPage('sales-rep-analytics', {
 	path: 'sales-rep-analytics',
 	component: (props) => (

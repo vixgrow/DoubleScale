@@ -13,6 +13,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Sales\Constants\PaymentMode;
 use DoubleScale\Modules\Sales\Models\PaymentModel;
+use DoubleScale\Modules\Sales\Services\DocumentPdf;
 use DoubleScale\Modules\Sales\Services\InvoicePayments;
 use WP_Error;
 use WP_REST_Request;
@@ -405,7 +406,7 @@ class RestPaymentController extends RestController {
 			$row['company'] = array(
 				'name'    => (string) get_bloginfo( 'name' ),
 				'url'     => (string) home_url( '/' ),
-				'address' => (string) apply_filters( 'doublescale_sales_pdf_company_address', '' ),
+				'address' => DocumentPdf::resolved_company_address(),
 			);
 		}
 

@@ -99,6 +99,17 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 				return data ? <ContactAnalytics dashboardData={data} /> : null;
 			case 'emails-analytics':
 				return data ? <EmailAnalytics dashboardData={data} /> : null;
+			case 'invoices-analytics':
+				return applyFilters(
+					'doublescale_analytics_invoices_content',
+					<ProFeatureNotice
+						featureName={__('Invoice Revenue', 'doublescale')}
+						description={__(
+							'Track collected payments, outstanding balances, and monthly invoice revenue.',
+							'doublescale'
+						)}
+					/>
+				);
 			default:
 				// Default view for analytics-and-reports main page
 				// Sales Rep (without manager access) sees only their reports

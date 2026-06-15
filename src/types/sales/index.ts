@@ -96,6 +96,7 @@ export interface Proposal {
 	phone: string | null;
 	allow_comments: boolean;
 	sent_at?: string | null;
+	viewed_at?: string | null;
 	accepted_at?: string | null;
 	declined_at?: string | null;
 	decline_reason?: string | null;
@@ -295,4 +296,5 @@ export interface SalesSettings {
 	default_offline_payment_modes: string[];
 	default_online_payment_gateways: string[];
 	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
+	pdf_company_address?: string;
 }

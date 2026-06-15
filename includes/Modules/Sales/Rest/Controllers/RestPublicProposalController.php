@@ -127,6 +127,11 @@ class RestPublicProposalController extends RestController {
 			$proposal->save();
 		}
 
+		if ( empty( $proposal->viewed_at ) ) {
+			$proposal->viewed_at = current_time( 'mysql' );
+			$proposal->save();
+		}
+
 		return new WP_REST_Response( ProposalShaper::shape_public( $proposal ), 200 );
 	}
 

@@ -73,6 +73,11 @@ class CompletedAutomation extends Rule {
 	public function get_options( $automation_name = '' ) {
 		$options = array();
 
+		if ( function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready( 'automations', AutomationModel::class ) ) {
+			return $options;
+		}
+
 		if ( '' === $automation_name ) {
 			$automations = AutomationModel::paginate( 10, array( '*' ), 'page', 1 );
 		} else {

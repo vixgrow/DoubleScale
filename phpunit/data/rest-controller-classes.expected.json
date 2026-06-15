@@ -37,6 +37,7 @@
     "RestPublicProposalController",
     "RestReplyController",
     "RestReportController",
+    "RestSalesAnalyticsController",
     "RestSalesSettingsController",
     "RestSalesTaxController",
     "RestSalesUsersController",

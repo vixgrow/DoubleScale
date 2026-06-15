@@ -39,6 +39,7 @@ final class SalesSettings {
 				PaymentMode::STRIPE,
 			),
 			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
+			'pdf_company_address'             => '',
 		);
 	}
 
@@ -146,9 +147,15 @@ final class SalesSettings {
 			'proposal_email_intro',
 			'invoice_email_subject',
 			'invoice_email_intro',
+			'pdf_company_address',
 		);
 		foreach ( $string_keys as $key ) {
-			if ( array_key_exists( $key, $merged ) ) {
+			if ( ! array_key_exists( $key, $merged ) ) {
+				continue;
+			}
+			if ( 'pdf_company_address' === $key ) {
+				$clean[ $key ] = sanitize_textarea_field( (string) $merged[ $key ] );
+			} else {
 				$clean[ $key ] = sanitize_text_field( (string) $merged[ $key ] );
 			}
 		}

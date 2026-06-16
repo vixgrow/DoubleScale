@@ -150,6 +150,11 @@ final class Module extends AbstractModule {
 		// contribution is gated on doublescale_sales_documents_ready().
 		new Services\SalesPortalProvider();
 
+		// Admin/staff calendar bridge: contributes invoice due dates, proposal
+		// expiries, and contract renewals to the cross-module calendar feed
+		// (rep-scoped; managers see all).
+		new Services\SalesCalendarProvider();
+
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
 		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
 

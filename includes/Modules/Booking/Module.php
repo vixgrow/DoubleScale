@@ -155,6 +155,9 @@ final class Module extends AbstractModule {
 		// Client Portal bridge: registers the Bookings section + summary +
 		// timeline filters (only while Booking is enabled).
 		$container->get( Services\BookingPortalProvider::class );
+		// Admin/staff calendar bridge: contributes bookings to the cross-module
+		// calendar feed (host-scoped for agents, all for managers).
+		new Services\BookingCalendarProvider();
 		$container->get( Services\EmailNotifications::class );
 		$container->get( Services\BookingJobs::class );
 		$container->get( Services\BookingTasks::class );

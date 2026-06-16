@@ -294,7 +294,7 @@ const SupportInbox: React.FC = () => {
 		!filters.tag_id;
 
 	return (
-		<div className="doublescale-support-inbox min-w-0 p-4 sm:p-6">
+		<div className="doublescale-support-inbox min-w-0 ">
 			<BulkActionBar
 				selectedCount={selectedCount}
 				onReply={() => setBulkModal('reply')}

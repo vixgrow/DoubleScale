@@ -127,6 +127,31 @@ export interface PortalTimelineResponse {
 	total: number;
 }
 
+export type PortalCalendarEventKind =
+	| 'booking'
+	| 'invoice'
+	| 'proposal'
+	| 'support';
+
+export interface PortalCalendarEvent {
+	id: string;
+	kind: PortalCalendarEventKind;
+	title: string;
+	/** Event date(time). All-day events carry a `YYYY-MM-DD` (or datetime) start. */
+	start: string;
+	end: string | null;
+	all_day: boolean;
+	/** Booking tz (fallback 'UTC'); null for all-day docs. */
+	timezone: string | null;
+	status: string;
+	/** In-portal navigation target, or null when the event isn't actionable. */
+	route: string | null;
+}
+
+export interface PortalCalendarResponse {
+	data: PortalCalendarEvent[];
+}
+
 export interface PortalBookingLocation {
 	label: string;
 	value: string;

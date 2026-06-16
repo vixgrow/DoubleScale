@@ -62,6 +62,7 @@ final class SalesPortalProvider {
 		add_filter( 'doublescale_portal_sections', array( $this, 'register_section' ) );
 		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_summary_card' ), 10, 2 );
 		add_filter( 'doublescale_portal_timeline_items', array( $this, 'add_timeline_items' ), 10, 2 );
+		add_filter( 'doublescale_portal_calendar_events', array( $this, 'add_calendar_events' ), 10, 4 );
 	}
 
 	/**
@@ -160,6 +161,73 @@ final class SalesPortalProvider {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Project the contact's invoice due dates + proposal expiries onto the
+	 * calendar feed as all-day events.
+	 *
+	 * Date-only columns (`due_date`, `open_till`) become tz-agnostic all-day
+	 * events (`timezone => null`). Comparing a DATE column to the window's
+	 * inclusive end-of-day bound (`…-30 23:59:59`) still includes the 30th.
+	 * Each event carries the document `hash` and a `/documents/{type}/{hash}`
+	 * route so the in-portal hash-keyed detail view resolves (a numeric id 404s).
+	 *
+	 * @param array<int, array<string, mixed>> $events        Calendar events.
+	 * @param ContactModel|null                $contact       Resolved contact.
+	 * @param string                           $start         Window start (Y-m-d).
+	 * @param string                           $end_inclusive Window end, inclusive end-of-day (Y-m-d H:i:s).
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function add_calendar_events( array $events, $contact, string $start, string $end_inclusive ): array {
+		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+			return $events;
+		}
+
+		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
+			->where( 'status', '!=', InvoiceStatus::DRAFT )
+			->whereNotNull( 'due_date' )
+			->whereBetween( 'due_date', array( $start, $end_inclusive ) )
+			->get();
+
+		foreach ( $invoices as $invoice ) {
+			$hash     = (string) $invoice->hash;
+			$events[] = array(
+				'id'       => 'invoice-' . (int) $invoice->id,
+				'kind'     => 'invoice',
+				'title'    => (string) $invoice->invoice_number,
+				'start'    => (string) $invoice->due_date,
+				'end'      => null,
+				'all_day'  => true,
+				'timezone' => null,
+				'status'   => (string) $invoice->status,
+				'route'    => '' !== $hash ? '/documents/invoice/' . $hash : '/documents',
+			);
+		}
+
+		$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
+			->where( 'status', '!=', ProposalStatus::DRAFT )
+			->whereNotNull( 'open_till' )
+			->whereBetween( 'open_till', array( $start, $end_inclusive ) )
+			->get();
+
+		foreach ( $proposals as $proposal ) {
+			$hash     = (string) $proposal->hash;
+			$title    = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
+			$events[] = array(
+				'id'       => 'proposal-' . (int) $proposal->id,
+				'kind'     => 'proposal',
+				'title'    => $title,
+				'start'    => (string) $proposal->open_till,
+				'end'      => null,
+				'all_day'  => true,
+				'timezone' => null,
+				'status'   => (string) $proposal->status,
+				'route'    => '' !== $hash ? '/documents/proposal/' . $hash : '/documents',
+			);
+		}
+
+		return $events;
 	}
 
 	/**

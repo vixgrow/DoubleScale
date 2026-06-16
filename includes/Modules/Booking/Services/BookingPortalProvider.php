@@ -30,6 +30,7 @@ final class BookingPortalProvider {
 		add_filter( 'doublescale_portal_sections', array( $this, 'register_section' ) );
 		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_summary_card' ), 10, 2 );
 		add_filter( 'doublescale_portal_timeline_items', array( $this, 'add_timeline_items' ), 10, 2 );
+		add_filter( 'doublescale_portal_calendar_events', array( $this, 'add_calendar_events' ), 10, 4 );
 	}
 
 	/**
@@ -109,6 +110,71 @@ final class BookingPortalProvider {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Project the contact's bookings in the window onto the calendar feed.
+	 *
+	 * Eager-loads `event` (for the title) AND `meta` (for the timezone) so the
+	 * per-row `timezone` accessor — which is backed by a `booking_meta` query,
+	 * not a column — doesn't fire one query per booking across an uncapped
+	 * window. The timezone is read from the loaded meta collection here, falling
+	 * back to 'UTC' (bookings never emit a null tz).
+	 *
+	 * @param array<int, array<string, mixed>> $events        Calendar events.
+	 * @param ContactModel|null                $contact       Resolved contact.
+	 * @param string                           $start         Window start (Y-m-d).
+	 * @param string                           $end_inclusive Window end, inclusive end-of-day (Y-m-d H:i:s).
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function add_calendar_events( array $events, $contact, string $start, string $end_inclusive ): array {
+		if ( ! $contact instanceof ContactModel ) {
+			return $events;
+		}
+
+		$bookings = BookingModel::with( array( 'event', 'meta' ) )
+			->where( 'contact_id', (int) $contact->id )
+			->whereBetween( 'start_time', array( $start, $end_inclusive ) )
+			->get();
+
+		foreach ( $bookings as $booking ) {
+			$event_name = $booking->event ? (string) $booking->event->name : __( 'Booking', 'doublescale' );
+
+			$events[] = array(
+				'id'       => 'booking-' . (int) $booking->id,
+				'kind'     => 'booking',
+				'title'    => $event_name,
+				'start'    => (string) $booking->start_time,
+				'end'      => (string) $booking->end_time,
+				'all_day'  => false,
+				'timezone' => self::resolve_timezone( $booking ),
+				'status'   => (string) $booking->status,
+				'route'    => '/bookings/' . (int) $booking->id,
+			);
+		}
+
+		return $events;
+	}
+
+	/**
+	 * Read the booking timezone from the already-loaded `meta` collection,
+	 * avoiding the per-row query the `timezone` accessor would run.
+	 *
+	 * @param BookingModel $booking Booking with `meta` eager-loaded.
+	 * @return string
+	 */
+	private static function resolve_timezone( BookingModel $booking ): string {
+		$meta = $booking->relationLoaded( 'meta' ) ? $booking->getRelation( 'meta' ) : $booking->meta;
+		foreach ( $meta as $row ) {
+			if ( 'timezone' === (string) $row->meta_key ) {
+				$value = maybe_unserialize( $row->meta_value );
+				if ( is_string( $value ) && '' !== $value ) {
+					return $value;
+				}
+			}
+		}
+
+		return 'UTC';
 	}
 
 	/**

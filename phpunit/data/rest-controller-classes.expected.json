@@ -31,6 +31,7 @@
     "RestPluginsController",
     "RestPortalBookingController",
     "RestPortalBootstrapController",
+    "RestPortalCalendarController",
     "RestPortalController",
     "RestPortalDocumentsController",
     "RestPortalPageController",

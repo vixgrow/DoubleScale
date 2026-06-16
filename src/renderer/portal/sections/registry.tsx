@@ -9,11 +9,13 @@
 import { lazy } from '@wordpress/element';
 import type { ComponentType } from 'react';
 
+const Calendar = lazy(() => import('./calendar'));
 const Tickets = lazy(() => import('./tickets'));
 const Bookings = lazy(() => import('./bookings'));
 const Documents = lazy(() => import('./documents'));
 
 export const SECTION_REGISTRY: Record<string, ComponentType> = {
+	calendar: Calendar,
 	tickets: Tickets,
 	bookings: Bookings,
 	documents: Documents,

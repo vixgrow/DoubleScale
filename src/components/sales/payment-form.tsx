@@ -1,5 +1,5 @@
 /**
- * Editable payment form (Perfex-style).
+ * Editable payment form.
  */
 
 import React, { useEffect, useMemo, useState } from '@wordpress/element';

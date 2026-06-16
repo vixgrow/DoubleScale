@@ -1,5 +1,5 @@
 /**
- * Payments list page (Perfex-style global payments table).
+ * Payments list page (a global table of all recorded payments).
  */
 
 import React, { useState } from '@wordpress/element';

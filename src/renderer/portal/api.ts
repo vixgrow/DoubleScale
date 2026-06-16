@@ -16,6 +16,7 @@ import { getPortalConfig } from './config';
 import type {
 	PortalBooking,
 	PortalBootstrap,
+	PortalCalendarResponse,
 	PortalDocument,
 	PortalPaymentsResponse,
 	PortalTimelineResponse,
@@ -90,6 +91,18 @@ export const fetchDocuments = (
 
 export const fetchPayments = (): Promise<PortalPaymentsResponse> =>
 	apiFetch<PortalPaymentsResponse>({ path: `${PORTAL}/payments` });
+
+/**
+ * Aggregated calendar feed for a date window. `start`/`end` are `YYYY-MM-DD`;
+ * the server clamps the span and owns the inclusive end-of-day bound.
+ */
+export const fetchCalendar = (
+	start: string,
+	end: string
+): Promise<PortalCalendarResponse> =>
+	apiFetch<PortalCalendarResponse>({
+		path: addQueryArgs(`${PORTAL}/calendar`, { start, end }),
+	});
 
 /**
  * Generic data hook for the read endpoints.

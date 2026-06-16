@@ -31,6 +31,7 @@
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
     "RestPortalBookingController": "DoubleScale\\Modules\\Booking\\Rest\\Controllers\\RestPortalBookingController",
     "RestPortalBootstrapController": "DoubleScale\\Modules\\Portal\\Rest\\Controllers\\RestPortalBootstrapController",
+    "RestPortalCalendarController": "DoubleScale\\Modules\\Portal\\Rest\\Controllers\\RestPortalCalendarController",
     "RestPortalController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestPortalController",
     "RestPortalDocumentsController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestPortalDocumentsController",
     "RestPortalPageController": "DoubleScale\\Modules\\Portal\\Rest\\Controllers\\RestPortalPageController",

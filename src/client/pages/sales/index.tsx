@@ -47,7 +47,7 @@ const SALES_MENU_CAPS = [
 ];
 
 /**
- * `/sales` → Proposals list (Perfex-style Sales parent). While the documents
+ * `/sales` → Proposals list (the Sales parent landing). While the documents
  * feature is gated, the only destination under Sales is the pipeline.
  */
 const resolveSalesLandingPath = (): string | null => {

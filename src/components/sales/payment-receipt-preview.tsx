@@ -1,5 +1,5 @@
 /**
- * Payment receipt preview (Perfex-style layout).
+ * Payment receipt preview.
  */
 
 import React from '@wordpress/element';

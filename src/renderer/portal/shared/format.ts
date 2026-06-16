@@ -51,6 +51,23 @@ export const formatDate = (value: string, timezone?: string): string => {
 	}
 };
 
+export const formatTime = (value: string, timezone?: string): string => {
+	const d = toDate(value);
+	if (!d) {
+		return '';
+	}
+	try {
+		return new Intl.DateTimeFormat(undefined, {
+			timeStyle: 'short',
+			timeZone: timezone || 'UTC',
+		}).format(d);
+	} catch (e) {
+		return new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
+			d
+		);
+	}
+};
+
 export const formatMoney = (
 	amount: string | number | null,
 	currency: string | null

@@ -294,7 +294,7 @@ const SupportInbox: React.FC = () => {
 		!filters.tag_id;
 
 	return (
-		<div className="doublescale-support-inbox p-6">
+		<div className="doublescale-support-inbox min-w-0 p-4 sm:p-6">
 			<BulkActionBar
 				selectedCount={selectedCount}
 				onReply={() => setBulkModal('reply')}
@@ -327,22 +327,28 @@ const SupportInbox: React.FC = () => {
 				</Alert>
 			)}
 
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold text-gray-900">
+			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+				<div className="min-w-0">
+					<h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
 						{__('Helpdesk Inbox', 'doublescale')}
 					</h1>
-					<p className="text-sm text-gray-600 mt-1">
+					<p className="mt-1 text-sm text-gray-600">
 						{__(
 							'Tickets across every mailbox, sorted by most recent activity.',
 							'doublescale'
 						)}
 					</p>
 				</div>
-				<div className="flex items-center gap-2">
-					<Button variant="outline" size="sm" onClick={() => refetch()}>
-						<RefreshCw />
-						{__('Refresh', 'doublescale')}
+				<div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => refetch()}
+						aria-label={__('Refresh', 'doublescale')}
+						className="flex-1 sm:flex-none"
+					>
+						<RefreshCw className="shrink-0" />
+							{__('Refresh', 'doublescale')}
 					</Button>
 					{canManageAllTickets && (
 						<Button
@@ -357,20 +363,22 @@ const SupportInbox: React.FC = () => {
 									  )
 									: undefined
 							}
+							aria-label={__('New ticket', 'doublescale')}
+							className="flex-1 sm:flex-none"
 						>
-							<Plus />
-							{__('New ticket', 'doublescale')}
+							<Plus className="shrink-0" />
+								{__('New ticket', 'doublescale')}
 						</Button>
 					)}
 				</div>
 			</div>
 
 			{/* Filter row */}
-			<div className="mb-4 flex flex-wrap gap-3 items-end">
-				<div>
+			<div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:flex-wrap xl:items-end">
+				<div className="min-w-0 sm:col-span-2 lg:col-span-1 xl:w-64">
 					<Label
 						htmlFor="ds-support-search"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="mb-1 block text-xs font-medium text-gray-700"
 					>
 						{__('Search', 'doublescale')}
 					</Label>
@@ -378,7 +386,7 @@ const SupportInbox: React.FC = () => {
 						id="ds-support-search"
 						type="search"
 						placeholder={__('Title contains…', 'doublescale')}
-						className="w-64"
+						className="w-full !rounded-lg !h-10 !border-border"
 						defaultValue={filters.search ?? ''}
 						onKeyDown={(e) => {
 							if (e.key === 'Enter') {
@@ -387,10 +395,10 @@ const SupportInbox: React.FC = () => {
 						}}
 					/>
 				</div>
-				<div>
+				<div className="min-w-0">
 					<Label
 						htmlFor="ds-support-status"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="mb-1 block text-xs font-medium text-gray-700"
 					>
 						{__('Status', 'doublescale')}
 					</Label>
@@ -400,7 +408,7 @@ const SupportInbox: React.FC = () => {
 							updateFilter({ status: v === 'all' ? undefined : v })
 						}
 					>
-						<SelectTrigger className="w-[140px]">
+						<SelectTrigger className="w-full sm:w-[140px]">
 							<SelectValue placeholder={__('All', 'doublescale')} />
 						</SelectTrigger>
 						<SelectContent>
@@ -413,10 +421,10 @@ const SupportInbox: React.FC = () => {
 						</SelectContent>
 					</Select>
 				</div>
-				<div>
+				<div className="min-w-0">
 					<Label
 						htmlFor="ds-support-priority"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="mb-1 block text-xs font-medium text-gray-700"
 					>
 						{__('Priority', 'doublescale')}
 					</Label>
@@ -428,7 +436,7 @@ const SupportInbox: React.FC = () => {
 							})
 						}
 					>
-						<SelectTrigger className="w-[140px]">
+						<SelectTrigger className="w-full sm:w-[140px]">
 							<SelectValue placeholder={__('All', 'doublescale')} />
 						</SelectTrigger>
 						<SelectContent>
@@ -441,10 +449,10 @@ const SupportInbox: React.FC = () => {
 						</SelectContent>
 					</Select>
 				</div>
-				<div>
+				<div className="min-w-0">
 					<Label
 						htmlFor="ds-support-mailbox"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="mb-1 block text-xs font-medium text-gray-700"
 					>
 						{__('Mailbox', 'doublescale')}
 					</Label>
@@ -456,7 +464,7 @@ const SupportInbox: React.FC = () => {
 							})
 						}
 					>
-						<SelectTrigger className="w-[140px]">
+						<SelectTrigger className="w-full sm:w-[140px]">
 							<SelectValue placeholder={__('All', 'doublescale')} />
 						</SelectTrigger>
 						<SelectContent>
@@ -469,10 +477,10 @@ const SupportInbox: React.FC = () => {
 						</SelectContent>
 					</Select>
 				</div>
-				<div>
+				<div className="min-w-0">
 					<Label
 						htmlFor="ds-support-tag"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="mb-1 block text-xs font-medium text-gray-700"
 					>
 						{__('Tag', 'doublescale')}
 					</Label>
@@ -484,7 +492,7 @@ const SupportInbox: React.FC = () => {
 							})
 						}
 					>
-						<SelectTrigger className="w-[140px]">
+						<SelectTrigger className="w-full sm:w-[140px]">
 							<SelectValue placeholder={__('All', 'doublescale')} />
 						</SelectTrigger>
 						<SelectContent>
@@ -505,8 +513,9 @@ const SupportInbox: React.FC = () => {
 				</div>
 			)}
 
-			<div className="bg-white rounded shadow-sm border overflow-hidden">
-				<table className="w-full text-sm">
+			<div className="overflow-hidden rounded border bg-white shadow-sm">
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-[56rem] text-sm">
 					<thead className="bg-gray-50">
 						<tr className="text-left text-xs uppercase tracking-wide text-gray-500">
 							<th className="w-10 px-4 py-2">
@@ -523,14 +532,14 @@ const SupportInbox: React.FC = () => {
 									aria-label={__('Select all on this page', 'doublescale')}
 								/>
 							</th>
-							<th className="px-4 py-2">{__('Title', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Customer', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Mailbox', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Assigned to', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Status', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Priority', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Replies', 'doublescale')}</th>
-							<th className="px-4 py-2">{__('Updated', 'doublescale')}</th>
+							<th className="min-w-[12rem] px-4 py-2">{__('Title', 'doublescale')}</th>
+							<th className="min-w-[8rem] px-4 py-2">{__('Customer', 'doublescale')}</th>
+							<th className="min-w-[7rem] whitespace-nowrap px-4 py-2">{__('Mailbox', 'doublescale')}</th>
+							<th className="min-w-[8rem] px-4 py-2">{__('Assigned to', 'doublescale')}</th>
+							<th className="whitespace-nowrap px-4 py-2">{__('Status', 'doublescale')}</th>
+							<th className="whitespace-nowrap px-4 py-2">{__('Priority', 'doublescale')}</th>
+							<th className="whitespace-nowrap px-4 py-2">{__('Replies', 'doublescale')}</th>
+							<th className="min-w-[9rem] whitespace-nowrap px-4 py-2">{__('Updated', 'doublescale')}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -617,38 +626,39 @@ const SupportInbox: React.FC = () => {
 											)}
 										/>
 									</td>
-									<td className="px-4 py-3 font-medium text-gray-900 max-w-md truncate">
+									<td className="max-w-[20rem] truncate px-4 py-3 font-medium text-gray-900">
 										{ticket.title}
 									</td>
-									<td className="px-4 py-3 text-gray-700">
+									<td className="min-w-[8rem] px-4 py-3 text-gray-700">
 										{contactName(ticket)}
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="whitespace-nowrap px-4 py-3 text-gray-600">
 										{ticket.mailbox?.name || ticket.mailbox?.slug || '—'}
 									</td>
-									<td className="px-4 py-3 text-gray-700">
+									<td className="min-w-[8rem] px-4 py-3 text-gray-700">
 										{ticket.agent?.display_name || (
 											<span className="text-gray-400">
 												{__('Unassigned', 'doublescale')}
 											</span>
 										)}
 									</td>
-									<td className="px-4 py-3">
+									<td className="whitespace-nowrap px-4 py-3">
 										<StatusPill status={ticket.status} />
 									</td>
-									<td className="px-4 py-3">
+									<td className="whitespace-nowrap px-4 py-3">
 										<PriorityPill priority={ticket.priority} />
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="whitespace-nowrap px-4 py-3 text-gray-600">
 										{ticket.response_count}
 									</td>
-									<td className="px-4 py-3 text-gray-500">
+									<td className="whitespace-nowrap px-4 py-3 text-gray-500">
 										{formatDate(ticket.updated_at)}
 									</td>
 								</tr>
 							))}
 					</tbody>
 				</table>
+				</div>
 			</div>
 
 			{showNewModal && (
@@ -694,7 +704,7 @@ const SupportInbox: React.FC = () => {
 			)}
 
 			{data && totalRecords > 0 && (
-				<div className="mt-4 bg-white rounded shadow-sm border">
+				<div className="mt-4 overflow-x-auto rounded border bg-white shadow-sm">
 					<DataTablePagination table={serverSideTable} />
 				</div>
 			)}

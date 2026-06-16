@@ -2,7 +2,7 @@
  * REST DTO shapes for the sales module.
  */
 
-import type { InvoiceStatus, ProposalStatus } from '@/constants/sales';
+import type { InvoiceStatus, ProposalStatus, ContractStatus } from '@/constants/sales';
 
 export interface ContactSummary {
 	id: number;
@@ -34,6 +34,11 @@ export interface SalesTax {
 	id: number;
 	name: string;
 	rate: number;
+}
+
+export interface ContractType {
+	id: number;
+	name: string;
 }
 
 export interface ProposalComment {
@@ -111,6 +116,45 @@ export interface Proposal {
 	updated_at: string | null;
 	contact?: ContactSummary | null;
 	assigned_user?: UserSummary | null;
+}
+
+export interface Contract {
+	id: number;
+	contract_number: string;
+	hash: string;
+	subject: string;
+	status: ContractStatus;
+	contact_id: number;
+	assigned_user_id: number | null;
+	contract_type_id: number | null;
+	contract_value: number;
+	currency: string;
+	start_date: string | null;
+	end_date: string | null;
+	description: string;
+	tag_ids: number[];
+	hide_from_customer: boolean;
+	is_trash: boolean;
+	sent_at?: string | null;
+	viewed_at?: string | null;
+	signed_name?: string | null;
+	signed_at?: string | null;
+	has_signature?: boolean;
+	is_expired?: boolean;
+	is_about_to_expire?: boolean;
+	public_url?: string | null;
+	created_at: string | null;
+	updated_at: string | null;
+	contact?: ContactSummary | null;
+	assigned_user?: UserSummary | null;
+	contract_type?: ContractType | null;
+}
+
+export interface ContractSignature {
+	signed_name: string | null;
+	signature: string;
+	signed_at: string | null;
+	signed_ip: string | null;
 }
 
 export interface InvoicePayment {
@@ -263,6 +307,39 @@ export interface ProposalFilters {
 
 export interface InvoiceFilters extends ProposalFilters {}
 
+export interface ContractFilters {
+	status?: string;
+	contact_id?: number;
+	contract_type_id?: number;
+	is_trash?: boolean;
+	search?: string;
+	sort_by?: string;
+	sort_order?: 'asc' | 'desc';
+	per_page?: number;
+	page?: number;
+}
+
+export interface ContractSummaryByType {
+	contract_type_id: number | null;
+	name: string;
+	count: number;
+	value_total: number;
+}
+
+export interface ContractSummary {
+	active_count: number;
+	expired_count: number;
+	about_to_expire_count: number;
+	recently_added_count: number;
+	trash_count: number;
+	total_count: number;
+	by_status: Record<
+		string,
+		{ count: number; amount: number; percent: number }
+	>;
+	by_type: ContractSummaryByType[];
+}
+
 export interface InvoiceSummary {
 	paid_total: number;
 	outstanding_total: number;
@@ -276,6 +353,10 @@ export interface InvoiceSummary {
 
 export type CreateProposalPayload = Partial<
 	Omit<Proposal, 'id' | 'proposal_number' | 'hash' | 'created_at' | 'updated_at'>
+> & { contact_id: number };
+
+export type CreateContractPayload = Partial<
+	Omit<Contract, 'id' | 'contract_number' | 'hash' | 'created_at' | 'updated_at'>
 > & { contact_id: number };
 
 export type CreateInvoicePayload = Partial<

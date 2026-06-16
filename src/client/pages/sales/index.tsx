@@ -24,6 +24,9 @@ const InvoiceView = lazy(() => import('./invoices/view'));
 const InvoiceEdit = lazy(() => import('./invoices/edit'));
 const PaymentsList = lazy(() => import('./payments'));
 const PaymentView = lazy(() => import('./payments/view'));
+const ContractsList = lazy(() => import('./contracts'));
+const ContractView = lazy(() => import('./contracts/view'));
+const ContractEdit = lazy(() => import('./contracts/edit'));
 const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
@@ -175,6 +178,38 @@ if (isSalesDocumentsReady()) {
 		path: 'sales/payments',
 		component: wrap(PaymentsList),
 		label: __('Payments', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
+
+	registerAdminPage('sales-contracts', {
+		path: 'sales/contracts',
+		component: wrap(ContractsList),
+		label: __('Contracts', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-new', {
+		path: 'sales/contracts/new',
+		component: wrap(ContractEdit),
+		label: __('New Contract', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
+
+	registerAdminPage('sales-contract', {
+		path: 'sales/contracts/:id',
+		component: wrap(ContractView),
+		label: __('Contract', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-edit', {
+		path: 'sales/contracts/:id/edit',
+		component: wrap(ContractEdit),
+		label: __('Edit Contract', 'doublescale'),
 		hidden: true,
 		...salesPageDefaults,
 	});

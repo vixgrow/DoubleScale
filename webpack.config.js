@@ -462,6 +462,44 @@ const portalRendererConfig = {
 	},
 };
 
+/**
+ * Public contract renderer — lean bundle for `[doublescale_contract]` pages.
+ */
+const contractRendererConfig = {
+	...defaultConfig,
+	name: 'contract-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/contract/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/contract'),
+		filename: '[name].js',
+	},
+};
+
 module.exports = [
 	adminClientConfig,
 	bookingRendererConfig,
@@ -469,4 +507,5 @@ module.exports = [
 	proposalRendererConfig,
 	invoiceRendererConfig,
 	portalRendererConfig,
+	contractRendererConfig,
 ];

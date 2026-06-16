@@ -1,0 +1,36 @@
+<?php
+/**
+ * Contract number merge tag.
+ *
+ * @package DoubleScale\Modules\Sales
+ */
+
+namespace DoubleScale\Modules\Sales\MergeTags;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\MergeTags\MergeTagsManager;
+
+/**
+ * ContractNumber merge tag.
+ */
+class ContractNumber extends AbstractContractSalesMergeTag {
+
+	public $name = 'Contract Number';
+
+	public $slug = 'contract_number';
+
+	public $description = 'Contract reference number.';
+
+	/**
+	 * @param mixed  $contact   Contact.
+	 * @param string $merge_tag Merge tag.
+	 * @return string
+	 */
+	public function get_value( $contact, $merge_tag = '' ) {
+		$contract = $this->resolve_contract( $contact );
+		return $contract ? (string) $contract->contract_number : '';
+	}
+}
+
+MergeTagsManager::instance()->register( new ContractNumber() );

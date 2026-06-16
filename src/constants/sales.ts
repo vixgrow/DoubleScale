@@ -14,6 +14,16 @@ export const PROPOSAL_STATUSES = [
 
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
 
+export const CONTRACT_STATUSES = [
+	'draft',
+	'sent',
+	'signed',
+	'active',
+	'expired',
+] as const;
+
+export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
+
 export const INVOICE_STATUSES = [
 	'draft',
 	'unpaid',
@@ -30,6 +40,14 @@ export const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, string> = {
 	open: 'Open',
 	declined: 'Declined',
 	accepted: 'Accepted',
+};
+
+export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
+	draft: 'Draft',
+	sent: 'Sent',
+	signed: 'Signed',
+	active: 'Active',
+	expired: 'Expired',
 };
 
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {

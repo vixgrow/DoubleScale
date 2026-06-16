@@ -730,7 +730,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const toolbarDashPattern = '5 14';
 
 	return (
-		<div className={cn('relative', className)}>
+		<div className={cn('relative w-full', className)}>
 			{!isCanvasFormat && (
 				<style>{`
 				.${editorId} {
@@ -811,7 +811,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			)}
 			<div
 				className={cn(
-					'rich-text-toolbar relative mb-2 rounded-xl [&_button_svg]:stroke-[2.5]',
+					'rich-text-toolbar relative mb-2 w-full rounded-xl [&_button_svg]:stroke-[2.5]',
 					isBuilderDark
 						? 'flex flex-col gap-2 bg-transparent p-2 [&_button]:text-white'
 						: 'flex flex-wrap items-center gap-1 rounded-lg border border-border bg-white p-2 shadow-sm [&_button]:text-foreground'
@@ -1056,7 +1056,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					suppressContentEditableWarning
 					className={cn(
 						editorId,
-						'min-h-[100px] rounded-lg border p-3 focus:outline-none',
+						'w-full rounded-lg border p-3 focus:outline-none',
+						isBuilderDark ? 'min-h-[100px]' : 'min-h-[200px]',
 						isBuilderDark
 							? 'prose prose-sm prose-invert max-w-none border-white/10 bg-white/[0.06] text-zinc-100 focus:ring-1 focus:ring-white/25'
 							: 'prose prose-sm max-w-none text-foreground focus:ring-1 focus:ring-ring'
@@ -1069,7 +1070,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							fontSize: `${fontSize}px`,
 							fontFamily: fontFamily,
 							lineHeight: '1.5',
-							maxWidth: isBuilderDark ? '100%' : '287.2px',
+							width: '100%',
+							maxWidth: '100%',
 							overflowX: 'auto',
 							color: isBuilderDark
 								? '#f4f4f5'

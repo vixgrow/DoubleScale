@@ -165,6 +165,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/proposals/:id': 'sales',
 	'sales/invoices': 'sales',
 	'sales/invoices/:id': 'sales',
+	'sales/contracts': 'sales',
+	'sales/contracts/:id': 'sales',
 	'sales/payments': 'sales',
 	'sales/payments/:id': 'sales',
 	'sales/settings': 'sales',
@@ -439,6 +441,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 									{
 										path: 'sales/invoices',
 										label: __('Invoices', 'doublescale'),
+									},
+									{
+										path: 'sales/contracts',
+										label: __('Contracts', 'doublescale'),
 									},
 									{
 										path: 'sales/payments',

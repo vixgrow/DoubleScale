@@ -546,9 +546,9 @@ const Automation: React.FC = () => {
 								</DialogTitle>
 
 								{/* Top bar: breadcrumb | centered title | active + save */}
-								<div className="flex flex-col gap-3 p-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4">
+								<div className="flex flex-col gap-2 p-3 md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-4">
 									<nav
-										className="flex min-w-0 items-center justify-between gap-2 text-sm lg:justify-self-start"
+										className="flex min-w-0 items-center justify-between gap-2 text-sm md:justify-self-start md:justify-start"
 										aria-label={__(
 											'Breadcrumb',
 											'doublescale'
@@ -585,7 +585,7 @@ const Automation: React.FC = () => {
 										</div>
 										<DialogClose
 											type="button"
-											className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none lg:hidden"
+											className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none md:hidden"
 											aria-label={__(
 												'Close',
 												'doublescale'
@@ -682,7 +682,7 @@ const Automation: React.FC = () => {
 										)}
 									</div>
 
-									<div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:flex-nowrap lg:justify-self-end lg:gap-3">
+									<div className="flex flex-wrap items-center justify-between gap-2 md:flex-nowrap md:justify-end md:justify-self-end md:gap-3">
 										<div className="flex items-center gap-1">
 											<button
 												type="button"
@@ -708,7 +708,7 @@ const Automation: React.FC = () => {
 										{/* divider */}
 										<div className="h-6 w-px bg-[#D0D0D0]"></div>
 										<label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#344054]">
-											<span className="hidden sm:inline">
+											<span className="hidden lg:inline">
 												{__('Active', 'doublescale')}
 											</span>
 											<Switch
@@ -742,10 +742,10 @@ const Automation: React.FC = () => {
 												})
 											}
 										>
-											<span className="sm:hidden">
+											<span className="lg:hidden">
 												{__('Save', 'doublescale')}
 											</span>
-											<span className="hidden sm:inline">
+											<span className="hidden lg:inline">
 												{__(
 													'Save & Publish',
 													'doublescale'
@@ -754,7 +754,7 @@ const Automation: React.FC = () => {
 										</Button>
 										<DialogClose
 											type="button"
-											className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none lg:inline-flex"
+											className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none md:inline-flex"
 											aria-label={__(
 												'Close',
 												'doublescale'

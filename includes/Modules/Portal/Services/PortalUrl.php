@@ -32,6 +32,14 @@ final class PortalUrl {
 	public const PATH_QUERY_ARG = 'doublescale_portal_path';
 
 	/**
+	 * Option holding the canonical portal page id (written by
+	 * {@see \DoubleScale\Modules\Portal\Services\PortalPageProvisioner}). Preferred
+	 * over the content scan so resolution is an O(1) lookup that can't pick the
+	 * wrong page when several embed the shortcode.
+	 */
+	public const PAGE_ID_OPTION = 'doublescale_client_portal_page_id';
+
+	/**
 	 * Transient key for the resolved portal page permalink.
 	 */
 	private const PAGE_URL_TRANSIENT = 'doublescale_client_portal_page_url';
@@ -47,7 +55,7 @@ final class PortalUrl {
 			return (string) apply_filters( 'doublescale_client_portal_page_url', $cached );
 		}
 
-		$page_id = self::locate_portal_page_id();
+		$page_id = self::resolve_page_id();
 		$url     = $page_id > 0 ? (string) get_permalink( $page_id ) : '';
 
 		if ( '' !== $url ) {
@@ -99,11 +107,52 @@ final class PortalUrl {
 	}
 
 	/**
-	 * Find a published page that embeds the portal shortcode.
+	 * Resolve the portal page id: prefer the provisioned page recorded in
+	 * {@see PAGE_ID_OPTION}, falling back to a content scan so a page the admin
+	 * built by hand (or one created before this option existed) still resolves.
 	 *
 	 * @return int Page ID, or 0.
 	 */
-	private static function locate_portal_page_id(): int {
+	private static function resolve_page_id(): int {
+		$stored = (int) get_option( self::PAGE_ID_OPTION, 0 );
+		if ( $stored > 0 && self::is_valid_portal_page( $stored ) ) {
+			return $stored;
+		}
+
+		return self::find_existing_page_id();
+	}
+
+	/**
+	 * Whether a page id points at a live page that still embeds the shortcode.
+	 * Guards against a stored id whose page was trashed, deleted, or had the
+	 * shortcode edited out.
+	 *
+	 * @param int $page_id Candidate page id.
+	 * @return bool
+	 */
+	private static function is_valid_portal_page( int $page_id ): bool {
+		$post = get_post( $page_id );
+		if ( ! $post instanceof \WP_Post || 'page' !== $post->post_type ) {
+			return false;
+		}
+		if ( ! in_array( $post->post_status, array( 'publish', 'private' ), true ) ) {
+			return false;
+		}
+
+		$needle = PortalFrontendHandler::SHORTCODE_NAME;
+
+		return has_shortcode( (string) $post->post_content, $needle )
+			|| false !== strpos( (string) $post->post_content, $needle );
+	}
+
+	/**
+	 * Find a published page that embeds the portal shortcode. Shared with
+	 * {@see \DoubleScale\Modules\Portal\Services\PortalPageProvisioner} so the
+	 * provisioner adopts an existing page instead of creating a duplicate.
+	 *
+	 * @return int Page ID, or 0.
+	 */
+	public static function find_existing_page_id(): int {
 		global $wpdb;
 
 		$needle = PortalFrontendHandler::SHORTCODE_NAME;

@@ -69,7 +69,7 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 
 	return (
 		<div className="doublescale-client-portal rounded-2xl bg-background text-base text-foreground">
-			<div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
 				<header className="mb-6 flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
 					<Avatar identity={identity} />
 					<div className="min-w-0">

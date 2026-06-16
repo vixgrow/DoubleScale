@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
 use DoubleScale\Modules\Portal\Renderer\PortalFrontendHandler;
+use DoubleScale\Modules\Portal\Services\PortalPageProvisioner;
 use DoubleScale\Modules\Portal\Services\PortalUrl;
 
 /**
@@ -76,6 +77,7 @@ final class Module extends AbstractModule {
 		return array(
 			Rest\Controllers\RestPortalBootstrapController::class,
 			Rest\Controllers\RestPortalTimelineController::class,
+			Rest\Controllers\RestPortalPageController::class,
 		);
 	}
 
@@ -84,6 +86,11 @@ final class Module extends AbstractModule {
 
 		// Wire the shortcode + enqueue listener.
 		$container->get( PortalFrontendHandler::class );
+
+		// Auto-create the portal page once so the portal is discoverable on a
+		// fresh install (admin_init: post types + home_url() are ready, and it
+		// never touches front-end requests).
+		add_action( 'admin_init', array( PortalPageProvisioner::class, 'maybe_provision' ) );
 
 		// Re-point the booking details URL (consumed by the
 		// {{booking.details_url}} merge tag) to the customer portal when a

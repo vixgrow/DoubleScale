@@ -114,12 +114,14 @@ final class PortalFrontendHandler {
 
 		$box_id = max( 0, (int) $atts['box_id'] );
 
-		// `alignwide` opts the portal into the block theme's wider content
-		// measure. Block themes constrain `.entry-content` children to the
-		// (narrow) content size by default; the portal is a full app surface and
-		// reads cramped at that width, so request the wide size where supported.
+		// `alignfull` opts the portal into the block theme's full-bleed width.
+		// Block themes constrain `.entry-content` children to the (narrow)
+		// content size by default; the portal is a full app surface that owns
+		// its page, so request the full size where supported. The shell caps its
+		// own readable measure internally, so this widens the page without
+		// running text edge-to-edge.
 		return sprintf(
-			'<div id="%s" class="alignwide" data-box-id="%d"></div>',
+			'<div id="%s" class="alignfull" data-box-id="%d"></div>',
 			esc_attr( self::MOUNT_ID ),
 			$box_id
 		);
@@ -165,6 +167,42 @@ final class PortalFrontendHandler {
 
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( self::HANDLE );
+
+		// The portal app owns the whole page, so hide the theme's page title
+		// ("Client Portal") and collapse the large header gap above it so the
+		// app starts near the top. Scoped to the portal body class so every
+		// other page keeps the theme's default title + spacing.
+		wp_add_inline_style( self::HANDLE, $this->page_chrome_css() );
+	}
+
+	/**
+	 * CSS that turns the host page into a clean, full-page app surface: it hides
+	 * the theme's page title, site header (nav) and footer, then zeroes the top
+	 * gap so the portal renders flush to the top (its own inner padding supplies
+	 * the breathing room). Selectors cover block themes (`.wp-block-post-title`,
+	 * `.wp-site-blocks > header|footer`, `*.wp-block-template-part`) and classic
+	 * themes (`.entry-title`/`.site-header`/`.site-footer`); each is scoped to
+	 * the portal body class so every other page keeps the theme's chrome, and is
+	 * harmless on themes whose markup does not match. The WP admin bar is left
+	 * intact (it is the logged-in customer's log-out affordance).
+	 *
+	 * @return string
+	 */
+	private function page_chrome_css(): string {
+		$b = 'body.doublescale-client-portal-page ';
+
+		return $b . '.wp-block-post-title,'
+			. $b . '.entry-title,'
+			. $b . '.page-title,'
+			. $b . '.entry-header,'
+			. $b . '.wp-site-blocks > header,'
+			. $b . 'header.wp-block-template-part,'
+			. $b . '.site-header,'
+			. $b . '.wp-site-blocks > footer,'
+			. $b . 'footer.wp-block-template-part,'
+			. $b . '.site-footer{display:none!important}'
+			. $b . 'main{margin-top:0!important}'
+			. $b . 'main>.wp-block-group{padding-top:0!important}';
 	}
 
 	/**

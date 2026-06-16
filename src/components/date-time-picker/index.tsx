@@ -101,7 +101,7 @@ export function DateTimePicker({
 	};
 
 	return (
-		<div className={cn('relative flex flex-col gap-2', className)}>
+		<div className={cn('relative flex w-full min-w-0 flex-col gap-2', className)}>
 			<Popover open={open} onOpenChange={(val) => {
 				if (!val) return; 
 				setOpen(val);
@@ -109,10 +109,12 @@ export function DateTimePicker({
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
-						className="px-3 h-12 !shadow-none bg-white hover:bg-white text-foreground border border-border/60 flex flex-row-reverse justify-between items-center"
+						className="flex h-12 w-full min-w-0 flex-row-reverse items-center justify-between overflow-hidden border border-border/60 bg-white px-3 !shadow-none hover:bg-white text-foreground"
 					>
-						<OutlinedCalendarIcon />
-						<span>{date ? formatDateTime(date) : placeholder}</span>
+						<OutlinedCalendarIcon className="shrink-0" />
+						<span className="min-w-0 flex-1 truncate text-left">
+							{date ? formatDateTime(date) : placeholder}
+						</span>
 					</Button>
 				</PopoverTrigger>
 

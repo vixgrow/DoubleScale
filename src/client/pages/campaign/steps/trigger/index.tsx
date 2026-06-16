@@ -253,6 +253,8 @@ const TriggerStep: React.FC = () => {
 			>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+						
+						<div className='lg:block hidden'>
 						<Stepper
 							steps={automatedCampaignSteps}
 							canProceed="true"
@@ -260,7 +262,7 @@ const TriggerStep: React.FC = () => {
 							onStepClick={goToStep}
 							disableNavigation={isNewCampaign}
 						/>
-
+						</div>
 						<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
 							<div className="pb-6">
 								<h2 className="text-xl font-semibold tracking-tight text-foreground">

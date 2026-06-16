@@ -19,7 +19,6 @@ interface ContactListProps {
 	filters?: FilterType[];
 	loading?: boolean;
 	searchPlaceholder?: string;
-	maxHeight?: number;
 	shouldFetch?: boolean;
 	onFetchComplete?: () => void;
 	onTotalChange?: (total: number) => void;
@@ -76,7 +75,6 @@ const ContactList: React.FC<ContactListProps> = ({
 	filters = [],
 	loading = false,
 	searchPlaceholder = __('Search Recipients', 'doublescale'),
-	maxHeight = 0,
 	shouldFetch = false,
 	onFetchComplete,
 	onTotalChange,
@@ -237,8 +235,8 @@ const ContactList: React.FC<ContactListProps> = ({
 		<RecipientsPanelShell
 			className="flex min-h-0 flex-col overflow-hidden"
 			style={{
-				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
-				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',
+				height: 'full',
+				maxHeight: 'full',
 			}}
 		>
 			<div className="flex gap-3 border-b border-[#CB5301]/30 pb-4 mb-4">

@@ -32,7 +32,11 @@ import {
 	TEMPLATE_CATEGORIES,
 	type TemplateItemConfig,
 } from './templatesConfig';
-import { getUserTemplates, renderTemplate, saveTemplate } from '@/builder/api/templates';
+import {
+	getUserTemplates,
+	renderTemplate,
+	saveTemplate,
+} from '@/builder/api/templates';
 import type { EmailTemplate } from '@doublescale/client';
 import configApi from '@doublescale/config';
 import {
@@ -41,11 +45,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import {
-	ArrowLeft,
-	ArrowUpFromLine,
-	Plus,
-} from 'lucide-react';
+import { ArrowLeft, ArrowUpFromLine, Plus } from 'lucide-react';
 import AIEmailBuilder from '../templates/ai-email-builder';
 import PreviewEyeIcon from '@doublescale/shared/icons/preview-eye';
 
@@ -130,9 +130,7 @@ const ReadyToUseTemplateCard = ({
 				disabled={!isProActive && upgradeDisabled}
 				className="shrink-0 rounded-md bg-white text-sm font-medium"
 			>
-				{isProActive
-					? __('Use template', 'doublescale')
-					: upgradeLabel}
+				{isProActive ? __('Use', 'doublescale') : upgradeLabel}
 			</Button>
 		</div>
 	</div>
@@ -187,7 +185,11 @@ const MyTemplateCard = ({
 							onSelect={() => onPreview(template)}
 							className="cursor-pointer gap-2"
 						>
-							<PreviewEyeIcon width={16} height={16} color="#3A3A98" />
+							<PreviewEyeIcon
+								width={16}
+								height={16}
+								color="#3A3A98"
+							/>
 							{__('Preview', 'doublescale')}
 						</DropdownMenuItem>
 						<DropdownMenuItem
@@ -214,9 +216,7 @@ const MyTemplateCard = ({
 				disabled={!isProActive && upgradeDisabled}
 				className="shrink-0 rounded-md bg-white text-sm font-medium"
 			>
-				{isProActive
-					? __('Use template', 'doublescale')
-					: upgradeLabel}
+				{isProActive ? __('Use', 'doublescale') : upgradeLabel}
 			</Button>
 		</div>
 	</div>
@@ -306,7 +306,10 @@ const EmailTemplatesStep: React.FC = () => {
 
 			if (!savedTemplate?.id) {
 				throw new Error(
-					__('Could not save email template for this campaign.', 'doublescale')
+					__(
+						'Could not save email template for this campaign.',
+						'doublescale'
+					)
 				);
 			}
 
@@ -319,10 +322,14 @@ const EmailTemplatesStep: React.FC = () => {
 				template_id: savedTemplate.id,
 			});
 			if (!ok) {
-				sessionStorage.removeItem(`${BUILDER_INITIAL_KEY}_${campaign.id}`);
+				sessionStorage.removeItem(
+					`${BUILDER_INITIAL_KEY}_${campaign.id}`
+				);
 				return;
 			}
-			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+			const navState = isNewCampaign
+				? { state: { isNew: true } }
+				: undefined;
 			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
 		} catch (error) {
 			console.error('Error applying template:', error);
@@ -336,7 +343,9 @@ const EmailTemplatesStep: React.FC = () => {
 				template_id: template.id,
 			});
 			if (!ok) return;
-			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+			const navState = isNewCampaign
+				? { state: { isNew: true } }
+				: undefined;
 			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
 		} catch (error) {
 			console.error('Error applying template:', error);
@@ -392,7 +401,10 @@ const EmailTemplatesStep: React.FC = () => {
 		if (!template.body) {
 			createNotice({
 				type: 'error',
-				message: __('This template has no content to export.', 'doublescale'),
+				message: __(
+					'This template has no content to export.',
+					'doublescale'
+				),
 			});
 			return;
 		}
@@ -440,7 +452,10 @@ const EmailTemplatesStep: React.FC = () => {
 		<div>
 			<PanelLayout
 				items={[
-					{ label: __('Campaigns', 'doublescale'), href: 'campaigns' },
+					{
+						label: __('Campaigns', 'doublescale'),
+						href: 'campaigns',
+					},
 					{
 						label: __('Create Campaign', 'doublescale'),
 						href: `campaigns/${campaign?.id}/template`,
@@ -457,8 +472,14 @@ const EmailTemplatesStep: React.FC = () => {
 			>
 				<Card className="overflow-hidden rounded-lg bg-[#F7F8FA] shadow-none p-6">
 					{/* Header - flex with buttons */}
-					<div className="flex items-center justify-between gap-4">
-						<div className="flex items-center gap-4">
+					<div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-4">
+						<div
+							className={`flex items-center gap-4 ${
+								showBackToBuilder
+									? 'max-sm:flex-col'
+									: ''
+							}`}
+						>
 							{!showBackToBuilder && campaign?.id && (
 								<Button
 									type="button"
@@ -502,16 +523,16 @@ const EmailTemplatesStep: React.FC = () => {
 								</p>
 							</div>
 						</div>
-					<div className="flex gap-4 flex-shrink-0">
-						<Button
-							variant="secondary"
-							onClick={() => setAiBuilderVisible(true)}
-							className="rounded-md"
-						>
-							<AiIcon width={32} height={32} />
-							{__('Generate With AI', 'doublescale')}
-						</Button>
-						<Button
+						<div className="flex flex-col lg:flex-row gap-4 flex-shrink-0">
+							<Button
+								variant="secondary"
+								onClick={() => setAiBuilderVisible(true)}
+								className="rounded-md"
+							>
+								<AiIcon width={32} height={32} />
+								{__('Generate With AI', 'doublescale')}
+							</Button>
+							<Button
 								variant="default"
 								onClick={handleStartFromScratch}
 								className="rounded-md"
@@ -523,35 +544,37 @@ const EmailTemplatesStep: React.FC = () => {
 					</div>
 					<div className="border-b border-border py-3" />
 					{/* Tabs - in card with white bg */}
-					<Card className="mt-6 bg-white border border-border shadow-none">
-						<CardContent className="p-0">
-							<div className="flex gap-8 px-4 pt-2 pb-0">
+					<Card className="mt-6 min-w-0 border border-border bg-white shadow-none">
+						<CardContent className="max-sm:overflow-x-auto p-0 max-sm:overflow-y-hidden">
+							<div className="flex gap-8 px-4 pt-2 pb-0 max-sm:w-max max-sm:flex-nowrap">
 								<button
 									type="button"
 									onClick={() => setActiveTab('my-templates')}
-									className={`flex items-center gap-2 pb-2 -mb-px transition-colors ${activeTab === 'my-templates'
-										? 'text-primary border-b-2 border-primary'
-										: 'text-muted-foreground hover:text-primary'
-										}`}
+									className={`flex shrink-0 items-center gap-2 pb-2 -mb-px transition-colors ${
+										activeTab === 'my-templates'
+											? 'text-primary border-b-2 border-primary'
+											: 'text-muted-foreground hover:text-primary'
+									}`}
 								>
 									<MyTemplatesSidebarIcon
 										width={24}
 										height={24}
 									/>
-									<span className="text-lg">
+									<span className="text-base lg:text-lg">
 										{__('My Templates', 'doublescale')}
 									</span>
 								</button>
 								<button
 									type="button"
 									onClick={() => setActiveTab('ready-to-use')}
-									className={`flex items-center gap-2 pb-2 -mb-px transition-colors ${activeTab === 'ready-to-use'
-										? 'text-primary border-b-2 border-primary'
-										: 'text-muted-foreground hover:text-primary'
-										}`}
+									className={`flex shrink-0 items-center gap-2 pb-2 -mb-px transition-colors ${
+										activeTab === 'ready-to-use'
+											? 'text-primary border-b-2 border-primary'
+											: 'text-muted-foreground hover:text-primary'
+									}`}
 								>
 									<ReadyToUseIcon width={24} height={24} />
-									<span className="text-lg">
+									<span className="text-base lg:text-lg">
 										{__('Ready-to-use', 'doublescale')}
 									</span>
 								</button>
@@ -612,14 +635,17 @@ const EmailTemplatesStep: React.FC = () => {
 							</Card>
 						</div>
 					) : (
-						<div className="flex gap-4 min-h-[400px] pt-6">
-							<div className="w-1/4 flex-shrink-0">
-								<Card className="h-full min-h-[300px] border border-border shadow-none bg-white">
+						<div className="flex min-h-[400px] flex-col gap-4 pt-6 lg:flex-row">
+							<div className="w-full shrink-0 lg:w-1/4">
+								<Card className="h-full lg:min-h-[300px] border border-border bg-white shadow-none">
 									<CardContent className="p-6">
-										<h3 className="text-sm text-muted-foreground uppercase tracking-wider mb-2">
-											{__('ALL CATEGORIES', 'doublescale')}
+										<h3 className="mb-2 text-sm uppercase tracking-wider text-center lg:text-left text-muted-foreground">
+											{__(
+												'ALL CATEGORIES',
+												'doublescale'
+											)}
 										</h3>
-										<nav className="flex flex-col gap-2">
+										<nav className="flex flex-row flex-wrap gap-2 max-lg:overflow-x-auto lg:flex-col justify-center lg:justify-start">
 											{TEMPLATE_CATEGORIES.filter(
 												(c) => c.templates.length > 0
 											).map((category) => (
@@ -631,11 +657,12 @@ const EmailTemplatesStep: React.FC = () => {
 															category.id
 														)
 													}
-													className={`text-left p-2 rounded-lg text-sm transition-colors ${selectedCategoryId ===
+													className={`shrink-0 rounded-lg p-2 text-left text-sm transition-colors max-lg:whitespace-nowrap lg:shrink ${
+														selectedCategoryId ===
 														category.id
-														? 'bg-secondary text-primary font-medium'
-														: 'text-foreground hover:bg-muted font-normal'
-														}`}
+															? 'bg-secondary font-medium text-primary'
+															: 'font-normal text-foreground hover:bg-muted'
+													}`}
 												>
 													{category.title}
 												</button>
@@ -644,7 +671,7 @@ const EmailTemplatesStep: React.FC = () => {
 									</CardContent>
 								</Card>
 							</div>
-							<div className="flex-1 min-w-0">
+							<div className="min-w-0 flex-1">
 								<Card className="h-full min-h-[300px] overflow-auto border border-border shadow-none bg-white">
 									<CardContent className="p-6">
 										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -653,7 +680,9 @@ const EmailTemplatesStep: React.FC = () => {
 													<ReadyToUseTemplateCard
 														key={template.id}
 														template={template}
-														isProActive={isProActive}
+														isProActive={
+															isProActive
+														}
 														onUpgrade={
 															handleTemplateUpgrade
 														}
@@ -748,6 +777,7 @@ const EmailTemplatesStep: React.FC = () => {
 				visible={aiBuilderVisible}
 				setVisible={setAiBuilderVisible}
 				campaign={campaign}
+				stackAboveFullscreenShell={true}
 			/>
 		</div>
 	);

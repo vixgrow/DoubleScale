@@ -36,13 +36,14 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 				'When would you like to send the campaign?',
 				'doublescale'
 			)}
+			button={false}
 		>
 			<div className="space-y-6">
 				{/* Send Now / Schedule for later */}
 				<RadioGroup
 					value={sendNow ? 'now' : 'later'}
 					onValueChange={(value) => setSendNow(value === 'now')}
-					className="flex gap-4"
+					className="flex flex-col sm:flex-row gap-4"
 				>
 					<Label
 						htmlFor="send-now"
@@ -74,11 +75,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 				{/* Date and Time Fields */}
 				{!sendNow && (
 					<>
-						<div>
-							<label className="block text-base text-[#09090B] mb-2">
+						<div className="min-w-0">
+							<label className="mb-2 block text-base text-[#09090B]">
 								{__('Schedule date & time', 'doublescale')}
 							</label>
 							<DateTimePicker
+								className="w-full"
 								value={scheduledAt ?? undefined}
 								onChange={(value) => setScheduledAt(new Date(value))}
 								placeholder={__(
@@ -96,7 +98,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 							<RadioGroup
 								value={timezoneMode}
 								onValueChange={setTimezoneMode}
-								className="flex gap-4 w-full"
+								className="flex flex-col sm:flex-row gap-4 w-full"
 							>
 								<Label
 									htmlFor="subscriber-timezone"
@@ -109,7 +111,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 										value="subscriber"
 										id="subscriber-timezone"
 									/>
-									<span className="text-base font-semibold">
+									<span className="text-sm lg:text-base font-semibold">
 										{__(
 											'Based on the Subscribers time zone',
 											'doublescale'
@@ -127,13 +129,13 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 										value="user"
 										id="user-timezone"
 									/>
-									<span className="text-base font-semibold">
+									<span className="text-sm lg:text-base font-semibold">
 										{__('Your time zone GMT+3', 'doublescale')}
 									</span>
 								</Label>
 							</RadioGroup>
 							{timezoneMode === 'subscriber' && (
-								<p className="text-base text-destructive mt-2">
+								<p className="text-sm lg:text-base text-destructive mt-2">
 									{__(
 										'(Applies only to subscribers with location data)',
 										'doublescale'

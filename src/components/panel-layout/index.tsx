@@ -59,8 +59,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
 	const showBar = showProgressBar && !!totalSteps;
-	const footerInnerPad =
-		type === 'form' ? 'px-6 md:px-8' : 'px-8';
+	const footerInnerPad = type === 'form' ? 'px-6 md:px-8' : 'px-8';
 	const shouldShowPanelClose = showPanelClose ?? type === 'campaign';
 	const handleClosePanel =
 		onClosePanel ??
@@ -78,14 +77,9 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			<div
 				className={`flex-none bg-white p-4 px-6 md:px-8 ${type === 'campaign' ? 'z-10' : ''}`}
 			>
-				<div className="flex items-center justify-between gap-4">
-					<Breadcrumb items={items} handleNavigate={handleNavigate} />
-
-					<div className="flex shrink-0 items-center gap-2">
-						{panelbtns.map((btn, index) => (
-							<div key={index}>{btn}</div>
-						))}
-						{shouldShowPanelClose && (
+				<div className="flex flex-col">
+					{shouldShowPanelClose && (
+						<div className="flex justify-end sm:hidden">
 							<Button
 								type="button"
 								variant="ghost"
@@ -97,20 +91,53 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 									'doublescale'
 								)}
 							>
-								<CloseIcon width={48} height={48} color="#000" />
+								<CloseIcon
+									width={48}
+									height={48}
+									color="#000"
+								/>
 							</Button>
-						)}
+						</div>
+					)}
+					<div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+						<Breadcrumb
+							items={items}
+							handleNavigate={handleNavigate}
+						/>
+
+						<div className="flex shrink-0 items-center gap-2">
+							{panelbtns.map((btn, index) => (
+								<div key={index}>{btn}</div>
+							))}
+							{shouldShowPanelClose && (
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									onClick={handleClosePanel}
+									className="hidden h-10 w-10 shrink-0 rounded-lg sm:inline-flex"
+									aria-label={__(
+										'Close campaign panel',
+										'doublescale'
+									)}
+								>
+									<CloseIcon
+										width={48}
+										height={48}
+										color="#000"
+									/>
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
 
 			{/* Scrollable Content Section */}
-			<div
-				className='w-full max-w-none bg-[#F7F8FA] p-6'
-			>
+			<div className="w-full max-w-none bg-[#F7F8FA] p-6">
 				<div
-					className='overflow-hidden rounded-[20px] bg-white p-6
-							shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]'
+					className="overflow-hidden rounded-[20px] bg-white p-6
+							shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 				>
 					{children}
 				</div>

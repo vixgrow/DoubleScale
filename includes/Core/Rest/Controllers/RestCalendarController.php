@@ -136,7 +136,7 @@ class RestCalendarController extends RestController {
 		 * @param array<int, array<string, mixed>> $events        Calendar events.
 		 * @param array{0:string,1:string}         $window        [ $start (Y-m-d), $end_inclusive (Y-m-d H:i:s) ].
 		 * @param int                              $viewer_id     Current staff user id — providers scope against THIS, never a client id.
-		 * @param int                              $view_user     Optional "view as assignee" id; providers honor it ONLY for manager-tier viewers (0 = self/own).
+		 * @param int                              $view_user     Optional "view as assignee" id; honored ONLY for manager-tier viewers (manager: 0 = all, >0 = that staffer; reps always see only their own and ignore it).
 		 */
 		$events = (array) apply_filters(
 			'doublescale_admin_calendar_events',

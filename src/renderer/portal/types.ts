@@ -6,6 +6,8 @@
  * filter (so the reused ticket views work unchanged).
  */
 
+import type { CalendarEvent, CalendarEventKind } from '@doublescale/shared/calendar';
+
 export interface PortalUser {
 	id: number;
 	email: string;
@@ -127,26 +129,12 @@ export interface PortalTimelineResponse {
 	total: number;
 }
 
-export type PortalCalendarEventKind =
-	| 'booking'
-	| 'invoice'
-	| 'proposal'
-	| 'support';
-
-export interface PortalCalendarEvent {
-	id: string;
-	kind: PortalCalendarEventKind;
-	title: string;
-	/** Event date(time). All-day events carry a `YYYY-MM-DD` (or datetime) start. */
-	start: string;
-	end: string | null;
-	all_day: boolean;
-	/** Booking tz (fallback 'UTC'); null for all-day docs. */
-	timezone: string | null;
-	status: string;
-	/** In-portal navigation target, or null when the event isn't actionable. */
-	route: string | null;
-}
+// The calendar event model now lives in the shared foundation layer so the admin
+// staff calendar can reuse the same grid/chip/colors. The portal feed emits only
+// booking/invoice/proposal and never the staff-facing extras, but the shape is a
+// superset — these aliases keep the portal's existing imports working unchanged.
+export type PortalCalendarEventKind = CalendarEventKind;
+export type PortalCalendarEvent = CalendarEvent;
 
 export interface PortalCalendarResponse {
 	data: PortalCalendarEvent[];

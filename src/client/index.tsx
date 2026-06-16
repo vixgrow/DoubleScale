@@ -32,6 +32,11 @@ if (config.isModuleEnabled('support')) {
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 require('./pages/sales');
 
+// Cross-module admin Calendar — always register (aggregates across modules; the
+// REST feed is role-scoped server-side, so it isn't tied to one requiresModule).
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+require('./pages/calendar');
+
 /**
  * When PHP marks the install as Pro (`doublescalePro.isPro`), treat Pro as active for
  * sidebar and feature gates even if the Pro client bundle did not register first.

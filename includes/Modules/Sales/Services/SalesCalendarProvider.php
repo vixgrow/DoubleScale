@@ -66,22 +66,28 @@ final class SalesCalendarProvider {
 			? ( $view_user > 0 ? $view_user : 0 )
 			: $viewer_id;
 
-		$invoices  = $this->scoped( InvoiceModel::query(), 'sale_agent_user_id', $scope_user )
-			->where( 'status', '!=', InvoiceStatus::DRAFT )
-			->whereBetween( 'due_date', array( $start, $end_inclusive ) )
-			->limit( self::MAX_ROWS )->get();
-		$proposals = $this->scoped( ProposalModel::query(), 'assigned_user_id', $scope_user )
-			->where( 'status', '!=', ProposalStatus::DRAFT )
-			->whereBetween( 'open_till', array( $start, $end_inclusive ) )
-			->limit( self::MAX_ROWS )->get();
-		$contracts = $this->scoped( ContractModel::query(), 'assigned_user_id', $scope_user )
-			->where( 'is_trash', false )
-			->where( 'status', '!=', ContractStatus::DRAFT )
-			->whereBetween( 'end_date', array( $start, $end_inclusive ) )
-			->limit( self::MAX_ROWS )->get();
+		$invoices  = $this->safe_get(
+			$this->scoped( InvoiceModel::query(), 'sale_agent_user_id', $scope_user )
+				->where( 'status', '!=', InvoiceStatus::DRAFT )
+				->whereBetween( 'due_date', array( $start, $end_inclusive ) ),
+			'invoices'
+		);
+		$proposals = $this->safe_get(
+			$this->scoped( ProposalModel::query(), 'assigned_user_id', $scope_user )
+				->where( 'status', '!=', ProposalStatus::DRAFT )
+				->whereBetween( 'open_till', array( $start, $end_inclusive ) ),
+			'proposals'
+		);
+		$contracts = $this->safe_get(
+			$this->scoped( ContractModel::query(), 'assigned_user_id', $scope_user )
+				->where( 'is_trash', false )
+				->where( 'status', '!=', ContractStatus::DRAFT )
+				->whereBetween( 'end_date', array( $start, $end_inclusive ) ),
+			'contracts'
+		);
 
 		// Batch-resolve assignee + contact display names across all three sets.
-		$user_ids = array_merge(
+		$user_ids    = array_merge(
 			$invoices->pluck( 'sale_agent_user_id' )->all(),
 			$proposals->pluck( 'assigned_user_id' )->all(),
 			$contracts->pluck( 'assigned_user_id' )->all()
@@ -91,8 +97,8 @@ final class SalesCalendarProvider {
 			$proposals->pluck( 'contact_id' )->all(),
 			$contracts->pluck( 'contact_id' )->all()
 		);
-		$names    = CalendarSupport::user_names( $user_ids );
-		$contacts = self::contact_names( $contact_ids );
+		$names       = CalendarSupport::user_names( $user_ids );
+		$contacts    = self::contact_names( $contact_ids );
 
 		foreach ( $invoices as $invoice ) {
 			$events[] = $this->shape(
@@ -110,7 +116,7 @@ final class SalesCalendarProvider {
 		}
 
 		foreach ( $proposals as $proposal ) {
-			$title = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
+			$title    = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
 			$events[] = $this->shape(
 				'proposal-' . (int) $proposal->id,
 				'proposal',
@@ -156,6 +162,56 @@ final class SalesCalendarProvider {
 			$query->where( $owner_col, $scope_user );
 		}
 		return $query;
+	}
+
+	/**
+	 * Run a windowed query, returning an empty collection (instead of fataling)
+	 * when its table is missing — e.g. a Sales sub-feature (contracts) whose
+	 * migration hasn't run on this install. Keeps one absent table from taking
+	 * down the whole aggregated calendar feed.
+	 *
+	 * @param mixed  $query Eloquent query builder (limit + get applied here).
+	 * @param string $kind  Kind label for the log entry.
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	private function safe_get( $query, string $kind ) {
+		$model = $query->getModel();
+		try {
+			// Skip a table that isn't installed (e.g. contracts, a sub-feature
+			// whose migration hasn't run) so we neither fatal nor let $wpdb echo a
+			// "table doesn't exist" banner into the REST response.
+			if ( ! self::table_exists( (string) $model->getTable() ) ) {
+				return $model->newCollection();
+			}
+			return $query->limit( self::MAX_ROWS )->get();
+		} catch ( \Throwable $e ) {
+			doublescale_get_logger()->warning(
+				'Sales calendar query skipped; table read failed.',
+				array(
+					'source'    => 'sales-calendar-provider',
+					'kind'      => $kind,
+					'exception' => $e->getMessage(),
+				)
+			);
+			// getModel() touches no DB, so newCollection() is safe here too.
+			return $model->newCollection();
+		}
+	}
+
+	/**
+	 * Whether a table exists. The name is taken verbatim from the model — WPEloquent
+	 * bakes the `$wpdb` prefix into `getTable()`, so it is already fully qualified
+	 * (e.g. `wp_doublescale_sales_contracts`); `esc_like()` keeps the literal
+	 * underscores from acting as LIKE wildcards.
+	 *
+	 * @param string $table Fully-qualified table name.
+	 * @return bool
+	 */
+	private static function table_exists( string $table ): bool {
+		global $wpdb;
+		$like = $wpdb->esc_like( $table );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off schema existence probe; there is no WP API for it and the result is not cacheable per request.
+		return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) ) === $table;
 	}
 
 	/**
@@ -209,7 +265,7 @@ final class SalesCalendarProvider {
 
 		$map = array();
 		foreach ( ContactModel::whereIn( 'id', $contact_ids )->get() as $contact ) {
-			$name              = trim( (string) ( $contact->first_name ?? '' ) . ' ' . (string) ( $contact->last_name ?? '' ) );
+			$name                      = trim( (string) ( $contact->first_name ?? '' ) . ' ' . (string) ( $contact->last_name ?? '' ) );
 			$map[ (int) $contact->id ] = '' !== $name ? $name : (string) ( $contact->email ?? '' );
 		}
 

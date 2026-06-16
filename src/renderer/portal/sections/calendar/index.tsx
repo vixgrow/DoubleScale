@@ -4,6 +4,10 @@
  * navigates to its in-portal detail route. The "Filter By" control toggles event
  * kinds client-side over the already-fetched window (no refetch).
  *
+ * The grid, chips, colors, and range/fetch hook now come from the shared calendar
+ * foundation (`@doublescale/shared/calendar`); this section keeps the portal's own
+ * `fetchCalendar`, in-portal navigation, and header/filter chrome.
+ *
  * Phase 1 ships the Month view only; the header is laid out to grow Week/Day
  * toggles later (see docs/portal-calendar-plan.md §4).
  */
@@ -11,12 +15,17 @@
 import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
+import {
+	MonthGrid,
+	useCalendar,
+	type CalendarEvent,
+} from '@doublescale/shared/calendar';
 import type { PortalCalendarEventKind } from '../../types';
+import { fetchCalendar } from '../../api';
 import { ChevronLeftIcon, ChevronRightIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui';
-import MonthGrid from './month-grid';
-import { useCalendar } from './use-calendar';
 
 interface KindFilter {
 	kind: PortalCalendarEventKind;
@@ -30,8 +39,9 @@ const KIND_FILTERS: KindFilter[] = [
 ];
 
 const Calendar = () => {
+	const navigate = useNavigate();
 	const { grid, events, loading, error, goPrev, goNext, goToday } =
-		useCalendar();
+		useCalendar(fetchCalendar);
 
 	// All kinds visible by default; toggling removes a kind from the view.
 	const [hidden, setHidden] = useState<Set<PortalCalendarEventKind>>(
@@ -54,6 +64,12 @@ const Calendar = () => {
 		() => events.filter((e) => !hidden.has(e.kind)),
 		[events, hidden]
 	);
+
+	const onSelect = (event: CalendarEvent) => {
+		if (event.route) {
+			navigate(event.route);
+		}
+	};
 
 	return (
 		<section className="space-y-4">
@@ -120,6 +136,7 @@ const Calendar = () => {
 						days={grid.days}
 						cursor={grid.cursor}
 						events={visibleEvents}
+						onSelect={onSelect}
 					/>
 					{events.length === 0 && (
 						<EmptyState

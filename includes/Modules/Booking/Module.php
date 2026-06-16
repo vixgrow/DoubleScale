@@ -80,6 +80,7 @@ final class Module extends AbstractModule {
 
 		$container->singleton( Services\BookingAjax::class, static fn () => new Services\BookingAjax() );
 		$container->singleton( Services\BookingPortalProvider::class, static fn () => new Services\BookingPortalProvider() );
+		$container->singleton( Services\BookingCalendarProvider::class, static fn () => new Services\BookingCalendarProvider() );
 		$container->singleton( Services\EmailNotifications::class, static fn () => new Services\EmailNotifications() );
 		$container->singleton( Services\BookingJobs::class, static fn () => new Services\BookingJobs() );
 		$container->singleton( Services\BookingTasks::class, static fn () => new Services\BookingTasks() );
@@ -157,7 +158,7 @@ final class Module extends AbstractModule {
 		$container->get( Services\BookingPortalProvider::class );
 		// Admin/staff calendar bridge: contributes bookings to the cross-module
 		// calendar feed (host-scoped for agents, all for managers).
-		new Services\BookingCalendarProvider();
+		$container->get( Services\BookingCalendarProvider::class );
 		$container->get( Services\EmailNotifications::class );
 		$container->get( Services\BookingJobs::class );
 		$container->get( Services\BookingTasks::class );

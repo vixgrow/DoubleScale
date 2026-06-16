@@ -546,35 +546,56 @@ const Automation: React.FC = () => {
 								</DialogTitle>
 
 								{/* Top bar: breadcrumb | centered title | active + save */}
-								<div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 p-3">
+								<div className="flex flex-col gap-3 p-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4">
 									<nav
-										className="flex min-w-0 items-center gap-1.5 justify-self-start text-sm"
+										className="flex min-w-0 items-center justify-between gap-2 text-sm lg:justify-self-start"
 										aria-label={__(
 											'Breadcrumb',
 											'doublescale'
 										)}
 									>
-										<button
+										<div className="flex min-w-0 items-center gap-1.5">
+											<button
+												type="button"
+												className="shrink-0 cursor-pointer text-base font-medium leading-7 text-foreground transition-colors hover:text-secondary"
+												onClick={() =>
+													navigate(
+														getToLink('automations')
+													)
+												}
+											>
+												{__(
+													'Automation List',
+													'doublescale'
+												)}
+											</button>
+
+												<AccordingRightIcon
+													width={20}
+													height={20}
+													color="hsl(var(--foreground))"
+												/>
+
+											<span className=" truncate text-base font-medium leading-7 text-muted-foreground ">
+												{__(
+													'Edit Automation',
+													'doublescale'
+												)}
+											</span>
+										</div>
+										<DialogClose
 											type="button"
-											className="shrink-0 cursor-pointer text-foreground text-base font-medium leading-7 transition-colors hover:text-secondary"
-											onClick={() =>
-												navigate(
-													getToLink('automations')
-												)
-											}
+											className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none lg:hidden"
+											aria-label={__(
+												'Close',
+												'doublescale'
+											)}
 										>
-											{__(
-												'Automation List',
-												'doublescale'
-											)}
-										</button>
-										<AccordingRightIcon width={20} height={20} color='hsl(var(--foreground))' />
-										<span className="truncate text-base font-medium leading-7 text-muted-foreground">
-											{__(
-												'Edit Automation',
-												'doublescale'
-											)}
-										</span>
+											<X className="h-6 w-6" />
+											<span className="sr-only">
+												{__('Close', 'doublescale')}
+											</span>
+										</DialogClose>
 									</nav>
 
 									<div className="flex max-w-[min(100%,28rem)] items-center justify-center justify-self-center gap-1.5">
@@ -617,7 +638,7 @@ const Automation: React.FC = () => {
 											<>
 												<button
 													type="button"
-													className="min-w-0 truncate text-center text-base font-medium text-[#101828] transition-colors hover:text-secondary"
+													className="min-w-0 truncate text-center text-base font-medium text-[#101828] transition-colors hover:text-secondary "
 													onClick={() => {
 														setAutomationNameDraft(
 															automation?.name ||
@@ -661,7 +682,7 @@ const Automation: React.FC = () => {
 										)}
 									</div>
 
-									<div className="flex flex-shrink-0 items-center justify-end justify-self-end gap-3">
+									<div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:flex-nowrap lg:justify-self-end lg:gap-3">
 										<div className="flex items-center gap-1">
 											<button
 												type="button"
@@ -687,7 +708,9 @@ const Automation: React.FC = () => {
 										{/* divider */}
 										<div className="h-6 w-px bg-[#D0D0D0]"></div>
 										<label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#344054]">
-											<span>{__('Active', 'doublescale')}</span>
+											<span className="hidden sm:inline">
+												{__('Active', 'doublescale')}
+											</span>
 											<Switch
 												checked={
 													automation.status ===
@@ -711,7 +734,7 @@ const Automation: React.FC = () => {
 										<div className="h-6 w-px bg-[#D0D0D0]"></div>
 										<Button
 											variant="default"
-											
+											className="shrink-0"
 											disabled={isSaving}
 											onClick={() =>
 												saveAutomation({
@@ -719,14 +742,19 @@ const Automation: React.FC = () => {
 												})
 											}
 										>
-											{__(
-												'Save & Publish',
-												'doublescale'
-											)}
+											<span className="sm:hidden">
+												{__('Save', 'doublescale')}
+											</span>
+											<span className="hidden sm:inline">
+												{__(
+													'Save & Publish',
+													'doublescale'
+												)}
+											</span>
 										</Button>
 										<DialogClose
 											type="button"
-											className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
+											className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none lg:inline-flex"
 											aria-label={__(
 												'Close',
 												'doublescale'
@@ -758,7 +786,7 @@ const Automation: React.FC = () => {
 															| 'reports'
 													)
 												}
-												className={`inline-flex items-center gap-2 rounded-lg p-2 text-sm font-medium shadow-none transition-colors ${
+												className={`inline-flex shrink-0 items-center gap-2 rounded-lg p-2 text-sm font-medium shadow-none transition-colors ${
 													isActive
 														? 'bg-[#EEF] text-brandPrimary'
 														: 'border border-border text-foreground hover:bg-gray-50'

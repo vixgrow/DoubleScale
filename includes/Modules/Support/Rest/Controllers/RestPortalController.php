@@ -745,10 +745,26 @@ class RestPortalController extends RestController {
 		$is_self         = ActivityTypes::SUPPORT_REPLY === $activity->activity_type
 			&& ( empty( $activity->user_id ) || (int) $activity->user_id === $current_user_id );
 
+		// Resolve the `user` shown to the customer. We expose only the WP
+		// display_name — never the agent's WP id or email:
+		// - The customer's OWN reply → their own id + display name.
+		// - A staff (agent) REPLY → the agent's display_name, so the customer
+		// sees who helped them (no id, no email).
+		// - Lifecycle events (created, status changed, …) → authorless rows.
 		$user = null;
-		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+		if ( $is_self ) {
+			if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+				$user = array(
+					'id'           => (int) $activity->user->ID,
+					'display_name' => (string) $activity->user->display_name,
+				);
+			}
+		} elseif (
+			ActivityTypes::SUPPORT_REPLY === $activity->activity_type
+			&& $activity->relationLoaded( 'user' )
+			&& $activity->user
+		) {
 			$user = array(
-				'id'           => (int) $activity->user->ID,
 				'display_name' => (string) $activity->user->display_name,
 			);
 		}
@@ -759,7 +775,7 @@ class RestPortalController extends RestController {
 			'id'          => $aid,
 			'kind'        => $kind,
 			'type'        => $activity->activity_type,
-			'user_id'     => $activity->user_id ? (int) $activity->user_id : null,
+			'user_id'     => $is_self && $activity->user_id ? (int) $activity->user_id : null,
 			'data'        => $data,
 			'is_self'     => $is_self,
 			'user'        => $user,

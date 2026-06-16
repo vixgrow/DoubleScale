@@ -144,6 +144,17 @@ const ConversationBubble = ({
 		typeof item.data?.content === 'string' ? item.data.content : '';
 	const isCustomer = item.is_customer === true || item.is_self === true;
 
+	// Lifecycle events (ticket created, status changed, …) are system rows, not
+	// messages. Render them as a neutral centered line — never as an authored
+	// bubble — so a guest never sees an empty box or staff identity.
+	if (item.kind === 'event') {
+		return (
+			<li className="text-center text-xs text-muted-foreground">
+				{describeEvent(item)}
+			</li>
+		);
+	}
+
 	return (
 		<li
 			className={`rounded-lg border p-3 text-sm ${
@@ -165,6 +176,25 @@ const ConversationBubble = ({
 <AttachmentList attachments={item.attachments} />
 		</li>
 	);
+};
+
+const describeEvent = (item: PortalConversationItem): string => {
+	const key =
+		typeof item.data?.event_key === 'string' ? item.data.event_key : item.type;
+	switch (key) {
+		case 'ticket_created':
+			return __('Ticket created', 'doublescale');
+		case 'ticket_status_changed':
+			return __('Status updated', 'doublescale');
+		case 'ticket_priority_changed':
+			return __('Priority updated', 'doublescale');
+		case 'ticket_assigned':
+			return __('Assigned to an agent', 'doublescale');
+		case 'ticket_unassigned':
+			return __('Unassigned', 'doublescale');
+		default:
+			return __('Update', 'doublescale');
+	}
 };
 
 export default GuestTicket;

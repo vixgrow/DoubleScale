@@ -70,15 +70,15 @@ class InvoiceModel extends Model {
 	 * @var array<string, string>
 	 */
 	protected $casts = array(
-		'tag_ids'                => 'array',
-		'line_items'             => 'array',
-		'allowed_payment_modes'  => 'array',
-		'discount_value'         => 'float',
-		'subtotal'               => 'float',
-		'total_tax'              => 'float',
-		'adjustment'             => 'float',
-		'total'                  => 'float',
-		'amount_paid'            => 'float',
+		'tag_ids'               => 'array',
+		'line_items'            => 'array',
+		'allowed_payment_modes' => 'array',
+		'discount_value'        => 'float',
+		'subtotal'              => 'float',
+		'total_tax'             => 'float',
+		'adjustment'            => 'float',
+		'total'                 => 'float',
+		'amount_paid'           => 'float',
 	);
 
 	/**
@@ -171,7 +171,7 @@ class InvoiceModel extends Model {
 
 		static::saving(
 			function ( $invoice ) {
-				$totals = TotalsCalculator::compute(
+				$totals             = TotalsCalculator::compute(
 					$invoice->line_items,
 					(string) ( $invoice->discount_type ?? 'none' ),
 					(float) ( $invoice->discount_value ?? 0 ),
@@ -243,7 +243,7 @@ class InvoiceModel extends Model {
 	 * @return void
 	 */
 	public function clear_in_progress_payment_refs(): void {
-		$this->external_payment_ref       = null;
+		$this->external_payment_ref     = null;
 		$this->stripe_payment_intent_id = null;
 		$this->save();
 	}

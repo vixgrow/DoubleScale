@@ -561,15 +561,19 @@ function doublescale_automation_module_dependency_result( array $module_slugs, s
 
 	switch ( $context ) {
 		case 'action':
+			/* translators: %s: module name (e.g. "Deals"). */
 			$template = __( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
 			break;
 		case 'condition':
+			/* translators: %s: module name (e.g. "Deals"). */
 			$template = __( 'This condition uses rules that require the %s module to be enabled under Settings → Modules.', 'doublescale' );
 			break;
 		case 'goal':
+			/* translators: %s: module name (e.g. "Deals"). */
 			$template = __( 'This goal requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
 			break;
 		default:
+			/* translators: %s: module name (e.g. "Deals"). */
 			$template = __( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
 			break;
 	}

@@ -117,7 +117,7 @@ const BookingsTabs: React.FC<BookingsTabsProps> = ({
 				value={period}
 				onValueChange={(value) => setPeriod(value as BookingsTabsTypes)}
 			>
-				<SelectTrigger className="h-10 w-full min-w-0 max-w-full sm:max-w-[260px]">
+				<SelectTrigger className="h-10 w-full min-w-0 max-w-full lg:max-w-[260px]">
 					<SelectValue />
 				</SelectTrigger>
 			<SelectContent>

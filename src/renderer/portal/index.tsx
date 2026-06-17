@@ -37,6 +37,13 @@ const seedSalesPublicConfig = ( restRoot: string, lang: string ): void => {
 			mount_id: '',
 		};
 	}
+	if ( ! window.doublescale_contract_config ) {
+		window.doublescale_contract_config = {
+			public_rest_url: `${ base }/doublescale/v1/sales/public/contracts`,
+			lang,
+			mount_id: '',
+		};
+	}
 };
 
 const config = getPortalConfig();

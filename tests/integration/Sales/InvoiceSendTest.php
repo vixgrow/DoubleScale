@@ -7,10 +7,10 @@ namespace DoubleScale\Tests\Integration\Sales;
 
 use DoubleScale\Core\ModuleManager;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Renderer\InvoiceFrontendHandler;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Renderer\InvoiceFrontendHandler;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 
 defined( 'ABSPATH' ) || exit;

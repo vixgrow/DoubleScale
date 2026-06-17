@@ -11,9 +11,9 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
 use DoubleScale\Modules\Notifications\Services\NotificationService;
-use DoubleScale\Modules\Sales\Models\ContractModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 
 /**
  * SalesRepNotifications service.

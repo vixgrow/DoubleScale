@@ -24,12 +24,12 @@ namespace DoubleScale\Modules\Sales\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
-use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
-use DoubleScale\Modules\Sales\Rest\ProposalShaper;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
+use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 
 /**
  * SalesPortalProvider.
@@ -77,7 +77,8 @@ final class SalesPortalProvider {
 			'label'        => __( 'Documents', 'doublescale' ),
 			'icon'         => 'document',
 			'order'        => 30,
-			'is_available' => static fn() => doublescale_sales_documents_ready(),
+			'is_available' => static fn() => doublescale_sales_documents_ready()
+				&& doublescale_any_sales_document_module_active(),
 			'badge'        => static fn( $contact ) => self::count_actionable( $contact ),
 		);
 
@@ -92,7 +93,9 @@ final class SalesPortalProvider {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function add_summary_card( array $cards, $contact ): array {
-		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+		if ( ! doublescale_sales_documents_ready()
+			|| ! doublescale_any_sales_document_module_active()
+			|| ! $contact instanceof ContactModel ) {
 			return $cards;
 		}
 
@@ -114,50 +117,51 @@ final class SalesPortalProvider {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function add_timeline_items( array $items, $contact ): array {
-		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+		if ( ! doublescale_sales_documents_ready()
+			|| ! doublescale_any_sales_document_module_active()
+			|| ! $contact instanceof ContactModel ) {
 			return $items;
 		}
 
-		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
-			->where( 'status', '!=', InvoiceStatus::DRAFT )
-			->orderBy( 'id', 'desc' )
-			->limit( self::TIMELINE_CAP )
-			->get();
+		if ( doublescale_sales_child_module_active( 'documents' ) ) {
+			$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', InvoiceStatus::DRAFT )
+				->orderBy( 'id', 'desc' )
+				->limit( self::TIMELINE_CAP )
+				->get();
 
-		foreach ( $invoices as $invoice ) {
-			$items[] = array(
-				// `date` is the timeline sort key and is compared as a string
-				// descending — it must be a full datetime, so use created_at (the
-				// doc's invoice_date is Y-m-d only and would mis-sort).
-				'id'            => 'invoice-' . (int) $invoice->id,
-				'kind'          => 'document',
-				'document_type' => 'invoice',
-				'type'          => self::invoice_lifecycle_type( $invoice ),
-				'date'          => (string) $invoice->created_at,
-				'title'         => (string) $invoice->invoice_number,
-				'status'        => (string) $invoice->status,
-				'public_url'    => (string) InvoiceUrl::get_public_url( $invoice ),
-			);
-		}
+			foreach ( $invoices as $invoice ) {
+				$items[] = array(
+					'id'            => 'invoice-' . (int) $invoice->id,
+					'kind'          => 'document',
+					'document_type' => 'invoice',
+					'type'          => self::invoice_lifecycle_type( $invoice ),
+					'date'          => (string) $invoice->created_at,
+					'title'         => (string) $invoice->invoice_number,
+					'status'        => (string) $invoice->status,
+					'public_url'    => (string) InvoiceUrl::get_public_url( $invoice ),
+				);
+			}
 
-		$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
-			->where( 'status', '!=', ProposalStatus::DRAFT )
-			->orderBy( 'id', 'desc' )
-			->limit( self::TIMELINE_CAP )
-			->get();
+			$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', ProposalStatus::DRAFT )
+				->orderBy( 'id', 'desc' )
+				->limit( self::TIMELINE_CAP )
+				->get();
 
-		foreach ( $proposals as $proposal ) {
-			$title   = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
-			$items[] = array(
-				'id'            => 'proposal-' . (int) $proposal->id,
-				'kind'          => 'document',
-				'document_type' => 'proposal',
-				'type'          => self::proposal_lifecycle_type( $proposal ),
-				'date'          => (string) $proposal->created_at,
-				'title'         => $title,
-				'status'        => (string) $proposal->status,
-				'public_url'    => (string) ProposalUrl::get_public_url( $proposal ),
-			);
+			foreach ( $proposals as $proposal ) {
+				$title   = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
+				$items[] = array(
+					'id'            => 'proposal-' . (int) $proposal->id,
+					'kind'          => 'document',
+					'document_type' => 'proposal',
+					'type'          => self::proposal_lifecycle_type( $proposal ),
+					'date'          => (string) $proposal->created_at,
+					'title'         => $title,
+					'status'        => (string) $proposal->status,
+					'public_url'    => (string) ProposalUrl::get_public_url( $proposal ),
+				);
+			}
 		}
 
 		return $items;
@@ -180,51 +184,55 @@ final class SalesPortalProvider {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function add_calendar_events( array $events, $contact, string $start, string $end_inclusive ): array {
-		if ( ! doublescale_sales_documents_ready() || ! $contact instanceof ContactModel ) {
+		if ( ! doublescale_sales_documents_ready()
+			|| ! doublescale_any_sales_document_module_active()
+			|| ! $contact instanceof ContactModel ) {
 			return $events;
 		}
 
-		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
-			->where( 'status', '!=', InvoiceStatus::DRAFT )
-			->whereNotNull( 'due_date' )
-			->whereBetween( 'due_date', array( $start, $end_inclusive ) )
-			->get();
+		if ( doublescale_sales_child_module_active( 'documents' ) ) {
+			$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', InvoiceStatus::DRAFT )
+				->whereNotNull( 'due_date' )
+				->whereBetween( 'due_date', array( $start, $end_inclusive ) )
+				->get();
 
-		foreach ( $invoices as $invoice ) {
-			$hash     = (string) $invoice->hash;
-			$events[] = array(
-				'id'       => 'invoice-' . (int) $invoice->id,
-				'kind'     => 'invoice',
-				'title'    => (string) $invoice->invoice_number,
-				'start'    => (string) $invoice->due_date,
-				'end'      => null,
-				'all_day'  => true,
-				'timezone' => null,
-				'status'   => (string) $invoice->status,
-				'route'    => '' !== $hash ? '/documents/invoice/' . $hash : '/documents',
-			);
-		}
+			foreach ( $invoices as $invoice ) {
+				$hash     = (string) $invoice->hash;
+				$events[] = array(
+					'id'       => 'invoice-' . (int) $invoice->id,
+					'kind'     => 'invoice',
+					'title'    => (string) $invoice->invoice_number,
+					'start'    => (string) $invoice->due_date,
+					'end'      => null,
+					'all_day'  => true,
+					'timezone' => null,
+					'status'   => (string) $invoice->status,
+					'route'    => '' !== $hash ? '/documents/invoice/' . $hash : '/documents',
+				);
+			}
 
-		$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
-			->where( 'status', '!=', ProposalStatus::DRAFT )
-			->whereNotNull( 'open_till' )
-			->whereBetween( 'open_till', array( $start, $end_inclusive ) )
-			->get();
+			$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', ProposalStatus::DRAFT )
+				->whereNotNull( 'open_till' )
+				->whereBetween( 'open_till', array( $start, $end_inclusive ) )
+				->get();
 
-		foreach ( $proposals as $proposal ) {
-			$hash     = (string) $proposal->hash;
-			$title    = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
-			$events[] = array(
-				'id'       => 'proposal-' . (int) $proposal->id,
-				'kind'     => 'proposal',
-				'title'    => $title,
-				'start'    => (string) $proposal->open_till,
-				'end'      => null,
-				'all_day'  => true,
-				'timezone' => null,
-				'status'   => (string) $proposal->status,
-				'route'    => '' !== $hash ? '/documents/proposal/' . $hash : '/documents',
-			);
+			foreach ( $proposals as $proposal ) {
+				$hash     = (string) $proposal->hash;
+				$title    = '' !== (string) $proposal->subject ? (string) $proposal->subject : (string) $proposal->proposal_number;
+				$events[] = array(
+					'id'       => 'proposal-' . (int) $proposal->id,
+					'kind'     => 'proposal',
+					'title'    => $title,
+					'start'    => (string) $proposal->open_till,
+					'end'      => null,
+					'all_day'  => true,
+					'timezone' => null,
+					'status'   => (string) $proposal->status,
+					'route'    => '' !== $hash ? '/documents/proposal/' . $hash : '/documents',
+				);
+			}
 		}
 
 		return $events;
@@ -242,13 +250,17 @@ final class SalesPortalProvider {
 			return 0;
 		}
 
-		$invoices = (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
-			->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
-			->count();
+		$invoices = doublescale_sales_child_module_active( 'documents' )
+			? (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
+				->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
+				->count()
+			: 0;
 
-		$proposals = (int) ProposalModel::where( 'contact_id', (int) $contact->id )
-			->whereIn( 'status', self::OPEN_PROPOSAL_STATUSES )
-			->count();
+		$proposals = doublescale_sales_child_module_active( 'documents' )
+			? (int) ProposalModel::where( 'contact_id', (int) $contact->id )
+				->whereIn( 'status', self::OPEN_PROPOSAL_STATUSES )
+				->count()
+			: 0;
 
 		return $invoices + $proposals;
 	}
@@ -264,6 +276,10 @@ final class SalesPortalProvider {
 	 * @return string e.g. "1,250.00 USD", or "0" when nothing is outstanding.
 	 */
 	private static function outstanding_balance_value( ContactModel $contact ): string {
+		if ( ! doublescale_sales_child_module_active( 'documents' ) ) {
+			return '0';
+		}
+
 		$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
 			->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
 			->get();

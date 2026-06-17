@@ -2,7 +2,7 @@
 /**
  * Sales module bootstrap.
  *
- * Owns proposals and invoices with JSON line items.
+ * Parent module for proposals, invoices, contracts, and shared sales settings.
  *
  * @package DoubleScale\Modules\Sales
  */
@@ -18,13 +18,10 @@ use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
 use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
-use DoubleScale\Modules\Sales\Renderer\ContractFrontendHandler;
-use DoubleScale\Modules\Sales\Renderer\InvoiceFrontendHandler;
-use DoubleScale\Modules\Sales\Renderer\ProposalFrontendHandler;
-use DoubleScale\Modules\Sales\Rest\ProposalShaper;
-use DoubleScale\Modules\Sales\Services\ConvertProposalToInvoice;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Rest\ProposalShaper;
+use DoubleScale\Modules\Documents\Services\ConvertProposalToInvoice;
 
 /**
  * Sales module.
@@ -41,12 +38,10 @@ final class Module extends AbstractModule {
 
 	public function description(): string {
 		if ( ! \doublescale_sales_documents_ready() ) {
-			// Documents (proposals/invoices) are gated until released — see
-			// doublescale_sales_documents_ready().
 			return __( 'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.', 'doublescale' );
 		}
 
-		return __( 'Create proposals and invoices with line items, discounts, and customer billing.', 'doublescale' );
+		return __( 'Sales workspace with proposals, invoices, contracts, payments, and team settings.', 'doublescale' );
 	}
 
 	public function version(): string {
@@ -62,34 +57,19 @@ final class Module extends AbstractModule {
 	}
 
 	public function onActivate(): void {
-		// Sales owns the shared SALES_REP / SALES_MANAGER roles (co-used by the
-		// Pro pipeline child module): create them on enable — the caps sync
-		// below only patches roles that already exist.
 		\DoubleScale\Core\UserRoles\UserRoles::provision_crm_roles();
 		Capabilities::sync_capabilities_for_user_roles();
 	}
 
 	public function onDeactivate(): void {
-		// Role definitions are removed only when no owning module still needs
-		// them; user assignments persist for re-enable.
 		\DoubleScale\Core\UserRoles\UserRoles::enforce_module_scoped_roles();
 	}
 
 	public function restControllers(): array {
 		return array(
-			Rest\Controllers\RestProposalController::class,
-			Rest\Controllers\RestContractController::class,
-			Rest\Controllers\RestContractTypeController::class,
-			Rest\Controllers\RestInvoiceController::class,
-			Rest\Controllers\RestInvoicePaymentController::class,
-			Rest\Controllers\RestPaymentController::class,
 			Rest\Controllers\RestContactSalesController::class,
-			Rest\Controllers\RestInvoiceOnlinePaymentController::class,
 			Rest\Controllers\RestSalesUsersController::class,
 			Rest\Controllers\RestSalesTaxController::class,
-			Rest\Controllers\RestPublicProposalController::class,
-			Rest\Controllers\RestPublicContractController::class,
-			Rest\Controllers\RestPublicInvoiceController::class,
 			Rest\Controllers\RestSalesSettingsController::class,
 			Rest\Controllers\RestPortalDocumentsController::class,
 			Rest\Controllers\RestPortalPaymentsController::class,
@@ -97,66 +77,35 @@ final class Module extends AbstractModule {
 		);
 	}
 
-	/**
-	 * @return array<int, array{0: string, 1: string}>
-	 */
-	public function scheduledHooks(): array {
-		return array(
-			array( 'doublescale_sales', 'doublescale_sales_overdue_invoices' ),
-			array( 'doublescale_sales', 'doublescale_sales_expiring_proposals' ),
-			array( 'doublescale_sales', 'doublescale_sales_expiring_contracts' ),
-		);
-	}
-
-	/**
-	 * Document tables (proposals, invoices, payments, taxes) are not created
-	 * while the feature is gated — their schema may still change.
-	 *
-	 * @return array<int, string>
-	 */
 	public function migrations(): array {
 		if ( ! \doublescale_sales_documents_ready() ) {
 			return array();
 		}
 
-		return parent::migrations();
+		$dir = $this->module_dir() . '/Migrations';
+		$shared = array(
+			$dir . '/SalesTagIdsColumn.php',
+			$dir . '/SalesTaxesTable.php',
+		);
+
+		return array_values( array_filter( $shared, 'is_file' ) );
 	}
 
 	public function boot( Container $container ): void {
+		Capabilities::ensure_capabilities_synced();
+
 		if ( ! \doublescale_sales_documents_ready() ) {
-			// Parent-toggle-only mode while the documents feature is gated:
-			// roles/capabilities stay (the pipeline child shares them), but
-			// no REST routes (skip parent::boot), schedules, public pages,
-			// menus, or proposal→invoice automation. All controllers in
-			// restControllers() serve the documents feature.
-			Capabilities::ensure_capabilities_synced();
 			return;
 		}
 
 		parent::boot( $container );
 
-		Capabilities::ensure_capabilities_synced();
-
 		GatewayManager::instance();
 
-		add_action( 'init', array( $this, 'register_overdue_schedule' ) );
-
-		new ProposalFrontendHandler();
-		new ContractFrontendHandler();
-		new InvoiceFrontendHandler();
-
-		// Client Portal bridge: contributes the Documents section, the outstanding
-		// balance summary card, and document-lifecycle timeline rows. Each
-		// contribution is gated on doublescale_sales_documents_ready().
 		new Services\SalesPortalProvider();
-
-		// Admin/staff calendar bridge: contributes invoice due dates, proposal
-		// expiries, and contract renewals to the cross-module calendar feed
-		// (rep-scoped; managers see all).
 		new Services\SalesCalendarProvider();
 
 		add_action( 'doublescale_sales_proposal_accepted', array( $this, 'auto_convert_accepted_proposal' ), 10, 1 );
-		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
 
 		add_filter( 'doublescale_mail_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
 
@@ -165,114 +114,16 @@ final class Module extends AbstractModule {
 
 		MenuRegistry::add(
 			array(
-				'page_title'      => __( 'Proposals', 'doublescale' ),
-				'menu_title'      => __( 'Proposals', 'doublescale' ),
+				'page_title'      => __( 'Sales Settings', 'doublescale' ),
+				'menu_title'      => __( 'Settings', 'doublescale' ),
 				'capability'      => 'doublescale_access',
-				'slug'            => 'doublescale&path=sales/proposals',
+				'slug'            => 'doublescale&path=sales/settings',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
-				'position'        => 41,
+				'position'        => 45,
 				'group'           => 'sales',
 				'requires_module' => 'sales',
 			)
 		);
-
-		MenuRegistry::add(
-			array(
-				'page_title'      => __( 'Invoices', 'doublescale' ),
-				'menu_title'      => __( 'Invoices', 'doublescale' ),
-				'capability'      => 'doublescale_access',
-				'slug'            => 'doublescale&path=sales/invoices',
-				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
-				'position'        => 42,
-				'group'           => 'sales',
-				'requires_module' => 'sales',
-			)
-		);
-
-		MenuRegistry::add(
-			array(
-				'page_title'      => __( 'Contracts', 'doublescale' ),
-				'menu_title'      => __( 'Contracts', 'doublescale' ),
-				'capability'      => 'doublescale_access',
-				'slug'            => 'doublescale&path=sales/contracts',
-				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
-				'position'        => 44,
-				'group'           => 'sales',
-				'requires_module' => 'sales',
-			)
-		);
-
-		MenuRegistry::add(
-			array(
-				'page_title'      => __( 'Payments', 'doublescale' ),
-				'menu_title'      => __( 'Payments', 'doublescale' ),
-				'capability'      => 'doublescale_access',
-				'slug'            => 'doublescale&path=sales/payments',
-				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
-				'position'        => 43,
-				'group'           => 'sales',
-				'requires_module' => 'sales',
-			)
-		);
-	}
-
-	/**
-	 * Register hourly overdue-invoice cron via Action Scheduler.
-	 *
-	 * @return void
-	 */
-	public function register_overdue_schedule(): void {
-		if ( get_transient( 'doublescale_register_tasks_lock_sales_overdue' ) ) {
-			return;
-		}
-		set_transient( 'doublescale_register_tasks_lock_sales_overdue', 1, MINUTE_IN_SECONDS );
-
-		$tasks = new \DoubleScale\Core\Tasks( 'doublescale_sales' );
-		$tasks->register_callback(
-			'doublescale_sales_overdue_invoices',
-			static function () {
-				( new Services\OverdueInvoices() )->run();
-			}
-		);
-
-		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_overdue_invoices' ) ) {
-			$tasks->schedule_recurring( time(), HOUR_IN_SECONDS, 'doublescale_sales_overdue_invoices' );
-		}
-
-		$tasks->register_callback(
-			'doublescale_sales_expiring_proposals',
-			static function () {
-				( new Services\ExpiringProposals() )->run();
-			}
-		);
-
-		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_proposals' ) ) {
-			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_proposals' );
-		}
-
-		$tasks->register_callback(
-			'doublescale_sales_expiring_contracts',
-			static function () {
-				( new Services\ExpiringContracts() )->run();
-			}
-		);
-
-		if ( false === $tasks->get_next_timestamp( 'doublescale_sales_expiring_contracts' ) ) {
-			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_sales_expiring_contracts' );
-		}
-	}
-
-	/**
-	 * Notify sales rep when an invoice is paid.
-	 *
-	 * @param \DoubleScale\Modules\Sales\Models\InvoiceModel $invoice Invoice.
-	 * @return void
-	 */
-	public function on_invoice_paid( $invoice ): void {
-		if ( ! $invoice instanceof \DoubleScale\Modules\Sales\Models\InvoiceModel ) {
-			return;
-		}
-		( new Services\SalesRepNotifications() )->notify_invoice_paid( $invoice );
 	}
 
 	/**
@@ -282,6 +133,11 @@ final class Module extends AbstractModule {
 	 * @return void
 	 */
 	public function auto_convert_accepted_proposal( ProposalModel $proposal ): void {
+		if ( ! function_exists( 'doublescale_is_module_active' )
+			|| ! doublescale_is_module_active( 'documents' ) ) {
+			return;
+		}
+
 		if ( ProposalStatus::ACCEPTED !== (string) $proposal->status ) {
 			return;
 		}

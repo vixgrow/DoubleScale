@@ -161,14 +161,15 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
 	sales: 'sales',
-	'sales/proposals': 'sales',
-	'sales/proposals/:id': 'sales',
-	'sales/invoices': 'sales',
-	'sales/invoices/:id': 'sales',
-	'sales/contracts': 'sales',
-	'sales/contracts/:id': 'sales',
-	'sales/payments': 'sales',
-	'sales/payments/:id': 'sales',
+	'sales/proposals': 'documents',
+	'sales/proposals/:id': 'documents',
+	'sales/invoices': 'documents',
+	'sales/invoices/:id': 'documents',
+	'sales/contracts': 'contracts',
+	'sales/contracts/:id': 'contracts',
+	'sales/contract-types': 'contracts',
+	'sales/payments': 'documents',
+	'sales/payments/:id': 'documents',
 	'sales/settings': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
@@ -434,22 +435,30 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					navItem.subMenu = [
 						...(isSalesDocumentsReady()
 							? [
-									{
-										path: 'sales/proposals',
-										label: __('Proposals', 'doublescale'),
-									},
-									{
-										path: 'sales/invoices',
-										label: __('Invoices', 'doublescale'),
-									},
-									{
-										path: 'sales/contracts',
-										label: __('Contracts', 'doublescale'),
-									},
-									{
-										path: 'sales/payments',
-										label: __('Payments', 'doublescale'),
-									},
+									...(config.isModuleToggleEnabled('documents')
+										? [
+												{
+													path: 'sales/proposals',
+													label: __('Proposals', 'doublescale'),
+												},
+												{
+													path: 'sales/invoices',
+													label: __('Invoices', 'doublescale'),
+												},
+												{
+													path: 'sales/payments',
+													label: __('Payments', 'doublescale'),
+												},
+										  ]
+										: []),
+									...(config.isModuleToggleEnabled('contracts')
+										? [
+												{
+													path: 'sales/contracts',
+													label: __('Contracts', 'doublescale'),
+												},
+										  ]
+										: []),
 									{
 										path: 'sales/settings',
 										label: __('Settings', 'doublescale'),

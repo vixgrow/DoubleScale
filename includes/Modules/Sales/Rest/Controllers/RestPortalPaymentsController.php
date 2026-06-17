@@ -19,10 +19,10 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Portal\Services\PortalIdentity;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\PaymentModel;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\PaymentModel;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;

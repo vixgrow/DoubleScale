@@ -24,12 +24,12 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Utils\CalendarSupport;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Constants\ContractStatus;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\ContractModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Contracts\Constants\ContractStatus;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 
 /**
  * SalesCalendarProvider.
@@ -68,25 +68,35 @@ final class SalesCalendarProvider {
 			? ( $view_user > 0 ? $view_user : 0 )
 			: $viewer_id;
 
-		$invoices  = $this->safe_get(
-			$this->scoped( InvoiceModel::query(), 'sale_agent_user_id', $scope_user )
-				->where( 'status', '!=', InvoiceStatus::DRAFT )
-				->whereBetween( 'due_date', array( $start, $end_inclusive ) ),
-			'invoices'
-		);
-		$proposals = $this->safe_get(
-			$this->scoped( ProposalModel::query(), 'assigned_user_id', $scope_user )
-				->where( 'status', '!=', ProposalStatus::DRAFT )
-				->whereBetween( 'open_till', array( $start, $end_inclusive ) ),
-			'proposals'
-		);
-		$contracts = $this->safe_get(
-			$this->scoped( ContractModel::query(), 'assigned_user_id', $scope_user )
-				->where( 'is_trash', false )
-				->where( 'status', '!=', ContractStatus::DRAFT )
-				->whereBetween( 'end_date', array( $start, $end_inclusive ) ),
-			'contracts'
-		);
+		$invoice_seed  = new InvoiceModel();
+		$proposal_seed = new ProposalModel();
+		$contract_seed = new ContractModel();
+
+		$invoices  = doublescale_sales_child_module_active( 'documents' )
+			? $this->safe_get(
+				$this->scoped( InvoiceModel::query(), 'sale_agent_user_id', $scope_user )
+					->where( 'status', '!=', InvoiceStatus::DRAFT )
+					->whereBetween( 'due_date', array( $start, $end_inclusive ) ),
+				'invoices'
+			)
+			: $invoice_seed->newCollection();
+		$proposals = doublescale_sales_child_module_active( 'documents' )
+			? $this->safe_get(
+				$this->scoped( ProposalModel::query(), 'assigned_user_id', $scope_user )
+					->where( 'status', '!=', ProposalStatus::DRAFT )
+					->whereBetween( 'open_till', array( $start, $end_inclusive ) ),
+				'proposals'
+			)
+			: $proposal_seed->newCollection();
+		$contracts = doublescale_sales_child_module_active( 'contracts' )
+			? $this->safe_get(
+				$this->scoped( ContractModel::query(), 'assigned_user_id', $scope_user )
+					->where( 'is_trash', false )
+					->where( 'status', '!=', ContractStatus::DRAFT )
+					->whereBetween( 'end_date', array( $start, $end_inclusive ) ),
+				'contracts'
+			)
+			: $contract_seed->newCollection();
 
 		// Batch-resolve assignee + contact display names across all three sets.
 		$user_ids    = array_merge(

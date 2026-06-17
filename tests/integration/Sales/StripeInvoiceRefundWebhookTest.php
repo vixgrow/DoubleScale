@@ -8,10 +8,10 @@
 namespace DoubleScale\Tests\Integration\Sales;
 
 use DoubleScale\Core\ModuleManager;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Constants\PaymentMode;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\PaymentModel;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\PaymentModel;
 use DoubleScale\Pro\Modules\Sales\PaymentGateways\StripeInvoiceWebhookHandler;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 

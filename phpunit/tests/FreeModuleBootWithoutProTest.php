@@ -29,7 +29,7 @@ final class FreeModuleBootWithoutProTest extends TestCase {
 		sort( $slugs );
 
 		$this->assertSame(
-			array( 'activities', 'automations', 'booking', 'campaigns', 'contacts', 'core', 'emails', 'forms', 'notifications', 'portal', 'sales', 'smtp', 'support', 'tracking' ),
+			array( 'activities', 'automations', 'booking', 'campaigns', 'contacts', 'contracts', 'core', 'documents', 'emails', 'forms', 'notifications', 'portal', 'sales', 'smtp', 'support', 'tracking' ),
 			$slugs,
 			'Free tree must register the expected module slugs (core + discovered feature modules) when Pro is not attached.'
 		);

@@ -107,13 +107,32 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
  */
 function doublescale_child_module_parent_map(): array {
 	$map = array(
-		'deals' => 'sales',
+		'deals'     => 'sales',
+		'documents' => 'sales',
+		'contracts' => 'sales',
 	);
 
 	/**
 	 * @param array<string, string> $map Child slug => parent slug.
 	 */
 	return (array) apply_filters( 'doublescale_child_module_parent_map', $map );
+}
+
+/**
+ * Whether a Sales document sub-feature (proposals, invoices, contracts) is active.
+ *
+ * @param string $slug Child slug (`proposals`, `invoices`, or `contracts`).
+ */
+function doublescale_sales_child_module_active( string $slug ): bool {
+	return function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( $slug );
+}
+
+/**
+ * True when at least one Sales document sub-feature is enabled.
+ */
+function doublescale_any_sales_document_module_active(): bool {
+	return doublescale_sales_child_module_active( 'documents' )
+		|| doublescale_sales_child_module_active( 'contracts' );
 }
 
 /**
@@ -132,6 +151,12 @@ function doublescale_module_setting_enabled( string $slug, array $stored, bool $
 	}
 	if ( ! $toggleable ) {
 		return true;
+	}
+	if ( 'documents' === $slug ) {
+		$proposals = ! array_key_exists( 'proposals', $stored ) || (bool) $stored['proposals'];
+		$invoices  = ! array_key_exists( 'invoices', $stored ) || (bool) $stored['invoices'];
+
+		return $proposals || $invoices;
 	}
 
 	return array_key_exists( $slug, doublescale_child_module_parent_map() );

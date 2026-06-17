@@ -9,9 +9,9 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Sales\Models\ContractModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 use Illuminate\Database\QueryException;
 use WPEloquent\Eloquent\Model;
 

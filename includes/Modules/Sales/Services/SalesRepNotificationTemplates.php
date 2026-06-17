@@ -10,10 +10,10 @@ namespace DoubleScale\Modules\Sales\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\ContractModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 
 /**
  * SalesRepNotificationTemplates service.

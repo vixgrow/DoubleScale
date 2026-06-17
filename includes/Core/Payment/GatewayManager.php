@@ -9,8 +9,8 @@ namespace DoubleScale\Core\Payment;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Services\InvoicePayable;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Services\InvoicePayable;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 

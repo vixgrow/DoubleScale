@@ -23,14 +23,14 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Portal\Services\PortalIdentity;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
-use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
-use DoubleScale\Modules\Sales\Rest\ProposalShaper;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
-use DoubleScale\Modules\Sales\Services\ProposalUrl;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
+use DoubleScale\Modules\Documents\Rest\ProposalShaper;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -99,7 +99,7 @@ class RestPortalDocumentsController extends RestController {
 		$type = (string) $request->get_param( 'type' );
 		$rows = array();
 
-		if ( 'proposal' !== $type ) {
+		if ( 'proposal' !== $type && doublescale_sales_child_module_active( 'documents' ) ) {
 			$invoices = InvoiceModel::where( 'contact_id', (int) $contact->id )
 				->where( 'status', '!=', InvoiceStatus::DRAFT )
 				->orderBy( 'id', 'desc' )
@@ -110,7 +110,7 @@ class RestPortalDocumentsController extends RestController {
 			}
 		}
 
-		if ( 'invoice' !== $type ) {
+		if ( 'invoice' !== $type && doublescale_sales_child_module_active( 'documents' ) ) {
 			$proposals = ProposalModel::where( 'contact_id', (int) $contact->id )
 				->where( 'status', '!=', ProposalStatus::DRAFT )
 				->orderBy( 'id', 'desc' )
@@ -148,7 +148,7 @@ class RestPortalDocumentsController extends RestController {
 	 * @return WP_Error|null
 	 */
 	private function documents_gate(): ?WP_Error {
-		if ( ! doublescale_sales_documents_ready() ) {
+		if ( ! doublescale_sales_documents_ready() || ! doublescale_any_sales_document_module_active() ) {
 			return new WP_Error(
 				'module_disabled',
 				__( 'The Documents area is unavailable.', 'doublescale' ),

@@ -154,11 +154,39 @@ final class SalesAutomationsCatalogTest extends TestCase {
 	}
 
 	public function test_sales_merge_tag_files_exist(): void {
-		$dir = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Sales/MergeTags/';
-		foreach ( self::EXPECTED_MERGE_TAG_SLUGS as $slug ) {
-			$matches = glob( $dir . $this->slug_to_class_basename( $slug ) . '.php' );
+		$document_slugs = array(
+			'proposal_number',
+			'proposal_subject',
+			'proposal_total',
+			'proposal_url',
+			'invoice_number',
+			'invoice_total',
+			'invoice_balance',
+			'invoice_url',
+		);
+		$contract_slugs = array(
+			'contract_number',
+			'contract_subject',
+			'contract_value',
+			'contract_url',
+			'contract_end_date',
+		);
+
+		$documents_dir = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Documents/MergeTags/';
+		foreach ( $document_slugs as $slug ) {
+			$matches = glob( $documents_dir . $this->slug_to_class_basename( $slug ) . '.php' );
 			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );
 		}
+
+		$contracts_dir = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Contracts/MergeTags/';
+		foreach ( $contract_slugs as $slug ) {
+			$matches = glob( $contracts_dir . $this->slug_to_class_basename( $slug ) . '.php' );
+			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );
+		}
+
+		$this->assertFileExists(
+			DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Sales/MergeTags/AbstractSalesMergeTag.php'
+		);
 	}
 
 	public function test_sales_trigger_dependency_warns_when_pro_inactive(): void {

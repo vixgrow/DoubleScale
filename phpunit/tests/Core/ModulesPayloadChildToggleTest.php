@@ -163,7 +163,14 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		$this->assertFalse( $inbox['setting_enabled'], 'Phantom non-child slugs keep the default-off contract' );
 	}
 
-	public function test_child_module_parent_map_lists_deals_under_sales(): void {
-		$this->assertSame( array( 'deals' => 'sales' ), doublescale_child_module_parent_map() );
+	public function test_child_module_parent_map_lists_sales_children(): void {
+		$this->assertSame(
+			array(
+				'deals'     => 'sales',
+				'documents' => 'sales',
+				'contracts' => 'sales',
+			),
+			doublescale_child_module_parent_map()
+		);
 	}
 }

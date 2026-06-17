@@ -67,9 +67,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const isTasksModuleEnabled = ConfigAPI.isModuleEnabled('tasks');
 	const isAutomationsModuleEnabled = ConfigAPI.isModuleEnabled('automations');
 	// The contact Sales tab lists proposals/invoices — hidden while the
-	// documents feature is gated (see isSalesDocumentsReady()).
+	// documents feature is gated or when every document sub-feature is off.
 	const isSalesModuleEnabled =
-		ConfigAPI.isModuleEnabled('sales') && isSalesDocumentsReady();
+		ConfigAPI.isModuleEnabled('sales') &&
+		isSalesDocumentsReady() &&
+		(ConfigAPI.isModuleEnabled('documents') || ConfigAPI.isModuleEnabled('contracts'));
 	if (!contact) {
 		return null;
 	}

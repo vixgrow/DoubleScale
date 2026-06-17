@@ -170,8 +170,8 @@ $gateway = $manager->get( \DoubleScale\Core\Payment\GatewayManager::CONTEXT_INVO
 t_assert( $gateway && $gateway->is_configured(), 'Stripe invoice gateway configured' );
 $listen = shell_exec( 'pgrep -f "stripe listen" 2>/dev/null' );
 t_assert( is_string( $listen ) && '' !== trim( $listen ), 'stripe listen is running', 'run ./bin/stripe-listen.sh' );
-$inv_model = \DoubleScale\Modules\Sales\Models\InvoiceModel::with( 'contact' )->find( $invoice_id );
-t_assert( $inv_model instanceof \DoubleScale\Modules\Sales\Models\InvoiceModel, 'Invoice exists' );
+$inv_model = \DoubleScale\Modules\Documents\Models\InvoiceModel::with( 'contact' )->find( $invoice_id );
+t_assert( $inv_model instanceof \DoubleScale\Modules\Documents\Models\InvoiceModel, 'Invoice exists' );
 if ( ! $inv_model ) {
 	echo "\nAbort: invoice not found.\n";
 	exit( 1 );
@@ -334,5 +334,5 @@ echo "\n" . str_repeat( '=', 52 ) . "\n";
 echo "PASSED: {$passed}  FAILED: {$failed}  SKIPPED: {$skipped}\n";
 $final = invoice_row( $invoice_id );
 echo "Final: status={$final->status} paid={$final->amount_paid}/{$final->total} {$final->currency} pi=" . ( $final->stripe_payment_intent_id ?: 'null' ) . " payments=" . payment_count( $invoice_id ) . "\n";
-echo "Invoice URL: " . \DoubleScale\Modules\Sales\Services\InvoiceUrl::get_public_url( $inv_model ) . "\n";
+echo "Invoice URL: " . \DoubleScale\Modules\Documents\Services\InvoiceUrl::get_public_url( $inv_model ) . "\n";
 exit( $failed > 0 ? 1 : 0 );

@@ -9,7 +9,7 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Sales\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Core\Payment\GatewayManager;
 
 /**

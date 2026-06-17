@@ -48,12 +48,19 @@ const SALES_MENU_CAPS = [
 ];
 
 /**
- * `/sales` → Proposals list (the Sales parent landing). While the documents
- * feature is gated, the only destination under Sales is the pipeline.
+ * `/sales` → first enabled Sales child (documents, contracts) or pipeline.
  */
 const resolveSalesLandingPath = (): string | null => {
 	if (isSalesDocumentsReady()) {
-		return 'sales/proposals';
+		const candidates: Array<{ module: string; path: string }> = [
+			{ module: 'documents', path: 'sales/proposals' },
+			{ module: 'contracts', path: 'sales/contracts' },
+		];
+		for (const { module, path } of candidates) {
+			if (config.isModuleToggleEnabled(module)) {
+				return path;
+			}
+		}
 	}
 	if (config.isModuleToggleEnabled('deals')) {
 		return 'sales-pipeline';
@@ -99,6 +106,16 @@ const salesPageDefaults = {
 	alwaysRegister: true,
 };
 
+const documentsPageDefaults = {
+	...salesPageDefaults,
+	requiresModule: 'documents' as const,
+};
+
+const contractPageDefaults = {
+	...salesPageDefaults,
+	requiresModule: 'contracts' as const,
+};
+
 registerAdminPage('sales', {
 	path: 'sales',
 	component: wrap(RedirectToProposals),
@@ -116,7 +133,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalsList),
 		label: __('Proposals', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal-new', {
@@ -124,7 +141,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalEdit),
 		label: __('New Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal', {
@@ -132,7 +149,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalView),
 		label: __('Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal-edit', {
@@ -140,7 +157,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalEdit),
 		label: __('Edit Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoices', {
@@ -148,7 +165,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(InvoicesList),
 		label: __('Invoices', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-new', {
@@ -156,7 +173,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(InvoiceEdit),
 		label: __('New Invoice', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice', {
@@ -164,7 +181,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(InvoiceView),
 		label: __('Invoice', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-edit', {
@@ -172,7 +189,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(InvoiceEdit),
 		label: __('Edit Invoice', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-payments', {
@@ -180,7 +197,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(PaymentsList),
 		label: __('Payments', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-contracts', {
@@ -188,7 +205,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ContractsList),
 		label: __('Contracts', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...contractPageDefaults,
 	});
 
 	registerAdminPage('sales-contract-new', {
@@ -196,7 +213,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ContractEdit),
 		label: __('New Contract', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...contractPageDefaults,
 	});
 
 	registerAdminPage('sales-contract', {
@@ -204,7 +221,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ContractView),
 		label: __('Contract', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...contractPageDefaults,
 	});
 
 	registerAdminPage('sales-contract-edit', {
@@ -212,7 +229,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ContractEdit),
 		label: __('Edit Contract', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...contractPageDefaults,
 	});
 
 	registerAdminPage('sales-contract-types', {
@@ -220,7 +237,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ContractTypes),
 		label: __('Contract Types', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...contractPageDefaults,
 	});
 
 	registerAdminPage('sales-payment', {
@@ -228,7 +245,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(PaymentView),
 		label: __('Payment', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-settings', {

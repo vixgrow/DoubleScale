@@ -11,12 +11,12 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Modules\Sales\Models\ContractModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
-use DoubleScale\Modules\Sales\Services\ContractUrl;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
-use DoubleScale\Modules\Sales\Services\ProposalUrl;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Contracts\Services\ContractUrl;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Services\ProposalUrl;
 
 /**
  * AbstractSalesMergeTag class.
@@ -42,7 +42,7 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 			return null;
 		}
 		if ( function_exists( 'doublescale_is_module_storage_ready' )
-			&& ! doublescale_is_module_storage_ready( 'sales', ProposalModel::class ) ) {
+			&& ! doublescale_is_module_storage_ready( 'documents', ProposalModel::class ) ) {
 			return null;
 		}
 		$proposal_id = (int) ( $contact->data['proposal_id'] ?? 0 );
@@ -68,7 +68,7 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 			return null;
 		}
 		if ( function_exists( 'doublescale_is_module_storage_ready' )
-			&& ! doublescale_is_module_storage_ready( 'sales', InvoiceModel::class ) ) {
+			&& ! doublescale_is_module_storage_ready( 'documents', InvoiceModel::class ) ) {
 			return null;
 		}
 		$invoice_id = (int) ( $contact->data['invoice_id'] ?? 0 );
@@ -131,7 +131,7 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 			}
 		}
 		if ( function_exists( 'doublescale_is_module_storage_ready' )
-			&& ! doublescale_is_module_storage_ready( 'sales', ContractModel::class ) ) {
+			&& ! doublescale_is_module_storage_ready( 'contracts', ContractModel::class ) ) {
 			return null;
 		}
 		$contract_id = (int) ( $contact->data['contract_id'] ?? 0 );

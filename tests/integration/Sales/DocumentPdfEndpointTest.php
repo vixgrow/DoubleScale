@@ -7,9 +7,9 @@ namespace DoubleScale\Tests\Integration\Sales;
 
 use DoubleScale\Core\ModuleManager;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Constants\InvoiceStatus;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 
 defined( 'ABSPATH' ) || exit;

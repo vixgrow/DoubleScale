@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Services\InvoiceAnalyticsService;
+use DoubleScale\Modules\Documents\Services\InvoiceAnalyticsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;

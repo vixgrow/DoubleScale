@@ -19,8 +19,8 @@ require $wp_root . '/wp-load.php';
 
 use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Booking\Models\BookingModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Pro\Modules\Booking\PaymentGateways\BookingPayableSubject;
 use DoubleScale\Pro\Modules\Booking\PaymentGateways\BookingStripeHandler;

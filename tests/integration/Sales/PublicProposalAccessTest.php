@@ -9,8 +9,8 @@ namespace DoubleScale\Tests\Integration\Sales;
 
 use DoubleScale\Core\ModuleManager;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 

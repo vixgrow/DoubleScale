@@ -36,7 +36,13 @@ export interface CalendarEvent {
 	/** Render tz for timed events (site tz on admin, booking tz on portal); null for all-day. */
 	timezone: string | null;
 	status: string;
-	/** Navigation target (slugless admin path or in-portal route); null when not actionable. */
+	/**
+	 * Navigation target; null when not actionable. The convention differs by feed:
+	 * the admin feed emits a slugless path for `getToLink` (e.g. `sales/invoices/12`),
+	 * the portal feed a root-relative react-router path (e.g. `/bookings/12`). The
+	 * shared grid/chip never navigate themselves — they forward to each surface's
+	 * `onSelect`, which applies the right router — so the two conventions don't clash.
+	 */
 	route: string | null;
 	/** Owner shown in the admin assignee filter/label. Absent on the portal feed. */
 	assignee?: CalendarEventParty | null;

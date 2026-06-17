@@ -8,7 +8,7 @@
  * datetime-vs-date midnight trap). Pure — no DB / no WP state — so it is
  * unit-testable in isolation and shared by every calendar feed: the customer
  * portal calendar ({@see \DoubleScale\Modules\Portal\Rest\Controllers\RestPortalCalendarController})
- * and the admin/staff calendar ({@see \DoubleScale\Core\Rest\Controllers\RestCalendarController}).
+ * and the admin/staff calendar ({@see \DoubleScale\Core\Rest\Controllers\RestAdminCalendarController}).
  *
  * Single-sourcing this keeps the off-by-one / clamp logic from drifting between
  * two controllers.

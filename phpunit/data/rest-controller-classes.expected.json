@@ -1,5 +1,6 @@
 [
     "RestActivityController",
+    "RestAdminCalendarController",
     "RestAttachmentController",
     "RestAutomationContactController",
     "RestAutomationController",

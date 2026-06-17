@@ -16,4 +16,24 @@
 		outline: none !important;
 		box-shadow: none !important;
 	}
+
+	/* react-select adds default margins/padding to the inner input + value
+	 * containers, which shows up as a stray top padding at rest and shifts
+	 * when the input activates on open. Normalize and vertically center. */
+	.custom-select__value-container {
+		align-items: center;
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+
+	.custom-select__input-container {
+		margin: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+
+	.custom-select__placeholder,
+	.custom-select__single-value {
+		margin: 0;
+	}
 }

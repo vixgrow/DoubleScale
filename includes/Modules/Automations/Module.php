@@ -125,7 +125,6 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Pmpro/*.php',
 				'includes/Modules/Automations/Actions/Deal/*.php',
 				'includes/Modules/Automations/Actions/Support/*.php',
-				'includes/Modules/Automations/Actions/Sales/*.php',
 				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/Email/*.php',
 				'includes/Modules/Automations/Actions/Prestoplayer/*.php',

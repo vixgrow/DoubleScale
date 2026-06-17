@@ -119,6 +119,8 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ProposalConvertedToInvoice::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\InvoiceSent::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\InvoicePaid::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ContractSent::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ContractSigned::class,
 	),
 	'actions'  => array(
 		\DoubleScale\Pro\Modules\Automations\Actions\Crm\Slack\SendToChannel::class,
@@ -155,8 +157,6 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Actions\Support\CloseTicket::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Support\CreateTicket::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Support\DeleteTicket::class,
-		\DoubleScale\Pro\Modules\Automations\Actions\Sales\SendProposal::class,
-		\DoubleScale\Pro\Modules\Automations\Actions\Sales\CreateInvoiceFromProposal::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Tutorlms\AddUserToCourse::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Tutorlms\RemoveUserFromCourse::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Webhooks\HttpRequestWebhook::class,

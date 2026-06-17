@@ -39,11 +39,8 @@ $expected_triggers = array(
 	'proposal_converted_to_invoice',
 	'invoice_sent',
 	'invoice_paid',
-);
-
-$expected_actions = array(
-	'send_proposal',
-	'create_invoice_from_proposal',
+	'contract_sent',
+	'contract_signed',
 );
 
 $expected_proposal_rules = array(
@@ -60,6 +57,13 @@ $expected_invoice_rules = array(
 	'invoice_number',
 );
 
+$expected_contract_rules = array(
+	'contract_status',
+	'contract_subject',
+	'contract_value',
+	'contract_number',
+);
+
 $sales_on = function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' );
 $pro_on   = function_exists( 'doublescale_is_pro_addon_active' ) && doublescale_is_pro_addon_active();
 
@@ -73,7 +77,8 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\TriggersManager' )
 		$check( isset( $triggers[ $slug ] ), "Trigger registered: {$slug}" );
 		if ( isset( $triggers[ $slug ] ) ) {
 			$t = $triggers[ $slug ];
-			$check( 'sales' === $t->source && 'sales' === $t->group, "Trigger {$slug} source/group = sales" );
+			$expected_group = ( 0 === strpos( $slug, 'contract_' ) ) ? 'contracts' : 'sales';
+			$check( 'sales' === $t->source && $expected_group === $t->group, "Trigger {$slug} source/group = sales/{$expected_group}" );
 			if ( $pro_on ) {
 				$check( empty( $t->is_pro ), "Trigger {$slug} is_pro=false when Pro active" );
 			}
@@ -91,9 +96,8 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\TriggersManager' )
 
 if ( class_exists( '\DoubleScale\Modules\Automations\Services\ActionsManager' ) ) {
 	$actions = \DoubleScale\Modules\Automations\Services\ActionsManager::instance()->get_actions();
-	foreach ( $expected_actions as $slug ) {
-		$check( isset( $actions[ $slug ] ), "Action registered: {$slug}" );
-	}
+	$check( ! isset( $actions['send_proposal'] ), 'send_proposal action is not registered' );
+	$check( ! isset( $actions['create_invoice_from_proposal'] ), 'create_invoice_from_proposal action is not registered' );
 } else {
 	$check( false, 'ActionsManager class missing' );
 }
@@ -102,6 +106,7 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\RulesManager' ) ) 
 	$groups = \DoubleScale\Modules\Automations\Services\RulesManager::instance()->get_groups();
 	$check( isset( $groups['proposal'] ), 'Rules group: proposal' );
 	$check( isset( $groups['invoice'] ), 'Rules group: invoice' );
+	$check( isset( $groups['contract'] ), 'Rules group: contract' );
 
 	if ( $sales_on && $pro_on ) {
 		foreach ( $expected_proposal_rules as $slug ) {
@@ -114,6 +119,12 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\RulesManager' ) ) 
 			$check(
 				isset( $groups['invoice']['rules'][ $slug ] ),
 				"Invoice rule registered: {$slug}"
+			);
+		}
+		foreach ( $expected_contract_rules as $slug ) {
+			$check(
+				isset( $groups['contract']['rules'][ $slug ] ),
+				"Contract rule registered: {$slug}"
 			);
 		}
 
@@ -135,7 +146,7 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\RulesManager' ) ) 
 if ( class_exists( '\DoubleScale\Core\MergeTags\MergeTagsManager' ) ) {
 	$groups = \DoubleScale\Core\MergeTags\MergeTagsManager::instance()->get_groups();
 	$sales_tags = $groups['sales']['mergeTags'] ?? array();
-	foreach ( array( 'proposal_url', 'invoice_url', 'proposal_total', 'invoice_balance' ) as $slug ) {
+	foreach ( array( 'proposal_url', 'invoice_url', 'proposal_total', 'invoice_balance', 'contract_url', 'contract_value' ) as $slug ) {
 		$check( isset( $sales_tags[ $slug ] ), "Merge tag registered in sales group: {$slug}" );
 	}
 }

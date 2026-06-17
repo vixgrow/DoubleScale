@@ -26,11 +26,8 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'proposal_converted_to_invoice',
 		'invoice_sent',
 		'invoice_paid',
-	);
-
-	private const EXPECTED_ACTION_SLUGS = array(
-		'send_proposal',
-		'create_invoice_from_proposal',
+		'contract_sent',
+		'contract_signed',
 	);
 
 	private const EXPECTED_PROPOSAL_RULE_SLUGS = array(
@@ -45,6 +42,13 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'invoice_total',
 		'invoice_balance',
 		'invoice_number',
+	);
+
+	private const EXPECTED_CONTRACT_RULE_SLUGS = array(
+		'contract_status',
+		'contract_subject',
+		'contract_value',
+		'contract_number',
 	);
 
 	private const EXPECTED_MERGE_TAG_SLUGS = array(
@@ -71,7 +75,7 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		$GLOBALS['__doublescale_phpunit_transients'] = array();
 	}
 
-	public function test_pro_automation_catalog_lists_sales_triggers_and_actions(): void {
+	public function test_pro_automation_catalog_lists_sales_triggers(): void {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 			$this->markTestSkipped( 'DOUBLESCALE_PLUGIN_DIR not defined.' );
 		}
@@ -90,14 +94,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 			);
 		}
 
-		foreach ( self::EXPECTED_ACTION_SLUGS as $slug ) {
-			$basename = $this->slug_to_class_basename( $slug );
-			$this->assertStringContainsString(
-				"Actions\\Sales\\{$basename}::class",
-				$contents,
-				"Catalog missing sales action class reference: {$slug}"
-			);
-		}
+		$this->assertStringNotContainsString(
+			'Actions\\Sales\\',
+			$contents,
+			'Sales document actions should not be listed in the automation catalog.'
+		);
 	}
 
 	public function test_free_sales_trigger_stubs_are_pro_gated(): void {
@@ -130,8 +131,10 @@ final class SalesAutomationsCatalogTest extends TestCase {
 
 		$this->assertStringContainsString( "'proposal'", $contents );
 		$this->assertStringContainsString( "'invoice'", $contents );
+		$this->assertStringContainsString( "'contract'", $contents );
 		$this->assertStringContainsString( __( 'Proposal', 'doublescale' ), $contents );
 		$this->assertStringContainsString( __( 'Invoice', 'doublescale' ), $contents );
+		$this->assertStringContainsString( __( 'Contract', 'doublescale' ), $contents );
 		$this->assertStringContainsString( "'invoice_sent'", $contents );
 		$this->assertStringContainsString( "'invoice_paid'", $contents );
 	}
@@ -150,6 +153,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		foreach ( self::EXPECTED_INVOICE_RULE_SLUGS as $slug ) {
 			$matches = glob( $pro_root . 'Invoice/' . $this->slug_to_class_basename( $slug ) . '.php' );
 			$this->assertNotEmpty( $matches, "Missing invoice rule file for {$slug}" );
+		}
+
+		foreach ( self::EXPECTED_CONTRACT_RULE_SLUGS as $slug ) {
+			$matches = glob( $pro_root . 'Contract/' . $this->slug_to_class_basename( $slug ) . '.php' );
+			$this->assertNotEmpty( $matches, "Missing contract rule file for {$slug}" );
 		}
 	}
 
@@ -302,38 +310,6 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		}
 	}
 
-	public function test_sales_action_dependency_warns_when_documents_module_off(): void {
-		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
-		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/ModuleFeatureGate.php';
-
-		$stored            = get_option( 'doublescale_enabled_modules', array() );
-		if ( ! is_array( $stored ) ) {
-			$stored = array();
-		}
-		$stored['sales']     = true;
-		$stored['documents'] = false;
-		update_option( 'doublescale_enabled_modules', $stored );
-		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
-			doublescale_flush_module_enabled_cache();
-		}
-
-		$action         = new \stdClass();
-		$action->source = 'sales';
-		$action->group  = 'sales';
-		$action->slug   = 'send_proposal';
-		$action->is_pro = false;
-
-		$out = $this->invoke_dependency_check( 'check_action_plugin_dependency', $action );
-		$this->assertFalse( (bool) ( $out['is_active'] ?? true ) );
-		$this->assertStringContainsString( 'Proposals & Invoices', (string) ( $out['message'] ?? '' ) );
-
-		unset( $stored['documents'] );
-		update_option( 'doublescale_enabled_modules', $stored );
-		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
-			doublescale_flush_module_enabled_cache();
-		}
-	}
-
 	public function test_condition_dependency_includes_proposal_and_invoice_groups(): void {
 		$file = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Automations/Rest/Controllers/RestAutomationController.php';
 		$this->assertFileExists( $file );
@@ -341,7 +317,41 @@ final class SalesAutomationsCatalogTest extends TestCase {
 
 		$this->assertStringContainsString( "'proposal'", $contents );
 		$this->assertStringContainsString( "'invoice'", $contents );
+		$this->assertStringContainsString( "'contract'", $contents );
 		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'documents' ) )", $contents );
+		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'contracts' ) )", $contents );
+	}
+
+	public function test_sales_trigger_dependency_warns_when_contracts_module_off(): void {
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/ModuleFeatureGate.php';
+
+		$stored              = get_option( 'doublescale_enabled_modules', array() );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+		$stored['sales']     = true;
+		$stored['contracts'] = false;
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
+
+		$trigger         = new \stdClass();
+		$trigger->source = 'sales';
+		$trigger->group  = 'contracts';
+		$trigger->slug   = 'contract_sent';
+		$trigger->is_pro = false;
+
+		$out = $this->invoke_dependency_check( 'check_trigger_plugin_dependency', $trigger );
+		$this->assertFalse( (bool) ( $out['is_active'] ?? true ) );
+		$this->assertStringContainsString( 'Contracts', (string) ( $out['message'] ?? '' ) );
+
+		unset( $stored['contracts'] );
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
 	}
 
 	/**

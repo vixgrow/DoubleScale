@@ -1678,6 +1678,10 @@ class RestAutomationController extends RestController {
 				'label'      => __( 'Proposals & Invoices', 'doublescale' ),
 				'is_enabled' => doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
+			'contract'                  => array(
+				'label'      => __( 'Contracts', 'doublescale' ),
+				'is_enabled' => doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+			),
 			'support'                   => array(
 				'label'      => __( 'Support', 'doublescale' ),
 				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'support' ),

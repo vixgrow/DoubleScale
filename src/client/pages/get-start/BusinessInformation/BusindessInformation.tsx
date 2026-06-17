@@ -410,7 +410,7 @@ export default function BusindessInformation({
 			</div>
 
 			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
-				<div className="flex items-center justify-end gap-6">
+				<div className="flex items-center justify-between gap-3 lg:justify-end sm:gap-6">
 					<Button
 						type="button"
 						size="lg"

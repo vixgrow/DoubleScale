@@ -52,6 +52,8 @@ class Install {
 				return;
 			}
 		}
+
+		self::repair_missing_schema_tables();
 	}
 
 	public static function init(): void {
@@ -107,7 +109,13 @@ class Install {
 
 		set_transient( 'doublescale_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 
-		MigrationRunner::run_all( self::migration_registry() );
+		$registry = self::migration_registry();
+
+		MigrationRunner::run_all( $registry );
+
+		MigrationRunner::repair_missing_tables( $registry );
+
+		self::maybe_unify_legacy_attachments();
 
 		// Provision DoubleScale roles (Support roles always; CRM roles only
 		// when Pro is loaded — gating lives inside `add_roles_and_capabilities`).
@@ -122,5 +130,43 @@ class Install {
 
 	private static function update_doublescale_version(): void {
 		update_option( 'doublescale_version', DOUBLESCALE_VERSION );
+	}
+
+	/**
+	 * Re-create module tables when the migrations ledger is ahead of the physical schema.
+	 *
+	 * @return void
+	 */
+	private static function repair_missing_schema_tables(): void {
+		MigrationRunner::repair_missing_tables( self::migration_registry() );
+	}
+
+	/**
+	 * Retry the legacy attachment data migration until the unified flag is set.
+	 *
+	 * @return void
+	 */
+	private static function maybe_unify_legacy_attachments(): void {
+		if ( get_option( 'doublescale_attachments_unified' ) ) {
+			return;
+		}
+
+		if ( ! class_exists( \DoubleScale\Core\Database\Migrations\MigrateLegacyAttachments::class ) ) {
+			return;
+		}
+
+		try {
+			( new \DoubleScale\Core\Database\Migrations\MigrateLegacyAttachments() )->run();
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Legacy attachment unification deferred',
+					array(
+						'source' => 'install',
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
 	}
 }

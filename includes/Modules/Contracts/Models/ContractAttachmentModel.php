@@ -1,6 +1,6 @@
 <?php
 /**
- * Contract attachment model.
+ * Contract attachment model (unified `doublescale_attachments` store).
  *
  * @package DoubleScale\Modules\Contracts
  */
@@ -9,29 +9,24 @@ namespace DoubleScale\Modules\Contracts\Models;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Core\Models\UserModel;
-use DoubleScale\Modules\Contacts\Models\ContactModel;
-use WPEloquent\Eloquent\Model;
+use DoubleScale\Core\Models\AttachmentModel as CoreAttachmentModel;
 
 /**
  * ContractAttachmentModel class.
  */
-class ContractAttachmentModel extends Model {
+class ContractAttachmentModel extends CoreAttachmentModel {
 
 	/**
-	 * @var string
+	 * Attachable type for sales contracts.
 	 */
-	protected $table = 'doublescale_sales_contract_attachments';
-
-	/**
-	 * @var string
-	 */
-	protected $primary_key = 'id';
+	public const ATTACHABLE_TYPE = 'sales_contract';
 
 	/**
 	 * @var string[]
 	 */
 	protected $fillable = array(
+		'attachable_type',
+		'attachable_id',
 		'contract_id',
 		'user_id',
 		'contact_id',
@@ -40,87 +35,46 @@ class ContractAttachmentModel extends Model {
 		'file_type',
 		'file_size',
 		'file_hash',
+		'driver',
+		'status',
+		'meta',
 	);
-
-	/**
-	 * @var bool
-	 */
-	public $timestamps = true;
 
 	/**
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contract() {
-		return $this->belongsTo( ContractModel::class, 'contract_id', 'id' );
+		return $this->belongsTo( ContractModel::class, 'attachable_id', 'id' );
 	}
 
 	/**
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 * @param array<string, mixed> $attributes Attributes.
+	 * @return $this
 	 */
-	public function user() {
-		return $this->belongsTo( UserModel::class, 'user_id', 'ID' );
-	}
-
-	/**
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-	 */
-	public function contact() {
-		return $this->belongsTo( ContactModel::class, 'contact_id', 'id' );
-	}
-
-	/**
-	 * @param string $file_hash File hash.
-	 * @return self|null
-	 */
-	public static function get_by_hash( $file_hash ) {
-		$file_hash = trim( (string) $file_hash );
-		if ( '' === $file_hash ) {
-			return null;
+	public function fill( array $attributes ) {
+		if ( isset( $attributes['contract_id'] ) ) {
+			$attributes['attachable_type'] = self::ATTACHABLE_TYPE;
+			$attributes['attachable_id']   = (int) $attributes['contract_id'];
+			unset( $attributes['contract_id'] );
 		}
-		return self::query()->where( 'file_hash', $file_hash )->first();
+		return parent::fill( $attributes );
 	}
 
 	/**
+	 * @return int|null
+	 */
+	public function getContractIdAttribute() {
+		return self::ATTACHABLE_TYPE === (string) $this->attachable_type
+			? ( $this->attachable_id ? (int) $this->attachable_id : null )
+			: null;
+	}
+
+	/**
+	 * @param int|null $value Contract id.
 	 * @return void
 	 */
-	public static function boot() {
-		parent::boot();
-
-		static::creating(
-			function ( $attachment ) {
-				if ( empty( $attachment->file_hash ) ) {
-					try {
-						$attachment->file_hash = bin2hex( random_bytes( 24 ) );
-					} catch ( \Throwable $e ) {
-						$attachment->file_hash = wp_generate_password( 48, false, false );
-					}
-				}
-			}
-		);
-
-		static::deleting(
-			function ( $attachment ) {
-				$absolute = self::resolve_absolute_path( (string) $attachment->file_path );
-				if ( '' !== $absolute && is_file( $absolute ) && is_writable( $absolute ) ) {
-					// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink,WordPress.PHP.NoSilencedErrors.Discouraged
-					@unlink( $absolute );
-				}
-			}
-		);
-	}
-
-	/**
-	 * @param string $relative_path Stored relative path.
-	 * @return string
-	 */
-	public static function resolve_absolute_path( $relative_path ) {
-		if ( '' === $relative_path || ! function_exists( 'wp_upload_dir' ) ) {
-			return '';
-		}
-		$upload = wp_upload_dir( null, false, false );
-		if ( ! is_array( $upload ) || empty( $upload['basedir'] ) ) {
-			return '';
-		}
-		return rtrim( (string) $upload['basedir'], '/\\' ) . '/' . ltrim( $relative_path, '/\\' );
+	public function setContractIdAttribute( $value ) {
+		$this->attributes['attachable_type'] = self::ATTACHABLE_TYPE;
+		$this->attributes['attachable_id']   = $value ? (int) $value : null;
 	}
 }

@@ -51,7 +51,6 @@ final class Module extends AbstractSalesChildModule {
 		return array(
 			$this->sales_migration_path( 'SalesContractsTable.php' ),
 			$this->sales_migration_path( 'SalesContractTypesTable.php' ),
-			$this->sales_migration_path( 'SalesContractAttachmentsTable.php' ),
 		);
 	}
 

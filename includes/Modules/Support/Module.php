@@ -32,7 +32,6 @@ use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
 use DoubleScale\Core\UserRoles\Permissions;
-use DoubleScale\Modules\Support\Renderer\AttachmentServeHandler;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
 use DoubleScale\Modules\Support\Services\AttachmentService;
@@ -146,11 +145,6 @@ final class Module extends AbstractModule {
 			AttachmentService::class,
 			static fn() => new AttachmentService()
 		);
-
-		$container->singleton(
-			AttachmentServeHandler::class,
-			static fn() => new AttachmentServeHandler()
-		);
 	}
 
 	public function restControllers(): array {
@@ -187,8 +181,6 @@ final class Module extends AbstractModule {
 		// Resolve the outbound email notifier so its constructor subscribes to
 		// the ticket-lifecycle hooks (reply / created / status-change → customer).
 		$container->get( EmailNotifications::class );
-
-		$container->get( AttachmentServeHandler::class );
 
 		add_action( 'init', array( $this, 'register_attachment_cleanup_schedule' ) );
 

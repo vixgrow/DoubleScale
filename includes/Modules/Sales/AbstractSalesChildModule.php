@@ -66,6 +66,16 @@ abstract class AbstractSalesChildModule extends AbstractModule {
 			return array();
 		}
 
+		return $this->schema_migration_files();
+	}
+
+	/**
+	 * Migration files for this child, ignoring runtime enable gates.
+	 * Used by schema repair when the ledger says "ran" but the table is missing.
+	 *
+	 * @return array<int, string>
+	 */
+	public function schema_migration_files(): array {
 		$files = $this->child_migration_files();
 		if ( array() !== $files ) {
 			sort( $files );

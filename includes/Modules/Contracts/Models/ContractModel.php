@@ -95,6 +95,14 @@ class ContractModel extends Model {
 	}
 
 	/**
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function attachments() {
+		return $this->hasMany( ContractAttachmentModel::class, 'attachable_id', 'id' )
+			->where( 'attachable_type', ContractAttachmentModel::ATTACHABLE_TYPE );
+	}
+
+	/**
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
 	public function tags() {
@@ -130,6 +138,14 @@ class ContractModel extends Model {
 				}
 				if ( empty( $contract->status ) ) {
 					$contract->status = ContractStatus::DRAFT;
+				}
+			}
+		);
+
+		static::deleting(
+			function ( $contract ) {
+				foreach ( $contract->attachments as $attachment ) {
+					$attachment->delete();
 				}
 			}
 		);

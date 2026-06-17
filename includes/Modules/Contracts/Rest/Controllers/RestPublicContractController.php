@@ -233,19 +233,16 @@ class RestPublicContractController extends RestController {
 		}
 
 		$service = new ContractAttachmentService();
-		$hash    = (string) $request->get_param( 'hash' );
 		$items   = \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::query()
+			->forType( \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
 			->with( array( 'user', 'contact' ) )
-			->where( 'contract_id', (int) $contract->id )
+			->where( 'attachable_id', (int) $contract->id )
 			->orderBy( 'id' )
 			->get();
 
 		$data = array();
 		foreach ( $items as $item ) {
-			$data[] = $service->shape_for_api(
-				$item,
-				"sales/public/contracts/{$hash}/attachments/{$item->file_hash}/download"
-			);
+			$data[] = $service->shape_for_api( $item );
 		}
 
 		return new WP_REST_Response( array( 'data' => $data ), 200 );
@@ -271,19 +268,17 @@ class RestPublicContractController extends RestController {
 
 		$file_hash  = (string) $request->get_param( 'file_hash' );
 		$attachment = \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::query()
-			->where( 'contract_id', (int) $contract->id )
+			->forType( \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
+			->where( 'attachable_id', (int) $contract->id )
 			->where( 'file_hash', $file_hash )
 			->first();
 		if ( ! $attachment ) {
 			return new WP_Error( 'not_found', __( 'Attachment not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
-		$stream_error = ( new ContractAttachmentService() )->stream_download( $attachment );
-		if ( $stream_error ) {
-			return $stream_error;
-		}
-
-		return new WP_REST_Response( null, 200 );
+		$service = new ContractAttachmentService();
+		wp_safe_redirect( $service->signed_url( $attachment ) );
+		exit;
 	}
 
 	/**

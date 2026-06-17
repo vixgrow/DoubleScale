@@ -139,7 +139,8 @@ class TicketModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function attachments() {
-		return $this->hasMany( AttachmentModel::class, 'ticket_id', 'id' );
+		return $this->hasMany( AttachmentModel::class, 'attachable_id', 'id' )
+			->where( 'attachable_type', AttachmentModel::ATTACHABLE_TYPE );
 	}
 
 	/**

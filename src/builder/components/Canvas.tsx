@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -18,9 +18,28 @@ import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { SectionDropZone } from './SectionDropZone';
 import CanvasShimmer from './CanvasShimmer';
 
+// Between 1024px and 1240px the sidebar leaves little room, so cap the canvas
+// preview to 600px regardless of the saved canvasWidth.
+function useIsMidScreen() {
+	const [isMidScreen, setIsMidScreen] = useState(false);
+
+	useEffect(() => {
+		const mql = window.matchMedia(
+			'(min-width: 1024px) and (max-width: 1240px)'
+		);
+		const onChange = () => setIsMidScreen(mql.matches);
+		mql.addEventListener('change', onChange);
+		setIsMidScreen(mql.matches);
+		return () => mql.removeEventListener('change', onChange);
+	}, []);
+
+	return isMidScreen;
+}
+
 const Canvas = () => {
 	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const isMidScreen = useIsMidScreen();
 
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
 		{
@@ -73,7 +92,9 @@ const Canvas = () => {
 			`}</style>
 			<div
 				className="mx-auto relative py-10"
-				style={{ width: `${globalSettings.canvasWidth}px` }}
+				style={{
+					width: `${isMidScreen ? 600 : globalSettings.canvasWidth}px`,
+				}}
 			>
 				{(sections.length > 0 || isLoading) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">

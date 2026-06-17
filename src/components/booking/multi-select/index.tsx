@@ -28,7 +28,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 }) => {
 	return (
 		<div
-			className={`flex items-center justify-center h-10 w-fit border border-border rounded-lg ${containerClassName}`}
+			className={`flex h-10 min-w-0 items-center justify-center border border-border rounded-lg ${containerClassName}`}
 		>
 			{Icon && <Icon size={iconSize} />}
 			<select

@@ -19,7 +19,7 @@ interface BookingsHeaderProps {
  */
 const BookingsHeader: React.FC<BookingsHeaderProps> = ({ handleOpen }) => {
 	return (
-        <div className='flex justify-between items-center'>
+        <div className='flex  flex-col min-[375px]:flex-row justify-between items-start min-[375px]:items-center'>
             <Header
 				header={__('Bookings', 'doublescale')}
 				subHeader={__(

@@ -67,58 +67,57 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 	canManageAllBookings,
 }) => {
 	return (
-        <div className='flex gap-2.5 justify-center items-center px-2'>
-            <SearchInput
+		<div className="search-filter flex w-full min-w-0 flex-col gap-2.5">
+			<SearchInput
 				placeholder={__('Search Bookings', 'doublescale')}
-				className="w-[220px]"
+				className="w-full min-w-0"
 				onChange={(e) => handleSearch(e.target.value)}
 			/>
-            {author === 'own' && (
-				<>
+			<div className="flex w-full min-w-0 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+				{author === 'own' && (
+					<>
+						<MultiSelect
+							title={__('Booking Type', 'doublescale')}
+							defaultValue={eventType}
+							onChange={(e) => setEventType(e.target.value)}
+							options={bookingTypesOptions}
+							Icon={IoFilterOutline}
+							containerClassName="!w-full min-w-0 pl-2 h-10 sm:!w-auto sm:min-w-[9.5rem] sm:max-w-[12.5rem] sm:flex-1"
+							selectClassName="!rounded-r-lg !rounded-l-none ml-2 min-w-0"
+						/>
+						<MultiSelect
+							title={__('Event', 'doublescale')}
+							defaultValue={event}
+							onChange={(e) => setEvent(e.target.value)}
+							options={events}
+							Icon={AllCalendarIcon as IconType}
+							containerClassName="!w-full min-w-0 pl-2 h-10 sm:!w-auto sm:min-w-[9.5rem] sm:max-w-[12.5rem] sm:flex-1"
+							selectClassName="!rounded-r-lg !rounded-l-none ml-2 min-w-0"
+						/>
+					</>
+				)}
+				{canManageAllBookings && (
 					<MultiSelect
-						title={__('Booking Type', 'doublescale')}
-						defaultValue={eventType}
-						style={{ width: 150 }}
-						onChange={(e) => setEventType(e.target.value)}
-						options={bookingTypesOptions}
-						Icon={IoFilterOutline}
-						containerClassName="pl-2 w-fit h-10"
-						selectClassName="!rounded-r-lg !rounded-l-none ml-2"
+						title={__('Author', 'doublescale')}
+						defaultValue={author}
+						onChange={(e) => setAuthor(e.target.value)}
+						options={[
+							{
+								value: 'own',
+								label: __('Meetings: My Meetings', 'doublescale'),
+							},
+							{
+								value: 'all',
+								label: __('Meetings: All', 'doublescale'),
+							},
+						]}
+						containerClassName="!w-full min-w-0 h-10 sm:!w-auto sm:min-w-[9.5rem] sm:max-w-[12.5rem] sm:flex-1"
+						selectClassName="!rounded-lg min-w-0"
 					/>
-					<MultiSelect
-						title={__('Event', 'doublescale')}
-						defaultValue={event}
-						style={{ width: 150 }}
-						onChange={(e) => setEvent(e.target.value)}
-						options={events}
-						Icon={AllCalendarIcon as IconType}
-						containerClassName="pl-2 w-fit h-10"
-						selectClassName="!rounded-r-lg !rounded-l-none ml-2"
-					/>
-				</>
-			)}
-            {canManageAllBookings && (
-				<MultiSelect
-					title={__('Author', 'doublescale')}
-					defaultValue={author}
-					style={{ width: 150 }}
-					onChange={(e) => setAuthor(e.target.value)}
-					options={[
-						{
-							value: 'own',
-							label: __('Meetings: My Meetings', 'doublescale'),
-						},
-						{
-							value: 'all',
-							label: __('Meetings: All', 'doublescale'),
-						},
-					]}
-					containerClassName="h-10 ml-2.5"
-					selectClassName="!rounded-lg"
-				/>
-			)}
-        </div>
-    );
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default SearchFilter;

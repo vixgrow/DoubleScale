@@ -378,7 +378,7 @@ const Calendars: React.FC = () => {
 				</div>
 			</div>
 			<Card className="doublescale-booking-calendars-action"><CardContent>
-				<div className='flex justify-between items-center'>
+				<div className='flex sm:flex-row flex-col justify-between items-center gap-2'>
 					<div>
 						<Tabs
 							value={
@@ -411,7 +411,7 @@ const Calendars: React.FC = () => {
 							</TabsList>
 						</Tabs>
 					</div>
-					<div className='flex gap-3'>
+					<div className='flex flex-col sm:flex-row gap-3'>
 						<SearchInput
 							placeholder={__('Search Events', 'doublescale')}
 							onChange={(e) => setSearch(e.target.value)}
@@ -593,7 +593,7 @@ const Calendars: React.FC = () => {
 										(calendar) => (
 											<Card
 												key={calendar.id}
-												className="bg-[#FDFDFD] mb-4"
+												className="bg-[#FDFDFD] w-full mb-4"
 											><CardContent>
 													<div className='flex flex-col gap-5'>
 														<Card className="bg-white"><CardContent>

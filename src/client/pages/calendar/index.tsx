@@ -1,16 +1,18 @@
 /**
- * Admin / staff Calendar page — a cross-module month view of the logged-in staff
+ * Admin / staff Calendar — a cross-module month view of the logged-in staff
  * member's dated work (bookings, tasks, deals, contracts, invoice due dates,
- * proposal expiries), role-scoped on the server. Read-only in Phase 1: clicking an
- * event navigates to that record's existing admin detail route.
+ * proposal expiries), role-scoped on the server. Read-only: clicking an event
+ * navigates to that record's existing admin detail route.
+ *
+ * Rendered as a **section on the admin Dashboard** (`pages/home`), not a separate
+ * nav page — the dashboard is single-sourced in Free and aliased into Pro, so this
+ * component appears in both bundles via the normal import graph (no per-bundle
+ * registration needed).
  *
  * The grid/chip/colors and the range+fetch hook are reused from the shared calendar
- * foundation (`@doublescale/shared/calendar`); this page owns the admin chrome —
- * `getToLink` navigation, the kind filter, and the manager-only assignee filter.
- *
- * Visibility is broad (any staff role); the row-level filtering happens server-side
- * in each provider, so an over-broad page gate can't leak another staffer's rows.
- * See docs/admin-calendar-plan.md.
+ * foundation (`@doublescale/shared/calendar`); this component owns the admin chrome
+ * — `getToLink` navigation, the kind filter, and the manager-only assignee filter.
+ * Row-level filtering happens server-side per provider. See docs/admin-calendar-plan.md.
  */
 
 import { useCallback, useMemo, useState } from '@wordpress/element';
@@ -18,11 +20,7 @@ import { __ } from '@wordpress/i18n';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import {
-	registerAdminPage,
-	useNavigate,
-	getToLink,
-} from '@doublescale/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 import {
 	MonthGrid,
 	useCalendar,
@@ -53,7 +51,7 @@ const KIND_FILTERS: KindFilter[] = [
 	{ kind: 'proposal', label: __( 'Proposals', 'doublescale' ) },
 ];
 
-const CalendarPage = () => {
+const AdminCalendar = () => {
 	const navigate = useNavigate();
 	const isManager = useMemo( isCalendarManager, [] );
 
@@ -218,14 +216,4 @@ const CalendarPage = () => {
 	);
 };
 
-registerAdminPage( 'calendar', {
-	path: 'calendar',
-	component: CalendarPage,
-	label: __( 'Calendar', 'doublescale' ),
-	icon: <CalendarIcon />,
-	// Cross-module aggregate, so it isn't tied to one requiresModule; content is
-	// role-scoped server-side, so the page gate stays broad (any staff role).
-	alwaysRegister: true,
-} );
-
-export default CalendarPage;
+export default AdminCalendar;

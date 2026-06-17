@@ -42,6 +42,28 @@ class Capabilities {
 	}
 
 	/**
+	 * Capability check for a specific user (defaults to the current user).
+	 *
+	 * Lets a caller that already resolved a user id — e.g. the admin calendar
+	 * aggregator, which scopes every provider against a server-resolved
+	 * `$viewer_id` rather than the ambient current user — check a Sales capability
+	 * for that exact user.
+	 *
+	 * @param string $capability Capability slug.
+	 * @param int    $user_id    User id (0 = current user).
+	 * @return bool
+	 */
+	public static function user_can( string $capability, int $user_id = 0 ): bool {
+		if ( $user_id <= 0 ) {
+			return self::current_user_can( $capability );
+		}
+		if ( is_multisite() && is_super_admin( $user_id ) ) {
+			return true;
+		}
+		return user_can( $user_id, $capability );
+	}
+
+	/**
 	 * @return bool
 	 */
 	public static function can_view_sales(): bool {
@@ -52,11 +74,16 @@ class Capabilities {
 	}
 
 	/**
+	 * Whether a user may manage every Sales record (not just their own).
+	 *
+	 * @param int $user_id User id to check (0 = current user). The admin calendar
+	 *                     passes its server-resolved `$viewer_id` so scoping follows
+	 *                     the intended viewer, not whoever the request runs as.
 	 * @return bool
 	 */
-	public static function can_manage_all_sales(): bool {
-		return self::current_user_can( 'doublescale_manage_all_sales' )
-			|| self::current_user_can( 'doublescale_manage' );
+	public static function can_manage_all_sales( int $user_id = 0 ): bool {
+		return self::user_can( 'doublescale_manage_all_sales', $user_id )
+			|| self::user_can( 'doublescale_manage', $user_id );
 	}
 
 	/**

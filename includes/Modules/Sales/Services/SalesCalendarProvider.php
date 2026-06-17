@@ -62,7 +62,9 @@ final class SalesCalendarProvider {
 		list( $start, $end_inclusive ) = $window;
 
 		// 0 = no owner constraint (managers, or a manager's "All"); >0 = a single staffer.
-		$scope_user = Capabilities::can_manage_all_sales()
+		// Scope against the server-resolved $viewer_id (never the ambient current
+		// user) so the aggregator's per-viewer contract holds.
+		$scope_user = Capabilities::can_manage_all_sales( $viewer_id )
 			? ( $view_user > 0 ? $view_user : 0 )
 			: $viewer_id;
 

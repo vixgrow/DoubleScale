@@ -33,9 +33,14 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * RestCalendarController.
+ * RestAdminCalendarController.
+ *
+ * Named distinctly from the Booking module's per-host {@see \DoubleScale\Modules\Booking\Rest\Controllers\RestCalendarController}
+ * so the two never collide in the short-name-keyed REST controller manifest
+ * ({@see phpunit/RestControllerManifestUtil.php}). This one is the cross-module
+ * admin/staff aggregator; that one manages a single calendar's events.
  */
-class RestCalendarController extends RestController {
+class RestAdminCalendarController extends RestController {
 
 	/**
 	 * REST base.

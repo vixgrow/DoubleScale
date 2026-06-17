@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Plus } from 'lucide-react';
+import { ExternalLink, Plus } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
@@ -30,7 +30,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { SendDocumentDialog } from '@/components/sales';
+import { SendDocumentDialog, ContractAttachmentsPanel } from '@/components/sales';
+import PageTabs from '@/components/page-tabs';
 import { normalizeSalesContact } from '@/components/sales/contact-sales-fields';
 import {
 	createContract,
@@ -263,6 +264,195 @@ const ContractEdit: React.FC = () => {
 
 	const assigneeReadOnly = assignableUsers.length <= 1;
 
+	const informationFields = (
+		<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+			<div className="space-y-4">
+				<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
+					<Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+				</FormField>
+
+				<FormField label={__('Customer', 'doublescale')} required className="!mb-0">
+					<InfiniteScrollSelect
+						value={contact?.id ? String(contact.id) : ''}
+						onValueChange={handleContactPick}
+						placeholder={__('Search contacts…', 'doublescale')}
+						apiEndpoint="/doublescale/v1/contacts"
+						searchParamName="keywords"
+						getOptionLabel={contactOptionLabel}
+						getOptionValue={(c: ContactSummary) => c.id}
+						dataPath="data"
+						totalPath="total"
+						perPage={20}
+						selectedItem={contact}
+					/>
+				</FormField>
+
+				<FormField label={__('Contract Type', 'doublescale')} className="!mb-0">
+					<div className="flex gap-2">
+						<Select
+							value={contractTypeId ? String(contractTypeId) : 'none'}
+							onValueChange={(next) =>
+								setContractTypeId(next === 'none' ? null : Number(next))
+							}
+						>
+							<SelectTrigger className="flex-1">
+								<SelectValue placeholder={__('— None —', 'doublescale')} />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="none">{__('— None —', 'doublescale')}</SelectItem>
+								{contractTypes.map((type) => (
+									<SelectItem key={type.id} value={String(type.id)}>
+										{type.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Button
+							type="button"
+							variant="outline"
+							size="icon"
+							onClick={() => setTypeDialogOpen(true)}
+							aria-label={__('Add contract type', 'doublescale')}
+						>
+							<Plus className="h-4 w-4" />
+						</Button>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							className="shrink-0 px-2"
+							onClick={() => navigate(getToLink('sales/contract-types'))}
+						>
+							<ExternalLink className="h-4 w-4" />
+						</Button>
+					</div>
+				</FormField>
+
+				<div className="grid grid-cols-2 gap-3">
+					<FormField label={__('Contract Value', 'doublescale')} required className="!mb-0">
+						<Input
+							type="number"
+							min={0}
+							step="0.01"
+							value={contractValue}
+							onChange={(e) => setContractValue(Number(e.target.value))}
+						/>
+					</FormField>
+					<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
+						<select
+							className={selectClass}
+							value={currency}
+							onChange={(e) => setCurrency(e.target.value)}
+						>
+							{CURRENCIES.map((c) => (
+								<option key={c} value={c}>
+									{c}
+								</option>
+							))}
+						</select>
+					</FormField>
+				</div>
+
+				<div className="grid grid-cols-2 gap-3">
+					<FormField label={__('Start Date', 'doublescale')} className="!mb-0">
+						<DatePicker
+							value={startDate}
+							onChange={setStartDate}
+							outputFormat="iso"
+							placeholder={__('Select date', 'doublescale')}
+							buttonClassName="w-full"
+							className="w-full"
+						/>
+					</FormField>
+					<FormField label={__('End Date', 'doublescale')} className="!mb-0">
+						<DatePicker
+							value={endDate}
+							onChange={setEndDate}
+							outputFormat="iso"
+							placeholder={__('Select date', 'doublescale')}
+							buttonClassName="w-full"
+							className="w-full"
+						/>
+					</FormField>
+				</div>
+
+				<FormField label={__('Tags', 'doublescale')} className="!mb-0">
+					<TagField value={tagIds} onChange={setTagIds} />
+				</FormField>
+			</div>
+
+			<div className="space-y-4">
+				<div className="grid grid-cols-2 gap-3">
+					<FormField label={__('Status', 'doublescale')} className="!mb-0">
+						<select
+							className={selectClass}
+							value={status}
+							onChange={(e) => setStatus(e.target.value)}
+						>
+							{CONTRACT_STATUSES.map((s) => (
+								<option key={s} value={s}>
+									{s}
+								</option>
+							))}
+						</select>
+					</FormField>
+					<FormField label={__('Assigned', 'doublescale')} className="!mb-0">
+						{usersLoading ? (
+							<div className="text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</div>
+						) : assigneeReadOnly ? (
+							<div className="border rounded px-3 py-2 bg-slate-50 text-sm h-10 flex items-center">
+								{assignableUsers.find((u) => u.id === assignedUserId)?.display_name ||
+									assignableUsers[0]?.display_name ||
+									'—'}
+							</div>
+						) : (
+							<Select
+								value={assignedUserId ? String(assignedUserId) : 'unassigned'}
+								onValueChange={(next) =>
+									setAssignedUserId(next === 'unassigned' ? null : Number(next))
+								}
+							>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="unassigned">
+										{__('— Unassigned —', 'doublescale')}
+									</SelectItem>
+									{assignableUsers.map((user) => (
+										<SelectItem key={user.id} value={String(user.id)}>
+											{user.display_name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					</FormField>
+				</div>
+
+				<div className="flex items-center justify-between pt-2">
+					<Label htmlFor="contract-hide-customer">
+						{__('Hide from Customer', 'doublescale')}
+					</Label>
+					<Switch
+						id="contract-hide-customer"
+						checked={hideFromCustomer}
+						onCheckedChange={setHideFromCustomer}
+					/>
+				</div>
+
+				<div className="flex items-center justify-between">
+					<Label htmlFor="contract-trash">{__('Move to Trash', 'doublescale')}</Label>
+					<Switch
+						id="contract-trash"
+						checked={isTrash}
+						onCheckedChange={setIsTrash}
+					/>
+				</div>
+			</div>
+		</div>
+	);
+
 	return (
 		<div className="p-6 space-y-6 max-w-6xl">
 			<div className="flex items-center justify-between">
@@ -276,187 +466,38 @@ const ContractEdit: React.FC = () => {
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-				<div className="space-y-4">
-					<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
-						<Input value={subject} onChange={(e) => setSubject(e.target.value)} />
-					</FormField>
-
-					<FormField label={__('Customer', 'doublescale')} required className="!mb-0">
-						<InfiniteScrollSelect
-							value={contact?.id ? String(contact.id) : ''}
-							onValueChange={handleContactPick}
-							placeholder={__('Search contacts…', 'doublescale')}
-							apiEndpoint="/doublescale/v1/contacts"
-							searchParamName="keywords"
-							getOptionLabel={contactOptionLabel}
-							getOptionValue={(c: ContactSummary) => c.id}
-							dataPath="data"
-							totalPath="total"
-							perPage={20}
-							selectedItem={contact}
-						/>
-					</FormField>
-
-					<FormField label={__('Contract Type', 'doublescale')} className="!mb-0">
-						<div className="flex gap-2">
-							<Select
-								value={contractTypeId ? String(contractTypeId) : 'none'}
-								onValueChange={(next) =>
-									setContractTypeId(next === 'none' ? null : Number(next))
-								}
-							>
-								<SelectTrigger className="flex-1">
-									<SelectValue placeholder={__('— None —', 'doublescale')} />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="none">{__('— None —', 'doublescale')}</SelectItem>
-									{contractTypes.map((type) => (
-										<SelectItem key={type.id} value={String(type.id)}>
-											{type.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<Button
-								type="button"
-								variant="outline"
-								size="icon"
-								onClick={() => setTypeDialogOpen(true)}
-								aria-label={__('Add contract type', 'doublescale')}
-							>
-								<Plus className="h-4 w-4" />
-							</Button>
-						</div>
-					</FormField>
-
-					<div className="grid grid-cols-2 gap-3">
-						<FormField label={__('Contract Value', 'doublescale')} required className="!mb-0">
-							<Input
-								type="number"
-								min={0}
-								step="0.01"
-								value={contractValue}
-								onChange={(e) => setContractValue(Number(e.target.value))}
+			<PageTabs
+				defaultValue="information"
+				tabsVariant="underline"
+				tabsListWrapperClassName="border-b border-border px-0 py-0 rounded-none bg-transparent"
+				tabsListClassName="bg-transparent gap-6"
+				enableHorizontalScroll
+				tabsList={[
+					{ value: 'information', label: __('Contract Information', 'doublescale') },
+					{ value: 'content', label: __('Content', 'doublescale') },
+					{ value: 'attachments', label: __('Attachments', 'doublescale') },
+				]}
+				tabsContent={[
+					{ value: 'information', children: informationFields },
+					{
+						value: 'content',
+						children: (
+							<FormField label={__('Contract Body', 'doublescale')} className="!mb-0">
+								<RichTextEditor content={description} onChange={setDescription} />
+							</FormField>
+						),
+					},
+					{
+						value: 'attachments',
+						children: (
+							<ContractAttachmentsPanel
+								contractId={contractId}
+								onNotice={(message) => setError(message)}
 							/>
-						</FormField>
-						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
-							<select
-								className={selectClass}
-								value={currency}
-								onChange={(e) => setCurrency(e.target.value)}
-							>
-								{CURRENCIES.map((c) => (
-									<option key={c} value={c}>
-										{c}
-									</option>
-								))}
-							</select>
-						</FormField>
-					</div>
-
-					<div className="grid grid-cols-2 gap-3">
-						<FormField label={__('Start Date', 'doublescale')} className="!mb-0">
-							<DatePicker
-								value={startDate}
-								onChange={setStartDate}
-								outputFormat="iso"
-								placeholder={__('Select date', 'doublescale')}
-								buttonClassName="w-full"
-								className="w-full"
-							/>
-						</FormField>
-						<FormField label={__('End Date', 'doublescale')} className="!mb-0">
-							<DatePicker
-								value={endDate}
-								onChange={setEndDate}
-								outputFormat="iso"
-								placeholder={__('Select date', 'doublescale')}
-								buttonClassName="w-full"
-								className="w-full"
-							/>
-						</FormField>
-					</div>
-
-					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
-						<TagField value={tagIds} onChange={setTagIds} />
-					</FormField>
-				</div>
-
-				<div className="space-y-4">
-					<div className="grid grid-cols-2 gap-3">
-						<FormField label={__('Status', 'doublescale')} className="!mb-0">
-							<select
-								className={selectClass}
-								value={status}
-								onChange={(e) => setStatus(e.target.value)}
-							>
-								{CONTRACT_STATUSES.map((s) => (
-									<option key={s} value={s}>
-										{s}
-									</option>
-								))}
-							</select>
-						</FormField>
-						<FormField label={__('Assigned', 'doublescale')} className="!mb-0">
-							{usersLoading ? (
-								<div className="text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</div>
-							) : assigneeReadOnly ? (
-								<div className="border rounded px-3 py-2 bg-slate-50 text-sm h-10 flex items-center">
-									{assignableUsers.find((u) => u.id === assignedUserId)?.display_name ||
-										assignableUsers[0]?.display_name ||
-										'—'}
-								</div>
-							) : (
-								<Select
-									value={assignedUserId ? String(assignedUserId) : 'unassigned'}
-									onValueChange={(next) =>
-										setAssignedUserId(next === 'unassigned' ? null : Number(next))
-									}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="unassigned">
-											{__('— Unassigned —', 'doublescale')}
-										</SelectItem>
-										{assignableUsers.map((user) => (
-											<SelectItem key={user.id} value={String(user.id)}>
-												{user.display_name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							)}
-						</FormField>
-					</div>
-
-					<div className="flex items-center justify-between pt-2">
-						<Label htmlFor="contract-hide-customer">
-							{__('Hide from Customer', 'doublescale')}
-						</Label>
-						<Switch
-							id="contract-hide-customer"
-							checked={hideFromCustomer}
-							onCheckedChange={setHideFromCustomer}
-						/>
-					</div>
-
-					<div className="flex items-center justify-between">
-						<Label htmlFor="contract-trash">{__('Move to Trash', 'doublescale')}</Label>
-						<Switch
-							id="contract-trash"
-							checked={isTrash}
-							onCheckedChange={setIsTrash}
-						/>
-					</div>
-				</div>
-			</div>
-
-			<FormField label={__('Contract Body', 'doublescale')} className="!mb-0">
-				<RichTextEditor content={description} onChange={setDescription} />
-			</FormField>
+						),
+					},
+				]}
+			/>
 
 			<div className="flex justify-end gap-2">
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/contracts'))}>

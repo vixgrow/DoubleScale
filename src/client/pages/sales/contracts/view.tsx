@@ -13,7 +13,9 @@ import {
 	ConfirmDialog,
 	ContractStatusPill,
 	SendDocumentDialog,
+	ContractAttachmentsPanel,
 } from '@/components/sales';
+import PageTabs from '@/components/page-tabs';
 import {
 	deleteContract,
 	downloadContractPdf,
@@ -171,6 +173,51 @@ const ContractView: React.FC = () => {
 
 	const showSend = contract.status !== 'expired';
 
+	const informationTab = (
+		<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+			<div>
+				<div className="text-muted-foreground">{__('Customer', 'doublescale')}</div>
+				<div className="font-medium">{contactName(contract)}</div>
+			</div>
+			<div>
+				<div className="text-muted-foreground">{__('Contract Type', 'doublescale')}</div>
+				<div className="font-medium">{contract.contract_type?.name || '—'}</div>
+			</div>
+			<div>
+				<div className="text-muted-foreground">{__('Value', 'doublescale')}</div>
+				<div className="font-medium">
+					{formatMoney(contract.contract_value, contract.currency)}
+				</div>
+			</div>
+			<div>
+				<div className="text-muted-foreground">{__('Status', 'doublescale')}</div>
+				<div className="font-medium">
+					{CONTRACT_STATUS_LABELS[contract.status] || contract.status}
+				</div>
+			</div>
+			<div>
+				<div className="text-muted-foreground">{__('Start Date', 'doublescale')}</div>
+				<div className="font-medium">{contract.start_date || '—'}</div>
+			</div>
+			<div>
+				<div className="text-muted-foreground">{__('End Date', 'doublescale')}</div>
+				<div className="font-medium">{contract.end_date || '—'}</div>
+			</div>
+			{contract.sent_at ? (
+				<div>
+					<div className="text-muted-foreground">{__('Sent', 'doublescale')}</div>
+					<div className="font-medium">{contract.sent_at}</div>
+				</div>
+			) : null}
+			{contract.viewed_at ? (
+				<div>
+					<div className="text-muted-foreground">{__('Viewed', 'doublescale')}</div>
+					<div className="font-medium">{contract.viewed_at}</div>
+				</div>
+			) : null}
+		</div>
+	);
+
 	return (
 		<div className="p-6 space-y-6 max-w-5xl">
 			{notice ? (
@@ -225,59 +272,44 @@ const ContractView: React.FC = () => {
 					/>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-					<div>
-						<div className="text-muted-foreground">{__('Customer', 'doublescale')}</div>
-						<div className="font-medium">{contactName(contract)}</div>
-					</div>
-					<div>
-						<div className="text-muted-foreground">{__('Contract Type', 'doublescale')}</div>
-						<div className="font-medium">{contract.contract_type?.name || '—'}</div>
-					</div>
-					<div>
-						<div className="text-muted-foreground">{__('Value', 'doublescale')}</div>
-						<div className="font-medium">
-							{formatMoney(contract.contract_value, contract.currency)}
-						</div>
-					</div>
-					<div>
-						<div className="text-muted-foreground">{__('Status', 'doublescale')}</div>
-						<div className="font-medium">
-							{CONTRACT_STATUS_LABELS[contract.status] || contract.status}
-						</div>
-					</div>
-					<div>
-						<div className="text-muted-foreground">{__('Start Date', 'doublescale')}</div>
-						<div className="font-medium">{contract.start_date || '—'}</div>
-					</div>
-					<div>
-						<div className="text-muted-foreground">{__('End Date', 'doublescale')}</div>
-						<div className="font-medium">{contract.end_date || '—'}</div>
-					</div>
-					{contract.sent_at ? (
-						<div>
-							<div className="text-muted-foreground">{__('Sent', 'doublescale')}</div>
-							<div className="font-medium">{contract.sent_at}</div>
-						</div>
-					) : null}
-					{contract.viewed_at ? (
-						<div>
-							<div className="text-muted-foreground">{__('Viewed', 'doublescale')}</div>
-							<div className="font-medium">{contract.viewed_at}</div>
-						</div>
-					) : null}
-				</div>
-
-				{contract.description ? (
-					<div className="border-t pt-6">
-						<h2 className="font-medium mb-3">{__('Contract Body', 'doublescale')}</h2>
-						<div
-							className="prose prose-sm max-w-none"
-							// eslint-disable-next-line react/no-danger
-							dangerouslySetInnerHTML={{ __html: contract.description }}
-						/>
-					</div>
-				) : null}
+				<PageTabs
+					defaultValue="information"
+					tabsVariant="underline"
+					tabsListWrapperClassName="border-b border-border px-0 py-0 rounded-none bg-transparent"
+					tabsListClassName="bg-transparent gap-6"
+					enableHorizontalScroll
+					tabsList={[
+						{ value: 'information', label: __('Contract Information', 'doublescale') },
+						{ value: 'content', label: __('Content', 'doublescale') },
+						{ value: 'attachments', label: __('Attachments', 'doublescale') },
+					]}
+					tabsContent={[
+						{ value: 'information', children: informationTab },
+						{
+							value: 'content',
+							children: contract.description ? (
+								<div
+									className="prose prose-sm max-w-none"
+									// eslint-disable-next-line react/no-danger
+									dangerouslySetInnerHTML={{ __html: contract.description }}
+								/>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									{__('No contract body content.', 'doublescale')}
+								</p>
+							),
+						},
+						{
+							value: 'attachments',
+							children: (
+								<ContractAttachmentsPanel
+									contractId={contractId}
+									onNotice={setNotice}
+								/>
+							),
+						},
+					]}
+				/>
 			</div>
 
 			{contract.has_signature || contract.signed_name ? (

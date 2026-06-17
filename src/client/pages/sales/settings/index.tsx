@@ -83,7 +83,7 @@ const SalesSettingsPage: React.FC = () => {
 					<h1 className="text-2xl font-semibold">{__('Sales Settings', 'doublescale')}</h1>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Emails, payment gateways, taxes, and customer experience for proposals and invoices.',
+							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, and invoices.',
 							'doublescale'
 						)}
 					</p>
@@ -144,6 +144,52 @@ const SalesSettingsPage: React.FC = () => {
 						<p className="text-xs text-muted-foreground">
 							{__(
 								'Tokens: {invoice_number}, {customer_name}, {total}, {balance}, {public_url}',
+								'doublescale'
+							)}
+						</p>
+					</section>
+
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Contract emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.contract_email_subject}
+								onChange={(e) => patch('contract_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<Textarea
+								value={form.contract_email_intro}
+								onChange={(e) => patch('contract_email_intro', e.target.value)}
+								rows={3}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Tokens: {subject}, {contract_number}, {customer_name}, {public_url}, {contract_value}, {end_date}',
+								'doublescale'
+							)}
+						</p>
+					</section>
+
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Contract signed emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.contract_signed_email_subject}
+								onChange={(e) => patch('contract_signed_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<Textarea
+								value={form.contract_signed_email_intro}
+								onChange={(e) => patch('contract_signed_email_intro', e.target.value)}
+								rows={3}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Sent to the customer after they sign. Tokens: {contract_number}, {subject}, {customer_name}, {public_url}',
 								'doublescale'
 							)}
 						</p>

@@ -428,6 +428,20 @@ class NotificationCategories {
 	const SALES_INVOICE_PAID = 'sales_invoice_paid';
 
 	/**
+	 * Sales subcategory: Contract sent to customer.
+	 *
+	 * @var string
+	 */
+	const SALES_CONTRACT_SENT = 'sales_contract_sent';
+
+	/**
+	 * Sales subcategory: Contract signed by customer.
+	 *
+	 * @var string
+	 */
+	const SALES_CONTRACT_SIGNED = 'sales_contract_signed';
+
+	/**
 	 * Get all available notification categories
 	 *
 	 * Returns basic category info (label, description). For UI display with
@@ -481,7 +495,7 @@ class NotificationCategories {
 			),
 			self::SALES          => array(
 				'label'       => __( 'Sales', 'doublescale' ),
-				'description' => __( 'Proposal and invoice notifications for assigned sales reps.', 'doublescale' ),
+				'description' => __( 'Proposal, contract, and invoice notifications for assigned sales reps.', 'doublescale' ),
 			),
 				// self::SYSTEM         => array(
 				// 'label'       => __( 'System', 'doublescale'),
@@ -776,6 +790,14 @@ class NotificationCategories {
 				self::SALES_INVOICE_PAID      => array(
 					'label'       => __( 'Invoice Paid', 'doublescale' ),
 					'description' => __( 'Notifications when an invoice is paid in full.', 'doublescale' ),
+				),
+				self::SALES_CONTRACT_SENT     => array(
+					'label'       => __( 'Contract Sent', 'doublescale' ),
+					'description' => __( 'Notifications when a contract is sent to a customer.', 'doublescale' ),
+				),
+				self::SALES_CONTRACT_SIGNED   => array(
+					'label'       => __( 'Contract Signed', 'doublescale' ),
+					'description' => __( 'Notifications when a customer signs a contract.', 'doublescale' ),
 				),
 			),
 			self::SYSTEM         => array(

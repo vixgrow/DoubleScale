@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
+use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 
@@ -39,6 +40,14 @@ final class SalesRepNotificationTemplates {
 			NotificationCategories::SALES_INVOICE_PAID      => array(
 				'title'   => __( 'Invoice paid: {invoice_number}', 'doublescale' ),
 				'message' => __( 'Invoice {invoice_number} has been paid in full.', 'doublescale' ),
+			),
+			NotificationCategories::SALES_CONTRACT_SENT     => array(
+				'title'   => __( '{event_label}: {contract_number}', 'doublescale' ),
+				'message' => __( '{contract_number} — {contract_subject}', 'doublescale' ),
+			),
+			NotificationCategories::SALES_CONTRACT_SIGNED   => array(
+				'title'   => __( '{event_label}: {contract_number}', 'doublescale' ),
+				'message' => __( '{contract_number} — {contract_subject}', 'doublescale' ),
 			),
 		);
 	}
@@ -119,6 +128,20 @@ final class SalesRepNotificationTemplates {
 		if ( $invoice instanceof InvoiceModel ) {
 			$tokens['invoice_number'] = (string) $invoice->invoice_number;
 			$tokens['sales_link']     = admin_url( 'admin.php?page=doublescale&path=sales/invoices/' . (int) $invoice->id );
+		}
+
+		$contract = $context['contract'] ?? null;
+		if ( $contract instanceof ContractModel ) {
+			$event  = isset( $context['event'] ) ? (string) $context['event'] : '';
+			$labels = array(
+				'sent'   => __( 'Contract sent to customer', 'doublescale' ),
+				'signed' => __( 'Contract signed by customer', 'doublescale' ),
+			);
+
+			$tokens['event_label']       = $labels[ $event ] ?? __( 'Contract update', 'doublescale' );
+			$tokens['contract_number']   = (string) $contract->contract_number;
+			$tokens['contract_subject']  = (string) $contract->subject;
+			$tokens['sales_link']        = admin_url( 'admin.php?page=doublescale&path=sales/contracts/' . (int) $contract->id );
 		}
 
 		return $tokens;

@@ -74,3 +74,42 @@ export const signPublicContract = (hash: string, payload: SignContractPayload = 
 	});
 
 export const getPublicContractPdfUrl = (hash: string) => `${getPublicBase()}/${hash}/pdf`;
+
+export interface PublicContractAttachment {
+	id: number;
+	file_hash: string;
+	file_name: string;
+	file_size: number;
+	file_type: string;
+	created_at: string | null;
+	url: string;
+}
+
+export const usePublicContractAttachments = (hash: string | null) => {
+	const [data, setData] = useState<PublicContractAttachment[]>([]);
+	const [loading, setLoading] = useState(false);
+
+	const refetch = useCallback(() => {
+		if (!hash) {
+			setData([]);
+			return;
+		}
+		setLoading(true);
+		fetch(`${getPublicBase()}/${hash}/attachments`)
+			.then(async (res) => {
+				if (!res.ok) {
+					return parseError(res);
+				}
+				return res.json() as Promise<{ data: PublicContractAttachment[] }>;
+			})
+			.then((response) => setData(Array.isArray(response?.data) ? response.data : []))
+			.catch(() => setData([]))
+			.finally(() => setLoading(false));
+	}, [hash]);
+
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
+
+	return { data, loading, refetch };
+};

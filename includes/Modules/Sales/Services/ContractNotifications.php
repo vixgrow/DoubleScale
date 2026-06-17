@@ -93,6 +93,83 @@ final class ContractNotifications {
 	}
 
 	/**
+	 * Send a signed confirmation email to the customer.
+	 *
+	 * @param ContractModel $contract Contract.
+	 * @return bool
+	 */
+	public function send_signed_confirmation( ContractModel $contract ): bool {
+		$to = $this->resolve_recipient_email( $contract );
+		if ( '' === $to ) {
+			return false;
+		}
+
+		$url = ContractUrl::get_public_url( $contract );
+		if ( '' === $url ) {
+			return false;
+		}
+
+		$tokens = SalesEmailTokens::for_contract( $contract, $url );
+
+		$host_user_id = $contract->assigned_user_id ? (int) $contract->assigned_user_id : null;
+		$identity     = EmailIdentityResolver::resolve( $host_user_id );
+
+		$contract->loadMissing( 'contact' );
+		$customer_name = __( 'there', 'doublescale' );
+		if ( $contract->contact ) {
+			$name = trim( (string) $contract->contact->first_name . ' ' . (string) $contract->contact->last_name );
+			if ( '' !== $name ) {
+				$customer_name = $name;
+			}
+		}
+
+		$subject_tpl = (string) SalesSettings::get( 'contract_signed_email_subject', '' );
+		$subject     = SalesEmailTokens::replace( $subject_tpl, $tokens );
+		if ( '' === trim( $subject ) ) {
+			$subject = sprintf(
+				/* translators: %s: contract number */
+				__( 'Contract signed: %s', 'doublescale' ),
+				(string) $contract->contract_number
+			);
+		}
+
+		$intro_tpl = (string) SalesSettings::get( 'contract_signed_email_intro', '' );
+		$intro     = ContractContentMergeTags::resolve(
+			$contract,
+			SalesEmailTokens::replace( $intro_tpl, $tokens )
+		);
+
+		$body = $this->build_body(
+			$contract,
+			$customer_name,
+			$url,
+			$intro,
+			__( 'View Signed Contract', 'doublescale' )
+		);
+
+		$emails = new Emails();
+		$emails->from_address = $identity['from_address'];
+		$emails->from_name    = $identity['from_name'];
+		$emails->reply_to     = $identity['reply_to'];
+
+		try {
+			return (bool) $emails->send( $to, $subject, $body );
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Contract signed confirmation email failed',
+					array(
+						'source'      => 'sales-contract-email',
+						'contract_id' => (int) $contract->id,
+						'error'       => $e->getMessage(),
+					)
+				);
+			}
+			return false;
+		}
+	}
+
+	/**
 	 * @param ContractModel $contract Contract.
 	 * @return string
 	 */
@@ -109,10 +186,11 @@ final class ContractNotifications {
 	 * @param ContractModel $contract Contract.
 	 * @param string        $customer_name Customer display name.
 	 * @param string        $url Public contract URL.
-	 * @param string        $custom_message Optional custom message.
+	 * @param string        $intro Intro message.
+	 * @param string|null   $button_label Optional CTA label.
 	 * @return string
 	 */
-	private function build_body( ContractModel $contract, string $customer_name, string $url, string $intro ): string {
+	private function build_body( ContractModel $contract, string $customer_name, string $url, string $intro, ?string $button_label = null ): string {
 		$intro_html = '' !== trim( $intro )
 			? nl2br( esc_html( $intro ) )
 			: esc_html__( 'Please review the contract below and sign when you are ready.', 'doublescale' );
@@ -184,7 +262,7 @@ final class ContractNotifications {
 		$html .= sprintf(
 			'<a href="%1$s" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:600;line-height:1;color:#ffffff;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">%2$s</a>',
 			esc_url( $url ),
-			esc_html__( 'View Contract', 'doublescale' )
+			esc_html( $button_label ?? __( 'View Contract', 'doublescale' ) )
 		);
 		$html .= '</td></tr></table>';
 

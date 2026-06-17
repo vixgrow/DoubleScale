@@ -40,5 +40,8 @@ final class RestContractRoutesTest extends TestCase {
 		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/send', $routes );
 		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/pdf', $routes );
 		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/signature', $routes );
+		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/attachments', $routes );
+		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/attachments/(?P<file_hash>[a-zA-Z0-9]+)', $routes );
+		$this->assertContains( '/sales/contracts/(?P<id>[\d]+)/attachments/(?P<file_hash>[a-zA-Z0-9]+)/download', $routes );
 	}
 }

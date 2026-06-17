@@ -27,6 +27,7 @@ const PaymentView = lazy(() => import('./payments/view'));
 const ContractsList = lazy(() => import('./contracts'));
 const ContractView = lazy(() => import('./contracts/view'));
 const ContractEdit = lazy(() => import('./contracts/edit'));
+const ContractTypes = lazy(() => import('./contract-types'));
 const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
@@ -210,6 +211,14 @@ if (isSalesDocumentsReady()) {
 		path: 'sales/contracts/:id/edit',
 		component: wrap(ContractEdit),
 		label: __('Edit Contract', 'doublescale'),
+		hidden: true,
+		...salesPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-types', {
+		path: 'sales/contract-types',
+		component: wrap(ContractTypes),
+		label: __('Contract Types', 'doublescale'),
 		hidden: true,
 		...salesPageDefaults,
 	});

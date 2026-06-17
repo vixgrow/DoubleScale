@@ -15,7 +15,10 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Constants\ContractStatus;
 use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Rest\ContractShaper;
+use DoubleScale\Modules\Sales\Services\ContractAttachmentService;
+use DoubleScale\Modules\Sales\Services\ContractNotifications;
 use DoubleScale\Modules\Sales\Services\DocumentPdf;
+use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 use WP_REST_Request;
@@ -67,6 +70,30 @@ class RestPublicContractController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_attachments' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<hash>[a-f0-9]{32})/attachments/(?P<file_hash>[a-zA-Z0-9]+)/download',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'download_attachment' ),
 					'permission_callback' => '__return_true',
 				),
 			)
@@ -158,6 +185,9 @@ class RestPublicContractController extends RestController {
 
 		do_action( 'doublescale_sales_contract_signed', $contract );
 
+		( new SalesRepNotifications() )->notify_contract_event( $contract, 'signed' );
+		( new ContractNotifications() )->send_signed_confirmation( $contract );
+
 		return new WP_REST_Response( ContractShaper::shape_public( $contract ), 200 );
 	}
 
@@ -182,6 +212,78 @@ class RestPublicContractController extends RestController {
 		$shaped = ContractShaper::shape_public( $contract );
 
 		return DocumentPdf::rest_response( $shaped, 'contract', (string) $contract->contract_number );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_attachments( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$contract = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$service = new ContractAttachmentService();
+		$hash    = (string) $request->get_param( 'hash' );
+		$items   = \DoubleScale\Modules\Sales\Models\ContractAttachmentModel::query()
+			->with( array( 'user', 'contact' ) )
+			->where( 'contract_id', (int) $contract->id )
+			->orderBy( 'id' )
+			->get();
+
+		$data = array();
+		foreach ( $items as $item ) {
+			$data[] = $service->shape_for_api(
+				$item,
+				"sales/public/contracts/{$hash}/attachments/{$item->file_hash}/download"
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function download_attachment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+		if ( ! $this->check_rate_limit() ) {
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'doublescale' ), array( 'status' => 429 ) );
+		}
+
+		$contract = $this->resolve_by_hash( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$file_hash  = (string) $request->get_param( 'file_hash' );
+		$attachment = \DoubleScale\Modules\Sales\Models\ContractAttachmentModel::query()
+			->where( 'contract_id', (int) $contract->id )
+			->where( 'file_hash', $file_hash )
+			->first();
+		if ( ! $attachment ) {
+			return new WP_Error( 'not_found', __( 'Attachment not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$stream_error = ( new ContractAttachmentService() )->stream_download( $attachment );
+		if ( $stream_error ) {
+			return $stream_error;
+		}
+
+		return new WP_REST_Response( null, 200 );
 	}
 
 	/**

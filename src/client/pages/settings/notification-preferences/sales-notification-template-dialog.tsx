@@ -23,6 +23,9 @@ const PROPOSAL_TOKENS =
 
 const INVOICE_TOKENS = '{invoice_number}, {company_name}, {sales_link}';
 
+const CONTRACT_TOKENS =
+	'{event_label}, {contract_number}, {contract_subject}, {company_name}, {sales_link}';
+
 interface SalesNotificationTemplateDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -78,7 +81,11 @@ export const SalesNotificationTemplateDialog: React.FC<SalesNotificationTemplate
 	};
 
 	const tokenHint =
-		subKey === 'sales_invoice_paid' ? INVOICE_TOKENS : PROPOSAL_TOKENS;
+		subKey === 'sales_invoice_paid'
+			? INVOICE_TOKENS
+			: subKey === 'sales_contract_sent' || subKey === 'sales_contract_signed'
+				? CONTRACT_TOKENS
+				: PROPOSAL_TOKENS;
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>

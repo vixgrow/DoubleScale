@@ -17,6 +17,7 @@ use DoubleScale\Modules\Sales\Constants\ContractStatus;
 use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Models\ContractTypeModel;
 use DoubleScale\Modules\Sales\Rest\ContractShaper;
+use DoubleScale\Modules\Sales\Services\ContractAttachmentService;
 use DoubleScale\Modules\Sales\Services\ContractNotifications;
 use DoubleScale\Modules\Sales\Services\ContractUrl;
 use DoubleScale\Modules\Sales\Services\DocumentPdf;
@@ -92,6 +93,47 @@ class RestContractController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_pdf' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_attachments' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload_attachment' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/attachments/(?P<file_hash>[a-zA-Z0-9]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_attachment' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/attachments/(?P<file_hash>[a-zA-Z0-9]+)/download',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'download_attachment' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
@@ -435,6 +477,8 @@ class RestContractController extends RestController {
 
 		do_action( 'doublescale_sales_contract_sent', $contract, $message );
 
+		( new SalesRepNotifications() )->notify_contract_event( $contract, 'sent' );
+
 		return new WP_REST_Response(
 			array(
 				'sent'     => true,
@@ -589,6 +633,174 @@ class RestContractController extends RestController {
 			),
 			200
 		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_attachments( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contract = $this->resolve_contract( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$service     = new ContractAttachmentService();
+		$contract_id = (int) $contract->id;
+		$items       = \DoubleScale\Modules\Sales\Models\ContractAttachmentModel::query()
+			->with( array( 'user', 'contact' ) )
+			->where( 'contract_id', $contract_id )
+			->orderBy( 'id' )
+			->get();
+
+		$data = array();
+		foreach ( $items as $item ) {
+			$data[] = $service->shape_for_api(
+				$item,
+				"sales/contracts/{$contract_id}/attachments/{$item->file_hash}/download"
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data'   => $data,
+				'limits' => ContractAttachmentService::limits_payload(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function upload_attachment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contract = $this->resolve_contract( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$files = $request->get_file_params();
+		$file  = isset( $files['file'] ) && is_array( $files['file'] ) ? $files['file'] : null;
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$service    = new ContractAttachmentService();
+		$attachment = $service->store_upload(
+			$file,
+			$contract,
+			array( 'user_id' => get_current_user_id() )
+		);
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		$contract_id = (int) $contract->id;
+		return new WP_REST_Response(
+			$service->shape_for_api(
+				$attachment,
+				"sales/contracts/{$contract_id}/attachments/{$attachment->file_hash}/download"
+			),
+			201
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_attachment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contract = $this->resolve_contract( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$attachment = $this->resolve_contract_attachment( $contract, (string) $request->get_param( 'file_hash' ) );
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		$attachment->delete();
+
+		return new WP_REST_Response( array( 'deleted' => true ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function download_attachment( $request ) {
+		$disabled = $this->require_module( 'sales' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contract = $this->resolve_contract( $request );
+		if ( is_wp_error( $contract ) ) {
+			return $contract;
+		}
+
+		$attachment = $this->resolve_contract_attachment( $contract, (string) $request->get_param( 'file_hash' ) );
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		$stream_error = ( new ContractAttachmentService() )->stream_download( $attachment );
+		if ( $stream_error ) {
+			return $stream_error;
+		}
+
+		return new WP_REST_Response( null, 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return ContractModel|WP_Error
+	 */
+	private function resolve_contract( WP_REST_Request $request ) {
+		$contract = ContractModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $contract ) {
+			return new WP_Error( 'not_found', __( 'Contract not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $contract );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		return $contract;
+	}
+
+	/**
+	 * @param ContractModel $contract Contract.
+	 * @param string        $file_hash File hash.
+	 * @return \DoubleScale\Modules\Sales\Models\ContractAttachmentModel|WP_Error
+	 */
+	private function resolve_contract_attachment( ContractModel $contract, string $file_hash ) {
+		$attachment = \DoubleScale\Modules\Sales\Models\ContractAttachmentModel::query()
+			->where( 'contract_id', (int) $contract->id )
+			->where( 'file_hash', $file_hash )
+			->first();
+		if ( ! $attachment ) {
+			return new WP_Error( 'not_found', __( 'Attachment not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+		return $attachment;
 	}
 
 	/**

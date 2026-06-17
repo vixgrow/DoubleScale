@@ -49,6 +49,23 @@ export interface ProposalComment {
 	created_at: string | null;
 }
 
+export interface ContractAttachment {
+	id: number;
+	file_hash: string;
+	file_name: string;
+	file_size: number;
+	file_type: string;
+	created_at: string | null;
+	uploaded_by: string | null;
+	url: string;
+}
+
+export interface ContractAttachmentLimits {
+	max_file_size_mb: number;
+	max_file_size_bytes: number;
+	max_file_count: number;
+}
+
 export interface ProposalSignature {
 	signed_name: string | null;
 	signature: string;
@@ -373,6 +390,10 @@ export interface SalesSettings {
 	proposal_email_intro: string;
 	invoice_email_subject: string;
 	invoice_email_intro: string;
+	contract_email_subject: string;
+	contract_email_intro: string;
+	contract_signed_email_subject: string;
+	contract_signed_email_intro: string;
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
 	enabled_online_gateways: string[];

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
 use DoubleScale\Modules\Notifications\Services\NotificationService;
+use DoubleScale\Modules\Sales\Models\ContractModel;
 use DoubleScale\Modules\Sales\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 
@@ -57,6 +58,43 @@ final class SalesRepNotifications {
 	}
 
 	/**
+	 * @param ContractModel $contract Contract.
+	 * @param string        $event Event key: sent|signed.
+	 * @return void
+	 */
+	public function notify_contract_event( ContractModel $contract, string $event ): void {
+		$user_id = $contract->assigned_user_id ? (int) $contract->assigned_user_id : 0;
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		$subcategory = $this->contract_subcategory_for_event( $event );
+		if ( ! $subcategory ) {
+			return;
+		}
+
+		$rendered = SalesRepNotificationTemplates::render(
+			$subcategory,
+			array(
+				'contract' => $contract,
+				'event'    => $event,
+			)
+		);
+
+		$this->notify_rep(
+			$user_id,
+			$rendered['title'],
+			$rendered['message'],
+			$this->contract_links( $contract ),
+			$subcategory,
+			array(
+				'contract_id' => (int) $contract->id,
+				'event'       => $event,
+			)
+		);
+	}
+
+	/**
 	 * @param InvoiceModel $invoice Invoice.
 	 * @return void
 	 */
@@ -81,6 +119,19 @@ final class SalesRepNotifications {
 				'invoice_id' => (int) $invoice->id,
 			)
 		);
+	}
+
+	/**
+	 * @param string $event Contract event key.
+	 * @return string|null
+	 */
+	private function contract_subcategory_for_event( string $event ): ?string {
+		$map = array(
+			'sent'   => NotificationCategories::SALES_CONTRACT_SENT,
+			'signed' => NotificationCategories::SALES_CONTRACT_SIGNED,
+		);
+
+		return $map[ $event ] ?? null;
 	}
 
 	/**
@@ -149,6 +200,18 @@ final class SalesRepNotifications {
 		return array(
 			'web'    => admin_url( 'admin.php?page=doublescale&path=sales/invoices/' . $id ),
 			'mobile' => '/sales/invoices/' . $id,
+		);
+	}
+
+	/**
+	 * @param ContractModel $contract Contract.
+	 * @return array{web:string,mobile:string}
+	 */
+	private function contract_links( ContractModel $contract ): array {
+		$id = (int) $contract->id;
+		return array(
+			'web'    => admin_url( 'admin.php?page=doublescale&path=sales/contracts/' . $id ),
+			'mobile' => '/sales/contracts/' . $id,
 		);
 	}
 }

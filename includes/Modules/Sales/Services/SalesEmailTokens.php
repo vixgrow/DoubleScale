@@ -94,6 +94,7 @@ final class SalesEmailTokens {
 			'contract_value'    => number_format_i18n( (float) $contract->contract_value, 2 ) . ' ' . (string) $contract->currency,
 			'end_date'          => $contract->end_date ? (string) $contract->end_date : '',
 			'contract_link'     => $url,
+			'public_url'        => $url,
 			'company_name'      => (string) get_bloginfo( 'name' ),
 		);
 	}

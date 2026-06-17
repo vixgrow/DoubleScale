@@ -329,6 +329,18 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
+				NotificationCategories::SALES_CONTRACT_SENT   => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_CONTRACT_SIGNED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
 				// System.
 				// NotificationCategories::SYSTEM_GENERAL               => array(
 				// 'bell'    => true,

@@ -28,6 +28,10 @@ final class SalesSettings {
 			'proposal_email_intro'          => __( 'Please review the proposal below and let us know if you would like to accept or decline.', 'doublescale' ),
 			'invoice_email_subject'         => __( 'Invoice: {invoice_number}', 'doublescale' ),
 			'invoice_email_intro'           => __( 'Please review your invoice and pay the balance due when ready.', 'doublescale' ),
+			'contract_email_subject'        => __( 'Contract: {subject}', 'doublescale' ),
+			'contract_email_intro'          => __( 'Please review the contract below and sign when you are ready.', 'doublescale' ),
+			'contract_signed_email_subject' => __( 'Contract signed: {contract_number}', 'doublescale' ),
+			'contract_signed_email_intro'   => __( 'Thank you for signing. You can view your signed contract using the link below.', 'doublescale' ),
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
 			'default_offline_payment_modes' => array(
@@ -147,6 +151,10 @@ final class SalesSettings {
 			'proposal_email_intro',
 			'invoice_email_subject',
 			'invoice_email_intro',
+			'contract_email_subject',
+			'contract_email_intro',
+			'contract_signed_email_subject',
+			'contract_signed_email_intro',
 			'pdf_company_address',
 		);
 		foreach ( $string_keys as $key ) {

@@ -39,5 +39,7 @@ final class RestPublicContractRoutesTest extends TestCase {
 		$this->assertContains( $base, $routes );
 		$this->assertContains( $base . '/sign', $routes );
 		$this->assertContains( $base . '/pdf', $routes );
+		$this->assertContains( $base . '/attachments', $routes );
+		$this->assertContains( $base . '/attachments/(?P<file_hash>[a-zA-Z0-9]+)/download', $routes );
 	}
 }

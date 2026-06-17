@@ -4,7 +4,7 @@
 
 import React, { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Eye, MoreVertical, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Eye, MoreVertical, Pencil, Plus, RefreshCw, Tags, Trash2 } from 'lucide-react';
 import {
 	Bar,
 	BarChart,
@@ -121,6 +121,13 @@ const ContractsList: React.FC = () => {
 					</p>
 				</div>
 				<div className="flex gap-2">
+					<Button
+						variant="outline"
+						onClick={() => navigate(getToLink('sales/contract-types'))}
+					>
+						<Tags className="h-4 w-4 mr-1" />
+						{__('Contract Types', 'doublescale')}
+					</Button>
 					<Button variant="outline" size="icon" onClick={refreshAll}>
 						<RefreshCw className="h-4 w-4" />
 					</Button>

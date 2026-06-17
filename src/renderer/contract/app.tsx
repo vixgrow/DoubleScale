@@ -13,6 +13,7 @@ import {
 	getPublicContractPdfUrl,
 	signPublicContract,
 	usePublicContract,
+	usePublicContractAttachments,
 } from './public-api';
 import { SignaturePad } from './signature-pad';
 
@@ -25,6 +26,8 @@ const formatMoney = (value: number, currency: string) =>
 
 const PublicContractApp = ({ hash }: Props) => {
 	const { data, loading, error, refetch } = usePublicContract(hash);
+	const { data: attachments, loading: attachmentsLoading } =
+		usePublicContractAttachments(hash);
 
 	const [busy, setBusy] = useState(false);
 	const [actionError, setActionError] = useState<string | null>(null);
@@ -146,6 +149,26 @@ const PublicContractApp = ({ hash }: Props) => {
 					/>
 				) : null}
 			</div>
+
+			{attachmentsLoading ? null : attachments.length > 0 ? (
+				<div className="border-t pt-6 mt-6 space-y-3">
+					<h2 className="font-medium">{__('Attachments', 'doublescale')}</h2>
+					<ul className="space-y-2">
+						{attachments.map((file) => (
+							<li key={file.file_hash}>
+								<a
+									href={file.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-sm text-blue-600 hover:underline"
+								>
+									{file.file_name}
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			) : null}
 
 			{actionError ? (
 				<div className="doublescale-contract-renderer__notice doublescale-contract-renderer__notice--error mt-4">

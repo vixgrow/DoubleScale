@@ -30,6 +30,8 @@ import type {
 	ProposalFilters,
 	ProposalSignature,
 	Contract,
+	ContractAttachment,
+	ContractAttachmentLimits,
 	ContractFilters,
 	ContractSignature,
 	ContractSummary,
@@ -307,6 +309,84 @@ export const updateContractType = (typeId: number, payload: Partial<Pick<Contrac
 export const deleteContractType = (typeId: number) =>
 	apiFetch<{ deleted: boolean }>({
 		path: `${NAMESPACE}/contract-types/${typeId}`,
+		method: 'DELETE',
+	});
+
+const restRoot = (): string => {
+	const root =
+		(window as { wpApiSettings?: { root?: string } }).wpApiSettings?.root ||
+		'/wp-json/';
+	return root.endsWith('/') ? root : `${root}/`;
+};
+
+export const useContractAttachments = (contractId: number | null, enabled = true) => {
+	const [data, setData] = useState<ContractAttachment[]>([]);
+	const [limits, setLimits] = useState<ContractAttachmentLimits | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		if (!contractId || !enabled) {
+			setData([]);
+			setLimits(null);
+			return Promise.resolve([]);
+		}
+		setLoading(true);
+		setError(null);
+		return apiFetch<{ data: ContractAttachment[]; limits?: ContractAttachmentLimits }>({
+			path: `${NAMESPACE}/contracts/${contractId}/attachments`,
+		})
+			.then((response) => {
+				const items = Array.isArray(response?.data) ? response.data : [];
+				setData(items);
+				setLimits(response?.limits ?? null);
+				return items;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, [contractId, enabled]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, limits, loading, error, refetch };
+};
+
+export const uploadContractAttachment = (contractId: number, file: File) => {
+	const formData = new FormData();
+	formData.append('file', file);
+
+	// Multipart uploads bypass apiFetch; build an absolute URL without a leading
+	// slash after restRoot() — `/wp-json//doublescale/...` 404s in REST routing.
+	const route = `${NAMESPACE.replace(/^\//, '')}/contracts/${contractId}/attachments`;
+
+	return fetch(`${restRoot()}${route}`, {
+		method: 'POST',
+		body: formData,
+		credentials: 'same-origin',
+		headers: {
+			'X-WP-Nonce': (window as { wpApiSettings?: { nonce?: string } }).wpApiSettings
+				?.nonce as string,
+		},
+	}).then(async (response) => {
+		if (!response.ok) {
+			const err = (await response.json()) as { message?: string };
+			throw new Error(err.message || __('Upload failed.', 'doublescale'));
+		}
+		return response.json() as Promise<ContractAttachment>;
+	});
+};
+
+export const deleteContractAttachment = (contractId: number, fileHash: string) =>
+	apiFetch<{ deleted: boolean }>({
+		path: `${NAMESPACE}/contracts/${contractId}/attachments/${fileHash}`,
 		method: 'DELETE',
 	});
 

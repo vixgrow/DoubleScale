@@ -193,8 +193,7 @@ final class Module extends AbstractModule {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function register_merge_tag_groups( array $groups ): array {
-		$disabled = ! function_exists( 'doublescale_is_module_active' )
-			|| ! doublescale_is_module_active( 'sales' );
+		$disabled = ! doublescale_automation_sales_merge_tags_enabled();
 
 		$groups['sales'] = array(
 			'name'        => __( 'Sales', 'doublescale' ),

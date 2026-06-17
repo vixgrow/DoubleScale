@@ -317,8 +317,7 @@ final class TriggersManager {
 					'sales' => array(
 						'label'       => __( 'Proposals & Invoices', 'doublescale' ),
 						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'sales' ),
+						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 					),
 				),
 			),

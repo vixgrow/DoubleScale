@@ -447,3 +447,127 @@ function doublescale_filter_merge_tag_groups_for_modules( array $groups ): array
 
 	return $groups;
 }
+
+/**
+ * Human-readable module label for automation dependency warnings.
+ *
+ * @param string $slug Module slug.
+ */
+function doublescale_automation_module_label( string $slug ): string {
+	$labels = array(
+		'support'   => __( 'Helpdesk', 'doublescale' ),
+		'deals'     => __( 'Pipelines & Deals', 'doublescale' ),
+		'booking'   => __( 'Booking', 'doublescale' ),
+		'forms'     => __( 'Forms', 'doublescale' ),
+		'sales'     => __( 'Sales', 'doublescale' ),
+		'documents' => __( 'Proposals & Invoices', 'doublescale' ),
+		'contracts' => __( 'Contracts', 'doublescale' ),
+	);
+
+	return $labels[ $slug ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $slug ) );
+}
+
+/**
+ * First inactive module in an ordered parent→child chain (e.g. sales then documents).
+ *
+ * @param array<int, string> $slugs Module slugs in check order.
+ */
+function doublescale_automation_first_inactive_module( array $slugs ): ?string {
+	foreach ( $slugs as $slug ) {
+		if ( ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( $slug ) ) {
+			return $slug;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * @param array<int, string> $slugs Module slugs in check order.
+ */
+function doublescale_automation_modules_available( array $slugs ): bool {
+	return null === doublescale_automation_first_inactive_module( $slugs );
+}
+
+/**
+ * Ordered module chain for a Sales lifecycle trigger/action slug.
+ *
+ * @param string $item_slug Trigger or action slug.
+ * @return array<int, string>
+ */
+function doublescale_automation_sales_item_modules( string $item_slug ): array {
+	if ( '' !== $item_slug && 0 === strpos( $item_slug, 'contract_' ) ) {
+		return array( 'sales', 'contracts' );
+	}
+
+	return array( 'sales', 'documents' );
+}
+
+/**
+ * Ordered module chain for an automation condition rule group.
+ *
+ * @param string $group Rule group key.
+ * @return array<int, string>|null Null when the group is not module-owned.
+ */
+function doublescale_automation_condition_group_modules( string $group ): ?array {
+	switch ( $group ) {
+		case 'proposal':
+		case 'invoice':
+			return array( 'sales', 'documents' );
+		case 'contract':
+			return array( 'sales', 'contracts' );
+		default:
+			return null;
+	}
+}
+
+/**
+ * Whether any Sales merge-tag submodule (documents or contracts) is available.
+ */
+function doublescale_automation_sales_merge_tags_enabled(): bool {
+	return doublescale_automation_modules_available( array( 'sales', 'documents' ) )
+		|| doublescale_automation_modules_available( array( 'sales', 'contracts' ) );
+}
+
+/**
+ * Build a dependency warning payload for automations UI / REST.
+ *
+ * @param array<int, string> $module_slugs Ordered module chain.
+ * @param string             $context      trigger|action|condition|goal.
+ * @return array{is_active: bool, is_pro: bool, message: string, plugin_label: string}
+ */
+function doublescale_automation_module_dependency_result( array $module_slugs, string $context ): array {
+	$inactive = doublescale_automation_first_inactive_module( $module_slugs );
+	if ( null === $inactive ) {
+		return array(
+			'is_active'    => true,
+			'is_pro'       => false,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
+
+	$label = doublescale_automation_module_label( $inactive );
+
+	switch ( $context ) {
+		case 'action':
+			$template = __( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		case 'condition':
+			$template = __( 'This condition uses rules that require the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		case 'goal':
+			$template = __( 'This goal requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		default:
+			$template = __( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+	}
+
+	return array(
+		'is_active'    => false,
+		'is_pro'       => false,
+		'message'      => sprintf( $template, $label ),
+		'plugin_label' => $label,
+	);
+}

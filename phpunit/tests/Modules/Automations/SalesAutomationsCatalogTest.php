@@ -270,6 +270,70 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		}
 	}
 
+	public function test_sales_trigger_dependency_warns_when_documents_module_off(): void {
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/ModuleFeatureGate.php';
+
+		$stored            = get_option( 'doublescale_enabled_modules', array() );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+		$stored['sales']     = true;
+		$stored['documents'] = false;
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
+
+		$trigger         = new \stdClass();
+		$trigger->source = 'sales';
+		$trigger->group  = 'sales';
+		$trigger->slug   = 'proposal_sent';
+		$trigger->is_pro = false;
+
+		$out = $this->invoke_dependency_check( 'check_trigger_plugin_dependency', $trigger );
+		$this->assertFalse( (bool) ( $out['is_active'] ?? true ) );
+		$this->assertStringContainsString( 'Proposals & Invoices', (string) ( $out['message'] ?? '' ) );
+
+		unset( $stored['documents'] );
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
+	}
+
+	public function test_sales_action_dependency_warns_when_documents_module_off(): void {
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
+		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/ModuleFeatureGate.php';
+
+		$stored            = get_option( 'doublescale_enabled_modules', array() );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+		$stored['sales']     = true;
+		$stored['documents'] = false;
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
+
+		$action         = new \stdClass();
+		$action->source = 'sales';
+		$action->group  = 'sales';
+		$action->slug   = 'send_proposal';
+		$action->is_pro = false;
+
+		$out = $this->invoke_dependency_check( 'check_action_plugin_dependency', $action );
+		$this->assertFalse( (bool) ( $out['is_active'] ?? true ) );
+		$this->assertStringContainsString( 'Proposals & Invoices', (string) ( $out['message'] ?? '' ) );
+
+		unset( $stored['documents'] );
+		update_option( 'doublescale_enabled_modules', $stored );
+		if ( function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+			doublescale_flush_module_enabled_cache();
+		}
+	}
+
 	public function test_condition_dependency_includes_proposal_and_invoice_groups(): void {
 		$file = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Automations/Rest/Controllers/RestAutomationController.php';
 		$this->assertFileExists( $file );
@@ -277,7 +341,7 @@ final class SalesAutomationsCatalogTest extends TestCase {
 
 		$this->assertStringContainsString( "'proposal'", $contents );
 		$this->assertStringContainsString( "'invoice'", $contents );
-		$this->assertStringContainsString( "doublescale_is_module_active( 'sales' )", $contents );
+		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'documents' ) )", $contents );
 	}
 
 	/**

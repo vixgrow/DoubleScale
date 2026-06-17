@@ -287,8 +287,7 @@ final class RulesManager {
 					'invoice_sent',
 					'invoice_paid',
 				),
-				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-					|| ! doublescale_is_module_active( 'sales' ),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
 			'invoice'                   => array(
 				'name'        => __( 'Invoice', 'doublescale' ),
@@ -299,8 +298,7 @@ final class RulesManager {
 					'invoice_paid',
 					'proposal_converted_to_invoice',
 				),
-				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-					|| ! doublescale_is_module_active( 'sales' ),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
 		);
 

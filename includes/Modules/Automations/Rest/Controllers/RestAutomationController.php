@@ -1270,7 +1270,6 @@ class RestAutomationController extends RestController {
 			'sales'       => array(
 				'sales' => array(
 					'plugin' => '',
-					'module' => 'sales',
 					'label'  => 'Double Scale Pro',
 				),
 			),
@@ -1369,18 +1368,13 @@ class RestAutomationController extends RestController {
 		}
 
 		if ( 'sales' === ( $trigger->source ?? '' ) ) {
-			if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'sales' ) ) {
-				$module_label = $this->get_action_module_label( 'sales' );
-				return array(
-					'is_active'    => false,
-					'is_pro'       => false,
-					'message'      => sprintf(
-						/* translators: %s: module name (e.g. Sales) */
-						__( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
-						$module_label
-					),
-					'plugin_label' => $module_label,
-				);
+			$item_slug = isset( $trigger->slug ) ? (string) $trigger->slug : '';
+			$dep       = doublescale_automation_module_dependency_result(
+				doublescale_automation_sales_item_modules( $item_slug ),
+				'trigger'
+			);
+			if ( ! $dep['is_active'] ) {
+				return $dep;
 			}
 			if ( ! empty( $trigger->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
 				return array(
@@ -1435,7 +1429,6 @@ class RestAutomationController extends RestController {
 			'sales'       => array(
 				'sales' => array(
 					'plugin' => '',
-					'module' => 'sales',
 					'label'  => 'Double Scale Pro',
 				),
 			),
@@ -1563,18 +1556,13 @@ class RestAutomationController extends RestController {
 		}
 
 		if ( 'sales' === ( $action->source ?? '' ) ) {
-			if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'sales' ) ) {
-				$module_label = $this->get_action_module_label( 'sales' );
-				return array(
-					'is_active'    => false,
-					'is_pro'       => false,
-					'message'      => sprintf(
-						/* translators: %s: module name (e.g. Sales) */
-						__( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
-						$module_label
-					),
-					'plugin_label' => $module_label,
-				);
+			$item_slug = isset( $action->slug ) ? (string) $action->slug : '';
+			$dep       = doublescale_automation_module_dependency_result(
+				doublescale_automation_sales_item_modules( $item_slug ),
+				'action'
+			);
+			if ( ! $dep['is_active'] ) {
+				return $dep;
 			}
 			if ( ! empty( $action->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
 				return array(
@@ -1604,6 +1592,10 @@ class RestAutomationController extends RestController {
 	 * @return string Display label, falling back to a title-cased slug.
 	 */
 	private function get_action_module_label( $module ) {
+		if ( function_exists( 'doublescale_automation_module_label' ) ) {
+			return doublescale_automation_module_label( (string) $module );
+		}
+
 		$labels = array(
 			'support' => __( 'Helpdesk', 'doublescale' ),
 			'deals'   => __( 'Pipelines & Deals', 'doublescale' ),
@@ -1679,12 +1671,12 @@ class RestAutomationController extends RestController {
 				'is_enabled' => doublescale_is_plugin_active( 'paid-memberships-pro/paid-memberships-pro.php' ),
 			),
 			'proposal'                  => array(
-				'label'      => __( 'Sales', 'doublescale' ),
-				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' ),
+				'label'      => __( 'Proposals & Invoices', 'doublescale' ),
+				'is_enabled' => doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
 			'invoice'                   => array(
-				'label'      => __( 'Sales', 'doublescale' ),
-				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' ),
+				'label'      => __( 'Proposals & Invoices', 'doublescale' ),
+				'is_enabled' => doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
 			'support'                   => array(
 				'label'      => __( 'Support', 'doublescale' ),

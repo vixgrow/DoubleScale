@@ -58,7 +58,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 			<div className="flex flex-col gap-5">
 				{/* First card: Total Emails (always shown) */}
 				<MessageStatsCard
-					icon={<ContactTotalEmailsIcon width={40} height={40} />}
+					icon={<ContactTotalEmailsIcon width={36} height={36} />}
 					value={totalMessages}
 					label={__('Total Emails', 'doublescale')}
 					iconBgClass="bg-primary/10"
@@ -71,8 +71,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={
 								<ScheduledEmailsIcon
-									width={40}
-									height={40}
+									width={36}
+									height={36}
 								/>
 							}
 							value={campaign.contacts_count - totalMessages}
@@ -85,8 +85,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={
 								<ProcessingEmailsIcon
-									width={40}
-									height={40}
+									width={36}
+									height={36}
 								/>
 							}
 							value={campaign.sent_count}
@@ -100,7 +100,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Failed emails */}
 						<MessageStatsCard
 							icon={
-								<FailedEmailsIcon width={40} height={40} />
+								<FailedEmailsIcon width={36} height={36} />
 							}
 							value={campaign.failed_count}
 							label={__('Failed Emails', 'doublescale')}
@@ -110,7 +110,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 
 						{/* Not Processing: Open rate */}
 						<MessageStatsCard
-							icon={<OpenRateIcon width={40} height={40} />}
+							icon={<OpenRateIcon width={36} height={36} />}
 							value={`${campaign.open_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Open Rate', 'doublescale')}
 							iconBgClass="bg-emerald-50"
@@ -119,7 +119,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 
 						{/* Not Processing: Click rate */}
 						<MessageStatsCard
-							icon={<ClickRateIcon width={40} height={40} />}
+							icon={<ClickRateIcon width={36} height={36} />}
 							value={`${campaign.click_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Click Rate', 'doublescale')}
 							iconBgClass="bg-violet-50"
@@ -130,8 +130,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={
 								<ClickToOpenRateIcon
-									width={40}
-									height={40}
+									width={36}
+									height={36}
 								/>
 							}
 							value={`${clickToOpenRate}%`}
@@ -143,7 +143,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Unsubscribed */}
 						<MessageStatsCard
 							icon={
-								<UnsubscribesIcon width={40} height={40} />
+								<UnsubscribesIcon width={36} height={36} />
 							}
 							value={
 								(campaign as any).unsubscribed_count || 0
@@ -164,7 +164,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 			<div className="flex flex-col gap-5">
 				{/* First card: Total SMS (always shown) */}
 				<MessageStatsCard
-					icon={<ContactSMSIcon width={40} height={40} />}
+					icon={<ContactSMSIcon width={36} height={36} />}
 					value={totalMessages}
 					label={__('Total SMS', 'doublescale')}
 					iconBgClass="bg-primary/10"
@@ -177,8 +177,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={
 								<ScheduleIcon
-									width={40}
-									height={40}
+									width={36}
+									height={36}
 								/>
 							}
 							value={campaign.contacts_count - totalMessages}
@@ -191,8 +191,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={
 								<ProcessingSMSIcon
-									width={40}
-									height={40}
+									width={36}
+									height={36}
 								/>
 							}
 							value={campaign.sent_count}
@@ -206,7 +206,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Failed SMS */}
 						<MessageStatsCard
 							icon={
-								<FailedSMSIcon width={40} height={40} />
+								<FailedSMSIcon width={36} height={36} />
 							}
 							value={campaign.failed_count}
 							label={__('Failed SMS', 'doublescale')}
@@ -217,7 +217,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Delivery Rate */}
 						<MessageStatsCard
 							icon={
-								<DeliveryRateIcon width={40} height={40} />
+								<DeliveryRateIcon width={36} height={36} />
 							}
 							value={`${campaign.delivery_rate || 0}%`}
 							label={__('Delivery Rate', 'doublescale')}
@@ -227,7 +227,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 
 						{/* Not Processing: Click rate */}
 						<MessageStatsCard
-							icon={<ClickRateIcon width={40} height={40} />}
+							icon={<ClickRateIcon width={36} height={36} />}
 							value={`${campaign.click_rate || 0}%`}
 							label={__('Click Rate', 'doublescale')}
 							iconBgClass="bg-violet-50"
@@ -237,7 +237,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Unsubscribed */}
 						<MessageStatsCard
 							icon={
-								<UnsubscribeSMSIcon width={40} height={40} />
+								<UnsubscribeSMSIcon width={36} height={36} />
 							}
 							value={
 								(campaign as any).unsubscribed_count || 0

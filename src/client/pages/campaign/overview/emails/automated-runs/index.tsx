@@ -670,14 +670,18 @@ const AutomatedRunsView: React.FC = () => {
 				)}
 
 				{isLoadingRuns ? (
-					<div className="flex items-center justify-center py-16">
+					<div className="flex items-center justify-center py-8">
 						<Spinner className="size-6" />
 					</div>
 				) : runs.length === 0 ? (
 					<NoData
-						icon={<ContactTotalEmailsIcon width={100} height={100} />}
+						icon={<ContactTotalEmailsIcon width={64} height={64} />}
 						title={__('No execution runs yet', 'doublescale')}
-						subtitle={__('Emails sent through this automated campaign will appear here grouped by execution run.', 'doublescale')}
+						subtitle={__(
+							'Emails sent through this automated campaign will appear here grouped by execution run.',
+							'doublescale'
+						)}
+						className="justify-start py-6"
 					/>
 				) : (
 					<div className="flex flex-col gap-3">

@@ -124,7 +124,7 @@ const Analytics: React.FC = () => {
 	const messageTypeLabel = getMessageTypeLabel();
 
 	return (
-		<div className="flex flex-col gap-5 w-1/3">
+		<div className="flex flex-col gap-5 w-full lg:w-1/3">
 			<Card className="bg-muted/50 shadow-none w-full px-5">
 				<CardHeader className="border-b pb-4 px-0">
 					<CardTitle className="text-xl font-medium text-foreground">

@@ -1,6 +1,6 @@
 <?php
 /**
- * Ensures guest proposal endpoints (accept, decline, comments, PDF) are registered.
+ * Ensures guest proposal endpoints (accept, decline, PDF) are registered.
  *
  * @package DoubleScale\Tests\Modules\Sales
  */
@@ -21,7 +21,7 @@ require_once dirname( __DIR__, 3 ) . '/RestApiEndpointTestUtil.php';
  */
 final class RestPublicProposalRoutesTest extends TestCase {
 
-	public function test_registers_guest_accept_decline_comments_and_pdf_routes(): void {
+	public function test_registers_guest_accept_decline_and_pdf_routes(): void {
 		doublescale_rest_reset_route_registry();
 
 		$controller = ( new ReflectionClass( RestPublicProposalController::class ) )->newInstanceWithoutConstructor();
@@ -39,7 +39,6 @@ final class RestPublicProposalRoutesTest extends TestCase {
 		$this->assertContains( $base, $routes );
 		$this->assertContains( $base . '/accept', $routes );
 		$this->assertContains( $base . '/decline', $routes );
-		$this->assertContains( $base . '/comments', $routes );
 		$this->assertContains( $base . '/pdf', $routes );
 	}
 }

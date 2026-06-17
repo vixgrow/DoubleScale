@@ -61,7 +61,6 @@ final class PublicProposalShaperTest extends TestCase {
 			'subtotal'        => 100.0,
 			'adjustment'      => 0.0,
 			'total'           => 100.0,
-			'allow_comments'  => false,
 		);
 
 		$proposal = new ProposalModel();

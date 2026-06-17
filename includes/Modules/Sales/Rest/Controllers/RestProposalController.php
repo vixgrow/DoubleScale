@@ -14,7 +14,6 @@ use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
-use DoubleScale\Modules\Sales\Models\ProposalCommentModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Rest\InvoiceShaper;
 use DoubleScale\Modules\Sales\Rest\ProposalShaper;
@@ -95,23 +94,6 @@ class RestProposalController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'duplicate_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/comments',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_comments' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'add_comment' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 			)
 		);
@@ -588,105 +570,6 @@ class RestProposalController extends RestController {
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_comments( $request ) {
-		$disabled = $this->require_module( 'sales' );
-		if ( $disabled ) {
-			return $disabled;
-		}
-
-		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
-		if ( ! $proposal ) {
-			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
-		}
-
-		$forbidden = $this->require_ownership( $proposal );
-		if ( $forbidden ) {
-			return $forbidden;
-		}
-
-		$comments = ProposalCommentModel::query()
-			->where( 'proposal_id', (int) $proposal->id )
-			->orderBy( 'id' )
-			->get();
-
-		$data = array();
-		foreach ( $comments as $comment ) {
-			$data[] = array(
-				'id'          => (int) $comment->id,
-				'author_name' => (string) $comment->author_name,
-				'content'     => (string) $comment->content,
-				'is_customer' => (bool) $comment->is_customer,
-				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
-			);
-		}
-
-		return new WP_REST_Response( array( 'data' => $data ), 200 );
-	}
-
-	/**
-	 * Staff reply to customer comments on a proposal.
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function add_comment( $request ) {
-		$disabled = $this->require_module( 'sales' );
-		if ( $disabled ) {
-			return $disabled;
-		}
-
-		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
-		if ( ! $proposal ) {
-			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
-		}
-
-		$forbidden = $this->require_ownership( $proposal );
-		if ( $forbidden ) {
-			return $forbidden;
-		}
-
-		if ( ! $proposal->allow_comments ) {
-			return new WP_Error( 'not_allowed', __( 'Comments are not allowed on this proposal.', 'doublescale' ), array( 'status' => 403 ) );
-		}
-
-		$params = $request->get_json_params();
-		if ( ! is_array( $params ) ) {
-			$params = $request->get_params();
-		}
-
-		$content = isset( $params['content'] ) ? sanitize_textarea_field( (string) $params['content'] ) : '';
-		if ( '' === trim( $content ) ) {
-			return new WP_Error( 'invalid_data', __( 'Comment cannot be empty.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		$user = wp_get_current_user();
-		$name = $user && $user->exists() ? (string) $user->display_name : __( 'Staff', 'doublescale' );
-
-		$comment = ProposalCommentModel::create(
-			array(
-				'proposal_id' => (int) $proposal->id,
-				'author_name' => $name,
-				'content'     => $content,
-				'is_customer' => false,
-			)
-		);
-
-		return new WP_REST_Response(
-			array(
-				'id'          => (int) $comment->id,
-				'author_name' => (string) $comment->author_name,
-				'content'     => (string) $comment->content,
-				'is_customer' => false,
-				'created_at'  => $comment->created_at ? (string) $comment->created_at : null,
-			),
-			201
-		);
-	}
-
-	/**
-	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response|WP_Error
-	 */
 	public function get_signature( $request ) {
 		$disabled = $this->require_module( 'sales' );
 		if ( $disabled ) {
@@ -780,9 +663,6 @@ class RestProposalController extends RestController {
 		}
 		if ( array_key_exists( 'adjustment', $params ) ) {
 			$payload['adjustment'] = (float) $params['adjustment'];
-		}
-		if ( array_key_exists( 'allow_comments', $params ) ) {
-			$payload['allow_comments'] = (bool) $params['allow_comments'];
 		}
 		if ( array_key_exists( 'tag_ids', $params ) ) {
 			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tag_ids'] );

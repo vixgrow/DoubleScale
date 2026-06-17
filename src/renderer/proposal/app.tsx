@@ -16,9 +16,7 @@ import {
 	acceptPublicProposal,
 	declinePublicProposal,
 	getPublicProposalPdfUrl,
-	postPublicProposalComment,
 	usePublicProposal,
-	usePublicProposalComments,
 } from './public-api';
 import { SignaturePad } from './signature-pad';
 
@@ -28,12 +26,6 @@ interface Props {
 
 const PublicProposalApp = ({ hash }: Props) => {
 	const { data, loading, error, refetch } = usePublicProposal(hash);
-	const commentsEnabled = Boolean(data?.allow_comments);
-	const {
-		data: comments,
-		loading: commentsLoading,
-		refetch: refetchComments,
-	} = usePublicProposalComments(hash, commentsEnabled);
 
 	const [busy, setBusy] = useState(false);
 	const [actionError, setActionError] = useState<string | null>(null);
@@ -42,8 +34,6 @@ const PublicProposalApp = ({ hash }: Props) => {
 	const [declineReason, setDeclineReason] = useState('');
 	const [signedName, setSignedName] = useState('');
 	const [signature, setSignature] = useState('');
-	const [commentAuthor, setCommentAuthor] = useState('');
-	const [commentBody, setCommentBody] = useState('');
 
 	const handleAccept = async () => {
 		if (data?.require_signature && (!signedName.trim() || !signature)) {
@@ -78,26 +68,6 @@ const PublicProposalApp = ({ hash }: Props) => {
 			refetch();
 		} catch (err) {
 			setActionError(err instanceof Error ? err.message : __('Decline failed.', 'doublescale'));
-		} finally {
-			setBusy(false);
-		}
-	};
-
-	const handleComment = async () => {
-		if (!commentBody.trim()) {
-			return;
-		}
-		setBusy(true);
-		setActionError(null);
-		try {
-			await postPublicProposalComment(hash, {
-				author_name: commentAuthor.trim() || undefined,
-				content: commentBody.trim(),
-			});
-			setCommentBody('');
-			await refetchComments();
-		} catch (err) {
-			setActionError(err instanceof Error ? err.message : __('Comment failed.', 'doublescale'));
 		} finally {
 			setBusy(false);
 		}
@@ -260,53 +230,6 @@ const PublicProposalApp = ({ hash }: Props) => {
 						<Button variant="destructive" onClick={() => void handleDecline()} disabled={busy}>
 							{__('Confirm Decline', 'doublescale')}
 						</Button>
-					</div>
-				</div>
-			) : null}
-
-			{commentsEnabled ? (
-				<div className="doublescale-proposal-renderer__comments">
-					<h4 className="font-medium mb-3">{__('Comments', 'doublescale')}</h4>
-					{commentsLoading ? (
-						<p className="text-sm text-muted-foreground">{__('Loading comments…', 'doublescale')}</p>
-					) : comments.length > 0 ? (
-						<ul className="space-y-3 mb-4">
-							{comments.map((comment) => (
-								<li key={comment.id} className="text-sm border rounded-lg p-3 bg-slate-50">
-									<div className="font-medium">{comment.author_name}</div>
-									<p className="mt-1 whitespace-pre-wrap">{comment.content}</p>
-									{comment.created_at ? (
-										<div className="text-xs text-muted-foreground mt-2">{comment.created_at}</div>
-									) : null}
-								</li>
-							))}
-						</ul>
-					) : (
-						<p className="text-sm text-muted-foreground mb-4">
-							{__('No comments yet.', 'doublescale')}
-						</p>
-					)}
-					<div className="space-y-3">
-						<Input
-							placeholder={__('Your name (optional)', 'doublescale')}
-							value={commentAuthor}
-							onChange={(e) => setCommentAuthor(e.target.value)}
-						/>
-						<Textarea
-							placeholder={__('Write a comment…', 'doublescale')}
-							value={commentBody}
-							onChange={(e) => setCommentBody(e.target.value)}
-							rows={3}
-						/>
-						<div className="flex justify-end">
-							<Button
-								variant="outline"
-								onClick={() => void handleComment()}
-								disabled={busy || !commentBody.trim()}
-							>
-								{__('Post Comment', 'doublescale')}
-							</Button>
-						</div>
 					</div>
 				</div>
 			) : null}

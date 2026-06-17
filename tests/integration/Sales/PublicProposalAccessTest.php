@@ -1,6 +1,6 @@
 <?php
 /**
- * Guest proposal REST: view, accept, decline, comments, PDF.
+ * Guest proposal REST: view, accept, decline, PDF.
  *
  * @package DoubleScale\Tests\Integration\Sales
  */
@@ -10,7 +10,6 @@ namespace DoubleScale\Tests\Integration\Sales;
 use DoubleScale\Core\ModuleManager;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Sales\Constants\ProposalStatus;
-use DoubleScale\Modules\Sales\Models\ProposalCommentModel;
 use DoubleScale\Modules\Sales\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
@@ -28,9 +27,8 @@ final class PublicProposalAccessTest extends IntegrationTestCase {
 	public function test_guest_can_view_sent_proposal_and_status_becomes_open(): void {
 		$proposal = $this->make_proposal(
 			array(
-				'status'         => ProposalStatus::SENT,
-				'allow_comments' => true,
-				'open_till'      => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
+				'status'    => ProposalStatus::SENT,
+				'open_till' => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
 			)
 		);
 
@@ -44,7 +42,6 @@ final class PublicProposalAccessTest extends IntegrationTestCase {
 		$this->assertSame( (string) $proposal->proposal_number, $data['proposal_number'] );
 		$this->assertTrue( $data['can_accept'] );
 		$this->assertTrue( $data['can_decline'] );
-		$this->assertTrue( $data['allow_comments'] );
 		$this->assertFalse( $data['is_expired'] );
 		$this->assertArrayNotHasKey( 'signature', $data );
 
@@ -59,9 +56,8 @@ final class PublicProposalAccessTest extends IntegrationTestCase {
 
 		$proposal = $this->make_proposal(
 			array(
-				'status'         => ProposalStatus::SENT,
-				'allow_comments' => true,
-				'open_till'      => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
+				'status'    => ProposalStatus::SENT,
+				'open_till' => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
 			)
 		);
 
@@ -108,65 +104,6 @@ final class PublicProposalAccessTest extends IntegrationTestCase {
 		$data = $response->get_data();
 		$this->assertSame( ProposalStatus::DECLINED, $data['status'] );
 		$this->assertSame( 'Budget constraints', $data['decline_reason'] );
-	}
-
-	public function test_guest_can_add_and_list_comments(): void {
-		$proposal = $this->make_proposal(
-			array(
-				'status'         => ProposalStatus::OPEN,
-				'allow_comments' => true,
-				'open_till'      => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
-			)
-		);
-
-		$create = $this->dispatch_rest(
-			'POST',
-			'/doublescale/v1/sales/public/proposals/' . $proposal->hash . '/comments',
-			array(
-				'author_name' => 'Jane Customer',
-				'content'     => 'Can we adjust the timeline?',
-			)
-		);
-
-		$this->assertSame( 201, $create->get_status() );
-		$created = $create->get_data();
-		$this->assertSame( 'Jane Customer', $created['author_name'] );
-		$this->assertSame( 'Can we adjust the timeline?', $created['content'] );
-
-		$list = $this->dispatch_rest(
-			'GET',
-			'/doublescale/v1/sales/public/proposals/' . $proposal->hash . '/comments'
-		);
-
-		$this->assertSame( 200, $list->get_status() );
-		$comments = $list->get_data()['data'] ?? array();
-		$this->assertCount( 1, $comments );
-		$this->assertSame( 'Can we adjust the timeline?', $comments[0]['content'] );
-
-		$this->assertSame(
-			1,
-			ProposalCommentModel::query()->where( 'proposal_id', (int) $proposal->id )->count()
-		);
-	}
-
-	public function test_comments_are_rejected_when_disabled(): void {
-		$proposal = $this->make_proposal(
-			array(
-				'status'         => ProposalStatus::OPEN,
-				'allow_comments' => false,
-				'open_till'      => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
-			)
-		);
-
-		$response = $this->dispatch_rest(
-			'POST',
-			'/doublescale/v1/sales/public/proposals/' . $proposal->hash . '/comments',
-			array(
-				'content' => 'Should not be saved',
-			)
-		);
-
-		$this->assertSame( 403, $response->get_status() );
 	}
 
 	public function test_proposal_pdf_endpoint_streams_pdf_bytes(): void {

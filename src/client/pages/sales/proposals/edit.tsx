@@ -11,9 +11,7 @@ import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
 	Select,
@@ -80,7 +78,6 @@ const ProposalEdit: React.FC = () => {
 	const [zip, setZip] = useState('');
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
-	const [allowComments, setAllowComments] = useState(true);
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
 	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [lineItems, setLineItems] = useState<LineItem[]>([
@@ -191,7 +188,6 @@ const ProposalEdit: React.FC = () => {
 		setZip(existing.zip || '');
 		setEmail(existing.email || '');
 		setPhone(existing.phone || '');
-		setAllowComments(existing.allow_comments);
 		setAssignedUserId(existing.assigned_user_id ?? null);
 		setTagIds(
 			Array.isArray(existing.tag_ids)
@@ -231,7 +227,6 @@ const ProposalEdit: React.FC = () => {
 		zip,
 		email,
 		phone,
-		allow_comments: allowComments,
 		assigned_user_id: assignedUserId,
 		tag_ids: tagIds,
 		line_items: lineItems,
@@ -425,17 +420,6 @@ const ProposalEdit: React.FC = () => {
 					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
 						<TagField value={tagIds} onChange={setTagIds} />
 					</FormField>
-
-					<div className="flex items-center justify-between pt-2">
-						<Label htmlFor="proposal-allow-comments">
-							{__('Allow Comments', 'doublescale')}
-						</Label>
-						<Switch
-							id="proposal-allow-comments"
-							checked={allowComments}
-							onCheckedChange={setAllowComments}
-						/>
-					</div>
 				</div>
 
 				<div className="space-y-4">

@@ -41,14 +41,6 @@ export interface ContractType {
 	name: string;
 }
 
-export interface ProposalComment {
-	id: number;
-	author_name: string;
-	content: string;
-	is_customer: boolean;
-	created_at: string | null;
-}
-
 export interface ContractAttachment {
 	id: number;
 	file_hash: string;
@@ -118,7 +110,6 @@ export interface Proposal {
 	zip: string | null;
 	email: string | null;
 	phone: string | null;
-	allow_comments: boolean;
 	sent_at?: string | null;
 	viewed_at?: string | null;
 	accepted_at?: string | null;

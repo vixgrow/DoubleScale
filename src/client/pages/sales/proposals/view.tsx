@@ -14,10 +14,7 @@ import {
 	ProposalDocumentPreview,
 	SendDocumentDialog,
 } from '@/components/sales';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
-	addProposalComment,
 	convertProposalToInvoice,
 	deleteProposal,
 	duplicateProposal,
@@ -25,7 +22,6 @@ import {
 	fetchProposalSignature,
 	sendProposal,
 	useProposal,
-	useProposalComments,
 } from '@/hooks/sales';
 import type { ProposalSignature } from '@/types/sales';
 
@@ -35,12 +31,6 @@ const ProposalView: React.FC = () => {
 	const proposalId = params?.id ? Number(params.id) : null;
 
 	const { data: proposal, loading, error, refetch } = useProposal(proposalId);
-	const commentsEnabled = Boolean(proposal?.allow_comments);
-	const {
-		data: comments,
-		loading: commentsLoading,
-		refetch: refetchComments,
-	} = useProposalComments(proposalId, commentsEnabled);
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [convertOpen, setConvertOpen] = useState(false);
@@ -50,25 +40,6 @@ const ProposalView: React.FC = () => {
 	const [signature, setSignature] = useState<ProposalSignature | null>(null);
 	const [signatureLoading, setSignatureLoading] = useState(false);
 	const [signatureError, setSignatureError] = useState<string | null>(null);
-	const [replyContent, setReplyContent] = useState('');
-
-	const handleReply = async () => {
-		if (!proposalId || !replyContent.trim()) {
-			return;
-		}
-		setBusy(true);
-		setNotice(null);
-		try {
-			await addProposalComment(proposalId, replyContent.trim());
-			setReplyContent('');
-			await refetchComments();
-			setNotice(__('Reply posted.', 'doublescale'));
-		} catch (err: unknown) {
-			setNotice(err instanceof Error ? err.message : __('Reply failed.', 'doublescale'));
-		} finally {
-			setBusy(false);
-		}
-	};
 
 	useEffect(() => {
 		if (!proposalId || !proposal?.has_signature) {
@@ -127,9 +98,6 @@ const ProposalView: React.FC = () => {
 		try {
 			await sendProposal(proposalId, message);
 			await refetch();
-			if (commentsEnabled) {
-				await refetchComments();
-			}
 			setNotice(__('Proposal sent to the customer.', 'doublescale'));
 			setSendOpen(false);
 		} catch (err: unknown) {
@@ -328,65 +296,6 @@ const ProposalView: React.FC = () => {
 							{__('Signature on file.', 'doublescale')}
 						</p>
 					) : null}
-				</div>
-			) : null}
-
-			{commentsEnabled ? (
-				<div className="border rounded-lg bg-white p-6 space-y-4">
-					<h2 className="font-medium">{__('Comments', 'doublescale')}</h2>
-					{commentsLoading ? (
-						<p className="text-sm text-muted-foreground">{__('Loading comments…', 'doublescale')}</p>
-					) : comments.length > 0 ? (
-						<ul className="space-y-3">
-							{comments.map((comment) => (
-								<li
-									key={comment.id}
-									className={`text-sm border rounded-lg p-3 ${
-										comment.is_customer ? 'bg-slate-50' : 'bg-blue-50 border-blue-100'
-									}`}
-								>
-									<div className="flex items-center gap-2">
-										<span className="font-medium">{comment.author_name}</span>
-										{comment.is_customer ? (
-											<span className="text-xs text-muted-foreground">
-												{__('Customer', 'doublescale')}
-											</span>
-										) : (
-											<span className="text-xs text-blue-700">{__('Staff', 'doublescale')}</span>
-										)}
-									</div>
-									<p className="mt-1 whitespace-pre-wrap">{comment.content}</p>
-									{comment.created_at ? (
-										<div className="text-xs text-muted-foreground mt-2">{comment.created_at}</div>
-									) : null}
-								</li>
-							))}
-						</ul>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							{__('No comments yet.', 'doublescale')}
-						</p>
-					)}
-					<div className="space-y-2 pt-2 border-t">
-						<Label htmlFor="proposal-reply">{__('Reply to customer', 'doublescale')}</Label>
-						<Textarea
-							id="proposal-reply"
-							value={replyContent}
-							onChange={(e) => setReplyContent(e.target.value)}
-							rows={3}
-							placeholder={__('Write a reply visible on the public proposal…', 'doublescale')}
-							disabled={busy}
-						/>
-						<div className="flex justify-end">
-							<Button
-								size="sm"
-								disabled={busy || !replyContent.trim()}
-								onClick={() => void handleReply()}
-							>
-								{__('Post Reply', 'doublescale')}
-							</Button>
-						</div>
-					</div>
 				</div>
 			) : null}
 

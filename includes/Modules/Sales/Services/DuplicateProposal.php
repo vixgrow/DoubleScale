@@ -49,7 +49,6 @@ final class DuplicateProposal {
 				'zip'              => $source->zip,
 				'email'            => $source->email,
 				'phone'            => $source->phone,
-				'allow_comments'   => (bool) $source->allow_comments,
 			)
 		);
 		SalesNumbering::save_with_retry( $copy );

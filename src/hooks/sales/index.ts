@@ -26,7 +26,6 @@ import type {
 	OnlinePaymentGatewayStatus,
 	PaginatedResponse,
 	Proposal,
-	ProposalComment,
 	ProposalFilters,
 	ProposalSignature,
 	Contract,
@@ -858,50 +857,6 @@ export const deleteSalesTax = (taxId: number) =>
 	apiFetch<{ deleted: boolean }>({
 		path: `${NAMESPACE}/taxes/${taxId}`,
 		method: 'DELETE',
-	});
-
-export const useProposalComments = (proposalId: number | null, enabled = true) => {
-	const [data, setData] = useState<ProposalComment[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
-	const refetch = useCallback(() => {
-		if (!proposalId || !enabled) {
-			setData([]);
-			return Promise.resolve([]);
-		}
-		setLoading(true);
-		setError(null);
-		return apiFetch<{ data: ProposalComment[] }>({
-			path: `${NAMESPACE}/proposals/${proposalId}/comments`,
-		})
-			.then((response) => {
-				const items = Array.isArray(response?.data) ? response.data : [];
-				setData(items);
-				return items;
-			})
-			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
-				throw err;
-			})
-			.finally(() => {
-				setLoading(false);
-			});
-	}, [proposalId, enabled]);
-
-	useEffect(() => {
-		void refetch();
-	}, [refetch]);
-
-	return { data, loading, error, refetch };
-};
-
-export const addProposalComment = (proposalId: number, content: string) =>
-	apiFetch<ProposalComment>({
-		path: `${NAMESPACE}/proposals/${proposalId}/comments`,
-		method: 'POST',
-		data: { content },
 	});
 
 export const fetchProposalSignature = (proposalId: number) =>

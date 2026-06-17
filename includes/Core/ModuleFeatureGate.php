@@ -76,6 +76,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'inbox',
 		'integrations',
 		'leadscoring',
+		'subscriptions',
 		'tasks',
 	);
 
@@ -107,9 +108,10 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
  */
 function doublescale_child_module_parent_map(): array {
 	$map = array(
-		'deals'     => 'sales',
-		'documents' => 'sales',
-		'contracts' => 'sales',
+		'deals'         => 'sales',
+		'documents'     => 'sales',
+		'contracts'     => 'sales',
+		'subscriptions' => 'sales',
 	);
 
 	/**
@@ -197,6 +199,14 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Lead scoring', 'doublescale' ),
 				'description' => __( 'Score contacts from behavior and profile data for prioritization.', 'doublescale' ),
+			);
+		case 'subscriptions':
+			return array(
+				'label'        => __( 'Subscriptions', 'doublescale' ),
+				'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
+				// Mirrors the real Pro module's dependencies() so the pre-Pro
+				// upsell row nests under Sales and signals the Documents need.
+				'dependencies' => array( 'contacts', 'sales', 'documents' ),
 			);
 		case 'tasks':
 			return array(

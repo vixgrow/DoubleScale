@@ -41,6 +41,7 @@ class InvoiceModel extends Model {
 		'status',
 		'contact_id',
 		'proposal_id',
+		'subscription_id',
 		'sale_agent_user_id',
 		'invoice_date',
 		'due_date',
@@ -97,6 +98,21 @@ class InvoiceModel extends Model {
 	 */
 	public function proposal() {
 		return $this->belongsTo( ProposalModel::class, 'proposal_id', 'id' );
+	}
+
+	/**
+	 * Subscription that generated this child invoice (Pro feature).
+	 *
+	 * The Pro class is referenced as a compile-time string literal, so this
+	 * method is safe to define even when Pro is absent — `::class` never
+	 * triggers the autoloader. It only resolves a class when the relation is
+	 * accessed, and Free never reads `$invoice->subscription` (only Pro's UI
+	 * does). When Pro is off, `subscription_id` is simply an inert column.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function subscription() {
+		return $this->belongsTo( \DoubleScale\Pro\Modules\Subscriptions\Models\SubscriptionModel::class, 'subscription_id', 'id' );
 	}
 
 	/**

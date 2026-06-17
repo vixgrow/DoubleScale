@@ -80,7 +80,7 @@ export interface PortalTimelineItem {
 	timezone?: string;
 }
 
-export type PortalDocumentType = 'invoice' | 'proposal';
+export type PortalDocumentType = 'invoice' | 'proposal' | 'contract';
 
 export interface PortalDocument {
 	id: number;

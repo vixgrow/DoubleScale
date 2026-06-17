@@ -331,6 +331,37 @@ if ( ! function_exists( 'delete_option' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_salt' ) ) {
+	/**
+	 * @param string $scheme Salt scheme.
+	 * @return string
+	 */
+	function wp_salt( $scheme ) {
+		return 'phpunit-salt-' . (string) $scheme;
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	/**
+	 * @param array<string, mixed>|string $key   Query args or key.
+	 * @param mixed                       $value Value when key is string.
+	 * @param string                      $url   Base URL.
+	 * @return string
+	 */
+	function add_query_arg( $key, $value = null, $url = null ) {
+		if ( is_array( $key ) ) {
+			$args = $key;
+			$url  = null === $value ? '' : (string) $value;
+		} else {
+			$args = array( (string) $key => $value );
+			$url  = null === $url ? '' : (string) $url;
+		}
+		$base = '' === $url ? 'http://example.test/' : $url;
+		$join = false !== strpos( $base, '?' ) ? '&' : '?';
+		return $base . $join . http_build_query( $args );
+	}
+}
+
 $GLOBALS['__doublescale_phpunit_hooks']   = array();
 $GLOBALS['__doublescale_phpunit_filters'] = array();
 

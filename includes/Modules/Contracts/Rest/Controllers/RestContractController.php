@@ -653,17 +653,15 @@ class RestContractController extends RestController {
 		$service     = new ContractAttachmentService();
 		$contract_id = (int) $contract->id;
 		$items       = \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::query()
+			->forType( \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
 			->with( array( 'user', 'contact' ) )
-			->where( 'contract_id', $contract_id )
+			->where( 'attachable_id', $contract_id )
 			->orderBy( 'id' )
 			->get();
 
 		$data = array();
 		foreach ( $items as $item ) {
-			$data[] = $service->shape_for_api(
-				$item,
-				"sales/contracts/{$contract_id}/attachments/{$item->file_hash}/download"
-			);
+			$data[] = $service->shape_for_api( $item );
 		}
 
 		return new WP_REST_Response(
@@ -706,12 +704,8 @@ class RestContractController extends RestController {
 			return $attachment;
 		}
 
-		$contract_id = (int) $contract->id;
 		return new WP_REST_Response(
-			$service->shape_for_api(
-				$attachment,
-				"sales/contracts/{$contract_id}/attachments/{$attachment->file_hash}/download"
-			),
+			$service->shape_for_api( $attachment ),
 			201
 		);
 	}
@@ -761,12 +755,9 @@ class RestContractController extends RestController {
 			return $attachment;
 		}
 
-		$stream_error = ( new ContractAttachmentService() )->stream_download( $attachment );
-		if ( $stream_error ) {
-			return $stream_error;
-		}
-
-		return new WP_REST_Response( null, 200 );
+		$service = new ContractAttachmentService();
+		wp_safe_redirect( $service->signed_url( $attachment ) );
+		exit;
 	}
 
 	/**
@@ -794,7 +785,8 @@ class RestContractController extends RestController {
 	 */
 	private function resolve_contract_attachment( ContractModel $contract, string $file_hash ) {
 		$attachment = \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::query()
-			->where( 'contract_id', (int) $contract->id )
+			->forType( \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
+			->where( 'attachable_id', (int) $contract->id )
 			->where( 'file_hash', $file_hash )
 			->first();
 		if ( ! $attachment ) {

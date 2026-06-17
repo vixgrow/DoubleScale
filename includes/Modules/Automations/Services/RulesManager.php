@@ -300,6 +300,16 @@ final class RulesManager {
 				),
 				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 			),
+			'contract'                  => array(
+				'name'        => __( 'Contract', 'doublescale' ),
+				'key'         => 'contract',
+				'rules'       => array(),
+				'triggers'    => array(
+					'contract_sent',
+					'contract_signed',
+				),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+			),
 		);
 
 		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {

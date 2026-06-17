@@ -1,11 +1,8 @@
 /**
- * Documents section — the customer's invoices, proposals, and payment history.
+ * Documents section — the customer's invoices, proposals, contracts, and payment history.
  *
- * Tabs: All / Invoices / Proposals / Payments. Clicking a document opens it
- * INLINE: the Free public renderer (PublicInvoiceApp / PublicProposalApp) is
- * mounted inside the portal, so view / pay (Stripe) / accept / decline / sign /
- * download all happen in the portal — no link-out. The payment UI is Free; the
- * Free→Pro seam stays in the backend gateway (see docs/portal-payments-plan.md).
+ * Tabs: All / Invoices / Proposals / Contracts / Payments. Clicking a document opens it
+ * INLINE via the Free public renderers (invoice, proposal, contract).
  */
 
 import { useState } from '@wordpress/element';
@@ -19,6 +16,7 @@ import {
 	useParams,
 } from 'react-router-dom';
 
+import PublicContractApp from '../../../contract/app';
 import PublicInvoiceApp from '../../../invoice/app';
 import PublicProposalApp from '../../../proposal/app';
 
@@ -35,16 +33,41 @@ const TABS: Array<{ key: DocTab; label: string }> = [
 	{ key: 'all', label: __('All', 'doublescale') },
 	{ key: 'invoice', label: __('Invoices', 'doublescale') },
 	{ key: 'proposal', label: __('Proposals', 'doublescale') },
+	{ key: 'contract', label: __('Contracts', 'doublescale') },
 	{ key: 'payments', label: __('Payments', 'doublescale') },
 ];
 
 const isPayable = (doc: PortalDocument): boolean =>
 	doc.type === 'invoice' && doc.balance !== null && doc.balance > 0;
 
+const isSignable = (doc: PortalDocument): boolean =>
+	doc.type === 'contract' &&
+	doc.status === 'sent' &&
+	!doc.is_expired;
+
+const documentTypeLabel = (doc: PortalDocument): string => {
+	if (doc.type === 'invoice') {
+		return sprintf(
+			/* translators: %s is the invoice number. */
+			__('Invoice · %s', 'doublescale'),
+			doc.number
+		);
+	}
+	if (doc.type === 'contract') {
+		return sprintf(
+			/* translators: %s is the contract number. */
+			__('Contract · %s', 'doublescale'),
+			doc.number
+		);
+	}
+	return __('Proposal', 'doublescale');
+};
+
 const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 	const isInvoice = doc.type === 'invoice';
+	const isContract = doc.type === 'contract';
 	const title = isInvoice ? doc.number : doc.subject || doc.number;
-	const dueValue = isInvoice ? doc.due_date : doc.open_till;
+	const endDate = isInvoice ? doc.due_date : doc.open_till;
 
 	return (
 		<Link
@@ -61,13 +84,7 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 						<StatusBadge status={doc.status} />
 					</div>
 					<p className="mt-0.5 text-xs uppercase tracking-wide text-muted-foreground">
-						{isInvoice
-							? sprintf(
-									// translators: %s is the invoice number.
-									__('Invoice · %s', 'doublescale'),
-									doc.number
-							  )
-							: __('Proposal', 'doublescale')}
+						{documentTypeLabel(doc)}
 					</p>
 					<div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
 						{doc.date && <span>{formatDate(doc.date)}</span>}
@@ -77,7 +94,7 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 						{isInvoice && doc.amount_paid !== null && doc.amount_paid > 0 && (
 							<span className="text-green-600">
 								{sprintf(
-									// translators: %s is the amount paid so far.
+									/* translators: %s is the amount paid so far. */
 									__('Paid: %s', 'doublescale'),
 									formatMoney(doc.amount_paid, doc.currency)
 								)}
@@ -86,18 +103,20 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 						{isInvoice && doc.balance !== null && doc.balance > 0 && (
 							<span className={doc.is_overdue ? 'font-medium text-red-600' : ''}>
 								{sprintf(
-									// translators: %s is the outstanding balance amount.
+									/* translators: %s is the outstanding balance amount. */
 									__('Balance: %s', 'doublescale'),
 									formatMoney(doc.balance, doc.currency)
 								)}
 							</span>
 						)}
-						{dueValue && (
+						{endDate && (
 							<span>
 								{isInvoice
 									? __('Due', 'doublescale')
+									: isContract
+									? __('Ends', 'doublescale')
 									: __('Valid until', 'doublescale')}
-								: {formatDate(dueValue)}
+								: {formatDate(endDate)}
 							</span>
 						)}
 					</div>
@@ -107,6 +126,8 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 			<span className="shrink-0 text-sm font-medium text-primary">
 				{isPayable(doc)
 					? __('View & pay', 'doublescale')
+					: isSignable(doc)
+					? __('View & sign', 'doublescale')
 					: __('View', 'doublescale')}
 			</span>
 		</Link>
@@ -130,7 +151,7 @@ const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
 			<EmptyState
 				title={__('No documents yet', 'doublescale')}
 				description={__(
-					'Your invoices and proposals will appear here.',
+					'Your invoices, proposals, and contracts will appear here.',
 					'doublescale'
 				)}
 			/>
@@ -203,7 +224,7 @@ const PaymentsList = () => {
 								)}
 								<span>
 									{sprintf(
-										// translators: %s is the invoice number.
+										/* translators: %s is the invoice number. */
 										__('Invoice %s', 'doublescale'),
 										payment.invoice_number
 									)}
@@ -229,7 +250,7 @@ const DocumentsHome = () => {
 				{__('Documents', 'doublescale')}
 			</h2>
 
-			<div className="mb-4 inline-flex rounded-lg border border-border bg-card p-1">
+			<div className="mb-4 inline-flex flex-wrap rounded-lg border border-border bg-card p-1">
 				{TABS.map((t) => (
 					<button
 						key={t.key}
@@ -297,11 +318,26 @@ const ProposalDetail = () => {
 	);
 };
 
+const ContractDetail = () => {
+	const { hash } = useParams();
+	return (
+		<section className="space-y-4">
+			<BackLink />
+			{hash ? (
+				<PublicContractApp hash={hash} />
+			) : (
+				<ErrorState message={__('Contract not found.', 'doublescale')} />
+			)}
+		</section>
+	);
+};
+
 const Documents = () => (
 	<Routes>
 		<Route index element={<DocumentsHome />} />
 		<Route path="invoice/:hash" element={<InvoiceDetail />} />
 		<Route path="proposal/:hash" element={<ProposalDetail />} />
+		<Route path="contract/:hash" element={<ContractDetail />} />
 		<Route path="*" element={<Navigate to="" replace />} />
 	</Routes>
 );

@@ -319,6 +319,11 @@ final class TriggersManager {
 						'triggers'    => array(),
 						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
 					),
+					'contracts' => array(
+						'label'       => __( 'Contracts', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+					),
 				),
 			),
 			'forms'       => array(

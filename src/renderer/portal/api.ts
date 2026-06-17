@@ -80,7 +80,7 @@ export const fetchRescheduleUrl = (id: number): Promise<{ url: string }> =>
 		path: `${PORTAL}/bookings/${id}/reschedule-url`,
 	});
 
-export type DocumentFilter = 'all' | 'invoice' | 'proposal';
+export type DocumentFilter = 'all' | 'invoice' | 'proposal' | 'contract';
 
 export const fetchDocuments = (
 	type: DocumentFilter = 'all'

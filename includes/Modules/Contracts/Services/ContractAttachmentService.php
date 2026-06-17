@@ -1,6 +1,6 @@
 <?php
 /**
- * Contract file upload and download helpers.
+ * Contract file upload adapter — delegates to the core attachment service.
  *
  * @package DoubleScale\Modules\Contracts
  */
@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Contracts\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Services\AttachmentService as CoreAttachmentService;
 use DoubleScale\Modules\Contracts\Models\ContractAttachmentModel;
 use DoubleScale\Modules\Contracts\Models\ContractModel;
 use WP_Error;
@@ -19,28 +20,23 @@ use WP_Error;
 final class ContractAttachmentService {
 
 	/**
-	 * @var string[]
+	 * @var CoreAttachmentService
 	 */
-	private const DEFAULT_MIMES = array(
-		'image/jpeg',
-		'image/png',
-		'image/gif',
-		'image/webp',
-		'application/pdf',
-		'text/plain',
-		'application/msword',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-		'application/vnd.ms-excel',
-		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		'application/zip',
-	);
+	private $core;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->core = new CoreAttachmentService();
+	}
 
 	/**
 	 * @return string[]
 	 */
 	public static function accepted_mimes(): array {
-		$mimes = apply_filters( 'doublescale_sales_contract_attachment_mimes', self::DEFAULT_MIMES );
-		return is_array( $mimes ) ? array_values( array_filter( array_map( 'strval', $mimes ) ) ) : self::DEFAULT_MIMES;
+		$mimes = apply_filters( 'doublescale_sales_contract_attachment_mimes', CoreAttachmentService::accepted_mimes() );
+		return is_array( $mimes ) ? array_values( array_filter( array_map( 'strval', $mimes ) ) ) : CoreAttachmentService::accepted_mimes();
 	}
 
 	/**
@@ -60,8 +56,6 @@ final class ContractAttachmentService {
 	}
 
 	/**
-	 * Limits surfaced to the admin uploader (mirrors support attachment caps).
-	 *
 	 * @return array{max_file_size_mb:int, max_file_size_bytes:int, max_file_count:int}
 	 */
 	public static function limits_payload(): array {
@@ -84,7 +78,8 @@ final class ContractAttachmentService {
 	 */
 	public function guard_contract_file_count( ContractModel $contract ): ?WP_Error {
 		$count = (int) ContractAttachmentModel::query()
-			->where( 'contract_id', (int) $contract->id )
+			->forType( ContractAttachmentModel::ATTACHABLE_TYPE )
+			->where( 'attachable_id', (int) $contract->id )
 			->count();
 		if ( $count >= self::max_files_per_contract() ) {
 			return new WP_Error(
@@ -112,84 +107,48 @@ final class ContractAttachmentService {
 	 * @return ContractAttachmentModel|WP_Error
 	 */
 	public function store_upload( array $file, ContractModel $contract, array $uploader ) {
-		if ( empty( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
-			return new WP_Error( 'invalid_upload', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
 		$too_many = $this->guard_contract_file_count( $contract );
 		if ( $too_many ) {
 			return $too_many;
 		}
 
-		$max_size  = self::max_file_size_bytes();
-		$file_size = isset( $file['size'] ) ? (int) $file['size'] : 0;
-		if ( $max_size > 0 && $file_size > $max_size ) {
-			return new WP_Error(
-				'file_too_large',
-				sprintf(
-					/* translators: %s: maximum upload size */
-					__( 'File exceeds the maximum upload size of %s.', 'doublescale' ),
-					size_format( $max_size )
-				),
-				array( 'status' => 400 )
-			);
-		}
+		$subdir = 'doublescale-sales/contracts/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
 
-		$original_name = sanitize_file_name( (string) ( $file['name'] ?? 'file' ) );
-		$mime          = $this->detect_mime( (string) $file['tmp_name'], (string) ( $file['type'] ?? '' ) );
-		if ( ! in_array( $mime, self::accepted_mimes(), true ) ) {
-			return new WP_Error( 'invalid_mime', __( 'This file type is not allowed.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		$upload_dir = wp_upload_dir( null, false, false );
-		if ( ! is_array( $upload_dir ) || empty( $upload_dir['basedir'] ) ) {
-			return new WP_Error( 'upload_dir_unavailable', __( 'Upload directory is unavailable.', 'doublescale' ), array( 'status' => 500 ) );
-		}
-
-		$subdir     = 'doublescale-sales/contracts/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
-		$target_dir = trailingslashit( $upload_dir['basedir'] ) . $subdir;
-		if ( ! wp_mkdir_p( $target_dir ) ) {
-			return new WP_Error( 'mkdir_failed', __( 'Could not create upload directory.', 'doublescale' ), array( 'status' => 500 ) );
-		}
-
-		$stored_name = wp_unique_filename( $target_dir, $original_name );
-		$absolute    = trailingslashit( $target_dir ) . $stored_name;
-		$relative    = $subdir . '/' . $stored_name;
-
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_move_uploaded_file -- validated via is_uploaded_file.
-		if ( ! move_uploaded_file( $file['tmp_name'], $absolute ) ) {
-			return new WP_Error( 'move_failed', __( 'Failed to store the uploaded file.', 'doublescale' ), array( 'status' => 500 ) );
-		}
-
-		return ContractAttachmentModel::create(
+		$result = $this->core->store_upload(
+			$file,
+			ContractAttachmentModel::ATTACHABLE_TYPE,
+			(int) $contract->id,
+			$uploader,
 			array(
-				'contract_id' => (int) $contract->id,
-				'user_id'     => ! empty( $uploader['user_id'] ) ? (int) $uploader['user_id'] : null,
-				'contact_id'  => ! empty( $uploader['contact_id'] ) ? (int) $uploader['contact_id'] : null,
-				'file_name'   => $original_name,
-				'file_path'   => $relative,
-				'file_type'   => $mime,
-				'file_size'   => $file_size > 0 ? $file_size : (int) filesize( $absolute ),
+				'status'         => 'active',
+				'storage_subdir' => $subdir,
+				'max_size_bytes' => self::max_file_size_bytes(),
 			)
 		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return ContractAttachmentModel::find( (int) $result->id );
 	}
 
 	/**
 	 * @param ContractAttachmentModel $attachment Attachment.
-	 * @param string                  $download_path REST download path without namespace.
 	 * @return array<string, mixed>
 	 */
-	public function shape_for_api( ContractAttachmentModel $attachment, string $download_path ): array {
-		return array(
-			'id'          => (int) $attachment->id,
-			'file_hash'   => (string) $attachment->file_hash,
-			'file_name'   => (string) $attachment->file_name,
-			'file_size'   => (int) $attachment->file_size,
-			'file_type'   => (string) $attachment->file_type,
-			'created_at'  => $attachment->created_at ? (string) $attachment->created_at : null,
-			'uploaded_by' => $this->resolve_uploader_name( $attachment ),
-			'url'         => rest_url( 'doublescale/v1/' . ltrim( $download_path, '/' ) ),
-		);
+	public function shape_for_api( ContractAttachmentModel $attachment ): array {
+		$shaped                = $this->core->shape_for_api( $attachment );
+		$shaped['uploaded_by'] = $this->resolve_uploader_name( $attachment );
+		return $shaped;
+	}
+
+	/**
+	 * @param ContractAttachmentModel $attachment Attachment.
+	 * @return string
+	 */
+	public function signed_url( ContractAttachmentModel $attachment ): string {
+		return $this->core->signed_url( $attachment );
 	}
 
 	/**
@@ -231,61 +190,5 @@ final class ContractAttachmentService {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Stream attachment bytes to the browser.
-	 *
-	 * @param ContractAttachmentModel $attachment Attachment.
-	 * @return WP_Error|null
-	 */
-	public function stream_download( ContractAttachmentModel $attachment ): ?WP_Error {
-		$absolute = ContractAttachmentModel::resolve_absolute_path( (string) $attachment->file_path );
-		if ( '' === $absolute || ! is_file( $absolute ) ) {
-			return new WP_Error( 'not_found', __( 'File not found.', 'doublescale' ), array( 'status' => 404 ) );
-		}
-
-		$filename = sanitize_file_name( (string) $attachment->file_name );
-		if ( '' === $filename ) {
-			$filename = 'attachment';
-		}
-
-		add_filter(
-			'rest_pre_serve_request',
-			static function ( $served ) use ( $absolute, $attachment, $filename ) {
-				if ( $served ) {
-					return $served;
-				}
-				if ( ! headers_sent() ) {
-					header( 'Content-Type: ' . (string) $attachment->file_type );
-					header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-					header( 'Content-Length: ' . (string) filesize( $absolute ) );
-					header( 'X-Content-Type-Options: nosniff' );
-					header( 'Cache-Control: private, no-store, max-age=0' );
-				}
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
-				readfile( $absolute );
-				return true;
-			},
-			10,
-			1
-		);
-
-		return null;
-	}
-
-	/**
-	 * @param string $absolute Absolute file path.
-	 * @param string $fallback Fallback MIME.
-	 * @return string
-	 */
-	private function detect_mime( string $absolute, string $fallback ): string {
-		if ( function_exists( 'wp_check_filetype_and_ext' ) ) {
-			$checked = wp_check_filetype_and_ext( $absolute, basename( $absolute ) );
-			if ( ! empty( $checked['type'] ) ) {
-				return (string) $checked['type'];
-			}
-		}
-		return '' !== $fallback ? $fallback : 'application/octet-stream';
 	}
 }

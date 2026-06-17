@@ -46,34 +46,18 @@ final class Module extends AbstractSalesChildModule {
 	/**
 	 * Honors legacy `proposals` / `invoices` toggles until `documents` is saved explicitly.
 	 *
+	 * @param array<string, mixed> $stored Normalized `doublescale_enabled_modules` array.
 	 * @return bool
 	 */
-	public function is_enabled(): bool {
-		$stored = get_option( 'doublescale_enabled_modules', array() );
-		if ( is_array( $stored ) && array_key_exists( $this->slug(), $stored ) ) {
-			$intent = (bool) $stored[ $this->slug() ];
-		} elseif ( is_array( $stored ) ) {
-			$proposals = ! array_key_exists( 'proposals', $stored ) || (bool) $stored['proposals'];
-			$invoices  = ! array_key_exists( 'invoices', $stored ) || (bool) $stored['invoices'];
-			$intent    = $proposals || $invoices;
-		} else {
-			$intent = true;
+	protected function child_stored_intent( array $stored ): bool {
+		if ( array_key_exists( $this->slug(), $stored ) ) {
+			return (bool) $stored[ $this->slug() ];
 		}
 
-		$intent = (bool) apply_filters( 'doublescale_module_enabled_' . $this->slug(), $intent );
-		if ( ! $intent ) {
-			return false;
-		}
+		$proposals = ! array_key_exists( 'proposals', $stored ) || (bool) $stored['proposals'];
+		$invoices  = ! array_key_exists( 'invoices', $stored ) || (bool) $stored['invoices'];
 
-		if ( function_exists( 'doublescale_sales_documents_ready' ) && ! doublescale_sales_documents_ready() ) {
-			return false;
-		}
-
-		if ( ! function_exists( 'doublescale_is_module_active' ) ) {
-			return true;
-		}
-
-		return doublescale_is_module_active( 'sales' );
+		return $proposals || $invoices;
 	}
 
 	public function restControllers(): array {

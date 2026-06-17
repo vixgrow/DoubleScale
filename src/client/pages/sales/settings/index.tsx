@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { ArrowLeft } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import ConfigAPI from '@doublescale/config';
 import { FormField } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ import { PaymentGatewaysSettings } from './payment-gateways-settings';
 
 const SalesSettingsPage: React.FC = () => {
 	const navigate = useNavigate();
+	const documentsEnabled = ConfigAPI.isModuleEnabled('documents');
 	const { data, loading, error, refetch } = useSalesSettings();
 	const [form, setForm] = useState<SalesSettings | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -32,6 +34,12 @@ const SalesSettingsPage: React.FC = () => {
 			setForm(data);
 		}
 	}, [data]);
+
+	useEffect(() => {
+		if (!documentsEnabled && tab === 'payments') {
+			setTab('general');
+		}
+	}, [documentsEnabled, tab]);
 
 	const patch = (key: keyof SalesSettings, value: SalesSettings[keyof SalesSettings]) => {
 		setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
@@ -101,7 +109,9 @@ const SalesSettingsPage: React.FC = () => {
 			<Tabs value={tab} onValueChange={setTab}>
 				<TabsList>
 					<TabsTrigger value="general">{__('General', 'doublescale')}</TabsTrigger>
-					<TabsTrigger value="payments">{__('Payments', 'doublescale')}</TabsTrigger>
+					{documentsEnabled ? (
+						<TabsTrigger value="payments">{__('Payments', 'doublescale')}</TabsTrigger>
+					) : null}
 					<TabsTrigger value="taxes">{__('Taxes', 'doublescale')}</TabsTrigger>
 				</TabsList>
 
@@ -242,9 +252,11 @@ const SalesSettingsPage: React.FC = () => {
 					</section>
 				</TabsContent>
 
-				<TabsContent value="payments" className="mt-6">
-					<PaymentGatewaysSettings form={form} patch={patch} />
-				</TabsContent>
+				{documentsEnabled ? (
+					<TabsContent value="payments" className="mt-6">
+						<PaymentGatewaysSettings form={form} patch={patch} />
+					</TabsContent>
+				) : null}
 
 				<TabsContent value="taxes" className="mt-6">
 					<TaxesManager />

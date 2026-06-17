@@ -1,9 +1,9 @@
 <?php
 /**
- * Shared behavior for Sales child sub-features (proposals, invoices, contracts).
+ * Shared behavior for Sales child sub-features (documents, contracts, pipelines).
  *
- * Effective state = Sales parent on AND documents ready AND own stored intent
- * (missing key defaults to on, like the pipeline child).
+ * Effective state = Sales parent on AND (optional documents-ready gate) AND own
+ * stored intent (missing key defaults to on, like the pipeline child).
  *
  * @package DoubleScale\Modules\Sales
  */
@@ -32,22 +32,23 @@ abstract class AbstractSalesChildModule extends AbstractModule {
 	}
 
 	/**
-	 * Child effective state = parent Sales on AND documents ready AND own intent.
+	 * Child effective state = parent Sales on AND optional release gate AND own intent.
 	 *
 	 * @return bool
 	 */
 	public function is_enabled(): bool {
 		$stored = get_option( 'doublescale_enabled_modules', array() );
-		$intent = ! is_array( $stored )
-			|| ! array_key_exists( $this->slug(), $stored )
-			|| (bool) $stored[ $this->slug() ];
+		$stored = is_array( $stored ) ? $stored : array();
 
+		$intent = $this->child_stored_intent( $stored );
 		$intent = (bool) apply_filters( 'doublescale_module_enabled_' . $this->slug(), $intent );
 		if ( ! $intent ) {
 			return false;
 		}
 
-		if ( function_exists( 'doublescale_sales_documents_ready' ) && ! doublescale_sales_documents_ready() ) {
+		if ( $this->requires_documents_ready()
+			&& function_exists( 'doublescale_sales_documents_ready' )
+			&& ! doublescale_sales_documents_ready() ) {
 			return false;
 		}
 
@@ -55,18 +56,24 @@ abstract class AbstractSalesChildModule extends AbstractModule {
 			return true;
 		}
 
-		return doublescale_is_module_active( 'sales' );
+		return doublescale_is_module_active( $this->sales_parent_slug() );
 	}
 
 	public function migrations(): array {
-		if ( function_exists( 'doublescale_sales_documents_ready' ) && ! doublescale_sales_documents_ready() ) {
+		if ( $this->requires_documents_ready()
+			&& function_exists( 'doublescale_sales_documents_ready' )
+			&& ! doublescale_sales_documents_ready() ) {
 			return array();
 		}
 
 		$files = $this->child_migration_files();
-		sort( $files );
+		if ( array() !== $files ) {
+			sort( $files );
 
-		return $files;
+			return $files;
+		}
+
+		return parent::migrations();
 	}
 
 	public function boot( Container $container ): void {
@@ -79,11 +86,43 @@ abstract class AbstractSalesChildModule extends AbstractModule {
 	}
 
 	/**
+	 * Parent module slug that gates this child (defaults to Sales).
+	 *
+	 * @return string
+	 */
+	protected function sales_parent_slug(): string {
+		return 'sales';
+	}
+
+	/**
+	 * When true, {@see doublescale_sales_documents_ready()} must pass before boot/migrations.
+	 *
+	 * @return bool
+	 */
+	protected function requires_documents_ready(): bool {
+		return true;
+	}
+
+	/**
+	 * Stored toggle intent before the parent / release gates are applied.
+	 *
+	 * @param array<string, mixed> $stored Normalized `doublescale_enabled_modules` array.
+	 * @return bool
+	 */
+	protected function child_stored_intent( array $stored ): bool {
+		return ! array_key_exists( $this->slug(), $stored ) || (bool) $stored[ $this->slug() ];
+	}
+
+	/**
 	 * Absolute paths to migration files owned by this child.
+	 *
+	 * Return an empty array to fall back to {@see AbstractModule::migrations()} glob.
 	 *
 	 * @return array<int, string>
 	 */
-	abstract protected function child_migration_files(): array;
+	protected function child_migration_files(): array {
+		return array();
+	}
 
 	/**
 	 * Child-specific boot (frontend handlers, cron, menus, etc.).
@@ -91,7 +130,9 @@ abstract class AbstractSalesChildModule extends AbstractModule {
 	 * @param Container $container DI container.
 	 * @return void
 	 */
-	abstract protected function boot_child( Container $container ): void;
+	protected function boot_child( Container $container ): void {
+		unset( $container );
+	}
 
 	/**
 	 * @param string $basename Migration filename without directory.

@@ -69,8 +69,8 @@ export function DataTable<TData>({
 		<div className="w-full ">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
-				<div className="flex border border-border rounded-lg p-4 flex-col gap-4 xl:gap-0 xl:flex-row items-center xl:justify-between  w-full mb-6">
-					<DataTableSearch
+				<div className="flex border border-border rounded-lg p-4 flex-col gap-4 2xl:gap-0 2xl:flex-row items-center 2xl:justify-between  w-full mb-6">
+					<DataTableSearch	
 						value={
 							config.search?.onChange
 								? config.search?.value || ''

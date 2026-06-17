@@ -482,6 +482,59 @@ registerAdminPage('deal-detail', {
 	],
 });
 
+// Subscriptions - stub registration the Pro plugin overrides via filter.
+// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds
+// it from the `sales` item); the route itself stays registered so the upsell
+// stub renders when Pro is absent.
+registerAdminPage('subscriptions', {
+	path: 'subscriptions',
+	hidden: true,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Subscriptions', 'doublescale')}
+			description={__(
+				'Bill customers on a recurring schedule through Stripe and record a child invoice for every charge with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Recurring Stripe billing (monthly, yearly, or custom)', 'doublescale'),
+				__('Hosted Checkout subscribe page for customers', 'doublescale'),
+				__('Automatic child invoice per billing cycle', 'doublescale'),
+				__('Pause, resume, cancel, and change plan or quantity', 'doublescale'),
+				__('Future start dates and Stripe tax rates', 'doublescale'),
+			]}
+		/>
+	), // Pro plugin overrides with the real subscriptions list
+	label: __('Subscriptions', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+// Subscription detail - stub registration the Pro plugin overrides.
+registerAdminPage('subscription-detail', {
+	path: 'subscriptions/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Subscription Details', 'doublescale')}
+			description={__(
+				'View and manage subscription details with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Subscription Details', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,

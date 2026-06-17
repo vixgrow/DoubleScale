@@ -91,6 +91,20 @@ export function DatePicker({
 }: DatePickerProps) {
 	const [open, setOpen] = React.useState(false);
 
+	// react-day-picker's "dropdown" caption defaults its navigable range to
+	// [today - 100y, today], so future years (deal close dates, task due dates,
+	// contract terms) are unreachable from the year dropdown AND the next-month
+	// arrow. Give the calendar an explicit range so future years are selectable.
+	// Honor min/maxDate when provided so the dropdown matches the allowed window.
+	const navStartMonth = React.useMemo(
+		() => minDate ?? new Date(new Date().getFullYear() - 100, 0, 1),
+		[minDate]
+	);
+	const navEndMonth = React.useMemo(
+		() => maxDate ?? new Date(new Date().getFullYear() + 10, 11, 31),
+		[maxDate]
+	);
+
 	// Parse the initial value
 	const initialDate = React.useMemo(() => parseDate(value), [value]);
 	const [date, setDate] = React.useState<Date | undefined>(initialDate);
@@ -197,6 +211,8 @@ export function DatePicker({
 						mode="single"
 						selected={date}
 						captionLayout="dropdown"
+						startMonth={navStartMonth}
+						endMonth={navEndMonth}
 						month={month}
 						onMonthChange={setMonth}
 						onSelect={handleDateSelect}

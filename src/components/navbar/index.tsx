@@ -160,6 +160,8 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
+	subscriptions: 'subscriptions',
+	'subscriptions/:id': 'subscriptions',
 	sales: 'sales',
 	'sales/proposals': 'documents',
 	'sales/proposals/:id': 'documents',
@@ -473,6 +475,19 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						// derived effective state (Sales is already on here, so it
 						// reduces to the child flag); without Pro it is the stored
 						// phantom preference and the entry leads to the upsell stub.
+						...(config.isModuleToggleEnabled('subscriptions')
+							? [
+									{
+										path: 'subscriptions',
+										label: __('Subscriptions', 'doublescale'),
+										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
 						...(config.isModuleToggleEnabled('deals')
 							? [
 									{

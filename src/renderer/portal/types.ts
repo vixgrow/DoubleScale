@@ -24,6 +24,12 @@ export interface PortalRendererConfig {
 	mount_id: string;
 	is_guest?: boolean;
 	guest_hash?: string;
+	/** True when the Credit Notes sales child module toggle is on. */
+	credit_notes_module_enabled?: boolean;
+	/** True when DoubleScale Pro is active and credit notes are available. */
+	credit_notes_pro_active?: boolean;
+	/** Public REST base for credit note hash lookups (Pro). */
+	credit_note_public_rest_url?: string;
 	/** Mailbox scope for the Tickets section (from the shortcode `box_id`). */
 	box_id?: number;
 	/** Injected by the Support module for the reused ticket views. */
@@ -76,11 +82,12 @@ export interface PortalTimelineItem {
 	booking_id?: number;
 	document_type?: PortalDocumentType;
 	public_url?: string;
+	hash?: string;
 	start_time?: string;
 	timezone?: string;
 }
 
-export type PortalDocumentType = 'invoice' | 'proposal' | 'contract';
+export type PortalDocumentType = 'invoice' | 'proposal' | 'contract' | 'credit_note';
 
 export interface PortalDocument {
 	id: number;

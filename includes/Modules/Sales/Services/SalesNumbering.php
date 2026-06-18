@@ -45,6 +45,14 @@ class SalesNumbering {
 	}
 
 	/**
+	 * @param string $prefix Prefix such as CN.
+	 * @return string
+	 */
+	public static function next_credit_note_number( string $prefix = 'CN' ): string {
+		return self::next_number( $prefix, \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class, 'credit_note_number' );
+	}
+
+	/**
 	 * @param string $prefix Number prefix.
 	 * @param class-string $model_class Model class.
 	 * @param string $column Column storing the formatted number.
@@ -114,7 +122,8 @@ class SalesNumbering {
 
 		return false !== stripos( $message, 'invoice_number' )
 			|| false !== stripos( $message, 'proposal_number' )
-			|| false !== stripos( $message, 'contract_number' );
+			|| false !== stripos( $message, 'contract_number' )
+			|| false !== stripos( $message, 'credit_note_number' );
 	}
 
 	/**
@@ -132,6 +141,10 @@ class SalesNumbering {
 		}
 		if ( $model instanceof ContractModel ) {
 			$model->contract_number = null;
+			return;
+		}
+		if ( $model instanceof \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel ) {
+			$model->credit_note_number = null;
 		}
 	}
 }

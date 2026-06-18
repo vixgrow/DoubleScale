@@ -100,6 +100,9 @@ const timelineCopy = (item: PortalTimelineItem): string => {
 			case 'proposal_declined':
 				// translators: %s is the proposal subject.
 				return sprintf(__('Proposal declined: %s', 'doublescale'), name);
+			case 'credit_note_sent':
+				// translators: %s is the credit note number.
+				return sprintf(__('Credit note: %s', 'doublescale'), name);
 			default:
 				// translators: %s is the proposal subject.
 				return sprintf(__('Proposal: %s', 'doublescale'), name);
@@ -119,6 +122,9 @@ const timelineTarget = (item: PortalTimelineItem): string | null => {
 		return `/bookings/${item.booking_id}`;
 	}
 	if (item.kind === 'document') {
+		if (item.document_type === 'credit_note' && item.hash) {
+			return `/documents/credit-note/${item.hash}`;
+		}
 		// Phase 1 is link-out: the doc itself opens on its public hash page from
 		// the Documents list, so the timeline row just lands the customer there.
 		return '/documents';

@@ -21,6 +21,7 @@ class PaymentMode {
 	const CASH          = 'cash';
 	const CHECK         = 'check';
 	const CREDIT_CARD   = 'credit_card';
+	const CREDIT_NOTE   = 'credit_note';
 	const STRIPE        = 'stripe';
 	const OTHER         = 'other';
 

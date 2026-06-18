@@ -170,6 +170,7 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 				'documents'     => 'sales',
 				'contracts'     => 'sales',
 				'subscriptions' => 'sales',
+				'credit_notes'  => 'sales',
 			),
 			doublescale_child_module_parent_map()
 		);
@@ -190,6 +191,19 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 
 	public function test_subscriptions_is_a_registered_phantom_toggle_slug(): void {
 		$this->assertContains( 'subscriptions', doublescale_phantom_module_toggle_slugs() );
+	}
+
+	public function test_credit_notes_is_a_registered_phantom_toggle_slug(): void {
+		$this->assertContains( 'credit_notes', doublescale_phantom_module_toggle_slugs() );
+	}
+
+	public function test_credit_notes_phantom_admin_meta_is_complete(): void {
+		$meta = doublescale_phantom_module_admin_meta( 'credit_notes' );
+
+		$this->assertIsArray( $meta );
+		$this->assertArrayHasKey( 'label', $meta );
+		$this->assertArrayHasKey( 'description', $meta );
+		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
 	}
 
 	public function test_subscriptions_phantom_admin_meta_is_complete(): void {

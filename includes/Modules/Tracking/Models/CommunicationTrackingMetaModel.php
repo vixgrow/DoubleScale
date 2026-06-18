@@ -232,8 +232,12 @@ class CommunicationTrackingMetaModel extends Model {
 				$merge_tag_slug = $slug_parts[0];
 				$full_tag       = "{$group}:{$merge_tag_slug}";
 
-				// Return stored value if exists, otherwise return empty
-				return isset( $merge_tags[ $full_tag ] ) ? $merge_tags[ $full_tag ] : '';
+				// Return stored value if it was captured. If a tag was never captured
+				// (e.g. a footer-only tag), keep the original placeholder rather than
+				// silently blanking it to an empty string — an empty value would produce
+				// broken markup such as an unsubscribe <a href="">. Leaving the tag intact
+				// also lets the broken-merge-tag fallback in click tracking recover it.
+				return isset( $merge_tags[ $full_tag ] ) ? $merge_tags[ $full_tag ] : $matches[0];
 			},
 			$template_content
 		);

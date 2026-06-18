@@ -83,7 +83,7 @@ class Store {
 			// 'image'       => 'make/make.svg',
 			// 'plan'        => 'basic',
 			// ),
-			'white-label'  => array(
+			'white-label'   => array(
 				'name'        => 'White Labeling',
 				'slug'        => 'white-label',
 				'description' => __( 'Remove Plugin branding and replace with your own plugin name, logo, menu icon, and brand colors.', 'doublescale' ),
@@ -93,13 +93,21 @@ class Store {
 				'image'       => 'white-label/white-label.svg',
 				'plan'        => 'enterprise',
 			),
-			'ai-assistant' => array(
+			'ai-assistant'  => array(
 				'name'        => 'AI Assistant',
 				'slug'        => 'ai-assistant',
 				'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
 				'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
 				'image'       => 'ai-assistant/ai-assistant.svg',
 				'plan'        => 'plus',
+			),
+			'subscriptions' => array(
+				'name'        => 'Subscriptions',
+				'slug'        => 'subscriptions',
+				'description' => __( 'Recurring Stripe billing — subscribe customers to a plan, auto-charge each cycle, and record a child invoice per charge.', 'doublescale' ),
+				'plugin_file' => self::resolve_subscriptions_plugin_file( $plugins_dir ),
+				'image'       => 'subscriptions/subscriptions.svg',
+				'plan'        => 'enterprise',
 			),
 		);
 
@@ -270,6 +278,27 @@ class Store {
 		$candidates = array(
 			'DoubleScale-AIAssistant/doublescale-ai-assistant.php',
 			'DS-AIAssistant/ds-ai-assistant.php',
+		);
+
+		foreach ( $candidates as $file ) {
+			if ( file_exists( $plugins_dir . $file ) ) {
+				return $file;
+			}
+		}
+
+		return $candidates[0];
+	}
+
+	/**
+	 * Resolve the Subscriptions add-on plugin file path across naming conventions.
+	 *
+	 * @param string $plugins_dir Absolute path to the plugins directory.
+	 * @return string Plugin file relative path.
+	 */
+	private static function resolve_subscriptions_plugin_file( $plugins_dir ) {
+		$candidates = array(
+			'DoubleScale-Subscriptions/doublescale-subscriptions.php',
+			'doublescale-subscriptions/doublescale-subscriptions.php',
 		);
 
 		foreach ( $candidates as $file ) {

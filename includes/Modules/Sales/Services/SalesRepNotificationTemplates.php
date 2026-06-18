@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\NotificationCategories;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
-use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Pro\Modules\Contracts\Models\ContractModel;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 

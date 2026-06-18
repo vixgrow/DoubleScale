@@ -74,7 +74,7 @@ final class DocumentPdfHtmlTest extends TestCase {
 	}
 
 	public function test_render_html_includes_contract_subject_and_value(): void {
-		$html = \DoubleScale\Modules\Contracts\Services\ContractPdf::render_html(
+		$html = \DoubleScale\Pro\Modules\Contracts\Services\ContractPdf::render_html(
 			array(
 				'contract_number' => 'CON-000007',
 				'subject'         => 'Annual retainer',

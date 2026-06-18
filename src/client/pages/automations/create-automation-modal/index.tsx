@@ -65,7 +65,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	onAutomationChange,
 	onClearError,
 	error,
-	removePortal = true,
+	removePortal = false,
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
 	const [selectedCategory, setSelectedCategory] = useState('crm');
@@ -749,11 +749,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
 			<DialogContent
-				className="max-w-[1100px] z-[150300] max-h-[90vh] h-full flex flex-col overflow-hidden bg-[#fff] gap-0 p-0"
+				className="left-0 top-0 z-[150300] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none bg-[#fff] p-0 sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-[1100px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
 				removePortal={removePortal}
 			>
 				{/* Sticky header */}
-				<DialogHeader className="shrink-0  bg-white p-6">
+				<DialogHeader className="shrink-0 bg-white p-4 sm:p-6">
 					<CustomDialogHeader
 						title={
 							isEditAutomation
@@ -772,7 +772,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				</DialogHeader>
 
 				{/* Scrollable body — light gray surface, 24px gutter around the inner card */}
-				<div className="min-h-0 flex-1 overflow-y-auto  p-6 pt-0">
+				<div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 sm:p-6 sm:pt-0">
 					{error && (
 						<div className="mb-4">
 							<NoticeBanner
@@ -783,7 +783,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 					)}
 
-					<div className="rounded-2xl border border-border bg-[#f7f8fa] p-6">
+					<div className="rounded-2xl border border-border bg-[#f7f8fa] p-4 sm:p-6">
 						<div className="doublescale-fields doublescale-automation-modal-fields flex flex-col gap-6">
 							{/* Row 1 — Automation Name (full width) */}
 							<div className="min-w-0 flex flex-col gap-2">
@@ -815,7 +815,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 									<span className="text-destructive">*</span>
 								</div>
 
-								<div className="grid grid-cols-2 gap-6">
+								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 									{/* Left: vertical list of horizontal trigger tabs */}
 									<div
 										role="tablist"
@@ -908,11 +908,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				</div>
 
 				{/* Sticky footer */}
-				<DialogFooter className="shrink-0  bg-white px-6 py-4 sm:justify-end gap-6">
+				<DialogFooter className="shrink-0  bg-white px-6 py-4 flex flex-row items-end justify-end gap-6">
 					<Button
 						type="button"
 						variant="secondaryDeepBlue"
-						
+
 						onClick={onCancel}
 						disabled={isSaving}
 					>
@@ -921,7 +921,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					<Button
 						onClick={onOk}
 						disabled={isSaving}
-						
+
 					>
 						{isSaving
 							? isEditAutomation

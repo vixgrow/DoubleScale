@@ -320,10 +320,10 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 			>
 				<DialogContent
 					overlayClassName="z-[160010]"
-					className="z-[160011] max-w-[840px] w-full mx-auto"
+					className="z-[160011] w-[calc(100vw-1.5rem)] max-w-[800px] max-h-[90vh] overflow-y-auto rounded-md p-4 sm:p-6"
 				>
-					<DialogHeader className="text-center sm:text-center">
-						<DialogTitle className="text-2xl font-bold mb-1">
+					<DialogHeader className="mt-4 text-center sm:mt-0 sm:text-center">
+						<DialogTitle className="mb-1 text-xl font-bold sm:text-2xl">
 							{__(
 								'Choose how you\'d like to build your Email',
 								'doublescale'
@@ -336,10 +336,10 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 							)}
 						</DialogDescription>
 					</DialogHeader>
-					<div className="flex gap-4">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{selectionOptions.map((option) => (
 							<div
-								className="flex flex-1 flex-col justify-between items-center py-6 px-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-secondary-background hover:border-primary hover:transition-all hover:duration-300"
+								className="flex w-full flex-col items-center justify-between rounded-lg border border-gray-200 px-4 py-5 sm:py-6 cursor-pointer hover:bg-secondary-background hover:border-primary hover:transition-all hover:duration-300"
 								key={option.type}
 								onClick={option.onClick}
 							>

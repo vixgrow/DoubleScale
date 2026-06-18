@@ -62,7 +62,7 @@ const GeneralSettings: React.FC = () => {
                     icon={<AdvancedSettingsIcon />}
                     border={false}
                 />
-                <Card className="mb-2 px-5"><CardContent>
+                <Card className="mb-2"><CardContent>
                         <div className='flex flex-col gap-5'>
                             <FeaturedImageSelector
                                 value={state.featured_image}
@@ -70,12 +70,12 @@ const GeneralSettings: React.FC = () => {
                                     handleChange('featured_image', value)
                                 }
                             />
-                            <div className='flex justify-between items-start w-full'>
+                            <div className='flex flex-col mx-auto md:flex-row justify-center  md:justify-between items-center md:items-start w-full gap-5'>
                                 <AvatarSelector
                                     value={state.avatar}
                                     onChange={(value) => handleChange('avatar', value)}
                                 />
-                                <div className='flex flex-col gap-[50px] w-full'>
+                                <div className='flex flex-col gap-[50px] w-full min-w-0'>
                                     <div className='flex flex-col gap-1'>
                                         <div className="text-base font-semibold">
                                             {__(
@@ -192,7 +192,7 @@ const GeneralSettings: React.FC = () => {
                                             >
                                                 <Radio
                                                     value="all"
-                                                    className={`custom-radio border w-[300px] rounded-lg p-3 font-semibold cursor-pointer transition-all duration-300 text-[#3F4254] 
+                                                    className={`custom-radio border w-[300px] rounded-lg p-3 font-semibold cursor-pointer transition-all duration-300 text-[#3F4254]
                                             ${
                                                 bookingForms === 'all'
                                                     ? 'bg-secondary border-primary'
@@ -206,7 +206,7 @@ const GeneralSettings: React.FC = () => {
                                                 </Radio>
                                                 <Radio
                                                     value="select"
-                                                    className={`custom-radio border w-[300px] rounded-lg p-3 font-semibold cursor-pointer transition-all duration-300 text-[#3F4254] 
+                                                    className={`custom-radio border w-[300px] rounded-lg p-3 font-semibold cursor-pointer transition-all duration-300 text-[#3F4254]
                                             ${
                                                 bookingForms === 'select'
                                                     ? 'bg-secondary border-primary'

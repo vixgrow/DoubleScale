@@ -419,8 +419,8 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             case 'meeting_scheduled':
                 return (
                     activity.data && (
-                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
-                            <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
+                        <div className="activity-meeting-content flex max-sm:flex-col max-sm:justify-center max-sm:items-center gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
+                            <div className="meeting-date-card h-full flex flex-row sm:flex-col items-center justify-center text-center sm:border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
                                 <div className=" text-foreground text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
                                         activity.data.scheduled_at ||
@@ -438,9 +438,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                 </div>
                             </div>
                             <div className=" flex flex-col gap-3">
-                                <div className="flex gap-6 items-center">
+                                <div className="flex max-sm:flex-col max-sm:justify-center max-sm:items-center gap-6 items-center">
                                     {activity.data.scheduled_at && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
+                                        <div className="flex justify-center gap-2 sm:border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <StartDateIcon />
                                             <span>
                                                 {__('Start Date', 'doublescale')}:
@@ -456,7 +456,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         </div>
                                     )}
                                     {activity.data.location && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
+                                        <div className="flex justify-center gap-2 sm:border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <LocationIcon />
                                             <span>
                                                 {__('Location', 'doublescale')}:{' '}
@@ -649,11 +649,11 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
             case 'page_visited':
                 return (
-                    <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-2 py-3 px-3">
-                        <p className="text-sm text-muted-foreground">
+                    <div className="flex min-w-0 max-w-full flex-col gap-2 rounded-lg border border-border/60 bg-[#DEE1E666] px-3 py-3">
+                        <p className="text-sm text-muted-foreground max-sm:break-all">
                             <span className="font-medium text-foreground">{activity.data?.path as string || '/'}</span>
                             {activity.data?.query ? (
-                                <span className="text-xs text-[#999] ml-1">?{activity.data.query as string}</span>
+                                <span className="ml-1 text-xs text-[#999] max-sm:break-all">?{activity.data.query as string}</span>
                             ) : null}
                         </p>
                     </div>
@@ -688,7 +688,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
     return (
         <div className="activity-container">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center max-sm:flex-col max-sm:gap-4">
                 <h2 className="text-2xl font-semibold">
                     {__('Activities', 'doublescale')}
                 </h2>
@@ -769,7 +769,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                 <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                                                     <div className="flex items-center gap-1.5">
                                                         <MeetingActivityIcon />
-                                                        <p className="border-r border-border/60 pr-2 text-xs font-medium text-muted-foreground">
+                                                        <p className="sm:border-r border-border/60 pr-2 text-xs font-medium text-muted-foreground">
                                                             {formatActivityTime(item.timestamp)}
                                                         </p>
                                                     </div>
@@ -801,7 +801,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                     </Badge>
                                                 </div>
                                                 {/* Actions */}
-                                                <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                                                <div className="flex max-sm:flex-col max-sm:items-start shrink-0 items-center gap-2 sm:gap-3">
                                                     {!isTask && activity && isEditableActivity(item.icon_type) && (
                                                         <ActivityActionsDropdown
                                                             onEdit={() => handleEditActivity(activity)}
@@ -831,7 +831,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                                 </Badge>
                                                             )}
                                                             {item.priority && (
-                                                                <Badge variant="outline" className="ml-2 text-xs">
+                                                                <Badge variant="outline" className="text-xs">
                                                                     {item.priority}
                                                                 </Badge>
                                                             )}

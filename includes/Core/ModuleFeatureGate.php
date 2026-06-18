@@ -78,6 +78,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'leadscoring',
 		'subscriptions',
 		'credit_notes',
+		'contracts',
 		'tasks',
 	);
 
@@ -214,6 +215,12 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'        => __( 'Credit Notes', 'doublescale' ),
 				'description'  => __( 'Issue credit notes, apply credit to invoices, and track open customer balances.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales' ),
+			);
+		case 'contracts':
+			return array(
+				'label'        => __( 'Contracts', 'doublescale' ),
+				'description'  => __( 'Manage customer contracts, types, attachments, and e-signatures.', 'doublescale' ),
 				'dependencies' => array( 'contacts', 'sales' ),
 			);
 		case 'tasks':

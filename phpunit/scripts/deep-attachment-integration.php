@@ -180,8 +180,8 @@ if ( $support_row ) {
 	$pass( 'Support ticket_id accessor', 1 === (int) $support_row->ticket_id );
 }
 
-$contract_row = \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::query()
-	->forType( \DoubleScale\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
+$contract_row = \DoubleScale\Pro\Modules\Contracts\Models\ContractAttachmentModel::query()
+	->forType( \DoubleScale\Pro\Modules\Contracts\Models\ContractAttachmentModel::ATTACHABLE_TYPE )
 	->where( 'file_hash', 'deep_contract_hash_b' )
 	->first();
 $pass( 'Contract model reads migrated row', null !== $contract_row );

@@ -39,7 +39,11 @@ declare global {
 		doublescaleProSmsCampaigns?: {
 			smsCampaignColumns?: SmsCampaignColumnsFn;
 			SMSTemplateStep?: ComponentType;
-			SMSDevice?: ComponentType<{ body?: string; className?: string }>;
+			SMSDevice?: ComponentType<{
+				body?: string;
+				className?: string;
+				showOnSmallScreens?: boolean;
+			}>;
 			SendTestSMSCard?: ComponentType<SendTestSMSCardProps>;
 			TwilioConfigModal?: ComponentType<TwilioConfigModalProps>;
 		};

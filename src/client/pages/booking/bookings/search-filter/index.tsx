@@ -66,42 +66,46 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 	handleSearch,
 	canManageAllBookings,
 }) => {
+	const filterClassName =
+		'!w-full min-w-0 h-10 md:min-w-0 lg:!w-auto lg:min-w-[9.5rem] lg:max-w-[12.5rem] lg:flex-1';
+	const filterWithIconClassName =
+		'!w-full min-w-0 pl-2 h-10 md:min-w-0 lg:!w-auto lg:min-w-[9.5rem] lg:max-w-[12.5rem] lg:flex-1';
+
 	return (
-        <div className='flex gap-2.5 justify-center items-center px-2'>
-            <SearchInput
+		<div className="search-filter grid w-full min-w-0 grid-cols-1 gap-2.5 md:grid-cols-3 lg:flex lg:flex-row lg:flex-wrap lg:items-center">
+			<SearchInput
 				placeholder={__('Search Bookings', 'doublescale')}
-				className="w-[220px]"
+				className="w-full min-w-0 md:col-span-3 lg:col-span-auto lg:w-auto lg:min-w-[12rem] lg:max-w-[14rem] lg:flex-shrink-0"
 				onChange={(e) => handleSearch(e.target.value)}
 			/>
-            {author === 'own' && (
+			{author === 'own' && (
 				<>
 					<MultiSelect
 						title={__('Booking Type', 'doublescale')}
 						defaultValue={eventType}
-						style={{ width: 150 }}
 						onChange={(e) => setEventType(e.target.value)}
 						options={bookingTypesOptions}
 						Icon={IoFilterOutline}
-						containerClassName="pl-2 w-fit h-10"
-						selectClassName="!rounded-r-lg !rounded-l-none ml-2"
+						iconSize={20}
+						containerClassName={filterWithIconClassName}
+						selectClassName="!rounded-r-lg !rounded-l-none ml-2 min-w-0 truncate"
 					/>
 					<MultiSelect
 						title={__('Event', 'doublescale')}
 						defaultValue={event}
-						style={{ width: 150 }}
 						onChange={(e) => setEvent(e.target.value)}
 						options={events}
 						Icon={AllCalendarIcon as IconType}
-						containerClassName="pl-2 w-fit h-10"
-						selectClassName="!rounded-r-lg !rounded-l-none ml-2"
+						iconSize={20}
+						containerClassName={filterWithIconClassName}
+						selectClassName="!rounded-r-lg !rounded-l-none ml-2 min-w-0 truncate"
 					/>
 				</>
 			)}
-            {canManageAllBookings && (
+			{canManageAllBookings && (
 				<MultiSelect
 					title={__('Author', 'doublescale')}
 					defaultValue={author}
-					style={{ width: 150 }}
 					onChange={(e) => setAuthor(e.target.value)}
 					options={[
 						{
@@ -113,12 +117,12 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 							label: __('Meetings: All', 'doublescale'),
 						},
 					]}
-					containerClassName="h-10 ml-2.5"
-					selectClassName="!rounded-lg"
+					containerClassName={filterClassName}
+					selectClassName="!rounded-lg min-w-0 truncate"
 				/>
 			)}
-        </div>
-    );
+		</div>
+	);
 };
 
 export default SearchFilter;

@@ -255,7 +255,7 @@ const SupportReports: React.FC = () => {
 			</div>
 
 			<div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-				<div className="flex flex-wrap items-end gap-x-4 gap-y-3">
+				<div className="flex flex-col sm:flex-row flex-wrap  gap-x-4 gap-y-3">
 					<div className="flex min-w-0 flex-col gap-1.5">
 						<span className="text-xs font-medium text-muted-foreground">
 							{__('Period', 'doublescale')}

@@ -88,7 +88,7 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 				<div
 					className={cn(
 						iconBgClass,
-						'flex h-10 w-10 items-center justify-center rounded-lg',
+						'flex h-10 w-10 items-center justify-center rounded-full',
 						iconColor
 					)}
 				>

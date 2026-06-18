@@ -37,7 +37,7 @@ interface PageTabsProps {
 }
 
 const pillTabsTriggerClassName =
-	'gap-2 whitespace-nowrap rounded-lg p-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:hover:text-foreground sm:px-4';
+	'gap-2 whitespace-nowrap rounded-lg p-1 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:hover:text-foreground sm:px-4';
 
 const underlineTabsTriggerClassName =
 	'group relative inline-flex items-center gap-1.5 whitespace-nowrap rounded-none border-0 border-b-[3px] border-transparent bg-transparent p-2 text-sm font-medium text-foreground shadow-none outline-none transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none';

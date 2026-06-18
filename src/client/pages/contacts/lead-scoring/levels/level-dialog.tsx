@@ -156,7 +156,7 @@ export const LevelDialog: React.FC<LevelDialogProps> = ({
 					</div>
 				</div>
 
-				<DialogFooter>
+				<DialogFooter className='gap-4'>
 					<Button
 						variant="outline"
 						onClick={onClose}

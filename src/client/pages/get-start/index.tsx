@@ -43,6 +43,9 @@ export default function GetStart() {
 		{ number: 5, label: __('Tags', 'doublescale'), icon: <StartTag /> },
 		{ number: 6, label: __('Contacts', 'doublescale'), icon: <StartContact /> },
 	];
+	const totalSteps = steps.length + 1;
+	const currentStepMeta = steps.find((step) => step.number === currentStep);
+	const mobileProgress = Math.min((currentStep / totalSteps) * 100, 100);
 
 	const handleNext = () => {
 		setCurrentStep((s) => Math.min(s + 1, steps.length + 1));
@@ -61,8 +64,8 @@ export default function GetStart() {
 	}
 
 	return (
-		<div className="doublescale-get-start flex flex-col lg:flex-row -mx-4 -my-4 lg:-mx-8 lg:-my-6 min-h-[calc(100vh-80px)] bg-white">
-			<aside className="w-full shrink-0 overflow-x-auto overscroll-x-contain border-b border-primary/20 bg-[#EEF] max-lg:snap-x max-lg:snap-mandatory lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:self-start lg:snap-none lg:overflow-x-visible lg:overflow-y-auto lg:border-b-0">
+		<div className="doublescale-get-start flex min-h-[calc(100vh-80px)] flex-col bg-white -mx-4 -my-4 lg:-mx-8 lg:-my-6 lg:flex-row">
+			<aside className="hidden w-full shrink-0 overflow-x-auto overscroll-x-contain border-b border-primary/20 bg-[#EEF] max-lg:snap-x max-lg:snap-mandatory lg:sticky lg:top-0 lg:block lg:h-screen lg:w-72 lg:self-start lg:snap-none lg:overflow-x-visible lg:overflow-y-auto lg:border-b-0">
 				<div className="flex w-max min-w-full flex-row flex-nowrap gap-3 p-4 lg:w-full lg:min-w-0 lg:flex-col lg:flex-nowrap lg:gap-4 lg:p-6">
 					{steps.map((step, index) => (
 						<StepIndicator
@@ -77,7 +80,30 @@ export default function GetStart() {
 				</div>
 			</aside>
              {/* right side */}
-			<div className="relative flex min-h-0 flex-1 min-w-0 flex-col p-6 m-6 rounded-[20px] bg-[#F7F8FA] shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)] overflow-hidden">
+			<div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+				{/* Mobile compact step header (outside content card) */}
+				<div className=" mt-4  bg-white lg:hidden sm:mx-6 sm:mt-6">
+					<div className="flex items-center gap-2 px-4 py-3">
+						<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+							{currentStep}
+						</span>
+						<div className="min-w-0">
+							<p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+								{`Step ${currentStep}/${totalSteps}`}
+							</p>
+							<p className="truncate text-sm font-semibold text-foreground">
+								{currentStepMeta?.label}
+							</p>
+						</div>
+					</div>
+					<div className="h-1 w-full bg-primary/15">
+						<div
+							className="h-full bg-primary transition-all duration-300"
+							style={{ width: `${mobileProgress}%` }}
+						/>
+					</div>
+				</div>
+				<div className="relative m-4 mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-[#F7F8FA] p-4 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)] sm:m-6 sm:mt-4 sm:p-6">
 				{/* decorative corner images — sit behind content on every step */}
 				<img
 					src={decorativeLeft}
@@ -133,6 +159,7 @@ export default function GetStart() {
 						/>
 					)}
 				</div>
+			</div>
 			</div>
 		</div>
 	);

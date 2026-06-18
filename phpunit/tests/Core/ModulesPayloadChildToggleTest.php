@@ -197,8 +197,21 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		$this->assertContains( 'credit_notes', doublescale_phantom_module_toggle_slugs() );
 	}
 
+	public function test_contracts_is_a_registered_phantom_toggle_slug(): void {
+		$this->assertContains( 'contracts', doublescale_phantom_module_toggle_slugs() );
+	}
+
 	public function test_credit_notes_phantom_admin_meta_is_complete(): void {
 		$meta = doublescale_phantom_module_admin_meta( 'credit_notes' );
+
+		$this->assertIsArray( $meta );
+		$this->assertArrayHasKey( 'label', $meta );
+		$this->assertArrayHasKey( 'description', $meta );
+		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
+	}
+
+	public function test_contracts_phantom_admin_meta_is_complete(): void {
+		$meta = doublescale_phantom_module_admin_meta( 'contracts' );
 
 		$this->assertIsArray( $meta );
 		$this->assertArrayHasKey( 'label', $meta );

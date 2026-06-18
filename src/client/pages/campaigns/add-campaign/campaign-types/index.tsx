@@ -104,7 +104,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 
 							<div
 								className={cn(
-									'flex shrink-0 items-center justify-center rounded-l-xl p-6',
+									'shrink-0 items-center justify-center rounded-l-xl p-6 hidden sm:flex',
 									opt.iconPanelClass
 								)}
 							>
@@ -115,8 +115,8 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 								/>
 							</div>
 
-							<div className="flex min-w-0 flex-1 items-start gap-4 rounded-r-xl pl-3 pr-4 py-4">
-								<div className="min-w-0 flex-1">
+							<div className="min-w-0 flex-1 items-start gap-4 rounded-r-xl pl-3 pr-4 py-4">
+								<div className="min-w-0 flex justify-between items-center flex-1">
 									<p className="text-sm font-semibold tracking-tight text-foreground">
 										{opt.label}
 										{isLocked && (
@@ -125,17 +125,8 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 											</span>
 										)}
 									</p>
-									<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-										{isLocked
-											? __(
-													'Upgrade to DoubleScale Pro to unlock automated campaigns triggered by content events or recurring schedules.',
-													'doublescale'
-												)
-											: opt.description}
-									</p>
-								</div>
 
-								<span
+									<span
 									className={cn(
 										'shrink-0 rounded-lg p-1 text-sm font-medium tracking-wide',
 										opt.badgeClass
@@ -143,6 +134,17 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 								>
 									{opt.hint}
 								</span>
+								</div>
+
+								<p className="text-sm leading-relaxed text-muted-foreground">
+										{isLocked
+											? __(
+													'Upgrade to DoubleScale Pro to unlock automated campaigns triggered by content events or recurring schedules.',
+													'doublescale'
+												)
+											: opt.description}
+									</p>
+									
 							</div>
 						</button>
 					);

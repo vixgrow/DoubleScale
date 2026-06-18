@@ -25,6 +25,18 @@ function escapeHtml(raw: string): string {
 		.replace(/"/g, '&quot;');
 }
 
+// True when the HTML has no visible text once tags, &nbsp; and whitespace are
+// stripped (e.g. '', '<p><br></p>'). Used to tell an unpopulated/blank editor
+// apart from one with real content so we never persist a blank over stored text.
+function isBlankHtml(html?: string | null): boolean {
+	if (!html) return true;
+	const text = html
+		.replace(/<[^>]*>/g, '')
+		.replace(/&nbsp;/gi, '')
+		.replace(/\s+/g, '');
+	return text.length === 0;
+}
+
 export interface TextRendererProps {
 	props: TextBlockProps;
 	/** Email builder: edit copy on the canvas when the block is selected. */
@@ -39,6 +51,11 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 }) => {
 	const editRef = useRef<HTMLDivElement>(null);
 	const editingRef = useRef(false);
+	// Whether the user has actually typed during the current editing session.
+	// Reset on focus, set on input. Lets us distinguish an intentional "cleared
+	// all text" from a blank editor that simply was never populated (the
+	// focus-before-sync race), so only the former is allowed to persist a blank.
+	const userInteractedRef = useRef(false);
 	const commitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const rendererIdRef = useRef<string | null>(null);
 	if (!rendererIdRef.current) {
@@ -145,6 +162,18 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		// and wipe the block's text. Only commit when the live node exists.
 		if (!editRef.current) return;
 		const html = editRef.current.innerHTML;
+		// Guard against the focus-before-sync race wiping content: if the editor
+		// is blank but the store still holds real text and the user never typed
+		// this session, the blank is an unpopulated editor — not an intentional
+		// clear. Committing it here would persist "" and push it onto undo
+		// history (hence the "content vanishes, undo brings it back" symptom).
+		if (
+			isBlankHtml(html) &&
+			!isBlankHtml(props.content) &&
+			!userInteractedRef.current
+		) {
+			return;
+		}
 		onCanvasContentChange(
 			stripRichTextChromeColors(html, {
 				blockColor: textColor,
@@ -178,13 +207,17 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	};
 
 	useLayoutEffect(() => {
-		if (
-			!canvasEditable ||
-			!onCanvasContentChange ||
-			!editRef.current ||
-			editingRef.current
-		) {
+		if (!canvasEditable || !onCanvasContentChange || !editRef.current) {
 			return;
+		}
+		// While the user is actively editing, don't clobber the live DOM (it
+		// would jump the caret) — UNLESS the editor is still blank and nothing
+		// has been typed yet. That case is the focus-before-sync race: focus set
+		// editingRef before this effect first populated the node, so fill it now.
+		if (editingRef.current) {
+			if (!isBlankHtml(editRef.current.innerHTML) || userInteractedRef.current) {
+				return;
+			}
 		}
 		const next = getEditableHtml();
 		if (editRef.current.innerHTML !== next) {
@@ -371,11 +404,19 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 						}}
 						onFocus={() => {
 							editingRef.current = true;
+							// New editing session: nothing typed yet. A blank
+							// editor at this point means "not populated", not
+							// "user cleared it".
+							userInteractedRef.current = false;
 							if (editRef.current) {
 								syncCanvasEditorColors(editRef.current);
 							}
 						}}
 						onInput={() => {
+							// The user actually changed the text — from here a
+							// blank editor is an intentional clear and may be
+							// committed.
+							userInteractedRef.current = true;
 							// Persist edits to the store as the user types (debounced)
 							// so autosave never snapshots stale, pre-edit content.
 							// The store→canvas sync bails while editingRef is true,

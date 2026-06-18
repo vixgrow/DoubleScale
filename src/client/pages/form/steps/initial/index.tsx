@@ -86,7 +86,7 @@ const Initial: React.FC = () => {
 					<div className="text-[#09090B] font-bold text-2xl">
 						{__('Basic Information', 'doublescale')}
 					</div>
-					<div className="flex gap-5 items-start">
+					<div className="flex flex-col sm:flex-row gap-5 items-start">
 						<Field
 							label={__('Form Name', 'doublescale')}
 							value={form.name}

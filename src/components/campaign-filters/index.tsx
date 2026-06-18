@@ -46,7 +46,7 @@ export function CampaignFilters({
 
 	return (
 		<div className="rounded-lg border border-gray-200 bg-white p-6">
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				{/* Status Filter */}
 				<div className="space-y-2">
 					<Label className="text-base font-semibold text-[#3F4254]">

@@ -259,8 +259,8 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 				}
 				className={cn(
 					view === 'preview'
-						? 'max-w-[900px] w-full mx-auto h-[85vh] flex flex-col'
-						: 'max-w-[640px] w-full mx-auto',
+						? 'max-w-[900px] w-full mx-auto h-[85vh] overflow-y-auto flex flex-col'
+						: 'max-w-[640px] max-h-[90vh] overflow-y-auto w-full mx-auto',
 					stackAboveFullscreenShell && 'z-[160011]'
 				)}
 			>
@@ -305,7 +305,7 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 								/>
 							</div>
 
-							<div className="flex gap-4">
+							<div className="flex flex-col gap-4 sm:flex-row">
 								<div className="flex-1">
 									<label className="text-sm font-medium text-foreground mb-1.5 block">
 										{__('Tone', 'doublescale')}
@@ -382,8 +382,8 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 													'doublescale'
 												)}
 											</label>
-											<div className="flex items-center gap-2 flex-wrap">
-												{COLOR_PRESETS.map((color) => (
+										<div className="flex flex-wrap items-center gap-2">
+											{COLOR_PRESETS.map((color) => (
 													<button
 														key={color.value}
 														type="button"
@@ -443,7 +443,7 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 													'doublescale'
 												)}
 											</label>
-											<div className="flex gap-3">
+											<div className="flex flex-col sm:flex-row gap-3">
 												{BUTTON_STYLES.map((style) => (
 													<button
 														key={style.value}

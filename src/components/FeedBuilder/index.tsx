@@ -8,8 +8,7 @@ const FeedBuilder: React.FC<{
 	subject?: string;
 	previewText?: string;
 }> = ({ fromName, subject, previewText }) => {
-	const displayFromName =
-		fromName?.trim() || __('From Name', 'doublescale');
+	const displayFromName = fromName?.trim() || __('From Name', 'doublescale');
 	const displaySubject =
 		subject?.trim() || __('Message Subject...', 'doublescale');
 	const displayPreview =
@@ -17,7 +16,7 @@ const FeedBuilder: React.FC<{
 	const avatarLetter = displayFromName.charAt(0).toUpperCase();
 
 	return (
-		<div className="flex flex-col items-center justify-center border border-border rounded-2xl bg-muted/50 w-full lg:w-1/3 py-8 sm:py-10">
+		<div className="sm:flex hidden flex-col items-center justify-center w-2/5 lg:w-1/3">
 			<div className="relative w-full flex items-center justify-center">
 				<img
 					src={device}
@@ -25,28 +24,30 @@ const FeedBuilder: React.FC<{
 					className="w-full max-w-[260px] sm:max-w-[300px] select-none pointer-events-none"
 				/>
 
-				<div className="absolute top-[21%] left-1/2 -translate-x-1/2 w-[68%] max-w-[240px] flex gap-2 sm:gap-3 items-start">
-					<div className="flex shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white font-semibold w-8 h-8 sm:w-9 sm:h-9">
+				<div className="absolute top-[21%] left-1/2 sm:left-[44%] xl:left-1/2 -translate-x-1/2 w-[68%] max-w-[240px] flex gap-2 sm:gap-3 items-start">
+					<div className="flex shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white font-semibold w-6 h-6 w- min-[1200px]:w-9 min-[1200px]:h-9">
 						{avatarLetter}
 					</div>
 
 					<div className="flex-1 space-y-1">
 						<div className="flex flex-col gap-1">
 							<div className="flex items-center justify-between gap-2">
-								<span className="font-medium text-foreground text-xs sm:text-sm max-w-[75px] truncate">
+								<span className="font-medium text-foreground text-xs max-[1200px]:leading-[0.75rem] min-[1200px]:text-sm max-w-[75px] truncate">
 									{displayFromName}
 								</span>
 								<span className="text-[9px] sm:text-[10px] text-[#9c9595] shrink-0">
 									{__('9:01 AM', 'doublescale')}
 								</span>
 							</div>
-							<span className="text-[10px] sm:text-xs text-foreground max-w-[180px] font-medium truncate">
+							<span className="text-[10px] max-[1200px]:leading-[0.75rem] min-[1200px]:text-xs text-foreground max-w-[180px] font-medium truncate">
 								{displaySubject}
 							</span>
 						</div>
 
-						<p className="text-[9px] sm:text-[10px] text-[#9c9595] line-clamp-1 flex items-center justify-between gap-2">
-							<span className="truncate max-w-[160px]">{displayPreview}</span>
+						<p className="text-[9px] min-[1200px]:text-[10px] text-[#9c9595] line-clamp-1 flex items-center justify-between gap-2">
+							<span className="truncate max-w-[160px]">
+								{displayPreview}
+							</span>
 							<Star className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
 						</p>
 					</div>

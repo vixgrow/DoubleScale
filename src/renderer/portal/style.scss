@@ -171,7 +171,8 @@
 
 .doublescale-invoice-renderer,
 .doublescale-proposal-renderer,
-.doublescale-contract-renderer {
+.doublescale-contract-renderer,
+.doublescale-credit-note-renderer {
 	background: #fff;
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
@@ -182,7 +183,8 @@
 
 .doublescale-invoice-renderer__toolbar,
 .doublescale-proposal-renderer__toolbar,
-.doublescale-contract-renderer__toolbar {
+.doublescale-contract-renderer__toolbar,
+.doublescale-credit-note-renderer__toolbar {
 	display: flex;
 	justify-content: flex-end;
 	margin-bottom: 1rem;
@@ -190,7 +192,8 @@
 
 .doublescale-invoice-renderer__download,
 .doublescale-proposal-renderer__download,
-.doublescale-contract-renderer__download {
+.doublescale-contract-renderer__download,
+.doublescale-credit-note-renderer__download {
 	align-items: center;
 	border: 1px solid #e2e8f0;
 	border-radius: 8px;
@@ -209,7 +212,8 @@
 
 .doublescale-invoice-renderer__notice,
 .doublescale-proposal-renderer__notice,
-.doublescale-contract-renderer__notice {
+.doublescale-contract-renderer__notice,
+.doublescale-credit-note-renderer__notice {
 	border-radius: 8px;
 	font-size: 14px;
 	margin-bottom: 1rem;

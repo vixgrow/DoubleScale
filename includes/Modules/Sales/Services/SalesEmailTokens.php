@@ -9,7 +9,7 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Contracts\Models\ContractModel;
+use DoubleScale\Pro\Modules\Contracts\Models\ContractModel;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 

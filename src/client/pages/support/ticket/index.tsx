@@ -437,7 +437,7 @@ const SupportTicketDetail: React.FC = () => {
 	};
 
 	return (
-		<div className="doublescale-support-ticket p-6 max-w-5xl">
+		<div className="doublescale-support-ticket">
 			<div className="flex items-center justify-between mb-4">
 				<button
 					type="button"
@@ -480,7 +480,7 @@ const SupportTicketDetail: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 text-sm">
 					<div>
 						<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
 							{__('Customer', 'doublescale')}
@@ -512,7 +512,7 @@ const SupportTicketDetail: React.FC = () => {
 								value={ticket.mailbox_id ? String(ticket.mailbox_id) : undefined}
 								onValueChange={(v) => handleMailboxChange(v)}
 							>
-								<SelectTrigger className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]">
+								<SelectTrigger className="border !rounded-lg !h-10 !border-border px-2 py-1 text-sm w-full max-w-[12rem]">
 									<SelectValue placeholder={__('Select mailbox', 'doublescale')} />
 								</SelectTrigger>
 								<SelectContent>
@@ -534,7 +534,7 @@ const SupportTicketDetail: React.FC = () => {
 								value={ticket.agent_user_id ? String(ticket.agent_user_id) : 'unassigned'}
 								onValueChange={(v) => handleAssigneeChange(v === 'unassigned' ? '' : v)}
 							>
-								<SelectTrigger className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]">
+								<SelectTrigger className="border !rounded-lg !h-10 !border-border px-2 py-1 text-sm w-full max-w-[12rem]">
 									<SelectValue placeholder={__('Unassigned', 'doublescale')} />
 								</SelectTrigger>
 								<SelectContent>
@@ -585,7 +585,7 @@ const SupportTicketDetail: React.FC = () => {
 								handleStatusChange(v as TicketStatus)
 							}
 						>
-							<SelectTrigger className="border rounded px-2 py-1">
+							<SelectTrigger className="border !rounded-lg !h-10 !border-border px-2 py-1">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -607,7 +607,7 @@ const SupportTicketDetail: React.FC = () => {
 								handlePriorityChange(v as TicketPriority)
 							}
 						>
-							<SelectTrigger className="border rounded px-2 py-1">
+							<SelectTrigger className="border !rounded-lg !h-10 !border-border px-2 py-1">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>

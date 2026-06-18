@@ -201,27 +201,30 @@ export function DataTableActions<TData>({
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
 			{config.bulkActions?.enabled && (
 				<div className="max-sm:w-full max-sm:[&_button]:w-full">
-				<BulkActionSelect
-					bulkAction={config.bulkActions?.currentAction}
-					setBulkAction={config.bulkActions?.onActionChange}
-					selectedRowKeys={
-						config.selection?.selectedKeys.map((key) =>
-							key.toString()
-						) || []
-					}
-					data={table.getRowModel().rows.map((row) => row.original)}
-					doBulkAction={config.bulkActions?.onExecuteAction}
-					setSelectedLists={
-						config.bulkActions.lists?.onSelectionChange ||
-						(() => { })
-					}
-					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => { })
-					}
-					selectedLists={config.bulkActions.lists?.selected || []}
-					selectedTags={config.bulkActions.tags?.selected || []}
-					activeTab={activeTab}
-				/>
+					<BulkActionSelect
+						bulkAction={config.bulkActions?.currentAction}
+						setBulkAction={config.bulkActions?.onActionChange}
+						selectedRowKeys={
+							config.selection?.selectedKeys.map((key) =>
+								key.toString()
+							) || []
+						}
+						data={table
+							.getRowModel()
+							.rows.map((row) => row.original)}
+						doBulkAction={config.bulkActions?.onExecuteAction}
+						setSelectedLists={
+							config.bulkActions.lists?.onSelectionChange ||
+							(() => {})
+						}
+						setSelectedTags={
+							config.bulkActions.tags?.onSelectionChange ||
+							(() => {})
+						}
+						selectedLists={config.bulkActions.lists?.selected || []}
+						selectedTags={config.bulkActions.tags?.selected || []}
+						activeTab={activeTab}
+					/>
 				</div>
 			)}
 
@@ -245,17 +248,14 @@ export function DataTableActions<TData>({
 								className={actionButtonClassName}
 							>
 								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
-									<FiltersIcon
-										width={14}
-										height={14}
-									/>
+									<FiltersIcon width={14} height={14} />
 								</span>
 								<span className="text-foreground">
 									{__('Filters', 'doublescale')}
 								</span>
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="sm:max-w-[800px]">
+						<DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
 							<DialogHeader>
 								<DialogTitle>
 									<CustomDialogHeader
@@ -289,7 +289,6 @@ export function DataTableActions<TData>({
 									type="button"
 									onClick={handleApplyCampaignFilters}
 									variant="default"
-
 								>
 									{__('Apply Filters', 'doublescale')}
 								</Button>
@@ -315,19 +314,16 @@ export function DataTableActions<TData>({
 							<Button
 								variant="outline"
 								onClick={handleAdvancedFiltersDialogOpen}
-								className={actionButtonClassName}
+								className={`${actionButtonClassName} relative`}
 							>
 								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
-									<FiltersIcon
-										width={14}
-										height={14}
-									/>
+									<FiltersIcon width={14} height={14} />
 								</span>
 								<span className="text-foreground">
 									{__('Advanced Filters', 'doublescale')}
 								</span>
 								{!isProActive && (
-									<Lock className="!h-3.5 !w-3.5 text-amber-500" />
+									<Lock className="!h-6 !w-6 text-amber-500 absolute -top-2.5 -right-1.5 bg-white rounded-full p-1" />
 								)}
 							</Button>
 						</DialogTrigger>
@@ -361,7 +357,6 @@ export function DataTableActions<TData>({
 									disabled={config.filters?.isApplying}
 									className="w-full"
 									variant="outline"
-
 								>
 									{config.filters?.isApplying
 										? __('Applying...', 'doublescale')
@@ -375,7 +370,6 @@ export function DataTableActions<TData>({
 					{showProModal && (
 						<ProAutomationModal
 							visible={showProModal}
-
 							onClose={() => setShowProModal(false)}
 							featureName={__('Advanced Filters', 'doublescale')}
 						/>
@@ -396,10 +390,7 @@ export function DataTableActions<TData>({
 							className={actionButtonClassName}
 						>
 							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
-								<ColumnsIcon
-									width={14}
-									height={14}
-								/>
+								<ColumnsIcon width={14} height={14} />
 							</span>
 							<span className="text-foreground">
 								{__('Manage Columns', 'doublescale')}

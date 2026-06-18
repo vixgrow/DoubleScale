@@ -90,6 +90,39 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 	const total =
 		(analytics?.total_sent || 0) + (analytics?.total_received || 0);
 
+	const emailStatsCards = useMemo(() => {
+		if (!analytics) {
+			return [];
+		}
+
+		return [
+			{
+				key: 'total-emails',
+				icon: <ContactTotalEmailsIcon width={40} height={40} />,
+				value: total,
+				label: __('Total Emails', 'doublescale'),
+				iconBgClass: 'bg-primary/10',
+				iconColor: 'text-primary',
+			},
+			{
+				key: 'open-rate',
+				icon: <OpenRateIcon width={40} height={40} />,
+				value: `${analytics.open_rate?.toFixed(2) || '0.00'}%`,
+				label: __('Open Rate', 'doublescale'),
+				iconBgClass: 'bg-emerald-50',
+				iconColor: 'text-emerald-600',
+			},
+			{
+				key: 'click-rate',
+				icon: <ClickRateIcon width={40} height={40} />,
+				value: `${analytics.click_rate?.toFixed(2) || '0.00'}%`,
+				label: __('Click Rate', 'doublescale'),
+				iconBgClass: 'bg-violet-50',
+				iconColor: 'text-violet-600',
+			},
+		];
+	}, [analytics, total]);
+
 	return (
 		<div className="doublescale-emails flex flex-col gap-5">
 			<div className="flex justify-between items-center">
@@ -108,30 +141,34 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 			</div>
 
 			{/* Statistics Cards */}
-			{analytics && (
-				<div className="flex gap-5">
-				<MessageStatsCard
-					icon={<ContactTotalEmailsIcon width={40} height={40} />}
-					value={total}
-					label={__('Total Emails', 'doublescale')}
-					iconBgClass="bg-primary/10"
-					iconColor="text-primary"
-				/>
-				<MessageStatsCard
-					icon={<OpenRateIcon width={40} height={40} />}
-					value={`${analytics?.open_rate?.toFixed(2) || '0.00'}%`}
-					label={__('Open Rate', 'doublescale')}
-					iconBgClass="bg-emerald-50"
-					iconColor="text-emerald-600"
-				/>
-				<MessageStatsCard
-					icon={<ClickRateIcon width={40} height={40} />}
-					value={`${analytics?.click_rate?.toFixed(2) || '0.00'}%`}
-					label={__('Click Rate', 'doublescale')}
-					iconBgClass="bg-violet-50"
-					iconColor="text-violet-600"
-				/>
-				</div>
+			{emailStatsCards.length > 0 && (
+				<>
+					<div className="flex flex-col gap-4 sm:hidden">
+						{emailStatsCards.map((card) => (
+							<MessageStatsCard
+								key={card.key}
+								icon={card.icon}
+								value={card.value}
+								label={card.label}
+								iconBgClass={card.iconBgClass}
+								iconColor={card.iconColor}
+								layout="centered"
+							/>
+						))}
+					</div>
+					<div className="hidden gap-5 sm:flex">
+						{emailStatsCards.map((card) => (
+							<MessageStatsCard
+								key={card.key}
+								icon={card.icon}
+								value={card.value}
+								label={card.label}
+								iconBgClass={card.iconBgClass}
+								iconColor={card.iconColor}
+							/>
+						))}
+					</div>
+				</>
 			)}
 
 			{/* Messages Display */}
@@ -168,26 +205,26 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 				)}
 			</div>
 
-		{/* Dialogs */}
-		<EmailDetails
-			campaignEmail={campaignEmail}
-			onClose={() => setCampaignEmail(null)}
-			onResendSuccess={() => {
-				setCampaignEmail(null);
-				refetch();
-			}}
-			onReply={handleReply}
-		/>
-		<SendEmailDialog
-			open={showSendEmailModal}
-			onClose={() => {
-				setShowSendEmailModal(false);
-				setReplyToEmail(null);
-				refetch();
-			}}
-			contact={contact}
-			replyTo={replyToEmail}
-		/>
+			{/* Dialogs */}
+			<EmailDetails
+				campaignEmail={campaignEmail}
+				onClose={() => setCampaignEmail(null)}
+				onResendSuccess={() => {
+					setCampaignEmail(null);
+					refetch();
+				}}
+				onReply={handleReply}
+			/>
+			<SendEmailDialog
+				open={showSendEmailModal}
+				onClose={() => {
+					setShowSendEmailModal(false);
+					setReplyToEmail(null);
+					refetch();
+				}}
+				contact={contact}
+				replyTo={replyToEmail}
+			/>
 		</div>
 	);
 };

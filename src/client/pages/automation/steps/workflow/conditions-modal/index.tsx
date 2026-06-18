@@ -367,7 +367,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						rulesGroups={filteredRulesGroups}
 					/>
 				</div>
-				<DialogFooter className="shrink-0 gap-2  bg-white p-6 sm:flex-row sm:justify-end">
+				<DialogFooter className="shrink-0 gap-2  bg-white p-6 flex-row justify-end">
 					<Button
 						type="button"
 						variant="outline"

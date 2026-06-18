@@ -463,6 +463,12 @@ const PaginatedSelect = ({
 							onMenuScrollToBottom={loadMoreOptions}
 							placeholder={placeholder}
 							isLoading={isLoading}
+							menuPortalTarget={
+								typeof document !== 'undefined'
+									? document.body
+									: null
+							}
+							menuPosition="fixed"
 							filterOption={() => true}
 							isOptionDisabled={(option) =>
 								(option as any).isDisabled || false
@@ -504,6 +510,11 @@ const PaginatedSelect = ({
 								menu: (base) => ({
 									...base,
 									color: 'black',
+									zIndex: 160010,
+								}),
+								menuPortal: (base) => ({
+									...base,
+									zIndex: 160010,
 								}),
 							}}
 							components={{

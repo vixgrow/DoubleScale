@@ -86,7 +86,7 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign, chartData: externa
 	);
 
 	return (
-		<div className="flex items-center gap-3 p-0 rounded">
+		<div className="flex max-sm:flex-col sm:flex-row lg:flex-col min-[1200px]:flex-row items-center gap-3 p-0 rounded">
 			{/* Chart on the left */}
 			<div className="flex-shrink-0 w-[200px] h-[200px]">
 				<Chart

@@ -13,6 +13,10 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
  * internal dependencies
  */
 import Header from './components/Header';
@@ -38,6 +42,22 @@ export interface BuilderData {
 	sections: EmailSection[];
 	globalSettings: GlobalSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+}
+
+// The email builder canvas needs desktop real estate; below 1024px we show a
+// notice instead of the (unusable) drag-and-drop surface.
+function useIsBelowDesktop() {
+	const [isBelowDesktop, setIsBelowDesktop] = useState(false);
+
+	useEffect(() => {
+		const mql = window.matchMedia('(max-width: 1023px)');
+		const onChange = () => setIsBelowDesktop(mql.matches);
+		mql.addEventListener('change', onChange);
+		setIsBelowDesktop(mql.matches);
+		return () => mql.removeEventListener('change', onChange);
+	}, []);
+
+	return isBelowDesktop;
 }
 
 export interface BuilderProps {
@@ -67,6 +87,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
 	const [templatesRefreshTrigger, setTemplatesRefreshTrigger] = useState(0);
 	const hasLoadedTemplateRef = useRef(false);
+	const isBelowDesktop = useIsBelowDesktop();
 
 	// Parse autoSave prop into enabled/interval
 	const autoSaveConfig =
@@ -331,29 +352,43 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					}
 					handleNavigate={handleNavigate}
 				/>
-				<div
-					className="flex flex-1 overflow-hidden"
-					style={{ backgroundColor: '#e6eff7' }}
-				>
-					<DndContext
-						sensors={sensors}
-						collisionDetection={customCollisionDetection}
-						onDragStart={handleDragStart}
-						onDragEnd={handleDragEnd}
-						modifiers={[snapCenterToCursor]}
+				{isBelowDesktop ? (
+					<div
+						className="flex flex-1 items-center justify-center overflow-auto p-6"
+						style={{ backgroundColor: '#e6eff7' }}
 					>
-						<Sidebar
-							sidebarCloseTrigger={sidebarCloseTrigger}
-							openGlobalSettings={handleOpenGlobalSettings}
-							openTemplatesOnMount={openTemplates}
-						/>
-						<Canvas />
+						<p className="max-w-md text-center text-base font-medium text-foreground">
+							{__(
+								'The email builder is available on desktop only. Please open it on a larger screen (1024px or wider) to start designing.',
+								'doublescale'
+							)}
+						</p>
+					</div>
+				) : (
+					<div
+						className="flex flex-1 overflow-hidden"
+						style={{ backgroundColor: '#e6eff7' }}
+					>
+						<DndContext
+							sensors={sensors}
+							collisionDetection={customCollisionDetection}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
+							modifiers={[snapCenterToCursor]}
+						>
+							<Sidebar
+								sidebarCloseTrigger={sidebarCloseTrigger}
+								openGlobalSettings={handleOpenGlobalSettings}
+								openTemplatesOnMount={openTemplates}
+							/>
+							<Canvas />
 
-						<DragOverlay dropAnimation={dropAnimation}>
-							<DragOverlayRenderer activeItem={activeItem} />
-						</DragOverlay>
-					</DndContext>
-				</div>
+							<DragOverlay dropAnimation={dropAnimation}>
+								<DragOverlayRenderer activeItem={activeItem} />
+							</DragOverlay>
+						</DndContext>
+					</div>
+				)}
 			</div>
 		</>
 	);

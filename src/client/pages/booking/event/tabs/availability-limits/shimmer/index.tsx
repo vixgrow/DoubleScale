@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Shimmer = () => {
 	return (
-        <div className="grid grid-cols-2 gap-5 px-9">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <Card className="rounded-lg"><CardContent>
                     <div className="animate-pulse">
                         {/* Header shimmer */}

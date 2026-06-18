@@ -155,8 +155,8 @@ const AvailabilitySection: React.FC<{
                     icon={<CalendarTickIcon />}
                 />
                 {event?.calendar.type === 'team' && (
-                    <div className='flex items-center mt-4'>
-                        <div className='flex flex-col gap-[1px]'>
+                    <div className="mt-4 flex flex-col gap-3 max-[768px]:gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0 flex-1 flex flex-col gap-[1px]">
                             <div className="text-[#09090B] text-[16px] font-semibold">
                                 {__('Choose a common schedule', 'doublescale')}
                             </div>
@@ -194,8 +194,8 @@ const AvailabilitySection: React.FC<{
                             }}
                             className={
                                 availabilityMeta?.is_common
-                                    ? 'bg-primary'
-                                    : 'bg-gray-400'
+                                    ? 'bg-primary shrink-0'
+                                    : 'bg-gray-400 shrink-0'
                             }
                         />
                     </div>
@@ -252,12 +252,12 @@ const AvailabilitySection: React.FC<{
                         />
                     </CardContent></Card>
                 <Card className="mt-6"><CardContent>
-                        <div className='flex items-center'>
-                            <div className='flex flex-col gap-[1px]'>
-                                <div className="text-[#09090B] text-[20px]">
+                        <div className="flex flex-col gap-3 max-[768px]:gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0 flex-1 flex flex-col gap-[1px]">
+                                <div className="text-[#09090B] text-[20px] max-[768px]:text-lg">
                                     {__('Reserve Times', 'doublescale')}
                                 </div>
-                                <div className="text-[#232325] text-[16px]">
+                                <div className="text-[#232325] text-[16px] max-[768px]:text-sm">
                                     {__(
                                         'Enable to reserve selected times for this event only. When disabled, times remain available and may disappear if booked by others.',
                                         'doublescale'
@@ -268,7 +268,9 @@ const AvailabilitySection: React.FC<{
                                 checked={reservetimes}
                                 onCheckedChange={handleToggle}
                                 className={
-                                    reservetimes ? 'bg-primary' : 'bg-gray-400'
+                                    reservetimes
+                                        ? 'bg-primary shrink-0'
+                                        : 'bg-gray-400 shrink-0'
                                 }
                             />
                         </div>

@@ -63,7 +63,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
 			{/* Months row */}
 			<div className="border-t pt-4">
-				<div className="flex gap-2 justify-center flex-wrap">
+				<div className="flex gap-2 justify-start sm:justify-center flex-wrap">
 					{MONTHS.map((month, index) => {
 						const monthNumber = index + 1;
 						const isActive = monthNumber === selectedMonth;

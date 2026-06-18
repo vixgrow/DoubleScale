@@ -115,7 +115,7 @@ function ContactsContent({ onSkip: _onSkip, onPrevious, onNext }: ContactsConten
 				</p>
 			</div>
 			<div className="min-h-0 flex-1 ">
-			<div className="grid grid-cols-2 gap-6 justify-center items-center max-w-2xl mx-auto ">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center items-center max-w-2xl mx-auto ">
 				<button
 					onClick={() => setDialogOpen(true)}
 					className="group relative flex flex-col items-center justify-center gap-4 p-8 text-foreground border border-border bg-[#fff] 
@@ -150,7 +150,7 @@ function ContactsContent({ onSkip: _onSkip, onPrevious, onNext }: ContactsConten
 			</div>
 
 			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
-				<div className="flex flex-wrap items-center justify-end gap-6">
+				<div className="flex flex-wrap items-center justify-between gap-3 lg:justify-end sm:gap-6">
 					<Button
 						type="button"
 						size="lg"

@@ -93,7 +93,7 @@ const SingleAvailability = ({
 					</p>
 				</>
 			)}
-            <Card className="mt-4 pt-4"><CardContent>
+            <Card className="mt-4 pt-4 overflow-hidden"><CardContent className="min-w-0">
                     <Schedule
                         availability={availability.value}
                         onCustomAvailabilityChange={onCustomAvailabilityChange}

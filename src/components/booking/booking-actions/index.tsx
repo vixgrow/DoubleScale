@@ -73,6 +73,9 @@ const statues: Record<string, string[]> = applyFilters(
 	}
 ) as Record<string, string[]>;
 
+const confirmationDialogClassName =
+	'!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-3 rounded-xl p-4 sm:mx-auto sm:p-6 !translate-x-[-50%] !translate-y-[-50%] z-[160100]';
+
 interface BookingActionsProps {
 	booking: Booking;
 	type: 'popover' | 'button';
@@ -286,19 +289,19 @@ const BookingActions: React.FC<BookingActionsProps> = ({
                         setCancelReason('');
                     }
                 }}
-            ><DialogContent className="z-[160100]" overlayClassName="z-[160100]"><DialogHeader><DialogTitle>{<div className="gap-2">
+            ><DialogContent className={confirmationDialogClassName} overlayClassName="z-[160100]"><DialogHeader><DialogTitle>{<div className="gap-2">
                                 <div className="flex flex-col justify-center items-center mb-4">
                                     <div className="text-[#EF4444] bg-[#EF44441F] p-2 rounded-lg">
                                         <CancelledCalendarIcon width={56} height={56} />
                                     </div>
                                 </div>
-                                <p className="text-center text-color-primary-text text-xl font-bold">
+                                <p className="text-center text-color-primary-text text-xl font-bold max-[768px]:text-lg">
                                     {__(
                                         'Are you sure you want to cancel this booking?',
                                         'doublescale'
                                     )}
                                 </p>
-                                <p className="text-center text-[#71717A] font-normal">
+                                <p className="text-center text-[#71717A] font-normal max-[768px]:text-sm">
                                     {__(
                                         "by cancelling this booking you won't be able to restore it again!",
                                         'doublescale'
@@ -320,10 +323,10 @@ const BookingActions: React.FC<BookingActionsProps> = ({
                             rows={3}
                         />
 
-                        <div className="flex justify-between gap-2 mt-4">
+                        <div className="flex justify-end gap-2 mt-4">
                             <Button
                                 variant="outline"
-                                className="border border-[#71717A] text-[#71717A] w-1/2"
+
                                 onClick={() => {
                                     setCancelModalVisible(false);
                                     setCancelReason('');
@@ -334,7 +337,8 @@ const BookingActions: React.FC<BookingActionsProps> = ({
                             </Button>
                             <Button
                                 disabled={!cancelReason.trim() || loading}
-                                className="text-white bg-[#EF4444] w-1/2"
+								variant="destructive"
+                                className="text-white bg-[#EF4444]"
                                 onClick={() => {
                                     updateStatus('cancelled', cancelReason);
                                     setCancelModalVisible(false);
@@ -355,29 +359,28 @@ const BookingActions: React.FC<BookingActionsProps> = ({
                         setDeleteModalVisible(false);
                     }
                 }}
-            ><DialogContent className="z-[160100]" overlayClassName="z-[160100]"><DialogHeader><DialogTitle>{<div className="gap-2">
+            ><DialogContent className={confirmationDialogClassName} overlayClassName="z-[160100]"><DialogHeader><DialogTitle>{<div className="gap-2">
                                 <div className="flex flex-col justify-center items-center mb-4">
-                                    <div className="text-[#EF4444] bg-[#EF44441F] p-2 rounded-lg">
+                                    <div className="text-[#EF4444] bg-[#EF44441F] p-2 rounded-lg max-[768px]:p-1.5">
                                         <TrashIcon width={56} height={56} />
                                     </div>
                                 </div>
-                                <p className="text-center text-color-primary-text text-xl font-bold">
+                                <p className="text-center text-color-primary-text text-xl font-bold max-[768px]:text-lg">
                                     {__(
                                         'Are you sure you want to delete this booking?',
                                         'doublescale'
                                     )}
                                 </p>
-                                <p className="text-center text-[#71717A] font-normal">
+                                <p className="text-center text-[#71717A] font-normal max-[768px]:text-sm">
                                     {__(
                                         "by Delete this booking you won't be able to restore it again!",
                                         'doublescale'
                                     )}
                                 </p>
                             </div>}</DialogTitle></DialogHeader>
-                    <div className="flex justify-between gap-2 mt-4">
+                    <div className="flex justify-end gap-2 mt-4">
                         <Button
                             variant="outline"
-                            className="border border-[#71717A] text-[#71717A] w-1/2"
                             onClick={() => {
                                 setDeleteModalVisible(false);
                             }}
@@ -387,7 +390,8 @@ const BookingActions: React.FC<BookingActionsProps> = ({
                         </Button>
                         <Button
                             disabled={loading}
-                            className="text-white bg-[#EF4444] w-1/2"
+							variant="destructive"
+                            className='bg-[#EF4444] text-white'
                             onClick={() => {
                                 deleteBooking();
                                 setDeleteModalVisible(false);

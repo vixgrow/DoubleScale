@@ -15,11 +15,22 @@ import {
 	PlayIcon,
 	Stepper,
 	ListTagFilter,
+	CustomDialogHeader,
+	GradientFilterIcon,
+	PlusIcon,
 } from '@doublescale/components';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import RulesBuilder from '@/components/rules-builder';
 import { getFilteredRulesGroups, getInitialRule } from '@doublescale/utils';
 import {
@@ -71,7 +82,14 @@ const Contacts: React.FC = () => {
 	const [inlineError, setInlineError] = useState<string | null>(null);
 	const [showProModal, setShowProModal] = useState(false);
 	const [proFeatureName, setProFeatureName] = useState('');
+	const [isAdvancedFilterDialogOpen, setIsAdvancedFilterDialogOpen] =
+		useState(false);
 	const applyFetchDoneRef = useRef<(() => void) | null>(null);
+
+	const hasAdvancedFiltersApplied =
+		Array.isArray(filters) &&
+		filters.length > 0 &&
+		Array.isArray(filters[0]);
 
 	// Rules builder state (shared with ConditionsModal component) - non-automation context
 	const filteredRulesGroups = getFilteredRulesGroups(false);
@@ -168,6 +186,32 @@ const Contacts: React.FC = () => {
 		applyFetchDoneRef.current = null;
 	};
 
+	const handleAdvancedFilterDialogOpen = () => {
+		if (hasAdvancedFiltersApplied) {
+			setRules(filters as any);
+		} else {
+			setRules([[getInitialRule(filteredRulesGroups)]]);
+		}
+		setIsAdvancedFilterDialogOpen(true);
+	};
+
+	const handleClearAdvancedFilters = () => {
+		setRules([[getInitialRule(filteredRulesGroups)]]);
+		setFilters([]);
+		setApplyRequested(true);
+		setIsApplying(true);
+		handleApplyFilters();
+		setIsAdvancedFilterDialogOpen(false);
+	};
+
+	const handleApplyAdvancedFilters = () => {
+		setFilters(rules as any);
+		setApplyRequested(true);
+		setIsApplying(true);
+		handleApplyFilters();
+		setIsAdvancedFilterDialogOpen(false);
+	};
+
 	const handleNext = async () => {
 		if (isApplying || !campaign) {
 			return;
@@ -243,6 +287,7 @@ const Contacts: React.FC = () => {
 							campaign?.status === 'processed' ||
 							campaign?.status === 'archived'
 						) && (
+							<div className="lg:block hidden">
 								<Stepper
 									steps={
 										campaign?.settings?.automated
@@ -250,12 +295,12 @@ const Contacts: React.FC = () => {
 											: campaign?.type === 'email'
 												? campaignSteps
 												: campaignSteps.filter(
-													(step) =>
-														step.slug !==
-														'builder' &&
-														step.slug !==
-														'email-templates'
-												)
+														(step) =>
+															step.slug !==
+																'builder' &&
+															step.slug !==
+																'email-templates'
+													)
 									}
 									canProceed="true"
 									currentStep={
@@ -268,7 +313,8 @@ const Contacts: React.FC = () => {
 									onStepClick={goToStep}
 									disableNavigation={isNewCampaign}
 								/>
-							)}
+							</div>
+						)}
 					</div>
 					<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
 						<div className="pb-6">
@@ -299,18 +345,17 @@ const Contacts: React.FC = () => {
 											onValueChange={
 												handleFilterModeChange
 											}
-											className="flex gap-4"
+											className="flex flex-col sm:flex-row gap-4"
 										>
 											<Label
 												htmlFor="list-tags"
 												className={cn(
-													'flex items-center justify-between text-foreground bg-white w-1/2 rounded-xl border px-4 py-3 cursor-pointer transition-all duration-150',
+													'flex items-center justify-between text-foreground bg-white w-full sm:w-1/2 rounded-xl border px-4 py-3 cursor-pointer transition-all duration-150',
 													filterBy === 'list-tags'
 														? 'border-primary'
 														: 'border-border hover:border-border/60 hover:bg-muted/30'
 												)}
 											>
-
 												<span className="text-base">
 													{__(
 														'Lists and Tags',
@@ -341,7 +386,7 @@ const Contacts: React.FC = () => {
 													}
 												}}
 												className={cn(
-													'flex items-center justify-between text-foreground bg-white w-1/2 rounded-xl border px-4 py-3 cursor-pointer transition-all duration-150',
+													'flex items-center justify-between text-foreground bg-white w-full sm:w-1/2 rounded-xl border px-4 py-3 cursor-pointer transition-all duration-150',
 													filterBy === 'advanced'
 														? 'border-primary'
 														: 'border-border hover:border-border/60 hover:bg-muted/30',
@@ -350,7 +395,7 @@ const Contacts: React.FC = () => {
 														: 'cursor-pointer'
 												)}
 											>
-												<span className="flex items-center gap-2">
+												<span className="flex items-center gap-2 text-base">
 													{__(
 														'Advanced Filter',
 														'doublescale'
@@ -379,63 +424,152 @@ const Contacts: React.FC = () => {
 										/>
 									)}
 									{filterBy === 'advanced' && (
-										<div className="space-y-6 border border-border bg-white rounded-xl p-6">
-											<RulesBuilder
-												rules={rules}
-												onChange={setRules}
-												rulesGroups={
-													filteredRulesGroups
-												}
-											/>
-											<div className="flex gap-6 justify-end">
-												<Button
-													variant="destructive"
-													className="bg-white text-destructive border border-destructive hover:text-white"
-													onClick={() => {
-														setRules([
-															[
-																getInitialRule(
-																	filteredRulesGroups
-																),
-															],
-														]);
-														setFilters([]);
-														setApplyRequested(true);
-														setIsApplying(true);
-														handleApplyFilters();
-													}}
-													disabled={
-														isLoading || isApplying
+										<>
+											<div className="sm:hidden">
+												<Dialog
+													open={
+														isAdvancedFilterDialogOpen
 													}
-												>
-													{__(
-														'Clear Filters',
-														'doublescale'
-													)}
-												</Button>
-												<Button
-													variant="secondary"
-													className="bg-white"
-													onClick={() => {
-														// Sync filters then reuse existing handler
-														setFilters(
-															rules as any
-														);
-														setApplyRequested(true);
-														setIsApplying(true);
-														handleApplyFilters();
+													onOpenChange={(open) => {
+														if (open) {
+															handleAdvancedFilterDialogOpen();
+														} else {
+															setIsAdvancedFilterDialogOpen(
+																false
+															);
+														}
 													}}
-													disabled={
-														isLoading || isApplying
-													}
 												>
-													{__(
-														'Apply Filters',
-														'doublescale'
-													)}
-												</Button>
+													<DialogTrigger asChild>
+														<Button
+															variant="secondary"
+															className="w-full bg-white"
+															onClick={
+																handleAdvancedFilterDialogOpen
+															}
+														>
+															<PlusIcon />
+															{hasAdvancedFiltersApplied
+																? __(
+																		'Change condition',
+																		'doublescale'
+																	)
+																: __(
+																		'Add condition',
+																		'doublescale'
+																	)}
+														</Button>
+													</DialogTrigger>
+													<DialogContent
+														overlayClassName="z-[150200]"
+														className="z-[150200] max-h-[90vh] min-w-0 overflow-x-hidden overflow-y-auto sm:max-w-[1100px]"
+													>
+														<DialogHeader>
+															<DialogTitle>
+																<CustomDialogHeader
+																	title={__(
+																		'Advanced Filter',
+																		'doublescale'
+																	)}
+																	subtitle={__(
+																		'Set conditions to filter recipients',
+																		'doublescale'
+																	)}
+																	icon={
+																		<GradientFilterIcon />
+																	}
+																/>
+															</DialogTitle>
+														</DialogHeader>
+														<RulesBuilder
+															className="min-w-0 w-full"
+															rules={rules}
+															onChange={setRules}
+															rulesGroups={
+																filteredRulesGroups
+															}
+														/>
+														<DialogFooter className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+															<Button
+																variant="destructive"
+																className="w-full bg-white text-destructive border border-destructive hover:text-white sm:w-auto"
+																onClick={
+																	handleClearAdvancedFilters
+																}
+																disabled={
+																	isLoading ||
+																	isApplying
+																}
+															>
+																{__(
+																	'Clear Filters',
+																	'doublescale'
+																)}
+															</Button>
+															<Button
+																variant="secondary"
+																className="w-full bg-white sm:w-auto"
+																onClick={
+																	handleApplyAdvancedFilters
+																}
+																disabled={
+																	isLoading ||
+																	isApplying
+																}
+															>
+																{__(
+																	'Apply Filters',
+																	'doublescale'
+																)}
+															</Button>
+														</DialogFooter>
+													</DialogContent>
+												</Dialog>
 											</div>
-										</div>
+											<div className="hidden sm:block space-y-6 border border-border bg-white rounded-xl p-6">
+												<RulesBuilder
+													rules={rules}
+													onChange={setRules}
+													rulesGroups={
+														filteredRulesGroups
+													}
+												/>
+												<div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center sm:justify-end">
+													<Button
+														variant="destructive"
+														className="bg-white text-destructive border border-destructive hover:text-white"
+														onClick={
+															handleClearAdvancedFilters
+														}
+														disabled={
+															isLoading ||
+															isApplying
+														}
+													>
+														{__(
+															'Clear Filters',
+															'doublescale'
+														)}
+													</Button>
+													<Button
+														variant="secondary"
+														className="bg-white"
+														onClick={
+															handleApplyAdvancedFilters
+														}
+														disabled={
+															isLoading ||
+															isApplying
+														}
+													>
+														{__(
+															'Apply Filters',
+															'doublescale'
+														)}
+													</Button>
+												</div>
+											</div>
+										</>
 									)}
 								</div>
 							</div>
@@ -443,7 +577,6 @@ const Contacts: React.FC = () => {
 							<ContactList
 								filters={filters}
 								loading={isApplying}
-								maxHeight={panelHeight}
 								shouldFetch={shouldFetchContacts}
 								onFetchComplete={handleRecipientsFetchComplete}
 								onTotalChange={setTotalRecipients}

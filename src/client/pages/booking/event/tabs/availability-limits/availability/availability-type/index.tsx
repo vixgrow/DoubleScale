@@ -31,7 +31,7 @@ const AvailabilityType: React.FC<AvailabilityTypeProps> = ({
 						value as 'existing' | 'custom'
 					);
 				}}
-				className="flex gap-1"
+				className="grid grid-cols-1 sm:grid-cols-2 gap-2"
 			>
 				<RadioCard
 					value="existing"

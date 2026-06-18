@@ -83,48 +83,50 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 		// Email Layout - All fields
 		return (
 			<>
-				<div className="grid grid-cols-4 gap-6">
-					<div>
-						<p className="text-base text-gray-500 mb-1">
+				<div className="grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div className="min-w-0">
+						<p className="mb-1 text-base text-gray-500">
 							{__('From Name', 'doublescale')}
 						</p>
-						<p className="text-base font-semibold text-gray-900">
+						<p className="break-words text-base font-semibold text-gray-900">
 							{fromName}
 						</p>
 					</div>
-					<div>
-						<p className="text-base text-gray-500 mb-1">
+					<div className="min-w-0">
+						<p className="mb-1 text-base text-gray-500">
 							{__('From Email', 'doublescale')}
 						</p>
-						<p className="text-base font-semibold text-gray-900">
+						<p className="break-all text-base font-semibold text-gray-900">
 							{fromEmail}
 						</p>
 					</div>
 
-					<div>
-						<p className="text-base text-gray-500 mb-1">
+					<div className="min-w-0">
+						<p className="mb-1 text-base text-gray-500">
 							{__('Reply to', 'doublescale')}
 						</p>
-						<p className="text-base font-semibold text-gray-900">
+						<p className="break-all text-base font-semibold text-gray-900">
 							{replyTo}
 						</p>
 					</div>
 
-					<div>
-						<p className="text-base text-gray-500 mb-1">
+					<div className="min-w-0">
+						<p className="mb-1 text-base text-gray-500">
 							{__('Subject', 'doublescale')}
 						</p>
-						<p className="text-base font-semibold text-gray-900">
+						<p className="break-words text-base font-semibold text-gray-900">
 							{emailSubject}
 						</p>
 					</div>
 				</div>
 
-				<div>
-					<p className="text-base text-gray-500 mb-1">
+				<div className="min-w-0">
+					<p className="mb-1 text-base text-gray-500">
 						{__('Preview Text', 'doublescale')}
 					</p>
-					<p className="text-base font-semibold text-gray-900">{previewText}</p>
+					<p className="break-words text-base font-semibold text-gray-900">
+						{previewText}
+					</p>
 				</div>
 			</>
 		);
@@ -139,7 +141,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 			onButtonClick={onEdit}
 			button={button}
 		>
-			<div className="space-y-4">
+			<div className="min-w-0 space-y-4">
 				{renderContent()}
 			</div>
 		</CardLayout>

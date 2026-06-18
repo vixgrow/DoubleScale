@@ -108,7 +108,7 @@ const CalendarEvents: React.FC<{
 							return (
                                 <Card
 									key={event.id}
-									className={`doublescale-booking-calendar-event w-[308px] border-t-4 border-t-primary rounded-xl ${isDisabled ? 'opacity-50' : ''}`}
+									className={`doublescale-booking-calendar-event w-full md:w-[308px] border-t-4 border-t-primary rounded-xl ${isDisabled ? 'opacity-50' : ''}`}
 								><CardContent>
                                         <div className='flex gap-5 flex-col'>
                                             <div className='flex justify-between border-b pb-2'>
@@ -303,7 +303,7 @@ const CalendarEvents: React.FC<{
                                                         paddingRight: 0,
                                                     }}
                                                     disabled={isDisabled}
-                                                    variant='ghost'>{<CloneIcon />} 
+                                                    variant='ghost'>{<CloneIcon />}
                                                     {__('Copy Link', 'doublescale')}
                                                 </Button>
                                                 <Button
@@ -315,7 +315,7 @@ const CalendarEvents: React.FC<{
                                                         setModalShareId(event.id)
                                                     }
                                                     disabled={isDisabled}
-                                                    variant='ghost'>{<ShareIcon />} 
+                                                    variant='ghost'>{<ShareIcon />}
                                                     {__('Share', 'doublescale')}
                                                 </Button>
                                                 {modalShareId !== null && (
@@ -341,7 +341,7 @@ const CalendarEvents: React.FC<{
 						{calendar.type == 'host' && onCreateEvent && (
 							<>
 								<Button
-									className="text-primary border-2 [&_svg]:size-10 border-primary bg-tertiary border-dashed font-[600] w-[310px] text-[20px] flex flex-col items-center justify-center text-center h-[385px] hover:text-white"
+									className="text-primary border-2 [&_svg]:size-10 border-primary bg-tertiary border-dashed font-[600] w-full sm:w-[310px] text-[20px] flex flex-col items-center justify-center text-center h-[385px] hover:text-white"
 									onClick={() => onCreateEvent(calendar.id)}
 								>
 									<CalendarAddIcon width={40} height={40}/>

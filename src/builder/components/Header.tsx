@@ -130,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	};
 	return (
-		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
+		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
 				{campaign && (
 					<BreadcrumbComponent
@@ -145,7 +145,8 @@ const Header: React.FC<HeaderProps> = ({
 					/>
 				)}
 			</div>
-			<div className="flex items-center gap-3">
+			<div className="flex flex-col lg:flex-row items-center gap-3">
+				<div className="flex items-center gap-3">
 				<SaveStatusIndicator
 					isSaving={isSaving}
 					lastSaved={lastSaved}
@@ -172,6 +173,7 @@ const Header: React.FC<HeaderProps> = ({
 					<RedoIcon />
 				</Button>
 				<div className="h-6 w-px bg-border" />
+				</div>
 				{campaign && !onSave && (
 					<>
 						<DropdownMenu>

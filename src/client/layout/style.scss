@@ -15,6 +15,11 @@ body.js.is-fullscreen-mode {
 	overflow-y: auto;
 	overflow-x: hidden;
 
+	@media (min-width: 300px) and (max-width: 900px) {
+		margin-top: -46px;
+		height: calc(100% + 46px);
+	}
+
 	#adminmenumain,
 	#wpadminbar {
 		display: none;

@@ -12,12 +12,6 @@ import { Plus as PlusOutlined } from 'lucide-react';
 import { filter } from 'lodash';
 import { IoEllipsisHorizontal as SlOptions } from 'react-icons/io5';
 
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
-
 /**
  * Internal dependencies
  */
@@ -378,7 +372,7 @@ const Calendars: React.FC = () => {
 				</div>
 			</div>
 			<Card className="doublescale-booking-calendars-action"><CardContent>
-				<div className='flex justify-between items-center'>
+				<div className='flex sm:flex-row flex-col justify-between items-center gap-2'>
 					<div>
 						<Tabs
 							value={
@@ -411,7 +405,7 @@ const Calendars: React.FC = () => {
 							</TabsList>
 						</Tabs>
 					</div>
-					<div className='flex gap-3'>
+					<div className='flex flex-col sm:flex-row gap-3'>
 						<SearchInput
 							placeholder={__('Search Events', 'doublescale')}
 							onChange={(e) => setSearch(e.target.value)}
@@ -593,12 +587,12 @@ const Calendars: React.FC = () => {
 										(calendar) => (
 											<Card
 												key={calendar.id}
-												className="bg-[#FDFDFD] mb-4"
+												className="bg-[#FDFDFD] w-full mb-4"
 											><CardContent>
 													<div className='flex flex-col gap-5'>
 														<Card className="bg-white"><CardContent>
-															<div className='flex justify-between items-center'>
-																<div className='flex flex-col'>
+															<div className='flex flex-col gap-3 sm:flex-row justify-between items-start sm:items-center w-full'>
+																<div className='flex w-full max-[767px]:flex-row max-[767px]:justify-between max-[767px]:items-center flex-col justify-start'>
 																	<div className="text-[#313131] text-base font-semibold">
 																		{
 																			calendar.name
@@ -628,15 +622,15 @@ const Calendars: React.FC = () => {
 																		</div>
 																	</a>
 																</div>
-																<div className='flex flex-wrap items-center justify-end gap-2'>
+																<div className='flex w-full max-[767px]:justify-between sm:w-auto  justify-end gap-3'>
 																	<Button
-																		className="border-[#EDEBEB] text-color-primary-text flex items-center gap-2"
 																		onClick={() =>
 																			navigate(
 																				`booking/calendars/${calendar.id}`
 																			)
 																		}
 																		variant='ghost'
+																		className=' !p-0 '
 																	>
 																		<SettingsIcon
 																			width={
@@ -651,8 +645,37 @@ const Calendars: React.FC = () => {
 																			'doublescale'
 																		)}
 																	</Button>
-																	<Popover>
-																		<PopoverTrigger asChild>
+																	<CalendarActions
+																		calendar={calendar}
+																		setCloneMessage={
+																			setCloneMessage
+																		}
+																		onSaved={
+																			handleSaved
+																		}
+																		onEdit={(
+																			id
+																		) =>
+																			navigate(
+																				`booking/calendars/${id}`
+																			)
+																		}
+																		onDelete={(
+																			id
+																		) =>
+																			deleteCalendar(
+																				{
+																					id: id,
+																				} as Calendar
+																			)
+																		}
+																		setDeleteCalendarMessage={
+																			setDeleteCalendarMessage
+																		}
+																		setErrorMessage={
+																			setErrorMessage
+																		}
+																		trigger={
 																			<Button
 																				className="bg-[#EDEBEB] border-none rounded-xl"
 																				variant="ghost"
@@ -664,46 +687,12 @@ const Calendars: React.FC = () => {
 																			>
 																				<SlOptions className="text-color-primary-text text-[18px]" />
 																			</Button>
-																		</PopoverTrigger>
-																		<PopoverContent className="w-auto p-0">
-																			<CalendarActions
-																				calendar={
-																					calendar
-																				}
-																				setCloneMessage={
-																					setCloneMessage
-																				}
-																				onSaved={
-																					handleSaved
-																				}
-																				onEdit={(
-																					id
-																				) =>
-																					navigate(
-																						`booking/calendars/${id}`
-																					)
-																				}
-																				onDelete={(
-																					id
-																				) =>
-																					deleteCalendar(
-																						{
-																							id: id,
-																						} as Calendar
-																					)
-																				}
-																				setDeleteCalendarMessage={
-																					setDeleteCalendarMessage
-																				}
-																				setErrorMessage={
-																					setErrorMessage
-																				}
-																			/>
-																		</PopoverContent>
-																	</Popover>
+																		}
+																	/>
 																</div>
 															</div>
-														</CardContent></Card>
+														</CardContent>
+														</Card>
 														<CalendarEvents
 															navigate={navigate}
 															calendar={calendar}

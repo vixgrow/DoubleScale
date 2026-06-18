@@ -153,7 +153,7 @@ export default function ListTagFilter({
 			/>
 
 			{showBtns && (
-				<div className="flex gap-6 justify-end">	
+				<div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center sm:justify-end">	
 					<Button
 						variant="destructive"
 						onClick={handleClearFilters}

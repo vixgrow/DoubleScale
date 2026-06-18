@@ -33,7 +33,7 @@ const BookingList: React.FC<BookingListProps> = ({
 				const [day, number] = dateLabel.split('-');
 				return (
                     <div
-						className="flex gap-8 border-solid border border-[#DEE1E6] bottom-2 p-7 my-3 rounded-xl"
+						className="flex flex-col md:flex-row gap-8 border-solid border border-[#DEE1E6] bottom-2 p-7 my-3 rounded-xl"
 						key={dateLabel}
 					>
                         <div className="flex flex-col justify-center items-center bg-primary text-white rounded-2xl p-2 w-24 h-24">

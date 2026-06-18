@@ -480,8 +480,9 @@ const Automation: React.FC = () => {
 				}}
 			>
 				<DialogContent
+					id="doublescale-automation-editor-dialog"
 					hideCloseButton={!loading && !!automation}
-					className="w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
+					className="doublescale-automation-editor-dialog w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
 					style={{
 						paddingTop: '0px',
 						paddingLeft: '0px',

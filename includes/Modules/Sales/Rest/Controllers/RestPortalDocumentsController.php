@@ -74,7 +74,7 @@ class RestPortalDocumentsController extends RestController {
 					'args'                => array(
 						'type' => array(
 							'type'    => 'string',
-							'enum'    => array( 'all', 'invoice', 'proposal', 'contract' ),
+							'enum'    => array( 'all', 'invoice', 'proposal', 'contract', 'credit_note' ),
 							'default' => 'all',
 						),
 					),
@@ -140,6 +140,15 @@ class RestPortalDocumentsController extends RestController {
 
 		// Sort the merged list newest-first by created_at (a full datetime, unlike
 		// the Y-m-d doc dates), then drop the private sort key and cap.
+		/**
+		 * Allow Pro modules to append customer-visible document rows before sort.
+		 *
+		 * @param array<int, array<string, mixed>> $rows    Merged rows with `_sort`.
+		 * @param ContactModel                      $contact Resolved contact.
+		 * @param string                            $type    Requested type filter.
+		 */
+		$rows = apply_filters( 'doublescale_portal_documents_rows', $rows, $contact, $type );
+
 		usort(
 			$rows,
 			static function ( $a, $b ) {

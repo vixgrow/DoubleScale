@@ -62,6 +62,9 @@ const STATUS_TONES: Record<string, string> = {
 	paused: 'bg-amber-100 text-amber-600',
 	canceled: 'bg-gray-200 text-gray-700',
 	not_subscribed: 'bg-gray-200 text-gray-700',
+	partially_applied: 'bg-amber-100 text-amber-600',
+	applied: 'bg-green-100 text-green-600',
+	void: 'bg-gray-200 text-gray-700',
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {

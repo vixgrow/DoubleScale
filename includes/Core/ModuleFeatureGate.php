@@ -77,6 +77,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'integrations',
 		'leadscoring',
 		'subscriptions',
+		'credit_notes',
 		'tasks',
 	);
 
@@ -112,6 +113,7 @@ function doublescale_child_module_parent_map(): array {
 		'documents'     => 'sales',
 		'contracts'     => 'sales',
 		'subscriptions' => 'sales',
+		'credit_notes'  => 'sales',
 	);
 
 	/**
@@ -207,6 +209,12 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 				// Mirrors the real Pro module's dependencies() so the pre-Pro
 				// upsell row nests under Sales and signals the Documents need.
 				'dependencies' => array( 'contacts', 'sales', 'documents' ),
+			);
+		case 'credit_notes':
+			return array(
+				'label'        => __( 'Credit Notes', 'doublescale' ),
+				'description'  => __( 'Issue credit notes, apply credit to invoices, and track open customer balances.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales' ),
 			);
 		case 'tasks':
 			return array(

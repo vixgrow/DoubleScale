@@ -167,6 +167,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/proposals/:id': 'documents',
 	'sales/invoices': 'documents',
 	'sales/invoices/:id': 'documents',
+	'sales/credit-notes': 'credit_notes',
+	'sales/credit-notes/:id': 'credit_notes',
 	'sales/contracts': 'contracts',
 	'sales/contracts/:id': 'contracts',
 	'sales/contract-types': 'contracts',
@@ -494,6 +496,22 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 										path: 'sales-pipeline',
 										label: __('Pipelines', 'doublescale'),
 										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
+						...(config.isModuleToggleEnabled('credit_notes')
+							? [
+									{
+										path: 'sales/credit-notes',
+										label: __('Credit Notes', 'doublescale'),
+										requiredCapability: [
+											'doublescale_view_sales',
+											'doublescale_manage_all_sales',
+											'doublescale_manage_own_sales',
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
 											'doublescale_sales_rep',

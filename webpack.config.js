@@ -23,6 +23,14 @@ const supportPortalCustomFieldsAlias = fs.existsSync(
 			'src/renderer/support/portal-custom-fields-stub.ts'
 		);
 
+const proPortalCreditNoteDetail = path.resolve(
+	__dirname,
+	'../doublescale-pro/src/renderer/portal/credit-note-detail.tsx'
+);
+const portalCreditNoteDetailAlias = fs.existsSync(proPortalCreditNoteDetail)
+	? proPortalCreditNoteDetail
+	: path.resolve(__dirname, 'src/renderer/portal/credit-note-detail-stub.tsx');
+
 /**
  * Aliases used by both the admin SPA build and the public booking renderer.
  *
@@ -434,6 +442,8 @@ const portalRendererConfig = {
 			// when Pro is installed.
 			'@doublescale-pro/support-portal-custom-fields':
 				supportPortalCustomFieldsAlias,
+			'@doublescale-pro/portal-credit-note-detail':
+				portalCreditNoteDetailAlias,
 			'@pro/client': path.resolve(
 				__dirname,
 				'../doublescale-pro/src/client'

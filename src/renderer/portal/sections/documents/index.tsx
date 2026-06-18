@@ -5,7 +5,7 @@
  * INLINE via the Free public renderers (invoice, proposal, contract).
  */
 
-import { useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Link,
@@ -19,8 +19,16 @@ import {
 import PublicContractApp from '../../../contract/app';
 import PublicInvoiceApp from '../../../invoice/app';
 import PublicProposalApp from '../../../proposal/app';
+import PortalCreditNoteDetail from '@doublescale-pro/portal-credit-note-detail';
 
 import { fetchDocuments, fetchPayments, useAsync, type DocumentFilter } from '../../api';
+import {
+	isCreditNotesPortalModuleEnabled,
+	isCreditNotesPortalProActive,
+} from '../../credit-notes';
+import CreditNotesPortalProGate from '../../credit-note-pro-gate';
+import { isInvoicesPaymentsPortalProActive } from '../../invoices-payments';
+import InvoicePaymentsPortalProGate from '../../invoice-payments-pro-gate';
 import type { PortalDocument, PortalPayment } from '../../types';
 import { formatDate, formatMoney } from '../../shared/format';
 import { ChevronLeftIcon, DocumentIcon, PaymentIcon } from '../../shared/icons';
@@ -29,13 +37,21 @@ import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
 /** Document filter tabs plus the consolidated payment-history view. */
 type DocTab = DocumentFilter | 'payments';
 
-const TABS: Array<{ key: DocTab; label: string }> = [
+const BASE_TABS: Array<{ key: Exclude<DocTab, 'credit_note'>; label: string }> = [
 	{ key: 'all', label: __('All', 'doublescale') },
 	{ key: 'invoice', label: __('Invoices', 'doublescale') },
 	{ key: 'proposal', label: __('Proposals', 'doublescale') },
 	{ key: 'contract', label: __('Contracts', 'doublescale') },
-	{ key: 'payments', label: __('Payments', 'doublescale') },
 ];
+
+const PAYMENTS_TAB = { key: 'payments' as const, label: __('Payments', 'doublescale') };
+const CREDIT_NOTES_TAB = {
+	key: 'credit_note' as const,
+	label: __('Credit Notes', 'doublescale'),
+};
+
+const documentRouteSegment = (type: PortalDocument['type']): string =>
+	type === 'credit_note' ? 'credit-note' : type;
 
 const isPayable = (doc: PortalDocument): boolean =>
 	doc.type === 'invoice' && doc.balance !== null && doc.balance > 0;
@@ -60,18 +76,27 @@ const documentTypeLabel = (doc: PortalDocument): string => {
 			doc.number
 		);
 	}
+	if (doc.type === 'credit_note') {
+		return sprintf(
+			/* translators: %s is the credit note number. */
+			__('Credit note · %s', 'doublescale'),
+			doc.number
+		);
+	}
 	return __('Proposal', 'doublescale');
 };
 
 const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 	const isInvoice = doc.type === 'invoice';
 	const isContract = doc.type === 'contract';
-	const title = isInvoice ? doc.number : doc.subject || doc.number;
+	const isCreditNote = doc.type === 'credit_note';
+	const title =
+		isInvoice || isCreditNote ? doc.number : doc.subject || doc.number;
 	const endDate = isInvoice ? doc.due_date : doc.open_till;
 
 	return (
 		<Link
-			to={`${doc.type}/${doc.hash}`}
+			to={`${documentRouteSegment(doc.type)}/${doc.hash}`}
 			className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary"
 		>
 			<div className="flex min-w-0 items-start gap-3">
@@ -109,6 +134,24 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 								)}
 							</span>
 						)}
+						{isCreditNote && doc.amount_paid !== null && doc.amount_paid > 0 && (
+							<span className="text-green-600">
+								{sprintf(
+									/* translators: %s is the amount applied so far. */
+									__('Applied: %s', 'doublescale'),
+									formatMoney(doc.amount_paid, doc.currency)
+								)}
+							</span>
+						)}
+						{isCreditNote && doc.balance !== null && doc.balance > 0 && (
+							<span>
+								{sprintf(
+									/* translators: %s is the remaining credit amount. */
+									__('Remaining: %s', 'doublescale'),
+									formatMoney(doc.balance, doc.currency)
+								)}
+							</span>
+						)}
 						{endDate && (
 							<span>
 								{isInvoice
@@ -135,10 +178,13 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 };
 
 const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
+	const invoicesPro = isInvoicesPaymentsPortalProActive();
 	const { data, loading, error } = useAsync(() => fetchDocuments(filter), [
 		filter,
 	]);
-	const docs = data?.data || [];
+	const docs = (data?.data || []).filter(
+		(doc) => invoicesPro || doc.type !== 'invoice'
+	);
 
 	if (loading) {
 		return <Spinner />;
@@ -251,6 +297,18 @@ const PaymentsList = () => {
 
 const DocumentsHome = () => {
 	const [tab, setTab] = useState<DocTab>('all');
+	const creditNotesEnabled = isCreditNotesPortalModuleEnabled();
+	const creditNotesPro = isCreditNotesPortalProActive();
+	const invoicesPaymentsPro = isInvoicesPaymentsPortalProActive();
+
+	const tabs = useMemo(() => {
+		const items: Array<{ key: DocTab; label: string }> = [...BASE_TABS];
+		if (creditNotesEnabled) {
+			items.push(CREDIT_NOTES_TAB);
+		}
+		items.push(PAYMENTS_TAB);
+		return items;
+	}, [creditNotesEnabled]);
 
 	return (
 		<section>
@@ -259,7 +317,7 @@ const DocumentsHome = () => {
 			</h2>
 
 			<div className="mb-4 inline-flex flex-wrap rounded-lg border border-border bg-card p-1">
-				{TABS.map((t) => (
+				{tabs.map((t) => (
 					<button
 						key={t.key}
 						type="button"
@@ -276,7 +334,15 @@ const DocumentsHome = () => {
 			</div>
 
 			{tab === 'payments' ? (
-				<PaymentsList />
+				invoicesPaymentsPro ? (
+					<PaymentsList />
+				) : (
+					<InvoicePaymentsPortalProGate />
+				)
+			) : tab === 'invoice' && !invoicesPaymentsPro ? (
+				<InvoicePaymentsPortalProGate />
+			) : tab === 'credit_note' && creditNotesEnabled && !creditNotesPro ? (
+				<CreditNotesPortalProGate />
 			) : (
 				<DocumentsList filter={tab} />
 			)}
@@ -311,6 +377,17 @@ const DocumentDetailFrame = ({
 
 const InvoiceDetail = () => {
 	const { hash } = useParams();
+	const invoicesPaymentsPro = isInvoicesPaymentsPortalProActive();
+
+	if (!invoicesPaymentsPro) {
+		return (
+			<section>
+				<BackLink />
+				<InvoicePaymentsPortalProGate />
+			</section>
+		);
+	}
+
 	return (
 		<DocumentDetailFrame>
 			{hash ? (
@@ -348,12 +425,26 @@ const ContractDetail = () => {
 	);
 };
 
+const CreditNoteDetail = () => {
+	const { hash } = useParams();
+	return (
+		<DocumentDetailFrame>
+			{hash ? (
+				<PortalCreditNoteDetail hash={hash} />
+			) : (
+				<ErrorState message={__('Credit note not found.', 'doublescale')} />
+			)}
+		</DocumentDetailFrame>
+	);
+};
+
 const Documents = () => (
 	<Routes>
 		<Route index element={<DocumentsHome />} />
 		<Route path="invoice/:hash" element={<InvoiceDetail />} />
 		<Route path="proposal/:hash" element={<ProposalDetail />} />
 		<Route path="contract/:hash" element={<ContractDetail />} />
+		<Route path="credit-note/:hash" element={<CreditNoteDetail />} />
 		<Route path="*" element={<Navigate to="" replace />} />
 	</Routes>
 );

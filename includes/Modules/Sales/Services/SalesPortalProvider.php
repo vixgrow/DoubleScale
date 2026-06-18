@@ -67,6 +67,25 @@ final class SalesPortalProvider {
 		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_summary_card' ), 10, 2 );
 		add_filter( 'doublescale_portal_timeline_items', array( $this, 'add_timeline_items' ), 10, 2 );
 		add_filter( 'doublescale_portal_calendar_events', array( $this, 'add_calendar_events' ), 10, 4 );
+		add_filter( 'doublescale_client_portal_config', array( $this, 'inject_portal_config' ) );
+	}
+
+	/**
+	 * Expose credit-notes portal flags to the renderer (Pro supplies the REST URL).
+	 *
+	 * @param array<string, mixed> $config Localized portal config.
+	 * @return array<string, mixed>
+	 */
+	public function inject_portal_config( array $config ): array {
+		$config['credit_notes_module_enabled'] = doublescale_sales_child_module_active( 'credit_notes' );
+		$config['credit_notes_pro_active']       = function_exists( 'doublescale_is_pro_addon_active' )
+			&& doublescale_is_pro_addon_active()
+			&& doublescale_sales_child_module_active( 'credit_notes' );
+		$config['invoices_payments_pro_active'] = function_exists( 'doublescale_is_pro_addon_active' )
+			&& doublescale_is_pro_addon_active()
+			&& doublescale_sales_child_module_active( 'documents' );
+
+		return $config;
 	}
 
 	/**
@@ -273,7 +292,13 @@ final class SalesPortalProvider {
 				->count();
 		}
 
-		return $count;
+		/**
+		 * Allow Pro modules to include additional customer-visible documents.
+		 *
+		 * @param int           $count   Current count.
+		 * @param ContactModel  $contact Resolved contact.
+		 */
+		return (int) apply_filters( 'doublescale_portal_visible_document_count', $count, $contact );
 	}
 
 	/**

@@ -56,6 +56,7 @@ import {
 	CustomFieldsIcon,
 	EmailSequenceIcon,
 	PiplelinesIcon,
+	SalesIcon,
 	SmtpIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
@@ -532,6 +533,94 @@ registerAdminPage('subscription-detail', {
 		'doublescale_crm_manager',
 		'doublescale_sales_manager',
 		'doublescale_sales_rep',
+	],
+});
+
+// Credit Notes — stub registration the Pro plugin overrides via filter.
+registerAdminPage('sales-credit-notes', {
+	path: 'sales/credit-notes',
+	hidden: true,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Notes', 'doublescale')}
+			description={__(
+				'Issue credit notes, apply credit to unpaid invoices, and track open customer balances with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Create & send credit notes to customers', 'doublescale'),
+				__('Apply credit to one or more unpaid invoices', 'doublescale'),
+				__('Track open credit and allocation history', 'doublescale'),
+				__('Customer portal & downloadable PDF', 'doublescale'),
+				__('Sequential CN numbering (CN-000001)', 'doublescale'),
+			]}
+		/>
+	),
+	label: __('Credit Notes', 'doublescale'),
+	icon: <SalesIcon />,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+registerAdminPage('sales-credit-note-new', {
+	path: 'sales/credit-notes/new',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Notes', 'doublescale')}
+			description={__(
+				'Create and manage credit notes with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('New Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
+	],
+});
+
+registerAdminPage('sales-credit-note', {
+	path: 'sales/credit-notes/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Note Details', 'doublescale')}
+			description={__(
+				'View credit note details and apply credit to invoices with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: ['doublescale_view_sales'],
+});
+
+registerAdminPage('sales-credit-note-edit', {
+	path: 'sales/credit-notes/:id/edit',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Edit Credit Note', 'doublescale')}
+			description={__(
+				'Edit credit notes with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Edit Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
 	],
 });
 

@@ -42,7 +42,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
  * Keep aligned with {@see doublescale_child_module_parent_map()} in PHP.
  */
 export const CHILD_MODULES_BY_PARENT: Readonly<Record<string, readonly string[]>> = {
-	sales: ['documents', 'contracts', 'deals'],
+	sales: ['documents', 'contracts', 'deals', 'credit_notes'],
 };
 
 const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
@@ -50,7 +50,7 @@ const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
 );
 
 /** Child sub-features that only function with the Pro add-on installed. */
-const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals']);
+const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals', 'credit_notes']);
 
 /**
  * Pro-only toggles the PHP REST layer persists even when the module class is not loaded yet.
@@ -249,6 +249,14 @@ function childPlaceholderFor(slug: string): Pick<ModuleInfo, 'label' | 'descript
 					'doublescale'
 				),
 			};
+		case 'credit_notes':
+			return {
+				label: __('Credit Notes', 'doublescale'),
+				description: __(
+					'Issue credit notes, apply credit to invoices, and track open customer balances.',
+					'doublescale'
+				),
+			};
 	}
 	return { label: slug, description: '' };
 }
@@ -269,6 +277,8 @@ export function getChildModuleDisplayLabel(
 			return __('Proposals & Invoices', 'doublescale');
 		case 'contracts':
 			return __('Contracts', 'doublescale');
+		case 'credit_notes':
+			return __('Credit Notes', 'doublescale');
 		default:
 			return fallbackLabel;
 	}

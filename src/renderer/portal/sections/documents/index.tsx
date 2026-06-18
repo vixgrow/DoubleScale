@@ -21,9 +21,9 @@ import PublicInvoiceApp from '../../../invoice/app';
 import PublicProposalApp from '../../../proposal/app';
 
 import { fetchDocuments, fetchPayments, useAsync, type DocumentFilter } from '../../api';
-import type { PortalDocument } from '../../types';
+import type { PortalDocument, PortalPayment } from '../../types';
 import { formatDate, formatMoney } from '../../shared/format';
-import { ChevronLeftIcon, DocumentIcon } from '../../shared/icons';
+import { ChevronLeftIcon, DocumentIcon, PaymentIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
 
 /** Document filter tabs plus the consolidated payment-history view. */
@@ -167,6 +167,44 @@ const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
 	);
 };
 
+const PaymentRow = ({ payment }: { payment: PortalPayment }) => (
+	<Link
+		to={`invoice/${payment.invoice_hash}`}
+		className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary"
+	>
+		<div className="flex min-w-0 items-start gap-3">
+			<span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-700">
+				<PaymentIcon className="h-5 w-5" />
+			</span>
+			<div className="min-w-0">
+				<p className="text-lg font-semibold text-foreground">
+					{formatMoney(payment.amount, payment.currency)}
+				</p>
+				<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+					{payment.payment_date && (
+						<span>{formatDate(payment.payment_date)}</span>
+					)}
+					{payment.payment_mode && (
+						<span className="inline-flex rounded-full bg-secondary px-2 py-0.5 text-xs font-medium capitalize text-secondary-foreground">
+							{payment.payment_mode.replace(/_/g, ' ')}
+						</span>
+					)}
+					<span>
+						{sprintf(
+							/* translators: %s is the invoice number. */
+							__('Invoice %s', 'doublescale'),
+							payment.invoice_number
+						)}
+					</span>
+				</div>
+			</div>
+		</div>
+		<span className="shrink-0 text-sm font-medium text-primary">
+			{__('View invoice', 'doublescale')}
+		</span>
+	</Link>
+);
+
 const PaymentsList = () => {
 	const { data, loading, error } = useAsync(() => fetchPayments(), []);
 	const payments = data?.data || [];
@@ -192,11 +230,11 @@ const PaymentsList = () => {
 	return (
 		<div className="space-y-4">
 			{data && data.total_paid > 0 && (
-				<div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-					<p className="text-xs uppercase tracking-wide text-muted-foreground">
+				<div className="rounded-xl border border-border bg-gradient-to-br from-card to-secondary/40 p-5 shadow-sm">
+					<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 						{__('Total paid', 'doublescale')}
 					</p>
-					<p className="mt-1 text-2xl font-bold text-foreground">
+					<p className="mt-1 text-3xl font-bold text-foreground">
 						{formatMoney(data.total_paid, data.currency)}
 					</p>
 				</div>
@@ -204,37 +242,7 @@ const PaymentsList = () => {
 
 			<div className="space-y-3">
 				{payments.map((payment) => (
-					<Link
-						key={payment.id}
-						to={`invoice/${payment.invoice_hash}`}
-						className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary"
-					>
-						<div className="min-w-0">
-							<p className="font-semibold text-foreground">
-								{formatMoney(payment.amount, payment.currency)}
-							</p>
-							<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-								{payment.payment_date && (
-									<span>{formatDate(payment.payment_date)}</span>
-								)}
-								{payment.payment_mode && (
-									<span className="capitalize">
-										{payment.payment_mode.replace(/_/g, ' ')}
-									</span>
-								)}
-								<span>
-									{sprintf(
-										/* translators: %s is the invoice number. */
-										__('Invoice %s', 'doublescale'),
-										payment.invoice_number
-									)}
-								</span>
-							</div>
-						</div>
-						<span className="shrink-0 text-sm font-medium text-primary">
-							{__('View invoice', 'doublescale')}
-						</span>
-					</Link>
+					<PaymentRow key={payment.id} payment={payment} />
 				))}
 			</div>
 		</div>
@@ -282,7 +290,7 @@ const BackLink = () => {
 		<button
 			type="button"
 			onClick={() => navigate('/documents')}
-			className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
+			className="mb-4 inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary hover:text-foreground"
 		>
 			<ChevronLeftIcon className="h-4 w-4" />
 			{__('Back to documents', 'doublescale')}
@@ -290,45 +298,53 @@ const BackLink = () => {
 	);
 };
 
+const DocumentDetailFrame = ({
+	children,
+}: {
+	children: React.ReactNode;
+}) => (
+	<section>
+		<BackLink />
+		<div className="min-w-0">{children}</div>
+	</section>
+);
+
 const InvoiceDetail = () => {
 	const { hash } = useParams();
 	return (
-		<section className="space-y-4">
-			<BackLink />
+		<DocumentDetailFrame>
 			{hash ? (
 				<PublicInvoiceApp hash={hash} />
 			) : (
 				<ErrorState message={__('Invoice not found.', 'doublescale')} />
 			)}
-		</section>
+		</DocumentDetailFrame>
 	);
 };
 
 const ProposalDetail = () => {
 	const { hash } = useParams();
 	return (
-		<section className="space-y-4">
-			<BackLink />
+		<DocumentDetailFrame>
 			{hash ? (
 				<PublicProposalApp hash={hash} />
 			) : (
 				<ErrorState message={__('Proposal not found.', 'doublescale')} />
 			)}
-		</section>
+		</DocumentDetailFrame>
 	);
 };
 
 const ContractDetail = () => {
 	const { hash } = useParams();
 	return (
-		<section className="space-y-4">
-			<BackLink />
+		<DocumentDetailFrame>
 			{hash ? (
 				<PublicContractApp hash={hash} />
 			) : (
 				<ErrorState message={__('Contract not found.', 'doublescale')} />
 			)}
-		</section>
+		</DocumentDetailFrame>
 	);
 };
 

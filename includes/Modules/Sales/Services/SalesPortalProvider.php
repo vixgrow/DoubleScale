@@ -32,6 +32,8 @@ use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
+use DoubleScale\Modules\Contracts\Constants\ContractStatus;
+use DoubleScale\Modules\Contracts\Models\ContractModel;
 
 /**
  * SalesPortalProvider.
@@ -81,7 +83,7 @@ final class SalesPortalProvider {
 			'order'        => 30,
 			'is_available' => static fn() => doublescale_sales_documents_ready()
 				&& doublescale_any_sales_document_module_active(),
-			'badge'        => static fn( $contact ) => self::count_actionable( $contact ),
+			'badge'        => static fn( $contact ) => self::count_visible_documents( $contact ),
 		);
 
 		return $sections;
@@ -241,8 +243,41 @@ final class SalesPortalProvider {
 	}
 
 	/**
-	 * Count a contact's actionable documents: outstanding invoices + open
-	 * proposals. Drives the nav badge.
+	 * Count customer-visible documents (mirrors the portal Documents → All list).
+	 *
+	 * @param ContactModel|null $contact Resolved contact.
+	 * @return int
+	 */
+	private static function count_visible_documents( $contact ): int {
+		if ( ! $contact instanceof ContactModel ) {
+			return 0;
+		}
+
+		$count = 0;
+
+		if ( doublescale_sales_child_module_active( 'documents' ) ) {
+			$count += (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', InvoiceStatus::DRAFT )
+				->count();
+
+			$count += (int) ProposalModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', ProposalStatus::DRAFT )
+				->count();
+		}
+
+		if ( doublescale_sales_child_module_active( 'contracts' ) ) {
+			$count += (int) ContractModel::where( 'contact_id', (int) $contact->id )
+				->where( 'status', '!=', ContractStatus::DRAFT )
+				->where( 'hide_from_customer', false )
+				->where( 'is_trash', false )
+				->count();
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Count outstanding invoices + open proposals (summary / attention helpers).
 	 *
 	 * @param ContactModel|null $contact Resolved contact.
 	 * @return int

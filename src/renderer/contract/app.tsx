@@ -8,6 +8,7 @@ import { Download, PenLine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ContractDocumentPreview } from '@/components/sales/document-preview';
 
 import {
 	getPublicContractPdfUrl,
@@ -20,9 +21,6 @@ import { SignaturePad } from './signature-pad';
 interface Props {
 	hash: string;
 }
-
-const formatMoney = (value: number, currency: string) =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 const PublicContractApp = ({ hash }: Props) => {
 	const { data, loading, error, refetch } = usePublicContract(hash);
@@ -108,65 +106,27 @@ const PublicContractApp = ({ hash }: Props) => {
 				</a>
 			</div>
 
-			<div className="space-y-4">
-				<div>
-					<div className="text-sm text-muted-foreground">{data.contract_number}</div>
-					<h1 className="text-2xl font-semibold mt-1">{data.subject}</h1>
-				</div>
-
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-					<div>
-						<div className="text-muted-foreground">{__('Value', 'doublescale')}</div>
-						<div className="font-medium">
-							{formatMoney(data.contract_value, data.currency)}
-						</div>
-					</div>
-					{data.contract_type ? (
-						<div>
-							<div className="text-muted-foreground">{__('Type', 'doublescale')}</div>
-							<div className="font-medium">{data.contract_type.name}</div>
-						</div>
-					) : null}
-					{data.start_date ? (
-						<div>
-							<div className="text-muted-foreground">{__('Start', 'doublescale')}</div>
-							<div className="font-medium">{data.start_date}</div>
-						</div>
-					) : null}
-					{data.end_date ? (
-						<div>
-							<div className="text-muted-foreground">{__('End', 'doublescale')}</div>
-							<div className="font-medium">{data.end_date}</div>
-						</div>
-					) : null}
-				</div>
-
-				{data.description ? (
-					<div
-						className="prose prose-sm max-w-none border-t pt-4"
-						// eslint-disable-next-line react/no-danger
-						dangerouslySetInnerHTML={{ __html: data.description }}
-					/>
-				) : null}
-			</div>
+			<ContractDocumentPreview contract={data} />
 
 			{attachmentsLoading ? null : attachments.length > 0 ? (
-				<div className="border-t pt-6 mt-6 space-y-3">
-					<h2 className="font-medium">{__('Attachments', 'doublescale')}</h2>
-					<ul className="space-y-2">
+				<div className="ds-sales-doc__section doublescale-contract-renderer__attachments">
+					<h4 className="ds-sales-doc__section-title">
+						{__('Attachments', 'doublescale')}
+					</h4>
+					<div className="ds-sales-doc__attachments">
 						{attachments.map((file) => (
-							<li key={file.file_hash}>
-								<a
-									href={file.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-sm text-blue-600 hover:underline"
-								>
-									{file.file_name}
-								</a>
-							</li>
+							<a
+								key={file.file_hash}
+								href={file.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="ds-sales-doc__attachment-link"
+							>
+								<Download className="h-4 w-4 shrink-0" />
+								{file.file_name}
+							</a>
 						))}
-					</ul>
+					</div>
 				</div>
 			) : null}
 

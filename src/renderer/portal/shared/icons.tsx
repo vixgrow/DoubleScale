@@ -79,6 +79,15 @@ export const MapPinIcon = (p: IconProps) =>
 
 export const ChevronLeftIcon = (p: IconProps) => base(<path d="M15 6l-6 6 6 6" />, p);
 
+export const PaymentIcon = (p: IconProps) =>
+	base(
+		<>
+			<rect x="2" y="5" width="20" height="14" rx="2" />
+			<path d="M2 10h20" />
+		</>,
+		p
+	);
+
 export const ChevronRightIcon = (p: IconProps) => base(<path d="M9 6l6 6-6 6" />, p);
 
 const REGISTRY: Record<string, (p: IconProps) => JSX.Element> = {

@@ -8,8 +8,10 @@ import { __ } from '@wordpress/i18n';
 import {
 	INVOICE_STATUS_LABELS,
 	PROPOSAL_STATUS_LABELS,
+	CONTRACT_STATUS_LABELS,
 	type InvoiceStatus,
 	type ProposalStatus,
+	type ContractStatus,
 } from '@/constants/sales';
 import { computeAmount, computeLineItemsTotals } from './line-items-editor';
 import type { Invoice, LineItem, Proposal } from '@/types/sales';
@@ -23,6 +25,9 @@ const proposalStatusClass = (status: ProposalStatus): string =>
 	`ds-sales-doc__status ds-sales-doc__status--${status}`;
 
 const invoiceStatusClass = (status: InvoiceStatus): string =>
+	`ds-sales-doc__status ds-sales-doc__status--${status}`;
+
+const contractStatusClass = (status: string): string =>
 	`ds-sales-doc__status ds-sales-doc__status--${status}`;
 
 const DocumentShell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -338,6 +343,92 @@ export const InvoiceDocumentPreview: React.FC<InvoiceDocumentPreviewProps> = ({
 				<div className="ds-sales-doc__section">
 					<h4 className="ds-sales-doc__section-title">{__('Terms', 'doublescale')}</h4>
 					<p className="ds-sales-doc__section-body">{invoice.terms}</p>
+				</div>
+			) : null}
+		</DocumentShell>
+	);
+};
+
+export interface ContractPreviewData {
+	contract_number: string;
+	subject: string;
+	status: string;
+	contract_value: number;
+	currency: string;
+	start_date: string | null;
+	end_date: string | null;
+	description: string;
+	contract_type: { id: number; name: string } | null;
+	is_expired: boolean;
+}
+
+interface ContractDocumentPreviewProps {
+	contract: ContractPreviewData;
+}
+
+export const ContractDocumentPreview: React.FC<ContractDocumentPreviewProps> = ({
+	contract,
+}) => {
+	const statusKey = contract.status as ContractStatus;
+	const statusLabel =
+		CONTRACT_STATUS_LABELS[statusKey] || contract.status;
+
+	return (
+		<DocumentShell>
+			<div className="ds-sales-doc__header">
+				<div className="ds-sales-doc__title-block">
+					<p className="ds-sales-doc__doc-type">{__('Contract', 'doublescale')}</p>
+					<h2 className="ds-sales-doc__number">{contract.contract_number}</h2>
+					{contract.subject ? (
+						<p className="ds-sales-doc__subject">{contract.subject}</p>
+					) : null}
+				</div>
+				<div className="ds-sales-doc__status-group">
+					<span className={contractStatusClass(contract.status)}>
+						{statusLabel}
+					</span>
+					{contract.is_expired ? (
+						<span className="ds-sales-doc__status ds-sales-doc__status--expired">
+							{__('Expired', 'doublescale')}
+						</span>
+					) : null}
+				</div>
+			</div>
+
+			<div className="ds-sales-doc__meta">
+				<div className="ds-sales-doc__party">
+					<h5 className="ds-sales-doc__party-label">
+						{__('Contract Details', 'doublescale')}
+					</h5>
+					{contract.contract_type ? (
+						<p className="ds-sales-doc__party-line">
+							{__('Type', 'doublescale')}: {contract.contract_type.name}
+						</p>
+					) : null}
+					<p className="ds-sales-doc__party-line">
+						{__('Value', 'doublescale')}:{' '}
+						{formatMoney(contract.contract_value, contract.currency)}
+					</p>
+					<p className="ds-sales-doc__party-line">
+						{__('Currency', 'doublescale')}: {contract.currency}
+					</p>
+				</div>
+				<div className="ds-sales-doc__dates">
+					<DateRow label={__('Start Date', 'doublescale')} value={contract.start_date} />
+					<DateRow label={__('End Date', 'doublescale')} value={contract.end_date} />
+				</div>
+			</div>
+
+			{contract.description ? (
+				<div className="ds-sales-doc__section">
+					<h4 className="ds-sales-doc__section-title">
+						{__('Description', 'doublescale')}
+					</h4>
+					<div
+						className="ds-sales-doc__section-body"
+						// eslint-disable-next-line react/no-danger
+						dangerouslySetInnerHTML={{ __html: contract.description }}
+					/>
 				</div>
 			) : null}
 		</DocumentShell>

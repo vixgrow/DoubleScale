@@ -44,6 +44,8 @@ interface RichTextEditorProps {
 	content: string;
 	onChange: (content: string) => void;
 	className?: string;
+	/** Hint shown inside the editing surface while it is empty. */
+	placeholder?: string;
 	fontSize?: number;
 	fontFamily?: string;
 	/** Builder sidebar: dashed toolbar, dark editing surface (Figma Text Settings). */
@@ -63,6 +65,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	content,
 	onChange,
 	className,
+	placeholder,
 	fontSize = 16,
 	fontFamily = 'Arial',
 	theme = 'default',
@@ -737,6 +740,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
+				${
+					placeholder
+						? `.${editorId}:empty::before {
+					content: ${JSON.stringify(placeholder)};
+					color: #9ca3af;
+					pointer-events: none;
+					cursor: text;
+				}`
+						: ''
+				}
 				.${editorId} * {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
@@ -1067,6 +1080,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							borderColor: isBuilderDark
 								? 'rgba(255, 255, 255, 0.12)'
 								: '#e5e5e5',
+							backgroundColor: isBuilderDark
+								? 'rgba(255, 255, 255, 0.06)'
+								: '#ffffff',
 							fontSize: `${fontSize}px`,
 							fontFamily: fontFamily,
 							lineHeight: '1.5',

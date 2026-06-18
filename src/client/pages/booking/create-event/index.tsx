@@ -754,7 +754,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 												<Card
 													key={item.value}
 													className={cn(
-														'cursor-pointer transition-all rounded-lg w-[200px]',
+														'cursor-pointer transition-all rounded-lg w-full sm:w-[200px]',
 														event.duration ==
 															item.value
 															? 'border-primary bg-secondary'
@@ -787,14 +787,14 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 											))}
 										</div>
 									</div>
-									<div className="flex gap-5 items-center">
-										<div className="text-[#09090B] text-[16px]">
+									<div className="flex flex-col max-[768px]:gap-2 sm:flex-row gap-5 sm:items-center">
+										<div className="text-[#09090B] text-[16px] shrink-0">
 											{__(
 												'Custom Duration',
 												'doublescale'
 											)}
 										</div>
-										<div className="flex items-center h-[48px] w-[194px] rounded-lg border border-input bg-background pr-3 focus-within:ring-2 focus-within:ring-ring">
+										<div className="flex items-center h-[48px] w-full sm:w-[194px] rounded-lg border border-input bg-background pr-3 focus-within:ring-2 focus-within:ring-ring">
 											<Input
 												type="number"
 												className="h-full !border-0 !rounded-l-lg !rounded-r-none outline-none shadow-none focus-visible:!ring-0 focus-visible:!ring-offset-0"
@@ -851,19 +851,19 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 				<Card>
 					<CardContent>
 						<div className="flex flex-col gap-5">
-							<div className="flex justify-between">
+							<div className="flex flex-col max-[768px]:gap-2 sm:flex-row sm:justify-between">
 								<div className="text-[#09090B] text-[16px]">
 									{__('How Will You Meet', 'doublescale')}
 									<span className="text-red-500">*</span>
 								</div>
-								<div className="text-[#848484] italic">
+								<div className="text-[#848484] italic max-[768px]:text-sm">
 									{__(
 										'You Can Select More Than One',
 										'doublescale'
 									)}
 								</div>
 							</div>
-							<div className="grid grid-cols-2 gap-[15px]">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
 								<Locations
 									locations={event.location || []}
 									onChange={(locations) => {
@@ -906,6 +906,9 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 	const submitDisabled =
 		loading || !event.location || event.location.length === 0;
 
+	const mobileProgress = ((current + 1) / steps.length) * 100;
+	const currentStepMeta = steps[current];
+
 	return (
 		<Dialog
 			open={visible}
@@ -913,9 +916,9 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 				if (!open) onClose();
 			}}
 		>
-			<DialogContent className="w-full max-w-[1000px] max-h-[90vh] overflow-y-auto">
-				<div className="flex flex-col doublescale-booking-create-event">
-					<div className="flex gap-2.5 items-center pb-8">
+			<DialogContent className="w-full max-w-[1000px] max-h-[90vh] overflow-y-auto overflow-x-hidden max-[768px]:max-w-[calc(100vw-2rem)] max-[768px]:p-4">
+				<div className="flex min-w-0 flex-col doublescale-booking-create-event">
+					<div className="flex gap-2.5 items-center pb-8 max-[768px]:gap-3 max-[768px]:pb-4 pr-8">
 						<ShareEventIcon />
 						<Header
 							header={__('Create a new event', 'doublescale')}
@@ -931,7 +934,28 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 							closeNotice={() => setErrorBanner(null)}
 						/>
 					)}
-					<div className="flex items-center gap-2 mb-6 bg-muted px-6 py-4 rounded-lg">
+					<div className="mb-6 md:hidden">
+						<div className="flex items-center gap-2 px-2 py-3">
+							<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+								{current + 1}
+							</span>
+							<div className="min-w-0">
+								<p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+									{`Step ${current + 1}/${steps.length}`}
+								</p>
+								<p className="truncate text-sm font-semibold text-foreground">
+									{currentStepMeta.title}
+								</p>
+							</div>
+						</div>
+						<div className="h-1 w-full rounded-full bg-primary/15">
+							<div
+								className="h-full rounded-full bg-primary transition-all duration-300"
+								style={{ width: `${mobileProgress}%` }}
+							/>
+						</div>
+					</div>
+					<div className="mb-6 hidden items-center gap-2 rounded-lg bg-muted px-6 py-4 md:flex">
 						{steps.map((item, idx) => (
 							<div
 								key={item.title}
@@ -962,15 +986,15 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 						))}
 					</div>
 
-					<div className="mb-6">{steps[current].content}</div>
+					<div className="mb-6 min-w-0">{steps[current].content}</div>
 
-					<div className="flex gap-2.5 items-center justify-end">
+					<div className="flex flex-col-reverse max-[768px]:gap-3 sm:flex-row gap-2.5 items-stretch sm:items-center justify-end">
 						{current > 0 && (
 							<Button
 								onClick={prev}
 								disabled={loading}
 								variant="ghost"
-								className="bg-muted text-primary text-[16px] px-16 font-semibold rounded-lg border-none"
+								className="bg-muted text-primary text-[16px] px-16 max-[768px]:w-full max-[768px]:px-4 font-semibold rounded-lg border-none"
 							>
 								{__('Back', 'doublescale')}
 							</Button>
@@ -980,8 +1004,8 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 								onClick={next}
 								disabled={continueDisabled}
 								className={cn(
-									'rounded-lg px-12 font-semibold text-[16px] text-white bg-primary border-none transition',
-									current === 0 && 'w-full'
+									'rounded-lg px-12 max-[768px]:w-full max-[768px]:px-4 font-semibold text-[16px] text-white bg-primary border-none transition',
+									current === 0 && 'w-full md:w-auto'
 								)}
 								variant="default"
 							>
@@ -991,7 +1015,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 							<Button
 								onClick={handleSubmit}
 								disabled={submitDisabled}
-								className="bg-primary px-8 text-white text-[16px] font-semibold rounded-lg border-none"
+								className="bg-primary px-8 w-full sm:w-auto text-white text-[16px] font-semibold rounded-lg border-none"
 								variant="default"
 							>
 								{__('Submit Event', 'doublescale')}

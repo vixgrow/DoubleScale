@@ -108,7 +108,7 @@ const CalendarEvents: React.FC<{
 							return (
                                 <Card
 									key={event.id}
-									className={`doublescale-booking-calendar-event w-full sm:w-[308px] border-t-4 border-t-primary rounded-xl ${isDisabled ? 'opacity-50' : ''}`}
+									className={`doublescale-booking-calendar-event w-full md:w-[308px] border-t-4 border-t-primary rounded-xl ${isDisabled ? 'opacity-50' : ''}`}
 								><CardContent>
                                         <div className='flex gap-5 flex-col'>
                                             <div className='flex justify-between border-b pb-2'>

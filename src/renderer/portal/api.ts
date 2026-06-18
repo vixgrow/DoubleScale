@@ -19,6 +19,7 @@ import type {
 	PortalCalendarResponse,
 	PortalDocument,
 	PortalPaymentsResponse,
+	PortalSubscription,
 	PortalTimelineResponse,
 } from './types';
 
@@ -91,6 +92,19 @@ export const fetchDocuments = (
 
 export const fetchPayments = (): Promise<PortalPaymentsResponse> =>
 	apiFetch<PortalPaymentsResponse>({ path: `${PORTAL}/payments` });
+
+export const fetchSubscriptions = (): Promise<{ data: PortalSubscription[] }> =>
+	apiFetch<{ data: PortalSubscription[] }>({
+		path: `${PORTAL}/subscriptions`,
+	});
+
+export const cancelSubscription = (
+	id: number
+): Promise<{ message: string; subscription: PortalSubscription }> =>
+	apiFetch<{ message: string; subscription: PortalSubscription }>({
+		path: `${PORTAL}/subscriptions/${id}/cancel`,
+		method: 'POST',
+	});
 
 /**
  * Aggregated calendar feed for a date window. `start`/`end` are `YYYY-MM-DD`;

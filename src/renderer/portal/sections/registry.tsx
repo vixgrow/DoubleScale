@@ -13,12 +13,14 @@ const Calendar = lazy(() => import('./calendar'));
 const Tickets = lazy(() => import('./tickets'));
 const Bookings = lazy(() => import('./bookings'));
 const Documents = lazy(() => import('./documents'));
+const Subscriptions = lazy(() => import('./subscriptions'));
 
 export const SECTION_REGISTRY: Record<string, ComponentType> = {
 	calendar: Calendar,
 	tickets: Tickets,
 	bookings: Bookings,
 	documents: Documents,
+	subscriptions: Subscriptions,
 };
 
 export const hasSection = (slug: string): boolean =>

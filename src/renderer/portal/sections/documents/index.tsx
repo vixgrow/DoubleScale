@@ -27,6 +27,8 @@ import {
 	isCreditNotesPortalProActive,
 } from '../../credit-notes';
 import CreditNotesPortalProGate from '../../credit-note-pro-gate';
+import { isInvoicesPaymentsPortalProActive } from '../../invoices-payments';
+import InvoicePaymentsPortalProGate from '../../invoice-payments-pro-gate';
 import type { PortalDocument, PortalPayment } from '../../types';
 import { formatDate, formatMoney } from '../../shared/format';
 import { ChevronLeftIcon, DocumentIcon, PaymentIcon } from '../../shared/icons';
@@ -176,10 +178,13 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 };
 
 const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
+	const invoicesPro = isInvoicesPaymentsPortalProActive();
 	const { data, loading, error } = useAsync(() => fetchDocuments(filter), [
 		filter,
 	]);
-	const docs = data?.data || [];
+	const docs = (data?.data || []).filter(
+		(doc) => invoicesPro || doc.type !== 'invoice'
+	);
 
 	if (loading) {
 		return <Spinner />;
@@ -294,6 +299,7 @@ const DocumentsHome = () => {
 	const [tab, setTab] = useState<DocTab>('all');
 	const creditNotesEnabled = isCreditNotesPortalModuleEnabled();
 	const creditNotesPro = isCreditNotesPortalProActive();
+	const invoicesPaymentsPro = isInvoicesPaymentsPortalProActive();
 
 	const tabs = useMemo(() => {
 		const items: Array<{ key: DocTab; label: string }> = [...BASE_TABS];
@@ -328,7 +334,13 @@ const DocumentsHome = () => {
 			</div>
 
 			{tab === 'payments' ? (
-				<PaymentsList />
+				invoicesPaymentsPro ? (
+					<PaymentsList />
+				) : (
+					<InvoicePaymentsPortalProGate />
+				)
+			) : tab === 'invoice' && !invoicesPaymentsPro ? (
+				<InvoicePaymentsPortalProGate />
 			) : tab === 'credit_note' && creditNotesEnabled && !creditNotesPro ? (
 				<CreditNotesPortalProGate />
 			) : (
@@ -365,6 +377,17 @@ const DocumentDetailFrame = ({
 
 const InvoiceDetail = () => {
 	const { hash } = useParams();
+	const invoicesPaymentsPro = isInvoicesPaymentsPortalProActive();
+
+	if (!invoicesPaymentsPro) {
+		return (
+			<section>
+				<BackLink />
+				<InvoicePaymentsPortalProGate />
+			</section>
+		);
+	}
+
 	return (
 		<DocumentDetailFrame>
 			{hash ? (

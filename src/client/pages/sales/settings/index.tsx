@@ -19,10 +19,13 @@ import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import { TaxesManager } from './taxes-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
+import { InvoicesProGate, PaymentsProGate } from '../pro-gates';
+import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 
 const SalesSettingsPage: React.FC = () => {
 	const navigate = useNavigate();
 	const documentsEnabled = ConfigAPI.isModuleEnabled('documents');
+	const isProActive = useIsProActive();
 	const { data, loading, error, refetch } = useSalesSettings();
 	const [form, setForm] = useState<SalesSettings | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -136,6 +139,7 @@ const SalesSettingsPage: React.FC = () => {
 						</p>
 					</section>
 
+					{isProActive ? (
 					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Invoice emails', 'doublescale')}</h2>
 						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
@@ -158,6 +162,9 @@ const SalesSettingsPage: React.FC = () => {
 							)}
 						</p>
 					</section>
+					) : (
+						<InvoicesProGate />
+					)}
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Contract emails', 'doublescale')}</h2>
@@ -254,7 +261,11 @@ const SalesSettingsPage: React.FC = () => {
 
 				{documentsEnabled ? (
 					<TabsContent value="payments" className="mt-6">
-						<PaymentGatewaysSettings form={form} patch={patch} />
+						{isProActive ? (
+							<PaymentGatewaysSettings form={form} patch={patch} />
+						) : (
+							<PaymentsProGate />
+						)}
 					</TabsContent>
 				) : null}
 

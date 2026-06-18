@@ -2188,29 +2188,39 @@ class RestContactController extends RestController {
 			}
 
 			$custom_fields = $request->get_param( 'custom_fields' );
-			if ( $custom_fields ) {
-				$custom_fields_arr = array();
+			if ( ! $custom_fields ) {
+				return;
+			}
 
-				foreach ( $custom_fields as $custom_field ) {
-					// Check if custom field exists
-					$custom_field_model = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find( $custom_field['id'] );
-					if ( ! $custom_field_model ) {
-						return new WP_Error( 'error', __( 'Custom field not found', 'doublescale' ), array( 'status' => 400 ) );
-					}
-					$validated = $custom_field_model->validate_value( $custom_field['value'] );
+			$normalized_fields = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::normalize_submission( $custom_fields );
+			if ( empty( $normalized_fields ) ) {
+				return;
+			}
 
-					if ( ! $validated ) {
-						continue;
-					}
+			$custom_fields_arr = array();
 
-					$custom_fields_arr[ $custom_field['id'] ] = array(
-						'value'       => $custom_field['value'],
-						'entity_type' => 'contact',
-					);
+			foreach ( $normalized_fields as $field_id => $value ) {
+				$custom_field_model = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find( $field_id );
+				if ( ! $custom_field_model ) {
+					return new WP_Error( 'error', __( 'Custom field not found', 'doublescale' ), array( 'status' => 400 ) );
 				}
 
-				$contact->custom_fields()->sync( $custom_fields_arr );
+				$validated = $custom_field_model->validate_submission_value( $value );
+				if ( is_wp_error( $validated ) ) {
+					return $validated;
+				}
+
+				if ( is_array( $value ) ) {
+					$value = implode( ',', $value );
+				}
+
+				$custom_fields_arr[ $field_id ] = array(
+					'value'       => $value,
+					'entity_type' => 'contact',
+				);
 			}
+
+			$contact->custom_fields()->sync( $custom_fields_arr );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}

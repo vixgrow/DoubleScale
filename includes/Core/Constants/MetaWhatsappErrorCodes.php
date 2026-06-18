@@ -61,6 +61,14 @@ class MetaWhatsappErrorCodes {
 	const TEMPLATE_NOT_APPROVED = 132000;
 
 	/**
+	 * Account not registered
+	 * The business sending number has not been registered with the Cloud Api.
+	 * A number added to a WhatsApp Business Account stays "Pending" until it is
+	 * explicitly registered; sending before that fails with this code.
+	 */
+	const ACCOUNT_NOT_REGISTERED = 133010;
+
+	/**
 	 * Invalid parameter
 	 * A parameter in the request is invalid.
 	 */
@@ -115,6 +123,19 @@ class MetaWhatsappErrorCodes {
 	}
 
 	/**
+	 * Check if an error code means the sending number is not registered
+	 *
+	 * Distinct from opt-out/retriable: this is a one-time setup gap that the
+	 * admin must fix by registering the phone number with the Cloud Api.
+	 *
+	 * @param int $error_code Meta Api error code.
+	 * @return bool True if this is the "account not registered" error.
+	 */
+	public static function is_registration_error( int $error_code ): bool {
+		return self::ACCOUNT_NOT_REGISTERED === $error_code;
+	}
+
+	/**
 	 * Get human-readable opt-out reason from Meta error code
 	 *
 	 * @param int $error_code Meta error code.
@@ -145,6 +166,7 @@ class MetaWhatsappErrorCodes {
 			self::MESSAGE_UNDELIVERABLE        => __( 'Message could not be delivered.', 'doublescale' ),
 			self::REENGAGEMENT_REQUIRED        => __( 'Conversation window expired. Use a template message.', 'doublescale' ),
 			self::TEMPLATE_NOT_APPROVED        => __( 'Template not found or not approved.', 'doublescale' ),
+			self::ACCOUNT_NOT_REGISTERED       => __( 'Your WhatsApp business number is not registered with Meta yet. Open Settings → Integrations → Meta WhatsApp and click "Register Number" to activate it.', 'doublescale' ),
 			self::INVALID_PARAMETER            => __( 'Invalid parameter in request.', 'doublescale' ),
 			self::RATE_LIMIT                   => __( 'Rate limit exceeded. Try again later.', 'doublescale' ),
 		);

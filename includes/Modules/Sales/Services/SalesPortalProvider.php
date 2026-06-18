@@ -30,6 +30,8 @@ use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Services\ProposalUrl;
 
 /**
  * SalesPortalProvider.

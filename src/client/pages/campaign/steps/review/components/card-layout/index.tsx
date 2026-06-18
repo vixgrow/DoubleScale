@@ -21,8 +21,8 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 	button = true,
 }) => {
 	return (
-		<div className="bg-white rounded-xl border border-border">
-			<div className="flex justify-between items-center p-6">
+		<div className="min-w-0 overflow-hidden rounded-xl border border-border bg-white">
+			<div className="flex flex-col sm:flex-row justify-between items-center p-6 gap-4 sm:gap-0">
 				<div className="flex items-center gap-2 text-foreground font-semibold text-lg">
 					<div className="rounded-full p-1 border border-border bg-[#F7F8FA] text-[#0D9DFC]">{icon}</div>
 					{header}
@@ -35,7 +35,7 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 					</Button>
 				)}
 			</div>
-			<div className="pb-6 px-6">{children}</div>
+			<div className="min-w-0 overflow-hidden pb-6 px-6">{children}</div>
 		</div>
 	);
 };

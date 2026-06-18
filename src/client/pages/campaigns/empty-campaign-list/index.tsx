@@ -42,30 +42,30 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 	};
 	
 	return (
-		<div className="flex items-center justify-center border border-gray-200 rounded-lg py-28 px-10">
-			<div className="flex items-center justify-center gap-24">
-				<div>
+		<div className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-6 max-sm:px-4 max-sm:py-5 sm:px-10 sm:py-28">
+			<div className="flex w-full items-center justify-center gap-24 max-sm:gap-0">
+				<div className="hidden sm:block">
 					<img
 						src={EmptyCampaignListImage}
 						alt="Empty Campaign List"
 					/>
 				</div>
-				<div className="w-full max-w-xl">
-					<div className="mb-3">
-						<h2 className="text-2xl font-semibold">
+				<div className="w-full max-w-lg rounded-md p-4 max-sm:max-w-full max-sm:p-3 sm:max-w-xl sm:p-0">
+					<div className="mb-3 max-sm:mb-2">
+						<h2 className="text-2xl font-semibold max-sm:text-lg">
 							{
 								/* translators: %s: Campaign channel name (Email, SMS, etc.) */
 								sprintf(__("Let's Start %s Campaign!", 'doublescale'), channelName)
 							}
 						</h2>
-						<p className="text-base text-gray-400">
+						<p className="text-base text-gray-400 max-sm:text-sm">
 							{__(
 								'Start organizing your workspace for stunning design creation.',
 								'doublescale'
 							)}
 						</p>
 					</div>
-					<ol className="ordered-list">
+					<ol className="ordered-list max-sm:text-sm">
 						<li>
 							{__(
 								'Click "Create Campaign" and Select one of the campaign types depending on your campaign goals.',
@@ -82,7 +82,7 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 							{stepThreeContent[campaignChannel] || stepThreeContent.email}
 						</li>
 					</ol>
-					<div className="flex gap-4 items-center">
+					<div className="flex flex-wrap items-center gap-4 max-sm:flex-col max-sm:gap-3 max-sm:[&_button]:w-full">
 						<Button onClick={handleCreateClick}>
 							{__('Create Campaign', 'doublescale')}
 						</Button>

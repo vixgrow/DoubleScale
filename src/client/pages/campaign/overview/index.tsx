@@ -52,7 +52,7 @@ const Overview: React.FC = () => {
 			}}
 		>
 			<DialogContent
-				className="z-[1800000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
+				className="z-[1800000] flex h-screen w-screen max-w-none flex-col gap-0 bg-white rounded-none shadow-none"
 				style={{
 					paddingTop: '10px',
 					paddingLeft: '0px',
@@ -71,10 +71,10 @@ const Overview: React.FC = () => {
 					</DialogTitle>
 				</DialogHeader>
 				{campaign ? (
-					<div className="px-12 overflow-y-auto py-8 flex-1">
+					<div className="min-h-0 flex-1 overflow-y-auto px-6 py-8 lg:px-12">
 						{campaign.status === 'draft' ? (
 							// Draft campaigns: Show only campaign details, full width
-							<Card className="bg-muted/50 shadow-none px-5 w-full">
+							<Card className="bg-muted/50 shadow-none px-5 w-full min-w-0">
 								<CardHeader className="border-b pb-4 px-0">
 									<CardTitle className="text-xl font-medium text-foreground flex items-center gap-2">
 										<CampaignsIcon width={24} height={24} />
@@ -90,7 +90,7 @@ const Overview: React.FC = () => {
 						<AutomatedRunsView />
 					) : (
 						// Regular campaigns: Show analytics + tabs
-						<div className="flex gap-5">
+						<div className="flex flex-col lg:flex-row gap-5">
 							<Analytics />
 							<TabsSelection />
 						</div>

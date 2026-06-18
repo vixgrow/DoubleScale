@@ -366,14 +366,21 @@ const Templates: React.FC = () => {
 			>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-						<Stepper
-							steps={campaign?.settings?.automated ? automatedCampaignSteps : campaignSteps}
-							canProceed="true"
-							currentStep={campaign?.settings?.automated ? 2 : 1}
-							onStepClick={goToStep}
-							disableNavigation={isNewCampaign}
-						/>
-
+						<div className="hidden lg:block">
+							<Stepper
+								steps={
+									campaign?.settings?.automated
+										? automatedCampaignSteps
+										: campaignSteps
+								}
+								canProceed="true"
+								currentStep={
+									campaign?.settings?.automated ? 2 : 1
+								}
+								onStepClick={goToStep}
+								disableNavigation={isNewCampaign}
+							/>
+						</div>
 						<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
 							<div className="pb-6">
 								<h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -398,64 +405,95 @@ const Templates: React.FC = () => {
 											/>
 										)}
 
-										<div className="flex gap-6">
+										<div className="flex flex-col sm:flex-row gap-0 sm:gap-4 lg:gap-6">
 											<FormField
-												label={__('From Name', 'doublescale')}
+												label={__(
+													'From Name',
+													'doublescale'
+												)}
 												required={true}
 												className="flex-1"
 											>
 												<Input
-													placeholder={__('Name here', 'doublescale')}
-													value={template.settings?.from_name || ''}
+													placeholder={__(
+														'Name here',
+														'doublescale'
+													)}
+													value={
+														template.settings
+															?.from_name || ''
+													}
 													onChange={(e) => {
 														clearError('from_name');
 														updateSettings({
-															from_name: e.target.value,
+															from_name:
+																e.target.value,
 														});
 													}}
 													className={cn(
 														validationErrors.from_name &&
-														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+															'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
 													)}
 												/>
 												{validationErrors.from_name && (
 													<p className="text-destructive text-sm mt-1">
-														{validationErrors.from_name}
+														{
+															validationErrors.from_name
+														}
 													</p>
 												)}
 											</FormField>
 
 											<FormField
-												label={__('From Email', 'doublescale')}
+												label={__(
+													'From Email',
+													'doublescale'
+												)}
 												required={true}
 												className="flex-1"
 											>
 												<FromEmailSelector
-													value={template.settings?.from_email || ''}
+													value={
+														template.settings
+															?.from_email || ''
+													}
 													onChange={(email, name) => {
-														clearError('from_email');
+														clearError(
+															'from_email'
+														);
 														updateSettings({
 															from_email: email,
 															// Auto-fill from name if provided and current from_name is empty
 															...(name &&
-																!template.settings?.from_name
-																? { from_name: name }
+															!template.settings
+																?.from_name
+																? {
+																		from_name:
+																			name,
+																	}
 																: {}),
 														});
 													}}
-													error={validationErrors.from_email}
+													error={
+														validationErrors.from_email
+													}
 												/>
 												{validationErrors.from_email && (
 													<p className="text-destructive text-sm mt-1">
-														{validationErrors.from_email}
+														{
+															validationErrors.from_email
+														}
 													</p>
 												)}
 											</FormField>
 										</div>
 
-										<div className="flex gap-6">
+										<div className="flex flex-col sm:flex-row gap-0 sm:gap-4 lg:gap-6">
 											<FormField
-												label={__('Reply To', 'doublescale')}
+												label={__(
+													'Reply To',
+													'doublescale'
+												)}
 												required={true}
 												className="flex-1"
 											>
@@ -465,55 +503,76 @@ const Templates: React.FC = () => {
 														'name@gmail.com',
 														'doublescale'
 													)}
-													value={template.settings?.reply_to || ''}
+													value={
+														template.settings
+															?.reply_to || ''
+													}
 													onChange={(e) => {
 														clearError('reply_to');
 														updateSettings({
-															reply_to: e.target.value,
+															reply_to:
+																e.target.value,
 														});
 													}}
 													className={cn(
 														'!rounded-lg !border-border',
 														validationErrors.reply_to &&
-														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+															'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
 													)}
 												/>
 												{validationErrors.reply_to && (
 													<p className="text-destructive text-sm mt-1">
-														{validationErrors.reply_to}
+														{
+															validationErrors.reply_to
+														}
 													</p>
 												)}
 											</FormField>
 
 											<FormField
-												label={__('Subject', 'doublescale')}
+												label={__(
+													'Subject',
+													'doublescale'
+												)}
 												required={true}
 												className="flex-1"
 											>
 												<Input
-													placeholder={__('Subject here', 'doublescale')}
-													value={template.settings?.subject || ''}
+													placeholder={__(
+														'Subject here',
+														'doublescale'
+													)}
+													value={
+														template.settings
+															?.subject || ''
+													}
 													onChange={(e) => {
 														clearError('subject');
 														updateSettings({
-															subject: e.target.value,
+															subject:
+																e.target.value,
 														});
 													}}
 													className={cn(
 														validationErrors.subject &&
-														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+															'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
 													)}
 												/>
 												{validationErrors.subject && (
 													<p className="text-destructive text-sm mt-1">
-														{validationErrors.subject}
+														{
+															validationErrors.subject
+														}
 													</p>
 												)}
 											</FormField>
 										</div>
 
 										<FormField
-											label={__('Preview Text', 'doublescale')}
+											label={__(
+												'Preview Text',
+												'doublescale'
+											)}
 											required={true}
 										>
 											<Textarea
@@ -521,21 +580,27 @@ const Templates: React.FC = () => {
 													'Preview text here',
 													'doublescale'
 												)}
-												value={template.settings?.preview_text || ''}
+												value={
+													template.settings
+														?.preview_text || ''
+												}
 												onChange={(e) => {
 													clearError('preview_text');
 													updateSettings({
-														preview_text: e.target.value,
+														preview_text:
+															e.target.value,
 													});
 												}}
 												className={cn(
 													validationErrors.preview_text &&
-													'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
 												)}
 											/>
 											{validationErrors.preview_text && (
 												<p className="text-destructive text-sm mt-1">
-													{validationErrors.preview_text}
+													{
+														validationErrors.preview_text
+													}
 												</p>
 											)}
 										</FormField>
@@ -552,9 +617,13 @@ const Templates: React.FC = () => {
 												</div>
 												<Switch
 													checked={
-														template.settings?.enable_utm || false
+														template.settings
+															?.enable_utm ||
+														false
 													}
-													onCheckedChange={(checked) =>
+													onCheckedChange={(
+														checked
+													) =>
 														updateSettings({
 															enable_utm: checked,
 														})
@@ -563,10 +632,13 @@ const Templates: React.FC = () => {
 											</div>
 
 											{template.settings?.enable_utm && (
-												<div className="space-y-4">
-													<div className="grid grid-cols-2 gap-6">
+												<div className="space-y-0 sm:space-y-4">
+													<div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-4 lg:gap-6">
 														<FormField
-															label={__('UTM Source', 'doublescale')}
+															label={__(
+																'UTM Source',
+																'doublescale'
+															)}
 															required={true}
 														>
 															<Input
@@ -575,19 +647,29 @@ const Templates: React.FC = () => {
 																	'doublescale'
 																)}
 																value={
-																	template.settings
-																		?.utm_source || ''
+																	template
+																		.settings
+																		?.utm_source ||
+																	''
 																}
-																onChange={(e) => {
-																	clearError('utm_source');
-																	updateSettings({
-																		utm_source:
-																			e.target.value,
-																	});
+																onChange={(
+																	e
+																) => {
+																	clearError(
+																		'utm_source'
+																	);
+																	updateSettings(
+																		{
+																			utm_source:
+																				e
+																					.target
+																					.value,
+																		}
+																	);
 																}}
 																className={cn(
 																	validationErrors.utm_source &&
-																	'!border-destructive focus-visible:!ring-destructive/20'
+																		'!border-destructive focus-visible:!ring-destructive/20'
 																)}
 															/>
 															{validationErrors.utm_source && (
@@ -600,7 +682,10 @@ const Templates: React.FC = () => {
 														</FormField>
 
 														<FormField
-															label={__('UTM Medium', 'doublescale')}
+															label={__(
+																'UTM Medium',
+																'doublescale'
+															)}
 															required={true}
 														>
 															<Input
@@ -609,19 +694,29 @@ const Templates: React.FC = () => {
 																	'doublescale'
 																)}
 																value={
-																	template.settings
-																		?.utm_medium || ''
+																	template
+																		.settings
+																		?.utm_medium ||
+																	''
 																}
-																onChange={(e) => {
-																	clearError('utm_medium');
-																	updateSettings({
-																		utm_medium:
-																			e.target.value,
-																	});
+																onChange={(
+																	e
+																) => {
+																	clearError(
+																		'utm_medium'
+																	);
+																	updateSettings(
+																		{
+																			utm_medium:
+																				e
+																					.target
+																					.value,
+																		}
+																	);
 																}}
 																className={cn(
 																	validationErrors.utm_medium &&
-																	'!border-destructive focus-visible:!ring-destructive/20'
+																		'!border-destructive focus-visible:!ring-destructive/20'
 																)}
 															/>
 															{validationErrors.utm_medium && (
@@ -634,9 +729,12 @@ const Templates: React.FC = () => {
 														</FormField>
 													</div>
 
-													<div className="grid grid-cols-2 gap-6">
+													<div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-4 lg:gap-6">
 														<FormField
-															label={__('UTM Name', 'doublescale')}
+															label={__(
+																'UTM Name',
+																'doublescale'
+															)}
 															required={true}
 														>
 															<Input
@@ -645,30 +743,45 @@ const Templates: React.FC = () => {
 																	'doublescale'
 																)}
 																value={
-																	template.settings
-																		?.utm_name || ''
+																	template
+																		.settings
+																		?.utm_name ||
+																	''
 																}
-																onChange={(e) => {
-																	clearError('utm_name');
-																	updateSettings({
-																		utm_name:
-																			e.target.value,
-																	});
+																onChange={(
+																	e
+																) => {
+																	clearError(
+																		'utm_name'
+																	);
+																	updateSettings(
+																		{
+																			utm_name:
+																				e
+																					.target
+																					.value,
+																		}
+																	);
 																}}
 																className={cn(
 																	validationErrors.utm_name &&
-																	'!border-destructive focus-visible:!ring-destructive/20'
+																		'!border-destructive focus-visible:!ring-destructive/20'
 																)}
 															/>
 															{validationErrors.utm_name && (
 																<p className="text-destructive text-sm mt-1">
-																	{validationErrors.utm_name}
+																	{
+																		validationErrors.utm_name
+																	}
 																</p>
 															)}
 														</FormField>
 
 														<FormField
-															label={__('UTM Term', 'doublescale')}
+															label={__(
+																'UTM Term',
+																'doublescale'
+															)}
 														>
 															<Input
 																placeholder={__(
@@ -676,25 +789,34 @@ const Templates: React.FC = () => {
 																	'doublescale'
 																)}
 																value={
-																	template.settings
-																		?.utm_term || ''
+																	template
+																		.settings
+																		?.utm_term ||
+																	''
 																}
 																className={cn(
 																	validationErrors.utm_term &&
-																	'!border-destructive focus-visible:!ring-destructive/20'
+																		'!border-destructive focus-visible:!ring-destructive/20'
 																)}
 																onChange={(e) =>
-																	updateSettings({
-																		utm_term:
-																			e.target.value,
-																	})
+																	updateSettings(
+																		{
+																			utm_term:
+																				e
+																					.target
+																					.value,
+																		}
+																	)
 																}
 															/>
 														</FormField>
 													</div>
 
 													<FormField
-														label={__('UTM Content', 'doublescale')}
+														label={__(
+															'UTM Content',
+															'doublescale'
+														)}
 													>
 														<Input
 															placeholder={__(
@@ -702,16 +824,20 @@ const Templates: React.FC = () => {
 																'doublescale'
 															)}
 															value={
-																template.settings
-																	?.utm_content || ''
+																template
+																	.settings
+																	?.utm_content ||
+																''
 															}
 															className={cn(
 																validationErrors.utm_content &&
-																'!border-destructive focus-visible:!ring-destructive/20'
+																	'!border-destructive focus-visible:!ring-destructive/20'
 															)}
 															onChange={(e) =>
 																updateSettings({
-																	utm_content: e.target.value,
+																	utm_content:
+																		e.target
+																			.value,
 																})
 															}
 														/>
@@ -724,7 +850,9 @@ const Templates: React.FC = () => {
 								<FeedBuilder
 									fromName={template.settings?.from_name}
 									subject={template.settings?.subject}
-									previewText={template.settings?.preview_text}
+									previewText={
+										template.settings?.preview_text
+									}
 								/>
 							</div>
 						</div>
@@ -742,7 +870,9 @@ const Templates: React.FC = () => {
 							onClick={saveTemplateStepAndNavigate}
 							disabled={isSaving}
 						>
-							{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
+							{isSaving
+								? __('Saving...', 'doublescale')
+								: __('Next Step', 'doublescale')}
 						</Button>
 					</div>
 				</div>

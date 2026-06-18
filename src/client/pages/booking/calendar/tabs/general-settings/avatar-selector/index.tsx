@@ -38,7 +38,7 @@ const AvatarSelector: React.FC<{
                 render={({ open }: { open: () => void }) => (
                     <div
                         onClick={open}
-                        className='relative cursor-pointer w-[120px] h-[120px]'
+                        className='relative cursor-pointer mx-auto md:mx-0 w-[120px] h-[120px]'
                     >
                         <Avatar className='h-[126px] w-[126px] bg-secondary'>
                             {value && <AvatarImage src={value.url} />}

@@ -15,6 +15,11 @@ body.js.is-fullscreen-mode {
 	overflow-y: auto;
 	overflow-x: hidden;
 
+	@media (min-width: 300px) and (max-width: 900px) {
+		margin-top: -46px;
+		height: calc(100% + 46px);
+	}
+
 	#adminmenumain,
 	#wpadminbar {
 		display: none;
@@ -54,7 +59,7 @@ body.js.is-fullscreen-mode {
 }
 
 #wpwrap {
-	background-color: #F7F8FA;
+	background-color: #f7f8fa;
 }
 
 div#wpcontent {
@@ -73,8 +78,10 @@ div#wpcontent {
 .doublescale-layout .doublescale-control-modules-dialog-header-icon,
 .doublescale-layout .doublescale-control-modules__submodule-tree,
 .doublescale-control-modules-dialog .doublescale-module-icon,
-.doublescale-control-modules-dialog .doublescale-control-modules-dialog-header-icon,
-.doublescale-control-modules-dialog .doublescale-control-modules__submodule-tree {
+.doublescale-control-modules-dialog
+	.doublescale-control-modules-dialog-header-icon,
+.doublescale-control-modules-dialog
+	.doublescale-control-modules__submodule-tree {
 	width: auto;
 }
 
@@ -83,7 +90,7 @@ div#wpcontent {
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 100vh;
-	background: #F7F8FA;
+	background: #f7f8fa;
 
 	/* Sidebar (fixed rail + spacer): default flex-shrink lets this column compress while the rail stays wide — content draws underneath. */
 	> .group.peer {
@@ -105,7 +112,7 @@ div#wpcontent {
 		height: 56px;
 		padding: 0 32px;
 		background: #ffffff;
-		border-bottom: 1px solid #E6E9EF;
+		border-bottom: 1px solid #e6e9ef;
 		flex-shrink: 0;
 	}
 
@@ -121,18 +128,18 @@ div#wpcontent {
 		height: 36px !important;
 		flex-shrink: 0;
 		border-radius: 8px;
-		color: #29292E;
+		color: #29292e;
 
 		&:hover {
-			background: #F5F6F8;
-			color: #29292E;
+			background: #f5f6f8;
+			color: #29292e;
 		}
 	}
 
 	.doublescale-layout__page-title {
 		font-size: 20px;
 		font-weight: 600;
-		color: #29292E;
+		color: #29292e;
 		line-height: 32px;
 		white-space: nowrap;
 	}
@@ -151,15 +158,15 @@ div#wpcontent {
 	.doublescale-layout__header-avatar-fallback {
 		font-size: 12px;
 		font-weight: 600;
-		border: 1px solid #D0D0D0;
-		background: #F5F5F5;
+		border: 1px solid #d0d0d0;
+		background: #f5f5f5;
 	}
 
 	.doublescale-layout__header-user-name {
 		font-size: 14px;
 		font-weight: 500;
 		line-height: 24px;
-		color: #29292E;
+		color: #29292e;
 	}
 
 	.doublescale-layout__license-link {
@@ -167,10 +174,10 @@ div#wpcontent {
 		align-items: center;
 		gap: 6px;
 		padding: 6px 14px;
-		border: 1px solid #6161FF;
+		border: 1px solid #6161ff;
 		border-radius: 8px;
 		background: transparent;
-		color: #6161FF;
+		color: #6161ff;
 		font-size: 13px;
 		font-weight: 500;
 		cursor: pointer;
@@ -179,7 +186,7 @@ div#wpcontent {
 		white-space: nowrap;
 
 		&:hover {
-			background: #F0F0FF;
+			background: #f0f0ff;
 		}
 	}
 
@@ -198,6 +205,32 @@ div#wpcontent {
 
 		.doublescale-layout__header-bar {
 			padding: 0 16px;
+		}
+
+		.doublescale-layout__header-label {
+			display: none;
+		}
+
+		.doublescale-layout__license-link,
+		.doublescale-layout__header-control-modules
+			.doublescale-control-modules-trigger {
+			box-sizing: border-box;
+			width: 30px;
+			min-width: 30px;
+			height: 30px;
+			padding: 0;
+			gap: 0;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			border-radius: 6px;
+
+			svg {
+				width: 24px;
+				height: 24px;
+				flex-shrink: 0;
+			}
 		}
 
 		.doublescale-page-component-wrapper {
@@ -331,7 +364,7 @@ body {
 // ─── Global design polish ───
 
 // Inter font import
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 // Selection color
 ::selection {
@@ -402,7 +435,7 @@ body {
 		overflow: hidden;
 	}
 
-	.ant-table-thead>tr>th {
+	.ant-table-thead > tr > th {
 		background: hsl(220 14% 96%);
 		font-weight: 600;
 		font-size: 12px;
@@ -413,18 +446,18 @@ body {
 		padding: 12px 16px;
 	}
 
-	.ant-table-tbody>tr>td {
+	.ant-table-tbody > tr > td {
 		padding: 12px 16px;
 		font-size: 14px;
 		color: hsl(240 6% 17%);
 		border-bottom: 1px solid hsl(220 13% 91% / 0.5);
 	}
 
-	.ant-table-tbody>tr:hover>td {
+	.ant-table-tbody > tr:hover > td {
 		background: hsl(220 14% 96% / 0.5);
 	}
 
-	.ant-table-tbody>tr:last-child>td {
+	.ant-table-tbody > tr:last-child > td {
 		border-bottom: none;
 	}
 
@@ -507,7 +540,7 @@ body {
 	}
 
 	// Form labels
-	.ant-form-item-label>label {
+	.ant-form-item-label > label {
 		font-weight: 500;
 		font-size: 13px;
 		color: hsl(240 6% 17%);
@@ -574,7 +607,7 @@ body {
 .doublescale-layout__header-divider {
 	width: 1px;
 	height: 30px;
-	background: #D9D9D9;
+	background: #d9d9d9;
 }
 
 .doublescale-layout__header-user-info {
@@ -584,7 +617,7 @@ body {
 }
 
 // Smooth page transitions
-.doublescale-page-component-wrapper>* {
+.doublescale-page-component-wrapper > * {
 	animation: fadeIn 0.2s ease-out;
 }
 

@@ -126,9 +126,9 @@ const CampaignDetails: React.FC = () => {
 		campaign.settings?.templates && campaign.settings.templates.length > 0;
 
 	return (
-		<div className="space-y-6">
+		<div className="min-w-0 space-y-6">
 			{/* Campaign Info */}
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				<div className="space-y-1">
 					<span className="text-base text-gray-500">
 						{__('Title', 'doublescale')}
@@ -181,8 +181,8 @@ const CampaignDetails: React.FC = () => {
 			</div>
 
 			{/* Email Template */}
-			<div className="space-y-3 border-t pt-4">
-				<div className="flex items-center justify-between">
+			<div className="min-w-0 space-y-3 border-t pt-4">
+				<div className="flex sm:flex-row flex-col gap-3 sm:gap-0 items-center justify-between">
 					<h3 className="text-2xl font-medium">
 						{campaign.type === CAMPAIGN_CHANNEL.EMAIL
 							? __('Email Template', 'doublescale')
@@ -223,7 +223,7 @@ const CampaignDetails: React.FC = () => {
 						return (
 							<div
 								key={index}
-								className="space-y-4 bg-[#E3EEFF99] p-4 rounded-lg border"
+								className="min-w-0 w-full space-y-4 overflow-hidden rounded-lg border bg-[#E3EEFF99] p-4"
 							>
 								{/* Template Body */}
 								{template.type === CAMPAIGN_CHANNEL.SMS ? (
@@ -238,6 +238,7 @@ const CampaignDetails: React.FC = () => {
 																template.body
 															)
 												}
+												showOnSmallScreens
 												className="bg-transparent border-none py-0 sm:p-0"
 											/>
 										</div>
@@ -255,7 +256,7 @@ const CampaignDetails: React.FC = () => {
 									)
 								) : renderedHtml ? (
 									<div
-										className="template-body-preview"
+										className="template-body-preview w-full min-w-0 max-w-full"
 										dangerouslySetInnerHTML={{
 											__html: renderedHtml || '',
 										}}

@@ -262,7 +262,7 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 					</div>
 				</div>
 
-				<DialogFooter>
+				<DialogFooter className="gap-4">
 					<Button
 						variant="outline"
 						onClick={onClose}

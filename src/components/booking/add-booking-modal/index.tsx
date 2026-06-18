@@ -519,15 +519,16 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
             onOpenChange={open => {
                 if (!open)
                     onClose();
-            }}><DialogContent className='max-w-[950px] z-[160100] max-h-[90vh] overflow-y-auto' overlayClassName='z-[160100]'><DialogHeader><DialogTitle>{<div className="flex gap-4 items-center">
-                            <div className="rounded-lg p-2 bg-[#EDEDED] text-color-primary-text">
+            }}><DialogContent className='max-w-[950px] rounded-lg z-[160100] max-h-[90vh] overflow-y-auto overflow-x-hidden max-[768px]:max-w-[calc(100vw-2rem)] max-[768px]:p-4' overlayClassName='z-[160100]'>
+				<DialogHeader><DialogTitle>{<div className="flex gap-4 items-center pr-8 max-[768px]:gap-3">
+                            <div className="shrink-0 rounded-lg p-2 bg-[#EDEDED] text-color-primary-text max-[768px]:p-1.5">
                                 <AddCalendarOutlinedIcon width={30} height={30} />
                             </div>
-                            <div>
-                                <p className="text-2xl">
+                            <div className="min-w-0">
+                                <p className="text-2xl max-[768px]:text-lg">
                                     {__('Add New Booking Manually', 'doublescale')}
                                 </p>
-                                <p className="text-sm text-[#979797] font-thin">
+                                <p className="text-sm text-[#979797] font-thin max-[768px]:text-xs">
                                     {__(
                                         'Fill in the details below to create a booking on behalf of an attendee.',
                                         'doublescale'
@@ -552,8 +553,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                         handleSubmit(formValues);
                     }}
                 >
-                    <div className='flex gap-5'>
-                        <div className="flex-1 space-y-1">
+                    <div className='flex flex-col md:flex-row gap-5'>
+                        <div className="flex-1 min-w-0 space-y-1">
                             <label className="text-sm font-medium">{__('Select Event', 'doublescale')}</label>
                             <Select
                                 value={
@@ -589,7 +590,7 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                         {selectedEvent &&
                             selectedEvent?.calendar.type != 'host' &&
                             selectedEvent?.type != 'collective' && (
-                                <div className="flex-1 space-y-1">
+                                <div className="flex-1 min-w-0 space-y-1">
                                     <label className="text-sm font-medium">
                                         {__('Select Host', 'doublescale')}{' '}
                                         <span className="text-[10px] text-[#949494]">
@@ -614,9 +615,9 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                             )}
                     </div>
 
-                    <div className='flex gap-5'>
+                    <div className='flex flex-col md:flex-row gap-5'>
                         {currentTimezone && (
-                            <div className="flex-1 mb-1 space-y-1">
+                            <div className="flex-1 min-w-0 mb-1 space-y-1">
                                 <label className="text-sm font-medium">{__("Attendee's Timezone", 'doublescale')}</label>
                                 <TimezoneSelect
                                     value={currentTimezone}
@@ -628,7 +629,7 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                                 />
                             </div>
                         )}
-                        <div className="flex-1 mb-1 space-y-1">
+                        <div className="flex-1 min-w-0 mb-1 space-y-1">
                             <label className="text-sm font-medium">{__('Meeting Duration', 'doublescale')}</label>
                             <Select
                                 disabled={!isReady}
@@ -682,8 +683,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                         <span>{__('Ignore Availability', 'doublescale')}</span>
                     </div>
 
-                    <div className='flex gap-5'>
-                        <div className="flex-1 space-y-1">
+                    <div className='flex flex-col md:flex-row gap-5'>
+                        <div className="flex-1 min-w-0 space-y-1">
                             <label className="text-sm font-medium">{__('Select Date', 'doublescale')}</label>
                             <Input
                                 type="date"
@@ -707,7 +708,7 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                                 }}
                             />
                         </div>
-                        <div className="flex-1 space-y-1">
+                        <div className="flex-1 min-w-0 space-y-1">
                             <label className="text-sm font-medium">{__('Select Time', 'doublescale')}</label>
                             <Select
                                 disabled={!formValues.selectDate}
@@ -741,8 +742,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">{__('Attendee', 'doublescale')}</label>
-                        <div className="inline-flex rounded-md border border-border/60 p-1 bg-muted/40 text-sm">
+                        <label className="text-sm font-medium pr-1">{__('Attendee', 'doublescale')}</label>
+                        <div className="inline-flex flex-wrap rounded-md border border-border/60 p-1 bg-muted/40 text-sm">
                             <button
                                 type="button"
                                 className={`px-3 py-1 rounded ${contactMode === 'existing' ? 'bg-white shadow text-foreground' : 'text-muted-foreground'}`}
@@ -787,8 +788,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                                 selectedItem={selectedContact}
                             />
                         ) : (
-                            <div className="flex gap-5">
-                                <div className="flex-1 space-y-1">
+                            <div className="flex flex-col md:flex-row gap-5">
+                                <div className="flex-1 min-w-0 space-y-1">
                                     <label className="text-xs font-medium text-muted-foreground">{__("Attendee's Name", 'doublescale')}</label>
                                     <Input
                                         value={formValues.name || ''}
@@ -799,7 +800,7 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                                         required
                                     />
                                 </div>
-                                <div className="flex-1 space-y-1">
+                                <div className="flex-1 min-w-0 space-y-1">
                                     <label className="text-xs font-medium text-muted-foreground">{__("Attendee's Email", 'doublescale')}</label>
                                     <Input
                                         type="email"
@@ -820,14 +821,15 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                         )}
                     </div>
                     {fields && <QuestionsComponents fields={fields} form={form} />}
-
-                    <Button
+                    <div className="flex justify-end">
+                     <Button
                         type="submit"
                         disabled={!selectedEvent || loading}
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
-                    >
+
+                     >
                         {loading ? __('Saving...', 'doublescale') : __('Save Booking', 'doublescale')}
-                    </Button>
+                     </Button>
+                    </div>
                 </form>
             </DialogContent></Dialog>
     );

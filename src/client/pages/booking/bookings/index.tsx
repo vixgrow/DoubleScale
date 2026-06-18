@@ -176,10 +176,9 @@ const Bookings: React.FC = () => {
 	}, [period, author, event, eventType, updateStatus, year, selectedMonth]);
 
 	return (
-        <div className="h-fit">
+        <div className="h-fit min-w-0">
             <BookingsHeader handleOpen={setOpen} />
-            <div
-                className='flex justify-between items-[middle] gap-3 flex-wrap border border-solid borderColor-[#DEDEDE] rounded-xl p-4 my-6'>
+            <div className="my-6 flex w-full min-w-0 flex-col gap-4 overflow-hidden rounded-xl border border-solid border-[#DEDEDE] p-4">
                 <BookingsTabs
                     setPeriod={setPeriod}
                     period={period}

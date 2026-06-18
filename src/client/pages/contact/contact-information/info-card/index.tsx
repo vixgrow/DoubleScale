@@ -784,7 +784,7 @@ const InfoCard: React.FC = () => {
 	return (
 		<div className="rounded-xl border border-border/50 bg-muted/15 p-1 shadow-sm">
 			<div
-				className="flex flex-wrap gap-1 rounded-lg bg-background/80 p-1 ring-1 ring-border/35"
+				className="flex flex-wrap justify-center items-center gap-1 rounded-lg bg-background/80 p-1 ring-1 ring-border/35"
 				role="tablist"
 			>
 				{tabs.map((tab) => (
@@ -796,7 +796,7 @@ const InfoCard: React.FC = () => {
 						onClick={() => setActiveTab(tab.id)}
 						className={`relative min-h-9 flex-1 cursor-pointer rounded-md border-0 px-3 py-1.5 text-center text-xs font-medium transition-all sm:flex-none sm:px-3 sm:text-sm ${
 							activeTab === tab.id
-								? 'bg-background font-semibold text-primary shadow-sm ring-1 ring-border/50'
+								? 'bg-background font-semibold text-primary shadow-sm'
 								: 'bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
 						}`}
 					>

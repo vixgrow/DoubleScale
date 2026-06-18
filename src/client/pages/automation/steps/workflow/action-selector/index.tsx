@@ -405,15 +405,15 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="z-[150200] h-[90vh] max-w-[1000px] flex flex-col overflow-hidden">
+			<DialogContent className="z-[150200] flex max-h-[90vh] w-[calc(100vw-1rem)] max-w-[1000px] flex-col overflow-y-auto sm:h-[90vh] sm:overflow-hidden">
 				<DialogHeader className="shrink-0">
 					<DialogTitle>{__('Action Library', 'doublescale')}</DialogTitle>
 					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'doublescale')}</DialogDescription>
 				</DialogHeader>
-				<div className="doublescale-fields flex-1 flex flex-col overflow-hidden min-h-0">
-					<div className="doublescale-field flex-1 flex flex-col overflow-hidden min-h-0">
-						<div className="flex flex-1 gap-5 overflow-hidden min-h-0">
-							<div className="w-1/2 overflow-y-auto pr-1">
+				<div className="doublescale-fields flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:overflow-hidden">
+					<div className="doublescale-field flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:overflow-hidden">
+						<div className="flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:flex-row sm:overflow-hidden">
+							<div className="w-full sm:w-1/2 sm:overflow-y-auto sm:pr-1">
 								<ActionSelectorCard
 									automationActions={filteredActions}
 									selectedCategory={selectedCategory}
@@ -421,7 +421,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 									categoryData={categoryData}
 								/>
 							</div>
-							<div className="w-1/2 overflow-y-auto pr-1">
+							<div className="w-full sm:w-1/2 sm:overflow-y-auto sm:pr-1">
 								<ActionsGroupRender
 									groups={currentCategoryData?.groups || {}}
 									onChange={(value) => handleActionSelect(value)}

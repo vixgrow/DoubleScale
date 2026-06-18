@@ -319,29 +319,33 @@ const Review: React.FC = () => {
 			type="campaign"
 		>
 			<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-					<Stepper
-						steps={
-							campaign?.settings?.automated
-								? automatedCampaignSteps
-								: campaign?.type === 'email'
-									? campaignSteps
-									: campaignSteps.filter((step) => step.slug !== 'builder')
-						}
-						canProceed="true"
-						currentStep={
-							campaign?.settings?.automated
-								? 6
-								: campaign?.type === 'email'
-									? 5
-									: 3
-						}
-						onStepClick={goToStep}
-						disableNavigation={isNewCampaign}
-					/>
-
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+					<div className='lg:block hidden'>
+						<Stepper
+							steps={
+								campaign?.settings?.automated
+									? automatedCampaignSteps
+									: campaign?.type === 'email'
+										? campaignSteps
+										: campaignSteps.filter(
+												(step) =>
+													step.slug !== 'builder'
+											)
+							}
+							canProceed="true"
+							currentStep={
+								campaign?.settings?.automated
+									? 6
+									: campaign?.type === 'email'
+										? 5
+										: 3
+							}
+							onStepClick={goToStep}
+							disableNavigation={isNewCampaign}
+						/>
+					</div>
 					<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
-						<div className="flex items-start justify-between gap-4 pb-6">
+						<div className="flex flex-col sm:flex-row items-start justify-between gap-4 pb-6">
 							<div>
 								<h2 className="text-xl font-semibold tracking-tight text-foreground">
 									{__('Review and Confirm', 'doublescale')}
@@ -349,13 +353,13 @@ const Review: React.FC = () => {
 								<p className="mt-3 text-sm leading-snug text-muted-foreground">
 									{campaign?.settings?.automated
 										? __(
-											'Review your automated campaign settings and activate it.',
-											'doublescale'
-										)
+												'Review your automated campaign settings and activate it.',
+												'doublescale'
+											)
 										: __(
-											'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
-											'doublescale'
-										)}
+												'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
+												'doublescale'
+											)}
 								</p>
 							</div>
 							<Button
@@ -364,12 +368,21 @@ const Review: React.FC = () => {
 								className="shrink-0 bg-white"
 								onClick={() => setSendTestDialogOpen(true)}
 							>
-								<PreviewEyeIcon color="#343498"/>
+								<PreviewEyeIcon color="#343498" />
 								{campaign?.type === 'sms'
-									? __('Preview and Send Test SMS', 'doublescale')
+									? __(
+											'Send Test SMS',
+											'doublescale'
+										)
 									: campaign?.type === 'whatsapp'
-										? __('Preview and Send Test WhatsApp', 'doublescale')
-										: __('Preview and Send Test Email', 'doublescale')}
+										? __(
+												'Send Test WhatsApp',
+												'doublescale'
+											)
+										: __(
+												'Send Test Email',
+												'doublescale'
+											)}
 							</Button>
 						</div>
 
@@ -393,7 +406,8 @@ const Review: React.FC = () => {
 								templateBody={whatsAppTemplateBody}
 								onEdit={() => goToStep('template')}
 								button={
-									campaign?.type === 'email' || campaign?.type === 'whatsapp'
+									campaign?.type === 'email' ||
+									campaign?.type === 'whatsapp'
 								}
 							/>
 
@@ -405,105 +419,211 @@ const Review: React.FC = () => {
 								onEdit={() => goToStep('contacts')}
 							/>
 
-							{campaign?.settings?.automated && campaign?.settings?.trigger && (
-								<CardLayout
-									icon={<ActionIcon width={20} height={20} />}
-									header={__('Trigger Configuration', 'doublescale')}
-									buttonText={__('Edit Trigger', 'doublescale')}
-									onButtonClick={() => goToStep('trigger')}
-								>
-									<div className="space-y-4">
-										<div>
-											<p className="mb-1 text-base text-gray-500">
-												{__('Type', 'doublescale')}
-											</p>
-											<p className="text-base font-semibold text-gray-900">
-												{campaign.settings.trigger.trigger_type === 'event'
-													? __('Event-Based', 'doublescale')
-													: __('Schedule-Based', 'doublescale')}
-											</p>
-										</div>
-										{campaign.settings.trigger.trigger_type === 'event' &&
-											campaign.settings.trigger.event && (
-												<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-													<div>
-														<p className="mb-1 text-base text-gray-500">
-															{__('Event', 'doublescale')}
-														</p>
-														<p className="text-base font-semibold capitalize text-gray-900">
-															{(campaign.settings.trigger.event as any).event_type?.replace(
-																/_/g,
-																' '
+							{campaign?.settings?.automated &&
+								campaign?.settings?.trigger && (
+									<CardLayout
+										icon={
+											<ActionIcon
+												width={20}
+												height={20}
+											/>
+										}
+										header={__(
+											'Trigger Configuration',
+											'doublescale'
+										)}
+										buttonText={__(
+											'Edit Trigger',
+											'doublescale'
+										)}
+										onButtonClick={() =>
+											goToStep('trigger')
+										}
+									>
+										<div className="space-y-4">
+											<div>
+												<p className="mb-1 text-base text-gray-500">
+													{__('Type', 'doublescale')}
+												</p>
+												<p className="text-base font-semibold text-gray-900">
+													{campaign.settings.trigger
+														.trigger_type ===
+													'event'
+														? __(
+																'Event-Based',
+																'doublescale'
+															)
+														: __(
+																'Schedule-Based',
+																'doublescale'
 															)}
-														</p>
-													</div>
-													{(campaign.settings.trigger.event as any).post_type && (
+												</p>
+											</div>
+											{campaign.settings.trigger
+												.trigger_type === 'event' &&
+												campaign.settings.trigger
+													.event && (
+													<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 														<div>
 															<p className="mb-1 text-base text-gray-500">
-																{__('Post Type', 'doublescale')}
+																{__(
+																	'Event',
+																	'doublescale'
+																)}
 															</p>
 															<p className="text-base font-semibold capitalize text-gray-900">
-																{(campaign.settings.trigger.event as any).post_type}
+																{(
+																	campaign
+																		.settings
+																		.trigger
+																		.event as any
+																).event_type?.replace(
+																	/_/g,
+																	' '
+																)}
 															</p>
 														</div>
-													)}
-													{(campaign.settings.trigger.event as any).categories
-														?.length > 0 && (
+														{(
+															campaign.settings
+																.trigger
+																.event as any
+														).post_type && (
 															<div>
 																<p className="mb-1 text-base text-gray-500">
-																	{__('Categories', 'doublescale')}
+																	{__(
+																		'Post Type',
+																		'doublescale'
+																	)}
 																</p>
-																<p className="text-base font-semibold text-gray-900">
+																<p className="text-base font-semibold capitalize text-gray-900">
 																	{
-																		(campaign.settings.trigger.event as any).categories
-																			.length
-																	}{' '}
-																	{(campaign.settings.trigger.event as any).categories
-																		.length === 1
-																		? __('category', 'doublescale')
-																		: __('categories', 'doublescale')}
+																		(
+																			campaign
+																				.settings
+																				.trigger
+																				.event as any
+																		)
+																			.post_type
+																	}
 																</p>
 															</div>
 														)}
-												</div>
-											)}
-										{campaign.settings.trigger.trigger_type === 'schedule' &&
-											campaign.settings.trigger.schedule && (
-												<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-													<div>
-														<p className="mb-1 text-base text-gray-500">
-															{__('Frequency', 'doublescale')}
-														</p>
-														<p className="text-base font-semibold capitalize text-gray-900">
-															{(campaign.settings.trigger.schedule as any).frequency}
-														</p>
+														{(
+															campaign.settings
+																.trigger
+																.event as any
+														).categories?.length >
+															0 && (
+															<div>
+																<p className="mb-1 text-base text-gray-500">
+																	{__(
+																		'Categories',
+																		'doublescale'
+																	)}
+																</p>
+																<p className="text-base font-semibold text-gray-900">
+																	{
+																		(
+																			campaign
+																				.settings
+																				.trigger
+																				.event as any
+																		)
+																			.categories
+																			.length
+																	}{' '}
+																	{(
+																		campaign
+																			.settings
+																			.trigger
+																			.event as any
+																	).categories
+																		.length ===
+																	1
+																		? __(
+																				'category',
+																				'doublescale'
+																			)
+																		: __(
+																				'categories',
+																				'doublescale'
+																			)}
+																</p>
+															</div>
+														)}
 													</div>
-													<div>
-														<p className="mb-1 text-base text-gray-500">
-															{__('Time', 'doublescale')}
-														</p>
-														<p className="text-base font-semibold text-gray-900">
-															{(campaign.settings.trigger.schedule as any).time}
-														</p>
-													</div>
-													{(campaign.settings.trigger.schedule as any).day_of_week && (
+												)}
+											{campaign.settings.trigger
+												.trigger_type === 'schedule' &&
+												campaign.settings.trigger
+													.schedule && (
+													<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 														<div>
 															<p className="mb-1 text-base text-gray-500">
-																{__('Day', 'doublescale')}
+																{__(
+																	'Frequency',
+																	'doublescale'
+																)}
 															</p>
 															<p className="text-base font-semibold capitalize text-gray-900">
 																{
-																	(campaign.settings.trigger.schedule as any)
-																		.day_of_week
+																	(
+																		campaign
+																			.settings
+																			.trigger
+																			.schedule as any
+																	).frequency
 																}
 															</p>
 														</div>
-													)}
-												</div>
-											)}
-									</div>
-								</CardLayout>
-							)}
+														<div>
+															<p className="mb-1 text-base text-gray-500">
+																{__(
+																	'Time',
+																	'doublescale'
+																)}
+															</p>
+															<p className="text-base font-semibold text-gray-900">
+																{
+																	(
+																		campaign
+																			.settings
+																			.trigger
+																			.schedule as any
+																	).time
+																}
+															</p>
+														</div>
+														{(
+															campaign.settings
+																.trigger
+																.schedule as any
+														).day_of_week && (
+															<div>
+																<p className="mb-1 text-base text-gray-500">
+																	{__(
+																		'Day',
+																		'doublescale'
+																	)}
+																</p>
+																<p className="text-base font-semibold capitalize text-gray-900">
+																	{
+																		(
+																			campaign
+																				.settings
+																				.trigger
+																				.schedule as any
+																		)
+																			.day_of_week
+																	}
+																</p>
+															</div>
+														)}
+													</div>
+												)}
+										</div>
+									</CardLayout>
+								)}
 
 							{!campaign?.settings?.automated && (
 								<ScheduleCard
@@ -519,7 +639,7 @@ const Review: React.FC = () => {
 					</div>
 				</div>
 
-					<div className="flex justify-end gap-3">
+				<div className="flex justify-end gap-3">
 					<Button
 						type="button"
 						variant="secondaryDeepBlue"
@@ -528,7 +648,12 @@ const Review: React.FC = () => {
 					>
 						{__('Back', 'doublescale')}
 					</Button>
-					<Button type="button" variant="gradient" onClick={save} disabled={saving}>
+					<Button
+						type="button"
+						variant="gradient"
+						onClick={save}
+						disabled={saving}
+					>
 						{saving
 							? __('Saving...', 'doublescale')
 							: campaign?.settings?.automated
@@ -537,20 +662,31 @@ const Review: React.FC = () => {
 									? __('Send Campaign Now', 'doublescale')
 									: __('Create Campaign', 'doublescale')}
 					</Button>
-					</div>
+				</div>
 			</div>
 
-			<Dialog open={sendTestDialogOpen} onOpenChange={setSendTestDialogOpen}>
-				<DialogContent className="max-w-2xl z-[1000000] bg-white">
+			<Dialog
+				open={sendTestDialogOpen}
+				onOpenChange={setSendTestDialogOpen}
+			>
+				<DialogContent className="max-w-2xl z-[1000000] bg-white max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<CustomDialogHeader
-						title={campaign?.type === 'sms'
-							? __('Send Test SMS', 'doublescale')
-							: campaign?.type === 'whatsapp'
-								? __('Send Test WhatsApp', 'doublescale')
-								: __('Send Test Email', 'doublescale')}
-						subtitle={__('Preview and send a test email to ensure your campaign is set up correctly.', 'doublescale')}
-						icon={<PreviewEyeIcon color="currentColor"/>}
+							title={
+								campaign?.type === 'sms'
+									? __('Send Test SMS', 'doublescale')
+									: campaign?.type === 'whatsapp'
+										? __(
+												'Send Test WhatsApp',
+												'doublescale'
+											)
+										: __('Send Test Email', 'doublescale')
+							}
+							subtitle={__(
+								'Preview and send a test email to ensure your campaign is set up correctly.',
+								'doublescale'
+							)}
+							icon={<PreviewEyeIcon color="currentColor" />}
 						/>
 					</DialogHeader>
 					{campaign?.type === 'sms' ? (

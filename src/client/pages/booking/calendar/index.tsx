@@ -258,38 +258,38 @@ const Calendar: React.FC = () => {
                         handleClose();
                 }}><DialogContent
                     hideCloseButton
-                    className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'>
-                    <div className="border-b px-4 py-2">
-                        <div className='flex justify-between items-center'>
-                            <div className='flex gap-2.5 items-center'>
+                    className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'>
+                    <div className="border-b px-4 py-2 overflow-x-hidden">
+                        <div className='flex flex-col gap-3 max-[768px]:gap-3 md:flex-row md:justify-between md:items-center'>
+                            <div className='flex gap-2.5 items-center min-w-0'>
                                 <button
                                     type="button"
-                                    className="cursor-pointer bg-transparent border-0 text-primary"
+                                    className="shrink-0 cursor-pointer bg-transparent border-0 text-primary"
                                     onClick={handleClose}
                                     aria-label={__('Close', 'doublescale')}
                                 >
                                     <IoCloseSharp/>
                                 </button>
-                                <div className="text-[#09090B] text-[24px] font-[500]">
+                                <div className="min-w-0 text-[#09090B] text-[24px] font-[500] max-[768px]:text-xl">
                                     {__('Calendar Settings', 'doublescale')}
                                 </div>
                             </div>
-                            <div className='flex gap-5 items-center'>
-                                <Button className="p-0" variant='ghost'>{<ShareIcon />} 
+                            <div className='flex w-full md:w-auto gap-3 md:gap-5 justify-between items-center'>
+                                <Button className="shrink-0 p-0" variant='ghost'>{<ShareIcon />}
                                     {__('View', 'doublescale')}
                                 </Button>
                                 <Button
                                     onClick={saveSettings}
                                     disabled={saveDisabled}
-                                    className="border-none shadow-none"
+                                    className="shrink-0 border-none shadow-none "
                                     variant='default'>
                                     {__('Save Setting Changes', 'doublescale')}
                                 </Button>
                             </div>
                         </div>
                     </div>
-                    <div className="doublescale-booking-event">
-                        <div className="px-20 py-5">
+                    <div className="doublescale-booking-event min-w-0 overflow-x-hidden">
+                        <div className="px-4 py-5 md:px-20">
                             {isLoading ? (
                                 <UnifiedShimmerLoader />
                             ) : (

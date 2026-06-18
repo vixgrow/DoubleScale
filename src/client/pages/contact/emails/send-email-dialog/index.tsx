@@ -115,7 +115,7 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 			<DialogPortal>
 				<DialogOverlay className="z-[150200] pointer-events-none" />
 				<DialogContent
-					className="max-w-[600px] z-[150200] max-h-[90vh] overflow-y-auto pointer-events-auto"
+					className="pointer-events-auto z-[150200] flex min-w-0 w-[min(calc(100vw-2rem),600px)] max-w-[min(calc(100vw-2rem),600px)] max-h-[90vh] flex-col overflow-x-hidden overflow-y-auto"
 					onEscapeKeyDown={(e) => {
 						// Prevent dialog from closing when WordPress media modal is open
 						const mediaModal =
@@ -167,9 +167,9 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							/>
 						</DialogTitle>
 					</DialogHeader>
-					<div className="flex flex-col gap-4">
+					<div className="flex min-w-0 flex-col gap-4 overflow-x-hidden">
 						{validationError && (
-							<div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm">
+							<div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
 								{validationError}
 							</div>
 						)}
@@ -188,11 +188,11 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							onChange={(value) => setSubject(value)}
 							type="text"
 						/>
-						<div>
-							<Label className="text-[#09090B] font-normal text-base">
+						<div className="min-w-0 max-w-full">
+							<Label className="text-base font-normal text-[#09090B]">
 								{__('Body', 'doublescale')}
 							</Label>
-							<div className="mt-2 border rounded-lg">
+							<div className="send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg border max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
 								<Editor
 									message={body}
 									onChange={(content) => setBody(content)}

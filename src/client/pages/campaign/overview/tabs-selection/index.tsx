@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-
+import { useEffect, useState } from 'react';
 /**
  * Internal dependencies
  */
@@ -16,7 +16,24 @@ import { CampaignsIcon, ContactTotalEmailsIcon, UnsubscribesIcon, UnsubscribeSMS
 import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
+const SM_BREAKPOINT = 640;
+
+function useIsSmallScreen() {
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+	useEffect(() => {
+		const mql = window.matchMedia(`(max-width: ${SM_BREAKPOINT - 1}px)`);
+		const onChange = () => setIsSmallScreen(mql.matches);
+		mql.addEventListener('change', onChange);
+		setIsSmallScreen(mql.matches);
+		return () => mql.removeEventListener('change', onChange);
+	}, []);
+
+	return isSmallScreen;
+}
+
 const TabsSelection: React.FC = () => {
+	const isSmallScreen = useIsSmallScreen();
 	const campaign = useSelect(
 		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
@@ -103,12 +120,14 @@ const TabsSelection: React.FC = () => {
 		];
 
 	return (
-		<Card className="bg-muted/50 shadow-none p-5 w-2/3">
+		<Card className="bg-muted/50 shadow-none p-5 w-full min-w-0 lg:w-2/3">
 			<PageTabs
 				defaultValue="details"
 				tabsList={tabsList}
 				tabsContent={tabsContent}
 				className="w-full"
+				enableHorizontalScroll={isSmallScreen}
+				scrollArrowBg="bg-muted/50"
 				tabsListWrapperClassName="border-b pb-4 pt-5"
 				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
 			/>

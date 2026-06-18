@@ -272,8 +272,8 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
             case 'meeting_scheduled':
                 return (
                     activity.data && (
-                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
-                            <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
+                        <div className="activity-meeting-content flex max-sm:flex-col max-sm:justify-center max-sm:items-center gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
+                            <div className="meeting-date-card h-full flex flex-row sm:flex-col items-center justify-center text-center sm:border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
                                 <div className=" text-foreground text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
                                         activity.data.scheduled_at ||
@@ -291,9 +291,9 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                 </div>
                             </div>
                             <div className=" flex flex-col gap-3">
-                                <div className="flex gap-6 items-center">
+                                <div className="flex max-sm:flex-col max-sm:justify-center max-sm:items-center gap-6 items-center">
                                     {activity.data.scheduled_at && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
+                                        <div className="flex justify-center gap-2 sm:border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <StartDateIcon />
                                             <span>
                                                 {__('Start Date', 'doublescale')}:
@@ -309,7 +309,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         </div>
                                     )}
                                     {activity.data.location && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
+                                        <div className="flex justify-center gap-2 sm:border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <LocationIcon />
                                             <span>
                                                 {__('Location', 'doublescale')}:{' '}
@@ -474,11 +474,11 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         {/* Activity/Task Content */}
                                         <div className="activity-content">
                                             {/* Header */}
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-2">
+                                            <div className="flex items-center flex-wrap gap-y-2 justify-between mb-2">
+                                                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                                                     <div className="flex justify-center gap-2">
-                                                        {isTask ? <TaskDoneIcon color="#CB5301" /> : <MeetingActivityIcon />}
-                                                        <p className="text-base font-normal text-muted-foreground border-r border-r-[#DEE1E6] pr-2">
+                                                        {isTask ? <TaskDoneIcon /> : <MeetingActivityIcon />}
+                                                        <p className="text-base font-normal text-muted-foreground sm:border-r border-r-[#DEE1E6] pr-2">
                                                             {formatActivityTime(displayDate)}
                                                         </p>
                                                     </div>
@@ -490,7 +490,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                                     </div>
                                                 </div>
                                                 {/* Actions */}
-                                                <div className="flex items-center gap-5">
+                                                <div className="flex max-sm:flex-col max-sm:items-start items-center gap-5">
                                                     {!isTask && activity && isEditableActivity(item.icon_type) && (
                                                         <ActivityActionsDropdown
                                                             onEdit={() => handleEditActivity(activity)}
@@ -537,7 +537,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                                                 </Badge>
                                                             )}
                                                             {item.priority && (
-                                                                <Badge className="text-xs ml-2">
+                                                                <Badge className="text-xs">
                                                                     {item.priority}
                                                                 </Badge>
                                                             )}

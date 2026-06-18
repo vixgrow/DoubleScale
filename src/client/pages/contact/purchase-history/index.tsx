@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
+import type { ReactNode } from 'react';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
@@ -30,6 +31,51 @@ import { getWooColumns, getEddColumns, getSurecartColumns } from './columns';
 interface PurchaseHistoryProps {
 	contact_id: number;
 }
+
+interface PurchaseStatsCardItem {
+	key: string;
+	icon: ReactNode;
+	value: string | number;
+	label: string;
+	iconBgClass: string;
+	iconColor: string;
+}
+
+const PurchaseStatsCards = ({ cards }: { cards: PurchaseStatsCardItem[] }) => {
+	if (cards.length === 0) {
+		return null;
+	}
+
+	return (
+		<>
+			<div className="flex flex-col gap-4 sm:hidden">
+				{cards.map((card) => (
+					<MessageStatsCard
+						key={card.key}
+						icon={card.icon}
+						value={card.value}
+						label={card.label}
+						iconBgClass={card.iconBgClass}
+						iconColor={card.iconColor}
+						layout="centered"
+					/>
+				))}
+			</div>
+			<div className="hidden gap-5 sm:flex">
+				{cards.map((card) => (
+					<MessageStatsCard
+						key={card.key}
+						icon={card.icon}
+						value={card.value}
+						label={card.label}
+						iconBgClass={card.iconBgClass}
+						iconColor={card.iconColor}
+					/>
+				))}
+			</div>
+		</>
+	);
+};
 
 const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 	const { purchaseHistory, setPurchaseHistory } = useContactContext();
@@ -113,6 +159,93 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 	const eddColumns = getEddColumns();
 	const surecartColumns = getSurecartColumns();
 
+	const wooStatsCards: PurchaseStatsCardItem[] = purchaseHistory
+		? [
+				{
+					key: 'woo-total-orders',
+					icon: <TotalOrdersIcon />,
+					value: purchaseHistory.wc.total,
+					label: __('Total Orders', 'doublescale'),
+					iconBgClass: 'bg-primary/10',
+					iconColor: 'text-primary',
+				},
+				{
+					key: 'woo-total-revenue',
+					icon: <TotalRevenueIcon />,
+					value: `${Number(purchaseHistory.wc.revenue || 0).toFixed(2)} ${purchaseHistory.wc.currency}`,
+					label: __('Total Revenue', 'doublescale'),
+					iconBgClass: 'bg-emerald-50',
+					iconColor: 'text-emerald-600',
+				},
+				{
+					key: 'woo-average-order',
+					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					value: `${Number(purchaseHistory.wc.average || 0).toFixed(2)} ${purchaseHistory.wc.currency}`,
+					label: __('Average Order Value', 'doublescale'),
+					iconBgClass: 'bg-violet-50',
+					iconColor: 'text-violet-600',
+				},
+			]
+		: [];
+
+	const eddStatsCards: PurchaseStatsCardItem[] = purchaseHistory
+		? [
+				{
+					key: 'edd-total-orders',
+					icon: <TotalOrdersIcon />,
+					value: purchaseHistory.edd.total,
+					label: __('Total Orders', 'doublescale'),
+					iconBgClass: 'bg-primary/10',
+					iconColor: 'text-primary',
+				},
+				{
+					key: 'edd-total-revenue',
+					icon: <TotalRevenueIcon />,
+					value: `${Number(purchaseHistory.edd.revenue || 0).toFixed(2)} ${purchaseHistory.edd.currency}`,
+					label: __('Total Revenue', 'doublescale'),
+					iconBgClass: 'bg-emerald-50',
+					iconColor: 'text-emerald-600',
+				},
+				{
+					key: 'edd-average-order',
+					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					value: `${Number(purchaseHistory.edd.average || 0).toFixed(2)} ${purchaseHistory.edd.currency}`,
+					label: __('Average Order Value', 'doublescale'),
+					iconBgClass: 'bg-violet-50',
+					iconColor: 'text-violet-600',
+				},
+			]
+		: [];
+
+	const surecartStatsCards: PurchaseStatsCardItem[] = purchaseHistory
+		? [
+				{
+					key: 'surecart-total-orders',
+					icon: <TotalOrdersIcon />,
+					value: purchaseHistory.surecart.total,
+					label: __('Total Orders', 'doublescale'),
+					iconBgClass: 'bg-primary/10',
+					iconColor: 'text-primary',
+				},
+				{
+					key: 'surecart-total-revenue',
+					icon: <TotalRevenueIcon />,
+					value: `${purchaseHistory.surecart.revenue?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`,
+					label: __('Total Revenue', 'doublescale'),
+					iconBgClass: 'bg-emerald-50',
+					iconColor: 'text-emerald-600',
+				},
+				{
+					key: 'surecart-average-order',
+					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					value: `${purchaseHistory.surecart.average?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`,
+					label: __('Average Order Value', 'doublescale'),
+					iconBgClass: 'bg-violet-50',
+					iconColor: 'text-violet-600',
+				},
+			]
+		: [];
+
 	return (
 		<div className="doublescale-purchase-history flex flex-col gap-5">
 			{/* WooCommerce Section */}
@@ -122,29 +255,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 						{__('WooCommerce Purchase History', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
-						<div className="flex gap-5">
-							<MessageStatsCard
-								icon={<TotalOrdersIcon />}
-								value={purchaseHistory.wc.total}
-								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-primary/10"
-								iconColor="text-primary"
-							/>
-							<MessageStatsCard
-								icon={<TotalRevenueIcon />}
-								value={`${Number(purchaseHistory.wc.revenue || 0).toFixed(2)} ${purchaseHistory.wc.currency}`}
-								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-emerald-50"
-								iconColor="text-emerald-600"
-							/>
-							<MessageStatsCard
-								icon={<AnalyticsReportsIcon width={40} height={40} />}
-								value={`${Number(purchaseHistory.wc.average || 0).toFixed(2)} ${purchaseHistory.wc.currency}`}
-								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-violet-50"
-								iconColor="text-violet-600"
-							/>
-						</div>
+						<PurchaseStatsCards cards={wooStatsCards} />
 					)}
 					<div>
 						{!loading &&
@@ -186,29 +297,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 						{__('Easy Digital Downloads', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
-						<div className="flex gap-5">
-							<MessageStatsCard
-								icon={<TotalOrdersIcon />}
-								value={purchaseHistory.edd.total}
-								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-primary/10"
-								iconColor="text-primary"
-							/>
-							<MessageStatsCard
-								icon={<TotalRevenueIcon />}
-								value={`${Number(purchaseHistory.edd.revenue || 0).toFixed(2)} ${purchaseHistory.edd.currency}`}
-								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-emerald-50"
-								iconColor="text-emerald-600"
-							/>
-							<MessageStatsCard
-								icon={<AnalyticsReportsIcon width={40} height={40} />}
-								value={`${Number(purchaseHistory.edd.average || 0).toFixed(2)} ${purchaseHistory.edd.currency}`}
-								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-violet-50"
-								iconColor="text-violet-600"
-							/>
-						</div>
+						<PurchaseStatsCards cards={eddStatsCards} />
 					)}
 					<div>
 						{!loading &&
@@ -250,29 +339,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 						{__('SureCart', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
-						<div className="flex gap-5">
-							<MessageStatsCard
-								icon={<TotalOrdersIcon />}
-								value={purchaseHistory.surecart.total}
-								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-primary/10"
-								iconColor="text-primary"
-							/>
-							<MessageStatsCard
-								icon={<TotalRevenueIcon />}
-								value={`${purchaseHistory.surecart.revenue?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
-								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-emerald-50"
-								iconColor="text-emerald-600"
-							/>
-							<MessageStatsCard
-								icon={<AnalyticsReportsIcon width={40} height={40} />}
-								value={`${purchaseHistory.surecart.average?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
-								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-violet-50"
-								iconColor="text-violet-600"
-							/>
-						</div>
+						<PurchaseStatsCards cards={surecartStatsCards} />
 					)}
 					<div>
 						{!loading &&

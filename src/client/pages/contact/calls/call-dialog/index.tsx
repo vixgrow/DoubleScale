@@ -348,7 +348,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                         </DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col gap-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Phone Number */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
@@ -408,7 +408,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Call Outcome */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">

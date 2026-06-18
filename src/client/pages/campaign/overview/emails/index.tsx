@@ -300,7 +300,7 @@ const EmailsTab: React.FC = () => {
 	return (
 		<>
 			<div className="flex flex-col gap-5">
-				<div className="flex justify-between items-center">
+				<div className="flex sm:flex-row flex-col gap-3 sm:gap-0 justify-between items-center">
 					<h3 className="text-2xl font-semibold text-[#09090B]">
 						{__('Emails', 'doublescale')}
 					</h3>
@@ -340,7 +340,7 @@ const EmailsTab: React.FC = () => {
 				)}
 
 				{hasFailedEmails && !isLoading && (
-					<div className="flex justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
+					<div className="flex sm:flex-row flex-col gap-3 sm:gap-0 justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
 						<div className="flex items-center gap-2">
 							<AlertIcon />
 							<div className="text-base text-[#CB5301]">

@@ -91,8 +91,11 @@ const ScheduleComponent: React.FC<ScheduleComponentProps> = ({
 						? day.times[0]
 						: DEFAULT_SLOT;
 				return (
-                    <div key={key} className='flex items-center gap-[15px] mb-5'>
-                        <div className='flex gap-2.5 items-center w-[145px]'>
+                    <div
+						key={key}
+						className="mb-5 flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-[15px]"
+					>
+                        <div className="flex w-full shrink-0 items-center gap-2.5 md:w-[145px]">
 							<Switch
 								checked={!day.off}
 								onCheckedChange={(checked) =>
@@ -102,14 +105,15 @@ const ScheduleComponent: React.FC<ScheduleComponentProps> = ({
 										!checked
 									)
 								}
-								className={`${!day.off ? 'bg-primary' : 'bg-gray-400'}`}
+								className={`shrink-0 ${!day.off ? 'bg-primary' : 'bg-gray-400'}`}
 							/>
-							<span className="capitalize text-[#1E2125] text-[16px] font-[700] flex-1">
+							<span className="capitalize text-[#1E2125] text-[16px] font-[700]">
 								{key}
 							</span>
 						</div>
-                        <div className="flex items-center gap-2 h-[48px] rounded-lg flex-1 border border-input px-3 custom-timepicker">
-							<span className="text-[#9BA7B7]">
+                        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row md:flex-1">
+                        <div className="flex min-w-0 flex-1 items-center gap-2 h-[48px] rounded-lg border border-input px-3 custom-timepicker">
+							<span className="shrink-0 text-[#9BA7B7] text-sm">
 								{__('From', 'doublescale')}
 							</span>
 							<Input
@@ -130,11 +134,11 @@ const ScheduleComponent: React.FC<ScheduleComponentProps> = ({
 									]);
 								}}
 								disabled={day.off}
-								className="!border-none shadow-none focus-visible:!ring-0 px-0"
+								className="min-w-0 flex-1 !border-none shadow-none focus-visible:!ring-0 px-0"
 							/>
 						</div>
-                        <div className="flex items-center gap-2 h-[48px] rounded-lg flex-1 border border-input px-3 custom-timepicker">
-							<span className="text-[#9BA7B7]">
+                        <div className="flex min-w-0 flex-1 items-center gap-2 h-[48px] rounded-lg border border-input px-3 custom-timepicker">
+							<span className="shrink-0 text-[#9BA7B7] text-sm">
 								{__('To', 'doublescale')}
 							</span>
 							<Input
@@ -155,9 +159,10 @@ const ScheduleComponent: React.FC<ScheduleComponentProps> = ({
 									]);
 								}}
 								disabled={day.off}
-								className="!border-none shadow-none focus-visible:!ring-0 px-0"
+								className="min-w-0 flex-1 !border-none shadow-none focus-visible:!ring-0 px-0"
 							/>
 						</div>
+                        </div>
                     </div>
                 );
 			})}

@@ -51,7 +51,7 @@ const RangeSection: React.FC<RangeSectionProps> = ({
 				onValueChange={(value) =>
 					onRangeTypeChange(value as 'days' | 'date_range' | 'infinity')
 				}
-				className="flex gap-1"
+				className="grid grid-cols-1 sm:grid-cols-3 gap-2"
 			>
 				<RadioCard
 					value="days"

@@ -911,6 +911,7 @@ export interface DataTableConfig<TData> {
 		placeholder?: string;
 		onChange?: (value: string) => void;
 		value?: string;
+		className?: string;
 	};
 	selection?: {
 		enabled: boolean;
@@ -958,6 +959,7 @@ export interface DataTableConfig<TData> {
 		onClear: () => void;
 	};
 	initialColumnVisibility?: Record<string, boolean>;
+	toolbarClassName?: string;
 }
 
 export type NoticeMessage = {

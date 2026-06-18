@@ -6,16 +6,28 @@ import { Search } from 'lucide-react';
  * internal dependencies
  */
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface DataTableSearchProps {
 	value: string;
 	onChange: (value: string) => void;
 	placeholder?: string;
+	className?: string;
 }
 
-export function DataTableSearch({ value, onChange, placeholder = "Search..." }: DataTableSearchProps) {
+export function DataTableSearch({
+	value,
+	onChange,
+	placeholder = 'Search...',
+	className,
+}: DataTableSearchProps) {
 	return (
-		<div className="relative w-full sm:w-1/2 sm:max-w-sm">
+		<div
+			className={cn(
+				'data-table-search relative w-full min-w-0 sm:flex-1 sm:max-w-xs xl:max-w-sm',
+				className
+			)}
+		>
 			<Input
 				placeholder={placeholder}
 				value={value}

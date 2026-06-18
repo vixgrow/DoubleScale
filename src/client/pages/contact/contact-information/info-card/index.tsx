@@ -25,6 +25,12 @@ import { useNavigate } from '@doublescale/navigation';
 import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCustomFields } from '../../../../hooks/use-customFields';
+import {
+	getCustomFieldAttributesMeta,
+	isCustomFieldRequired,
+	isEmptyCrmCustomFieldValue,
+	mapCrmCustomFieldRestError,
+} from '@doublescale/shared/utils/custom-fields-validation';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -61,6 +67,9 @@ const InfoCard: React.FC = () => {
 	>('');
 	const [isSavingCustomField, setIsSavingCustomField] =
 		useState<boolean>(false);
+	const [customFieldErrors, setCustomFieldErrors] = useState<
+		Record<number, string>
+	>({});
 	const navigate = useNavigate();
 	const tabs = [
 		{ id: 'basic' as TabType, label: __('Basic Information', 'doublescale') },
@@ -126,10 +135,39 @@ const InfoCard: React.FC = () => {
 	) => {
 		setEditingCustomField(fieldId);
 		setCustomFieldValue(currentValue || '');
+		setCustomFieldErrors((prev) => {
+			if (!prev[fieldId]) {
+				return prev;
+			}
+			const next = { ...prev };
+			delete next[fieldId];
+			return next;
+		});
 	};
 
 	const handleSaveCustomField = async () => {
 		if (editingCustomField && contact && !isSavingCustomField) {
+			const fieldDefinition = groups
+				.flatMap((group) => group.custom_fields)
+				.find((field) => field.id === editingCustomField);
+
+			if (
+				fieldDefinition &&
+				isCustomFieldRequired(fieldDefinition) &&
+				isEmptyCrmCustomFieldValue(
+					customFieldValue,
+					fieldDefinition.type
+				)
+			) {
+				setCustomFieldErrors({
+					[editingCustomField]: __(
+						`The field "${fieldDefinition.name}" is required.`,
+						'doublescale'
+					),
+				});
+				return;
+			}
+
 			setIsSavingCustomField(true);
 			try {
 				await updateCustomFieldValue(
@@ -138,7 +176,15 @@ const InfoCard: React.FC = () => {
 				);
 				setEditingCustomField(null);
 				setCustomFieldValue('');
+				setCustomFieldErrors({});
 			} catch (error) {
+				const serverFieldErrors = mapCrmCustomFieldRestError(
+					error,
+					groups
+				);
+				if (Object.keys(serverFieldErrors).length > 0) {
+					setCustomFieldErrors(serverFieldErrors);
+				}
 				console.error('Failed to update custom field:', error);
 			} finally {
 				setIsSavingCustomField(false);
@@ -204,21 +250,8 @@ const InfoCard: React.FC = () => {
 
 	// Helper function to get options from custom field attributes
 	const getFieldOptions = (customField: any) => {
-		if (!customField.attributes) {
-			return [];
-		}
-
-		let options;
-
-		// Check if attributes is directly an array (like ["ee1", "ee2"])
-		if (Array.isArray(customField.attributes)) {
-			options = customField.attributes;
-		} else if (customField.attributes.options) {
-			// Check if attributes has an options property
-			options = customField.attributes.options;
-		} else {
-			return [];
-		}
+		const meta = getCustomFieldAttributesMeta(customField.attributes);
+		const options = meta.options;
 
 		// If options is already in correct format [{label, value}]
 		if (
@@ -568,6 +601,14 @@ const InfoCard: React.FC = () => {
 														const isEditing =
 															editingCustomField ===
 															customField.id;
+														const fieldError =
+															customFieldErrors[
+																customField.id
+															];
+														const required =
+															isCustomFieldRequired(
+																customField
+															);
 
 														return (
 															<div
@@ -585,10 +626,15 @@ const InfoCard: React.FC = () => {
 																}`}
 															>
 																<div className="flex items-center justify-between gap-2">
-																	<label className="text-xs font-medium text-muted-foreground">
+																	<label className={`text-xs font-medium ${fieldError ? 'text-red-600' : 'text-muted-foreground'}`}>
 																		{
 																			customField.name
 																		}
+																		{required && (
+																			<span className="text-red-500 ml-0.5">
+																				*
+																			</span>
+																		)}
 																	</label>
 																	{!isEditing ? (
 																		<Button
@@ -662,14 +708,52 @@ const InfoCard: React.FC = () => {
 																			options={
 																				fieldOptions
 																			}
+																			required={
+																				required
+																			}
+																			status={
+																				fieldError
+																					? 'error'
+																					: undefined
+																			}
 																			onChange={(
 																				value
-																			) =>
+																			) => {
 																				setCustomFieldValue(
 																					value
-																				)
-																			}
+																				);
+																				setCustomFieldErrors(
+																					(
+																						prev
+																					) => {
+																						if (
+																							!prev[
+																								customField
+																									.id
+																							]
+																						) {
+																							return prev;
+																						}
+																						const next =
+																							{
+																								...prev,
+																							};
+																						delete next[
+																							customField
+																								.id
+																						];
+																						return next;
+																					}
+																				);
+																			}}
 																		/>
+																		{fieldError && (
+																			<p className="mt-1 text-xs text-red-600 m-0">
+																				{
+																					fieldError
+																				}
+																			</p>
+																		)}
 																	</div>
 																) : (
 																	<div className="text-sm font-medium leading-snug text-foreground">

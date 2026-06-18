@@ -140,6 +140,21 @@
 			background: #e0e7ff;
 			color: #4338ca;
 		}
+
+		&--partially_applied {
+			background: #fef3c7;
+			color: #b45309;
+		}
+
+		&--applied {
+			background: #dcfce7;
+			color: #15803d;
+		}
+
+		&--void {
+			background: #f1f5f9;
+			color: #64748b;
+		}
 	}
 
 	&__meta {

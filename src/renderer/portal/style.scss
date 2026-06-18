@@ -157,16 +157,21 @@
 	}
 }
 
-// Embedded public invoice / proposal renderers.
+// Embedded public invoice / proposal / contract renderers.
 //
-// The Documents section mounts the Free public renderers (PublicInvoiceApp /
-// PublicProposalApp) inline so the customer can view / pay / accept / decline
-// inside the portal. Those components carry their own document-preview.scss via
-// JS import, but their BEM wrapper classes live in the renderer style.scss files
-// — which also re-run `@tailwind` and redefine `:root`. To avoid duplicating
-// Tailwind in this bundle we copy only the presentational rules here.
+// The Documents section mounts the Free public renderers inline so the customer
+// can view / pay / accept / decline / sign inside the portal. Their BEM wrapper
+// classes live in the renderer style.scss files — which also re-run `@tailwind`
+// and redefine `:root`. To avoid duplicating Tailwind in this bundle we copy
+// only the presentational rules here.
+//
+// document-preview.scss is imported directly (not via lazy chunk) so proposal /
+// invoice / contract previews always have their layout styles on first paint.
+@import '../../components/sales/document-preview.scss';
+
 .doublescale-invoice-renderer,
-.doublescale-proposal-renderer {
+.doublescale-proposal-renderer,
+.doublescale-contract-renderer {
 	background: #fff;
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
@@ -176,27 +181,16 @@
 }
 
 .doublescale-invoice-renderer__toolbar,
-.doublescale-proposal-renderer__toolbar {
+.doublescale-proposal-renderer__toolbar,
+.doublescale-contract-renderer__toolbar {
 	display: flex;
 	justify-content: flex-end;
 	margin-bottom: 1rem;
 }
 
-.doublescale-invoice-renderer__download {
-	align-items: center;
-	color: #4c6fff;
-	display: inline-flex;
-	font-size: 14px;
-	font-weight: 500;
-	gap: 0.35rem;
-	text-decoration: none;
-
-	&:hover {
-		text-decoration: underline;
-	}
-}
-
-.doublescale-proposal-renderer__download {
+.doublescale-invoice-renderer__download,
+.doublescale-proposal-renderer__download,
+.doublescale-contract-renderer__download {
 	align-items: center;
 	border: 1px solid #e2e8f0;
 	border-radius: 8px;
@@ -214,7 +208,8 @@
 }
 
 .doublescale-invoice-renderer__notice,
-.doublescale-proposal-renderer__notice {
+.doublescale-proposal-renderer__notice,
+.doublescale-contract-renderer__notice {
 	border-radius: 8px;
 	font-size: 14px;
 	margin-bottom: 1rem;
@@ -268,7 +263,8 @@
 }
 
 .doublescale-proposal-renderer__accept,
-.doublescale-proposal-renderer__decline {
+.doublescale-proposal-renderer__decline,
+.doublescale-contract-renderer__sign {
 	background: #f8fafc;
 	border: 1px solid #e2e8f0;
 	border-radius: 10px;
@@ -276,7 +272,24 @@
 	padding: 1rem;
 }
 
-.doublescale-proposal-renderer__signature-canvas {
+.doublescale-contract-renderer__actions {
+	border-top: 1px solid #edf2f7;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-contract-renderer__attachments {
+	border-top: 1px solid #edf2f7;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__signature-canvas,
+.doublescale-contract-renderer__signature-canvas {
 	background: #fff;
 	border: 1px dashed #cbd5e1;
 	border-radius: 8px;

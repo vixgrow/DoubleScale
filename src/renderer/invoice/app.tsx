@@ -276,20 +276,35 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 
 			{payments.length > 0 ? (
 				<div className="doublescale-invoice-renderer__payments">
-					<h4 className="font-medium mb-2">{__('Payment History', 'doublescale')}</h4>
-					<ul className="space-y-2 text-sm">
-						{payments.map((payment, index) => (
-							<li key={`${payment.payment_date}-${index}`} className="flex justify-between gap-4">
-								<span className="text-muted-foreground">
-									{payment.payment_date || '—'}
-									{payment.payment_mode ? ` · ${payment.payment_mode}` : ''}
-								</span>
-								<span className="font-medium">
-									{formatMoney(payment.amount, data.currency)}
-								</span>
-							</li>
-						))}
-					</ul>
+					<div className="ds-sales-doc__section ds-sales-doc__payments">
+						<h4 className="ds-sales-doc__section-title">
+							{__('Payment History', 'doublescale')}
+						</h4>
+						<div className="ds-sales-doc__payments-table">
+							<table>
+								<thead>
+									<tr>
+										<th>{__('Date', 'doublescale')}</th>
+										<th>{__('Method', 'doublescale')}</th>
+										<th>{__('Amount', 'doublescale')}</th>
+									</tr>
+								</thead>
+								<tbody>
+									{payments.map((payment, index) => (
+										<tr key={`${payment.payment_date}-${index}`}>
+											<td>{payment.payment_date || '—'}</td>
+											<td className="capitalize">
+												{payment.payment_mode
+													? payment.payment_mode.replace(/_/g, ' ')
+													: '—'}
+											</td>
+											<td>{formatMoney(payment.amount, data.currency)}</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			) : null}
 

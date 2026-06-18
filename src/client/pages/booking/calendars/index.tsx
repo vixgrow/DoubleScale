@@ -592,7 +592,7 @@ const Calendars: React.FC = () => {
 													<div className='flex flex-col gap-5'>
 														<Card className="bg-white"><CardContent>
 															<div className='flex flex-col gap-3 sm:flex-row justify-between items-start sm:items-center w-full'>
-																<div className='flex w-full max-[768px]:flex-row max-[768px]:justify-between max-[768px]:items-center flex-col justify-start'>
+																<div className='flex w-full max-[767px]:flex-row max-[767px]:justify-between max-[767px]:items-center flex-col justify-start'>
 																	<div className="text-[#313131] text-base font-semibold">
 																		{
 																			calendar.name
@@ -622,7 +622,7 @@ const Calendars: React.FC = () => {
 																		</div>
 																	</a>
 																</div>
-																<div className='flex w-full max-[768px]:justify-between sm:w-auto flex-wrap justify-end gap-2'>
+																<div className='flex w-full max-[767px]:justify-between sm:w-auto  justify-end gap-3'>
 																	<Button
 																		onClick={() =>
 																			navigate(
@@ -630,7 +630,7 @@ const Calendars: React.FC = () => {
 																			)
 																		}
 																		variant='ghost'
-																		className=' !p-0'
+																		className=' !p-0 '
 																	>
 																		<SettingsIcon
 																			width={

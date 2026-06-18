@@ -213,6 +213,11 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		$this->assertArrayHasKey( 'label', $meta );
 		$this->assertArrayHasKey( 'description', $meta );
 		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
+		$this->assertContains(
+			'documents',
+			$meta['dependencies'],
+			'Upsell row must signal the Documents requirement (child invoices need it)'
+		);
 	}
 
 	public function test_subscriptions_child_defaults_on_when_sales_on(): void {

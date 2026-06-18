@@ -90,12 +90,24 @@ export const PaymentIcon = (p: IconProps) =>
 
 export const ChevronRightIcon = (p: IconProps) => base(<path d="M9 6l6 6-6 6" />, p);
 
+export const RepeatIcon = (p: IconProps) =>
+	base(
+		<>
+			<path d="M17 1l4 4-4 4" />
+			<path d="M3 11V9a4 4 0 0 1 4-4h14" />
+			<path d="M7 23l-4-4 4-4" />
+			<path d="M21 13v2a4 4 0 0 1-4 4H3" />
+		</>,
+		p
+	);
+
 const REGISTRY: Record<string, (p: IconProps) => JSX.Element> = {
 	home: HomeIcon,
 	ticket: TicketIcon,
 	calendar: CalendarIcon,
 	document: DocumentIcon,
 	clock: ClockIcon,
+	subscriptions: RepeatIcon,
 };
 
 export const SectionIcon = ({

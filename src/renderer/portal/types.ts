@@ -175,6 +175,23 @@ export interface PortalBooking {
 	can_reschedule: boolean;
 }
 
+export interface PortalSubscription {
+	id: number;
+	name: string;
+	status: string;
+	status_label: string;
+	currency: string;
+	amount: number;
+	quantity: number;
+	billing_interval: string;
+	billing_interval_count: number;
+	current_period_end: string | null;
+	cancel_at_period_end: boolean;
+	started_at: string | null;
+	canceled_at: string | null;
+	can_cancel: boolean;
+}
+
 declare global {
 	interface Window {
 		doublescale_client_portal_config?: PortalRendererConfig;

@@ -55,6 +55,13 @@ const STATUS_TONES: Record<string, string> = {
 	signed: 'bg-green-100 text-green-600',
 	active: 'bg-green-100 text-green-600',
 	expired: 'bg-red-100 text-red-600',
+	// Subscription statuses (`canceled` single-l is Stripe's spelling — distinct
+	// from booking `cancelled`).
+	future: 'bg-blue-100 text-blue-600',
+	past_due: 'bg-amber-100 text-amber-600',
+	paused: 'bg-amber-100 text-amber-600',
+	canceled: 'bg-gray-200 text-gray-700',
+	not_subscribed: 'bg-gray-200 text-gray-700',
 	partially_applied: 'bg-amber-100 text-amber-600',
 	applied: 'bg-green-100 text-green-600',
 	void: 'bg-gray-200 text-gray-700',

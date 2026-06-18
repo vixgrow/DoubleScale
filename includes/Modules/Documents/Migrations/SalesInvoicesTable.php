@@ -52,6 +52,8 @@ class SalesInvoicesTable extends Migration {
 			shipping_address TEXT NULL,
 			client_note TEXT NULL,
 			terms TEXT NULL,
+			sent_at DATETIME NULL,
+			viewed_at DATETIME NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),

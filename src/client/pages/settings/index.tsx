@@ -54,6 +54,7 @@ import CurrenciesSettings from './currencies';
 import SystemSettings from './system';
 import License from './license';
 import ClientPortalSettings from './client-portal';
+import config from '@doublescale/config';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -551,6 +552,11 @@ const SettingsPage: React.FC = () => {
 	// Filter tabs based on user role - Sales Reps and Sales Managers only see allowed tabs
 	const tabsList = useMemo(() => {
 		let tabs = filteredTabsList;
+		// Hide the Client Portal settings tab while the Portal module is disabled
+		// (see Portal/Module.php::is_enabled). Auto-restores when the module is re-enabled.
+		if (!config.isModuleToggleEnabled('portal')) {
+			tabs = tabs.filter((tab) => tab.value !== 'client_portal');
+		}
 		if (hasLimitedSettingsAccess) {
 			tabs = tabs.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value));
 		}

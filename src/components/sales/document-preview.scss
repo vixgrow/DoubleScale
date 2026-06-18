@@ -130,6 +130,31 @@
 			background: #fef3c7;
 			color: #b45309;
 		}
+
+		&--signed {
+			background: #dcfce7;
+			color: #15803d;
+		}
+
+		&--active {
+			background: #e0e7ff;
+			color: #4338ca;
+		}
+
+		&--partially_applied {
+			background: #fef3c7;
+			color: #b45309;
+		}
+
+		&--applied {
+			background: #dcfce7;
+			color: #15803d;
+		}
+
+		&--void {
+			background: #f1f5f9;
+			color: #64748b;
+		}
 	}
 
 	&__meta {
@@ -342,5 +367,79 @@
 		line-height: 1.65;
 		margin: 0;
 		white-space: pre-wrap;
+
+		p {
+			margin: 0 0 0.65rem;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__payments {
+		margin-top: 1.75rem;
+		width: 100%;
+	}
+
+	&__payments-table {
+		border: 1px solid var(--ds-doc-border);
+		border-radius: 8px;
+		overflow: hidden;
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		th,
+		td {
+			font-size: 13px;
+			padding: 0.75rem 1rem;
+			text-align: left;
+		}
+
+		thead th {
+			background: var(--ds-doc-row-odd);
+			color: var(--ds-doc-text);
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+		}
+
+		tbody tr + tr td {
+			border-top: 1px solid var(--ds-doc-border);
+		}
+
+		tbody td:last-child {
+			font-weight: 600;
+			text-align: right;
+			white-space: nowrap;
+		}
+	}
+
+	&__attachments {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	&__attachment-link {
+		align-items: center;
+		border: 1px solid var(--ds-doc-border);
+		border-radius: 8px;
+		color: var(--ds-doc-primary);
+		display: inline-flex;
+		font-size: 13px;
+		font-weight: 500;
+		gap: 0.5rem;
+		padding: 0.65rem 0.85rem;
+		text-decoration: none;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: var(--ds-doc-row-odd);
+		}
 	}
 }

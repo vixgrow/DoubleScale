@@ -139,6 +139,12 @@
 			"@/renderer/booking/*": [
 				"renderer/booking/*"
 			],
+			"@/renderer/portal": [
+				"renderer/portal"
+			],
+			"@/renderer/portal/*": [
+				"renderer/portal/*"
+			],
 			"@/types/support": [
 				"types/support"
 			],

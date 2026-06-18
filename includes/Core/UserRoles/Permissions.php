@@ -200,19 +200,29 @@ final class Permissions {
 	}
 
 	/**
-	 * Whether a logged-in support-capable user should be turned away from the
-	 * customer portal shortcode (staff redirect instead of the SPA).
+	 * Whether a logged-in DoubleScale staff member should be turned away from
+	 * the customer portal shortcode (staff redirect instead of the SPA).
 	 *
-	 * Mirrors Fluent Support: agents without a customer identity are blocked,
-	 * but a WP user whose email matches a CRM contact is treated as a customer
-	 * and may use the portal even when they also hold support capabilities.
+	 * "Staff" is any administrator OR any DoubleScale role (CRM Manager, Sales
+	 * Manager, Sales Rep, Support Manager/Agent, Booking Manager/Agent) — NOT
+	 * just support-capable roles. The previous gate keyed off
+	 * `doublescale_view_support`, which let Sales Manager / Sales Rep (who lack
+	 * that cap) into an empty customer portal; every staff role is now treated
+	 * the same.
+	 *
+	 * Exception (kept intentionally): a staff member whose WP email also matches
+	 * a CRM contact is a genuine customer too, so they may use the portal as
+	 * that contact. Customers (no staff role) are never blocked.
 	 *
 	 * @param int|null $user_id User ID (null for current user).
 	 * @return bool
 	 */
 	public static function should_block_customer_portal( $user_id = null ) {
 		$user_id = self::set_current_user_id( $user_id );
-		if ( $user_id <= 0 || ! self::has_support_access( $user_id ) ) {
+
+		$is_staff = $user_id > 0
+			&& ( user_can( $user_id, 'manage_options' ) || self::check_user_has_role( $user_id ) );
+		if ( ! $is_staff ) {
 			return false;
 		}
 

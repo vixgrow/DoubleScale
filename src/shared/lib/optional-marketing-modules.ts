@@ -42,7 +42,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
  * Keep aligned with {@see doublescale_child_module_parent_map()} in PHP.
  */
 export const CHILD_MODULES_BY_PARENT: Readonly<Record<string, readonly string[]>> = {
-	sales: ['deals'],
+	sales: ['documents', 'contracts', 'deals', 'credit_notes'],
 };
 
 const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
@@ -50,7 +50,7 @@ const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
 );
 
 /** Child sub-features that only function with the Pro add-on installed. */
-const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals']);
+const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals', 'credit_notes', 'contracts']);
 
 /**
  * Pro-only toggles the PHP REST layer persists even when the module class is not loaded yet.
@@ -100,7 +100,7 @@ function placeholderFor(
 				label: __('Sales', 'doublescale'),
 				description: isSalesDocumentsReady()
 					? __(
-							'Create proposals and invoices with line items, discounts, and customer billing.',
+							'Sales workspace with proposals, invoices, contracts, payments, and team settings.',
 							'doublescale'
 					  )
 					: __(
@@ -224,14 +224,39 @@ export type ChildModuleRow = {
 };
 
 function childPlaceholderFor(slug: string): Pick<ModuleInfo, 'label' | 'description'> {
-	if (slug === 'deals') {
-		return {
-			label: __('Pipelines', 'doublescale'),
-			description: __(
-				'Manage deals, stages, and pipeline analytics within Sales.',
-				'doublescale'
-			),
-		};
+	switch (slug) {
+		case 'documents':
+			return {
+				label: __('Proposals & Invoices', 'doublescale'),
+				description: __(
+					'Create proposals and invoices, record payments, and manage the quote-to-cash flow.',
+					'doublescale'
+				),
+			};
+		case 'contracts':
+			return {
+				label: __('Contracts', 'doublescale'),
+				description: __(
+					'Manage customer contracts, types, attachments, and e-signatures.',
+					'doublescale'
+				),
+			};
+		case 'deals':
+			return {
+				label: __('Pipelines', 'doublescale'),
+				description: __(
+					'Manage deals, stages, and pipeline analytics within Sales.',
+					'doublescale'
+				),
+			};
+		case 'credit_notes':
+			return {
+				label: __('Credit Notes', 'doublescale'),
+				description: __(
+					'Issue credit notes, apply credit to invoices, and track open customer balances.',
+					'doublescale'
+				),
+			};
 	}
 	return { label: slug, description: '' };
 }
@@ -242,10 +267,21 @@ export function getChildModuleDisplayLabel(
 	parentSlug: string,
 	fallbackLabel: string
 ): string {
-	if (slug === 'deals' && parentSlug === 'sales') {
-		return __('Pipelines', 'doublescale');
+	if (parentSlug !== 'sales') {
+		return fallbackLabel;
 	}
-	return fallbackLabel;
+	switch (slug) {
+		case 'deals':
+			return __('Pipelines', 'doublescale');
+		case 'documents':
+			return __('Proposals & Invoices', 'doublescale');
+		case 'contracts':
+			return __('Contracts', 'doublescale');
+		case 'credit_notes':
+			return __('Credit Notes', 'doublescale');
+		default:
+			return fallbackLabel;
+	}
 }
 
 /**

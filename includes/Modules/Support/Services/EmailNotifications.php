@@ -97,7 +97,7 @@ final class EmailNotifications {
 					return;
 				}
 
-				$tokens  = $this->tokens( $t );
+				$tokens = $this->tokens( $t );
 				if ( '' === $tokens['ticket_public_url'] && str_contains( $tpl['body'], '{ticket_public_url}' ) ) {
 					doublescale_get_logger()->warning(
 						'{ticket_public_url} is empty — publish a page with the [doublescale_support_portal] shortcode.',
@@ -679,15 +679,47 @@ final class EmailNotifications {
 	 * {@see TicketService::sanitize_content()} (or, for operator bodies, by the
 	 * notification-template sanitiser).
 	 *
-	 * @param TicketModel $ticket Ticket (reserved for future templating / footer).
+	 * Always appends a "View Ticket" call-to-action linking to the customer's
+	 * guest portal URL so a recipient can always reach the thread — even when an
+	 * operator's custom mailbox template omits the `{ticket_public_url}` token.
+	 * The button is skipped when (a) no portal page is published (URL is empty,
+	 * so there's nothing to link) or (b) the body already references the URL
+	 * (operator placed the link themselves — don't duplicate it).
+	 *
+	 * @param TicketModel $ticket Ticket whose guest portal URL to append.
 	 * @param string      $inner  Inner HTML/body content.
 	 * @return string
 	 */
 	private function wrap_body( TicketModel $ticket, string $inner ): string {
-		unset( $ticket ); // Reserved for a future per-mailbox footer; not used yet.
 		return '<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#1f2937;">'
 			. $inner
+			. $this->portal_link_block( $ticket, $inner )
 			. '</div>';
+	}
+
+	/**
+	 * Build the appended "View Ticket" button, or '' when it should be omitted.
+	 *
+	 * @param TicketModel $ticket Ticket whose guest portal URL to link.
+	 * @param string      $inner  Already-rendered body — checked so we don't
+	 *                            duplicate a link the operator template included.
+	 * @return string Button HTML, or '' when no portal URL or already present.
+	 */
+	private function portal_link_block( TicketModel $ticket, string $inner ): string {
+		$url = PortalUrl::get_public_ticket_url( $ticket );
+		if ( '' === $url ) {
+			return '';
+		}
+		if ( false !== strpos( $inner, $url ) ) {
+			return '';
+		}
+
+		return '<div style="margin-top:24px;">'
+			. '<a href="' . esc_url( $url ) . '" '
+			. 'style="display:inline-block;padding:10px 18px;background:#6d78d8;color:#ffffff;'
+			. 'text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">'
+			. esc_html__( 'View Ticket', 'doublescale' )
+			. '</a></div>';
 	}
 
 	/**

@@ -160,11 +160,21 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
+	subscriptions: 'subscriptions',
+	'subscriptions/:id': 'subscriptions',
 	sales: 'sales',
-	'sales/proposals': 'sales',
-	'sales/proposals/:id': 'sales',
-	'sales/invoices': 'sales',
-	'sales/invoices/:id': 'sales',
+	'sales/proposals': 'documents',
+	'sales/proposals/:id': 'documents',
+	'sales/invoices': 'documents',
+	'sales/invoices/:id': 'documents',
+	'sales/credit-notes': 'credit_notes',
+	'sales/credit-notes/:id': 'credit_notes',
+	'sales/contracts': 'contracts',
+	'sales/contracts/:id': 'contracts',
+	'sales/contract-types': 'contracts',
+	'sales/payments': 'documents',
+	'sales/payments/:id': 'documents',
+	'sales/settings': 'sales',
 	tasks: 'tasks',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
@@ -182,6 +192,7 @@ const SUB_PATH_TO_MODULE: Record<string, string> = {
 	campaigns: 'campaigns',
 	'email-sequences': 'campaigns',
 	'deals-analytics': 'analytics',
+	'invoices-analytics': 'analytics',
 	'sales-rep-analytics': 'analytics',
 	'pipeline-analytics': 'analytics',
 	'my-reports': 'analytics',
@@ -294,6 +305,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
+							},
+							{
 								path: 'sales-rep-analytics',
 								label: __('Sales Rep Analytics', 'doublescale'),
 							},
@@ -308,6 +323,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'deals-analytics',
 								label: __('Deals Analytics', 'doublescale'),
+							},
+							{
+								path: 'invoices-analytics',
+								label: __('Invoice Revenue', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',
@@ -418,17 +437,39 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						// Proposals/Invoices stay hidden until the documents
-						// feature ships — see isSalesDocumentsReady().
 						...(isSalesDocumentsReady()
 							? [
+									...(config.isModuleToggleEnabled('documents')
+										? [
+												{
+													path: 'sales/proposals',
+													label: __('Proposals', 'doublescale'),
+												},
+												{
+													path: 'sales/invoices',
+													label: __('Invoices', 'doublescale'),
+												},
+												{
+													path: 'sales/payments',
+													label: __('Payments', 'doublescale'),
+												},
+										  ]
+										: []),
+									...(config.isModuleToggleEnabled('contracts')
+										? [
+												{
+													path: 'sales/contracts',
+													label: __('Contracts', 'doublescale'),
+												},
+										  ]
+										: []),
 									{
-										path: 'sales/proposals',
-										label: __('Proposals', 'doublescale'),
-									},
-									{
-										path: 'sales/invoices',
-										label: __('Invoices', 'doublescale'),
+										path: 'sales/settings',
+										label: __('Settings', 'doublescale'),
+										requiredCapability: [
+											'doublescale_manage_all_sales',
+											'doublescale_crm_manager',
+										],
 									},
 							  ]
 							: []),
@@ -436,12 +477,41 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						// derived effective state (Sales is already on here, so it
 						// reduces to the child flag); without Pro it is the stored
 						// phantom preference and the entry leads to the upsell stub.
+						...(config.isModuleToggleEnabled('subscriptions')
+							? [
+									{
+										path: 'subscriptions',
+										label: __('Subscriptions', 'doublescale'),
+										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
 						...(config.isModuleToggleEnabled('deals')
 							? [
 									{
 										path: 'sales-pipeline',
 										label: __('Pipelines', 'doublescale'),
 										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
+						...(config.isModuleToggleEnabled('credit_notes')
+							? [
+									{
+										path: 'sales/credit-notes',
+										label: __('Credit Notes', 'doublescale'),
+										requiredCapability: [
+											'doublescale_view_sales',
+											'doublescale_manage_all_sales',
+											'doublescale_manage_own_sales',
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
 											'doublescale_sales_rep',

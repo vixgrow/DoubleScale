@@ -88,7 +88,7 @@ class Account_API {
 	 *
 	 * @return WP_Error|array
 	 */
-	public function send( $args ) {
+	public function send( $args, $is_retry = false ) {
 		$response = wp_remote_request(
 			'https://graph.microsoft.com/v1.0/me/sendMail',
 			array(
@@ -110,12 +110,23 @@ class Account_API {
 		$response_message = wp_remote_retrieve_response_message( $response );
 		$response_code    = wp_remote_retrieve_response_code( $response );
 
-		if ( $response_code == 401 ) {
+		// A 401 means the token was rejected. Refresh and retry EXACTLY ONCE.
+		// A persistent 401 (e.g. a consumer-account opaque token that Graph never
+		// accepts) must surface as an error, not recurse — otherwise each retry is
+		// a fresh 60s request and the caller appears to hang indefinitely.
+		if ( 401 === (int) $response_code ) {
+			if ( $is_retry ) {
+				return new WP_Error(
+					'send_auth_error',
+					__( 'Outlook rejected the access token (HTTP 401) after a refresh. The mailbox may not be provisioned for this connection.', 'doublescale' )
+				);
+			}
+
 			$refreshed = $this->refresh_tokens();
 			if ( ! $refreshed ) {
 				return new WP_Error( 'refresh_error', __( 'Could not refresh tokens.', 'doublescale' ) );
 			}
-			return $this->send( $args );
+			return $this->send( $args, true );
 		}
 
 		$body = json_decode( $body, true );

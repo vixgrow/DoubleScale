@@ -26,7 +26,7 @@ const emptyItem = (): LineItem => ({
 	optional: false,
 });
 
-const computeAmount = (item: LineItem): number => {
+export const computeAmount = (item: LineItem): number => {
 	const qty = Number(item.qty) || 0;
 	const rate = Number(item.rate) || 0;
 	return Math.round(qty * rate * 100) / 100;

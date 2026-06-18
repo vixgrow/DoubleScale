@@ -18,9 +18,10 @@ import type {
 	PaginatedResponse,
 	TicketFilters,
 } from '@/types/support';
-import type { PortalConfig, PortalConversationItem, PortalTicket } from './types';
+import type { PortalConversationItem, PortalTicket } from './types';
+import { getSupportPortalConfig } from './config';
 
-const config = window.doublescale_support_portal_config as PortalConfig | undefined;
+const config = getSupportPortalConfig();
 
 if (config) {
 	apiFetch.use(apiFetch.createRootURLMiddleware(config.rest_root));

@@ -108,8 +108,42 @@ class MigrationRunner {
 		}
 
 		$instance = new $class();
-		if ( method_exists( $instance, 'run' ) ) {
+		if ( ! method_exists( $instance, 'run' ) ) {
+			return;
+		}
+
+		// Detect a silent SQL failure inside the migration. Migration `run()`
+		// methods return void and call `$wpdb->query()` directly (swallowing the
+		// boolean result), so a failed ALTER/CREATE would otherwise still be
+		// recorded as "ran" — making the partial failure permanent and invisible
+		// (the migration never re-runs to finish the job). We snapshot the wpdb
+		// error state, run, then refuse to record the migration if it errored so
+		// the next install attempt retries it (every migration is idempotent).
+		$migration_error = '';
+		if ( property_exists( $wpdb, 'last_error' ) ) {
+			$wpdb->last_error = '';
+		}
+
+		try {
 			$instance->run();
+			$migration_error = property_exists( $wpdb, 'last_error' ) ? (string) $wpdb->last_error : '';
+		} catch ( \Throwable $e ) {
+			$migration_error = $e->getMessage();
+		}
+
+		if ( '' !== $migration_error ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Migration failed; not recorded as ran (will retry next install).',
+					array(
+						'source'    => 'migration-runner',
+						'module'    => $module_slug,
+						'migration' => $migration_name,
+						'error'     => $migration_error,
+					)
+				);
+			}
+			return;
 		}
 
 		$wpdb->insert(
@@ -121,6 +155,138 @@ class MigrationRunner {
 			),
 			array( '%s', '%s', '%s' )
 		);
+	}
+
+	/**
+	 * Re-run migration files without consulting the ledger (idempotent migrations only).
+	 *
+	 * @param array<int, string> $files Absolute paths to migration PHP files.
+	 * @return void
+	 */
+	public static function replay_files( array $files ): void {
+		foreach ( $files as $file ) {
+			self::execute_migration_file( $file );
+		}
+	}
+
+	/**
+	 * Re-create tables recorded by dbDelta migrations when the physical table is missing.
+	 * Also replays companion ALTER migrations in module order.
+	 *
+	 * @param ModuleRegistry $registry Module registry.
+	 * @return void
+	 */
+	public static function repair_missing_tables( ModuleRegistry $registry ): void {
+		self::ensure_tracking_table();
+
+		foreach ( $registry->all_sorted_by_dependencies() as $module ) {
+			if ( $module->is_toggleable() && ! $module->is_enabled() ) {
+				continue;
+			}
+
+			$files = self::schema_migration_files_for( $module );
+			if ( empty( $files ) ) {
+				continue;
+			}
+
+			$needs_replay = false;
+			foreach ( $files as $file ) {
+				$table = self::migration_table_name( $file );
+				if ( null !== $table && ! self::table_exists( $table ) ) {
+					$needs_replay = true;
+					break;
+				}
+			}
+
+			if ( $needs_replay ) {
+				self::replay_files( $files );
+			}
+		}
+	}
+
+	/**
+	 * @param ModuleInterface $module Module.
+	 * @return array<int, string>
+	 */
+	private static function schema_migration_files_for( ModuleInterface $module ): array {
+		if ( method_exists( $module, 'schema_migration_files' ) ) {
+			$files = $module->schema_migration_files();
+			return is_array( $files ) ? $files : array();
+		}
+
+		return $module->migrations();
+	}
+
+	/**
+	 * @param string $table_name Fully qualified table name.
+	 * @return bool
+	 */
+	private static function table_exists( string $table_name ): bool {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
+	}
+
+	/**
+	 * @param string $file Migration file path.
+	 * @return string|null Physical table name for Migration subclasses, else null.
+	 */
+	private static function migration_table_name( string $file ): ?string {
+		if ( ! is_readable( $file ) ) {
+			return null;
+		}
+
+		require_once $file;
+
+		$class = self::class_from_file( $file );
+		if ( ! $class || ! class_exists( $class ) || ! is_subclass_of( $class, Migration::class ) ) {
+			return null;
+		}
+
+		$instance = new $class();
+		return isset( $instance->table_name ) ? (string) $instance->table_name : null;
+	}
+
+	/**
+	 * @param string $file Migration file path.
+	 * @return void
+	 */
+	private static function execute_migration_file( string $file ): void {
+		if ( ! is_readable( $file ) ) {
+			return;
+		}
+
+		require_once $file;
+
+		$class = self::class_from_file( $file );
+		if ( ! $class || ! class_exists( $class ) ) {
+			return;
+		}
+
+		$instance = new $class();
+		if ( ! method_exists( $instance, 'run' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		if ( property_exists( $wpdb, 'last_error' ) ) {
+			$wpdb->last_error = '';
+		}
+
+		try {
+			$instance->run();
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Migration replay failed',
+					array(
+						'source' => 'migration-runner',
+						'file'   => $file,
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
 	}
 
 	private static function class_from_file( string $file ): ?string {

@@ -16,6 +16,7 @@ import UpgradeHeroBanner from './upgrade-hero-banner';
 import UserDashboard from './user-dashboard';
 import { UserDashboardShimmer } from './user-dashboard/UserDashboardShimmer';
 import { useDashboardData } from './use-analytics';
+import AdminCalendar from '../calendar';
 
 /**
  * When the upgrade hero is shown: normal spacing below the tall hero.
@@ -102,6 +103,8 @@ const Dashboard: React.FC = () => {
 			{hero}
 			<div className="doublescale-dashboard-main">
 				<UserDashboard dashboardData={data} />
+				{/* Cross-module staff calendar — role-scoped server-side. */}
+				<AdminCalendar />
 			</div>
 		</div>
 	);

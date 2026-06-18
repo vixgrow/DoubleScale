@@ -163,7 +163,86 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		$this->assertFalse( $inbox['setting_enabled'], 'Phantom non-child slugs keep the default-off contract' );
 	}
 
-	public function test_child_module_parent_map_lists_deals_under_sales(): void {
-		$this->assertSame( array( 'deals' => 'sales' ), doublescale_child_module_parent_map() );
+	public function test_child_module_parent_map_lists_sales_children(): void {
+		$this->assertSame(
+			array(
+				'deals'         => 'sales',
+				'documents'     => 'sales',
+				'contracts'     => 'sales',
+				'subscriptions' => 'sales',
+				'credit_notes'  => 'sales',
+			),
+			doublescale_child_module_parent_map()
+		);
+	}
+
+	public function test_phantom_subscriptions_row_nests_under_sales(): void {
+		$this->set_stored_modules( array( 'sales' => true ) );
+
+		$payload = doublescale_build_modules_list_payload(
+			array( 'sales' => $this->make_module( 'sales' ) )
+		);
+
+		$subscriptions = $this->row( $payload, 'subscriptions' );
+		$this->assertNotNull( $subscriptions, 'Phantom subscriptions row must be present without Pro' );
+		$this->assertContains( 'sales', $subscriptions['dependencies'], 'Phantom subscriptions row must declare the sales parent' );
+		$this->assertTrue( $subscriptions['is_toggleable'] );
+	}
+
+	public function test_subscriptions_is_a_registered_phantom_toggle_slug(): void {
+		$this->assertContains( 'subscriptions', doublescale_phantom_module_toggle_slugs() );
+	}
+
+	public function test_credit_notes_is_a_registered_phantom_toggle_slug(): void {
+		$this->assertContains( 'credit_notes', doublescale_phantom_module_toggle_slugs() );
+	}
+
+	public function test_contracts_is_a_registered_phantom_toggle_slug(): void {
+		$this->assertContains( 'contracts', doublescale_phantom_module_toggle_slugs() );
+	}
+
+	public function test_credit_notes_phantom_admin_meta_is_complete(): void {
+		$meta = doublescale_phantom_module_admin_meta( 'credit_notes' );
+
+		$this->assertIsArray( $meta );
+		$this->assertArrayHasKey( 'label', $meta );
+		$this->assertArrayHasKey( 'description', $meta );
+		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
+	}
+
+	public function test_contracts_phantom_admin_meta_is_complete(): void {
+		$meta = doublescale_phantom_module_admin_meta( 'contracts' );
+
+		$this->assertIsArray( $meta );
+		$this->assertArrayHasKey( 'label', $meta );
+		$this->assertArrayHasKey( 'description', $meta );
+		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
+	}
+
+	public function test_subscriptions_phantom_admin_meta_is_complete(): void {
+		$meta = doublescale_phantom_module_admin_meta( 'subscriptions' );
+
+		$this->assertIsArray( $meta );
+		$this->assertArrayHasKey( 'label', $meta );
+		$this->assertArrayHasKey( 'description', $meta );
+		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
+		$this->assertContains(
+			'documents',
+			$meta['dependencies'],
+			'Upsell row must signal the Documents requirement (child invoices need it)'
+		);
+	}
+
+	public function test_subscriptions_child_defaults_on_when_sales_on(): void {
+		$this->set_stored_modules( array( 'sales' => true ) );
+
+		$payload = doublescale_build_modules_list_payload(
+			array( 'sales' => $this->make_module( 'sales' ) )
+		);
+
+		$subscriptions = $this->row( $payload, 'subscriptions' );
+		$this->assertNotNull( $subscriptions );
+		$this->assertTrue( $subscriptions['setting_enabled'], 'Child intent defaults to on' );
+		$this->assertTrue( $subscriptions['enabled'], 'Child follows the Sales parent by default' );
 	}
 }

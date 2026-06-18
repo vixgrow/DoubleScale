@@ -729,22 +729,42 @@ class RestPortalController extends RestController {
 		// `contact_id` (agent-internal) and add `is_self` so the renderer can
 		// right-align the customer's own bubbles.
 		//
-		// "Self" = the message was authored by the customer, not an agent.
-		// Customer replies are deliberately written with `user_id = NULL` (see
-		// add_reply(): `author_user_id = null`), and so is the customer-authored
-		// opening message. An agent reply always carries the agent's `user_id`.
-		// Because the portal only ever returns tickets the current user OWNS
-		// (resolve_own_ticket / contact_id gate), any reply with no agent
-		// `user_id` on this ticket is the customer's own — so NULL author IS the
-		// self marker. (Comparing user_id to get_current_user_id() would never
-		// match, since the customer's replies have no user_id, which is exactly
-		// why every customer message was mislabeled "Support team".)
-		$is_self = empty( $activity->user_id ) && ActivityTypes::SUPPORT_REPLY === $activity->activity_type;
+		// "Self" = the message was authored by the customer, not an agent. Two
+		// shapes count as the customer's own message. (a) NULL `user_id`:
+		// customer replies are deliberately written that way (see add_reply():
+		// `author_user_id = null`), as are inbound email replies. (b) `user_id`
+		// === the current (owning) user: the opening message of a web-created
+		// ticket is credited to the logged-in customer (TicketService, source
+		// `web`, no explicit author), so it carries their WP id, not NULL. The
+		// portal only ever returns tickets the current user OWNS, so matching
+		// get_current_user_id() is safe and correctly flags that opening message
+		// as self. An agent reply (or an agent filing on the customer's behalf)
+		// carries a different id and stays "not self". Testing only
+		// `empty(user_id)` mislabels the customer's own opening message.
+		$current_user_id = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
+		$is_self         = ActivityTypes::SUPPORT_REPLY === $activity->activity_type
+			&& ( empty( $activity->user_id ) || (int) $activity->user_id === $current_user_id );
 
+		// Resolve the `user` shown to the customer. We expose only the WP
+		// display_name — never the agent's WP id or email:
+		// - The customer's OWN reply → their own id + display name.
+		// - A staff (agent) REPLY → the agent's display_name, so the customer
+		// sees who helped them (no id, no email).
+		// - Lifecycle events (created, status changed, …) → authorless rows.
 		$user = null;
-		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+		if ( $is_self ) {
+			if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+				$user = array(
+					'id'           => (int) $activity->user->ID,
+					'display_name' => (string) $activity->user->display_name,
+				);
+			}
+		} elseif (
+			ActivityTypes::SUPPORT_REPLY === $activity->activity_type
+			&& $activity->relationLoaded( 'user' )
+			&& $activity->user
+		) {
 			$user = array(
-				'id'           => (int) $activity->user->ID,
 				'display_name' => (string) $activity->user->display_name,
 			);
 		}
@@ -755,7 +775,7 @@ class RestPortalController extends RestController {
 			'id'          => $aid,
 			'kind'        => $kind,
 			'type'        => $activity->activity_type,
-			'user_id'     => $activity->user_id ? (int) $activity->user_id : null,
+			'user_id'     => $is_self && $activity->user_id ? (int) $activity->user_id : null,
 			'data'        => $data,
 			'is_self'     => $is_self,
 			'user'        => $user,

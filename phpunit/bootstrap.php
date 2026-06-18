@@ -79,6 +79,17 @@ if ( ! function_exists( 'delete_transient' ) ) {
 	}
 }
 
+if ( ! function_exists( 'doublescale_is_plugin_active' ) ) {
+	/**
+	 * @param string $plugin Plugin basename.
+	 * @return bool
+	 */
+	function doublescale_is_plugin_active( $plugin ) {
+		unset( $plugin );
+		return false;
+	}
+}
+
 if ( empty( $GLOBALS['wpdb'] ) ) {
 	$GLOBALS['wpdb'] = new class() {
 		/** @var string */
@@ -197,6 +208,26 @@ if ( ! function_exists( 'esc_html' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	function wp_strip_all_tags( $string ) {
+		return strip_tags( (string) $string );
+	}
+}
+
+if ( ! function_exists( 'wp_kses_post' ) ) {
+	/**
+	 * @param string $data
+	 * @return string
+	 */
+	function wp_kses_post( $data ) {
+		return (string) $data;
+	}
+}
+
 if ( ! function_exists( 'esc_html_e' ) ) {
 	/**
 	 * @param string $text
@@ -220,13 +251,54 @@ if ( ! function_exists( 'number_format_i18n' ) ) {
 }
 
 if ( ! function_exists( 'is_multisite' ) ) {
-	/**
-	 * Tests run as a single site; pro-detection helpers branch on this.
-	 *
-	 * @return bool
-	 */
 	function is_multisite() {
 		return false;
+	}
+}
+
+if ( ! function_exists( 'get_site_option' ) ) {
+	/**
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	function get_site_option( $option, $default = false ) {
+		unset( $option );
+		return $default;
+	}
+}
+
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	/**
+	 * @param string $str
+	 * @return string
+	 */
+	function sanitize_text_field( $str ) {
+		return trim( (string) $str );
+	}
+}
+
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	/**
+	 * @param string $str
+	 * @return string
+	 */
+	function sanitize_textarea_field( $str ) {
+		return trim( (string) $str );
+	}
+}
+
+if ( ! function_exists( 'plugin_basename' ) ) {
+	/**
+	 * @param string $file
+	 * @return string
+	 */
+	function plugin_basename( $file ) {
+		$file = str_replace( '\\', '/', (string) $file );
+		$plugins_pos = strpos( $file, '/plugins/' );
+		if ( false !== $plugins_pos ) {
+			return substr( $file, $plugins_pos + strlen( '/plugins/' ) );
+		}
+		return basename( $file );
 	}
 }
 
@@ -256,6 +328,37 @@ if ( ! function_exists( 'delete_option' ) ) {
 	function delete_option( $option ) {
 		unset( $GLOBALS['__doublescale_phpunit_options'][ $option ] );
 		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_salt' ) ) {
+	/**
+	 * @param string $scheme Salt scheme.
+	 * @return string
+	 */
+	function wp_salt( $scheme ) {
+		return 'phpunit-salt-' . (string) $scheme;
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	/**
+	 * @param array<string, mixed>|string $key   Query args or key.
+	 * @param mixed                       $value Value when key is string.
+	 * @param string                      $url   Base URL.
+	 * @return string
+	 */
+	function add_query_arg( $key, $value = null, $url = null ) {
+		if ( is_array( $key ) ) {
+			$args = $key;
+			$url  = null === $value ? '' : (string) $value;
+		} else {
+			$args = array( (string) $key => $value );
+			$url  = null === $url ? '' : (string) $url;
+		}
+		$base = '' === $url ? 'http://example.test/' : $url;
+		$join = false !== strpos( $base, '?' ) ? '&' : '?';
+		return $base . $join . http_build_query( $args );
 	}
 }
 

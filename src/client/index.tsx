@@ -32,6 +32,9 @@ if (config.isModuleEnabled('support')) {
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 require('./pages/sales');
 
+// NOTE: the cross-module staff calendar is rendered as a section on the Dashboard
+// (`pages/home`), not a separate page — no registration needed here.
+
 /**
  * When PHP marks the install as Pro (`doublescalePro.isPro`), treat Pro as active for
  * sidebar and feature gates even if the Pro client bundle did not register first.

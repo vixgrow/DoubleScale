@@ -56,10 +56,16 @@ export const usePublicProposal = (hash: string | null) => {
 	return { data, loading, error, refetch };
 };
 
-export const acceptPublicProposal = (hash: string) =>
+export interface AcceptProposalPayload {
+	signed_name?: string;
+	signature?: string;
+}
+
+export const acceptPublicProposal = (hash: string, payload: AcceptProposalPayload = {}) =>
 	fetch(`${getPublicBase()}/${hash}/accept`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload),
 	}).then(async (res) => {
 		if (!res.ok) {
 			return parseError(res);
@@ -78,3 +84,5 @@ export const declinePublicProposal = (hash: string, reason = '') =>
 		}
 		return res.json() as Promise<PublicProposal>;
 	});
+
+export const getPublicProposalPdfUrl = (hash: string) => `${getPublicBase()}/${hash}/pdf`;

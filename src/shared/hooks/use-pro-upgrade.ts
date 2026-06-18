@@ -15,7 +15,14 @@ import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 export const useProUpgrade = () => {
 	const license = config.getLicense();
 	const pluginData = config.getProPluginData();
-	const { createNotice } = useDispatch('doublescale/core');
+	const dispatch = useDispatch('doublescale/core') as
+		| { createNotice?: (notice: { type: string; message: string }) => void }
+		| null;
+	const createNotice =
+		dispatch?.createNotice ??
+		(() => {
+			// Portal and other non-admin mounts do not register doublescale/core.
+		});
 	const [isInstalling, setIsInstalling] = useState(false);
 	const [isActivating, setIsActivating] = useState(false);
 	const ajaxUrl = config.getAjaxUrl();

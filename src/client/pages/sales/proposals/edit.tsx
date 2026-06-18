@@ -11,9 +11,7 @@ import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
 	Select,
@@ -22,7 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { LineItemsEditor } from '@/components/sales';
+import { LineItemsEditor, SendDocumentDialog } from '@/components/sales';
 import {
 	normalizeSalesContact,
 	proposalFieldsFromContact,
@@ -80,7 +78,6 @@ const ProposalEdit: React.FC = () => {
 	const [zip, setZip] = useState('');
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
-	const [allowComments, setAllowComments] = useState(true);
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
 	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [lineItems, setLineItems] = useState<LineItem[]>([
@@ -191,7 +188,6 @@ const ProposalEdit: React.FC = () => {
 		setZip(existing.zip || '');
 		setEmail(existing.email || '');
 		setPhone(existing.phone || '');
-		setAllowComments(existing.allow_comments);
 		setAssignedUserId(existing.assigned_user_id ?? null);
 		setTagIds(
 			Array.isArray(existing.tag_ids)
@@ -231,7 +227,6 @@ const ProposalEdit: React.FC = () => {
 		zip,
 		email,
 		phone,
-		allow_comments: allowComments,
 		assigned_user_id: assignedUserId,
 		tag_ids: tagIds,
 		line_items: lineItems,
@@ -253,9 +248,11 @@ const ProposalEdit: React.FC = () => {
 		return true;
 	};
 
-	const handleSave = async (andSend = false) => {
+	const [sendOpen, setSendOpen] = useState(false);
+
+	const persistProposal = async (): Promise<number | null> => {
 		if (!validateForm()) {
-			return;
+			return null;
 		}
 
 		setSaving(true);
@@ -271,16 +268,38 @@ const ProposalEdit: React.FC = () => {
 			} else if (proposalId) {
 				await updateProposal(proposalId, payload);
 			}
-
-			if (andSend && id) {
-				await sendProposal(id);
-			}
-
-			navigate(getToLink(`sales/proposals/${id}`));
+			return id ?? null;
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			return null;
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const handleSave = async () => {
+		const id = await persistProposal();
+		if (id) {
+			navigate(getToLink(`sales/proposals/${id}`));
+		}
+	};
+
+	const handleSaveAndSend = async (message: string) => {
+		const id = await persistProposal();
+		if (!id) {
+			return;
+		}
+
+		setSaving(true);
+		setError(null);
+		try {
+			await sendProposal(id, message);
+			navigate(getToLink(`sales/proposals/${id}`));
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+		} finally {
+			setSaving(false);
+			setSendOpen(false);
 		}
 	};
 
@@ -401,17 +420,6 @@ const ProposalEdit: React.FC = () => {
 					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
 						<TagField value={tagIds} onChange={setTagIds} />
 					</FormField>
-
-					<div className="flex items-center justify-between pt-2">
-						<Label htmlFor="proposal-allow-comments">
-							{__('Allow Comments', 'doublescale')}
-						</Label>
-						<Switch
-							id="proposal-allow-comments"
-							checked={allowComments}
-							onCheckedChange={setAllowComments}
-						/>
-					</div>
 				</div>
 
 				<div className="space-y-4">
@@ -521,13 +529,29 @@ const ProposalEdit: React.FC = () => {
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/proposals'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave(false)} disabled={saving}>
+				<Button variant="outline" onClick={() => void handleSave()} disabled={saving}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 				</Button>
-				<Button onClick={() => void handleSave(true)} disabled={saving || status === 'declined'}>
-					{saving ? __('Sending…', 'doublescale') : __('Save & Send', 'doublescale')}
+				<Button
+					onClick={() => setSendOpen(true)}
+					disabled={saving || status === 'declined'}
+				>
+					{__('Save & Send', 'doublescale')}
 				</Button>
 			</div>
+
+			<SendDocumentDialog
+				open={sendOpen}
+				onOpenChange={setSendOpen}
+				title={__('Save & Send Proposal', 'doublescale')}
+				description={__(
+					'Save this proposal and email it to the customer. Add an optional personal note below.',
+					'doublescale'
+				)}
+				confirmLabel={__('Save & Send', 'doublescale')}
+				busy={saving}
+				onConfirm={handleSaveAndSend}
+			/>
 		</div>
 	);
 };

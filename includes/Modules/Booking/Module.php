@@ -79,6 +79,8 @@ final class Module extends AbstractModule {
 		);
 
 		$container->singleton( Services\BookingAjax::class, static fn () => new Services\BookingAjax() );
+		$container->singleton( Services\BookingPortalProvider::class, static fn () => new Services\BookingPortalProvider() );
+		$container->singleton( Services\BookingCalendarProvider::class, static fn () => new Services\BookingCalendarProvider() );
 		$container->singleton( Services\EmailNotifications::class, static fn () => new Services\EmailNotifications() );
 		$container->singleton( Services\BookingJobs::class, static fn () => new Services\BookingJobs() );
 		$container->singleton( Services\BookingTasks::class, static fn () => new Services\BookingTasks() );
@@ -137,6 +139,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestBookingController::class,
 			Rest\Controllers\RestAvailabilityController::class,
 			Rest\Controllers\RestBookingSettingsController::class,
+			Rest\Controllers\RestPortalBookingController::class,
 		);
 	}
 
@@ -150,6 +153,12 @@ final class Module extends AbstractModule {
 
 		// Constructors of these services register their own AJAX/action hooks; resolving them is the registration step.
 		$container->get( Services\BookingAjax::class );
+		// Client Portal bridge: registers the Bookings section + summary +
+		// timeline filters (only while Booking is enabled).
+		$container->get( Services\BookingPortalProvider::class );
+		// Admin/staff calendar bridge: contributes bookings to the cross-module
+		// calendar feed (host-scoped for agents, all for managers).
+		$container->get( Services\BookingCalendarProvider::class );
 		$container->get( Services\EmailNotifications::class );
 		$container->get( Services\BookingJobs::class );
 		$container->get( Services\BookingTasks::class );

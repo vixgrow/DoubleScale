@@ -121,9 +121,9 @@ class RestGuestController extends RestController {
 			->whereIn( 'activity_type', $allowed )
 			->with( 'user' );
 
-		$paginator = $query->paginate( 100, array( '*' ), 'page', 1 );
-		$items     = $paginator->items();
-		$ids       = array_map(
+		$paginator       = $query->paginate( 100, array( '*' ), 'page', 1 );
+		$items           = $paginator->items();
+		$ids             = array_map(
 			static function ( $activity ) {
 				return (int) $activity->id;
 			},
@@ -206,7 +206,7 @@ class RestGuestController extends RestController {
 	 * @return TicketModel|WP_Error
 	 */
 	private function resolve_ticket_by_hash( WP_REST_Request $request ) {
-		$hash = (string) $request->get_param( 'hash' );
+		$hash   = (string) $request->get_param( 'hash' );
 		$ticket = TicketModel::get_by_hash( $hash );
 		if ( ! $ticket ) {
 			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
@@ -237,7 +237,7 @@ class RestGuestController extends RestController {
 	}
 
 	/**
-	 * @param ActivityModel                             $activity Activity.
+	 * @param ActivityModel                                $activity Activity.
 	 * @param array<int, array<int, array<string, mixed>>> $attachments_map Attachments by activity id.
 	 * @return array
 	 */
@@ -246,30 +246,46 @@ class RestGuestController extends RestController {
 			ActivityTypes::SUPPORT_REPLY => 'reply',
 			ActivityTypes::SUPPORT_EVENT => 'event',
 		);
-		$kind = $kind_map[ $activity->activity_type ] ?? 'event';
-		$data = is_array( $activity->data ) ? $activity->data : array();
+		$kind     = $kind_map[ $activity->activity_type ] ?? 'event';
+		$data     = is_array( $activity->data ) ? $activity->data : array();
 
+		$is_customer = $this->activity_is_customer_authored( $activity );
+
+		// Resolve the `user` shown to the guest. We expose only the WP
+		// display_name — never the agent's WP id or email:
+		// - Customer-authored row → the customer's own id (their reply).
+		// - Staff REPLY → the agent's display_name, so the customer sees who
+		// helped them (no id, no email).
+		// - Events (ticket created, status changed, …) → authorless system rows.
 		$user = null;
-		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+		if ( $is_customer ) {
+			if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+				$user = array(
+					'id'           => (int) $activity->user->ID,
+					'display_name' => (string) $activity->user->display_name,
+				);
+			}
+		} elseif (
+			ActivityTypes::SUPPORT_REPLY === $activity->activity_type
+			&& $activity->relationLoaded( 'user' )
+			&& $activity->user
+		) {
 			$user = array(
-				'id'           => (int) $activity->user->ID,
 				'display_name' => (string) $activity->user->display_name,
 			);
 		}
-
-		$is_customer = $this->activity_is_customer_authored( $activity );
 
 		$payload = array(
 			'id'          => (int) $activity->id,
 			'kind'        => $kind,
 			'type'        => $activity->activity_type,
-			'user_id'     => $activity->user_id ? (int) $activity->user_id : null,
+			'user_id'     => $is_customer && $activity->user_id ? (int) $activity->user_id : null,
 			'data'        => $data,
 			'is_self'     => $is_customer,
 			'is_customer' => $is_customer,
 			'user'        => $user,
-			'created_at' => $activity->created_at ? (string) $activity->created_at : null,
-			'updated_at' => $activity->updated_at ? (string) $activity->updated_at : null,
+			'created_at'  => $activity->created_at ? (string) $activity->created_at : null,
+			'updated_at'  => $activity->updated_at ? (string) $activity->updated_at : null,
 		);
 
 		$aid = (int) $activity->id;
@@ -321,8 +337,8 @@ class RestGuestController extends RestController {
 	 */
 	private function check_rate_limit(): bool {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP used only for rate-limit key.
-		$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
-		$key = 'ds_support_pub_' . md5( $ip );
+		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
+		$key   = 'ds_support_pub_' . md5( $ip );
 		$count = (int) get_transient( $key );
 		if ( $count > 120 ) {
 			return false;

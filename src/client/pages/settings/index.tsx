@@ -53,6 +53,7 @@ import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 import SystemSettings from './system';
 import License from './license';
+import ClientPortalSettings from './client-portal';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -86,6 +87,7 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'debugging',
 	'notifications',
 	'mailbox',
+	'client_portal',
 ];
 
 const SETTINGS_DEPENDENT_TABS = new Set([
@@ -387,6 +389,8 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'license':
 				return <License />;
+			case 'client_portal':
+				return <ClientPortalSettings />;
 			case 'custom_fields': {
 				const CustomFieldsSettingsComponent = applyFilters(
 					'doublescale_settings_custom_fields_settings',
@@ -503,6 +507,11 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'website_tracking',
 			label: 'Website Tracking',
+			icon: <WebsiteIcon width={24} height={24} />,
+		},
+		{
+			value: 'client_portal',
+			label: 'Client Portal',
 			icon: <WebsiteIcon width={24} height={24} />,
 		},
 		{

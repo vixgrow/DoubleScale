@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 
 import type { PaginatedResponse } from '@/types/support';
 import type { PortalConversationItem, PublicTicket } from './types';
+import { getSupportPortalConfig } from './config';
 
 const formatError = (err: unknown): string => {
 	if (err instanceof Error && err.message) {
@@ -16,7 +17,7 @@ const formatError = (err: unknown): string => {
 };
 
 const getPublicBase = (): string => {
-	const config = window.doublescale_support_portal_config;
+	const config = getSupportPortalConfig();
 	return config?.public_rest_url || '/wp-json/doublescale/v1/support/public';
 };
 

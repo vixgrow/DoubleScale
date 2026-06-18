@@ -31,6 +31,9 @@ export interface PublicProposal {
 	zip: string | null;
 	email: string | null;
 	phone: string | null;
+	require_signature: boolean;
+	signed_name: string | null;
+	has_signature: boolean;
 	is_expired?: boolean;
 	can_accept: boolean;
 	can_decline: boolean;

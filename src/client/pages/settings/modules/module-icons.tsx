@@ -35,6 +35,10 @@ export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
 				return <SalesIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'deals':
 				return <PipelineIcon width={dim} height={dim} color={ICON_COLOR} />;
+			case 'documents':
+			case 'contracts':
+			case 'credit_notes':
+				return <SalesIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'forms':
 				return <FormsIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'automations':

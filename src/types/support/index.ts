@@ -21,6 +21,18 @@ export interface AgentSummary {
 	email: string;
 }
 
+/**
+ * Author shown on a conversation item. The admin/agent views populate the full
+ * {@see AgentSummary} (id + email). Customer-facing payloads (guest + portal)
+ * expose only a friendly `display_name` for staff replies — never the agent's
+ * WP id or email — so `id`/`email` are optional here.
+ */
+export interface ConversationAuthor {
+	display_name: string;
+	id?: number;
+	email?: string;
+}
+
 export interface MailboxSummary {
 	id: number;
 	slug: string;
@@ -100,7 +112,7 @@ export interface ConversationItem {
 	cc?: string[];
 	created_at: string | null;
 	updated_at: string | null;
-	user: AgentSummary | null;
+	user: ConversationAuthor | null;
 	attachments?: ConversationAttachment[];
 }
 

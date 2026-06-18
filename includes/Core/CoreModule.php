@@ -42,8 +42,10 @@ final class CoreModule extends AbstractModule {
 		$base   = DOUBLESCALE_PLUGIN_DIR;
 		$logger = (array) glob( $base . 'includes/Core/Logger/Migrations/*.php' );
 		sort( $logger );
-		$task_meta = $base . 'includes/Core/Database/Migrations/TaskMetaTable.php';
-		return array_merge( array( $task_meta ), $logger );
+		$task_meta        = $base . 'includes/Core/Database/Migrations/TaskMetaTable.php';
+		$attachments      = $base . 'includes/Core/Database/Migrations/AttachmentsTable.php';
+		$migrate_legacy   = $base . 'includes/Core/Database/Migrations/MigrateLegacyAttachments.php';
+		return array_merge( array( $task_meta, $attachments, $migrate_legacy ), $logger );
 	}
 
 	public function register( Container $container ): void {
@@ -60,6 +62,7 @@ final class CoreModule extends AbstractModule {
 	public function restControllers(): array {
 		return array(
 			Rest\Controllers\RestGeneralController::class,
+			Rest\Controllers\RestAdminCalendarController::class,
 			Rest\Controllers\RestModulesController::class,
 			Rest\Controllers\RestPluginsController::class,
 			Rest\Controllers\RestSiteVerificationController::class,
@@ -85,6 +88,8 @@ final class CoreModule extends AbstractModule {
 		\DoubleScale\Core\UserRoles\WooCommerceCompat::instance();
 		\DoubleScale\Database\Install::init();
 		\DoubleScale\Website\Site::instance();
+
+		new \DoubleScale\Core\Renderer\AttachmentServeHandler();
 
 		// The DoubleScale top-level admin menu and every CRM REST route check the
 		// `doublescale_access` capability. Historically this cap was granted as a

@@ -1,7 +1,11 @@
 export { LineItemsEditor, computeLineItemsTotals } from './line-items-editor';
-export { ProposalStatusPill, InvoiceStatusPill } from './status-pill';
+export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
 export { ConfirmDialog } from './confirm-dialog';
+export { SendDocumentDialog } from './send-document-dialog';
+export { default as ContractAttachmentsPanel } from './contract-attachments-panel';
 export { ProposalDocumentPreview, InvoiceDocumentPreview } from './document-preview';
+export { PaymentReceiptPreview } from './payment-receipt-preview';
+export { PaymentForm } from './payment-form';
 export { RecordPaymentDialog } from './record-payment-dialog';
 export { PaymentsList } from './payments-list';
-export { InvoiceStripePayment } from './invoice-stripe-payment';
+export { InvoiceOnlinePayment, InvoiceStripePayment } from './invoice-online-payment';

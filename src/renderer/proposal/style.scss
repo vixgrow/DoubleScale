@@ -96,3 +96,51 @@
 	margin-top: 1rem;
 	padding: 1rem;
 }
+
+.doublescale-proposal-renderer__accept {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	margin-top: 1rem;
+	padding: 1rem;
+}
+
+.doublescale-proposal-renderer__toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 1rem;
+}
+
+.doublescale-proposal-renderer__download {
+	align-items: center;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	color: #334155;
+	display: inline-flex;
+	font-size: 14px;
+	font-weight: 500;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	text-decoration: none;
+
+	&:hover {
+		background: #f8fafc;
+	}
+}
+
+.doublescale-proposal-renderer__signature-canvas {
+	background: #fff;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	cursor: crosshair;
+	display: block;
+	height: 160px;
+	touch-action: none;
+	width: 100%;
+}
+
+.doublescale-proposal-renderer__comments {
+	border-top: 1px solid #edf2f7;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}

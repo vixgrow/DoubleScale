@@ -246,9 +246,14 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                 meeting_title: formData.meetingTitle.trim(),
                 duration: formData.duration,
                 location: formData.location || undefined,
+                // Store UTC: the picker value is local wall-clock time, but
+                // activity_date is compared against UTC boundaries server-side
+                // (gmdate/current_time(...,true)) and read back via dayjs.utc().
+                // Without .utc() the stored local time is mis-read as UTC and
+                // shifts by the viewer's offset.
                 meeting_date_time: formData.meetingDateTime
-                    ? dayjs(formData.meetingDateTime).format('YYYY-MM-DD HH:mm:ss')
-                    : dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                    ? dayjs(formData.meetingDateTime).utc().format('YYYY-MM-DD HH:mm:ss')
+                    : dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
                 description: formData.description.trim() || undefined,
             };
 

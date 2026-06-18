@@ -76,6 +76,9 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'inbox',
 		'integrations',
 		'leadscoring',
+		'subscriptions',
+		'credit_notes',
+		'contracts',
 		'tasks',
 	);
 
@@ -89,24 +92,10 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
 	return in_array( $slug, doublescale_phantom_module_toggle_slugs(), true );
 }
 
-/**
- * Whether the Sales documents feature set (proposals + invoices) is released.
- *
- * TEMPORARY GATE — proposals/invoices are still in development on the `sales`
- * branch and their DB schema may change. On this branch the Sales module ships
- * only as the parent toggle for the pipeline child: no document REST routes,
- * no document migrations, no Proposals/Invoices menus or pages.
- *
- * Remove this gate (revert the commit that introduced it) when the documents
- * feature is finished and merged from the `sales` branch. The `sales` branch
- * can flip it early via the filter:
- * `add_filter( 'doublescale_sales_documents_ready', '__return_true' );`
- *
- * @return bool
- */
-function doublescale_sales_documents_ready(): bool {
-	return (bool) apply_filters( 'doublescale_sales_documents_ready', false );
-}
+// `doublescale_sales_documents_ready()` lives in includes/Core/functions.php and
+// returns true whenever the Sales module is active (the Documents/Portal feature
+// has shipped). The temporary WP_DEBUG release-gate that previously lived here was
+// removed on merge to avoid a duplicate definition; do not re-add it here.
 
 /**
  * Child module slug => parent module slug.
@@ -121,13 +110,34 @@ function doublescale_sales_documents_ready(): bool {
  */
 function doublescale_child_module_parent_map(): array {
 	$map = array(
-		'deals' => 'sales',
+		'deals'         => 'sales',
+		'documents'     => 'sales',
+		'contracts'     => 'sales',
+		'subscriptions' => 'sales',
+		'credit_notes'  => 'sales',
 	);
 
 	/**
 	 * @param array<string, string> $map Child slug => parent slug.
 	 */
 	return (array) apply_filters( 'doublescale_child_module_parent_map', $map );
+}
+
+/**
+ * Whether a Sales document sub-feature (proposals, invoices, contracts) is active.
+ *
+ * @param string $slug Child slug (`proposals`, `invoices`, or `contracts`).
+ */
+function doublescale_sales_child_module_active( string $slug ): bool {
+	return function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( $slug );
+}
+
+/**
+ * True when at least one Sales document sub-feature is enabled.
+ */
+function doublescale_any_sales_document_module_active(): bool {
+	return doublescale_sales_child_module_active( 'documents' )
+		|| doublescale_sales_child_module_active( 'contracts' );
 }
 
 /**
@@ -146,6 +156,12 @@ function doublescale_module_setting_enabled( string $slug, array $stored, bool $
 	}
 	if ( ! $toggleable ) {
 		return true;
+	}
+	if ( 'documents' === $slug ) {
+		$proposals = ! array_key_exists( 'proposals', $stored ) || (bool) $stored['proposals'];
+		$invoices  = ! array_key_exists( 'invoices', $stored ) || (bool) $stored['invoices'];
+
+		return $proposals || $invoices;
 	}
 
 	return array_key_exists( $slug, doublescale_child_module_parent_map() );
@@ -186,6 +202,26 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Lead scoring', 'doublescale' ),
 				'description' => __( 'Score contacts from behavior and profile data for prioritization.', 'doublescale' ),
+			);
+		case 'subscriptions':
+			return array(
+				'label'        => __( 'Subscriptions', 'doublescale' ),
+				'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
+				// Mirrors the real Pro module's dependencies() so the pre-Pro
+				// upsell row nests under Sales and signals the Documents need.
+				'dependencies' => array( 'contacts', 'sales', 'documents' ),
+			);
+		case 'credit_notes':
+			return array(
+				'label'        => __( 'Credit Notes', 'doublescale' ),
+				'description'  => __( 'Issue credit notes, apply credit to invoices, and track open customer balances.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales' ),
+			);
+		case 'contracts':
+			return array(
+				'label'        => __( 'Contracts', 'doublescale' ),
+				'description'  => __( 'Manage customer contracts, types, attachments, and e-signatures.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales' ),
 			);
 		case 'tasks':
 			return array(
@@ -435,4 +471,132 @@ function doublescale_filter_merge_tag_groups_for_modules( array $groups ): array
 	$groups = apply_filters( 'doublescale_merge_tag_groups_module_filtered', $groups );
 
 	return $groups;
+}
+
+/**
+ * Human-readable module label for automation dependency warnings.
+ *
+ * @param string $slug Module slug.
+ */
+function doublescale_automation_module_label( string $slug ): string {
+	$labels = array(
+		'support'   => __( 'Helpdesk', 'doublescale' ),
+		'deals'     => __( 'Pipelines & Deals', 'doublescale' ),
+		'booking'   => __( 'Booking', 'doublescale' ),
+		'forms'     => __( 'Forms', 'doublescale' ),
+		'sales'     => __( 'Sales', 'doublescale' ),
+		'documents' => __( 'Proposals & Invoices', 'doublescale' ),
+		'contracts' => __( 'Contracts', 'doublescale' ),
+	);
+
+	return $labels[ $slug ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $slug ) );
+}
+
+/**
+ * First inactive module in an ordered parent→child chain (e.g. sales then documents).
+ *
+ * @param array<int, string> $slugs Module slugs in check order.
+ */
+function doublescale_automation_first_inactive_module( array $slugs ): ?string {
+	foreach ( $slugs as $slug ) {
+		if ( ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( $slug ) ) {
+			return $slug;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * @param array<int, string> $slugs Module slugs in check order.
+ */
+function doublescale_automation_modules_available( array $slugs ): bool {
+	return null === doublescale_automation_first_inactive_module( $slugs );
+}
+
+/**
+ * Ordered module chain for a Sales lifecycle trigger/action slug.
+ *
+ * @param string $item_slug Trigger or action slug.
+ * @return array<int, string>
+ */
+function doublescale_automation_sales_item_modules( string $item_slug ): array {
+	if ( '' !== $item_slug && 0 === strpos( $item_slug, 'contract_' ) ) {
+		return array( 'sales', 'contracts' );
+	}
+
+	return array( 'sales', 'documents' );
+}
+
+/**
+ * Ordered module chain for an automation condition rule group.
+ *
+ * @param string $group Rule group key.
+ * @return array<int, string>|null Null when the group is not module-owned.
+ */
+function doublescale_automation_condition_group_modules( string $group ): ?array {
+	switch ( $group ) {
+		case 'proposal':
+		case 'invoice':
+			return array( 'sales', 'documents' );
+		case 'contract':
+			return array( 'sales', 'contracts' );
+		default:
+			return null;
+	}
+}
+
+/**
+ * Whether any Sales merge-tag submodule (documents or contracts) is available.
+ */
+function doublescale_automation_sales_merge_tags_enabled(): bool {
+	return doublescale_automation_modules_available( array( 'sales', 'documents' ) )
+		|| doublescale_automation_modules_available( array( 'sales', 'contracts' ) );
+}
+
+/**
+ * Build a dependency warning payload for automations UI / REST.
+ *
+ * @param array<int, string> $module_slugs Ordered module chain.
+ * @param string             $context      trigger|action|condition|goal.
+ * @return array{is_active: bool, is_pro: bool, message: string, plugin_label: string}
+ */
+function doublescale_automation_module_dependency_result( array $module_slugs, string $context ): array {
+	$inactive = doublescale_automation_first_inactive_module( $module_slugs );
+	if ( null === $inactive ) {
+		return array(
+			'is_active'    => true,
+			'is_pro'       => false,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
+
+	$label = doublescale_automation_module_label( $inactive );
+
+	switch ( $context ) {
+		case 'action':
+			/* translators: %s: module name (e.g. "Deals"). */
+			$template = __( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		case 'condition':
+			/* translators: %s: module name (e.g. "Deals"). */
+			$template = __( 'This condition uses rules that require the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		case 'goal':
+			/* translators: %s: module name (e.g. "Deals"). */
+			$template = __( 'This goal requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+		default:
+			/* translators: %s: module name (e.g. "Deals"). */
+			$template = __( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' );
+			break;
+	}
+
+	return array(
+		'is_active'    => false,
+		'is_pro'       => false,
+		'message'      => sprintf( $template, $label ),
+		'plugin_label' => $label,
+	);
 }

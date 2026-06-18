@@ -1,0 +1,305 @@
+// Tailwind utilities for the public Client Portal. `@tailwind base` is skipped
+// on purpose — the renderer mounts inline on host pages (via the
+// [doublescale_client_portal] shortcode) and preflight would reset the host
+// theme's typography. Matches the support/booking renderers.
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind components;
+@tailwind utilities;
+
+// shadcn design tokens, scoped to the portal mount node + :root so any Radix
+// portals escaping into <body> still resolve the CSS custom properties. Kept in
+// sync with src/renderer/support/style.scss so reused ticket views look right.
+#doublescale-client-portal,
+:root {
+	--background: 228 25% 97%;
+	--foreground: 240 6% 17%;
+	--card: 0 0% 100%;
+	--card-foreground: 240 6% 17%;
+	--popover: 0 0% 100%;
+	--popover-foreground: 240 6% 17%;
+	--primary: 240 45% 41%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 254 76% 94%;
+	--secondary-foreground: 240 45% 41%;
+	--secondary-background: 220 23% 97%;
+	--muted: 220 23% 97%;
+	--muted-foreground: 233 5% 44%;
+	--accent: 220 23% 97%;
+	--accent-foreground: 240 6% 17%;
+	--tertiary: 220 23% 97%;
+	--tertiary-foreground: 240 6% 17%;
+	--destructive: 0 84.2% 60.2%;
+	--destructive-foreground: 0 0% 98%;
+	--border: 0 0% 82%;
+	--input: 0 0% 82%;
+	--ring: 240 45% 41%;
+	--radius: 0.5rem;
+
+	font-family: theme('fontFamily.sans');
+	color: hsl(var(--foreground));
+	-webkit-font-smoothing: antialiased;
+}
+
+// Scoped preflight-lite.
+//
+// The renderer omits Tailwind's GLOBAL preflight on purpose (so it never resets
+// the host theme). But many Tailwind utilities silently assume preflight ran:
+//   - `border` / `border-*` set only `border-width`; with no global
+//     `border-style: solid` the browser default (`none`) collapses every border
+//     to 0px — which is why portal cards rendered with invisible edges.
+//   - native <button>/<input> keep their UA chrome (outset borders, grey
+//     backgrounds, platform fonts), so the host theme's button styling leaks
+//     straight into the SPA controls.
+//   - host-theme list bullets / link underlines / heading margins bleed in.
+//
+// Re-apply just those primitives, SCOPED to the mount node, so Tailwind behaves
+// as designed inside the portal while the surrounding theme is left untouched.
+// (The embedded support views render inside this node, so they benefit too.)
+//
+// The scope is wrapped in `:where()` so the id contributes ZERO specificity:
+// otherwise an `#id button { padding: 0 }` reset would OUTWEIGH Tailwind's
+// `.px-3` utility (id 1,0,1 vs class 0,1,0) and collapse every padded control.
+// `:where(#id)` keeps these at element-level specificity, exactly like
+// Tailwind's own preflight, so utilities always win.
+:where(#doublescale-client-portal) {
+	box-sizing: border-box;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+		border-width: 0;
+		border-style: solid;
+		border-color: hsl(var(--border));
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	figure,
+	blockquote {
+		margin: 0;
+	}
+
+	ul,
+	ol {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		margin: 0;
+	}
+
+	a,
+	a:hover,
+	a:focus {
+		color: inherit;
+		text-decoration: none;
+		box-shadow: none;
+	}
+
+	button,
+	input,
+	optgroup,
+	select,
+	textarea {
+		margin: 0;
+		padding: 0;
+		font-family: inherit;
+		font-size: 100%;
+		font-weight: inherit;
+		line-height: inherit;
+		color: inherit;
+	}
+
+	// The `[type='…']` attribute selectors must be wrapped in `:where()` too.
+	// Unlike the bare `button` element (specificity 0,0,1), an attribute selector
+	// weighs 0,1,0 — exactly equal to a Tailwind utility like `.bg-primary`. With
+	// the tie, source order decides, and this reset is emitted AFTER the utilities
+	// layer, so `background-color: transparent` would clobber `.bg-primary` on any
+	// `<button type="button">` (e.g. the portal's status-filter pills rendered
+	// white-on-white). `:where()` zeroes their specificity so utilities win.
+	button,
+	:where([type='button'], [type='reset'], [type='submit']) {
+		-webkit-appearance: button;
+		appearance: button;
+		background-color: transparent;
+		background-image: none;
+		cursor: pointer;
+		// NB: never set `border: 0` here — that would force border-style:none on
+		// buttons (beating the `* { border-style: solid }` rule above) and make
+		// every `.border` button render a 1px-wide *styleless* (invisible) edge.
+		// The `*` rule already zeroes border-WIDTH; utilities re-add it.
+	}
+
+	input,
+	textarea,
+	select {
+		background-color: transparent;
+	}
+
+	img,
+	svg {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
+}
+
+// Embedded public invoice / proposal / contract renderers.
+//
+// The Documents section mounts the Free public renderers inline so the customer
+// can view / pay / accept / decline / sign inside the portal. Their BEM wrapper
+// classes live in the renderer style.scss files — which also re-run `@tailwind`
+// and redefine `:root`. To avoid duplicating Tailwind in this bundle we copy
+// only the presentational rules here.
+//
+// document-preview.scss is imported directly (not via lazy chunk) so proposal /
+// invoice / contract previews always have their layout styles on first paint.
+@import '../../components/sales/document-preview.scss';
+
+.doublescale-invoice-renderer,
+.doublescale-proposal-renderer,
+.doublescale-contract-renderer,
+.doublescale-credit-note-renderer {
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	overflow: hidden;
+	padding: 1.5rem;
+}
+
+.doublescale-invoice-renderer__toolbar,
+.doublescale-proposal-renderer__toolbar,
+.doublescale-contract-renderer__toolbar,
+.doublescale-credit-note-renderer__toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 1rem;
+}
+
+.doublescale-invoice-renderer__download,
+.doublescale-proposal-renderer__download,
+.doublescale-contract-renderer__download,
+.doublescale-credit-note-renderer__download {
+	align-items: center;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	color: #334155;
+	display: inline-flex;
+	font-size: 14px;
+	font-weight: 500;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	text-decoration: none;
+
+	&:hover {
+		background: #f8fafc;
+	}
+}
+
+.doublescale-invoice-renderer__notice,
+.doublescale-proposal-renderer__notice,
+.doublescale-contract-renderer__notice,
+.doublescale-credit-note-renderer__notice {
+	border-radius: 8px;
+	font-size: 14px;
+	margin-bottom: 1rem;
+	padding: 0.75rem 1rem;
+
+	&--info {
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		color: #334155;
+	}
+
+	&--success {
+		background: #ecfdf5;
+		border: 1px solid #a7f3d0;
+		color: #065f46;
+	}
+
+	&--warning {
+		background: #fffbeb;
+		border: 1px solid #fde68a;
+		color: #92400e;
+	}
+
+	&--error {
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		color: #b91c1c;
+	}
+}
+
+.doublescale-invoice-renderer__payments,
+.doublescale-proposal-renderer__comments {
+	border-top: 1px solid #edf2f7;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-invoice-renderer__pay {
+	border-top: 1px solid #edf2f7;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__actions {
+	border-top: 1px solid #edf2f7;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__accept,
+.doublescale-proposal-renderer__decline,
+.doublescale-contract-renderer__sign {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	margin-top: 1rem;
+	padding: 1rem;
+}
+
+.doublescale-contract-renderer__actions {
+	border-top: 1px solid #edf2f7;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-contract-renderer__attachments {
+	border-top: 1px solid #edf2f7;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.doublescale-proposal-renderer__signature-canvas,
+.doublescale-contract-renderer__signature-canvas {
+	background: #fff;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	cursor: crosshair;
+	display: block;
+	height: 160px;
+	touch-action: none;
+	width: 100%;
+}

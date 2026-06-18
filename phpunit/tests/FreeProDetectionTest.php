@@ -32,11 +32,18 @@ final class FreeProDetectionTest extends TestCase {
 
 		require_once \DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
 
+		// Exercise the real detector (`doublescale_is_plugin_active_basename`) rather
+		// than the `doublescale_is_plugin_active` wrapper: the phpunit bootstrap
+		// installs a `doublescale_is_plugin_active` stub hardwired to `return false`
+		// (so the free-standalone tests run as if Pro were absent), and the
+		// `function_exists()` guard makes that stub win over the real implementation.
+		// The wrapper only delegates to `_basename`, which the bootstrap does NOT
+		// stub, so this tests the actual `active_plugins` lookup the wrapper performs.
 		update_option( 'active_plugins', array() );
-		$this->assertFalse( doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
+		$this->assertFalse( doublescale_is_plugin_active_basename( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
 
 		update_option( 'active_plugins', array( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
-		$this->assertTrue( doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
+		$this->assertTrue( doublescale_is_plugin_active_basename( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
 	}
 
 	public function test_rest_template_collection_includes_is_pro_filter(): void {

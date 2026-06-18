@@ -11,10 +11,10 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
-use DoubleScale\Modules\Sales\Services\InvoiceUrl;
-use DoubleScale\Modules\Sales\Services\ProposalUrl;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Services\ProposalUrl;
 
 /**
  * AbstractSalesMergeTag class.
@@ -40,10 +40,16 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 			return null;
 		}
 		if ( function_exists( 'doublescale_is_module_storage_ready' )
-			&& ! doublescale_is_module_storage_ready( 'sales', ProposalModel::class ) ) {
+			&& ! doublescale_is_module_storage_ready( 'documents', ProposalModel::class ) ) {
 			return null;
 		}
 		$proposal_id = (int) ( $contact->data['proposal_id'] ?? 0 );
+		if ( $proposal_id <= 0 ) {
+			$invoice = $this->resolve_invoice( $contact );
+			if ( $invoice instanceof InvoiceModel && ! empty( $invoice->proposal_id ) ) {
+				$proposal_id = (int) $invoice->proposal_id;
+			}
+		}
 		if ( $proposal_id <= 0 ) {
 			return null;
 		}
@@ -60,7 +66,7 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 			return null;
 		}
 		if ( function_exists( 'doublescale_is_module_storage_ready' )
-			&& ! doublescale_is_module_storage_ready( 'sales', InvoiceModel::class ) ) {
+			&& ! doublescale_is_module_storage_ready( 'documents', InvoiceModel::class ) ) {
 			return null;
 		}
 		$invoice_id = (int) ( $contact->data['invoice_id'] ?? 0 );
@@ -107,4 +113,37 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 	protected function invoice_public_url( InvoiceModel $invoice ): string {
 		return InvoiceUrl::get_public_url( $invoice );
 	}
+}
+
+/**
+ * Proposal-scoped sales merge tags.
+ */
+abstract class AbstractProposalSalesMergeTag extends AbstractSalesMergeTag {
+
+	/**
+	 * @var array<int, string>
+	 */
+	public $required_triggers = array(
+		'proposal_sent',
+		'proposal_declined',
+		'proposal_accepted',
+		'proposal_converted_to_invoice',
+		'invoice_sent',
+		'invoice_paid',
+	);
+}
+
+/**
+ * Invoice-scoped sales merge tags.
+ */
+abstract class AbstractInvoiceSalesMergeTag extends AbstractSalesMergeTag {
+
+	/**
+	 * @var array<int, string>
+	 */
+	public $required_triggers = array(
+		'invoice_sent',
+		'invoice_paid',
+		'proposal_converted_to_invoice',
+	);
 }

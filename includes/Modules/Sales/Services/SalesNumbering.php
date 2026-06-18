@@ -9,8 +9,8 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Sales\Models\InvoiceModel;
-use DoubleScale\Modules\Sales\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 use Illuminate\Database\QueryException;
 use WPEloquent\Eloquent\Model;
 
@@ -33,6 +33,22 @@ class SalesNumbering {
 	 */
 	public static function next_invoice_number( string $prefix = 'INV' ): string {
 		return self::next_number( $prefix, InvoiceModel::class, 'invoice_number' );
+	}
+
+	/**
+	 * @param string $prefix Prefix such as CON.
+	 * @return string
+	 */
+	public static function next_contract_number( string $prefix = 'CON' ): string {
+		return self::next_number( $prefix, \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class, 'contract_number' );
+	}
+
+	/**
+	 * @param string $prefix Prefix such as CN.
+	 * @return string
+	 */
+	public static function next_credit_note_number( string $prefix = 'CN' ): string {
+		return self::next_number( $prefix, \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class, 'credit_note_number' );
 	}
 
 	/**
@@ -104,7 +120,9 @@ class SalesNumbering {
 		}
 
 		return false !== stripos( $message, 'invoice_number' )
-			|| false !== stripos( $message, 'proposal_number' );
+			|| false !== stripos( $message, 'proposal_number' )
+			|| false !== stripos( $message, 'contract_number' )
+			|| false !== stripos( $message, 'credit_note_number' );
 	}
 
 	/**
@@ -118,6 +136,14 @@ class SalesNumbering {
 		}
 		if ( $model instanceof InvoiceModel ) {
 			$model->invoice_number = null;
+			return;
+		}
+		if ( $model instanceof \DoubleScale\Pro\Modules\Contracts\Models\ContractModel ) {
+			$model->contract_number = null;
+			return;
+		}
+		if ( $model instanceof \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel ) {
+			$model->credit_note_number = null;
 		}
 	}
 }

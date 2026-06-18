@@ -56,6 +56,7 @@ import {
 	CustomFieldsIcon,
 	EmailSequenceIcon,
 	PiplelinesIcon,
+	SalesIcon,
 	SmtpIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
@@ -488,6 +489,147 @@ registerAdminPage('deal-detail', {
 	],
 });
 
+// Subscriptions - stub registration the Pro plugin overrides via filter.
+// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds
+// it from the `sales` item); the route itself stays registered so the upsell
+// stub renders when Pro is absent.
+registerAdminPage('subscriptions', {
+	path: 'subscriptions',
+	hidden: true,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Subscriptions', 'doublescale')}
+			description={__(
+				'Bill customers on a recurring schedule through Stripe and record a child invoice for every charge with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Recurring Stripe billing (monthly, yearly, or custom)', 'doublescale'),
+				__('Hosted Checkout subscribe page for customers', 'doublescale'),
+				__('Automatic child invoice per billing cycle', 'doublescale'),
+				__('Pause, resume, cancel, and change plan or quantity', 'doublescale'),
+				__('Future start dates and Stripe tax rates', 'doublescale'),
+			]}
+		/>
+	), // Pro plugin overrides with the real subscriptions list
+	label: __('Subscriptions', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+// Subscription detail - stub registration the Pro plugin overrides.
+registerAdminPage('subscription-detail', {
+	path: 'subscriptions/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Subscription Details', 'doublescale')}
+			description={__(
+				'View and manage subscription details with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Subscription Details', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+// Credit Notes — stub registration the Pro plugin overrides via filter.
+registerAdminPage('sales-credit-notes', {
+	path: 'sales/credit-notes',
+	hidden: true,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Notes', 'doublescale')}
+			description={__(
+				'Issue credit notes, apply credit to unpaid invoices, and track open customer balances with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Create & send credit notes to customers', 'doublescale'),
+				__('Apply credit to one or more unpaid invoices', 'doublescale'),
+				__('Track open credit and allocation history', 'doublescale'),
+				__('Customer portal & downloadable PDF', 'doublescale'),
+				__('Sequential CN numbering (CN-000001)', 'doublescale'),
+			]}
+		/>
+	),
+	label: __('Credit Notes', 'doublescale'),
+	icon: <SalesIcon />,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+registerAdminPage('sales-credit-note-new', {
+	path: 'sales/credit-notes/new',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Notes', 'doublescale')}
+			description={__(
+				'Create and manage credit notes with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('New Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
+	],
+});
+
+registerAdminPage('sales-credit-note', {
+	path: 'sales/credit-notes/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Credit Note Details', 'doublescale')}
+			description={__(
+				'View credit note details and apply credit to invoices with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: ['doublescale_view_sales'],
+});
+
+registerAdminPage('sales-credit-note-edit', {
+	path: 'sales/credit-notes/:id/edit',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Edit Credit Note', 'doublescale')}
+			description={__(
+				'Edit credit notes with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Edit Credit Note', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_view_sales',
+		'doublescale_manage_all_sales',
+		'doublescale_manage_own_sales',
+	],
+});
+
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,
@@ -663,6 +805,18 @@ registerAdminPage('deals-analytics', {
 		'doublescale_crm_manager',
 		'doublescale_sales_manager',
 	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('invoices-analytics', {
+	path: 'invoices-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="invoices-analytics" />
+	),
+	label: __('Invoice Revenue', 'doublescale'),
+	hidden: true,
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_view_sales'],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });

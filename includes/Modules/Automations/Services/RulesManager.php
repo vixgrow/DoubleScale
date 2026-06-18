@@ -275,6 +275,41 @@ final class RulesManager {
 				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
 					|| ! doublescale_is_module_active( 'support' ),
 			),
+			'proposal'                  => array(
+				'name'        => __( 'Proposal', 'doublescale' ),
+				'key'         => 'proposal',
+				'rules'       => array(),
+				'triggers'    => array(
+					'proposal_sent',
+					'proposal_accepted',
+					'proposal_declined',
+					'proposal_converted_to_invoice',
+					'invoice_sent',
+					'invoice_paid',
+				),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
+			),
+			'invoice'                   => array(
+				'name'        => __( 'Invoice', 'doublescale' ),
+				'key'         => 'invoice',
+				'rules'       => array(),
+				'triggers'    => array(
+					'invoice_sent',
+					'invoice_paid',
+					'proposal_converted_to_invoice',
+				),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
+			),
+			'contract'                  => array(
+				'name'        => __( 'Contract', 'doublescale' ),
+				'key'         => 'contract',
+				'rules'       => array(),
+				'triggers'    => array(
+					'contract_sent',
+					'contract_signed',
+				),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+			),
 		);
 
 		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {

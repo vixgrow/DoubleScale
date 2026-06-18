@@ -44,6 +44,8 @@ interface RichTextEditorProps {
 	content: string;
 	onChange: (content: string) => void;
 	className?: string;
+	/** Hint shown inside the editing surface while it is empty. */
+	placeholder?: string;
 	fontSize?: number;
 	fontFamily?: string;
 	/** Builder sidebar: dashed toolbar, dark editing surface (Figma Text Settings). */
@@ -63,6 +65,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	content,
 	onChange,
 	className,
+	placeholder,
 	fontSize = 16,
 	fontFamily = 'Arial',
 	theme = 'default',
@@ -730,12 +733,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const toolbarDashPattern = '5 14';
 
 	return (
-		<div className={cn('relative', className)}>
+		<div className={cn('relative w-full', className)}>
 			{!isCanvasFormat && (
 				<style>{`
 				.${editorId} {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
+				}
+				${
+					placeholder
+						? `.${editorId}:empty::before {
+					content: ${JSON.stringify(placeholder)};
+					color: #9ca3af;
+					pointer-events: none;
+					cursor: text;
+				}`
+						: ''
 				}
 				.${editorId} * {
 					font-family: ${fontFamily} !important;
@@ -811,7 +824,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			)}
 			<div
 				className={cn(
-					'rich-text-toolbar relative mb-2 rounded-xl [&_button_svg]:stroke-[2.5]',
+					'rich-text-toolbar relative mb-2 w-full rounded-xl [&_button_svg]:stroke-[2.5]',
 					isBuilderDark
 						? 'flex flex-col gap-2 bg-transparent p-2 [&_button]:text-white'
 						: 'flex flex-wrap items-center gap-1 rounded-lg border border-border bg-white p-2 shadow-sm [&_button]:text-foreground'
@@ -1056,7 +1069,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					suppressContentEditableWarning
 					className={cn(
 						editorId,
-						'min-h-[100px] rounded-lg border p-3 focus:outline-none',
+						'w-full rounded-lg border p-3 focus:outline-none',
+						isBuilderDark ? 'min-h-[100px]' : 'min-h-[200px]',
 						isBuilderDark
 							? 'prose prose-sm prose-invert max-w-none border-white/10 bg-white/[0.06] text-zinc-100 focus:ring-1 focus:ring-white/25'
 							: 'prose prose-sm max-w-none text-foreground focus:ring-1 focus:ring-ring'
@@ -1066,10 +1080,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							borderColor: isBuilderDark
 								? 'rgba(255, 255, 255, 0.12)'
 								: '#e5e5e5',
+							backgroundColor: isBuilderDark
+								? 'rgba(255, 255, 255, 0.06)'
+								: '#ffffff',
 							fontSize: `${fontSize}px`,
 							fontFamily: fontFamily,
 							lineHeight: '1.5',
-							maxWidth: isBuilderDark ? '100%' : '287.2px',
+							width: '100%',
+							maxWidth: '100%',
 							overflowX: 'auto',
 							color: isBuilderDark
 								? '#f4f4f5'

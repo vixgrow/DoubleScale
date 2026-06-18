@@ -311,6 +311,21 @@ final class TriggersManager {
 					),
 				),
 			),
+			'sales'       => array(
+				'label'  => __( 'Sales', 'doublescale' ),
+				'groups' => array(
+					'sales' => array(
+						'label'       => __( 'Proposals & Invoices', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
+					),
+					'contracts' => array(
+						'label'       => __( 'Contracts', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+					),
+				),
+			),
 			'forms'       => array(
 				'label'  => __( 'Forms', 'doublescale' ),
 				'groups' => array(),

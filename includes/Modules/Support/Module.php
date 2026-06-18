@@ -29,15 +29,19 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
+use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
 use DoubleScale\Core\UserRoles\Permissions;
-use DoubleScale\Modules\Support\Renderer\AttachmentServeHandler;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
 use DoubleScale\Modules\Support\Services\AttachmentService;
 use DoubleScale\Modules\Support\Services\ContactResolver;
 use DoubleScale\Modules\Support\Services\EmailNotifications;
 use DoubleScale\Modules\Support\Services\TicketService;
+use DoubleScale\Modules\Support\Services\AttachmentSettings;
+use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Constants\TicketStatus;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 final class Module extends AbstractModule {
 
@@ -141,11 +145,6 @@ final class Module extends AbstractModule {
 			AttachmentService::class,
 			static fn() => new AttachmentService()
 		);
-
-		$container->singleton(
-			AttachmentServeHandler::class,
-			static fn() => new AttachmentServeHandler()
-		);
 	}
 
 	public function restControllers(): array {
@@ -183,9 +182,21 @@ final class Module extends AbstractModule {
 		// the ticket-lifecycle hooks (reply / created / status-change → customer).
 		$container->get( EmailNotifications::class );
 
-		$container->get( AttachmentServeHandler::class );
-
 		add_action( 'init', array( $this, 'register_attachment_cleanup_schedule' ) );
+
+		// Client Portal integration: contribute the Tickets section, inject the
+		// support REST bases + attachment limits the reused ticket views need,
+		// and add an "open tickets" dashboard summary card. Registered here (only
+		// when the module is enabled) so a disabled Support module drops the
+		// Tickets tab from the unified portal automatically.
+		add_filter( 'doublescale_portal_sections', array( $this, 'register_portal_tickets_section' ) );
+		add_filter( 'doublescale_client_portal_config', array( $this, 'inject_portal_config' ), 10, 2 );
+		add_filter( 'doublescale_portal_summary_cards', array( $this, 'add_portal_summary_card' ), 10, 2 );
+
+		// Opt `support_reply` into the portal timeline whitelist. Registered here
+		// (enabled-only) so a disabled Support module drops its conversation rows
+		// from the dashboard timeline too — the whitelist itself is deny-by-default.
+		add_filter( 'doublescale_portal_timeline_activity_types', array( $this, 'allow_portal_timeline_types' ) );
 
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools
@@ -273,5 +284,93 @@ final class Module extends AbstractModule {
 		if ( false === $tasks->get_next_timestamp( 'doublescale_support_attachment_cleanup' ) ) {
 			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_support_attachment_cleanup' );
 		}
+	}
+
+	/**
+	 * Contribute the Tickets section to the Client Portal.
+	 *
+	 * @param array<int, array<string, mixed>> $sections Section descriptors.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function register_portal_tickets_section( array $sections ): array {
+		$sections[] = array(
+			'slug'         => 'tickets',
+			'label'        => __( 'Support', 'doublescale' ),
+			'icon'         => 'ticket',
+			'order'        => 10,
+			'is_available' => static fn() => doublescale_is_module_active( 'support' ),
+			'badge'        => static fn( $contact ) => self::count_open_tickets( $contact ),
+		);
+
+		return $sections;
+	}
+
+	/**
+	 * Inject the support REST bases + uploader settings the reused portal ticket
+	 * views require into the Client Portal renderer config.
+	 *
+	 * @param array<string, mixed> $config Renderer config.
+	 * @param \WP_User             $user   Current user (unused).
+	 * @return array<string, mixed>
+	 */
+	public function inject_portal_config( array $config, $user ): array { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$config['rest_url']              = esc_url_raw( rest_url( 'doublescale/v1/support/portal' ) );
+		$config['public_rest_url']       = esc_url_raw( rest_url( 'doublescale/v1/support/public' ) );
+		$config['custom_fields_enabled'] = class_exists( '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService' );
+		$config['attachment_limits']     = AttachmentSettings::to_payload();
+
+		return $config;
+	}
+
+	/**
+	 * Add the "open tickets" dashboard summary card.
+	 *
+	 * @param array<int, array<string, mixed>> $cards   Summary cards.
+	 * @param ContactModel|null                $contact Resolved contact.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function add_portal_summary_card( array $cards, $contact ): array {
+		$cards[] = array(
+			'key'   => 'open_tickets',
+			'label' => __( 'Open tickets', 'doublescale' ),
+			'value' => self::count_open_tickets( $contact ),
+			'route' => 'tickets',
+		);
+
+		return $cards;
+	}
+
+	/**
+	 * Opt the `support_reply` activity type into the portal timeline whitelist.
+	 *
+	 * The whitelist is deny-by-default and lives in the Portal module; Support
+	 * is the owner of the only customer-safe activity row written to
+	 * `doublescale_activities`, so it contributes the type here. Because this
+	 * runs from {@see boot()} (enabled-only), disabling Support removes its
+	 * timeline rows in lock-step with the Tickets section + summary card.
+	 *
+	 * @param array<int, string> $types Allowed activity_type slugs.
+	 * @return array<int, string>
+	 */
+	public function allow_portal_timeline_types( array $types ): array {
+		$types[] = ActivityTypes::SUPPORT_REPLY;
+
+		return $types;
+	}
+
+	/**
+	 * Count a contact's not-yet-closed tickets (open + pending).
+	 *
+	 * @param ContactModel|null $contact Resolved contact.
+	 * @return int
+	 */
+	private static function count_open_tickets( $contact ): int {
+		if ( ! $contact instanceof ContactModel ) {
+			return 0;
+		}
+
+		return (int) TicketModel::where( 'contact_id', $contact->id )
+			->whereIn( 'status', array( TicketStatus::OPEN, TicketStatus::PENDING ) )
+			->count();
 	}
 }

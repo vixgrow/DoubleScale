@@ -163,6 +163,12 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 	}
 }
 
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	function sanitize_textarea_field( $str ) {
+		return is_string( $str ) ? $str : (string) $str;
+	}
+}
+
 if ( ! function_exists( 'rest_authorization_required_code' ) ) {
 	function rest_authorization_required_code() {
 		return 401;

@@ -5,17 +5,22 @@
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { registerAdminPage, useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	registerAdminPage,
+	useNavigate,
+	getToLink,
+	getAdminPages,
+} from '@doublescale/navigation';
 import { SalesIcon } from '@doublescale/components';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
+import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContractsProGate, InvoicesProGate, PaymentsProGate } from './pro-gates';
 
 const ProposalsList = lazy(() => import('./proposals'));
 const ProposalView = lazy(() => import('./proposals/view'));
 const ProposalEdit = lazy(() => import('./proposals/edit'));
-const InvoicesList = lazy(() => import('./invoices'));
-const InvoiceView = lazy(() => import('./invoices/view'));
-const InvoiceEdit = lazy(() => import('./invoices/edit'));
+const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
 	<div className="p-6 space-y-4">
@@ -35,18 +40,39 @@ const SALES_MENU_CAPS = [
 ];
 
 /**
- * `/sales` → Proposals list (Perfex-style Sales parent). While the documents
- * feature is gated, the only destination under Sales is the pipeline.
+ * `/sales` → first enabled Sales child (documents, contracts) or pipeline.
  */
+const resolveSalesLandingPath = (): string | null => {
+	if (isSalesDocumentsReady()) {
+		const candidates: Array<{ module: string; path: string }> = [
+			{ module: 'documents', path: 'sales/proposals' },
+			{ module: 'contracts', path: 'sales/contracts' },
+		];
+		for (const { module, path } of candidates) {
+			if (config.isModuleToggleEnabled(module)) {
+				return path;
+			}
+		}
+	}
+	if (config.isModuleToggleEnabled('deals')) {
+		return 'sales-pipeline';
+	}
+	const registeredPaths = new Set(
+		Object.values(getAdminPages()).map((page) => page.path)
+	);
+	if (registeredPaths.has('sales-pipeline')) {
+		return 'sales-pipeline';
+	}
+	return null;
+};
+
 const RedirectToProposals = () => {
 	const navigate = useNavigate();
 	useEffect(() => {
-		navigate(
-			getToLink(
-				isSalesDocumentsReady() ? 'sales/proposals' : 'sales-pipeline'
-			),
-			{ replace: true }
-		);
+		const target = resolveSalesLandingPath();
+		if (target) {
+			navigate(getToLink(target), { replace: true });
+		}
 	}, [navigate]);
 	return null;
 };
@@ -72,6 +98,16 @@ const salesPageDefaults = {
 	alwaysRegister: true,
 };
 
+const documentsPageDefaults = {
+	...salesPageDefaults,
+	requiresModule: 'documents' as const,
+};
+
+const contractPageDefaults = {
+	...salesPageDefaults,
+	requiresModule: 'contracts' as const,
+};
+
 registerAdminPage('sales', {
 	path: 'sales',
 	component: wrap(RedirectToProposals),
@@ -89,7 +125,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalsList),
 		label: __('Proposals', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal-new', {
@@ -97,7 +133,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalEdit),
 		label: __('New Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal', {
@@ -105,7 +141,7 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalView),
 		label: __('Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-proposal-edit', {
@@ -113,38 +149,105 @@ if (isSalesDocumentsReady()) {
 		component: wrap(ProposalEdit),
 		label: __('Edit Proposal', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
+	// Invoice & payment routes — stub registration the Pro plugin overrides via filter.
 	registerAdminPage('sales-invoices', {
 		path: 'sales/invoices',
-		component: wrap(InvoicesList),
+		component: () => <InvoicesProGate />,
 		label: __('Invoices', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-new', {
 		path: 'sales/invoices/new',
-		component: wrap(InvoiceEdit),
+		component: () => <InvoicesProGate />,
 		label: __('New Invoice', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice', {
 		path: 'sales/invoices/:id',
-		component: wrap(InvoiceView),
+		component: () => <InvoicesProGate />,
 		label: __('Invoice', 'doublescale'),
 		hidden: true,
-		...salesPageDefaults,
+		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-edit', {
 		path: 'sales/invoices/:id/edit',
-		component: wrap(InvoiceEdit),
+		component: () => <InvoicesProGate />,
 		label: __('Edit Invoice', 'doublescale'),
 		hidden: true,
+		...documentsPageDefaults,
+	});
+
+	registerAdminPage('sales-payments', {
+		path: 'sales/payments',
+		component: () => <PaymentsProGate />,
+		label: __('Payments', 'doublescale'),
+		hidden: true,
+		...documentsPageDefaults,
+	});
+
+	// Contract routes — stub registration the Pro plugin overrides via filter.
+	registerAdminPage('sales-contracts', {
+		path: 'sales/contracts',
+		component: () => <ContractsProGate />,
+		label: __('Contracts', 'doublescale'),
+		hidden: true,
+		...contractPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-new', {
+		path: 'sales/contracts/new',
+		component: () => <ContractsProGate />,
+		label: __('New Contract', 'doublescale'),
+		hidden: true,
+		...contractPageDefaults,
+	});
+
+	registerAdminPage('sales-contract', {
+		path: 'sales/contracts/:id',
+		component: () => <ContractsProGate />,
+		label: __('Contract', 'doublescale'),
+		hidden: true,
+		...contractPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-edit', {
+		path: 'sales/contracts/:id/edit',
+		component: () => <ContractsProGate />,
+		label: __('Edit Contract', 'doublescale'),
+		hidden: true,
+		...contractPageDefaults,
+	});
+
+	registerAdminPage('sales-contract-types', {
+		path: 'sales/contract-types',
+		component: () => <ContractsProGate />,
+		label: __('Contract Types', 'doublescale'),
+		hidden: true,
+		...contractPageDefaults,
+	});
+
+	registerAdminPage('sales-payment', {
+		path: 'sales/payments/:id',
+		component: () => <PaymentsProGate />,
+		label: __('Payment', 'doublescale'),
+		hidden: true,
+		...documentsPageDefaults,
+	});
+
+	registerAdminPage('sales-settings', {
+		path: 'sales/settings',
+		component: wrap(SalesSettings),
+		label: __('Sales Settings', 'doublescale'),
+		hidden: true,
+		requiredCapability: ['doublescale_manage_all_sales', 'doublescale_crm_manager'],
 		...salesPageDefaults,
 	});
 }

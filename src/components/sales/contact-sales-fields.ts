@@ -44,7 +44,7 @@ const contactCityLine = (c: ContactSummary): string => {
 	return cityState || c.zip || '';
 };
 
-/** Multiline billing/shipping block (Perfex-style). */
+/** Multiline billing/shipping block. */
 export const formatContactAddressBlock = (c: ContactSummary): string => {
 	const lines: string[] = [];
 	const name = contactDisplayName(c);

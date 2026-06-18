@@ -2,7 +2,7 @@
  * Public invoice renderer config and DTOs.
  */
 
-import type { InvoiceStatus, LineItem } from '@/types/sales';
+import type { InvoiceStatus, LineItem, OnlinePaymentGatewayStatus } from '@/types/sales';
 
 export interface InvoiceRendererConfig {
 	public_rest_url: string;
@@ -35,6 +35,7 @@ export interface PublicInvoice {
 	balance: number;
 	is_overdue: boolean;
 	can_pay: boolean;
+	online_payment_gateways?: OnlinePaymentGatewayStatus[];
 	billing_address: string | null;
 	shipping_address: string | null;
 	client_note: string | null;
@@ -43,12 +44,16 @@ export interface PublicInvoice {
 	payments?: PublicPayment[];
 }
 
-export interface StripeInitResponse {
+export interface OnlinePaymentInitResponse {
+	gateway?: string;
 	publishable_key: string;
 	client_secret?: string;
 	already_paid?: boolean;
 	invoice?: PublicInvoice;
 }
+
+/** @deprecated Use OnlinePaymentInitResponse */
+export type StripeInitResponse = OnlinePaymentInitResponse;
 
 declare global {
 	interface Window {

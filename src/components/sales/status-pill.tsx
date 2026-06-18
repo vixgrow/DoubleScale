@@ -8,8 +8,10 @@ import { __ } from '@wordpress/i18n';
 import {
 	INVOICE_STATUS_LABELS,
 	PROPOSAL_STATUS_LABELS,
+	CONTRACT_STATUS_LABELS,
 	type InvoiceStatus,
 	type ProposalStatus,
+	type ContractStatus,
 } from '@/constants/sales';
 
 const proposalClasses: Record<ProposalStatus, string> = {
@@ -28,6 +30,14 @@ const invoiceClasses: Record<InvoiceStatus, string> = {
 	overdue: 'bg-orange-100 text-orange-800',
 };
 
+const contractClasses: Record<ContractStatus, string> = {
+	draft: 'bg-slate-100 text-slate-700',
+	sent: 'bg-sky-100 text-sky-700',
+	signed: 'bg-indigo-100 text-indigo-700',
+	active: 'bg-green-100 text-green-700',
+	expired: 'bg-amber-100 text-amber-800',
+};
+
 export const ProposalStatusPill: React.FC<{
 	status: ProposalStatus;
 	expired?: boolean;
@@ -41,6 +51,30 @@ export const ProposalStatusPill: React.FC<{
 		{expired ? (
 			<span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-800">
 				{__('Expired', 'doublescale')}
+			</span>
+		) : null}
+	</span>
+);
+
+export const ContractStatusPill: React.FC<{
+	status: ContractStatus;
+	expired?: boolean;
+	aboutToExpire?: boolean;
+}> = ({ status, expired = false, aboutToExpire = false }) => (
+	<span className="inline-flex items-center gap-1.5">
+		<span
+			className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${contractClasses[status] || contractClasses.draft}`}
+		>
+			{CONTRACT_STATUS_LABELS[status] || status}
+		</span>
+		{expired ? (
+			<span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-800">
+				{__('Expired', 'doublescale')}
+			</span>
+		) : null}
+		{aboutToExpire && !expired ? (
+			<span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-orange-100 text-orange-800">
+				{__('Expiring Soon', 'doublescale')}
 			</span>
 		) : null}
 	</span>

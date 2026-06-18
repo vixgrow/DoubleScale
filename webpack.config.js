@@ -23,6 +23,14 @@ const supportPortalCustomFieldsAlias = fs.existsSync(
 			'src/renderer/support/portal-custom-fields-stub.ts'
 		);
 
+const proPortalCreditNoteDetail = path.resolve(
+	__dirname,
+	'../doublescale-pro/src/renderer/portal/credit-note-detail.tsx'
+);
+const portalCreditNoteDetailAlias = fs.existsSync(proPortalCreditNoteDetail)
+	? proPortalCreditNoteDetail
+	: path.resolve(__dirname, 'src/renderer/portal/credit-note-detail-stub.tsx');
+
 /**
  * Aliases used by both the admin SPA build and the public booking renderer.
  *
@@ -48,6 +56,7 @@ const sharedAlias = {
 	'@/config/booking': path.resolve(__dirname, 'src/config/booking'),
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
+	'@/renderer/portal': path.resolve(__dirname, 'src/renderer/portal'),
 
 	// Support-scoped aliases — same ordering rule as booking (must precede the
 	// generic `@/<type>/*` fallbacks below).
@@ -404,10 +413,109 @@ const invoiceRendererConfig = {
 	},
 };
 
+/**
+ * Public Client Portal renderer — unified logged-in customer shell
+ * ([doublescale_client_portal]). Mirrors the lean proposal/invoice configs.
+ */
+const portalRendererConfig = {
+	...defaultConfig,
+	name: 'portal-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/portal/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+			// The Tickets section reuses the support ticket views, which import
+			// the Pro custom-fields block through this alias (free stub when Pro
+			// is absent). Mirror the support renderer config so it resolves here
+			// — including `@pro/client`, which the Pro custom-fields file pulls in
+			// when Pro is installed.
+			'@doublescale-pro/support-portal-custom-fields':
+				supportPortalCustomFieldsAlias,
+			'@doublescale-pro/portal-credit-note-detail':
+				portalCreditNoteDetailAlias,
+			'@pro/client': path.resolve(
+				__dirname,
+				'../doublescale-pro/src/client'
+			),
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/portal'),
+		filename: '[name].js',
+		// Lazy section chunks (React.lazy → import()) are emitted as bare
+		// `[id].js` by default, which the browser caches indefinitely with no
+		// cache-buster — so returning customers keep a stale section bundle
+		// after a plugin update (the entry `index.js` busts via its asset.php
+		// `?ver` hash, but async chunks do not). Content-hash the async chunk
+		// names so they invalidate whenever their contents change.
+		chunkFilename: '[name].[contenthash].js',
+	},
+};
+
+/**
+ * Public contract renderer — lean bundle for `[doublescale_contract]` pages.
+ */
+const contractRendererConfig = {
+	...defaultConfig,
+	name: 'contract-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/contract/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: {
+			...sharedAlias,
+		},
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/contract'),
+		filename: '[name].js',
+	},
+};
+
 module.exports = [
 	adminClientConfig,
 	bookingRendererConfig,
 	supportRendererConfig,
 	proposalRendererConfig,
 	invoiceRendererConfig,
+	portalRendererConfig,
+	contractRendererConfig,
 ];

@@ -7,6 +7,8 @@ import { __ } from '@wordpress/i18n';
 import { Plus } from 'lucide-react';
 
 import { getToLink } from '@doublescale/navigation';
+import config from '@doublescale/config';
+import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { Button } from '@/components/ui/button';
 import { InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
 import {
@@ -15,6 +17,7 @@ import {
 	useProposals,
 } from '@/hooks/sales';
 import { PAYMENT_MODE_LABELS } from '@/constants/sales';
+import { InvoicesProGate, PaymentsProGate } from '../../sales/pro-gates';
 
 interface ContactSalesProps {
 	contact_id: number;
@@ -60,9 +63,12 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 	const proposals = proposalsData?.data ?? [];
 	const invoices = invoicesData?.data ?? [];
 	const payments = paymentsData?.data ?? [];
+	const showDocuments = config.isModuleToggleEnabled('documents');
+	const isProActive = useIsProActive();
 
 	return (
 		<div className="space-y-8">
+			{showDocuments ? (
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
 					<h3 className="text-base font-semibold">{__('Proposals', 'doublescale')}</h3>
@@ -123,7 +129,10 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 					</table>
 				</div>
 			</section>
+			) : null}
 
+			{showDocuments ? (
+			isProActive ? (
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
 					<h3 className="text-base font-semibold">{__('Invoices', 'doublescale')}</h3>
@@ -183,7 +192,13 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 					</table>
 				</div>
 			</section>
+			) : (
+				<InvoicesProGate />
+			)
+			) : null}
 
+			{showDocuments ? (
+			isProActive ? (
 			<section className="space-y-3">
 				<h3 className="text-base font-semibold">{__('Payments', 'doublescale')}</h3>
 				<div className="border rounded-lg overflow-hidden">
@@ -234,6 +249,10 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 					</table>
 				</div>
 			</section>
+			) : (
+				<PaymentsProGate />
+			)
+			) : null}
 		</div>
 	);
 };

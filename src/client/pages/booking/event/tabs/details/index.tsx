@@ -33,8 +33,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const EventDetailsShimmer = () => {
 	return (
-        <div className="w-full px-9">
-            <div className="grid grid-cols-2 gap-5">
+        <div className="w-full ">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 				<div className='flex flex-col gap-5'>
 					<Card><CardContent>
                             <div className='flex flex-col gap-5'>
@@ -261,7 +261,7 @@ const EventDetails = forwardRef<EventTabHandle, EventDetailsProps>(
 		};
 
 		return (
-            <div className="w-full px-9">
+            <div className="w-full">
                 {notice && (
 					<NoticeBanner
 						notice={{
@@ -272,7 +272,7 @@ const EventDetails = forwardRef<EventTabHandle, EventDetailsProps>(
 						closeNotice={clearNotice}
 					/>
 				)}
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 					<div className='flex flex-col gap-5'>
 						<EventInfo
 							name={event.name}

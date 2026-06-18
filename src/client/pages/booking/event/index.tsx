@@ -524,7 +524,7 @@ const Event: React.FC = () => {
 		return (
             <Dialog open={true}><DialogContent
                     hideCloseButton
-                    className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'
+                    className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'
                     {...eventDialogOutsideProps}>
                     <div className="flex items-center justify-center h-full">
                         <div>Loading event...</div>
@@ -542,25 +542,25 @@ const Event: React.FC = () => {
                     handleClose();
             }}><DialogContent
                 hideCloseButton
-                className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'
+                className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'
                 {...eventDialogOutsideProps}>
-                <div className="border-b px-4 py-2">
-                    <div className='flex justify-between items-center'>
-                        <div className='flex gap-2.5 items-center'>
-                            <button
-                                type="button"
-                                className="cursor-pointer bg-transparent border-0 text-primary"
-                                onClick={handleClose}
-                                aria-label={__('Close', 'doublescale')}
-                            >
-                                <IoCloseSharp />
-                            </button>
-                            <div className="text-[#09090B] text-[24px] font-[500]">
-                                {__('Event Setup', 'doublescale')}
+                <div className="border-b px-4 py-2 overflow-x-hidden">
+                    <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+                        <div className="flex w-full md:w-auto items-center justify-between gap-3 md:justify-start">
+                            <div className="flex gap-2.5 items-center min-w-0">
+                                <button
+                                    type="button"
+                                    className="shrink-0 cursor-pointer bg-transparent border-0 text-primary"
+                                    onClick={handleClose}
+                                    aria-label={__('Close', 'doublescale')}
+                                >
+                                    <IoCloseSharp />
+                                </button>
+                                <div className="min-w-0 text-[#09090B] text-[24px] font-[500] max-[768px]:text-xl">
+                                    {__('Event Setup', 'doublescale')}
+                                </div>
                             </div>
-                        </div>
-                        <div className='flex gap-6 items-center'>
-                            <div className='flex gap-4 items-center'>
+                            <div className="flex shrink-0 items-center gap-3 md:hidden">
                                 <Switch
                                     checked={!isEventDisabled}
                                     onCheckedChange={toggleEventStatus}
@@ -572,7 +572,7 @@ const Event: React.FC = () => {
                                     } />
                                 <button
                                     type="button"
-                                    className="cursor-pointer bg-transparent border-0"
+                                    className="cursor-pointer bg-transparent border-0 shrink-0"
                                     onClick={handleDeleteEvent}
                                     aria-label={__('Delete event', 'doublescale')}
                                 >
@@ -581,44 +581,77 @@ const Event: React.FC = () => {
                                 <Button
                                     style={{ paddingLeft: 0, paddingRight: 0 }}
                                     onClick={() => setModalShareId(id)}
-                                    variant='ghost'>{<ShareIcon />} 
+                                    className="shrink-0"
+                                    variant="ghost"
+                                >
+                                    <ShareIcon />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center md:gap-6">
+                            <div className="hidden md:flex items-center gap-4">
+                                <Switch
+                                    checked={!isEventDisabled}
+                                    onCheckedChange={toggleEventStatus}
+                                    disabled={isSwitchLoading}
+                                    className={
+                                        !isEventDisabled
+                                            ? 'bg-primary'
+                                            : 'bg-gray-400'
+                                    } />
+                                <button
+                                    type="button"
+                                    className="cursor-pointer bg-transparent border-0 shrink-0"
+                                    onClick={handleDeleteEvent}
+                                    aria-label={__('Delete event', 'doublescale')}
+                                >
+                                    <TrashRedIcon />
+                                </button>
+                                <Button
+                                    style={{ paddingLeft: 0, paddingRight: 0 }}
+                                    onClick={() => setModalShareId(id)}
+                                    className="shrink-0"
+                                    variant="ghost"
+                                >
+                                    <ShareIcon />
                                     {__('Share', 'doublescale')}
                                 </Button>
-                                {modalShareId !== null && (
-                                    <ShareModal
-                                        event={event as EventType}
-                                        open={modalShareId !== null}
-                                        onClose={() => setModalShareId(null)}
-                                        url={`${siteUrl}?doublescale_booking_event=${event?.slug}`}
-                                    />
-                                )}
                             </div>
+                            {modalShareId !== null && (
+                                <ShareModal
+                                    event={event as EventType}
+                                    open={modalShareId !== null}
+                                    onClose={() => setModalShareId(null)}
+                                    url={`${siteUrl}?doublescale_booking_event=${event?.slug}`}
+                                />
+                            )}
                             <Button
                                 onClick={handleSave}
                                 disabled={saveDisabled || isSaving}
-                                className={`rounded-lg font-[500] text-white ${
+                                className={`rounded-lg font-[500] text-white w-full md:w-auto max-[768px]:px-4 ${
                                     saveDisabled || isSaving
                                         ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-primary '
                                 }`}
-                                variant='default'>
+                                variant="default"
+                            >
                                 {__('Save Changes', 'doublescale')}
                             </Button>
                         </div>
                     </div>
                 </div>
-                <div className="doublescale-booking-event">
+                <div className="doublescale-booking-event min-w-0 overflow-x-hidden">
                     <div
-                        className="w-full flex justify-start px-4 py-5 overflow-x-auto"
+                        className="min-w-0 overflow-x-auto hide-scrollbar px-4 py-5"
                         style={{ backgroundColor: '#FBFBFB' }}
                     >
-                        <div className='flex gap-1 items-center'>
+                        <div className="flex w-max min-w-full flex-nowrap gap-1 items-center">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.key}
                                     type="button"
                                     onClick={() => handleTabChange(tab.key)}
-                                    className={`flex items-center justify-center gap-2 rounded-xl capitalize font-bold transition-all px-4 py-2 min-h-[48px] h-12 mx-0.5 cursor-pointer border-0 ${
+                                    className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl capitalize font-bold transition-all px-4 py-2 min-h-[48px] h-12 mx-0.5 cursor-pointer border-0 ${
                                         activeTab === tab.key
                                             ? 'bg-primary text-white'
                                             : 'bg-transparent text-[#292D32]'
@@ -630,7 +663,7 @@ const Event: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="p-5">
+                    <div className="p-5 max-[768px]:p-4 min-w-0">
                         {showSavedBanner && (
                             <div className="px-9">
                                 <NoticeBanner

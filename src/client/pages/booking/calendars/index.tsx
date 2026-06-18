@@ -12,12 +12,6 @@ import { Plus as PlusOutlined } from 'lucide-react';
 import { filter } from 'lodash';
 import { IoEllipsisHorizontal as SlOptions } from 'react-icons/io5';
 
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
-
 /**
  * Internal dependencies
  */
@@ -651,8 +645,37 @@ const Calendars: React.FC = () => {
 																			'doublescale'
 																		)}
 																	</Button>
-																	<Popover>
-																		<PopoverTrigger asChild>
+																	<CalendarActions
+																		calendar={calendar}
+																		setCloneMessage={
+																			setCloneMessage
+																		}
+																		onSaved={
+																			handleSaved
+																		}
+																		onEdit={(
+																			id
+																		) =>
+																			navigate(
+																				`booking/calendars/${id}`
+																			)
+																		}
+																		onDelete={(
+																			id
+																		) =>
+																			deleteCalendar(
+																				{
+																					id: id,
+																				} as Calendar
+																			)
+																		}
+																		setDeleteCalendarMessage={
+																			setDeleteCalendarMessage
+																		}
+																		setErrorMessage={
+																			setErrorMessage
+																		}
+																		trigger={
 																			<Button
 																				className="bg-[#EDEBEB] border-none rounded-xl"
 																				variant="ghost"
@@ -664,43 +687,8 @@ const Calendars: React.FC = () => {
 																			>
 																				<SlOptions className="text-color-primary-text text-[18px]" />
 																			</Button>
-																		</PopoverTrigger>
-																		<PopoverContent className="w-auto p-0">
-																			<CalendarActions
-																				calendar={
-																					calendar
-																				}
-																				setCloneMessage={
-																					setCloneMessage
-																				}
-																				onSaved={
-																					handleSaved
-																				}
-																				onEdit={(
-																					id
-																				) =>
-																					navigate(
-																						`booking/calendars/${id}`
-																					)
-																				}
-																				onDelete={(
-																					id
-																				) =>
-																					deleteCalendar(
-																						{
-																							id: id,
-																						} as Calendar
-																					)
-																				}
-																				setDeleteCalendarMessage={
-																					setDeleteCalendarMessage
-																				}
-																				setErrorMessage={
-																					setErrorMessage
-																				}
-																			/>
-																		</PopoverContent>
-																	</Popover>
+																		}
+																	/>
 																</div>
 															</div>
 														</CardContent></Card>

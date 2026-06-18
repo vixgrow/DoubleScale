@@ -194,7 +194,8 @@ class Settings {
 		$key       = hash( 'sha256', SECURE_AUTH_KEY, true );
 		$iv        = openssl_random_pseudo_bytes( 16 );
 		$encrypted = openssl_encrypt( $value, 'aes-256-cbc', $key, 0, $iv );
-		return base64_encode( $iv . '::' . $encrypted );
+		// 16-byte IV prefix + ciphertext (no delimiter — IV bytes can be 0x3A).
+		return base64_encode( $iv . $encrypted );
 	}
 
 	/**
@@ -212,15 +213,35 @@ class Settings {
 			return '';
 		}
 		$decoded = base64_decode( $value, true );
-		if ( false === $decoded || strpos( $decoded, '::' ) === false ) {
+		if ( false === $decoded || strlen( $decoded ) < 17 ) {
 			return $value;
 		}
-		$parts = explode( '::', $decoded, 2 );
-		if ( count( $parts ) !== 2 || strlen( $parts[0] ) !== 16 ) {
-			return $value;
+
+		$key = hash( 'sha256', SECURE_AUTH_KEY, true );
+
+		// Legacy payloads: 16-byte IV + literal "::" + ciphertext.
+		if ( strlen( $decoded ) >= 18 && '::' === substr( $decoded, 16, 2 ) ) {
+			$decrypted = openssl_decrypt(
+				substr( $decoded, 18 ),
+				'aes-256-cbc',
+				$key,
+				0,
+				substr( $decoded, 0, 16 )
+			);
+			if ( false !== $decrypted ) {
+				return $decrypted;
+			}
 		}
-		$key       = hash( 'sha256', SECURE_AUTH_KEY, true );
-		$decrypted = openssl_decrypt( $parts[1], 'aes-256-cbc', $key, 0, $parts[0] );
+
+		// Current payloads: 16-byte IV prefix + ciphertext.
+		$decrypted = openssl_decrypt(
+			substr( $decoded, 16 ),
+			'aes-256-cbc',
+			$key,
+			0,
+			substr( $decoded, 0, 16 )
+		);
+
 		return false === $decrypted ? $value : $decrypted;
 	}
 }

@@ -30,6 +30,10 @@ export interface PortalRendererConfig {
 	credit_notes_pro_active?: boolean;
 	/** True when DoubleScale Pro is active and invoices/payments are available. */
 	invoices_payments_pro_active?: boolean;
+	/** True when the Contracts sales child module toggle is on. */
+	contracts_module_enabled?: boolean;
+	/** True when DoubleScale Pro is active and contracts are available. */
+	contracts_pro_active?: boolean;
 	/** Public REST base for credit note hash lookups (Pro). */
 	credit_note_public_rest_url?: string;
 	/** Mailbox scope for the Tickets section (from the shortcode `box_id`). */

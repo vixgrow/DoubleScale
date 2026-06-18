@@ -9,7 +9,6 @@ namespace DoubleScale\Modules\Sales\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Contracts\Models\ContractModel;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use Illuminate\Database\QueryException;
@@ -41,7 +40,7 @@ class SalesNumbering {
 	 * @return string
 	 */
 	public static function next_contract_number( string $prefix = 'CON' ): string {
-		return self::next_number( $prefix, ContractModel::class, 'contract_number' );
+		return self::next_number( $prefix, \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class, 'contract_number' );
 	}
 
 	/**
@@ -139,7 +138,7 @@ class SalesNumbering {
 			$model->invoice_number = null;
 			return;
 		}
-		if ( $model instanceof ContractModel ) {
+		if ( $model instanceof \DoubleScale\Pro\Modules\Contracts\Models\ContractModel ) {
 			$model->contract_number = null;
 			return;
 		}

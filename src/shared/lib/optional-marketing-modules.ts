@@ -50,7 +50,7 @@ const CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(
 );
 
 /** Child sub-features that only function with the Pro add-on installed. */
-const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals', 'credit_notes']);
+const PRO_ONLY_CHILD_MODULE_SLUGS: ReadonlySet<string> = new Set(['deals', 'credit_notes', 'contracts']);
 
 /**
  * Pro-only toggles the PHP REST layer persists even when the module class is not loaded yet.

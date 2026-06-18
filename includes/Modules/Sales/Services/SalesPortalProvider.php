@@ -32,8 +32,6 @@ use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
-use DoubleScale\Modules\Contracts\Constants\ContractStatus;
-use DoubleScale\Modules\Contracts\Models\ContractModel;
 
 /**
  * SalesPortalProvider.
@@ -84,6 +82,10 @@ final class SalesPortalProvider {
 		$config['invoices_payments_pro_active'] = function_exists( 'doublescale_is_pro_addon_active' )
 			&& doublescale_is_pro_addon_active()
 			&& doublescale_sales_child_module_active( 'documents' );
+		$config['contracts_module_enabled'] = doublescale_sales_child_module_active( 'contracts' );
+		$config['contracts_pro_active']       = function_exists( 'doublescale_is_pro_addon_active' )
+			&& doublescale_is_pro_addon_active()
+			&& doublescale_sales_child_module_active( 'contracts' );
 
 		return $config;
 	}
@@ -281,14 +283,6 @@ final class SalesPortalProvider {
 
 			$count += (int) ProposalModel::where( 'contact_id', (int) $contact->id )
 				->where( 'status', '!=', ProposalStatus::DRAFT )
-				->count();
-		}
-
-		if ( doublescale_sales_child_module_active( 'contracts' ) ) {
-			$count += (int) ContractModel::where( 'contact_id', (int) $contact->id )
-				->where( 'status', '!=', ContractStatus::DRAFT )
-				->where( 'hide_from_customer', false )
-				->where( 'is_trash', false )
 				->count();
 		}
 

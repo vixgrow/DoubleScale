@@ -31,10 +31,6 @@ use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
-use DoubleScale\Modules\Contracts\Constants\ContractStatus;
-use DoubleScale\Modules\Contracts\Models\ContractModel;
-use DoubleScale\Modules\Contracts\Rest\ContractShaper;
-use DoubleScale\Modules\Contracts\Services\ContractUrl;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -122,19 +118,6 @@ class RestPortalDocumentsController extends RestController {
 				->get();
 			foreach ( $proposals as $proposal ) {
 				$rows[] = $this->shape_proposal( $proposal );
-			}
-		}
-
-		if ( in_array( $type, array( 'all', 'contract' ), true ) && doublescale_sales_child_module_active( 'contracts' ) ) {
-			$contracts = ContractModel::where( 'contact_id', (int) $contact->id )
-				->where( 'status', '!=', ContractStatus::DRAFT )
-				->where( 'hide_from_customer', false )
-				->where( 'is_trash', false )
-				->orderBy( 'id', 'desc' )
-				->limit( self::LIST_CAP )
-				->get();
-			foreach ( $contracts as $contract ) {
-				$rows[] = $this->shape_contract( $contract );
 			}
 		}
 
@@ -243,35 +226,6 @@ class RestPortalDocumentsController extends RestController {
 			'hash'        => (string) $proposal->hash,
 			'public_url'  => ProposalUrl::get_public_url( $proposal ),
 			'_sort'       => (string) $proposal->created_at,
-		);
-	}
-
-	/**
-	 * Customer-safe contract list row.
-	 *
-	 * @param ContractModel $contract Contract.
-	 * @return array<string, mixed>
-	 */
-	private function shape_contract( ContractModel $contract ): array {
-		return array(
-			'id'          => (int) $contract->id,
-			'type'        => 'contract',
-			'number'      => (string) $contract->contract_number,
-			'subject'     => (string) $contract->subject,
-			'status'      => (string) $contract->status,
-			'date'        => $contract->start_date,
-			'due_date'    => null,
-			'open_till'   => $contract->end_date,
-			'currency'    => (string) $contract->currency,
-			'total'       => (float) $contract->contract_value,
-			'amount_paid' => null,
-			'balance'     => null,
-			'is_overdue'  => false,
-			'is_expired'  => ContractShaper::is_expired( $contract ),
-			'invoice_id'  => null,
-			'hash'        => (string) $contract->hash,
-			'public_url'  => ContractUrl::get_public_url( $contract ),
-			'_sort'       => (string) $contract->created_at,
 		);
 	}
 }

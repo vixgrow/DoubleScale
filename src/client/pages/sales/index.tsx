@@ -15,15 +15,11 @@ import { SalesIcon } from '@doublescale/components';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
-import { InvoicesProGate, PaymentsProGate } from './pro-gates';
+import { ContractsProGate, InvoicesProGate, PaymentsProGate } from './pro-gates';
 
 const ProposalsList = lazy(() => import('./proposals'));
 const ProposalView = lazy(() => import('./proposals/view'));
 const ProposalEdit = lazy(() => import('./proposals/edit'));
-const ContractsList = lazy(() => import('./contracts'));
-const ContractView = lazy(() => import('./contracts/view'));
-const ContractEdit = lazy(() => import('./contracts/edit'));
-const ContractTypes = lazy(() => import('./contract-types'));
 const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
@@ -197,9 +193,10 @@ if (isSalesDocumentsReady()) {
 		...documentsPageDefaults,
 	});
 
+	// Contract routes — stub registration the Pro plugin overrides via filter.
 	registerAdminPage('sales-contracts', {
 		path: 'sales/contracts',
-		component: wrap(ContractsList),
+		component: () => <ContractsProGate />,
 		label: __('Contracts', 'doublescale'),
 		hidden: true,
 		...contractPageDefaults,
@@ -207,7 +204,7 @@ if (isSalesDocumentsReady()) {
 
 	registerAdminPage('sales-contract-new', {
 		path: 'sales/contracts/new',
-		component: wrap(ContractEdit),
+		component: () => <ContractsProGate />,
 		label: __('New Contract', 'doublescale'),
 		hidden: true,
 		...contractPageDefaults,
@@ -215,7 +212,7 @@ if (isSalesDocumentsReady()) {
 
 	registerAdminPage('sales-contract', {
 		path: 'sales/contracts/:id',
-		component: wrap(ContractView),
+		component: () => <ContractsProGate />,
 		label: __('Contract', 'doublescale'),
 		hidden: true,
 		...contractPageDefaults,
@@ -223,7 +220,7 @@ if (isSalesDocumentsReady()) {
 
 	registerAdminPage('sales-contract-edit', {
 		path: 'sales/contracts/:id/edit',
-		component: wrap(ContractEdit),
+		component: () => <ContractsProGate />,
 		label: __('Edit Contract', 'doublescale'),
 		hidden: true,
 		...contractPageDefaults,
@@ -231,7 +228,7 @@ if (isSalesDocumentsReady()) {
 
 	registerAdminPage('sales-contract-types', {
 		path: 'sales/contract-types',
-		component: wrap(ContractTypes),
+		component: () => <ContractsProGate />,
 		label: __('Contract Types', 'doublescale'),
 		hidden: true,
 		...contractPageDefaults,

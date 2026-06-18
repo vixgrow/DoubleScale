@@ -27,6 +27,11 @@ import {
 	isCreditNotesPortalProActive,
 } from '../../credit-notes';
 import CreditNotesPortalProGate from '../../credit-note-pro-gate';
+import {
+	isContractsPortalModuleEnabled,
+	isContractsPortalProActive,
+} from '../../contracts';
+import ContractsPortalProGate from '../../contract-pro-gate';
 import { isInvoicesPaymentsPortalProActive } from '../../invoices-payments';
 import InvoicePaymentsPortalProGate from '../../invoice-payments-pro-gate';
 import type { PortalDocument, PortalPayment } from '../../types';
@@ -37,12 +42,16 @@ import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
 /** Document filter tabs plus the consolidated payment-history view. */
 type DocTab = DocumentFilter | 'payments';
 
-const BASE_TABS: Array<{ key: Exclude<DocTab, 'credit_note'>; label: string }> = [
+const BASE_TABS: Array<{ key: Exclude<DocTab, 'credit_note' | 'contract'>; label: string }> = [
 	{ key: 'all', label: __('All', 'doublescale') },
 	{ key: 'invoice', label: __('Invoices', 'doublescale') },
 	{ key: 'proposal', label: __('Proposals', 'doublescale') },
-	{ key: 'contract', label: __('Contracts', 'doublescale') },
 ];
+
+const CONTRACTS_TAB = {
+	key: 'contract' as const,
+	label: __('Contracts', 'doublescale'),
+};
 
 const PAYMENTS_TAB = { key: 'payments' as const, label: __('Payments', 'doublescale') };
 const CREDIT_NOTES_TAB = {
@@ -177,14 +186,27 @@ const DocumentRow = ({ doc }: { doc: PortalDocument }) => {
 	);
 };
 
-const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
-	const invoicesPro = isInvoicesPaymentsPortalProActive();
+const DocumentsList = ({
+	filter,
+	invoicesPro,
+	contractsPro,
+}: {
+	filter: DocumentFilter;
+	invoicesPro: boolean;
+	contractsPro: boolean;
+}) => {
 	const { data, loading, error } = useAsync(() => fetchDocuments(filter), [
 		filter,
 	]);
-	const docs = (data?.data || []).filter(
-		(doc) => invoicesPro || doc.type !== 'invoice'
-	);
+	const docs = (data?.data || []).filter((doc) => {
+		if (!invoicesPro && doc.type === 'invoice') {
+			return false;
+		}
+		if (!contractsPro && doc.type === 'contract') {
+			return false;
+		}
+		return true;
+	});
 
 	if (loading) {
 		return <Spinner />;
@@ -193,13 +215,28 @@ const DocumentsList = ({ filter }: { filter: DocumentFilter }) => {
 		return <ErrorState message={error} />;
 	}
 	if (docs.length === 0) {
+		const emptyParts: string[] = [];
+		if (invoicesPro) {
+			emptyParts.push(__('invoices', 'doublescale'));
+		}
+		emptyParts.push(__('proposals', 'doublescale'));
+		if (contractsPro) {
+			emptyParts.push(__('contracts', 'doublescale'));
+		}
+
+		const description =
+			emptyParts.length > 0
+				? sprintf(
+						/* translators: %s is a comma-separated list of document types. */
+						__('Your %s will appear here.', 'doublescale'),
+						emptyParts.join(', ')
+				  )
+				: __('Your documents will appear here.', 'doublescale');
+
 		return (
 			<EmptyState
 				title={__('No documents yet', 'doublescale')}
-				description={__(
-					'Your invoices, proposals, and contracts will appear here.',
-					'doublescale'
-				)}
+				description={description}
 			/>
 		);
 	}
@@ -299,16 +336,21 @@ const DocumentsHome = () => {
 	const [tab, setTab] = useState<DocTab>('all');
 	const creditNotesEnabled = isCreditNotesPortalModuleEnabled();
 	const creditNotesPro = isCreditNotesPortalProActive();
+	const contractsEnabled = isContractsPortalModuleEnabled();
+	const contractsPro = isContractsPortalProActive();
 	const invoicesPaymentsPro = isInvoicesPaymentsPortalProActive();
 
 	const tabs = useMemo(() => {
 		const items: Array<{ key: DocTab; label: string }> = [...BASE_TABS];
+		if (contractsEnabled) {
+			items.push(CONTRACTS_TAB);
+		}
 		if (creditNotesEnabled) {
 			items.push(CREDIT_NOTES_TAB);
 		}
 		items.push(PAYMENTS_TAB);
 		return items;
-	}, [creditNotesEnabled]);
+	}, [contractsEnabled, creditNotesEnabled]);
 
 	return (
 		<section>
@@ -341,10 +383,16 @@ const DocumentsHome = () => {
 				)
 			) : tab === 'invoice' && !invoicesPaymentsPro ? (
 				<InvoicePaymentsPortalProGate />
+			) : tab === 'contract' && contractsEnabled && !contractsPro ? (
+				<ContractsPortalProGate />
 			) : tab === 'credit_note' && creditNotesEnabled && !creditNotesPro ? (
 				<CreditNotesPortalProGate />
 			) : (
-				<DocumentsList filter={tab} />
+				<DocumentsList
+					filter={tab}
+					invoicesPro={invoicesPaymentsPro}
+					contractsPro={contractsPro}
+				/>
 			)}
 		</section>
 	);
@@ -414,6 +462,17 @@ const ProposalDetail = () => {
 
 const ContractDetail = () => {
 	const { hash } = useParams();
+	const contractsPro = isContractsPortalProActive();
+
+	if (!contractsPro) {
+		return (
+			<section>
+				<BackLink />
+				<ContractsPortalProGate />
+			</section>
+		);
+	}
+
 	return (
 		<DocumentDetailFrame>
 			{hash ? (

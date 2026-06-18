@@ -4,12 +4,12 @@
  *
  * Contributes three all-day kinds to the cross-module admin/staff calendar feed
  * (`doublescale_admin_calendar_events`): invoice due dates (`due_date`), proposal
- * expiries (`open_till`), and contract renewals (`end_date`).
+ * expiries (`open_till`). Contract renewals are contributed by the Pro Contracts module.
  *
  * Role scoping mirrors the Sales list endpoints: a manager
  * ({@see Capabilities::can_manage_all_sales()}) sees everything in the window;
  * a rep sees only records assigned to them (`sale_agent_user_id` for invoices,
- * `assigned_user_id` for proposals/contracts). A manager may scope to one staffer
+ * `assigned_user_id` for proposals). A manager may scope to one staffer
  * via `$view_user`.
  *
  * Resolved in {@see \DoubleScale\Modules\Sales\Module::boot()}.
@@ -24,10 +24,8 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Utils\CalendarSupport;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Sales\Capabilities;
-use DoubleScale\Modules\Contracts\Constants\ContractStatus;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
-use DoubleScale\Modules\Contracts\Models\ContractModel;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 
@@ -46,7 +44,7 @@ final class SalesCalendarProvider {
 	}
 
 	/**
-	 * Project the viewer's in-window invoices, proposals, and contracts.
+	 * Project the viewer's in-window invoices and proposals.
 	 *
 	 * @param array<int, array<string, mixed>> $events    Events collected so far.
 	 * @param array{0:string,1:string}         $window    [ start (Y-m-d), end_inclusive (Y-m-d H:i:s) ].
@@ -70,7 +68,6 @@ final class SalesCalendarProvider {
 
 		$invoice_seed  = new InvoiceModel();
 		$proposal_seed = new ProposalModel();
-		$contract_seed = new ContractModel();
 
 		$invoices  = doublescale_sales_child_module_active( 'documents' )
 			? $this->safe_get(
@@ -88,26 +85,15 @@ final class SalesCalendarProvider {
 				'proposals'
 			)
 			: $proposal_seed->newCollection();
-		$contracts = doublescale_sales_child_module_active( 'contracts' )
-			? $this->safe_get(
-				$this->scoped( ContractModel::query(), 'assigned_user_id', $scope_user )
-					->where( 'is_trash', false )
-					->where( 'status', '!=', ContractStatus::DRAFT )
-					->whereBetween( 'end_date', array( $start, $end_inclusive ) ),
-				'contracts'
-			)
-			: $contract_seed->newCollection();
 
-		// Batch-resolve assignee + contact display names across all three sets.
+		// Batch-resolve assignee + contact display names across both sets.
 		$user_ids    = array_merge(
 			$invoices->pluck( 'sale_agent_user_id' )->all(),
-			$proposals->pluck( 'assigned_user_id' )->all(),
-			$contracts->pluck( 'assigned_user_id' )->all()
+			$proposals->pluck( 'assigned_user_id' )->all()
 		);
 		$contact_ids = array_merge(
 			$invoices->pluck( 'contact_id' )->all(),
-			$proposals->pluck( 'contact_id' )->all(),
-			$contracts->pluck( 'contact_id' )->all()
+			$proposals->pluck( 'contact_id' )->all()
 		);
 		$names       = CalendarSupport::user_names( $user_ids );
 		$contacts    = self::contact_names( $contact_ids );
@@ -138,21 +124,6 @@ final class SalesCalendarProvider {
 				(int) $proposal->assigned_user_id,
 				(int) $proposal->contact_id,
 				'sales/proposals/' . (int) $proposal->id,
-				$names,
-				$contacts
-			);
-		}
-
-		foreach ( $contracts as $contract ) {
-			$events[] = $this->shape(
-				'contract-' . (int) $contract->id,
-				'contract',
-				(string) $contract->subject,
-				(string) $contract->end_date,
-				(string) $contract->status,
-				(int) $contract->assigned_user_id,
-				(int) $contract->contact_id,
-				'sales/contracts/' . (int) $contract->id,
 				$names,
 				$contacts
 			);

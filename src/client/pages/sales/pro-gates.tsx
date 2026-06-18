@@ -37,3 +37,20 @@ export const PaymentsProGate = () => (
 		]}
 	/>
 );
+
+export const ContractsProGate = () => (
+	<ProFeatureNotice
+		featureName={__('Contracts', 'doublescale')}
+		description={__(
+			'Manage customer contracts, types, attachments, and e-signatures with DoubleScale Pro.',
+			'doublescale'
+		)}
+		features={[
+			__('Create, send, and track customer contracts', 'doublescale'),
+			__('Contract types and reusable templates', 'doublescale'),
+			__('File attachments and customer e-signatures', 'doublescale'),
+			__('Customer portal access and downloadable PDFs', 'doublescale'),
+			__('Sequential contract numbering (CON-000001)', 'doublescale'),
+		]}
+	/>
+);

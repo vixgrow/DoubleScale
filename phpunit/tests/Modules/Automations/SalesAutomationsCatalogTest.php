@@ -186,7 +186,7 @@ final class SalesAutomationsCatalogTest extends TestCase {
 			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );
 		}
 
-		$contracts_dir = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Contracts/MergeTags/';
+		$contracts_dir = dirname( DOUBLESCALE_PLUGIN_DIR ) . '/doublescale-pro/includes/Modules/Contracts/MergeTags/';
 		foreach ( $contract_slugs as $slug ) {
 			$matches = glob( $contracts_dir . $this->slug_to_class_basename( $slug ) . '.php' );
 			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );

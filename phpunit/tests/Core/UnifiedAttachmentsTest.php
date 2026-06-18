@@ -10,7 +10,7 @@ namespace DoubleScale\Tests\Core;
 use DoubleScale\Core\Database\Migrations\AttachmentsTable;
 use DoubleScale\Core\Models\AttachmentModel;
 use DoubleScale\Core\Services\AttachmentService;
-use DoubleScale\Modules\Contracts\Models\ContractAttachmentModel;
+use DoubleScale\Pro\Modules\Contracts\Models\ContractAttachmentModel;
 use DoubleScale\Modules\Support\Models\AttachmentModel as SupportAttachmentModel;
 use PHPUnit\Framework\TestCase;
 
@@ -68,6 +68,9 @@ final class UnifiedAttachmentsTest extends TestCase {
 	}
 
 	public function test_module_attachable_type_constants(): void {
+		if ( ! class_exists( ContractAttachmentModel::class ) ) {
+			$this->markTestSkipped( 'Contracts module (Pro) is not loaded.' );
+		}
 		$this->assertSame( 'support_ticket', SupportAttachmentModel::ATTACHABLE_TYPE );
 		$this->assertSame( 'sales_contract', ContractAttachmentModel::ATTACHABLE_TYPE );
 	}
@@ -82,6 +85,9 @@ final class UnifiedAttachmentsTest extends TestCase {
 	}
 
 	public function test_contract_id_accessor_maps_to_attachable_id(): void {
+		if ( ! class_exists( ContractAttachmentModel::class ) ) {
+			$this->markTestSkipped( 'Contracts module (Pro) is not loaded.' );
+		}
 		$attachment = new ContractAttachmentModel();
 		$attachment->contract_id = 88;
 
@@ -91,6 +97,9 @@ final class UnifiedAttachmentsTest extends TestCase {
 	}
 
 	public function test_contract_shape_for_api_returns_signed_url(): void {
+		if ( ! class_exists( ContractAttachmentModel::class ) ) {
+			$this->markTestSkipped( 'Contracts module (Pro) is not loaded.' );
+		}
 		$attachment            = new ContractAttachmentModel();
 		$attachment->id        = 12;
 		$attachment->file_hash = 'contractfile1';
@@ -98,7 +107,7 @@ final class UnifiedAttachmentsTest extends TestCase {
 		$attachment->file_size = 1024;
 		$attachment->file_type = 'application/pdf';
 
-		$shaped = ( new \DoubleScale\Modules\Contracts\Services\ContractAttachmentService() )->shape_for_api( $attachment );
+		$shaped = ( new \DoubleScale\Pro\Modules\Contracts\Services\ContractAttachmentService() )->shape_for_api( $attachment );
 
 		$this->assertArrayHasKey( 'url', $shaped );
 		$this->assertStringContainsString( 'ds_file=contractfile1', (string) $shaped['url'] );

@@ -50,6 +50,23 @@ final class Module extends AbstractModule {
 		return false;
 	}
 
+	/**
+	 * TEMPORARY: the Client Portal needs adjustments before it ships, so force it
+	 * off. {@see ModuleRegistry} skips both register() and boot() for a disabled
+	 * module, which disables every portal surface at once — the
+	 * `[doublescale_client_portal]` shortcode + renderer bundle, the page
+	 * auto-provisioner, the section/calendar filters, and all `/portal/*` REST
+	 * routes (registered in {@see AbstractModule::boot()}).
+	 *
+	 * No code is removed. To re-enable the portal, delete this override to restore
+	 * the always-on host-shell behaviour.
+	 *
+	 * @return bool
+	 */
+	public function is_enabled(): bool {
+		return false;
+	}
+
 	public function version(): string {
 		return '1.0.0';
 	}

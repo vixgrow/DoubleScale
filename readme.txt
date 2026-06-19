@@ -4,11 +4,11 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native CRM, deals & pipelines, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
+WordPress-native CRM, sales, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
 
 == Description ==
 
@@ -23,8 +23,19 @@ DoubleScale is a single install that gives you **nine first-class modules**, eve
 **1. CRM — contacts, lists, segmentation, activity timeline**
 A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, bulk operations, and CSV / WordPress user / WooCommerce imports. Every contact has a **full activity timeline** that stitches together emails, SMS and WhatsApp messages, deal stage changes, bookings, support threads, page visits, form submissions, link clicks, and automation runs — one chronological view per contact, no tab-switching.
 
-**2. Deals & Pipelines — sales pipeline management**
-Drag-and-drop kanban pipelines with multiple stages, weighted forecasting, win/loss reasons, and per-deal custom fields. Run separate pipelines for sales, partnerships, renewals, or onboarding. Every deal carries the full contact, activity, and email thread with it. Stage transitions can fire automations (move to "Closed Won" → send invoice + assign onboarding task + tag in CRM).
+**2. Sales — pipelines, documents, and recurring revenue**
+Run your full revenue workflow from one Sales workspace in wp-admin — from first lead to signed contract, paid invoice, and recurring subscription.
+
+* **Pipelines** — drag-and-drop kanban deal boards with multiple stages, weighted forecasting, win/loss reasons, and per-deal custom fields. Stage changes fire automations (move to "Closed Won" → send an invoice, assign a task, tag in CRM).
+* **Proposals** — branded quotes with line items, customer acceptance, and one-click convert to invoice.
+* **Invoices** — send, track, and collect payment online (Stripe and manual payments).
+* **Contracts** — templated agreements with signatures and lifecycle automations.
+* **Credit notes** — issue refunds and adjustments tied to invoices.
+* **Taxes** — configure tax rates and apply them to proposal, contract, and invoice line items.
+* **Subscriptions** — recurring billing and subscription management (Pro).
+* **Client portal** — embeddable logged-in customer hub (`[doublescale_client_portal]`) where buyers view proposals and invoices, see outstanding balance, follow document lifecycle on a unified timeline, open contracts and credit notes (Pro), and manage subscriptions (Pro). Customers jump to secure public pages to accept proposals, pay invoices, or sign contracts; the portal aggregates sales documents alongside support tickets and bookings in one dashboard.
+
+Every deal, document, and payment links to the same contact record, activity timeline, and automation engine.
 
 **3. Campaigns — email, SMS, and WhatsApp broadcasts and sequences**
 A drag-and-drop email builder with responsive blocks, reusable templates, A/B testing, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments.
@@ -48,8 +59,34 @@ A complete helpdesk built into your CRM. Customers open tickets via a self-servi
 **8. Analytics — dashboards & reports**
 A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**9. Team management — roles, ownership, collaboration**
-Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see only deals they own, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
+**9. User roles — scoped access for sales, support, and booking teams**
+DoubleScale ships **seven dedicated WordPress roles** (plus site administrators). Assign them under **Settings → Team**. Users can hold **multiple roles** — capabilities merge across roles.
+
+**Sales (Pro)**
+
+* **CRM Manager** — Full CRM admin: all contacts, deals, pipelines, settings, team, reports, import/export, and all proposals/invoices. Full Support inbox access without a separate support role.
+* **Sales Manager** — All deals and contacts; import/export; all proposals and invoices. Support access requires an additional support role.
+* **Sales Rep** — Own deals and contacts only; own proposals and invoices; create deals and log activities.
+
+**Support**
+
+* **Support Manager** — View and manage every support ticket; assign agents; reply on any thread.
+* **Support Agent** — View the Support module; reply on tickets assigned to them.
+
+**Booking**
+
+* **Booking Manager** — Read and manage all calendars, bookings, and availability schedules across the team.
+* **Booking Agent** — Manage only own calendars, bookings, and availability.
+
+**Administrators**
+
+* **WordPress Administrator** — Every DoubleScale capability automatically.
+
+**Notes**
+
+* CRM Manager, Sales Manager, and Sales Rep require **DoubleScale Pro**.
+* Support and Booking roles are available when those modules are enabled.
+* Disabling a module suspends its role capabilities; assignments are preserved when you turn the module back on.
 
 = Plus: a visual automation engine that connects all nine =
 
@@ -178,7 +215,7 @@ For most teams, yes. The unified inbox handles email, SMS, and WhatsApp threads 
 
 = How does team management work? =
 
-WordPress roles map to access patterns inside DoubleScale: sales reps see only deals they own, CRM managers see all deals and contacts, support agents see the inbox. Notifications, activity attribution, and ownership are user-aware throughout.
+DoubleScale adds seven scoped WordPress roles — CRM Manager, Sales Manager, Sales Rep, Support Manager, Support Agent, Booking Manager, and Booking Agent — plus full access for site administrators. Sales reps see only their own deals; sales managers and CRM managers see the full pipeline; support agents see assigned tickets while support managers see the entire inbox; booking agents manage their own calendars while booking managers oversee the whole schedule. Users can combine roles, activity is attributed by user, and in-app notifications keep the team aligned. See **User roles** in the description above for the full capability matrix.
 
 = Which form plugins work? =
 
@@ -201,6 +238,22 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.0 = 19 Jun 2026
+- New Sales workspace: proposals, invoices, contracts, credit notes, and subscription billing (Pro)
+- Convert proposals to invoices, track payment history, and manage line items with tax settings
+- Sales automations: contract triggers, document-ready module checks, and merge tags for proposals and invoices
+- Unified attachment management across sales documents and support tickets
+- Admin calendar aggregating bookings, sales, and cross-module events in one view
+- Customer portal foundation: document access, payment history, subscriptions, and calendar (portal module temporarily disabled while final adjustments ship)
+- Improved contact custom fields: validation, required-field handling, and deal custom fields in the pipeline
+- Email builder: insert sections in the canvas, richer text block styling and color controls, RichTextEditor placeholders, and footer merge tag extraction
+- Support: "View Ticket" button in notification emails and clearer agent attribution on customer ticket views
+- Booking: UTC-safe meeting date-time storage and broad layout/responsiveness improvements across calendars and modals
+- Meta WhatsApp: clearer account registration error handling
+- Settings: improved encryption handling for stored credentials
+- Pro feature gates for invoices, payments, and related sales surfaces
+- Admin UI: DataTable configuration options, mobile responsiveness, and layout polish across campaigns, automations, booking, support, and sales screens
+
 = 1.1.9 = 15 Jun 2026
 - Fix Pro form integrations (Gravity Forms, Elementor, Ninja Forms, etc.) staying locked when DoubleScale Pro is active
 - Fix Outlook OAuth scope for consumer Microsoft accounts so IMAP/SMTP connections are not rejected
@@ -427,3 +480,7 @@ Bug reports, ideas, and pull requests are welcome on the public GitHub repositor
 == Languages ==
 
 DoubleScale is translation-ready. English ships by default; additional locales welcome via community contributions.
+
+== Compare ==
+
+* **DoubleScale vs FluentCRM:** [doublescale.io/compare/vs-fluentcrm](https://doublescale.io/compare/vs-fluentcrm/)

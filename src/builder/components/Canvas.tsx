@@ -16,6 +16,7 @@ import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { SectionDropZone } from './SectionDropZone';
+import { SectionInsertButton } from './SectionInsertButton';
 import CanvasShimmer from './CanvasShimmer';
 
 // Between 1024px and 1240px the sidebar leaves little room, so cap the canvas
@@ -39,6 +40,12 @@ function useIsMidScreen() {
 const Canvas = () => {
 	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	// Where the next added section should be inserted. null = append after the
+	// last section (the "Add New Section" button); a number = insert at that
+	// index (the between-sections hover "+").
+	const [pendingInsertIndex, setPendingInsertIndex] = useState<number | null>(
+		null
+	);
 	const isMidScreen = useIsMidScreen();
 
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
@@ -67,16 +74,30 @@ const Canvas = () => {
 	);
 
 	const handleOpenModal = () => {
+		// Append after the last section.
+		setPendingInsertIndex(null);
+		setIsModalOpen(true);
+	};
+
+	const handleInsertAt = (index: number) => {
+		// Insert between sections at the given index.
+		setPendingInsertIndex(index);
 		setIsModalOpen(true);
 	};
 
 	const handleCloseModal = () => {
+		setPendingInsertIndex(null);
 		setIsModalOpen(false);
 	};
 
 	const handleSectionSelect = (sectionType: LayoutTemplate) => {
 		const newSection = EmailBuilderService.createSection(sectionType);
-		dispatch(STORE_KEY).addSection(newSection);
+		// addSection treats undefined index as append; a number inserts there.
+		dispatch(STORE_KEY).addSection(
+			newSection,
+			pendingInsertIndex ?? undefined
+		);
+		setPendingInsertIndex(null);
 		setIsModalOpen(false);
 	};
 
@@ -180,6 +201,17 @@ const Canvas = () => {
 										/>
 
 										<SectionRenderer section={section} />
+
+										{/* Hover "+" to insert a section between this
+										    one and the next (not after the last —
+										    that has its own "Add New Section"). */}
+										{index < sections.length - 1 && (
+											<SectionInsertButton
+												onInsert={() =>
+													handleInsertAt(index + 1)
+												}
+											/>
+										)}
 
 										{/* Drop zone after last section */}
 										{index === sections.length - 1 && (

@@ -14,7 +14,6 @@ import {
 	Underline,
 	Strikethrough,
 	Link,
-	Palette,
 	List,
 	ListOrdered,
 	AlignLeft,
@@ -28,13 +27,7 @@ import {
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover-dialog';
 import { LinkDialog, LinkData } from './LinkDialog';
 import { MerageTagsIcon } from '@doublescale/components';
 import MergeTagsSelector from '@/components/merge-tags';
@@ -562,11 +555,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		}
 	};
 
-	const handleColorChange = (color: string) => {
-		setSelectedColor(color);
-		executeCommand('foreColor', color);
-	};
-
 	// Enhanced link handling
 	const handleLinkClick = () => {
 		const selection = window.getSelection();
@@ -971,31 +959,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 					<div className={toolbarSep} />
 
-					{/* Color picker */}
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								className={toolbarIconBtn(false)}
-								onMouseDown={(e) => e.preventDefault()}
-							>
-								<Palette className="h-4 w-4" />
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-2">
-							<div className="flex items-center gap-2">
-								<Input
-									type="color"
-									value={selectedColor}
-									onChange={(e) =>
-										handleColorChange(e.target.value)
-									}
-									className="h-8 w-10 rounded p-1"
-								/>
-							</div>
-						</PopoverContent>
-					</Popover>
+					{/* Per-selection font color picker removed: the contentEditable
+					    selection was unreliable (recolored the whole block) and the
+					    feature was bug-prone. Block-level "Font Color" lives in the
+					    Text block sidebar instead. Existing inline span colors in
+					    saved content still render. */}
 
 					{!isBuilderDark && (
 						<>

@@ -198,11 +198,11 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 
 	const syncCanvasEditorColors = (root: HTMLElement) => {
 		root.style.color = textColor;
+		// Headings follow the block "Font Color". Clear any baked-in inline color
+		// so the heading inherits the block color (per-word <span> colors, which
+		// are nested inside, keep their own color).
 		root.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((node) => {
-			const el = node as HTMLElement;
-			if (!el.style.color?.trim()) {
-				el.style.color = textColor;
-			}
+			(node as HTMLElement).style.color = textColor;
 		});
 	};
 
@@ -296,8 +296,6 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} [data-text-canvas-editor="true"] h4,
 				.${rendererId} [data-text-canvas-editor="true"] h5,
 				.${rendererId} [data-text-canvas-editor="true"] h6,
-				.${rendererId} [data-text-canvas-editor="true"] strong,
-				.${rendererId} [data-text-canvas-editor="true"] em,
 				.${rendererId} [data-text-canvas-editor="true"] p,
 				.${rendererId} [data-text-canvas-editor="true"] li,
 				.${rendererId} [data-text-canvas-editor="true"] div,
@@ -310,7 +308,16 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} .text-block-html-root p,
 				.${rendererId} .text-block-html-root li,
 				.${rendererId} .text-block-html-root div {
-					color: inherit;
+					/* Block-level *structural* text follows the block "Font Color"
+					   (the container color), overriding any baked-in inline color on
+					   these elements. !important is required so it beats inline
+					   color:#333. Deliberately scoped to structural containers only:
+					   inline carriers (<span>/<font>) AND inline formatting
+					   (<strong>/<em>) are NOT matched, so a per-selection toolbar
+					   color on bold/italic/spanned text wins. -webkit-text-fill-color
+					   stays non-!important so it never leaks over a nested span's
+					   own color. */
+					color: inherit !important;
 					-webkit-text-fill-color: currentColor;
 				}
 				/* Only override font-size and font-family inline styles if no HTML formatting exists */

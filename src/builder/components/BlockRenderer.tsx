@@ -152,7 +152,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		block.type === 'text' ? (
 			<blockDefinition.Renderer
 				props={renderProps as any}
-				canvasEditable={isSelected && !isThisTemplateBlock}
+				canvasEditable={isSelected}
 				onCanvasContentChange={(content: string) =>
 					dispatch(STORE_KEY).updateBlock(block.id, {
 						content,

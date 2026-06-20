@@ -103,11 +103,9 @@ export const blockExists = (
 /**
  * Gets draggable blocks for sidebar (excludes system blocks)
  * System blocks: 'unknown'
- * 'text' is excluded so it is not offered as an "add" block in the palette
- * (existing text blocks in templates/emails still render and edit normally).
  */
 export const getDraggableBlocks = (registry: BlockRegistry): BlockRegistry => {
-	const systemBlocks = ['unknown', 'text'];
+	const systemBlocks = ['unknown'];
 	return Object.keys(registry).reduce((acc, key) => {
 		if (!systemBlocks.includes(key)) {
 			acc[key] = registry[key];

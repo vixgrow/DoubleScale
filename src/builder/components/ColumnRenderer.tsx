@@ -1011,8 +1011,8 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 							return renderedBlocks;
 						})()}
 
-						{/* "Add Text Block" button removed: text blocks are no longer
-						    user-addable (also excluded from the blocks palette). */}
+						{/* In-column "Add Text Block" button intentionally removed.
+						    Text blocks are added from the sidebar blocks palette. */}
 					</>
 				)}
 			</SortableContext>

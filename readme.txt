@@ -4,11 +4,13 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 WordPress-native CRM, sales, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
+
+**Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
 == Description ==
 
@@ -238,6 +240,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.1 = 19 Jun 2026
+- Fix fatal error when updating the free plugin while an older DoubleScale Pro build is still active (legacy booking payment gateway compatibility)
+- Show an admin notice when DoubleScale Pro needs updating to 1.1.0 or newer
+
 = 1.2.0 = 19 Jun 2026
 - New Sales workspace: proposals, invoices, contracts, credit notes, and subscription billing (Pro)
 - Convert proposals to invoices, track payment history, and manage line items with tax settings

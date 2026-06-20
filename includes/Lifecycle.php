@@ -38,7 +38,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.2.0',
+			'DOUBLESCALE_VERSION'       => '1.2.1',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -140,6 +140,9 @@ final class Lifecycle {
 		// activation migrations — Install::install() runs on register_activation_hook,
 		// which fires before PluginKernel loads includes/Core/functions.php.
 		require_once $dir . 'includes/Core/functions.php';
+
+		require_once $dir . 'includes/Compat/LegacyProBookingPayment.php';
+		\DoubleScale\Compat\LegacyProBookingPayment::ensure_loaded();
 	}
 
 	/**

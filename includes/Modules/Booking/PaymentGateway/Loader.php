@@ -10,6 +10,7 @@
 
 namespace DoubleScale\Modules\Booking\PaymentGateway;
 
+use DoubleScale\Compat\LegacyProBookingPayment;
 use DoubleScale\Core\Payment\GatewayManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,5 +23,6 @@ final class Loader {
 	public static function register(): void {
 		GatewayManager::instance();
 		require_once __DIR__ . '/ReturnHandler.php';
+		LegacyProBookingPayment::ensure_loaded();
 	}
 }

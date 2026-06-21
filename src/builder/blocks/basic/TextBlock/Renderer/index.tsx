@@ -64,7 +64,15 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	const rendererId = rendererIdRef.current;
 	const headingConfig = getHeadingConfig(props.headingStyle);
 	const ElementType = headingConfig.element as keyof JSX.IntrinsicElements;
-	const fontSize = calculateFontSize(props.headingStyle, props.fontSize);
+	// props.fontSize is already the final px value the user sees in the Font
+	// Size field (the style dropdown seeds it directly, e.g. H1 -> 36) — do
+	// NOT also multiply it by the heading multiplier here, or the rendered
+	// size stops matching the number shown in the field (e.g. H1 at "36"
+	// would render at 90px). Only enforce the floor.
+	const fontSize = Math.max(props.fontSize, headingConfig.minSize);
+	const h1FontSize = calculateFontSize('h1', props.fontSize);
+	const h2FontSize = calculateFontSize('h2', props.fontSize);
+	const h3FontSize = calculateFontSize('h3', props.fontSize);
 	const textColor = props.color?.trim() || '#333';
 	const linkColorResolved = props.linkColor?.trim() || '#458DC7';
 
@@ -284,6 +292,26 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} a:hover {
 					color: ${linkColorResolved};
 					text-decoration: underline !important;
+				}
+				/* Headings typed via the rich text editor's heading button keep their
+				   own size (scaled off the block "Font Size" by the same multipliers
+				   used for the block-level heading style), instead of being squashed
+				   to the flat block font-size by the blanket rules above. Unconditional
+				   (not gated by hasHtmlFormatting) because a heading alone — with no
+				   bold/italic — wouldn't otherwise trigger that gate. */
+				.${rendererId} h1 {
+					font-size: ${h1FontSize}px !important;
+				}
+				.${rendererId} h2 {
+					font-size: ${h2FontSize}px !important;
+				}
+				.${rendererId} h3 {
+					font-size: ${h3FontSize}px !important;
+				}
+				.${rendererId} h4,
+				.${rendererId} h5,
+				.${rendererId} h6 {
+					font-size: ${fontSize}px !important;
 				}
 				/* Selected / contentEditable: headings must inherit block color (UA defaults are dark). */
 				.${rendererId} [data-text-canvas-editor="true"] {

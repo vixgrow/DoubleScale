@@ -43,6 +43,10 @@ interface RichTextEditorProps {
 	fontFamily?: string;
 	/** Builder sidebar: dashed toolbar, dark editing surface (Figma Text Settings). */
 	theme?: 'default' | 'builderDark';
+	/** Limits merge-tag picker to tags for this sales document (settings emails). */
+	salesEmailDocumentType?: import('@/components/merge-tags/utils').SalesEmailDocumentType;
+	/** @deprecated Use salesEmailDocumentType for sales settings emails. */
+	mergeTagTriggerId?: string;
 	/**
 	 * `canvas` — toolbar applies to the selected text block on the canvas (no sidebar body field).
 	 * Use with the email builder canvas `contentEditable` marked `data-text-canvas-editor`.
@@ -65,6 +69,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	formattingTarget = 'local',
 	defaultBodyColor,
 	defaultLinkColor,
+	mergeTagTriggerId,
+	salesEmailDocumentType,
 }) => {
 	const isBuilderDark = theme === 'builderDark';
 	const isCanvasFormat = formattingTarget === 'canvas';
@@ -1086,6 +1092,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				visible={isMergeTagsModalOpen}
 				onClose={() => setIsMergeTagsModalOpen(false)}
 				onInsertTag={handleInsertMergeTag}
+				triggerId={mergeTagTriggerId}
+				salesEmailDocumentType={salesEmailDocumentType}
 			/>
 
 			{/* Copy Notification - Rendered via Portal to document body */}

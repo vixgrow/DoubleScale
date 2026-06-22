@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 
 /**
  * SalesEmailMergeTags helper.
@@ -53,5 +55,59 @@ final class SalesEmailMergeTags {
 		}
 
 		return $context;
+	}
+
+	/**
+	 * @param ProposalModel $proposal Proposal.
+	 * @return AutomationContactModel
+	 */
+	public static function for_proposal( ProposalModel $proposal ): AutomationContactModel {
+		$proposal->loadMissing( 'contact' );
+
+		return self::context_from_contact(
+			$proposal->contact,
+			array( 'proposal_id' => (int) $proposal->id )
+		);
+	}
+
+	/**
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return AutomationContactModel
+	 */
+	public static function for_invoice( InvoiceModel $invoice ): AutomationContactModel {
+		$invoice->loadMissing( 'contact' );
+
+		$data = array( 'invoice_id' => (int) $invoice->id );
+		if ( ! empty( $invoice->proposal_id ) ) {
+			$data['proposal_id'] = (int) $invoice->proposal_id;
+		}
+
+		return self::context_from_contact( $invoice->contact, $data );
+	}
+
+	/**
+	 * @param object $document      Credit note, contract, or subscription model.
+	 * @param string $id_key        Context data key, e.g. credit_note_id.
+	 * @return AutomationContactModel
+	 */
+	public static function for_document( object $document, string $id_key ): AutomationContactModel {
+		if ( method_exists( $document, 'loadMissing' ) ) {
+			$document->loadMissing( 'contact' );
+		}
+
+		// Eloquent models expose id/contact via __get — property_exists() is always false.
+		$contact = isset( $document->contact ) ? $document->contact : null;
+
+		$id = 0;
+		if ( isset( $document->id ) ) {
+			$id = (int) $document->id;
+		} elseif ( method_exists( $document, 'getKey' ) ) {
+			$id = (int) $document->getKey();
+		}
+
+		return self::context_from_contact(
+			$contact instanceof ContactModel ? $contact : null,
+			array( $id_key => $id )
+		);
 	}
 }

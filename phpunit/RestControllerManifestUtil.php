@@ -16,6 +16,15 @@ function doublescale_rest_module_files( string $plugin_root ): array {
 	if ( is_array( $modules ) ) {
 		$files = array_merge( $files, $modules );
 	}
+
+	$pro_root = dirname( rtrim( $plugin_root, '/\\' ) ) . '/doublescale-pro';
+	if ( is_dir( $pro_root ) ) {
+		$pro_modules = glob( $pro_root . '/includes/Modules/*/Module.php' );
+		if ( is_array( $pro_modules ) ) {
+			$files = array_merge( $files, $pro_modules );
+		}
+	}
+
 	return array_values( array_filter( $files, 'is_file' ) );
 }
 
@@ -90,12 +99,44 @@ function doublescale_php_file_namespace( string $file ): string {
 }
 
 /**
+ * Import map (short class name => FQCN) from `use` statements in a PHP file.
+ *
+ * @return array<string, string>
+ */
+function doublescale_php_file_use_imports( string $file ): array {
+	$c = (string) file_get_contents( $file );
+	$imports = array();
+	if ( ! preg_match_all( '/^\s*use\s+([^;]+);/m', $c, $matches ) ) {
+		return $imports;
+	}
+	foreach ( $matches[1] as $use_clause ) {
+		$use_clause = trim( (string) $use_clause );
+		if ( '' === $use_clause || false !== strpos( $use_clause, '{' ) ) {
+			continue;
+		}
+		$parts = explode( ' as ', $use_clause );
+		$fqcn  = ltrim( trim( $parts[0] ), '\\' );
+		$alias = isset( $parts[1] ) ? trim( $parts[1] ) : '';
+		$slash = strrpos( $fqcn, '\\' );
+		$short = false !== $slash ? substr( $fqcn, $slash + 1 ) : $fqcn;
+		$key   = '' !== $alias ? $alias : $short;
+		if ( '' !== $key ) {
+			$imports[ $key ] = $fqcn;
+		}
+	}
+	return $imports;
+}
+
+/**
  * Turn a `Some\Sub\Class` token from restControllers() into an FQCN.
  */
-function doublescale_rest_resolve_fqcn_token( string $file_namespace, string $token ): string {
+function doublescale_rest_resolve_fqcn_token( string $file_namespace, string $token, array $imports = array() ): string {
 	$token = trim( $token );
 	if ( '' === $token ) {
 		return $token;
+	}
+	if ( isset( $imports[ $token ] ) ) {
+		return $imports[ $token ];
 	}
 	if ( '\\' === $token[0] ) {
 		return substr( $token, 1 );
@@ -120,7 +161,8 @@ function doublescale_collect_rest_controller_fqcn_map( string $plugin_root ): ar
 		if ( null === $inner ) {
 			continue;
 		}
-		$ns = doublescale_php_file_namespace( $path );
+		$ns      = doublescale_php_file_namespace( $path );
+		$imports = doublescale_php_file_use_imports( $path );
 		foreach ( explode( ',', $inner ) as $raw ) {
 			$t = trim( (string) preg_replace( '/\s*\/\/.*$/', '', $raw ) );
 			if ( '' === $t || substr( $t, -7 ) !== '::class' ) {
@@ -130,7 +172,7 @@ function doublescale_collect_rest_controller_fqcn_map( string $plugin_root ): ar
 			if ( '' === $token ) {
 				continue;
 			}
-			$fqcn          = doublescale_rest_resolve_fqcn_token( $ns, $token );
+			$fqcn          = doublescale_rest_resolve_fqcn_token( $ns, $token, $imports );
 			$slash         = strrpos( $fqcn, '\\' );
 			$short         = false !== $slash ? substr( $fqcn, $slash + 1 ) : $fqcn;
 			$map[ $short ] = $fqcn;

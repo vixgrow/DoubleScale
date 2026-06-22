@@ -16,11 +16,17 @@ defined( 'ABSPATH' ) || exit;
 
 require_once dirname( __DIR__ ) . '/RestApiEndpointTestStubs.php';
 require_once dirname( __DIR__ ) . '/RestApiEndpointTestUtil.php';
+require_once dirname( __DIR__ ) . '/ProTestAutoload.php';
 
 /**
  * @group smoke
  */
 final class RestAllEndpointsRegistrationTest extends TestCase {
+
+	public static function setUpBeforeClass(): void {
+		doublescale_phpunit_ensure_pro_autoload();
+		parent::setUpBeforeClass();
+	}
 
 	/**
 	 * @return array<string, array{0: string}>

@@ -94,7 +94,7 @@ const SalesSettingsPage: React.FC = () => {
 					<h1 className="text-2xl font-semibold">{__('Sales Settings', 'doublescale')}</h1>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, and invoices.',
+							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, invoices, and credit notes.',
 							'doublescale'
 						)}
 					</p>
@@ -165,6 +165,31 @@ const SalesSettingsPage: React.FC = () => {
 					) : (
 						<InvoicesProGate />
 					)}
+
+					{isProActive ? (
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Credit note emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.credit_note_email_subject}
+								onChange={(e) => patch('credit_note_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<Textarea
+								value={form.credit_note_email_intro}
+								onChange={(e) => patch('credit_note_email_intro', e.target.value)}
+								rows={3}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Tokens: {credit_note_number}, {contact_name}, {total}, {remaining}, {credit_note_date}, {public_url}',
+								'doublescale'
+							)}
+						</p>
+					</section>
+					) : null}
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Contract emails', 'doublescale')}</h2>

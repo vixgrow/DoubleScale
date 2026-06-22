@@ -8,10 +8,17 @@ namespace DoubleScale\Tests\Modules\Documents;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__, 3 ) . '/ProTestAutoload.php';
+
 /**
  * @group smoke
  */
 final class DocumentPdfHtmlTest extends TestCase {
+
+	public static function setUpBeforeClass(): void {
+		doublescale_phpunit_ensure_pro_autoload();
+		parent::setUpBeforeClass();
+	}
 
 	public function test_render_html_includes_invoice_totals_and_tax(): void {
 		$html = DocumentPdf::render_html(

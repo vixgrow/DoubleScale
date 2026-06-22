@@ -1,6 +1,15 @@
+.date-time-container {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
 .date-time-picker {
 	display: flex;
-	gap: 20px;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+	min-width: 0;
 	align-items: stretch;
 
 	.custom-calendar,
@@ -9,6 +18,14 @@
 		height: 442px;
 		box-sizing: border-box;
 	}
+}
+
+.date-picker-scroll {
+	width: 100%;
+	min-width: 0;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
 }
 
 .date-time-title {
@@ -34,6 +51,7 @@
 
 .date-time-timezone-select {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 10px;
 	align-items: center;
 }
@@ -44,10 +62,32 @@
 	vertical-align: middle;
 }
 
-@media screen and (max-width: 768px) {
-	.date-time-picker {
-		flex-direction: column;
+.timezone {
+	font-weight: 400;
+	font-size: 16px;
+	color: #000000;
+}
 
+@media screen and (min-width: 769px) {
+	.date-time-picker {
+		flex-direction: row;
+		gap: 20px;
+		align-items: stretch;
+	}
+
+	.date-picker-scroll {
+		flex: 4;
+		min-width: 0;
+		overflow-x: visible;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.date-time-title {
+		font-size: 18px;
+	}
+
+	.date-time-picker {
 		.custom-calendar,
 		.time-picker-container {
 			min-height: auto;
@@ -55,14 +95,9 @@
 		}
 
 		.time-picker-container {
-			min-height: 320px;
-			height: 320px;
+			width: 100%;
+			min-height: 200px;
+			max-height: 320px;
 		}
 	}
-}
-
-.timezone {
-	font-weight: 400;
-	font-size: 16px;
-	color: #000000;
 }

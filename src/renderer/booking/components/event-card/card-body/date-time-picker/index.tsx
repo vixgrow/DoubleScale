@@ -63,6 +63,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 				</p>
 			</div>
 			<div className="date-time-picker">
+				<div className="date-picker-scroll">
 				<DatePicker
 					event={event}
 					selectedDate={selectedDate}
@@ -78,6 +79,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 					setIsLoading={setIsLoading}
 					setWaitingListEnabled={setWaitingListEnabled}
 				/>
+				</div>
 				{selectedDate && (
 					<TimePicker
 						selectedTime={selectedTime}

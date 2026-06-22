@@ -114,10 +114,29 @@
 	gap: 10px;
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 769px) {
 	.time-picker-container {
 		flex: 1;
+		min-width: 0;
 		min-height: 442px;
 		height: 442px;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.time-picker-container {
+		width: 100%;
+		flex: none;
+		padding: 16px;
+		overflow-y: auto;
+	}
+
+	.time-picker-title {
+		font-size: 15px;
+	}
+
+	.time-slot {
+		padding: 12px 16px;
+		font-size: 15px;
 	}
 }

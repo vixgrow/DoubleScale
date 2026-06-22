@@ -173,7 +173,14 @@ class TextBlock extends EmailBlock {
 	 * and margin which must be overridden explicitly.
 	 *
 	 * For every <p>, <div>, and <h1>-<h6> tag found in content:
-	 *   - Injects each style from $styles only when the tag doesn't already have it.
+	 *   - 'color', 'font-size', 'font-family' always win over any existing inline
+	 *     declaration on that tag (matches the frontend's unconditional `!important`
+	 *     CSS rule forcing the block's color/size/family onto these structural
+	 *     tags — see TextRenderer's `.rendererId p, div, span/h1-h6` rules — so a
+	 *     stray inline color/size baked into saved content, e.g. from a paste or an
+	 *     older save, can't make the sent email diverge from what the builder showed).
+	 *   - Other styles (e.g. line-height) are injected only when the tag doesn't
+	 *     already have them.
 	 *   - Always injects margin:0 when missing.
 	 *
 	 * @param string $content HTML content
@@ -186,15 +193,21 @@ class TextBlock extends EmailBlock {
 			$escaped[ $prop ] = esc_attr( $val );
 		}
 
+		$force_props = array( 'color', 'font-size', 'font-family' );
+
 		return preg_replace_callback(
 			'/<(p|div|h[1-6])((?:\s+[^>]*)?)>/i',
-			function ( $matches ) use ( $escaped ) {
+			function ( $matches ) use ( $escaped, $force_props ) {
 				$tag   = $matches[1];
 				$attrs = $matches[2];
 
 				$inject = array();
 				foreach ( $escaped as $prop => $val ) {
-					if ( ! preg_match( '/style\s*=\s*("[^"]*|\'[^\']*)' . preg_quote( $prop, '/' ) . '/i', $attrs ) ) {
+					$has_prop = (bool) preg_match( '/style\s*=\s*("[^"]*|\'[^\']*)' . preg_quote( $prop, '/' ) . '/i', $attrs );
+					if ( ! $has_prop ) {
+						$inject[] = $prop . ': ' . $val;
+					} elseif ( in_array( $prop, $force_props, true ) ) {
+						$attrs    = preg_replace( '/' . preg_quote( $prop, '/' ) . '\s*:\s*[^;"\']+;?/i', '', $attrs );
 						$inject[] = $prop . ': ' . $val;
 					}
 				}

@@ -45,20 +45,20 @@ export const ConversationIcon: React.FC<IconProps> = (props) => (
 );
 
 const STATUS_STYLES: Record<TicketStatus, { bg: string; fg: string; Icon: React.FC<IconProps> }> = {
-	open: { bg: 'bg-blue-100', fg: 'text-blue-700', Icon: (p) => <Circle {...p} /> },
+	open: { bg: 'bg-[#D9E9F3]', fg: 'text-[#0D9DFC]', Icon: (p) => <Circle {...p} /> },
 	pending: {
-		bg: 'bg-yellow-100',
-		fg: 'text-yellow-800',
+		bg: 'bg-[#FAEADF]',
+		fg: 'text-[#CB5301]',
 		Icon: (p) => <CircleDot {...p} />,
 	},
 	resolved: {
-		bg: 'bg-green-100',
-		fg: 'text-green-700',
+		bg: 'bg-[#F7F4C3]',
+		fg: 'text-[#896900]',
 		Icon: (p) => <CheckCircle2 {...p} />,
 	},
 	closed: {
-		bg: 'bg-gray-100',
-		fg: 'text-gray-600',
+		bg: 'bg-[#E4FAEC]',
+		fg: 'text-[#16A34A]',
 		Icon: (p) => <CheckCircle2 {...p} />,
 	},
 };
@@ -68,9 +68,9 @@ export const StatusPill: React.FC<{ status: TicketStatus }> = ({ status }) => {
 	const Icon = style.Icon;
 	return (
 		<span
-			className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${style.bg} ${style.fg}`}
+			className={`inline-flex items-center gap-1 rounded-[8px] px-2 py-1 text-sm leading-6 font-medium ${style.bg} ${style.fg}`}
 		>
-			<Icon width={12} height={12} />
+			{/* <Icon width={12} height={12} /> */}
 			{STATUS_LABELS[status] ?? status}
 		</span>
 	);
@@ -78,17 +78,17 @@ export const StatusPill: React.FC<{ status: TicketStatus }> = ({ status }) => {
 
 const PRIORITY_STYLES: Record<
 	TicketPriority,
-	{ bg: string; fg: string; Icon: React.FC<IconProps> }
+	{ fg: string; Icon: React.FC<IconProps> }
 > = {
-	low: { bg: 'bg-gray-100', fg: 'text-gray-600', Icon: (p) => <Circle {...p} /> },
-	normal: { bg: 'bg-blue-50', fg: 'text-blue-700', Icon: (p) => <Circle {...p} /> },
+	low: {  fg: 'text-[#16A34A]', Icon: (p) => <Circle {...p} /> },
+	normal: { fg: 'text-[#0D9DFC]', Icon: (p) => <Circle {...p} /> },
 	high: {
-		bg: 'bg-orange-100',
-		fg: 'text-orange-700',
+		// bg: 'bg-[#CB5301]',
+		fg: 'text-[#CB5301]',
 		Icon: (p) => <AlertCircle {...p} />,
 	},
 	urgent: {
-		bg: 'bg-red-100',
+
 		fg: 'text-red-700',
 		Icon: (p) => <AlertTriangle {...p} />,
 	},
@@ -111,10 +111,10 @@ export const PriorityPill: React.FC<{ priority: TicketPriority }> = ({
 	const Icon = style.Icon;
 	return (
 		<span
-			className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${style.bg} ${style.fg}`}
+			className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium  ${style.fg}`}
 		>
-			<Icon width={12} height={12} />
-			{PRIORITY_LABELS[priority] ?? priority}
+			<Icon width={16} height={16} />
+			<span className=' text-foreground'>{PRIORITY_LABELS[priority] ?? priority}</span>
 		</span>
 	);
 };

@@ -416,11 +416,11 @@ const SupportInbox: React.FC = () => {
 						/>
 					</div>
 				</div>
-				<div className="overflow-x-auto">
-					<table className="w-full min-w-[56rem] text-sm">
-						<thead className="bg-gray-50">
-							<tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-								<th className="w-10 px-4 py-2">
+				<div className="overflow-x-auto rounded-lg border border-border">
+					<table className="w-full min-w-[56rem] border-collapse text-sm">
+						<thead>
+							<tr className="border-b border-border bg-white text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+								<th className="w-10 px-4 py-3">
 									<Checkbox
 										checked={
 											allPageSelected
@@ -440,35 +440,35 @@ const SupportInbox: React.FC = () => {
 										)}
 									/>
 								</th>
-								<th className="min-w-[12rem] px-4 py-2">
+								<th className="min-w-[12rem] px-4 py-3">
 									{__('Title', 'doublescale')}
 								</th>
-								<th className="min-w-[8rem] px-4 py-2">
+								<th className="min-w-[8rem] px-4 py-3">
 									{__('Customer', 'doublescale')}
 								</th>
-								<th className="min-w-[7rem] whitespace-nowrap px-4 py-2">
+								<th className="min-w-[7rem] whitespace-nowrap px-4 py-3">
 									{__('Mailbox', 'doublescale')}
 								</th>
-								<th className="min-w-[8rem] px-4 py-2">
+								<th className="min-w-[8rem] px-4 py-3">
 									{__('Assigned to', 'doublescale')}
 								</th>
-								<th className="whitespace-nowrap px-4 py-2">
+								<th className="whitespace-nowrap px-4 py-3">
 									{__('Status', 'doublescale')}
 								</th>
-								<th className="whitespace-nowrap px-4 py-2">
+								<th className="whitespace-nowrap px-4 py-3">
 									{__('Priority', 'doublescale')}
 								</th>
-								<th className="whitespace-nowrap px-4 py-2">
+								<th className="whitespace-nowrap px-4 py-3">
 									{__('Replies', 'doublescale')}
 								</th>
-								<th className="min-w-[9rem] whitespace-nowrap px-4 py-2">
+								<th className="min-w-[9rem] whitespace-nowrap px-4 py-3">
 									{__('Updated', 'doublescale')}
 								</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loading && (
-								<tr>
+								<tr className="border-b border-border bg-white">
 									<td
 										colSpan={9}
 										className="px-4 py-8 text-center text-gray-500"
@@ -478,7 +478,7 @@ const SupportInbox: React.FC = () => {
 								</tr>
 							)}
 							{!loading && data?.data.length === 0 && (
-								<tr>
+								<tr className="border-b border-border bg-white">
 									<td
 										colSpan={9}
 										className="px-4 py-16 text-center"
@@ -549,9 +549,9 @@ const SupportInbox: React.FC = () => {
 								data?.data.map((ticket) => (
 									<tr
 										key={ticket.id}
-										className={`border-t hover:bg-gray-50 cursor-pointer ${
+										className={`cursor-pointer border-b border-border odd:bg-[#F7F8FA] even:bg-white hover:bg-[#EFF1F4] ${
 											selectedIds.has(ticket.id)
-												? 'bg-blue-50/60'
+												? '!bg-blue-50/60 hover:!bg-blue-50/60'
 												: ''
 										}`}
 										onClick={() =>

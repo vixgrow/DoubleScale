@@ -186,7 +186,7 @@ const EventActions: React.FC<EventActionsProps> = ({
                 onOpenChange={open => {
                     if (!open)
                         handleDeleteCancel();
-                }}><DialogContent>
+                }}><DialogContent className="!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-3 rounded-xl p-4 sm:mx-auto sm:w-full sm:p-8  !translate-x-[-50%] !translate-y-[-50%]">
                     <div className='flex flex-col justify-center items-center rounded-lg'>
                         <div className="bg-[#EF44441F] p-4 rounded-lg">
                             <CalendarDeleteIcon />
@@ -204,7 +204,7 @@ const EventActions: React.FC<EventActionsProps> = ({
                             )}
                         </span>
                     </div>
-                    <DialogFooter className="mt-5">
+                    <DialogFooter className="mt-5 flex flex-row justify-end gap-2">
                         <Button
                             variant="outline"
                             onClick={handleDeleteCancel}
@@ -224,7 +224,7 @@ const EventActions: React.FC<EventActionsProps> = ({
                 onOpenChange={open => {
                     if (!open)
                         handleDisableCancel();
-                }}><DialogContent>
+                }}><DialogContent className="!flex !flex-col mx-1 w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-hidden gap-3 rounded-xl p-4 sm:mx-auto sm:w-full sm:p-8  !translate-x-[-50%] !translate-y-[-50%]">
                     <div className='flex flex-col justify-center items-center rounded-lg'>
                         <div className="bg-[#EF44441F] p-4 rounded-lg">
                             <CalendarDisableIcon />
@@ -252,7 +252,7 @@ const EventActions: React.FC<EventActionsProps> = ({
                                 )}
                         </span>
                     </div>
-                    <DialogFooter className="mt-5">
+                    <DialogFooter className="mt-5 flex flex-row justify-end gap-2">
                         <Button
                             variant="outline"
                             onClick={handleDisableCancel}

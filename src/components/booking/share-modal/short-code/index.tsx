@@ -66,12 +66,12 @@ const ShortCode: React.FC<{
 	return (
         <>
             {/* static */}
-            <div className='flex gap-2.5 items-center border-b pb-4 border-[#E4E4E4]'>
-				<div className="rounded-lg p-2 border border-secondary">
+            <div className='flex gap-2.5 items-start sm:items-center border-b pb-4 border-[#E4E4E4] min-w-0'>
+				<div className="shrink-0 rounded-lg p-2 border border-secondary">
 					{icon}
 				</div>
-				<div className="flex flex-col">
-					<span className="text-[#09090B] text-[20px] font-[700]">
+				<div className="flex flex-col min-w-0">
+					<span className="text-[#09090B] text-[16px] sm:text-[20px] font-[700]">
 						{title}
 					</span>
 					<span className="text-[12px] font-[400] text-[#71717A]">
@@ -84,13 +84,13 @@ const ShortCode: React.FC<{
 			</div>
             <Card className="mt-5"><CardContent>
                     <div className='flex flex-col gap-5'>
-                        <div className='flex items-center justify-between'>
-                            <span className="text-[#1E2125] text-[16px] font-[700]">
+                        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+                            <span className="text-[#1E2125] text-[16px] font-[700] shrink-0">
                                 {__('Width', 'doublescale')}
                             </span>
-                            <div className='flex gap-[18px]'>
+                            <div className='flex gap-2 sm:gap-[18px] min-w-0'>
                                 <Input
-                                    className="h-[48px] rounded-lg w-[132px]"
+                                    className="h-[48px] rounded-lg w-full sm:w-[132px]"
                                     placeholder="100"
                                     value={shortCode.width.value}
                                     onChange={(e) =>
@@ -113,13 +113,13 @@ const ShortCode: React.FC<{
                                     } />
                             </div>
                         </div>
-                        <div className='flex items-center justify-between'>
-                            <span className="text-[#1E2125] text-[16px] font-[700]">
+                        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+                            <span className="text-[#1E2125] text-[16px] font-[700] shrink-0">
                                 {__('Minimum Height', 'doublescale')}
                             </span>
-                            <div className='flex gap-[18px]'>
+                            <div className='flex gap-2 sm:gap-[18px] min-w-0'>
                                 <Input
-                                    className="h-[48px] rounded-lg w-[132px]"
+                                    className="h-[48px] rounded-lg w-full sm:w-[132px]"
                                     placeholder="100"
                                     value={shortCode.minHeight.value}
                                     onChange={(e) =>
@@ -142,13 +142,13 @@ const ShortCode: React.FC<{
                                     } />
                             </div>
                         </div>
-                        <div className='flex items-center justify-between'>
-                            <span className="text-[#1E2125] text-[16px] font-[700]">
+                        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+                            <span className="text-[#1E2125] text-[16px] font-[700] shrink-0">
                                 {__('Maximum Height', 'doublescale')}
                             </span>
-                            <div className='flex gap-[18px]'>
+                            <div className='flex gap-2 sm:gap-[18px] min-w-0'>
                                 <Input
-                                    className="h-[48px] rounded-lg w-[132px]"
+                                    className="h-[48px] rounded-lg w-full sm:w-[132px]"
                                     placeholder="100"
                                     value={shortCode.maxHeight.value}
                                     onChange={(e) =>
@@ -177,14 +177,14 @@ const ShortCode: React.FC<{
 				<div className="pb-2 text-[#3F4254] text-[16px] font-semibold">
 					{__('Generated Shortcode', 'doublescale')}
 				</div>
-				<div className='flex gap-2.5'>
+				<div className='flex flex-col sm:flex-row gap-2.5 min-w-0'>
 					<Input
 						value={generateShortcode()}
 						readOnly
-						className="h-[48px] text-[#999999] rounded-lg"
+						className="h-[48px] min-w-0 flex-1 text-[#999999] rounded-lg"
 					/>
 					<Button
-						className="bg-primary h-[48px] px-7 rounded-lg text-white"
+						className="bg-primary h-[48px] w-full sm:w-auto shrink-0 px-7 rounded-lg text-white"
 						onClick={() =>
 							copyToClipboard(
 								generateShortcode(),

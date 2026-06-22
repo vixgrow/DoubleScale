@@ -52,8 +52,8 @@ export interface ShareModalProps {
 
 const Shimmer: React.FC = () => {
 	return (
-        <div className='flex gap-[30px]'>
-            <Card className="w-[648px]"><CardContent>
+        <div className='flex flex-col lg:flex-row gap-4 lg:gap-[30px] min-w-0'>
+            <Card className="w-full min-w-0 lg:flex-1 lg:max-w-[648px]"><CardContent>
                     <div className='flex flex-col gap-2.5'>
                         {[1, 2, 3, 4, 5].map((item) => (
                             <div
@@ -68,7 +68,7 @@ const Shimmer: React.FC = () => {
                         ))}
                     </div>
                 </CardContent></Card>
-            <Card className="w-[648px]"><CardContent>
+            <Card className="w-full min-w-0 lg:flex-1 lg:max-w-[648px]"><CardContent>
                     <div className='flex flex-col gap-1 p-4'>
                         <div className="h-[24px] w-[200px] animate-pulse bg-gray-200 rounded mb-4" />
                         <div className="h-[40px] w-full animate-pulse bg-gray-200 rounded" />
@@ -175,9 +175,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
 	}, []);
 
 	const modalTitle = (
-		<div className='flex gap-2.5 items-center'>
-			<ShareEventIcon />
-			<div className='flex flex-col gap-1'>
+		<div className='flex gap-2.5 items-start sm:items-center min-w-0 pr-8 [&_h1]:text-xl [&_h1]:sm:text-3xl [&_p]:text-xs [&_p]:sm:text-sm'>
+			<span className="shrink-0"><ShareEventIcon /></span>
+			<div className='flex flex-col gap-1 min-w-0'>
 				<Header header={headerTitle} subHeader={headerSubTitle} />
 				{hasMultipleProviders && (
 					<div className='flex gap-2 items-center mt-1'>
@@ -212,27 +212,27 @@ const ShareModal: React.FC<ShareModalProps> = ({
             onOpenChange={open => {
                 if (!open)
                     onClose();
-            }}><DialogContent className='max-w-[1360px] z-[150300] share-modal'><DialogHeader><DialogTitle>{modalTitle}</DialogTitle></DialogHeader>
+            }}><DialogContent className='w-[calc(100%-1.5rem)] max-w-[1360px] max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 z-[150300] share-modal'><DialogHeader><DialogTitle className="text-left">{modalTitle}</DialogTitle></DialogHeader>
                 {isLoading ? (
                     <Shimmer />
                 ) : (
-                    <div className='flex gap-[30px]'>
-                        <Card className="w-[648px]"><CardContent>
+                    <div className='flex flex-col lg:flex-row gap-4 lg:gap-[30px] min-w-0'>
+                        <Card className="w-full min-w-0 lg:flex-1 lg:max-w-[648px]"><CardContent>
                                 <div className='flex flex-col gap-2.5'>
                                     {shareOptions.map(
                                         ({ key, icon, title, description }) => (
                                             <div
-												className={`flex gap-2.5 items-center border p-4 rounded-lg cursor-pointer ${selectedKey === key ? 'border-primary bg-[#E8E2FB]' : 'border-[#E4E4E4]'}`}
+												className={`flex gap-2.5 items-start sm:items-center border p-3 sm:p-4 rounded-lg cursor-pointer min-w-0 ${selectedKey === key ? 'border-primary bg-[#E8E2FB]' : 'border-[#E4E4E4]'}`}
                                                 key={key}
                                                 onClick={() => setSelectedKey(key)}>
                                                 <div
-													className={`rounded-lg p-2 border ${selectedKey === key ? 'border-primary' : 'border-[#E4E4E4]'}`}
+													className={`shrink-0 rounded-lg p-2 border ${selectedKey === key ? 'border-primary' : 'border-[#E4E4E4]'}`}
                                                 >
                                                     {icon}
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <div className="flex gap-5 items-center">
-                                                        <span className="text-[#3F4254] text-[16px] font-semibold">
+                                                <div className="flex flex-col min-w-0 flex-1">
+                                                    <div className="flex flex-wrap gap-x-5 gap-y-1 items-center">
+                                                        <span className="text-[#3F4254] text-[14px] sm:text-[16px] font-semibold">
                                                             {title}
                                                         </span>
                                                         {(key === 'popUp' ||
@@ -246,7 +246,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                                                             )}
                                                     </div>
                                                     <span
-                                                        className={`text-[12px] font-[400] ${selectedKey === key ? 'text-[#505255]' : 'text-[#9197A4]'}`}
+                                                        className={`text-[12px] font-[400] break-words ${selectedKey === key ? 'text-[#505255]' : 'text-[#9197A4]'}`}
                                                     >
                                                         {description}
                                                     </span>
@@ -257,7 +257,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                                 </div>
                             </CardContent></Card>
 
-                        <Card className="w-[648px]"><CardContent>
+                        <Card className="w-full min-w-0 lg:flex-1 lg:max-w-[648px]"><CardContent>
                                 {selectedOption && SelectedComponent && (
                                     <SelectedComponent
                                         url={url}

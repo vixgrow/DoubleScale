@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -240,6 +240,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.3 = 22 Jun 2026
+- Fix booking calendar provisioning errors on multisite when the booking tables are not yet created
+- Fix email builder text block heading sizes conflicting with the block font size
+
 = 1.2.2 = 11 Jun 2026
 - Fix email builder text blocks not appearing in the free version when adding or editing content on the canvas
 - Add demo, website, and documentation links at the top of the plugin readme

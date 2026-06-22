@@ -148,28 +148,35 @@ final class SalesSettings {
 		$merged = array_merge( self::defaults(), $stored, $settings );
 		$clean  = array();
 
-		$string_keys = array(
+		$subject_keys = array(
 			'proposal_email_subject',
-			'proposal_email_intro',
 			'invoice_email_subject',
-			'invoice_email_intro',
 			'credit_note_email_subject',
-			'credit_note_email_intro',
 			'contract_email_subject',
-			'contract_email_intro',
 			'contract_signed_email_subject',
-			'contract_signed_email_intro',
-			'pdf_company_address',
 		);
-		foreach ( $string_keys as $key ) {
+		$intro_keys   = array(
+			'proposal_email_intro',
+			'invoice_email_intro',
+			'credit_note_email_intro',
+			'contract_email_intro',
+			'contract_signed_email_intro',
+		);
+		foreach ( $subject_keys as $key ) {
 			if ( ! array_key_exists( $key, $merged ) ) {
 				continue;
 			}
-			if ( 'pdf_company_address' === $key ) {
-				$clean[ $key ] = sanitize_textarea_field( (string) $merged[ $key ] );
-			} else {
-				$clean[ $key ] = sanitize_text_field( (string) $merged[ $key ] );
+			$clean[ $key ] = sanitize_text_field( (string) $merged[ $key ] );
+		}
+		foreach ( $intro_keys as $key ) {
+			if ( ! array_key_exists( $key, $merged ) ) {
+				continue;
 			}
+			$clean[ $key ] = wp_kses_post( (string) $merged[ $key ] );
+		}
+
+		if ( array_key_exists( 'pdf_company_address', $merged ) ) {
+			$clean['pdf_company_address'] = sanitize_textarea_field( (string) $merged['pdf_company_address'] );
 		}
 
 		$bool_keys = array(

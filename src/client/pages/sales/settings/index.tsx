@@ -19,6 +19,7 @@ import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import { TaxesManager } from './taxes-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
+import { SalesEmailIntroField } from './sales-email-intro-field';
 import { InvoicesProGate, PaymentsProGate } from '../pro-gates';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 
@@ -128,10 +129,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.proposal_email_intro}
-								onChange={(e) => patch('proposal_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('proposal_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -149,10 +149,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.invoice_email_intro}
-								onChange={(e) => patch('invoice_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('invoice_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -176,10 +175,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.credit_note_email_intro}
-								onChange={(e) => patch('credit_note_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('credit_note_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -200,10 +198,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.contract_email_intro}
-								onChange={(e) => patch('contract_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('contract_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -223,10 +220,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.contract_signed_email_intro}
-								onChange={(e) => patch('contract_signed_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('contract_signed_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">

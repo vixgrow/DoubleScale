@@ -37,7 +37,7 @@ const Question: React.FC<QuestionProps> = ({
 	const [type, setType] = useState(allFields[fieldKey].type);
 
 	return (
-        <Card className="mt-4" type="inner" key={fieldKey} id={`card-${fieldKey}`}><CardHeader className='flex flex-row items-center justify-between'><CardTitle>{<QuestionInfo
+        <Card className="mt-4 overflow-hidden" key={fieldKey} id={`card-${fieldKey}`}><CardHeader className='flex flex-col gap-3 md:flex-row md:items-start md:justify-between'><CardTitle className="min-w-0 flex-1">{<QuestionInfo
                         allFields={allFields}
                         fieldKey={fieldKey}
                         index={index}
@@ -50,7 +50,7 @@ const Question: React.FC<QuestionProps> = ({
 					moveField={moveField}
 					removeField={removeField}
 					sortedFields={sortedFields}
-				/>}</CardHeader><CardContent>
+				/>}</CardHeader><CardContent className="min-w-0">
                 <QuestionInputs
                     allFields={allFields}
                     fieldKey={fieldKey}

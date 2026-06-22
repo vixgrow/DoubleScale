@@ -99,7 +99,7 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex gap-4">
+			<div className="flex flex-col gap-4 md:flex-row">
 				<div className="flex-1">
 					<CommonInput
 						required={true}
@@ -180,7 +180,7 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 			)}
 
 			{type === 'number' && (
-				<div className="flex gap-4">
+				<div className="flex flex-col gap-4 md:flex-row">
 					<div className="flex-1 space-y-1">
 						<label className="text-sm font-medium">
 							{__('Min Value', 'doublescale')}
@@ -214,7 +214,7 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 
 			{(type === 'date' || type === 'datetime') && (
 				<>
-					<div className="flex gap-4">
+					<div className="flex flex-col gap-4 md:flex-row">
 						<div className="flex-1">
 							<CommonInput
 								label={__('Placeholder', 'doublescale')}
@@ -232,7 +232,7 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 							/>
 						</div>
 					</div>
-					<div className="flex gap-4">
+					<div className="flex flex-col gap-4 md:flex-row">
 						<div className="flex-1">
 							<CommonDatepicker
 								label={__('Min Date', 'doublescale')}
@@ -255,7 +255,7 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 
 			{type === 'file' && (
 				<>
-					<div className="flex gap-4">
+					<div className="flex flex-col gap-4 md:flex-row">
 						<div className="flex-1">
 							<CommonNumberInput
 								label={__('Max File Size (MB)', 'doublescale')}

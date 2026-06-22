@@ -33,7 +33,7 @@ const QuestionActions: React.FC<QuestionActionsProps> = ({
 	removeField,
 }) => {
 	return (
-        <div className="flex gap-3 items-center">
+        <div className="flex w-full flex-wrap gap-3 items-center md:w-auto md:justify-end">
             {(allFields[fieldKey].group !== 'system' ||
 				fieldKey === 'message' ||
 				fieldKey === 'guest') && (
@@ -54,7 +54,7 @@ const QuestionActions: React.FC<QuestionActionsProps> = ({
 				/>
 			)}
             {allFields[fieldKey].group !== 'other' && (
-				<div className="flex gap-5 border-l border-r border-[#D8D7D7] pl-4  pr-4">
+				<div className="flex gap-4 border-l border-r border-[#D8D7D7] px-3">
 					<div
 						className={`${
 							sortedFields.indexOf(fieldKey) === 0

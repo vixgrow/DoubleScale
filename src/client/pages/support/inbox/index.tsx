@@ -372,8 +372,8 @@ const SupportInbox: React.FC = () => {
 				</div>
 			)}
 
-			<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden rounded-xl rounded-b-none bg-white pt-6 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
-				<div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden rounded-xl p-6 bg-white  shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
+				<div className="flex flex-col gap-3   sm:flex-row sm:items-center sm:justify-between">
 				<div className="search-input relative min-w-0 shrink-0 md:flex-1 md:max-w-xl">
 				    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground flex items-center">
 						<SearchIcon className="w-4 h-4" />

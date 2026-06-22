@@ -28,6 +28,8 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'invoice_paid',
 		'contract_sent',
 		'contract_signed',
+		'credit_note_sent',
+		'credit_note_applied',
 	);
 
 	private const EXPECTED_PROPOSAL_RULE_SLUGS = array(
@@ -51,6 +53,13 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'contract_number',
 	);
 
+	private const EXPECTED_CREDIT_NOTE_RULE_SLUGS = array(
+		'credit_note_status',
+		'credit_note_total',
+		'credit_note_remaining',
+		'credit_note_number',
+	);
+
 	private const EXPECTED_MERGE_TAG_SLUGS = array(
 		'proposal_number',
 		'proposal_subject',
@@ -65,6 +74,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		'contract_value',
 		'contract_url',
 		'contract_end_date',
+		'credit_note_number',
+		'credit_note_total',
+		'credit_note_remaining',
+		'credit_note_url',
+		'credit_note_status',
 	);
 
 	protected function setUp(): void {
@@ -132,9 +146,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		$this->assertStringContainsString( "'proposal'", $contents );
 		$this->assertStringContainsString( "'invoice'", $contents );
 		$this->assertStringContainsString( "'contract'", $contents );
+		$this->assertStringContainsString( "'credit_note'", $contents );
 		$this->assertStringContainsString( __( 'Proposal', 'doublescale' ), $contents );
 		$this->assertStringContainsString( __( 'Invoice', 'doublescale' ), $contents );
 		$this->assertStringContainsString( __( 'Contract', 'doublescale' ), $contents );
+		$this->assertStringContainsString( __( 'Credit Note', 'doublescale' ), $contents );
 		$this->assertStringContainsString( "'invoice_sent'", $contents );
 		$this->assertStringContainsString( "'invoice_paid'", $contents );
 	}
@@ -158,6 +174,11 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		foreach ( self::EXPECTED_CONTRACT_RULE_SLUGS as $slug ) {
 			$matches = glob( $pro_root . 'Contract/' . $this->slug_to_class_basename( $slug ) . '.php' );
 			$this->assertNotEmpty( $matches, "Missing contract rule file for {$slug}" );
+		}
+
+		foreach ( self::EXPECTED_CREDIT_NOTE_RULE_SLUGS as $slug ) {
+			$matches = glob( $pro_root . 'CreditNote/' . $this->slug_to_class_basename( $slug ) . '.php' );
+			$this->assertNotEmpty( $matches, "Missing credit note rule file for {$slug}" );
 		}
 	}
 
@@ -189,6 +210,19 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		$contracts_dir = dirname( DOUBLESCALE_PLUGIN_DIR ) . '/doublescale-pro/includes/Modules/Contracts/MergeTags/';
 		foreach ( $contract_slugs as $slug ) {
 			$matches = glob( $contracts_dir . $this->slug_to_class_basename( $slug ) . '.php' );
+			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );
+		}
+
+		$credit_note_slugs = array(
+			'credit_note_number',
+			'credit_note_total',
+			'credit_note_remaining',
+			'credit_note_url',
+			'credit_note_status',
+		);
+		$credit_notes_dir = dirname( DOUBLESCALE_PLUGIN_DIR ) . '/doublescale-pro/includes/Modules/CreditNotes/MergeTags/';
+		foreach ( $credit_note_slugs as $slug ) {
+			$matches = glob( $credit_notes_dir . $this->slug_to_class_basename( $slug ) . '.php' );
 			$this->assertNotEmpty( $matches, "Missing merge tag file for {$slug}" );
 		}
 
@@ -318,8 +352,10 @@ final class SalesAutomationsCatalogTest extends TestCase {
 		$this->assertStringContainsString( "'proposal'", $contents );
 		$this->assertStringContainsString( "'invoice'", $contents );
 		$this->assertStringContainsString( "'contract'", $contents );
+		$this->assertStringContainsString( "'credit_note'", $contents );
 		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'documents' ) )", $contents );
 		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'contracts' ) )", $contents );
+		$this->assertStringContainsString( "doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) )", $contents );
 	}
 
 	public function test_sales_trigger_dependency_warns_when_contracts_module_off(): void {

@@ -207,6 +207,8 @@ final class Module extends AbstractModule {
 				'contract_signed',
 				'invoice_sent',
 				'invoice_paid',
+				'credit_note_sent',
+				'credit_note_applied',
 			),
 			'is_disabled' => $disabled,
 		);

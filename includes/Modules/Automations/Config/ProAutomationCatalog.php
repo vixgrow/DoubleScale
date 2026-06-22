@@ -121,6 +121,8 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\InvoicePaid::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ContractSent::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\ContractSigned::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\CreditNoteSent::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Sales\CreditNoteApplied::class,
 	),
 	'actions'  => array(
 		\DoubleScale\Pro\Modules\Automations\Actions\Crm\Slack\SendToChannel::class,

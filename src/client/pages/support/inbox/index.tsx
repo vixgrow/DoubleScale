@@ -6,13 +6,17 @@
  * deep-linkable filter state can come in a follow-up.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import React, {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import {
 	Plus,
-	RefreshCw,
 	Inbox as InboxEmptyIcon,
 	AlertTriangle,
 } from 'lucide-react';
@@ -23,14 +27,6 @@ import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -41,24 +37,18 @@ import {
 	deleteTicket,
 	addReply,
 } from '@/hooks/support';
-import {
-	StatusPill,
-	PriorityPill,
-} from '@/components/support';
-import {
-	TICKET_STATUSES,
-	TICKET_PRIORITIES,
-	type TicketPriority,
-} from '@/constants/support';
+import { StatusPill, PriorityPill } from '@/components/support';
 import type { Ticket, TicketFilters } from '@/types/support';
 import NewTicketModal from './new-ticket-modal';
-import BulkActionBar from './bulk-action-bar';
+import SupportInboxFilterDialog from './filter-dialog';
+import SupportInboxBulkActionSelect from './bulk-action-select';
 import {
 	AssignAgentModal,
 	AssignMailboxModal,
 	AssignTagsModal,
 	BulkReplyModal,
 } from './bulk-action-modals';
+import { SearchIcon } from '@doublescale/components';
 
 type BulkModal = 'reply' | 'agent' | 'mailbox' | 'tags' | null;
 
@@ -210,13 +200,16 @@ const SupportInbox: React.FC = () => {
 	};
 
 	const handleBulkClose = () => {
-		runBulk(async () => {
-			await Promise.all(
-				selectedIdList.map((id) =>
-					updateTicket(id, { status: 'closed' })
-				)
-			);
-		}, __('Selected tickets closed.', 'doublescale'));
+		runBulk(
+			async () => {
+				await Promise.all(
+					selectedIdList.map((id) =>
+						updateTicket(id, { status: 'closed' })
+					)
+				);
+			},
+			__('Selected tickets closed.', 'doublescale')
+		);
 	};
 
 	const handleBulkDelete = () => {
@@ -231,56 +224,73 @@ const SupportInbox: React.FC = () => {
 								'doublescale'
 							),
 							selectedCount
-					  )
+						)
 			)
 		) {
 			return;
 		}
 
-		runBulk(async () => {
-			await Promise.all(selectedIdList.map((id) => deleteTicket(id)));
-		}, __('Selected tickets deleted.', 'doublescale'));
+		runBulk(
+			async () => {
+				await Promise.all(selectedIdList.map((id) => deleteTicket(id)));
+			},
+			__('Selected tickets deleted.', 'doublescale')
+		);
 	};
 
 	const handleBulkAssignAgent = async (agentUserId: number | null) => {
-		await runBulk(async () => {
-			await Promise.all(
-				selectedIdList.map((id) =>
-					updateTicket(id, { agent_user_id: agentUserId })
-				)
-			);
-		}, __('Agent assigned.', 'doublescale'));
+		await runBulk(
+			async () => {
+				await Promise.all(
+					selectedIdList.map((id) =>
+						updateTicket(id, { agent_user_id: agentUserId })
+					)
+				);
+			},
+			__('Agent assigned.', 'doublescale')
+		);
 	};
 
 	const handleBulkAssignMailbox = async (mailboxId: number) => {
-		await runBulk(async () => {
-			await Promise.all(
-				selectedIdList.map((id) =>
-					updateTicket(id, { mailbox_id: mailboxId })
-				)
-			);
-		}, __('Tickets moved.', 'doublescale'));
+		await runBulk(
+			async () => {
+				await Promise.all(
+					selectedIdList.map((id) =>
+						updateTicket(id, { mailbox_id: mailboxId })
+					)
+				);
+			},
+			__('Tickets moved.', 'doublescale')
+		);
 	};
 
 	const handleBulkAssignTags = async (tagIds: number[]) => {
-		await runBulk(async () => {
-			await Promise.all(
-				selectedIdList.map((id) => {
-					const ticket = ticketsById.get(id);
-					const existing = ticket?.tag_ids ?? [];
-					const merged = Array.from(new Set([...existing, ...tagIds]));
-					return updateTicket(id, { tag_ids: merged });
-				})
-			);
-		}, __('Tags applied.', 'doublescale'));
+		await runBulk(
+			async () => {
+				await Promise.all(
+					selectedIdList.map((id) => {
+						const ticket = ticketsById.get(id);
+						const existing = ticket?.tag_ids ?? [];
+						const merged = Array.from(
+							new Set([...existing, ...tagIds])
+						);
+						return updateTicket(id, { tag_ids: merged });
+					})
+				);
+			},
+			__('Tags applied.', 'doublescale')
+		);
 	};
 
 	const handleBulkReply = async (content: string) => {
-		await runBulk(async () => {
-			await Promise.all(
-				selectedIdList.map((id) => addReply(id, content))
-			);
-		}, __('Replies sent.', 'doublescale'));
+		await runBulk(
+			async () => {
+				await Promise.all(
+					selectedIdList.map((id) => addReply(id, content))
+				);
+			},
+			__('Replies sent.', 'doublescale')
+		);
 	};
 
 	const hasNoMailboxes = mailboxes.length === 0;
@@ -295,19 +305,6 @@ const SupportInbox: React.FC = () => {
 
 	return (
 		<div className="doublescale-support-inbox min-w-0 ">
-			<BulkActionBar
-				selectedCount={selectedCount}
-				onReply={() => setBulkModal('reply')}
-				onAssignAgent={() => setBulkModal('agent')}
-				onAssignMailbox={() => setBulkModal('mailbox')}
-				onAssignTags={() => setBulkModal('tags')}
-				onClose={handleBulkClose}
-				onDelete={handleBulkDelete}
-				onClear={() => setSelectedIds(new Set())}
-				busy={bulkBusy}
-				canDelete={canManageAllTickets}
-			/>
-
 			{!mailboxesLoading && hasNoMailboxes && (
 				<Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
 					<AlertTriangle className="h-4 w-4" />
@@ -318,7 +315,9 @@ const SupportInbox: React.FC = () => {
 						)}{' '}
 						<button
 							type="button"
-							onClick={() => navigate(getToLink('support/mailboxes'))}
+							onClick={() =>
+								navigate(getToLink('support/mailboxes'))
+							}
 							className="font-medium underline underline-offset-2 hover:no-underline"
 						>
 							{__('Add a mailbox', 'doublescale')}
@@ -330,17 +329,11 @@ const SupportInbox: React.FC = () => {
 			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div className="min-w-0">
 					<h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
-						{__('Helpdesk Inbox', 'doublescale')}
+						{__(' Inbox', 'doublescale')}
 					</h1>
-					<p className="mt-1 text-sm text-gray-600">
-						{__(
-							'Tickets across every mailbox, sorted by most recent activity.',
-							'doublescale'
-						)}
-					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
-					<Button
+					{/* <Button
 						variant="outline"
 						size="sm"
 						onClick={() => refetch()}
@@ -349,7 +342,7 @@ const SupportInbox: React.FC = () => {
 					>
 						<RefreshCw className="shrink-0" />
 							{__('Refresh', 'doublescale')}
-					</Button>
+					</Button> */}
 					{canManageAllTickets && (
 						<Button
 							size="sm"
@@ -360,150 +353,16 @@ const SupportInbox: React.FC = () => {
 									? __(
 											'Create a mailbox before opening tickets.',
 											'doublescale'
-									  )
+										)
 									: undefined
 							}
 							aria-label={__('New ticket', 'doublescale')}
 							className="flex-1 sm:flex-none"
 						>
 							<Plus className="shrink-0" />
-								{__('New ticket', 'doublescale')}
+							{__('Create New Ticket', 'doublescale')}
 						</Button>
 					)}
-				</div>
-			</div>
-
-			{/* Filter row */}
-			<div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:flex-wrap xl:items-end">
-				<div className="min-w-0 sm:col-span-2 lg:col-span-1 xl:w-64">
-					<Label
-						htmlFor="ds-support-search"
-						className="mb-1 block text-xs font-medium text-gray-700"
-					>
-						{__('Search', 'doublescale')}
-					</Label>
-					<Input
-						id="ds-support-search"
-						type="search"
-						placeholder={__('Title contains…', 'doublescale')}
-						className="w-full !rounded-lg !h-10 !border-border"
-						defaultValue={filters.search ?? ''}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								updateFilter({ search: (e.target as HTMLInputElement).value });
-							}
-						}}
-					/>
-				</div>
-				<div className="min-w-0">
-					<Label
-						htmlFor="ds-support-status"
-						className="mb-1 block text-xs font-medium text-gray-700"
-					>
-						{__('Status', 'doublescale')}
-					</Label>
-					<Select
-						value={filters.status ?? 'all'}
-						onValueChange={(v) =>
-							updateFilter({ status: v === 'all' ? undefined : v })
-						}
-					>
-						<SelectTrigger className="w-full sm:w-[140px]">
-							<SelectValue placeholder={__('All', 'doublescale')} />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
-							{TICKET_STATUSES.map((s) => (
-								<SelectItem key={s} value={s}>
-									{s}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="min-w-0">
-					<Label
-						htmlFor="ds-support-priority"
-						className="mb-1 block text-xs font-medium text-gray-700"
-					>
-						{__('Priority', 'doublescale')}
-					</Label>
-					<Select
-						value={filters.priority ?? 'all'}
-						onValueChange={(v) =>
-							updateFilter({
-								priority: v === 'all' ? undefined : (v as TicketPriority),
-							})
-						}
-					>
-						<SelectTrigger className="w-full sm:w-[140px]">
-							<SelectValue placeholder={__('All', 'doublescale')} />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
-							{TICKET_PRIORITIES.map((p) => (
-								<SelectItem key={p} value={p}>
-									{p}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="min-w-0">
-					<Label
-						htmlFor="ds-support-mailbox"
-						className="mb-1 block text-xs font-medium text-gray-700"
-					>
-						{__('Mailbox', 'doublescale')}
-					</Label>
-					<Select
-						value={filters.mailbox_id != null ? String(filters.mailbox_id) : 'all'}
-						onValueChange={(v) =>
-							updateFilter({
-								mailbox_id: v === 'all' ? undefined : Number(v),
-							})
-						}
-					>
-						<SelectTrigger className="w-full sm:w-[140px]">
-							<SelectValue placeholder={__('All', 'doublescale')} />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
-							{mailboxes.map((m) => (
-								<SelectItem key={m.id} value={String(m.id)}>
-									{m.name || m.slug}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="min-w-0">
-					<Label
-						htmlFor="ds-support-tag"
-						className="mb-1 block text-xs font-medium text-gray-700"
-					>
-						{__('Tag', 'doublescale')}
-					</Label>
-					<Select
-						value={filters.tag_id != null ? String(filters.tag_id) : 'all'}
-						onValueChange={(v) =>
-							updateFilter({
-								tag_id: v === 'all' ? undefined : Number(v),
-							})
-						}
-					>
-						<SelectTrigger className="w-full sm:w-[140px]">
-							<SelectValue placeholder={__('All', 'doublescale')} />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">{__('All', 'doublescale')}</SelectItem>
-							{tags.map((tag) => (
-								<SelectItem key={tag.id} value={String(tag.id)}>
-									{tag.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
 				</div>
 			</div>
 
@@ -513,151 +372,254 @@ const SupportInbox: React.FC = () => {
 				</div>
 			)}
 
-			<div className="overflow-hidden rounded border bg-white shadow-sm">
+			<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden rounded-xl p-6 bg-white  shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
+				<div className="flex flex-col gap-3   sm:flex-row sm:items-center sm:justify-between">
+				<div className="search-input relative min-w-0 shrink-0 md:flex-1 md:max-w-xl">
+				    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground flex items-center">
+						<SearchIcon className="w-4 h-4" />
+					</span>
+					<Input
+						id="ds-support-search"
+						type="search"
+						placeholder={__('Title contains…', 'doublescale')}
+						className="w-full h-9 !pl-9 !border !border-border !rounded-lg bg-[#F7F8FA] text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brandPrimary/20 focus:border-brandPrimary transition-colors"
+						defaultValue={filters.search ?? ''}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								updateFilter({ search: (e.target as HTMLInputElement).value });
+							}
+						}}
+					/>
+				</div>
+					<div className="flex w-full shrink-0 flex-col gap-6 sm:w-auto sm:flex-row sm:items-center">
+						<SupportInboxBulkActionSelect
+							selectedCount={selectedCount}
+							disabled={bulkBusy}
+							canDelete={canManageAllTickets}
+							onReply={() => setBulkModal('reply')}
+							onAssignAgent={() => setBulkModal('agent')}
+							onAssignMailbox={() => setBulkModal('mailbox')}
+							onAssignTags={() => setBulkModal('tags')}
+							onClose={handleBulkClose}
+							onDelete={handleBulkDelete}
+						/>
+						<SupportInboxFilterDialog
+							filters={{
+								status: filters.status,
+								priority: filters.priority,
+								mailbox_id: filters.mailbox_id,
+								tag_id: filters.tag_id,
+							}}
+							mailboxes={mailboxes}
+							tags={tags}
+							onApply={updateFilter}
+						/>
+					</div>
+				</div>
 				<div className="overflow-x-auto">
 					<table className="w-full min-w-[56rem] text-sm">
-					<thead className="bg-gray-50">
-						<tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-							<th className="w-10 px-4 py-2">
-								<Checkbox
-									checked={
-										allPageSelected
-											? true
-											: somePageSelected
-											  ? 'indeterminate'
-											  : false
-									}
-									onCheckedChange={toggleSelectAll}
-									disabled={loading || pageTicketIds.length === 0}
-									aria-label={__('Select all on this page', 'doublescale')}
-								/>
-							</th>
-							<th className="min-w-[12rem] px-4 py-2">{__('Title', 'doublescale')}</th>
-							<th className="min-w-[8rem] px-4 py-2">{__('Customer', 'doublescale')}</th>
-							<th className="min-w-[7rem] whitespace-nowrap px-4 py-2">{__('Mailbox', 'doublescale')}</th>
-							<th className="min-w-[8rem] px-4 py-2">{__('Assigned to', 'doublescale')}</th>
-							<th className="whitespace-nowrap px-4 py-2">{__('Status', 'doublescale')}</th>
-							<th className="whitespace-nowrap px-4 py-2">{__('Priority', 'doublescale')}</th>
-							<th className="whitespace-nowrap px-4 py-2">{__('Replies', 'doublescale')}</th>
-							<th className="min-w-[9rem] whitespace-nowrap px-4 py-2">{__('Updated', 'doublescale')}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{loading && (
-							<tr>
-								<td colSpan={9} className="px-4 py-8 text-center text-gray-500">
-									{__('Loading tickets…', 'doublescale')}
-								</td>
-							</tr>
-						)}
-						{!loading && data?.data.length === 0 && (
-							<tr>
-								<td colSpan={9} className="px-4 py-16 text-center">
-									<div className="flex flex-col items-center gap-3">
-										<InboxEmptyIcon
-											width={48}
-											height={48}
-											className="text-gray-300"
-										/>
-										{hasNoTickets ? (
-											<>
-												<div className="text-base font-medium text-gray-700">
-													{__('No tickets yet', 'doublescale')}
-												</div>
-												<div className="text-sm text-gray-500 max-w-md">
-													{hasNoMailboxes
-														? __(
-																'Create a mailbox first, then open a ticket or wait for one to come in via the public portal.',
-																'doublescale'
-														  )
-														: __(
-																'When customers submit through the portal or email, their tickets will appear here.',
-																'doublescale'
-														  )}
-												</div>
-												{!hasNoMailboxes && (
-													<Button
-														size="sm"
-														onClick={() => setShowNewModal(true)}
-													>
-														<Plus />
-														{__('Open the first ticket', 'doublescale')}
-													</Button>
-												)}
-											</>
-										) : (
-											<>
-												<div className="text-base font-medium text-gray-700">
-													{__('No tickets match these filters', 'doublescale')}
-												</div>
-												<div className="text-sm text-gray-500">
-													{__(
-														'Try clearing the search or status filters.',
-														'doublescale'
-													)}
-												</div>
-											</>
+						<thead className="bg-gray-50">
+							<tr className="text-left text-xs uppercase tracking-wide text-gray-500">
+								<th className="w-10 px-4 py-2">
+									<Checkbox
+										checked={
+											allPageSelected
+												? true
+												: somePageSelected
+													? 'indeterminate'
+													: false
+										}
+										onCheckedChange={toggleSelectAll}
+										disabled={
+											loading ||
+											pageTicketIds.length === 0
+										}
+										aria-label={__(
+											'Select all on this page',
+											'doublescale'
 										)}
-									</div>
-								</td>
+									/>
+								</th>
+								<th className="min-w-[12rem] px-4 py-2">
+									{__('Title', 'doublescale')}
+								</th>
+								<th className="min-w-[8rem] px-4 py-2">
+									{__('Customer', 'doublescale')}
+								</th>
+								<th className="min-w-[7rem] whitespace-nowrap px-4 py-2">
+									{__('Mailbox', 'doublescale')}
+								</th>
+								<th className="min-w-[8rem] px-4 py-2">
+									{__('Assigned to', 'doublescale')}
+								</th>
+								<th className="whitespace-nowrap px-4 py-2">
+									{__('Status', 'doublescale')}
+								</th>
+								<th className="whitespace-nowrap px-4 py-2">
+									{__('Priority', 'doublescale')}
+								</th>
+								<th className="whitespace-nowrap px-4 py-2">
+									{__('Replies', 'doublescale')}
+								</th>
+								<th className="min-w-[9rem] whitespace-nowrap px-4 py-2">
+									{__('Updated', 'doublescale')}
+								</th>
 							</tr>
-						)}
-						{!loading &&
-							data?.data.map((ticket) => (
-								<tr
-									key={ticket.id}
-									className={`border-t hover:bg-gray-50 cursor-pointer ${
-										selectedIds.has(ticket.id) ? 'bg-blue-50/60' : ''
-									}`}
-									onClick={() =>
-										navigate(getToLink(`support/ticket/${ticket.id}`))
-									}
-								>
+						</thead>
+						<tbody>
+							{loading && (
+								<tr>
 									<td
-										className="px-4 py-3"
-										onClick={(e) => e.stopPropagation()}
+										colSpan={9}
+										className="px-4 py-8 text-center text-gray-500"
 									>
-										<Checkbox
-											checked={selectedIds.has(ticket.id)}
-											onCheckedChange={() => toggleSelect(ticket.id)}
-											aria-label={__(
-												'Select ticket',
-												'doublescale'
-											)}
-										/>
-									</td>
-									<td className="max-w-[20rem] truncate px-4 py-3 font-medium text-gray-900">
-										{ticket.title}
-									</td>
-									<td className="min-w-[8rem] px-4 py-3 text-gray-700">
-										{contactName(ticket)}
-									</td>
-									<td className="whitespace-nowrap px-4 py-3 text-gray-600">
-										{ticket.mailbox?.name || ticket.mailbox?.slug || '—'}
-									</td>
-									<td className="min-w-[8rem] px-4 py-3 text-gray-700">
-										{ticket.agent?.display_name || (
-											<span className="text-gray-400">
-												{__('Unassigned', 'doublescale')}
-											</span>
-										)}
-									</td>
-									<td className="whitespace-nowrap px-4 py-3">
-										<StatusPill status={ticket.status} />
-									</td>
-									<td className="whitespace-nowrap px-4 py-3">
-										<PriorityPill priority={ticket.priority} />
-									</td>
-									<td className="whitespace-nowrap px-4 py-3 text-gray-600">
-										{ticket.response_count}
-									</td>
-									<td className="whitespace-nowrap px-4 py-3 text-gray-500">
-										{formatDate(ticket.updated_at)}
+										{__('Loading tickets…', 'doublescale')}
 									</td>
 								</tr>
-							))}
-					</tbody>
-				</table>
+							)}
+							{!loading && data?.data.length === 0 && (
+								<tr>
+									<td
+										colSpan={9}
+										className="px-4 py-16 text-center"
+									>
+										<div className="flex flex-col items-center gap-3">
+											<InboxEmptyIcon
+												width={48}
+												height={48}
+												className="text-gray-300"
+											/>
+											{hasNoTickets ? (
+												<>
+													<div className="text-base font-medium text-gray-700">
+														{__(
+															'No tickets yet',
+															'doublescale'
+														)}
+													</div>
+													<div className="text-sm text-gray-500 max-w-md">
+														{hasNoMailboxes
+															? __(
+																	'Create a mailbox first, then open a ticket or wait for one to come in via the public portal.',
+																	'doublescale'
+																)
+															: __(
+																	'When customers submit through the portal or email, their tickets will appear here.',
+																	'doublescale'
+																)}
+													</div>
+													{!hasNoMailboxes && (
+														<Button
+															size="sm"
+															onClick={() =>
+																setShowNewModal(
+																	true
+																)
+															}
+														>
+															<Plus />
+															{__(
+																'Open the first ticket',
+																'doublescale'
+															)}
+														</Button>
+													)}
+												</>
+											) : (
+												<>
+													<div className="text-base font-medium text-gray-700">
+														{__(
+															'No tickets match these filters',
+															'doublescale'
+														)}
+													</div>
+													<div className="text-sm text-gray-500">
+														{__(
+															'Try clearing the search or status filters.',
+															'doublescale'
+														)}
+													</div>
+												</>
+											)}
+										</div>
+									</td>
+								</tr>
+							)}
+							{!loading &&
+								data?.data.map((ticket) => (
+									<tr
+										key={ticket.id}
+										className={`border-t hover:bg-gray-50 cursor-pointer ${
+											selectedIds.has(ticket.id)
+												? 'bg-blue-50/60'
+												: ''
+										}`}
+										onClick={() =>
+											navigate(
+												getToLink(
+													`support/ticket/${ticket.id}`
+												)
+											)
+										}
+									>
+										<td
+											className="px-4 py-3"
+											onClick={(e) => e.stopPropagation()}
+										>
+											<Checkbox
+												checked={selectedIds.has(
+													ticket.id
+												)}
+												onCheckedChange={() =>
+													toggleSelect(ticket.id)
+												}
+												aria-label={__(
+													'Select ticket',
+													'doublescale'
+												)}
+											/>
+										</td>
+										<td className="max-w-[20rem] truncate px-4 py-3 font-medium text-gray-900">
+											{ticket.title}
+										</td>
+										<td className="min-w-[8rem] px-4 py-3 text-gray-700">
+											{contactName(ticket)}
+										</td>
+										<td className="whitespace-nowrap px-4 py-3 text-gray-600">
+											{ticket.mailbox?.name ||
+												ticket.mailbox?.slug ||
+												'—'}
+										</td>
+										<td className="min-w-[8rem] px-4 py-3 text-gray-700">
+											{ticket.agent?.display_name || (
+												<span className="text-gray-400">
+													{__(
+														'Unassigned',
+														'doublescale'
+													)}
+												</span>
+											)}
+										</td>
+										<td className="whitespace-nowrap px-4 py-3">
+											<StatusPill
+												status={ticket.status}
+											/>
+										</td>
+										<td className="whitespace-nowrap px-4 py-3">
+											<PriorityPill
+												priority={ticket.priority}
+											/>
+										</td>
+										<td className="whitespace-nowrap px-4 py-3 text-gray-600">
+											{ticket.response_count}
+										</td>
+										<td className="whitespace-nowrap px-4 py-3 text-gray-500">
+											{formatDate(ticket.updated_at)}
+										</td>
+									</tr>
+								))}
+						</tbody>
+					</table>
 				</div>
 			</div>
 

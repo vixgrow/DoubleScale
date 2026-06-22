@@ -269,7 +269,7 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
 
 		return (
             <>
-                <Card><CardContent>
+                <Card><CardContent className="min-w-0">
                         <CardHeader
                             title={__('Question Settings', 'doublescale')}
                             description={__(
@@ -279,7 +279,7 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
                             icon={<QuestionOutlineIcon width={24} height={24} />}
                             border={false}
                         />
-                        <Card><CardContent>
+                        <Card className="overflow-hidden"><CardContent className="min-w-0">
                                 <div>
                                     <h3 className="text-xl font-semibold text-color-primary-text">
                                         {__('Booking Questions', 'doublescale')}
@@ -330,7 +330,7 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
                                     ) as any
                                 }
                             </CardContent></Card>
-                        <Card className="mt-4"><CardContent>
+                        <Card className="mt-4 overflow-hidden"><CardContent className="min-w-0">
                                 <div>
                                     <h3 className="text-xl font-semibold text-color-primary-text">
                                         {__('Other Questions', 'doublescale')}

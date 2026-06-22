@@ -100,7 +100,7 @@ final class SalesRepNotificationTemplates {
 	 */
 	private static function build_tokens( string $subcategory, array $context ): array {
 		$tokens = array(
-			'company_name' => (string) get_bloginfo( 'name' ),
+			'company_name' => (string) \get_bloginfo( 'name' ),
 		);
 
 		$proposal = $context['proposal'] ?? null;

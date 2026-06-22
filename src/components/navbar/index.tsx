@@ -437,69 +437,29 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						...(isSalesDocumentsReady()
+						{
+							path: 'sales-pipeline',
+							label: __('Pipelines', 'doublescale'),
+						},
+						...(isSalesDocumentsReady() &&
+						config.isModuleToggleEnabled('documents')
 							? [
-									...(config.isModuleToggleEnabled('documents')
-										? [
-												{
-													path: 'sales/proposals',
-													label: __('Proposals', 'doublescale'),
-												},
-												{
-													path: 'sales/invoices',
-													label: __('Invoices', 'doublescale'),
-												},
-												{
-													path: 'sales/payments',
-													label: __('Payments', 'doublescale'),
-												},
-										  ]
-										: []),
-									...(config.isModuleToggleEnabled('contracts')
-										? [
-												{
-													path: 'sales/contracts',
-													label: __('Contracts', 'doublescale'),
-												},
-										  ]
-										: []),
 									{
-										path: 'sales/settings',
-										label: __('Settings', 'doublescale'),
-										requiredCapability: [
-											'doublescale_manage_all_sales',
-											'doublescale_crm_manager',
-										],
+										path: 'sales/proposals',
+										label: __('Proposals', 'doublescale'),
+									},
+									{
+										path: 'sales/invoices',
+										label: __('Invoices', 'doublescale'),
 									},
 							  ]
 							: []),
-						// Pipeline nests under Sales: with Pro, `enabled` is the
-						// derived effective state (Sales is already on here, so it
-						// reduces to the child flag); without Pro it is the stored
-						// phantom preference and the entry leads to the upsell stub.
-						...(config.isModuleToggleEnabled('subscriptions')
+						...(isSalesDocumentsReady() &&
+						config.isModuleToggleEnabled('contracts')
 							? [
 									{
-										path: 'subscriptions',
-										label: __('Subscriptions', 'doublescale'),
-										requiredCapability: [
-											'doublescale_crm_manager',
-											'doublescale_sales_manager',
-											'doublescale_sales_rep',
-										],
-									},
-							  ]
-							: []),
-						...(config.isModuleToggleEnabled('deals')
-							? [
-									{
-										path: 'sales-pipeline',
-										label: __('Pipelines', 'doublescale'),
-										requiredCapability: [
-											'doublescale_crm_manager',
-											'doublescale_sales_manager',
-											'doublescale_sales_rep',
-										],
+										path: 'sales/contracts',
+										label: __('Contracts', 'doublescale'),
 									},
 							  ]
 							: []),
@@ -515,6 +475,40 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
 											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
+						...(config.isModuleToggleEnabled('subscriptions')
+							? [
+									{
+										path: 'subscriptions',
+										label: __('Subscriptions', 'doublescale'),
+										requiredCapability: [
+											'doublescale_crm_manager',
+											'doublescale_sales_manager',
+											'doublescale_sales_rep',
+										],
+									},
+							  ]
+							: []),
+						...(isSalesDocumentsReady() &&
+						config.isModuleToggleEnabled('documents')
+							? [
+									{
+										path: 'sales/payments',
+										label: __('Payments', 'doublescale'),
+									},
+							  ]
+							: []),
+						...(isSalesDocumentsReady()
+							? [
+									{
+										path: 'sales/settings',
+										label: __('Settings', 'doublescale'),
+										requiredCapability: [
+											'doublescale_manage_all_sales',
+											'doublescale_crm_manager',
 										],
 									},
 							  ]

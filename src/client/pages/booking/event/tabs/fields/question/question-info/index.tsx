@@ -22,11 +22,11 @@ const QuestionInfo: React.FC<QuestionInfoProps> = ({
 	setType,
 }) => {
 	return (
-        <div className="flex items-center gap-8">
-            <p className="font-medium text-xl">
+        <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
+            <p className="font-medium text-xl max-[768px]:text-lg">
 				{__('Question', 'doublescale')} {`(${index + 1})`}
 			</p>
-            <div>
+            <div className="w-full md:w-auto">
 				<Select
                     defaultValue={allFields[fieldKey].type}
                     onValueChange={(value) => {
@@ -62,7 +62,7 @@ const QuestionInfo: React.FC<QuestionInfoProps> = ({
 						allFields[fieldKey].group === 'other'
 					}
 				>
-					<SelectTrigger className="min-w-[160px]">
+					<SelectTrigger className="w-full md:min-w-[160px]">
 						<SelectValue placeholder={__('Select type', 'doublescale')} />
 					</SelectTrigger>
 					<SelectContent>
@@ -81,7 +81,7 @@ const QuestionInfo: React.FC<QuestionInfoProps> = ({
 					</SelectContent>
 				</Select>
 			</div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
 				{allFields[fieldKey].group == 'system' && (
 					<TagComponent label={__('system', 'doublescale')} />
 				)}

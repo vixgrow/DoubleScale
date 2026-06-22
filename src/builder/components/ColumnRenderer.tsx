@@ -12,7 +12,6 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
 /**
  * internal dependencies
  */
@@ -23,7 +22,6 @@ import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
 import { isSectionTemplate } from '@doublescale/utils/templateUtils';
 import { hasActiveTextSelection } from '../utils/selectionGuards';
-import TextBlock from '../blocks/basic/TextBlock';
 
 interface ColumnRendererProps {
 	column: EmailColumn;
@@ -81,22 +79,6 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 			isTemplateSection: isThisTemplateSection,
 		},
 	});
-
-	const addTextBlock = () => {
-		const base = { ...TextBlock.defaultProps } as Record<string, unknown>;
-		delete base.isProActivated;
-		delete base.isPro;
-		const newBlock = {
-			id: `block-${Date.now()}`,
-			type: 'text' as const,
-			props: {
-				...base,
-				content: `<p style="color:#333">${__('Your text here', 'doublescale')}</p>`,
-			},
-		};
-
-		dispatch(STORE_KEY).addBlock(sectionId, column.id, newBlock);
-	};
 
 	return (
 		<div
@@ -1029,40 +1011,8 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 							return renderedBlocks;
 						})()}
 
-						{/* Add Block Button - hidden for template sections and ready-made email templates */}
-						{!isThisTemplateSection && !hideAddButton && (
-							<div className="px-10 py-2">
-								<div className="relative w-full rounded-lg">
-									<svg
-										className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg text-primary"
-										xmlns="http://www.w3.org/2000/svg"
-										aria-hidden
-									>
-										<rect
-											x="0.5"
-											y="0.5"
-											width="calc(100% - 1px)"
-											height="calc(100% - 1px)"
-											rx="7"
-											ry="7"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="1"
-											strokeDasharray="10 8"
-											vectorEffect="nonScalingStroke"
-										/>
-									</svg>
-									<Button
-										variant="ghost"
-										className="relative z-10 w-full border-0 bg-transparent p-6 text-primary shadow-none hover:bg-primary/10"
-										onClick={addTextBlock}
-									>
-										<Plus className="w-4 h-4 mr-2" />
-										{__('Add Text Block', 'doublescale')}
-									</Button>
-								</div>
-							</div>
-						)}
+						{/* In-column "Add Text Block" button intentionally removed.
+						    Text blocks are added from the sidebar blocks palette. */}
 					</>
 				)}
 			</SortableContext>

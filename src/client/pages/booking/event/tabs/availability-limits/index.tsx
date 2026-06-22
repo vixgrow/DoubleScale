@@ -245,7 +245,7 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 		}
 
 		return (
-			<div className="grid grid-cols-2 gap-5 px-9">
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-5 ">
 				<AvailabilitySection
 					event={event}
 					eventAvailability={eventAvailability}

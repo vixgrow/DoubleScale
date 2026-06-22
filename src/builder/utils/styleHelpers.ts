@@ -31,16 +31,14 @@ export const TEXT_ALIGNMENT_MAP: Record<string, string> = {
  */
 interface HeadingConfig {
   element: string;
-  multiplier: number;
-  minSize: number;
 }
 
 export const HEADING_CONFIG: Record<string, HeadingConfig> = {
-  h1: { element: 'h1', multiplier: 2.5, minSize: 24 },
-  h2: { element: 'h2', multiplier: 2, minSize: 20 },
-  h3: { element: 'h3', multiplier: 1.5, minSize: 18 },
-  small: { element: 'small', multiplier: 0.8, minSize: 12 },
-  p: { element: 'p', multiplier: 1, minSize: 0 },
+  h1: { element: 'h1' },
+  h2: { element: 'h2' },
+  h3: { element: 'h3' },
+  small: { element: 'small' },
+  p: { element: 'p' },
 };
 
 /**
@@ -78,17 +76,6 @@ export const getTextAlignment = (align: string): string => {
  */
 export const getHeadingConfig = (style: string): HeadingConfig => {
   return HEADING_CONFIG[style] || HEADING_CONFIG.p;
-};
-
-/**
- * Calculate font size based on heading style
- */
-export const calculateFontSize = (
-  headingStyle: string,
-  baseFontSize: number
-): number => {
-  const config = getHeadingConfig(headingStyle);
-  return Math.max(baseFontSize * config.multiplier, config.minSize);
 };
 
 /**

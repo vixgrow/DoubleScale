@@ -33,6 +33,18 @@ final class BookingProvisioner {
 			return null;
 		}
 
+		// `set_user_role` / `user_register` can fire for a blog whose DoubleScale
+		// tables don't exist yet — e.g. multisite site-duplicator tools (Easy
+		// Plugin Demo et al.) assign the registrant's admin role via
+		// `add_user_to_blog()` *inside* `wp_insert_site()`, before WP fires the
+		// `wpmu_new_blog`/`wp_initialize_site` action this plugin's own table
+		// provisioning listens on. Bail quietly rather than let WPEloquent throw
+		// on the missing table; the module's bulk-provisioning pass picks up
+		// this admin once the new blog's tables exist (its first real page load).
+		if ( ! self::host_calendar_table_ready() ) {
+			return null;
+		}
+
 		// Collapse any pre-existing duplicate host calendars for this user down to
 		// a single canonical row before doing anything else. Historically the
 		// check-then-create below was not atomic (and bulk provisioning could
@@ -82,6 +94,20 @@ final class BookingProvisioner {
 	}
 
 	/**
+	 * Whether the booking_calendars table exists for the current blog.
+	 *
+	 * @return bool
+	 */
+	private static function host_calendar_table_ready(): bool {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'doublescale_booking_calendars';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- existence probe before an Eloquent query that would otherwise throw on a missing table.
+		return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+	}
+
+	/**
 	 * Collapse duplicate host calendars for a user into a single canonical row.
 	 *
 	 * Picks the calendar with the most bookings (ties broken by lowest id) as the
@@ -94,6 +120,10 @@ final class BookingProvisioner {
 	 */
 	public function dedupe_host_calendars( int $user_id ): ?CalendarModel {
 		if ( $user_id <= 0 ) {
+			return null;
+		}
+
+		if ( ! self::host_calendar_table_ready() ) {
 			return null;
 		}
 

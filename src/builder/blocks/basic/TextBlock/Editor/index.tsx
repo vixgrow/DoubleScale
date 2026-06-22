@@ -26,6 +26,7 @@ import {
 import * as TypographyControls from '../../shared/control-groups/typography';
 import * as StyleControls from '../../shared/control-groups/style';
 import * as LayoutControls from '../../shared/control-groups/layout';
+import { getDefaultFontSizeForStyle } from '@/builder/utils/styleHelpers';
 
 export interface TextEditorProps {
 	props: TextBlockProps;
@@ -57,7 +58,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						<TypographyControls.TextStyleControl
 							value={props.headingStyle}
 							onChange={(headingStyle) =>
-								onChange({ headingStyle })
+								onChange({
+									headingStyle,
+									fontSize: getDefaultFontSizeForStyle(
+										headingStyle
+									),
+								})
 							}
 						/>
 
@@ -70,6 +76,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							onFontSizeChange={(fontSize) =>
 								onChange({ fontSize })
 							}
+						/>
+
+						{/* Font Color */}
+						<StyleControls.ColorPickerControl
+							value={props.color?.trim() || '#333'}
+							onChange={(color) => onChange({ color })}
+							label={__('Font Color', 'doublescale')}
+							id="font-color"
 						/>
 
 						{/* Line Height & Letter Spacing */}

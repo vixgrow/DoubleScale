@@ -314,7 +314,10 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$skipped_contacts = array();
 		$subject          = $template->subject ?? '';
 		$body             = $template->body ?? $this->get_default_campaign_content();
-		$content          = $subject . ' ' . $body;
+		// Include the (raw) footer so its merge tags (e.g. {{contact:unsubscribe_link}})
+		// are registered as recipient variables. Without this the footer link is
+		// injected after key extraction and the mailer substitutes it with an empty value.
+		$content          = $subject . ' ' . $body . ' ' . $this->get_raw_footer_content();
 
 		// Extract merge tags from content
 		$merge_tag_keys = MergeTagsManager::instance()->extract_merge_tag_keys( $content );
@@ -884,7 +887,10 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$skipped_contacts = array();
 		$subject          = $template->subject ?? '';
 		$body             = $template->body ?? $this->get_default_campaign_content();
-		$content          = $subject . ' ' . $body;
+		// Include the (raw) footer so its merge tags (e.g. {{contact:unsubscribe_link}})
+		// are registered as recipient variables. Without this the footer link is
+		// injected after key extraction and the mailer substitutes it with an empty value.
+		$content          = $subject . ' ' . $body . ' ' . $this->get_raw_footer_content();
 
 		// Extract merge tags from content
 		$merge_tag_keys = MergeTagsManager::instance()->extract_merge_tag_keys( $content );
@@ -1623,22 +1629,32 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * @return string Footer HTML with recipient variable placeholders
 	 */
 	protected function get_bulk_footer_content() {
-		// Get footer from settings
+		// Convert merge tags to mailer-specific format
+		return \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $this->get_raw_footer_content() );
+	}
+
+	/**
+	 * Get the raw (unconverted) email footer content, respecting the settings hierarchy.
+	 *
+	 * Returns the footer with its merge tags intact (e.g. {{contact:unsubscribe_link}}),
+	 * before any mailer-specific recipient-variable conversion. Used both for rendering
+	 * and for merge-tag key extraction so footer-only tags get per-recipient values.
+	 *
+	 * @since 1.1.10
+	 *
+	 * @return string Raw footer HTML with merge tags intact.
+	 */
+	protected function get_raw_footer_content() {
 		if ( ! empty( $this->settings['email_footer'] ) ) {
-			$footer = $this->settings['email_footer'];
-		} else {
-			$global_settings = \DoubleScale\Core\Settings\Settings::get( 'email', array() );
-			if ( ! empty( $global_settings['email_footer'] ) ) {
-				$footer = $global_settings['email_footer'];
-			} else {
-				$footer = EmailTrackingHelper::get_default_footer();
-			}
+			return $this->settings['email_footer'];
 		}
 
-		// Convert merge tags to mailer-specific format
-		$footer = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $footer );
+		$global_settings = \DoubleScale\Core\Settings\Settings::get( 'email', array() );
+		if ( ! empty( $global_settings['email_footer'] ) ) {
+			return $global_settings['email_footer'];
+		}
 
-		return $footer;
+		return EmailTrackingHelper::get_default_footer();
 	}
 
 	/**
@@ -1730,8 +1746,10 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			: $contact_or_automation_contact;
 
 		// STEP 1: Extract merge tag keys if not already cached
+		// Include the (raw) footer so footer-only merge tags (e.g. {{contact:unsubscribe_link}})
+		// are captured into stored values and resolve correctly in historical/preview renders.
 		if ( is_null( $this->template_merge_tag_keys ) ) {
-			$combined_content              = $subject . ' ' . $message;
+			$combined_content              = $subject . ' ' . $message . ' ' . $this->get_raw_footer_content();
 			$this->template_merge_tag_keys = MergeTagsManager::instance()->extract_merge_tag_keys( $combined_content );
 		}
 

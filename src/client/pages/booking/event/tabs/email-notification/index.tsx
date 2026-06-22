@@ -24,46 +24,52 @@ import { Switch } from '@/components/ui/switch';
 
 const EmailNotificationShimmer = () => {
 	return (
-        <div className="grid grid-cols-2 gap-5 px-9">
-            <Card><CardContent>
-                    <div className='flex flex-col gap-5'>
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className='flex border-b pb-4'>
-                                <div className='flex flex-col gap-2 w-full'>
-                                    <div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
-                                    <div className="animate-pulse bg-gray-200 h-4 w-32 rounded" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent></Card>
-            <Card><CardContent>
-                    <div className='flex justify-between items-center border-b pb-4 mb-4'>
-                        <div className='flex flex-col gap-2'>
-                            <div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
-                            <div className="animate-pulse bg-gray-200 h-4 w-64 rounded" />
-                        </div>
-                        <div className="animate-pulse bg-gray-200 h-8 w-12 rounded-full" />
-                    </div>
-                    <div className='flex flex-col gap-4'>
-                        <div className="animate-pulse bg-gray-200 h-32 w-full rounded" />
-                        <div className="animate-pulse bg-gray-200 h-32 w-full rounded" />
-                    </div>
-                </CardContent></Card>
-            <Card><CardContent>
-                    <div className='flex flex-col gap-5'>
-                        {[1, 2].map((i) => (
-                            <div key={i} className='flex border-b pb-4'>
-                                <div className='flex flex-col gap-2 w-full'>
-                                    <div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
-                                    <div className="animate-pulse bg-gray-200 h-4 w-32 rounded" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent></Card>
-        </div>
-    );
+		<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+			<Card>
+				<CardContent>
+					<div className="flex flex-col gap-5">
+						{[1, 2, 3].map((i) => (
+							<div key={i} className="flex border-b pb-4">
+								<div className="flex flex-col gap-2 w-full">
+									<div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
+									<div className="animate-pulse bg-gray-200 h-4 w-32 rounded" />
+								</div>
+							</div>
+						))}
+					</div>
+				</CardContent>
+			</Card>
+			<Card>
+				<CardContent>
+					<div className="flex justify-between items-center border-b pb-4 mb-4">
+						<div className="flex flex-col gap-2">
+							<div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
+							<div className="animate-pulse bg-gray-200 h-4 w-64 rounded" />
+						</div>
+						<div className="animate-pulse bg-gray-200 h-8 w-12 rounded-full" />
+					</div>
+					<div className="flex flex-col gap-4">
+						<div className="animate-pulse bg-gray-200 h-32 w-full rounded" />
+						<div className="animate-pulse bg-gray-200 h-32 w-full rounded" />
+					</div>
+				</CardContent>
+			</Card>
+			<Card>
+				<CardContent>
+					<div className="flex flex-col gap-5">
+						{[1, 2].map((i) => (
+							<div key={i} className="flex border-b pb-4">
+								<div className="flex flex-col gap-2 w-full">
+									<div className="animate-pulse bg-gray-200 h-6 w-48 rounded" />
+									<div className="animate-pulse bg-gray-200 h-4 w-32 rounded" />
+								</div>
+							</div>
+						))}
+					</div>
+				</CardContent>
+			</Card>
+		</div>
+	);
 };
 
 export interface EmailNotificationsTabHandle {
@@ -192,60 +198,63 @@ const EmailNotificationTab = forwardRef<
 	}
 
 	return (
-        <div className="grid grid-cols-2 gap-5 px-9">
-            <EmailTabs
+		<div className="grid grid-cols-1 lg:grid-cols-2 gap-5 ">
+			<EmailTabs
 				isNoticeVisible={isNoticeVisible}
 				setNoticeVisible={setNoticeVisible}
 				notificationSettings={notificationSettings}
 				editingKey={editingKey}
 				onSelect={handleNotificationSelect}
 			/>
-            <Card><CardContent>
-                    <div className='flex justify-between items-center border-b mb-4'>
-                        <CardHeader
-                            title={__('Edit', 'doublescale')}
-                            description={__(
-                                'Booking Confirmation Email to Attendee',
-                                'doublescale'
-                            )}
-                            icon={<EditNotificationIcon />}
-                            border={false}
-                        />
-                        {editingKey && (
-                            <Switch
-                                checked={
-                                    notificationSettings?.[editingKey]?.default ||
-                                    false
-                                }
-                                onCheckedChange={(checked) =>
-                                    handleSwitchChange(checked, editingKey)
-                                }
-                                className={
-                                    notificationSettings?.[editingKey]?.default
-                                        ? 'bg-primary'
-                                        : 'bg-gray-400'
-                                } />
-                        )}
-                    </div>
-                    {editingKey && notificationSettings[editingKey] && (
-                        <EmailNotificationCard
-                            key={editingKey}
-                            notifications={notificationSettings}
-                            notificationKey={editingKey}
-                            setNotifications={(updatedNotifications) => {
-                                setNotificationSettings(updatedNotifications);
-                            }}
-                            setDisabled={props.setDisabled}
-                        />
-                    )}
-                </CardContent></Card>
-            <OtherNotifications
+			<Card>
+				<CardContent>
+					<div className="flex justify-between items-center border-b mb-4">
+						<CardHeader
+							title={__('Edit', 'doublescale')}
+							description={__(
+								'Booking Confirmation Email to Attendee',
+								'doublescale'
+							)}
+							icon={<EditNotificationIcon />}
+							border={false}
+						/>
+						{editingKey && (
+							<Switch
+								checked={
+									notificationSettings?.[editingKey]
+										?.default || false
+								}
+								onCheckedChange={(checked) =>
+									handleSwitchChange(checked, editingKey)
+								}
+								className={
+									notificationSettings?.[editingKey]?.default
+										? 'bg-primary'
+										: 'bg-gray-400'
+								}
+							/>
+						)}
+					</div>
+					{editingKey && notificationSettings[editingKey] && (
+						<EmailNotificationCard
+							key={editingKey}
+							notifications={notificationSettings}
+							notificationKey={editingKey}
+							setNotifications={(updatedNotifications) => {
+								setNotificationSettings(updatedNotifications);
+							}}
+							setDisabled={props.setDisabled}
+						/>
+					)}
+				</CardContent>
+			</Card>
+			<OtherNotifications
 				notificationSettings={notificationSettings}
 				setEditingKey={setEditingKey}
 				editingKey={editingKey}
 			/>
-        </div>
-    );
+		</div>
+	);
 });
 
 export default EmailNotificationTab;

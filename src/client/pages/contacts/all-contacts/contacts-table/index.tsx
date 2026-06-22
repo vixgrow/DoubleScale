@@ -67,6 +67,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 	});
 
 	const tableConfig: DataTableConfig<any> = {
+		toolbarClassName:
+			'min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:gap-1',
 		manageColumns: {
 			enabled: true,
 		},

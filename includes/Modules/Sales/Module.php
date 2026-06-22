@@ -41,7 +41,7 @@ final class Module extends AbstractModule {
 			return __( 'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.', 'doublescale' );
 		}
 
-		return __( 'Sales workspace with proposals, invoices, contracts, payments, and team settings.', 'doublescale' );
+		return __( 'Sales workspace with pipelines, proposals, invoices, contracts, credit notes, taxes, subscriptions, and team settings.', 'doublescale' );
 	}
 
 	public function version(): string {

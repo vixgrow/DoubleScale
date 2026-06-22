@@ -4,7 +4,7 @@
  * each module’s restControllers() return array. Only that method is scanned
  * so CoreModule::register() and similar are ignored.
  *
- * @package DoubleScale\Pro\Tests
+ * @package DoubleScale\Tests
  */
 
 /**

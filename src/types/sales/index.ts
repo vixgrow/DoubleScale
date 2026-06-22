@@ -381,6 +381,8 @@ export interface SalesSettings {
 	proposal_email_intro: string;
 	invoice_email_subject: string;
 	invoice_email_intro: string;
+	credit_note_email_subject: string;
+	credit_note_email_intro: string;
 	contract_email_subject: string;
 	contract_email_intro: string;
 	contract_signed_email_subject: string;

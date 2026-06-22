@@ -19,6 +19,7 @@ import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import { TaxesManager } from './taxes-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
+import { SalesEmailIntroField } from './sales-email-intro-field';
 import { InvoicesProGate, PaymentsProGate } from '../pro-gates';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 
@@ -94,7 +95,7 @@ const SalesSettingsPage: React.FC = () => {
 					<h1 className="text-2xl font-semibold">{__('Sales Settings', 'doublescale')}</h1>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, and invoices.',
+							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, invoices, and credit notes.',
 							'doublescale'
 						)}
 					</p>
@@ -128,10 +129,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.proposal_email_intro}
-								onChange={(e) => patch('proposal_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('proposal_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -149,10 +149,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.invoice_email_intro}
-								onChange={(e) => patch('invoice_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('invoice_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -166,6 +165,30 @@ const SalesSettingsPage: React.FC = () => {
 						<InvoicesProGate />
 					)}
 
+					{isProActive ? (
+					<section className="space-y-4 border rounded-lg bg-white p-6">
+						<h2 className="font-medium">{__('Credit note emails', 'doublescale')}</h2>
+						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
+							<Input
+								value={form.credit_note_email_subject}
+								onChange={(e) => patch('credit_note_email_subject', e.target.value)}
+							/>
+						</FormField>
+						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
+							<SalesEmailIntroField
+								value={form.credit_note_email_intro}
+								onChange={(value) => patch('credit_note_email_intro', value)}
+							/>
+						</FormField>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Tokens: {credit_note_number}, {contact_name}, {total}, {remaining}, {credit_note_date}, {public_url}',
+								'doublescale'
+							)}
+						</p>
+					</section>
+					) : null}
+
 					<section className="space-y-4 border rounded-lg bg-white p-6">
 						<h2 className="font-medium">{__('Contract emails', 'doublescale')}</h2>
 						<FormField label={__('Email subject', 'doublescale')} className="!mb-0">
@@ -175,10 +198,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.contract_email_intro}
-								onChange={(e) => patch('contract_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('contract_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">
@@ -198,10 +220,9 @@ const SalesSettingsPage: React.FC = () => {
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
-							<Textarea
+							<SalesEmailIntroField
 								value={form.contract_signed_email_intro}
-								onChange={(e) => patch('contract_signed_email_intro', e.target.value)}
-								rows={3}
+								onChange={(value) => patch('contract_signed_email_intro', value)}
 							/>
 						</FormField>
 						<p className="text-xs text-muted-foreground">

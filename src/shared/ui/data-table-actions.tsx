@@ -184,7 +184,7 @@ export function DataTableActions<TData>({
 		'group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
 
 	return (
-		<div className="flex flex-wrap justify-center items-center gap-3 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
+		<div className="flex items-center justify-center gap-4 sm:gap-1 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
 			{config.dateRange?.enabled && (
 				<DateRangePicker
 					value={config.dateRange?.value}
@@ -195,12 +195,12 @@ export function DataTableActions<TData>({
 						}
 					}}
 					placeholder={config.dateRange?.placeholder}
-					className="ml-2 max-sm:ml-0 max-sm:w-full"
+					className="ml-2 max-sm:ml-0 max-sm:w-full sm:w-auto lg:ml-0"
 				/>
 			)}
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
 			{config.bulkActions?.enabled && (
-				<div className="max-sm:w-full max-sm:[&_button]:w-full">
+				<div className="max-sm:w-full max-sm:[&_button]:w-full sm:w-auto sm:[&_button]:w-auto">
 					<BulkActionSelect
 						bulkAction={config.bulkActions?.currentAction}
 						setBulkAction={config.bulkActions?.onActionChange}

@@ -31,12 +31,12 @@ const QrCode: React.FC<{
 	return (
         <>
             <div
-                className='flex gap-2.5 items-center border-b pb-4 border-[#E4E4E4] mb-4'>
-				<div className="rounded-lg p-2 border border-secondary">
+                className='flex gap-2.5 items-start sm:items-center border-b pb-4 border-[#E4E4E4] mb-4 min-w-0'>
+				<div className="shrink-0 rounded-lg p-2 border border-secondary">
 					{icon}
 				</div>
-				<div className="flex flex-col">
-					<span className="text-[#09090B] text-[20px] font-[700]">
+				<div className="flex flex-col min-w-0">
+					<span className="text-[#09090B] text-[16px] sm:text-[20px] font-[700]">
 						{title}
 					</span>
 					<span className="text-[12px] font-[400] text-[#71717A]">
@@ -72,7 +72,7 @@ const QrCode: React.FC<{
 					<QRCodeCanvas value={url} size={160} />
 				</div>
 				<Button
-					className="bg-primary h-[48px] px-7 rounded-lg"
+					className="bg-primary h-[48px] w-full sm:w-auto px-7 rounded-lg"
 					onClick={handleDownload}
 				>
 					<RiDownloadCloud2Line className="text-white text-[18px]" />

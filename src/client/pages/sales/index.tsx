@@ -43,6 +43,12 @@ const SALES_MENU_CAPS = [
  * `/sales` → first enabled Sales child (documents, contracts) or pipeline.
  */
 const resolveSalesLandingPath = (): string | null => {
+	const registeredPaths = new Set(
+		Object.values(getAdminPages()).map((page) => page.path)
+	);
+	if (registeredPaths.has('sales-pipeline')) {
+		return 'sales-pipeline';
+	}
 	if (isSalesDocumentsReady()) {
 		const candidates: Array<{ module: string; path: string }> = [
 			{ module: 'documents', path: 'sales/proposals' },
@@ -53,15 +59,6 @@ const resolveSalesLandingPath = (): string | null => {
 				return path;
 			}
 		}
-	}
-	if (config.isModuleToggleEnabled('deals')) {
-		return 'sales-pipeline';
-	}
-	const registeredPaths = new Set(
-		Object.values(getAdminPages()).map((page) => page.path)
-	);
-	if (registeredPaths.has('sales-pipeline')) {
-		return 'sales-pipeline';
 	}
 	return null;
 };

@@ -23,8 +23,12 @@ import DataTablePagination from './data-table-pagination';
 import { useDataTable } from '@doublescale/hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
 import { DataTableActions } from './data-table-actions';
-import { DataTableConfig } from '@doublescale/client';
+import type { DataTableConfig } from '../../client/types';
 import { TableSkeleton } from './table-skeleton';
+import { cn } from '@/lib/utils';
+
+const defaultToolbarClassName =
+	'sm:flex-row sm:items-center sm:justify-between sm:gap-1';
 
 interface DataTableProps<TData> {
 	columns: ColumnDef<TData, any>[];
@@ -69,8 +73,13 @@ export function DataTable<TData>({
 		<div className="w-full ">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
-				<div className="flex border border-border rounded-lg p-4 flex-col gap-4 2xl:gap-0 2xl:flex-row items-center 2xl:justify-between  w-full mb-6">
-					<DataTableSearch	
+				<div
+					className={cn(
+						'mb-6 flex w-full min-w-0 flex-col gap-4 rounded-lg border border-border p-4 items-center justify-center',
+						config.toolbarClassName ?? defaultToolbarClassName
+					)}
+				>
+					<DataTableSearch
 						value={
 							config.search?.onChange
 								? config.search?.value || ''
@@ -78,14 +87,17 @@ export function DataTable<TData>({
 						}
 						onChange={handleSearchChange}
 						placeholder={config.search?.placeholder}
+						className={config.search?.className}
 					/>
 
-					<DataTableActions
-						table={table}
-						config={config}
-						activeTab={activeTab}
-						setPage={setPage}
-					/>
+					<div className="w-full min-w-0 sm:w-auto">
+						<DataTableActions
+							table={table}
+							config={config}
+							activeTab={activeTab}
+							setPage={setPage}
+						/>
+					</div>
 				</div>
 			)}
 
@@ -102,10 +114,10 @@ export function DataTable<TData>({
 										{header.isPlaceholder
 											? null
 											: flexRender(
-												header.column.columnDef
-													.header,
-												header.getContext()
-											)}
+													header.column.columnDef
+														.header,
+													header.getContext()
+												)}
 									</TableHead>
 								))}
 							</TableRow>
@@ -113,7 +125,9 @@ export function DataTable<TData>({
 					</TableHeader>
 					<TableBody className="bg-white">
 						{loading ? (
-							<TableSkeleton columns={table.getVisibleLeafColumns().length} />
+							<TableSkeleton
+								columns={table.getVisibleLeafColumns().length}
+							/>
 						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow

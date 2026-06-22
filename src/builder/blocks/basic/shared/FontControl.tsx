@@ -38,17 +38,15 @@ const FONT_FAMILIES = [
     },
 ];
 
-const MIN_FONT_SIZE = 8;
-const MAX_FONT_SIZE = 72;
+// Applied only when the field is left empty/invalid — there is no min/max bound
+// on what the user can type.
+const DEFAULT_FONT_SIZE = 16;
 
 const labelClass = 'text-white';
 const triggerClass =
     'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
 const sizeInputClass =
     'h-10 !rounded-lg !border-none !ring-0 !ring-offset-0 !text-white pr-8 shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
-
-const clampFontSize = (value: number) =>
-    Math.min(Math.max(value, MIN_FONT_SIZE), MAX_FONT_SIZE);
 
 export const FontControl: React.FC<FontControlProps> = ({
     fontFamily,
@@ -63,17 +61,14 @@ export const FontControl: React.FC<FontControlProps> = ({
         setFontSizeDraft(String(fontSize));
     }, [fontSize]);
 
+    // Fall back to the default only when the field is empty or not a number —
+    // otherwise honour whatever the user typed (no min/max clamping).
     const commitFontSize = (raw: string) => {
         const parsed = parseInt(raw, 10);
-        if (Number.isNaN(parsed)) {
-            setFontSizeDraft(String(fontSize));
-            return;
-        }
-
-        const clampedValue = clampFontSize(parsed);
-        setFontSizeDraft(String(clampedValue));
-        if (clampedValue !== fontSize) {
-            onFontSizeChange(clampedValue);
+        const next = Number.isNaN(parsed) ? DEFAULT_FONT_SIZE : parsed;
+        setFontSizeDraft(String(next));
+        if (next !== fontSize) {
+            onFontSizeChange(next);
         }
     };
 
@@ -114,18 +109,13 @@ export const FontControl: React.FC<FontControlProps> = ({
                         onChange={(e) => {
                             const raw = e.target.value;
                             setFontSizeDraft(raw);
-                            // Live-apply only a complete, in-range value. Do NOT
-                            // clamp while typing: clamping rewrites the field
-                            // mid-edit (e.g. typing "1" toward "12" snaps to the
-                            // min of 8), which makes the input impossible to
-                            // edit. Clamping happens on blur/Enter instead.
+                            // No min/max: live-apply any number the user types.
+                            // The empty/invalid -> default fallback runs on
+                            // blur/Enter (see commitFontSize) so the field stays
+                            // freely editable while typing.
                             if (raw === '') return;
                             const parsed = parseInt(raw, 10);
-                            if (
-                                !Number.isNaN(parsed) &&
-                                parsed >= MIN_FONT_SIZE &&
-                                parsed <= MAX_FONT_SIZE
-                            ) {
+                            if (!Number.isNaN(parsed)) {
                                 onFontSizeChange(parsed);
                             }
                         }}
@@ -138,8 +128,6 @@ export const FontControl: React.FC<FontControlProps> = ({
                         }}
                         className={sizeInputClass}
                         style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                        min={MIN_FONT_SIZE}
-                        max={MAX_FONT_SIZE}
                         step={1}
                     />
                 </div>

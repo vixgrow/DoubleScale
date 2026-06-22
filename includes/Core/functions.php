@@ -286,6 +286,62 @@ if ( ! function_exists( 'doublescale_is_pro_addon_active' ) ) {
 	}
 }
 
+if ( ! function_exists( 'doublescale_uses_legacy_pro_booking_gateway' ) ) {
+	/**
+	 * Whether an older doublescale-pro build still ships StripeBookingGateway.
+	 *
+	 * Free 1.2+ removed the legacy PaymentGateway base class; Pro 1.1+ replaced
+	 * StripeBookingGateway with BookingStripeHandler. Mismatched pairs fatal without
+	 * the compatibility shims restored in PaymentGateway\Loader.
+	 *
+	 * @return bool
+	 */
+	function doublescale_uses_legacy_pro_booking_gateway(): bool {
+		if ( ! doublescale_is_pro_addon_active() ) {
+			return false;
+		}
+
+		$pro_dir = defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' ) ? (string) \DOUBLESCALE_PRO_PLUGIN_DIR : '';
+		if ( '' === $pro_dir ) {
+			foreach ( doublescale_get_pro_plugin_basenames() as $basename ) {
+				$main_file = ( defined( 'WP_PLUGIN_DIR' ) ? \WP_PLUGIN_DIR : '' ) . '/' . $basename;
+				if ( is_readable( $main_file ) ) {
+					$pro_dir = plugin_dir_path( $main_file );
+					break;
+				}
+			}
+		}
+
+		if ( '' === $pro_dir ) {
+			return false;
+		}
+
+		$legacy = $pro_dir . 'includes/Modules/Booking/PaymentGateways/Stripe/StripeBookingGateway.php';
+		$modern = $pro_dir . 'includes/Modules/Booking/PaymentGateways/BookingStripeHandler.php';
+
+		return is_readable( $legacy ) && ! is_readable( $modern );
+	}
+}
+
+add_action(
+	'admin_notices',
+	static function (): void {
+		if ( ! is_admin() || ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+		if ( ! doublescale_uses_legacy_pro_booking_gateway() ) {
+			return;
+		}
+
+		echo '<div class="notice notice-warning"><p>';
+		echo esc_html__(
+			'DoubleScale Pro is outdated for this version of DoubleScale. Update DoubleScale Pro to 1.1.0 or newer to use the unified payment gateway stack.',
+			'doublescale'
+		);
+		echo '</p></div>';
+	}
+);
+
 if ( ! function_exists( 'doublescale_pro_task_model_available' ) ) {
 	/**
 	 * Whether the Pro tasks Eloquent model is loaded (unified timelines include tasks).

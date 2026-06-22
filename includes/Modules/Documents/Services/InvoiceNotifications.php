@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Communication\EmailIdentityResolver;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Sales\Services\SalesEmailHtml;
+use DoubleScale\Modules\Sales\Services\SalesEmailMergeTags;
 use DoubleScale\Modules\Sales\Services\SalesEmailTokens;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 
@@ -54,12 +56,20 @@ final class InvoiceNotifications {
 			);
 		}
 
-		$intro_tpl = (string) SalesSettings::get( 'invoice_email_intro', '' );
-		$intro     = '' !== trim( $custom_message )
-			? $custom_message
-			: SalesEmailTokens::replace( $intro_tpl, $tokens );
+		$invoice->loadMissing( 'contact' );
+		$intro_tpl  = (string) SalesSettings::get( 'invoice_email_intro', '' );
+		$intro_html = SalesEmailHtml::resolve_intro_html(
+			$custom_message,
+			$intro_tpl,
+			$tokens,
+			__( 'Please review your invoice and pay the balance due when ready.', 'doublescale' ),
+			SalesEmailMergeTags::context_from_contact(
+				$invoice->contact,
+				array( 'invoice_id' => (int) $invoice->id )
+			)
+		);
 
-		$body = $this->build_body( $invoice, $customer_name, $url, $intro );
+		$body = $this->build_body( $invoice, $customer_name, $url, $intro_html );
 
 		$emails = new Emails();
 		$emails->from_address = $identity['from_address'];
@@ -124,14 +134,10 @@ final class InvoiceNotifications {
 	 * @param InvoiceModel $invoice Invoice.
 	 * @param string       $customer_name Customer display name.
 	 * @param string       $url Public invoice URL.
-	 * @param string       $custom_message Optional custom message.
+	 * @param string       $intro_html Safe HTML intro.
 	 * @return string
 	 */
-	private function build_body( InvoiceModel $invoice, string $customer_name, string $url, string $custom_message ): string {
-		$intro = '' !== trim( $custom_message )
-			? nl2br( esc_html( $custom_message ) )
-			: esc_html__( 'Please review your invoice and pay the balance due when ready.', 'doublescale' );
-
+	private function build_body( InvoiceModel $invoice, string $customer_name, string $url, string $intro_html ): string {
 		$balance = max( 0, round( (float) $invoice->total - (float) $invoice->amount_paid, 2 ) );
 		$formatted_total = sprintf(
 			'%1$s %2$s',
@@ -176,8 +182,8 @@ final class InvoiceNotifications {
 			esc_html( $customer_name )
 		);
 		$html .= sprintf(
-			'<p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#4a5568;">%s</p>',
-			$intro // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above or via esc_html__.
+			'<div style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#4a5568;">%s</div>',
+			$intro_html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized via SalesEmailHtml.
 		);
 
 		$html .= '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 28px;border-collapse:collapse;background-color:#f7fafc;border:1px solid #edf2f7;border-top:4px solid #4c6fff;border-radius:8px;">';

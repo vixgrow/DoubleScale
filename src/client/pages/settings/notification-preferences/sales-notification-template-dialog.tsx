@@ -19,12 +19,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 
 const PROPOSAL_TOKENS =
-	'{event_label}, {proposal_number}, {proposal_subject}, {decline_reason_suffix}, {company_name}, {sales_link}';
+	'{{sales:event_label}}, {{sales:proposal_number}}, {{sales:proposal_subject}}, {{sales:decline_reason_suffix}}, {{sales:company_name}}, {{sales:admin_link}}';
 
-const INVOICE_TOKENS = '{invoice_number}, {company_name}, {sales_link}';
+const INVOICE_TOKENS =
+	'{{sales:invoice_number}}, {{sales:company_name}}, {{sales:admin_link}}';
 
 const CONTRACT_TOKENS =
-	'{event_label}, {contract_number}, {contract_subject}, {company_name}, {sales_link}';
+	'{{sales:event_label}}, {{sales:contract_number}}, {{sales:contract_subject}}, {{sales:company_name}}, {{sales:admin_link}}';
 
 interface SalesNotificationTemplateDialogProps {
 	open: boolean;

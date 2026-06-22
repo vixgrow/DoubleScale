@@ -81,13 +81,15 @@ final class SalesSettings {
 		$merged = array();
 		foreach ( $defaults as $key => $default ) {
 			$custom = isset( $stored[ $key ] ) && is_array( $stored[ $key ] ) ? $stored[ $key ] : array();
+			$title  = '' !== trim( (string) ( $custom['title'] ?? '' ) )
+				? (string) $custom['title']
+				: (string) $default['title'];
+			$message = '' !== trim( (string) ( $custom['message'] ?? '' ) )
+				? (string) $custom['message']
+				: (string) $default['message'];
 			$merged[ $key ] = array(
-				'title'   => '' !== trim( (string) ( $custom['title'] ?? '' ) )
-					? (string) $custom['title']
-					: (string) $default['title'],
-				'message' => '' !== trim( (string) ( $custom['message'] ?? '' ) )
-					? (string) $custom['message']
-					: (string) $default['message'],
+				'title'   => SalesRepNotificationTemplates::normalize_template_part( $title ),
+				'message' => SalesRepNotificationTemplates::normalize_template_part( $message ),
 			);
 		}
 

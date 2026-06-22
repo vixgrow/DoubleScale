@@ -14,6 +14,7 @@ use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Pro\Modules\Contracts\Models\ContractModel;
 
 /**
  * SalesEmailMergeTags helper.
@@ -109,5 +110,55 @@ final class SalesEmailMergeTags {
 			$contact instanceof ContactModel ? $contact : null,
 			array( $id_key => $id )
 		);
+	}
+
+	/**
+	 * Build merge-tag context for sales-rep in-app / email notifications.
+	 *
+	 * @param array<string, mixed> $context     Proposal, invoice, or contract + event.
+	 * @param string               $subcategory Notification subcategory key.
+	 * @return AutomationContactModel
+	 */
+	public static function for_rep_notification( array $context, string $subcategory ): AutomationContactModel {
+		$event = isset( $context['event'] ) ? (string) $context['event'] : '';
+		$data  = array(
+			'rep_event'       => $event,
+			'rep_subcategory' => $subcategory,
+		);
+
+		$proposal = $context['proposal'] ?? null;
+		if ( $proposal instanceof ProposalModel ) {
+			$proposal->loadMissing( 'contact' );
+			$data['proposal_id']      = (int) $proposal->id;
+			$data['sales_admin_link'] = admin_url( 'admin.php?page=doublescale&path=sales/proposals/' . (int) $proposal->id );
+
+			return self::context_from_contact( $proposal->contact, $data );
+		}
+
+		$invoice = $context['invoice'] ?? null;
+		if ( $invoice instanceof InvoiceModel ) {
+			$invoice->loadMissing( 'contact' );
+			$data['invoice_id']       = (int) $invoice->id;
+			$data['sales_admin_link'] = admin_url( 'admin.php?page=doublescale&path=sales/invoices/' . (int) $invoice->id );
+
+			return self::context_from_contact( $invoice->contact, $data );
+		}
+
+		$contract = $context['contract'] ?? null;
+		if ( $contract instanceof ContractModel ) {
+			if ( method_exists( $contract, 'loadMissing' ) ) {
+				$contract->loadMissing( 'contact' );
+			}
+			$contact = isset( $contract->contact ) ? $contract->contact : null;
+			$data['contract_id']      = isset( $contract->id ) ? (int) $contract->id : (int) $contract->getKey();
+			$data['sales_admin_link'] = admin_url( 'admin.php?page=doublescale&path=sales/contracts/' . (int) $data['contract_id'] );
+
+			return self::context_from_contact(
+				$contact instanceof ContactModel ? $contact : null,
+				$data
+			);
+		}
+
+		return self::context_from_contact( null, $data );
 	}
 }

@@ -22,11 +22,19 @@ import React, {
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
-import { X, Search, UserPlus } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 
+import { CustomDialogHeader } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import {
 	Select,
 	SelectContent,
@@ -44,11 +52,17 @@ import {
 } from '@/hooks/support';
 import {
 	AttachmentUploader,
+	SupportIcon,
 	toPendingAttachment,
 	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
-import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
+import {
+	PRIORITY_LABELS,
+	TICKET_PRIORITIES,
+	type TicketPriority,
+} from '@/constants/support';
+import { cn } from '@/lib/utils';
 import type { Mailbox, SupportCustomFieldDefinition } from '@/types/support';
 
 interface Props {
@@ -68,6 +82,28 @@ interface ContactHit {
 const contactLabel = (c: ContactHit): string => {
 	const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
 	return name ? `${name} <${c.email}>` : c.email;
+};
+
+const PRIORITY_TOGGLE_STYLES: Record<
+	TicketPriority,
+	{ dot: string; active: string }
+> = {
+	low: {
+		dot: 'bg-[#16A34A]',
+		active: 'border-[#16A34A] bg-[#16A34A]/5 ring-1 ring-[#16A34A]/30',
+	},
+	normal: {
+		dot: 'bg-[#0D9DFC]',
+		active: 'border-[#0D9DFC] bg-[#0D9DFC]/5 ring-1 ring-[#0D9DFC]/30',
+	},
+	high: {
+		dot: 'bg-[#CB5301]',
+		active: 'border-[#CB5301] bg-[#CB5301]/5 ring-1 ring-[#CB5301]/30',
+	},
+	urgent: {
+		dot: 'bg-red-600',
+		active: 'border-red-600 bg-red-50 ring-1 ring-red-600/30',
+	},
 };
 
 const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
@@ -97,20 +133,27 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	>([]);
 	const { limits: attachmentLimits } = useAttachmentLimits();
 
-	// --- Customer selection (Q1) ---------------------------------------------
-	// Two mutually-exclusive modes: pick an existing contact (binds contact_id),
-	// or enter a new email (+ optional name) for find_or_create.
-	const [mode, setMode] = useState<'search' | 'new'>('search');
 	const [query, setQuery] = useState('');
 	const [results, setResults] = useState<ContactHit[]>([]);
 	const [searching, setSearching] = useState(false);
 	const [picked, setPicked] = useState<ContactHit | null>(null);
-	// New-email branch fields.
 	const [email, setEmail] = useState('');
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
 
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const clearNewCustomerFields = () => {
+		setEmail('');
+		setFirstName('');
+		setLastName('');
+	};
+
+	const clearPickedContact = () => {
+		setPicked(null);
+		setQuery('');
+		setResults([]);
+	};
 
 	const runSearch = useCallback((term: string) => {
 		if (!term.trim()) {
@@ -134,9 +177,8 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 			});
 	}, []);
 
-	// Debounced search as the operator types.
 	useEffect(() => {
-		if (mode !== 'search' || picked) {
+		if (picked) {
 			return;
 		}
 		if (debounceRef.current) {
@@ -148,7 +190,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 				clearTimeout(debounceRef.current);
 			}
 		};
-	}, [query, mode, picked, runSearch]);
+	}, [query, picked, runSearch]);
 
 	const handleAttachmentSelect = async (file: File) => {
 		setUploading(true);
@@ -173,8 +215,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		}
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleCreateTicket = async () => {
+		if (submitting) {
+			return;
+		}
 		setError(null);
 
 		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
@@ -184,9 +228,8 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 			return;
 		}
 
-		// Resolve the customer: a picked contact wins; otherwise the new email.
-		const hasContact = mode === 'search' && picked;
-		const hasEmail = mode === 'new' && email.trim();
+		const hasContact = Boolean(picked);
+		const hasEmail = Boolean(email.trim());
 		if (!hasContact && !hasEmail) {
 			setError(
 				__('Select a contact or enter a customer email.', 'doublescale')
@@ -242,7 +285,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 						? customDataPayload
 						: undefined,
 				...(hasContact
-					? { contact_id: picked.id }
+					? { contact_id: picked!.id }
 					: {
 							email: email.trim(),
 							first_name: firstName.trim() || undefined,
@@ -260,359 +303,426 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	};
 
 	return (
-		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-			onClick={onClose}
-		>
-			<div
-				className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
-				onClick={(e) => e.stopPropagation()}
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent
+				className={cn(
+					'z-[150200] !flex !flex-col bg-white',
+					'mx-1 w-[calc(100%-2rem)] max-w-4xl max-h-[calc(100dvh-2rem)]',
+					'gap-0 overflow-hidden rounded-2xl p-0 sm:mx-auto sm:w-full',
+					'max-sm:!top-4 max-sm:!translate-x-[-50%] max-sm:!translate-y-0'
+				)}
 			>
-				<div className="flex items-center justify-between px-6 py-4 border-b">
-					<h2 className="text-lg font-semibold text-gray-900">
-						{__('Open a new ticket', 'doublescale')}
-					</h2>
-					<button
-						type="button"
-						onClick={onClose}
-						className="text-gray-400 hover:text-gray-600"
-						aria-label={__('Close', 'doublescale')}
-					>
-						<X width={20} height={20} />
-					</button>
-				</div>
-
-				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{mailboxes.length === 0 && (
-						<div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-700">
-							{__(
-								'Add a support mailbox before opening tickets.',
+				<DialogHeader className="shrink-0 space-y-0 bg-white px-4 pt-4 text-left sm:px-6 sm:pt-6">
+					<DialogTitle className="text-left">
+						<CustomDialogHeader
+							title={__('Create New Ticket', 'doublescale')}
+							subtitle={__(
+								'Provide a brief summary of the issue. Be specific so your team can quickly understand and prioritize it.',
 								'doublescale'
 							)}
-						</div>
-					)}
-
-					<div>
-						<Label
-							htmlFor="ds-new-ticket-title"
-							className="block text-sm font-medium text-gray-700 mb-1"
-						>
-							{__('Title', 'doublescale')}{' '}
-							<span className="text-red-500">*</span>
-						</Label>
-						<Input
-							id="ds-new-ticket-title"
-							type="text"
-							className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							placeholder={__(
-								'Short summary of the issue',
-								'doublescale'
-							)}
-							autoFocus
+							icon={<SupportIcon width={20} height={20} />}
 						/>
-					</div>
+					</DialogTitle>
+				</DialogHeader>
 
-					{/* Customer — contact picker (Q1) */}
-					<div>
-						<div className="flex items-center justify-between mb-1">
-							<Label className="block text-sm font-medium text-gray-700">
-								{__('Customer', 'doublescale')}{' '}
-								<span className="text-red-500">*</span>
-							</Label>
-							<button
-								type="button"
-								className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-								onClick={() => {
-									// Toggle between picking an existing contact and
-									// entering a brand-new customer email.
-									setMode((m) =>
-										m === 'search' ? 'new' : 'search'
-									);
-									setPicked(null);
-									setQuery('');
-									setResults([]);
-								}}
-							>
-								{mode === 'search' ? (
-									<>
-										<UserPlus width={12} height={12} />
-										{__('New customer', 'doublescale')}
-									</>
-								) : (
-									<>
-										<Search width={12} height={12} />
-										{__('Search existing', 'doublescale')}
-									</>
+				<div className="flex min-h-0 flex-1 flex-col">
+					<div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-6">
+						<div className="space-y-6 rounded-lg border border-border bg-[#F7F8FA] p-4 sm:p-6">
+						{mailboxes.length === 0 && (
+							<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+								{__(
+									'Add a support mailbox before opening tickets.',
+									'doublescale'
 								)}
-							</button>
+							</div>
+						)}
+
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<div className="min-w-0 space-y-2">
+								<Label
+									htmlFor="ds-new-ticket-title"
+									className="text-base font-normal text-foreground"
+								>
+									{__('Title', 'doublescale')}{' '}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Input
+									id="ds-new-ticket-title"
+
+									value={title}
+									onChange={(e) => setTitle(e.target.value)}
+									placeholder={__('Title', 'doublescale')}
+									autoFocus
+								/>
+							</div>
+
+							<div className="min-w-0 space-y-2">
+								<Label
+									htmlFor="ds-new-ticket-mailbox"
+									className="text-base font-normal text-foreground"
+								>
+									{__('Mailbox', 'doublescale')}{' '}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Select
+									value={
+										mailboxId === ''
+											? undefined
+											: String(mailboxId)
+									}
+									onValueChange={(v) =>
+										setMailboxId(Number(v))
+									}
+								>
+									<SelectTrigger
+										id="ds-new-ticket-mailbox"
+										className="h-10 w-full rounded-lg bg-white"
+									>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{mailboxes.map((m) => (
+											<SelectItem
+												key={m.id}
+												value={String(m.id)}
+											>
+												{m.name || m.slug}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 
-						{mode === 'search' ? (
-							picked ? (
-								<div className="flex items-center justify-between border rounded px-3 py-2 bg-gray-50">
-									<span className="text-sm text-gray-800">
-										{contactLabel(picked)}
-									</span>
-									<button
-										type="button"
-										className="text-gray-400 hover:text-gray-600"
-										onClick={() => setPicked(null)}
-										aria-label={__('Clear', 'doublescale')}
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<div className="min-w-0 space-y-2">
+								<Label
+									htmlFor="ds-new-ticket-assignee"
+									className="text-base font-normal text-foreground"
+								>
+									{__('Assignee', 'doublescale')}{' '}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Select
+									value={
+										agentUserId === ''
+											? 'unassigned'
+											: String(agentUserId)
+									}
+									onValueChange={(v) =>
+										setAgentUserId(
+											v === 'unassigned'
+												? ''
+												: Number(v)
+										)
+									}
+								>
+									<SelectTrigger
+										id="ds-new-ticket-assignee"
+
 									>
-										<X width={16} height={16} />
-									</button>
-								</div>
-							) : (
-								<div className="relative">
-									<Input
-										type="text"
-										className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-										value={query}
-										onChange={(e) =>
-											setQuery(e.target.value)
-										}
-										placeholder={__(
-											'Search contacts by name or email…',
-											'doublescale'
-										)}
-									/>
-									{(searching || results.length > 0) && (
-										<div className="absolute z-10 mt-1 w-full bg-white border rounded shadow-lg max-h-56 overflow-y-auto">
-											{searching && (
-												<div className="px-3 py-2 text-sm text-gray-500">
-													{__(
-														'Searching…',
-														'doublescale'
-													)}
-												</div>
+										<SelectValue
+											placeholder={__(
+												'— Unassigned —',
+												'doublescale'
 											)}
-											{!searching &&
-												results.length === 0 && (
-													<div className="px-3 py-2 text-sm text-gray-500">
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="unassigned">
+											{__('— Unassigned —', 'doublescale')}
+										</SelectItem>
+										{assignableAgents.map((agent) => (
+											<SelectItem
+												key={agent.id}
+												value={String(agent.id)}
+											>
+												{agent.display_name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="min-w-0 space-y-2">
+								<Label className="text-base font-normal text-foreground">
+									{__('Priority', 'doublescale')}{' '}
+									<span className="text-destructive">*</span>
+								</Label>
+								<div className="grid grid-cols-4 gap-2">
+									{TICKET_PRIORITIES.map((p) => {
+										const style =
+											PRIORITY_TOGGLE_STYLES[p];
+										const isActive = priority === p;
+										return (
+											<button
+												key={p}
+												type="button"
+												onClick={() =>
+													setPriority(p)
+												}
+												className={cn(
+													'inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-1 text-sm font-medium text-foreground transition-colors',
+													isActive && style.active
+												)}
+											>
+												<span
+													className={cn(
+														'h-4 w-4 shrink-0 rounded-sm',
+														style.dot
+													)}
+													aria-hidden="true"
+												/>
+												{PRIORITY_LABELS[p]}
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						</div>
+
+						<div className="space-y-4 rounded-md border border-border bg-[#F5F5F5] p-4">
+							<div className="space-y-2">
+								<Label className="text-base font-normal text-foreground">
+									{__('Customer', 'doublescale')}{' '}
+									<span className="text-destructive">*</span>
+								</Label>
+
+								{picked ? (
+									<div className="flex items-center justify-between !rounded-lg border !border-border bg-white px-3 py-2">
+										<span className="text-sm text-foreground">
+											{contactLabel(picked)}
+										</span>
+										<button
+											type="button"
+											className="text-muted-foreground hover:text-foreground"
+											onClick={clearPickedContact}
+											aria-label={__(
+												'Clear',
+												'doublescale'
+											)}
+										>
+											<X width={16} height={16} />
+										</button>
+									</div>
+								) : (
+									<div className="relative">
+										<Search
+											width={16}
+											height={16}
+											className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
+										/>
+										<Input
+											type="text"
+											className="h-10 w-full !rounded-lg !border !border-border bg-white !pl-10 pr-3 shadow-none"
+											value={query}
+											onChange={(e) =>
+												setQuery(e.target.value)
+											}
+											placeholder={__(
+												'Search contacts by name or email…',
+												'doublescale'
+											)}
+										/>
+										{(searching || results.length > 0) && (
+											<div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-border bg-white shadow-lg">
+												{searching && (
+													<div className="px-3 py-2 text-sm text-muted-foreground">
 														{__(
-															'No contacts found.',
+															'Searching…',
 															'doublescale'
 														)}
 													</div>
 												)}
-											{results.map((c) => (
-												<button
-													key={c.id}
-													type="button"
-													className="block w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
-													onClick={() => {
-														setPicked(c);
-														setResults([]);
-													}}
-												>
-													{contactLabel(c)}
-												</button>
-											))}
-										</div>
-									)}
-								</div>
-							)
-						) : (
-							<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-								<Input
-									type="text"
-									className="w-full border rounded px-3 py-2 text-sm"
-									value={firstName}
-									onChange={(e) =>
-										setFirstName(e.target.value)
-									}
-									placeholder={__(
-										'First name',
-										'doublescale'
-									)}
-								/>
-								<Input
-									type="text"
-									className="w-full border rounded px-3 py-2 text-sm"
-									value={lastName}
-									onChange={(e) =>
-										setLastName(e.target.value)
-									}
-									placeholder={__('Last name', 'doublescale')}
-								/>
-								<Input
-									type="email"
-									className="w-full border rounded px-3 py-2 text-sm"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									placeholder="customer@example.com"
-								/>
+												{!searching &&
+													results.length === 0 && (
+														<div className="px-3 py-2 text-sm text-muted-foreground">
+															{__(
+																'No contacts found.',
+																'doublescale'
+															)}
+														</div>
+													)}
+												{results.map((c) => (
+													<button
+														key={c.id}
+														type="button"
+														className="block w-full px-3 py-2 text-left text-sm hover:bg-muted/60"
+														onClick={() => {
+															setPicked(c);
+															setResults([]);
+															clearNewCustomerFields();
+														}}
+													>
+														{contactLabel(c)}
+													</button>
+												))}
+											</div>
+										)}
+									</div>
+								)}
 							</div>
-						)}
-					</div>
 
-					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-						<div>
-							<Label
-								htmlFor="ds-new-ticket-mailbox"
-								className="block text-sm font-medium text-gray-700 mb-1"
-							>
-								{__('Mailbox', 'doublescale')}
-							</Label>
-							<Select
-								value={mailboxId === '' ? undefined : String(mailboxId)}
-								onValueChange={(v) => setMailboxId(Number(v))}
-							>
-								<SelectTrigger id="ds-new-ticket-mailbox" className="w-full border rounded px-3 py-2 text-sm">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{/* Mailbox is mandatory (Q4) — no "None" option. */}
-									{mailboxes.map((m) => (
-										<SelectItem key={m.id} value={String(m.id)}>
-											{m.name || m.slug}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<p className="text-center text-sm font-medium text-[#CB5301]">
+								{__('Or adding New Customer', 'doublescale')}
+							</p>
+
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+								<div className="space-y-2">
+									<Label className="text-base font-normal text-foreground">
+										{__('First Name', 'doublescale')}{' '}
+										<span className="text-destructive">
+											*
+										</span>
+									</Label>
+									<Input
+
+										value={firstName}
+										disabled={Boolean(picked)}
+										onChange={(e) => {
+											clearPickedContact();
+											setFirstName(e.target.value);
+										}}
+										placeholder={__(
+											'First Name',
+											'doublescale'
+										)}
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label className="text-base font-normal text-foreground">
+										{__('Last Name', 'doublescale')}{' '}
+										<span className="text-destructive">
+											*
+										</span>
+									</Label>
+									<Input
+
+										value={lastName}
+										disabled={Boolean(picked)}
+										onChange={(e) => {
+											clearPickedContact();
+											setLastName(e.target.value);
+										}}
+										placeholder={__(
+											'Last Name',
+											'doublescale'
+										)}
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label className="text-base font-normal text-foreground">
+										{__('Email', 'doublescale')}{' '}
+										<span className="text-destructive">
+											*
+										</span>
+									</Label>
+									<Input
+										type="email"
+										className="h-10 !rounded-lg !border-border !bg-white"
+										value={email}
+										disabled={Boolean(picked)}
+										onChange={(e) => {
+											clearPickedContact();
+											setEmail(e.target.value);
+										}}
+										placeholder={__(
+											'eg: customer@example.com',
+											'doublescale'
+										)}
+									/>
+								</div>
+							</div>
 						</div>
-						<div>
+
+						{
+							applyFilters(
+								'doublescale_support_new_ticket_custom_fields',
+								null,
+								{
+									scope: 'admin',
+									form: {
+										title,
+										content,
+										priority,
+									},
+									customData,
+									onCustomDataChange: setCustomData,
+									errors: customFieldsErrors,
+									onErrorsChange: setCustomFieldsErrors,
+									onDefinitionsChange: setCustomFieldDefs,
+								}
+							) as React.ReactNode
+						}
+
+						<div className="space-y-2">
 							<Label
-								htmlFor="ds-new-ticket-assignee"
-								className="block text-sm font-medium text-gray-700 mb-1"
+								htmlFor="ds-new-ticket-content"
+								className="text-base font-normal text-foreground"
 							>
-								{__('Assignee', 'doublescale')}
+								{__('Opening message', 'doublescale')}{' '}
+								<span className="text-destructive">*</span>
 							</Label>
-							<Select
-								value={agentUserId === '' ? 'unassigned' : String(agentUserId)}
-								onValueChange={(v) =>
-									setAgentUserId(
-										v === 'unassigned'
-											? ''
-											: Number(v)
+							<SupportRichText
+								message={content}
+								onChange={setContent}
+								placeholder={__(
+									'What is the customer reporting?',
+									'doublescale'
+								)}
+							/>
+							<AttachmentUploader
+								pending={pendingAttachments}
+								uploading={uploading}
+								disabled={submitting}
+								maxFileCount={
+									attachmentLimits?.max_file_count
+								}
+								maxFileSizeBytes={
+									attachmentLimits?.max_file_size_bytes
+								}
+								onValidationError={setError}
+								onSelect={handleAttachmentSelect}
+								onRemove={(hash) =>
+									setPendingAttachments((prev) =>
+										removePendingByHash(prev, hash)
 									)
 								}
-							>
-								<SelectTrigger id="ds-new-ticket-assignee" className="w-full border rounded px-3 py-2 text-sm">
-									<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="unassigned">
-										{__('— Unassigned —', 'doublescale')}
-									</SelectItem>
-									{assignableAgents.map((agent) => (
-										<SelectItem key={agent.id} value={String(agent.id)}>
-											{agent.display_name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							/>
 						</div>
-						<div>
-							<Label
-								htmlFor="ds-new-ticket-priority"
-								className="block text-sm font-medium text-gray-700 mb-1"
-							>
-								{__('Priority', 'doublescale')}
-							</Label>
-							<Select
-								value={priority}
-								onValueChange={(v) =>
-									setPriority(v as TicketPriority)
-								}
-							>
-								<SelectTrigger id="ds-new-ticket-priority" className="w-full border rounded px-3 py-2 text-sm">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{TICKET_PRIORITIES.map((p) => (
-										<SelectItem key={p} value={p}>
-											{p}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+
+						{error && (
+							<div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+								{error}
+							</div>
+						)}
 						</div>
 					</div>
 
-					{
-						applyFilters(
-							'doublescale_support_new_ticket_custom_fields',
-							null,
-							{
-								scope: 'admin',
-								form: {
-									title,
-									content,
-									priority,
-								},
-								customData,
-								onCustomDataChange: setCustomData,
-								errors: customFieldsErrors,
-								onErrorsChange: setCustomFieldsErrors,
-								onDefinitionsChange: setCustomFieldDefs,
-							}
-						) as React.ReactNode
-					}
-
-					<div>
-						<Label
-							htmlFor="ds-new-ticket-content"
-							className="block text-sm font-medium text-gray-700 mb-1"
-						>
-							{__('Opening message', 'doublescale')}{' '}
-							<span className="text-red-500">*</span>
-						</Label>
-						<SupportRichText
-							message={content}
-							onChange={setContent}
-							placeholder={__(
-								'What is the customer reporting?',
-								'doublescale'
-							)}
-						/>
-						<AttachmentUploader
-							pending={pendingAttachments}
-							uploading={uploading}
-							disabled={submitting}
-							maxFileCount={attachmentLimits?.max_file_count}
-							maxFileSizeBytes={
-								attachmentLimits?.max_file_size_bytes
-							}
-							onValidationError={setError}
-							onSelect={handleAttachmentSelect}
-							onRemove={(hash) =>
-								setPendingAttachments((prev) =>
-									removePendingByHash(prev, hash)
-								)
-							}
-						/>
-					</div>
-
-					{error && (
-						<div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-							{error}
-						</div>
-					)}
-
-					<div className="flex justify-end gap-2 pt-2">
+					<DialogFooter className="shrink-0 flex-row justify-end gap-3  bg-white px-4 py-4 sm:space-x-0 sm:px-6">
 						<Button
 							type="button"
 							variant="outline"
+
 							onClick={onClose}
 							disabled={submitting}
 						>
 							{__('Cancel', 'doublescale')}
 						</Button>
 						<Button
-							type="submit"
+							type="button"
+							variant='default'
 							disabled={submitting || mailboxes.length === 0}
+							onClick={handleCreateTicket}
 						>
 							{submitting
 								? __('Creating…', 'doublescale')
-								: __('Create ticket', 'doublescale')}
+								: __('Create Ticket', 'doublescale')}
 						</Button>
-					</div>
-				</form>
-			</div>
-		</div>
+					</DialogFooter>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

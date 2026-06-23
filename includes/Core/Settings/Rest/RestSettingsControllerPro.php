@@ -713,13 +713,7 @@ class RestSettingsControllerPro {
 			}
 
 			try {
-				$client = new $graph_class(
-					$graph_config['client_id'],
-					$graph_config['client_secret'],
-					$graph_config['refresh_token'],
-					$graph_config['email'],
-					$graph_config['on_refresh_token_rotated']
-				);
+				$client = $graph_class::from_config( $graph_config );
 				$client->connect();
 				$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 				$client->disconnect();
@@ -893,13 +887,7 @@ class RestSettingsControllerPro {
 		}
 
 		try {
-			$client = new $graph_class(
-				$graph_config['client_id'],
-				$graph_config['client_secret'],
-				$graph_config['refresh_token'],
-				$graph_config['email'],
-				$graph_config['on_refresh_token_rotated']
-			);
+			$client = $graph_class::from_config( $graph_config );
 			$client->connect();
 			// Count only recent unseen mail (today onward), as the IMAP branch does.
 			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );

@@ -27,15 +27,17 @@ final class PaymentModeSplitTest extends TestCase {
 
 	public function test_split_modes_separates_offline_and_online(): void {
 		$split = PaymentMode::split_modes(
-			array( PaymentMode::CASH, PaymentMode::STRIPE, PaymentMode::BANK_TRANSFER )
+			array( PaymentMode::CASH, PaymentMode::STRIPE, PaymentMode::PAYPAL, PaymentMode::BANK_TRANSFER )
 		);
 
 		$this->assertSame( array( PaymentMode::CASH, PaymentMode::BANK_TRANSFER ), $split['offline'] );
-		$this->assertSame( array( PaymentMode::STRIPE ), $split['online'] );
+		$this->assertSame( array( PaymentMode::STRIPE, PaymentMode::PAYPAL ), $split['online'] );
 	}
 
-	public function test_legacy_paypal_normalizes_to_other(): void {
-		$this->assertSame( PaymentMode::OTHER, PaymentMode::normalize( 'paypal' ) );
-		$this->assertNotContains( 'paypal', PaymentMode::offline_modes() );
+	public function test_paypal_is_online_gateway(): void {
+		$this->assertSame( PaymentMode::PAYPAL, PaymentMode::normalize( 'paypal' ) );
+		$this->assertTrue( PaymentMode::is_online_gateway( PaymentMode::PAYPAL ) );
+		$this->assertContains( PaymentMode::PAYPAL, PaymentMode::online_gateway_slugs() );
+		$this->assertNotContains( PaymentMode::PAYPAL, PaymentMode::offline_modes() );
 	}
 }

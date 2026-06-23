@@ -1,13 +1,14 @@
 /**
- * Online payment UI for an invoice (gateway-agnostic; Stripe implementation today).
+ * Online payment UI for an invoice (Stripe + PayPal).
  */
 
-import React, { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 
 import { Button } from '@/components/ui/button';
+import { PayPalPayButtons } from '@/components/sales/paypal-pay-buttons';
 import {
 	confirmInvoiceOnlinePayment,
 	initInvoiceOnlinePayment,
@@ -85,6 +86,8 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	const balanceDue = Math.max(0, invoice.total - invoice.amount_paid);
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
+	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
+	const [paypalBusy, setPaypalBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
@@ -160,6 +163,10 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 					onPaidRef.current(response.invoice);
 					return;
 				}
+				if (gateway.slug === 'paypal') {
+					setPaypalClientId(response.client_id || null);
+					return;
+				}
 				setPublishableKey(response.publishable_key);
 				setClientSecret(response.client_secret || null);
 			})
@@ -180,6 +187,34 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		};
 	}, [invoice.id, gateway.slug]);
 
+	const handlePayPalApprove = useCallback(async () => {
+		setPaypalBusy(true);
+		setError(null);
+		try {
+			const result = await confirmInvoiceOnlinePayment(invoice.id, gateway.slug);
+			if (result.invoice) {
+				onPaidRef.current(result.invoice);
+			}
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale'));
+			throw err;
+		} finally {
+			setPaypalBusy(false);
+		}
+	}, [invoice.id, gateway.slug]);
+
+	const createPayPalOrder = useCallback(async () => {
+		const response = await initInvoiceOnlinePayment(invoice.id, gateway.slug);
+		if (response.already_paid && response.invoice) {
+			onPaidRef.current(response.invoice);
+			throw new Error(__('Invoice is already paid.', 'doublescale'));
+		}
+		if (!response.order_id) {
+			throw new Error(__('Could not start PayPal checkout.', 'doublescale'));
+		}
+		return response.order_id;
+	}, [invoice.id, gateway.slug]);
+
 	if (loading) {
 		return (
 			<div className="text-sm text-muted-foreground">{__('Loading payment options…', 'doublescale')}</div>
@@ -188,6 +223,37 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 
 	if (error) {
 		return <div className="text-sm text-red-600">{error}</div>;
+	}
+
+	if (gateway.slug === 'paypal') {
+		if (!paypalClientId) {
+			return (
+				<div className="text-sm text-muted-foreground">
+					{__('Could not start PayPal checkout.', 'doublescale')}
+				</div>
+			);
+		}
+
+		return (
+			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
+				<div>
+					<h4 className="font-medium">
+						{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}
+					</h4>
+					<p className="text-sm text-muted-foreground">
+						{__('Balance due:', 'doublescale')}{' '}
+						{formatMoney(balanceDue, invoice.currency)}
+					</p>
+				</div>
+				<PayPalPayButtons
+					clientId={paypalClientId}
+					currency={invoice.currency}
+					createOrder={createPayPalOrder}
+					busy={paypalBusy}
+					onApprove={handlePayPalApprove}
+				/>
+			</div>
+		);
 	}
 
 	if (gateway.slug !== 'stripe' || !clientSecret || !stripePromise) {

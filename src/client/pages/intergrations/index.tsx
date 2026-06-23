@@ -32,6 +32,8 @@ import twilioImg from '@doublescale/assets/images/twilio/twilio.png';
 // @ts-ignore
 import stripeImg from '@doublescale/assets/images/stripe/stripe.png';
 // @ts-ignore
+import paypalImg from '@doublescale/assets/images/paypal/paypal.png';
+// @ts-ignore
 import metaWhatsappImg from '@doublescale/assets/images/meta-whatsapp/meta-whatsapp.svg';
 
 const proPluginUrl =
@@ -47,12 +49,13 @@ const integrationImages: Record<string, string> = {
 	slack: slackImg,
 	twilio: twilioImg,
 	stripe: stripeImg,
+	paypal: paypalImg,
 	'meta-whatsapp': metaWhatsappImg,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
 };
 
-const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'slack', 'meta-whatsapp', 'zapier', 'make'];
+const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'zapier', 'make'];
 
 const ADDON_INTEGRATIONS = ['zapier', 'make'];
 
@@ -101,7 +104,10 @@ const Integrations: React.FC = () => {
 					// @ts-ignore
 					settings: response.settings,
 					// @ts-ignore
-					is_connected: Object.keys(response.settings || {}).length > 0,
+					is_connected:
+						typeof response.is_connected === 'boolean'
+							? response.is_connected
+							: Object.keys(response.settings || {}).length > 0,
 				},
 			}));
 		} catch (error) {
@@ -118,6 +124,12 @@ const Integrations: React.FC = () => {
 			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		}
 	}, [notice]);
+
+	useEffect(() => {
+		INTEGRATIONS_TO_SHOW.forEach((integrationKey) => {
+			void refreshIntegration(integrationKey);
+		});
+	}, []);
 
 	const handleSuccess = async (integrationLabel: string, integrationKey?: string) => {
 		if (!integrationKey) return;

@@ -496,7 +496,7 @@ const InvoiceEdit: React.FC = () => {
 						<Label>{__('Online payment gateways', 'doublescale')}</Label>
 						<p className="text-xs text-muted-foreground">
 							{__(
-								'Customers can pay automatically on the public invoice page. Stripe uses Integrations → Stripe.',
+								'Customers can pay automatically on the public invoice page. Credentials are managed in Integrations (Stripe, PayPal).',
 								'doublescale'
 							)}
 						</p>

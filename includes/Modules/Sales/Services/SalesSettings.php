@@ -44,6 +44,7 @@ final class SalesSettings {
 			),
 			'default_online_payment_gateways' => array(
 				PaymentMode::STRIPE,
+				PaymentMode::PAYPAL,
 			),
 			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
 			'pdf_company_address'             => '',

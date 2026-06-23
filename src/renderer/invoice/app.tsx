@@ -2,13 +2,14 @@
  * Public invoice view with payment history and online gateway checkout.
  */
 
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Download } from 'lucide-react';
 
 import { InvoiceDocumentPreview } from '@/components/sales/document-preview';
+import { PayPalPayButtons } from '@/components/sales/paypal-pay-buttons';
 import { Button } from '@/components/ui/button';
 import type { Invoice } from '@/types/sales';
 import type { OnlinePaymentGatewayStatus } from '@/types/sales';
@@ -90,6 +91,8 @@ const PublicOnlinePayment: React.FC<{
 }> = ({ hash, invoice, gateway, onPaid }) => {
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
+	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
+	const [paypalBusy, setPaypalBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
@@ -164,6 +167,10 @@ const PublicOnlinePayment: React.FC<{
 					onPaidRef.current();
 					return;
 				}
+				if (gateway.slug === 'paypal') {
+					setPaypalClientId(response.client_id || null);
+					return;
+				}
 				setPublishableKey(response.publishable_key);
 				setClientSecret(response.client_secret || null);
 			})
@@ -184,6 +191,32 @@ const PublicOnlinePayment: React.FC<{
 		};
 	}, [hash, gateway.slug]);
 
+	const handlePayPalApprove = useCallback(async () => {
+		setPaypalBusy(true);
+		setError(null);
+		try {
+			await confirmPublicInvoicePayment(hash, gateway.slug);
+			onPaidRef.current();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale'));
+			throw err;
+		} finally {
+			setPaypalBusy(false);
+		}
+	}, [hash, gateway.slug]);
+
+	const createPayPalOrder = useCallback(async () => {
+		const response = await initPublicInvoicePayment(hash, gateway.slug);
+		if (response.already_paid) {
+			onPaidRef.current();
+			throw new Error(__('Invoice is already paid.', 'doublescale'));
+		}
+		if (!response.order_id) {
+			throw new Error(__('Could not start PayPal checkout.', 'doublescale'));
+		}
+		return response.order_id;
+	}, [hash, gateway.slug]);
+
 	if (loading) {
 		return (
 			<div className="text-sm text-muted-foreground">{__('Loading payment options…', 'doublescale')}</div>
@@ -197,6 +230,31 @@ const PublicOnlinePayment: React.FC<{
 				{isUnavailable
 					? __('Online payment is not available on this site. Please use another payment method.', 'doublescale')
 					: error}
+			</div>
+		);
+	}
+
+	if (gateway.slug === 'paypal') {
+		if (!paypalClientId) {
+			return null;
+		}
+
+		return (
+			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
+				<div>
+					<h4 className="font-medium">{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}</h4>
+					<p className="text-sm text-muted-foreground">
+						{__('Balance due:', 'doublescale')}{' '}
+						{formatMoney(invoice.balance, invoice.currency)}
+					</p>
+				</div>
+				<PayPalPayButtons
+					clientId={paypalClientId}
+					currency={invoice.currency}
+					createOrder={createPayPalOrder}
+					busy={paypalBusy}
+					onApprove={handlePayPalApprove}
+				/>
 			</div>
 		);
 	}

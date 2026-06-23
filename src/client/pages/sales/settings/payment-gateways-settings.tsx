@@ -95,7 +95,7 @@ const GatewayCard: React.FC<{
 				/>
 			</div>
 		</div>
-		{gateway.slug === 'stripe' || gateway.integration_url ? (
+		{gateway.slug === 'stripe' || gateway.slug === 'paypal' || gateway.integration_url ? (
 			<Button type="button" variant="outline" size="sm" onClick={onConfigure}>
 				<Settings2 className="h-4 w-4 mr-1" />
 				{__('Configure in Integrations', 'doublescale')}
@@ -136,8 +136,8 @@ export const PaymentGatewaysSettings: React.FC<PaymentGatewaysSettingsProps> = (
 	};
 
 	const openIntegration = (gateway: OnlinePaymentGatewayStatus) => {
-		if (gateway.slug === 'stripe') {
-			navigate(getToLink('integrations/stripe'));
+		if (gateway.slug === 'stripe' || gateway.slug === 'paypal') {
+			navigate(getToLink(`integrations/${gateway.slug}`));
 		}
 	};
 

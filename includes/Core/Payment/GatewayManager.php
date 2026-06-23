@@ -368,6 +368,10 @@ final class GatewayManager {
 			return admin_url( 'admin.php?page=doublescale&path=integrations/stripe' );
 		}
 
+		if ( 'paypal' === $slug ) {
+			return admin_url( 'admin.php?page=doublescale&path=integrations/paypal' );
+		}
+
 		return '';
 	}
 }

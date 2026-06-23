@@ -23,6 +23,7 @@ class PaymentMode {
 	const CREDIT_CARD   = 'credit_card';
 	const CREDIT_NOTE   = 'credit_note';
 	const STRIPE        = 'stripe';
+	const PAYPAL        = 'paypal';
 	const OTHER         = 'other';
 
 	/**
@@ -45,7 +46,7 @@ class PaymentMode {
 	 * @return string[]
 	 */
 	public static function online_gateway_slugs(): array {
-		$slugs = array( self::STRIPE );
+		$slugs = array( self::STRIPE, self::PAYPAL );
 
 		/**
 		 * Register additional online payment gateway slugs for invoices.
@@ -126,7 +127,6 @@ class PaymentMode {
 			'bank'            => self::BANK_TRANSFER,
 			'stripe_checkout' => self::STRIPE,
 			'credit_card'     => self::CREDIT_CARD,
-			'paypal'          => self::OTHER,
 		);
 
 		return $legacy[ $mode ] ?? self::OTHER;

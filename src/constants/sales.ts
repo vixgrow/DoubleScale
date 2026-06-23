@@ -78,7 +78,7 @@ export const OFFLINE_PAYMENT_MODES = [
 export type OfflinePaymentMode = (typeof OFFLINE_PAYMENT_MODES)[number];
 
 /** Online gateway slugs — implementations register via Pro/modules. */
-export const ONLINE_PAYMENT_GATEWAYS = ['stripe'] as const;
+export const ONLINE_PAYMENT_GATEWAYS = ['stripe', 'paypal'] as const;
 
 export type OnlinePaymentGatewaySlug = (typeof ONLINE_PAYMENT_GATEWAYS)[number];
 
@@ -104,6 +104,7 @@ const LEGACY_PAYMENT_MODE_LABELS = {
 
 export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, string> = {
 	stripe: 'Stripe (online)',
+	paypal: 'PayPal (online)',
 };
 
 export const PAYMENT_MODE_LABELS: Record<

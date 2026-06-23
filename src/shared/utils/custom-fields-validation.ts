@@ -12,6 +12,25 @@ export type CrmCustomFieldAttributesMeta = {
 	required: boolean;
 };
 
+export const normalizeCustomFieldOptionValue = (option: unknown): string => {
+	if (typeof option === 'string' || typeof option === 'number') {
+		return String(option).trim();
+	}
+
+	if (option && typeof option === 'object') {
+		const record = option as Record<string, unknown>;
+		const value = record.value ?? record.label ?? '';
+		return String(value).trim();
+	}
+
+	return '';
+};
+
+export const normalizeCustomFieldOptionValues = (
+	options: unknown[]
+): string[] =>
+	options.map(normalizeCustomFieldOptionValue).filter(Boolean);
+
 export const getCustomFieldAttributesMeta = (
 	attributes: unknown
 ): CrmCustomFieldAttributesMeta => {
@@ -21,9 +40,7 @@ export const getCustomFieldAttributesMeta = (
 
 	if (Array.isArray(attributes)) {
 		return {
-			options: attributes
-				.map((option) => String(option).trim())
-				.filter(Boolean),
+			options: normalizeCustomFieldOptionValues(attributes),
 			required: false,
 		};
 	}
@@ -32,7 +49,7 @@ export const getCustomFieldAttributesMeta = (
 		const record = attributes as Record<string, unknown>;
 		const rawOptions = record.options;
 		const options = Array.isArray(rawOptions)
-			? rawOptions.map((option) => String(option).trim()).filter(Boolean)
+			? normalizeCustomFieldOptionValues(rawOptions)
 			: [];
 
 		return {
@@ -94,6 +111,34 @@ export const isEmptyCrmCustomFieldValue = (
 	return String(value).trim() === '';
 };
 
+export const isValidCrmCustomFieldValue = (
+	field: CrmCustomFieldLike,
+	value: unknown
+): boolean => {
+	if (isEmptyCrmCustomFieldValue(value, field.type)) {
+		return true;
+	}
+
+	const { options } = getCustomFieldAttributesMeta(field.attributes);
+
+	if (field.type === 'select') {
+		return options.includes(String(value).trim());
+	}
+
+	if (field.type === 'multiselect') {
+		const selected = Array.isArray(value)
+			? value.map((item) => String(item).trim()).filter(Boolean)
+			: String(value)
+					.split(',')
+					.map((item) => item.trim())
+					.filter(Boolean);
+
+		return selected.every((item) => options.includes(item));
+	}
+
+	return true;
+};
+
 export const validateCrmCustomFields = (
 	groups: Array<{ custom_fields?: CrmCustomFieldLike[] }>,
 	values: Record<number, unknown>
@@ -102,14 +147,21 @@ export const validateCrmCustomFields = (
 
 	for (const group of groups) {
 		for (const field of group.custom_fields || []) {
-			if (!isCustomFieldRequired(field)) {
-				continue;
-			}
+			const value = values[field.id];
 
-			if (isEmptyCrmCustomFieldValue(values[field.id], field.type)) {
+			if (isCustomFieldRequired(field) && isEmptyCrmCustomFieldValue(value, field.type)) {
 				errors[field.id] = sprintf(
 					/* translators: %s: field label */
 					__('The field "%s" is required.', 'doublescale'),
+					field.name
+				);
+				continue;
+			}
+
+			if (!isValidCrmCustomFieldValue(field, value)) {
+				errors[field.id] = sprintf(
+					/* translators: %s: field label */
+					__('The field "%s" has an invalid value.', 'doublescale'),
 					field.name
 				);
 			}
@@ -150,7 +202,11 @@ export const mapCrmCustomFieldRestError = (
 		data?: { field_id?: number };
 	};
 
-	if (error.code !== 'custom_field_required' || !error.message) {
+	if (
+		(error.code !== 'custom_field_required' &&
+			error.code !== 'custom_field_invalid') ||
+		!error.message
+	) {
 		return {};
 	}
 

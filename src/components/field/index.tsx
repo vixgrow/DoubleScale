@@ -430,6 +430,14 @@ const Field: React.FC<FieldProps> = ({
 		}
 		case 'multiselect':
 			const multiOptions = options || [];
+			const selectedValues = Array.isArray(value)
+				? value.map((item) => String(item).trim()).filter(Boolean)
+				: typeof value === 'string' && value
+					? value
+							.split(',')
+							.map((item) => item.trim())
+							.filter(Boolean)
+					: [];
 			fieldContent = (
 				<Select
 					onChange={(selectedOptions) => {
@@ -440,7 +448,7 @@ const Field: React.FC<FieldProps> = ({
 					}}
 					options={multiOptions}
 					value={multiOptions.filter((option) =>
-						value?.includes(option.value)
+						selectedValues.includes(String(option.value))
 					)}
 					isMulti
 					placeholder={placeholder}

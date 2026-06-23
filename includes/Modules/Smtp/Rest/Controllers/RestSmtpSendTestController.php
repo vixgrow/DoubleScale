@@ -139,8 +139,21 @@ class RestSmtpSendTestController extends RestController {
 		$headers      = array(
 			'Content-Type: ' . $content_head . '; charset=UTF-8',
 		);
-		if ( $admin_email ) {
-			$from      = $blogname ? sprintf( '%s <%s>', $blogname, $admin_email ) : $admin_email;
+
+		// From MUST be the selected connection's own sending address, not the WP
+		// admin_email. OAuth providers that send "as" the authenticated mailbox —
+		// Outlook (Graph /me/sendMail), Gmail (Graph-equivalent), Zoho — reject any
+		// other From with an identity error (e.g. Outlook's ErrorSendAsDenied:
+		// "does not have the right to send mail on behalf of the specified sending
+		// account"). Fall back to admin_email only when the connection has no
+		// from_email of its own (e.g. a bare custom SMTP relay).
+		$connection_from = isset( $connection_row['from_email'] ) ? trim( (string) $connection_row['from_email'] ) : '';
+		$from_address    = '' !== $connection_from ? $connection_from : $admin_email;
+		$from_name       = isset( $connection_row['from_name'] ) && '' !== trim( (string) $connection_row['from_name'] )
+			? trim( (string) $connection_row['from_name'] )
+			: $blogname;
+		if ( $from_address ) {
+			$from      = $from_name ? sprintf( '%s <%s>', $from_name, $from_address ) : $from_address;
 			$headers[] = 'From: ' . $from;
 		}
 

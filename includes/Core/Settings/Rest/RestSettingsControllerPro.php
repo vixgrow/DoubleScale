@@ -1695,6 +1695,65 @@ class RestSettingsControllerPro {
 		);
 	}
 
+	/**
+	 * Get Microsoft Graph config for a smtp Outlook account.
+	 *
+	 * Parallels {@see get_smtp_outlook_imap_config()} but for the Graph receive
+	 * path: returns the app client_id/secret and the account refresh token that
+	 * {@see \DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient} mints a
+	 * Graph-audience token from. No token is minted here — the client does that
+	 * at connect() and persists any rotation via the callback.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $account_id Optional account ID. Uses first account if empty.
+	 * @return array{client_id:string, client_secret:string, refresh_token:string, email:string, on_refresh_token_rotated:callable}|false
+	 */
+	public static function get_smtp_outlook_graph_config( $account_id = '' ) {
+		$outlook_option   = EmailOauth::mailer_settings_option_name( 'outlook' );
+		$outlook_settings = get_option( $outlook_option, array() );
+		$outlook_app      = $outlook_settings['app'] ?? array();
+		$outlook_accounts = $outlook_settings['accounts'] ?? array();
+
+		if ( empty( $outlook_accounts ) ) {
+			return false;
+		}
+
+		if ( ! empty( $account_id ) && isset( $outlook_accounts[ $account_id ] ) ) {
+			$account = $outlook_accounts[ $account_id ];
+		} else {
+			$account_id = array_key_first( $outlook_accounts );
+			$account    = $outlook_accounts[ $account_id ];
+		}
+
+		$credentials   = $account['credentials'] ?? array();
+		$refresh_token = $credentials['refresh_token'] ?? '';
+		if ( is_array( $refresh_token ) ) {
+			$refresh_token = $refresh_token['refresh_token'] ?? ( $refresh_token[0] ?? '' );
+		}
+
+		$client_id     = $outlook_app['client_id'] ?? '';
+		$client_secret = $outlook_app['client_secret'] ?? '';
+
+		if ( empty( $refresh_token ) || empty( $client_id ) || empty( $client_secret ) ) {
+			return false;
+		}
+
+		return array(
+			'client_id'                => $client_id,
+			'client_secret'            => $client_secret,
+			'refresh_token'            => $refresh_token,
+			'email'                    => $account['name'] ?? $account_id,
+			'on_refresh_token_rotated' => static function ( $new_refresh_token ) use ( $outlook_option, $account_id ) {
+				$settings = get_option( $outlook_option, array() );
+				if ( isset( $settings['accounts'][ $account_id ] ) ) {
+					$settings['accounts'][ $account_id ]['credentials']['refresh_token'] = $new_refresh_token;
+					update_option( $outlook_option, $settings );
+				}
+			},
+		);
+	}
+
 	// ─── Mobile App (Firebase Push) Endpoints ───────────────────────────────
 
 	/**

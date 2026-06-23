@@ -14,7 +14,6 @@ use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Services\SalesEmailHtml;
 use DoubleScale\Modules\Sales\Services\SalesEmailMergeTags;
-use DoubleScale\Modules\Sales\Services\SalesEmailTokens;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 
 /**
@@ -40,14 +39,14 @@ final class ProposalNotifications {
 			return false;
 		}
 
-		$tokens = SalesEmailTokens::for_proposal( $proposal, $url );
+		$context = SalesEmailMergeTags::for_proposal( $proposal );
 
 		$host_user_id = $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : null;
 		$identity     = EmailIdentityResolver::resolve( $host_user_id );
 
 		$customer_name = $proposal->to_name ? (string) $proposal->to_name : __( 'there', 'doublescale' );
 		$subject_tpl   = (string) SalesSettings::get( 'proposal_email_subject', '' );
-		$subject       = SalesEmailTokens::replace( $subject_tpl, $tokens );
+		$subject       = trim( SalesEmailHtml::resolve_template( $subject_tpl, $context, 'proposal' ) );
 		if ( '' === trim( $subject ) ) {
 			$subject = sprintf(
 				/* translators: %s: proposal subject */
@@ -56,17 +55,13 @@ final class ProposalNotifications {
 			);
 		}
 
-		$proposal->loadMissing( 'contact' );
 		$intro_tpl  = (string) SalesSettings::get( 'proposal_email_intro', '' );
 		$intro_html = SalesEmailHtml::resolve_intro_html(
 			$custom_message,
 			$intro_tpl,
-			$tokens,
 			__( 'Please review the proposal below and let us know if you would like to accept or decline.', 'doublescale' ),
-			SalesEmailMergeTags::context_from_contact(
-				$proposal->contact,
-				array( 'proposal_id' => (int) $proposal->id )
-			)
+			$context,
+			'proposal'
 		);
 
 		$body = $this->build_body( $proposal, $customer_name, $url, $intro_html );

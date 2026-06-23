@@ -41,6 +41,8 @@ $expected_triggers = array(
 	'invoice_paid',
 	'contract_sent',
 	'contract_signed',
+	'credit_note_sent',
+	'credit_note_applied',
 );
 
 $expected_proposal_rules = array(
@@ -64,6 +66,13 @@ $expected_contract_rules = array(
 	'contract_number',
 );
 
+$expected_credit_note_rules = array(
+	'credit_note_status',
+	'credit_note_total',
+	'credit_note_remaining',
+	'credit_note_number',
+);
+
 $sales_on = function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' );
 $pro_on   = function_exists( 'doublescale_is_pro_addon_active' ) && doublescale_is_pro_addon_active();
 
@@ -77,7 +86,13 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\TriggersManager' )
 		$check( isset( $triggers[ $slug ] ), "Trigger registered: {$slug}" );
 		if ( isset( $triggers[ $slug ] ) ) {
 			$t = $triggers[ $slug ];
-			$expected_group = ( 0 === strpos( $slug, 'contract_' ) ) ? 'contracts' : 'sales';
+			if ( 0 === strpos( $slug, 'contract_' ) ) {
+				$expected_group = 'contracts';
+			} elseif ( 0 === strpos( $slug, 'credit_note_' ) ) {
+				$expected_group = 'credit_notes';
+			} else {
+				$expected_group = 'sales';
+			}
 			$check( 'sales' === $t->source && $expected_group === $t->group, "Trigger {$slug} source/group = sales/{$expected_group}" );
 			if ( $pro_on ) {
 				$check( empty( $t->is_pro ), "Trigger {$slug} is_pro=false when Pro active" );
@@ -107,6 +122,7 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\RulesManager' ) ) 
 	$check( isset( $groups['proposal'] ), 'Rules group: proposal' );
 	$check( isset( $groups['invoice'] ), 'Rules group: invoice' );
 	$check( isset( $groups['contract'] ), 'Rules group: contract' );
+	$check( isset( $groups['credit_note'] ), 'Rules group: credit_note' );
 
 	if ( $sales_on && $pro_on ) {
 		foreach ( $expected_proposal_rules as $slug ) {
@@ -125,6 +141,12 @@ if ( class_exists( '\DoubleScale\Modules\Automations\Services\RulesManager' ) ) 
 			$check(
 				isset( $groups['contract']['rules'][ $slug ] ),
 				"Contract rule registered: {$slug}"
+			);
+		}
+		foreach ( $expected_credit_note_rules as $slug ) {
+			$check(
+				isset( $groups['credit_note']['rules'][ $slug ] ),
+				"Credit note rule registered: {$slug}"
 			);
 		}
 

@@ -22,6 +22,7 @@ import {
 	PremiumIcon,
 } from '@doublescale/components';
 import type { DashboardData } from '@doublescale/client';
+import config from '@doublescale/config';
 
 interface DashboardCardsProps {
 	data: DashboardData;
@@ -39,6 +40,7 @@ const formatDealsWonValue = (n: number) =>
 
 export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
+	const dealsModuleEnabled = config.isModuleToggleEnabled('deals');
 
 	return (
 		<DashboardContentCard
@@ -97,7 +99,8 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					iconColor="text-white"
 				/>
 
-				{isProActive ? (
+				{dealsModuleEnabled &&
+					(isProActive ? (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -117,9 +120,10 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#0D9DFC]"
 						iconColor="text-white"
 					/>
-				)}
+				))}
 
-				{isProActive ? (
+				{dealsModuleEnabled &&
+					(isProActive ? (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -139,9 +143,10 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#16A34A]"
 						iconColor="text-white"
 					/>
-				)}
+				))}
 
-				{isProActive ? (
+				{dealsModuleEnabled &&
+					(isProActive ? (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -160,7 +165,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#16A34A]"
 						iconColor="text-white"
 					/>
-				)}
+				))}
 			</div>
 		</DashboardContentCard>
 	);

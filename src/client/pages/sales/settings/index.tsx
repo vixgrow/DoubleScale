@@ -23,6 +23,19 @@ import { SalesEmailIntroField } from './sales-email-intro-field';
 import { InvoicesProGate, PaymentsProGate } from '../pro-gates';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 
+const SALES_EMAIL_MERGE_TAG_HINT = __(
+	'Use merge tags from the editor toolbar — {{sales:…}} for document fields and {{contact:…}} for contact fields. Legacy {token} placeholders still work.',
+	'doublescale'
+);
+
+const SALES_EMAIL_SUBJECT_PLACEHOLDERS: Record<string, string> = {
+	proposal_email_subject: 'Proposal: {{sales:proposal_subject}}',
+	invoice_email_subject: 'Invoice: {{sales:invoice_number}}',
+	credit_note_email_subject: 'Credit Note: {{sales:credit_note_number}}',
+	contract_email_subject: 'Contract: {{sales:contract_subject}}',
+	contract_signed_email_subject: 'Contract signed: {{sales:contract_number}}',
+};
+
 const SalesSettingsPage: React.FC = () => {
 	const navigate = useNavigate();
 	const documentsEnabled = ConfigAPI.isModuleEnabled('documents');
@@ -126,17 +139,17 @@ const SalesSettingsPage: React.FC = () => {
 							<Input
 								value={form.proposal_email_subject}
 								onChange={(e) => patch('proposal_email_subject', e.target.value)}
+								placeholder={SALES_EMAIL_SUBJECT_PLACEHOLDERS.proposal_email_subject}
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
 							<SalesEmailIntroField
 								value={form.proposal_email_intro}
 								onChange={(value) => patch('proposal_email_intro', value)}
+								documentType="proposal"
 							/>
 						</FormField>
-						<p className="text-xs text-muted-foreground">
-							{__('Tokens: {subject}, {proposal_number}, {customer_name}, {public_url}', 'doublescale')}
-						</p>
+						<p className="text-xs text-muted-foreground">{SALES_EMAIL_MERGE_TAG_HINT}</p>
 					</section>
 
 					{isProActive ? (
@@ -146,20 +159,17 @@ const SalesSettingsPage: React.FC = () => {
 							<Input
 								value={form.invoice_email_subject}
 								onChange={(e) => patch('invoice_email_subject', e.target.value)}
+								placeholder={SALES_EMAIL_SUBJECT_PLACEHOLDERS.invoice_email_subject}
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
 							<SalesEmailIntroField
 								value={form.invoice_email_intro}
 								onChange={(value) => patch('invoice_email_intro', value)}
+								documentType="invoice"
 							/>
 						</FormField>
-						<p className="text-xs text-muted-foreground">
-							{__(
-								'Tokens: {invoice_number}, {customer_name}, {total}, {balance}, {public_url}',
-								'doublescale'
-							)}
-						</p>
+						<p className="text-xs text-muted-foreground">{SALES_EMAIL_MERGE_TAG_HINT}</p>
 					</section>
 					) : (
 						<InvoicesProGate />
@@ -172,20 +182,17 @@ const SalesSettingsPage: React.FC = () => {
 							<Input
 								value={form.credit_note_email_subject}
 								onChange={(e) => patch('credit_note_email_subject', e.target.value)}
+								placeholder={SALES_EMAIL_SUBJECT_PLACEHOLDERS.credit_note_email_subject}
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
 							<SalesEmailIntroField
 								value={form.credit_note_email_intro}
 								onChange={(value) => patch('credit_note_email_intro', value)}
+								documentType="credit_note"
 							/>
 						</FormField>
-						<p className="text-xs text-muted-foreground">
-							{__(
-								'Tokens: {credit_note_number}, {contact_name}, {total}, {remaining}, {credit_note_date}, {public_url}',
-								'doublescale'
-							)}
-						</p>
+						<p className="text-xs text-muted-foreground">{SALES_EMAIL_MERGE_TAG_HINT}</p>
 					</section>
 					) : null}
 
@@ -195,20 +202,17 @@ const SalesSettingsPage: React.FC = () => {
 							<Input
 								value={form.contract_email_subject}
 								onChange={(e) => patch('contract_email_subject', e.target.value)}
+								placeholder={SALES_EMAIL_SUBJECT_PLACEHOLDERS.contract_email_subject}
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
 							<SalesEmailIntroField
 								value={form.contract_email_intro}
 								onChange={(value) => patch('contract_email_intro', value)}
+								documentType="contract"
 							/>
 						</FormField>
-						<p className="text-xs text-muted-foreground">
-							{__(
-								'Tokens: {subject}, {contract_number}, {customer_name}, {public_url}, {contract_value}, {end_date}',
-								'doublescale'
-							)}
-						</p>
+						<p className="text-xs text-muted-foreground">{SALES_EMAIL_MERGE_TAG_HINT}</p>
 					</section>
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">
@@ -217,20 +221,17 @@ const SalesSettingsPage: React.FC = () => {
 							<Input
 								value={form.contract_signed_email_subject}
 								onChange={(e) => patch('contract_signed_email_subject', e.target.value)}
+								placeholder={SALES_EMAIL_SUBJECT_PLACEHOLDERS.contract_signed_email_subject}
 							/>
 						</FormField>
 						<FormField label={__('Email intro', 'doublescale')} className="!mb-0">
 							<SalesEmailIntroField
 								value={form.contract_signed_email_intro}
 								onChange={(value) => patch('contract_signed_email_intro', value)}
+								documentType="contract"
 							/>
 						</FormField>
-						<p className="text-xs text-muted-foreground">
-							{__(
-								'Sent to the customer after they sign. Tokens: {contract_number}, {subject}, {customer_name}, {public_url}',
-								'doublescale'
-							)}
-						</p>
+						<p className="text-xs text-muted-foreground">{SALES_EMAIL_MERGE_TAG_HINT}</p>
 					</section>
 
 					<section className="space-y-4 border rounded-lg bg-white p-6">

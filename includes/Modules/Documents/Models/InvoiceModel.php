@@ -101,18 +101,24 @@ class InvoiceModel extends Model {
 	}
 
 	/**
-	 * Subscription that generated this child invoice (Pro feature).
+	 * Subscription that generated this child invoice (add-on feature).
 	 *
-	 * The Pro class is referenced as a compile-time string literal, so this
-	 * method is safe to define even when Pro is absent — `::class` never
-	 * triggers the autoloader. It only resolves a class when the relation is
-	 * accessed, and Free never reads `$invoice->subscription` (only Pro's UI
-	 * does). When Pro is off, `subscription_id` is simply an inert column.
+	 * The model class is resolved through the `doublescale_subscription_model_class`
+	 * filter, supplied by the DoubleScale Subscriptions add-on. Free holds no
+	 * compile-time dependency on that plugin; the string literal default keeps the
+	 * relation resolvable once the add-on is active even if the filter is
+	 * detached. The relation is only ever read by the add-on UI — when the add-on
+	 * is absent, `subscription_id` is an inert column and this method is never
+	 * called, so the (then non-existent) default class is never instantiated.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function subscription() {
-		return $this->belongsTo( \DoubleScale\Pro\Modules\Subscriptions\Models\SubscriptionModel::class, 'subscription_id', 'id' );
+		$class = apply_filters( 'doublescale_subscription_model_class', '\\DoubleScale\\Subscriptions\\Models\\SubscriptionModel' );
+		if ( ! is_string( $class ) || '' === $class ) {
+			$class = '\\DoubleScale\\Subscriptions\\Models\\SubscriptionModel';
+		}
+		return $this->belongsTo( $class, 'subscription_id', 'id' );
 	}
 
 	/**

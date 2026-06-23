@@ -196,7 +196,11 @@ final class LoginRedirect {
 
 		foreach ( $user->roles as $role ) {
 			if ( in_array( $role, $sales_roles, true ) ) {
-				return admin_url( 'admin.php?page=' . self::CRM_DASHBOARD_SLUG . '&path=sales-pipeline' );
+				if ( function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'deals' ) ) {
+					return admin_url( 'admin.php?page=' . self::CRM_DASHBOARD_SLUG . '&path=sales-pipeline' );
+				}
+
+				return admin_url( 'admin.php?page=' . self::CRM_DASHBOARD_SLUG . '&path=sales' );
 			}
 		}
 

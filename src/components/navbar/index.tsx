@@ -187,8 +187,9 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'abandoned-carts': 'campaigns',
 };
 
-/** Submenu routes gated by a Pro module (when Pro is active). */
+/** Submenu routes gated by a module toggle (Sales pipeline, analytics, etc.). */
 const SUB_PATH_TO_MODULE: Record<string, string> = {
+	'sales-pipeline': 'deals',
 	campaigns: 'campaigns',
 	'email-sequences': 'campaigns',
 	'deals-analytics': 'analytics',
@@ -223,15 +224,13 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const modulesTick = useModulesConfigTick();
 
 	const filterSubMenuByModules = useCallback(
-		(items: SubMenuItem[] | undefined, isPro: boolean): SubMenuItem[] | undefined => {
+		(items: SubMenuItem[] | undefined): SubMenuItem[] | undefined => {
 			if (!items?.length) {
 				return items;
 			}
-			if (!isPro) {
-				return items;
-			}
 			return items.filter((sub) => {
-				const mod = SUB_PATH_TO_MODULE[sub.path];
+				const mod =
+					SUB_PATH_TO_MODULE[sub.path] ?? PATH_TO_MODULE[sub.path];
 				return !mod || config.isModuleToggleEnabled(mod);
 			});
 		},
@@ -437,10 +436,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'sales') {
 					navItem.subMenu = [
-						{
-							path: 'sales-pipeline',
-							label: __('Pipelines', 'doublescale'),
-						},
+						...(config.isModuleToggleEnabled('deals')
+							? [
+									{
+										path: 'sales-pipeline',
+										label: __('Pipelines', 'doublescale'),
+									},
+							  ]
+							: []),
 						...(isSalesDocumentsReady() &&
 						config.isModuleToggleEnabled('documents')
 							? [
@@ -561,10 +564,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				}
 
 				if (navItem.subMenu) {
-					const filtered = filterSubMenuByModules(
-						navItem.subMenu,
-						isProActive
-					);
+					const filtered = filterSubMenuByModules(navItem.subMenu);
 					navItem.subMenu =
 						filtered && filtered.length > 0 ? filtered : undefined;
 				}

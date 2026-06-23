@@ -310,6 +310,16 @@ final class RulesManager {
 				),
 				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
 			),
+			'credit_note'               => array(
+				'name'        => __( 'Credit Note', 'doublescale' ),
+				'key'         => 'credit_note',
+				'rules'       => array(),
+				'triggers'    => array(
+					'credit_note_sent',
+					'credit_note_applied',
+				),
+				'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) ),
+			),
 		);
 
 		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {

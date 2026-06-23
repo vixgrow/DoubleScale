@@ -33,7 +33,10 @@ import CustomDialogHeader from '../dialog-header';
 import EnhancedMergeTagsSelector from './enhanced-selector';
 import {
 	filterMergeTagGroups,
+	filterMergeTagGroupsForSalesEmail,
+	getVisibleMergeTagsForSalesEmail,
 	getVisibleMergeTagsForTrigger,
+	type SalesEmailDocumentType,
 } from './utils';
 
 interface MergeTagsSelectorProps {
@@ -42,6 +45,8 @@ interface MergeTagsSelectorProps {
 	onInsertTag?: (tagValue: string) => void;
 	// Enhanced props for dynamic loading
 	triggerId?: string;
+	/** When set, limits the Sales group to tags for this document (settings emails). */
+	salesEmailDocumentType?: SalesEmailDocumentType;
 	formId?: string | number;
 	automationId?: string | number;
 	postId?: string | number; // For Elementor forms
@@ -52,6 +57,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	onClose,
 	onInsertTag,
 	triggerId,
+	salesEmailDocumentType,
 	formId,
 	automationId,
 	postId,
@@ -64,11 +70,18 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 		formContext: select('doublescale/core').getFormContext(),
 	}));
 
+	const activeTrigger = triggerId ?? currentTrigger;
+
 	const automationMergeTags = ConfigAPI.getMergeTags();
-	const automationMergeTagsWithTrigger = filterMergeTagGroups(
-		automationMergeTags,
-		currentTrigger
-	);
+	const salesEmailGroups = salesEmailDocumentType
+		? filterMergeTagGroupsForSalesEmail(
+				automationMergeTags,
+				salesEmailDocumentType
+		  )
+		: null;
+	const automationMergeTagsWithTrigger = salesEmailGroups
+		? salesEmailGroups.map((entry) => entry.group)
+		: filterMergeTagGroups(automationMergeTags, activeTrigger);
 
 	useEffect(() => {
 		if (selectedTabIndex >= automationMergeTagsWithTrigger.length) {
@@ -95,6 +108,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	}
 
 	const selectedGroup = automationMergeTagsWithTrigger[selectedTabIndex];
+	const selectedGroupId = salesEmailGroups?.[selectedTabIndex]?.id;
 
 	return (
 		<Dialog open={visible} onOpenChange={() => onClose()}>
@@ -137,7 +151,9 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 							<MergeTagsGroupRender
 								mergeTags={selectedGroup.mergeTags}
 								onInsertTag={onInsertTag}
-								activeTrigger={currentTrigger}
+								activeTrigger={activeTrigger}
+								salesEmailDocumentType={salesEmailDocumentType}
+								groupId={selectedGroupId}
 							/>
 						)}
 					</div>
@@ -151,13 +167,24 @@ const MergeTagsGroupRender: React.FC<{
 	mergeTags: MergeTags;
 	onInsertTag?: (tagValue: string) => void;
 	activeTrigger?: string;
-}> = ({ mergeTags, onInsertTag, activeTrigger }) => {
+	salesEmailDocumentType?: SalesEmailDocumentType;
+	groupId?: string;
+}> = ({
+	mergeTags,
+	onInsertTag,
+	activeTrigger,
+	salesEmailDocumentType,
+	groupId,
+}) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('doublescale/core');
 
-	const filteredMergeTags = getVisibleMergeTagsForTrigger(
-		mergeTags,
-		activeTrigger
-	);
+	const filteredMergeTags =
+		salesEmailDocumentType && 'sales' === groupId
+			? getVisibleMergeTagsForSalesEmail(
+					mergeTags,
+					salesEmailDocumentType
+			  )
+			: getVisibleMergeTagsForTrigger(mergeTags, activeTrigger);
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {

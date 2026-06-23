@@ -113,6 +113,32 @@ abstract class AbstractSalesMergeTag extends MergeTag {
 	protected function invoice_public_url( InvoiceModel $invoice ): string {
 		return InvoiceUrl::get_public_url( $invoice );
 	}
+
+	/**
+	 * Resolve a friendly customer name from automation context.
+	 *
+	 * @param AutomationContactModel|mixed $contact Contact context.
+	 * @return string
+	 */
+	protected function resolve_customer_display_name( $contact ): string {
+		if ( ! $contact instanceof AutomationContactModel ) {
+			return __( 'there', 'doublescale' );
+		}
+
+		if ( $contact->relationLoaded( 'contact' ) && $contact->contact ) {
+			$name = trim( (string) $contact->contact->first_name . ' ' . (string) $contact->contact->last_name );
+			if ( '' !== $name ) {
+				return $name;
+			}
+		}
+
+		$proposal = $this->resolve_proposal( $contact );
+		if ( $proposal && '' !== trim( (string) $proposal->to_name ) ) {
+			return trim( (string) $proposal->to_name );
+		}
+
+		return __( 'there', 'doublescale' );
+	}
 }
 
 /**

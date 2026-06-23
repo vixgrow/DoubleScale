@@ -14,7 +14,6 @@ use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Sales\Services\SalesEmailHtml;
 use DoubleScale\Modules\Sales\Services\SalesEmailMergeTags;
-use DoubleScale\Modules\Sales\Services\SalesEmailTokens;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 
 /**
@@ -40,14 +39,14 @@ final class InvoiceNotifications {
 			return false;
 		}
 
-		$tokens = SalesEmailTokens::for_invoice( $invoice, $url );
+		$context = SalesEmailMergeTags::for_invoice( $invoice );
 
 		$host_user_id = $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : null;
 		$identity     = EmailIdentityResolver::resolve( $host_user_id );
 
 		$customer_name = $this->resolve_customer_name( $invoice );
 		$subject_tpl   = (string) SalesSettings::get( 'invoice_email_subject', '' );
-		$subject       = SalesEmailTokens::replace( $subject_tpl, $tokens );
+		$subject       = trim( SalesEmailHtml::resolve_template( $subject_tpl, $context, 'invoice' ) );
 		if ( '' === trim( $subject ) ) {
 			$subject = sprintf(
 				/* translators: %s: invoice number */
@@ -56,17 +55,13 @@ final class InvoiceNotifications {
 			);
 		}
 
-		$invoice->loadMissing( 'contact' );
 		$intro_tpl  = (string) SalesSettings::get( 'invoice_email_intro', '' );
 		$intro_html = SalesEmailHtml::resolve_intro_html(
 			$custom_message,
 			$intro_tpl,
-			$tokens,
 			__( 'Please review your invoice and pay the balance due when ready.', 'doublescale' ),
-			SalesEmailMergeTags::context_from_contact(
-				$invoice->contact,
-				array( 'invoice_id' => (int) $invoice->id )
-			)
+			$context,
+			'invoice'
 		);
 
 		$body = $this->build_body( $invoice, $customer_name, $url, $intro_html );

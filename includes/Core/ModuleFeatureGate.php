@@ -525,6 +525,10 @@ function doublescale_automation_sales_item_modules( string $item_slug ): array {
 		return array( 'sales', 'contracts' );
 	}
 
+	if ( '' !== $item_slug && 0 === strpos( $item_slug, 'credit_note_' ) ) {
+		return array( 'sales', 'credit_notes' );
+	}
+
 	return array( 'sales', 'documents' );
 }
 
@@ -541,6 +545,8 @@ function doublescale_automation_condition_group_modules( string $group ): ?array
 			return array( 'sales', 'documents' );
 		case 'contract':
 			return array( 'sales', 'contracts' );
+		case 'credit_note':
+			return array( 'sales', 'credit_notes' );
 		default:
 			return null;
 	}
@@ -551,7 +557,8 @@ function doublescale_automation_condition_group_modules( string $group ): ?array
  */
 function doublescale_automation_sales_merge_tags_enabled(): bool {
 	return doublescale_automation_modules_available( array( 'sales', 'documents' ) )
-		|| doublescale_automation_modules_available( array( 'sales', 'contracts' ) );
+		|| doublescale_automation_modules_available( array( 'sales', 'contracts' ) )
+		|| doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) );
 }
 
 /**

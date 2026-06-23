@@ -46,7 +46,10 @@ const resolveSalesLandingPath = (): string | null => {
 	const registeredPaths = new Set(
 		Object.values(getAdminPages()).map((page) => page.path)
 	);
-	if (registeredPaths.has('sales-pipeline')) {
+	if (
+		config.isModuleToggleEnabled('deals') &&
+		registeredPaths.has('sales-pipeline')
+	) {
 		return 'sales-pipeline';
 	}
 	if (isSalesDocumentsReady()) {

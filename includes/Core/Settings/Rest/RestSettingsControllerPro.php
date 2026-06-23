@@ -696,6 +696,57 @@ class RestSettingsControllerPro {
 			);
 		}
 
+		// Outlook receives over Microsoft Graph; Gmail still uses IMAP+XOAUTH2.
+		// Test the transport the poller actually uses for each provider.
+		if ( 'outlook' === $provider ) {
+			$graph_config = EmailOauth::get_graph_config();
+			$graph_class  = '\DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient';
+
+			if ( ! $graph_config || ! class_exists( $graph_class ) ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'Failed to get Outlook Graph configuration. Token may have expired — try reconnecting.', 'doublescale' ),
+					),
+					200
+				);
+			}
+
+			try {
+				$client = new $graph_class(
+					$graph_config['client_id'],
+					$graph_config['client_secret'],
+					$graph_config['refresh_token'],
+					$graph_config['email'],
+					$graph_config['on_refresh_token_rotated']
+				);
+				$client->connect();
+				$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
+				$client->disconnect();
+
+				return new WP_REST_Response(
+					array(
+						'success'      => true,
+						'message'      => sprintf(
+							/* translators: %d: number of recent unseen emails */
+							__( 'Outlook connected successfully via Microsoft Graph. Found %d new unseen email(s) today.', 'doublescale' ),
+							$unseen_count
+						),
+						'unseen_count' => $unseen_count,
+					),
+					200
+				);
+			} catch ( \Exception $e ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => $e->getMessage(),
+					),
+					200
+				);
+			}
+		}
+
 		$config = EmailOauth::get_imap_config( $provider );
 		if ( ! $config ) {
 			return new WP_REST_Response(
@@ -823,9 +874,15 @@ class RestSettingsControllerPro {
 	 */
 	private function test_smtp_outlook_connection( $body ) {
 		$account_id = sanitize_text_field( $body['account_id'] ?? '' );
-		$config     = self::get_smtp_outlook_imap_config( $account_id );
 
-		if ( ! $config ) {
+		// Outlook *receives* over Microsoft Graph, not IMAP — test the path the
+		// poller actually uses (GraphMailClient), so the result matches reality.
+		// Testing IMAP here would fail with "User is authenticated but not
+		// connected" for personal mailboxes even though Graph receive works.
+		$graph_config = self::get_smtp_outlook_graph_config( $account_id );
+		$graph_class  = '\DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient';
+
+		if ( ! $graph_config || ! class_exists( $graph_class ) ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -836,17 +893,15 @@ class RestSettingsControllerPro {
 		}
 
 		try {
-			$client = new ImapClient(
-				$config['host'],
-				$config['port'],
-				$config['username'],
-				$config['password'],
-				$config['encryption'],
-				$config['authentication']
+			$client = new $graph_class(
+				$graph_config['client_id'],
+				$graph_config['client_secret'],
+				$graph_config['refresh_token'],
+				$graph_config['email'],
+				$graph_config['on_refresh_token_rotated']
 			);
 			$client->connect();
-			// Count only recent unseen mail (today onward) — see the Gmail branch
-			// and ImapClient::count_unseen() for why a raw backlog count misleads.
+			// Count only recent unseen mail (today onward), as the IMAP branch does.
 			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
@@ -855,8 +910,8 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: 1: email address, 2: number of recent unseen emails */
-						__( 'Outlook (%1$s) connected via smtp. Found %2$d new unseen email(s) today.', 'doublescale' ),
-						$config['username'],
+						__( 'Outlook (%1$s) connected via Microsoft Graph. Found %2$d new unseen email(s) today.', 'doublescale' ),
+						$graph_config['email'],
 						$unseen_count
 					),
 					'unseen_count' => $unseen_count,

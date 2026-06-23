@@ -29,6 +29,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import AttachmentList from '@/components/support/attachment-list';
 import { useResendEmail } from '@/hooks/use-resend-email';
 import { useContactContext } from '../../state/context';
 
@@ -451,6 +452,18 @@ const EmailDetails: React.FC< EmailDetailsProps > = ( {
 									/>
 								) }
 							</div>
+
+							{ /* Attachments */ }
+							{ campaignEmail.attachments?.length ? (
+								<div className="px-6 pb-4">
+									<div className="text-sm font-medium text-gray-500 mb-2">
+										{ __( 'Attachments', 'doublescale' ) }
+									</div>
+									<AttachmentList
+										attachments={ campaignEmail.attachments }
+									/>
+								</div>
+							) : null }
 						</div>
 					) }
 

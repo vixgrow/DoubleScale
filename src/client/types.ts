@@ -1,3 +1,5 @@
+import type { ConversationAttachment } from '@/types/support';
+
 export type List = {
 	id: number;
 	name: string;
@@ -664,6 +666,7 @@ export type TrackedMessage = {
 	unsubscribe_reason?: string; // Extracted from contact notes
 	communication_tracking_meta?: CommunicationTrackingMeta[]; // Meta data including merge tags and WhatsApp template params
 	error_info?: MessageErrorInfo; // Error information for failed messages (code and message from provider)
+	attachments?: ConversationAttachment[]; // Inbound/outbound email file attachments (individual messages only)
 };
 
 // Legacy alias for backward compatibility

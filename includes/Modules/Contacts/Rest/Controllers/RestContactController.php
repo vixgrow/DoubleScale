@@ -33,6 +33,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
+use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Core\Constants\MessageSourceTypes;
@@ -1459,6 +1460,29 @@ class RestContactController extends RestController {
 			foreach ( $messages->items() as $msg ) {
 				if ( $msg->template && $msg->template->subject ) {
 					$msg->resolved_subject = $msg->render_original_content( $msg->template->subject );
+				}
+			}
+
+			// Attach stored email attachments to each individual-message row.
+			// For INDIVIDUAL messages source_id is the email activity id (see the
+			// model's activity() docblock), so we key the map on it directly without
+			// touching the eager-loaded `activity` relation. Campaign rows (no
+			// activity) always get an empty list. `attachments` is a dynamic
+			// attribute serialized into the JSON response, exactly like
+			// `resolved_subject` above — there is no relation/accessor name clash.
+			$activity_ids = array();
+			foreach ( $messages->items() as $msg ) {
+				$msg->attachments = array();
+				if ( (int) $msg->source_type === MessageSourceTypes::INDIVIDUAL && $msg->source_id ) {
+					$activity_ids[] = (int) $msg->source_id;
+				}
+			}
+			if ( ! empty( $activity_ids ) ) {
+				$attachment_map = ( new EmailAttachmentService() )->map_for_activities( $activity_ids );
+				foreach ( $messages->items() as $msg ) {
+					if ( (int) $msg->source_type === MessageSourceTypes::INDIVIDUAL && $msg->source_id ) {
+						$msg->attachments = $attachment_map[ (int) $msg->source_id ] ?? array();
+					}
 				}
 			}
 

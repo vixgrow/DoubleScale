@@ -17,7 +17,7 @@ import {
 	TimeAgoCell,
 	ViewIcon,
 } from '@doublescale/components';
-import { ChevronDown, ChevronRight, Reply } from 'lucide-react';
+import { ChevronDown, ChevronRight, Paperclip, Reply } from 'lucide-react';
 import type { EmailRow } from '@doublescale/utils';
 export type { EmailRow };
 
@@ -51,11 +51,19 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 					(activitySubject && activitySubject.trim()) ||
 					__('No Subject', 'doublescale');
 
+				const hasAttachments = !!email.attachments?.length;
+
 				if (isReply) {
 					return (
 						<div className="flex items-center gap-2 pl-8 min-w-0">
 							<Reply className="w-3.5 h-3.5 text-muted-foreground shrink-0 scale-x-[-1]" />
 							<span className="text-muted-foreground truncate">{subject}</span>
+							{hasAttachments && (
+								<Paperclip
+									className="w-3.5 h-3.5 text-muted-foreground shrink-0"
+									aria-label={__('Has attachments', 'doublescale')}
+								/>
+							)}
 						</div>
 					);
 				}
@@ -79,6 +87,12 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 							</button>
 						)}
 						<span>{subject}</span>
+						{hasAttachments && (
+							<Paperclip
+								className="w-3.5 h-3.5 text-muted-foreground shrink-0"
+								aria-label={__('Has attachments', 'doublescale')}
+							/>
+						)}
 						{replyCount > 0 && !isExpanded && (
 							<span className="text-xs text-muted-foreground ml-1">
 								({replyCount}{' '}

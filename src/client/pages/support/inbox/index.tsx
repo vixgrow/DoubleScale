@@ -15,11 +15,7 @@ import React, {
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	Plus,
-	Inbox as InboxEmptyIcon,
-	AlertTriangle,
-} from 'lucide-react';
+import { Plus, Inbox as InboxEmptyIcon, AlertTriangle } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -374,23 +370,26 @@ const SupportInbox: React.FC = () => {
 
 			<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden rounded-xl p-6 bg-white  shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
 				<div className="flex flex-col gap-3   sm:flex-row sm:items-center sm:justify-between">
-				<div className="search-input relative min-w-0 shrink-0 md:flex-1 md:max-w-xl">
-				    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground flex items-center">
-						<SearchIcon className="w-4 h-4" />
-					</span>
-					<Input
-						id="ds-support-search"
-						type="search"
-						placeholder={__('Title contains…', 'doublescale')}
-						className="w-full h-9 !pl-9 !border !border-border !rounded-lg bg-[#F7F8FA] text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brandPrimary/20 focus:border-brandPrimary transition-colors"
-						defaultValue={filters.search ?? ''}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								updateFilter({ search: (e.target as HTMLInputElement).value });
-							}
-						}}
-					/>
-				</div>
+					<div className="search-input relative min-w-0 shrink-0 md:flex-1 md:max-w-xl">
+						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground flex items-center">
+							<SearchIcon className="w-4 h-4" />
+						</span>
+						<Input
+							id="ds-support-search"
+							type="search"
+							placeholder={__('Title contains…', 'doublescale')}
+							className="w-full h-9 !pl-9 !border !border-border !rounded-lg bg-[#F7F8FA] text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brandPrimary/20 focus:border-brandPrimary transition-colors"
+							defaultValue={filters.search ?? ''}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									updateFilter({
+										search: (e.target as HTMLInputElement)
+											.value,
+									});
+								}
+							}}
+						/>
+					</div>
 					<div className="flex w-full shrink-0 flex-col gap-6 sm:w-auto sm:flex-row sm:items-center">
 						<SupportInboxBulkActionSelect
 							selectedCount={selectedCount}
@@ -468,7 +467,7 @@ const SupportInbox: React.FC = () => {
 						</thead>
 						<tbody>
 							{loading && (
-								<tr className="border-b border-border bg-white">
+								<tr className=" bg-white">
 									<td
 										colSpan={9}
 										className="px-4 py-8 text-center text-gray-500"
@@ -478,7 +477,7 @@ const SupportInbox: React.FC = () => {
 								</tr>
 							)}
 							{!loading && data?.data.length === 0 && (
-								<tr className="border-b border-border bg-white">
+								<tr className=" bg-white">
 									<td
 										colSpan={9}
 										className="px-4 py-16 text-center"

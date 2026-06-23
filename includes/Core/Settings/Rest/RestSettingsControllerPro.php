@@ -696,6 +696,51 @@ class RestSettingsControllerPro {
 			);
 		}
 
+		// Outlook receives over Microsoft Graph; Gmail still uses IMAP+XOAUTH2.
+		// Test the transport the poller actually uses for each provider.
+		if ( 'outlook' === $provider ) {
+			$graph_config = EmailOauth::get_graph_config();
+			$graph_class  = '\DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient';
+
+			if ( ! $graph_config || ! class_exists( $graph_class ) ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => __( 'Failed to get Outlook Graph configuration. Token may have expired — try reconnecting.', 'doublescale' ),
+					),
+					200
+				);
+			}
+
+			try {
+				$client = $graph_class::from_config( $graph_config );
+				$client->connect();
+				$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
+				$client->disconnect();
+
+				return new WP_REST_Response(
+					array(
+						'success'      => true,
+						'message'      => sprintf(
+							/* translators: %d: number of recent unseen emails */
+							__( 'Outlook connected successfully via Microsoft Graph. Found %d new unseen email(s) today.', 'doublescale' ),
+							$unseen_count
+						),
+						'unseen_count' => $unseen_count,
+					),
+					200
+				);
+			} catch ( \Exception $e ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => $e->getMessage(),
+					),
+					200
+				);
+			}
+		}
+
 		$config = EmailOauth::get_imap_config( $provider );
 		if ( ! $config ) {
 			return new WP_REST_Response(
@@ -823,9 +868,15 @@ class RestSettingsControllerPro {
 	 */
 	private function test_smtp_outlook_connection( $body ) {
 		$account_id = sanitize_text_field( $body['account_id'] ?? '' );
-		$config     = self::get_smtp_outlook_imap_config( $account_id );
 
-		if ( ! $config ) {
+		// Outlook *receives* over Microsoft Graph, not IMAP — test the path the
+		// poller actually uses (GraphMailClient), so the result matches reality.
+		// Testing IMAP here would fail with "User is authenticated but not
+		// connected" for personal mailboxes even though Graph receive works.
+		$graph_config = self::get_smtp_outlook_graph_config( $account_id );
+		$graph_class  = '\DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient';
+
+		if ( ! $graph_config || ! class_exists( $graph_class ) ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -836,17 +887,9 @@ class RestSettingsControllerPro {
 		}
 
 		try {
-			$client = new ImapClient(
-				$config['host'],
-				$config['port'],
-				$config['username'],
-				$config['password'],
-				$config['encryption'],
-				$config['authentication']
-			);
+			$client = $graph_class::from_config( $graph_config );
 			$client->connect();
-			// Count only recent unseen mail (today onward) — see the Gmail branch
-			// and ImapClient::count_unseen() for why a raw backlog count misleads.
+			// Count only recent unseen mail (today onward), as the IMAP branch does.
 			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
 			$client->disconnect();
 
@@ -855,8 +898,8 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: 1: email address, 2: number of recent unseen emails */
-						__( 'Outlook (%1$s) connected via smtp. Found %2$d new unseen email(s) today.', 'doublescale' ),
-						$config['username'],
+						__( 'Outlook (%1$s) connected via Microsoft Graph. Found %2$d new unseen email(s) today.', 'doublescale' ),
+						$graph_config['email'],
 						$unseen_count
 					),
 					'unseen_count' => $unseen_count,
@@ -1692,6 +1735,65 @@ class RestSettingsControllerPro {
 			'password'       => $token_string,
 			'encryption'     => 'ssl',
 			'authentication' => 'oauth',
+		);
+	}
+
+	/**
+	 * Get Microsoft Graph config for a smtp Outlook account.
+	 *
+	 * Parallels {@see get_smtp_outlook_imap_config()} but for the Graph receive
+	 * path: returns the app client_id/secret and the account refresh token that
+	 * {@see \DoubleScale\Pro\Modules\Inbox\Incoming\GraphMailClient} mints a
+	 * Graph-audience token from. No token is minted here — the client does that
+	 * at connect() and persists any rotation via the callback.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $account_id Optional account ID. Uses first account if empty.
+	 * @return array{client_id:string, client_secret:string, refresh_token:string, email:string, on_refresh_token_rotated:callable}|false
+	 */
+	public static function get_smtp_outlook_graph_config( $account_id = '' ) {
+		$outlook_option   = EmailOauth::mailer_settings_option_name( 'outlook' );
+		$outlook_settings = get_option( $outlook_option, array() );
+		$outlook_app      = $outlook_settings['app'] ?? array();
+		$outlook_accounts = $outlook_settings['accounts'] ?? array();
+
+		if ( empty( $outlook_accounts ) ) {
+			return false;
+		}
+
+		if ( ! empty( $account_id ) && isset( $outlook_accounts[ $account_id ] ) ) {
+			$account = $outlook_accounts[ $account_id ];
+		} else {
+			$account_id = array_key_first( $outlook_accounts );
+			$account    = $outlook_accounts[ $account_id ];
+		}
+
+		$credentials   = $account['credentials'] ?? array();
+		$refresh_token = $credentials['refresh_token'] ?? '';
+		if ( is_array( $refresh_token ) ) {
+			$refresh_token = $refresh_token['refresh_token'] ?? ( $refresh_token[0] ?? '' );
+		}
+
+		$client_id     = $outlook_app['client_id'] ?? '';
+		$client_secret = $outlook_app['client_secret'] ?? '';
+
+		if ( empty( $refresh_token ) || empty( $client_id ) || empty( $client_secret ) ) {
+			return false;
+		}
+
+		return array(
+			'client_id'                => $client_id,
+			'client_secret'            => $client_secret,
+			'refresh_token'            => $refresh_token,
+			'email'                    => $account['name'] ?? $account_id,
+			'on_refresh_token_rotated' => static function ( $new_refresh_token ) use ( $outlook_option, $account_id ) {
+				$settings = get_option( $outlook_option, array() );
+				if ( isset( $settings['accounts'][ $account_id ] ) ) {
+					$settings['accounts'][ $account_id ]['credentials']['refresh_token'] = $new_refresh_token;
+					update_option( $outlook_option, $settings );
+				}
+			},
 		);
 	}
 

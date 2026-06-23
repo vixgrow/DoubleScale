@@ -76,7 +76,6 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'inbox',
 		'integrations',
 		'leadscoring',
-		'subscriptions',
 		'credit_notes',
 		'contracts',
 		'tasks',
@@ -203,14 +202,6 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 				'label'       => __( 'Lead scoring', 'doublescale' ),
 				'description' => __( 'Score contacts from behavior and profile data for prioritization.', 'doublescale' ),
 			);
-		case 'subscriptions':
-			return array(
-				'label'        => __( 'Subscriptions', 'doublescale' ),
-				'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
-				// Mirrors the real Pro module's dependencies() so the pre-Pro
-				// upsell row nests under Sales and signals the Documents need.
-				'dependencies' => array( 'contacts', 'sales', 'documents' ),
-			);
 		case 'credit_notes':
 			return array(
 				'label'        => __( 'Credit Notes', 'doublescale' ),
@@ -314,7 +305,69 @@ function doublescale_build_modules_list_payload( array $all ): array {
 		);
 	}
 
+	// Standalone-plugin modules (e.g. Subscriptions) always get a row so the admin
+	// SPA can authoritatively gate their routes/sidebar via
+	// `config.isModuleToggleEnabled()` — even when the owning plugin is INACTIVE,
+	// in which case `enabled` is false and the SPA redirects away (no stub upsell).
+	// `is_toggleable: false` keeps them out of the Modules settings UI: activation
+	// is owned by the Plugins screen, not a toggle here.
+	foreach ( doublescale_standalone_plugin_module_slugs() as $slug ) {
+		if ( isset( $all[ $slug ] ) ) {
+			continue;
+		}
+		$meta     = doublescale_standalone_plugin_module_meta( $slug );
+		$enabled  = doublescale_is_module_active( $slug );
+		$result[] = array(
+			'slug'            => $slug,
+			'label'           => $meta['label'],
+			'description'     => $meta['description'],
+			'enabled'         => $enabled,
+			'active'          => $enabled,
+			'setting_enabled' => $enabled,
+			'is_toggleable'   => false,
+			'is_explicit'     => array_key_exists( $slug, $stored ),
+			'dependencies'    => isset( $meta['dependencies'] ) ? (array) $meta['dependencies'] : array(),
+		);
+	}
+
 	return $result;
+}
+
+/**
+ * Module slugs that ship as their own standalone WordPress plugin: activation is
+ * owned by the Plugins screen, so they never render a toggle in
+ * DoubleScale → Modules. They DO appear in the modules payload (as a
+ * non-toggleable row) so the admin SPA can gate their routes/sidebar.
+ *
+ * @return string[]
+ */
+function doublescale_standalone_plugin_module_slugs(): array {
+	/**
+	 * @param string[] $slugs Standalone-plugin module slugs.
+	 */
+	return (array) apply_filters( 'doublescale_standalone_plugin_module_slugs', array( 'subscriptions' ) );
+}
+
+/**
+ * Label + description for a standalone-plugin module row when its module class
+ * is not registered (plugin inactive).
+ *
+ * @param string $slug Module slug.
+ * @return array{label: string, description: string, dependencies?: array<int, string>}
+ */
+function doublescale_standalone_plugin_module_meta( string $slug ): array {
+	if ( 'subscriptions' === $slug ) {
+		return array(
+			'label'        => __( 'Subscriptions', 'doublescale' ),
+			'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
+			'dependencies' => array( 'contacts', 'sales' ),
+		);
+	}
+
+	return array(
+		'label'       => ucfirst( str_replace( array( '-', '_' ), ' ', $slug ) ),
+		'description' => '',
+	);
 }
 
 /**
@@ -347,6 +400,17 @@ function doublescale_is_module_active( string $slug ): bool {
 
 			return $v;
 		}
+
+		// A known child sub-feature whose module class is not registered means its
+		// owning add-on plugin is inactive — report inactive rather than defaulting
+		// to true. (`subscriptions` is the standalone-plugin case: no phantom
+		// toggle, so without the add-on its class never enters the slug→class map.)
+		if ( array_key_exists( $slug, doublescale_child_module_parent_map() ) ) {
+			\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, false );
+
+			return false;
+		}
+
 		\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, true );
 
 		return true;

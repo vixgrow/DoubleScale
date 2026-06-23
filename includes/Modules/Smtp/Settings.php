@@ -601,9 +601,14 @@ class Settings {
 				(string) ( $resolved['smtp_gmail_account'] ?? '' )
 			);
 		} elseif ( 'smtp_outlook' === $provider ) {
-			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_imap_config(
+			// Outlook *receives* over Microsoft Graph, not IMAP — return a
+			// graph-tagged config so the poller builds a GraphMailClient.
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_graph_config(
 				(string) ( $resolved['smtp_outlook_account'] ?? '' )
 			);
+			if ( is_array( $config ) ) {
+				$config['transport'] = 'graph';
+			}
 		} else {
 			return null;
 		}
@@ -642,9 +647,15 @@ class Settings {
 				(string) ( $resolved['smtp_gmail_account'] ?? '' )
 			);
 		} elseif ( 'smtp_outlook' === $provider ) {
-			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_imap_config(
+			// Outlook *receives* over Microsoft Graph, not IMAP — return a
+			// graph-tagged config so the poller builds a GraphMailClient. The
+			// `transport` key distinguishes it from the six-key IMAP shape.
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_graph_config(
 				(string) ( $resolved['smtp_outlook_account'] ?? '' )
 			);
+			if ( is_array( $config ) ) {
+				$config['transport'] = 'graph';
+			}
 		} else {
 			return null;
 		}

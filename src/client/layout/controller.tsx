@@ -489,29 +489,20 @@ registerAdminPage('deal-detail', {
 	],
 });
 
-// Subscriptions - stub registration the Pro plugin overrides via filter.
-// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds
-// it from the `sales` item); the route itself stays registered so the upsell
-// stub renders when Pro is absent.
+// Subscriptions - stub the DoubleScale-Subscriptions add-on plugin overrides via
+// the `doublescale_navigation_page_settings` filter. `requiresModule` gates the
+// route on the module being active (add-on plugin active AND Sales on): when the
+// add-on is inactive the row is `enabled: false` in the modules payload, so
+// `ProtectedRoute` redirects to '/' instead of rendering this fallback. Activation
+// is owned by the WordPress Plugins screen — there is no toggle in DoubleScale →
+// Modules, so this stub never doubles as a Pro upsell.
+// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds it
+// from the `sales` item, also gated on the module).
 registerAdminPage('subscriptions', {
 	path: 'subscriptions',
 	hidden: true,
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Subscriptions', 'doublescale')}
-			description={__(
-				'Bill customers on a recurring schedule through Stripe and record a child invoice for every charge with DoubleScale Pro.',
-				'doublescale'
-			)}
-			features={[
-				__('Recurring Stripe billing (monthly, yearly, or custom)', 'doublescale'),
-				__('Hosted Checkout subscribe page for customers', 'doublescale'),
-				__('Automatic child invoice per billing cycle', 'doublescale'),
-				__('Pause, resume, cancel, and change plan or quantity', 'doublescale'),
-				__('Future start dates and Stripe tax rates', 'doublescale'),
-			]}
-		/>
-	), // Pro plugin overrides with the real subscriptions list
+	requiresModule: 'subscriptions',
+	component: () => null, // Add-on plugin overrides with the real subscriptions list.
 	label: __('Subscriptions', 'doublescale'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: [
@@ -521,18 +512,11 @@ registerAdminPage('subscriptions', {
 	],
 });
 
-// Subscription detail - stub registration the Pro plugin overrides.
+// Subscription detail - stub the add-on plugin overrides. Same module gate.
 registerAdminPage('subscription-detail', {
 	path: 'subscriptions/:id',
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Subscription Details', 'doublescale')}
-			description={__(
-				'View and manage subscription details with DoubleScale Pro.',
-				'doublescale'
-			)}
-		/>
-	),
+	requiresModule: 'subscriptions',
+	component: () => null,
 	label: __('Subscription Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: [

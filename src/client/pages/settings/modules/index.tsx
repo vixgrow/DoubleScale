@@ -4,6 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
+import { getToLink } from '@doublescale/navigation';
 import type { ModuleInfo } from '@doublescale/config';
 import {
 	buildChildModuleRows,
@@ -208,7 +209,13 @@ export default function ModulesSettings({
 				config.setModules( response.modules );
 				setPendingChanges( {} );
 				setRoleImpact( {} );
-				window.location.reload();
+				// Full-document navigation to the SPA root rather than reloading
+				// the current URL: disabling a module (e.g. Sales, the Subscriptions
+				// parent) can gate the route we are on, and reloading into a route
+				// that immediately redirects leaves the open dialog's Radix overlay
+				// orphaned over the page (dark, frozen backdrop). Landing on the
+				// always-accessible Dashboard avoids that and drops any stale modal.
+				window.location.assign( getToLink( '/' ) );
 				return;
 			}
 		} catch ( error: any ) {
@@ -228,13 +235,19 @@ export default function ModulesSettings({
 			return;
 		}
 
-		if ( affectedDisableModules.length > 0 ) {
+		// In the Control Modules dialog the role-impact warning already renders
+		// inline inside the module card, so a second confirmation modal is
+		// redundant — and worse, stacking a Radix AlertDialog on top of the
+		// dialog's own Radix modal collides the two focus traps / scroll locks
+		// and freezes the page. Save directly here; only the full-page variant
+		// (no surrounding modal) escalates to the confirm AlertDialog.
+		if ( variant !== 'dialog' && affectedDisableModules.length > 0 ) {
 			setConfirmDisableOpen( true );
 			return;
 		}
 
 		void performSave();
-	}, [ hasChanges, affectedDisableModules, performSave ] );
+	}, [ hasChanges, affectedDisableModules, performSave, variant ] );
 
 	useEffect( () => {
 		onFooterStateChange?.( {

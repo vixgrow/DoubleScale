@@ -36,6 +36,7 @@ import {
 import { StatusPill, PriorityPill } from '@/components/support';
 import type { Ticket, TicketFilters } from '@/types/support';
 import NewTicketModal from './new-ticket-modal';
+import { TicketDetailModal } from './ticket-detail-modal';
 import SupportInboxFilterDialog from './filter-dialog';
 import SupportInboxBulkActionSelect from './bulk-action-select';
 import {
@@ -83,6 +84,10 @@ const SupportInbox: React.FC = () => {
 	const { data: mailboxes, loading: mailboxesLoading } = useMailboxes();
 	const { data: assignableAgents } = useAssignableAgents();
 	const [showNewModal, setShowNewModal] = useState(false);
+	const [selectedTicketId, setSelectedTicketId] = useState<number | null>(
+		null
+	);
+	const [ticketModalVisible, setTicketModalVisible] = useState(false);
 	const [tags, setTags] = useState<Array<{ id: number; name: string }>>([]);
 	const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 	const [bulkModal, setBulkModal] = useState<BulkModal>(null);
@@ -553,13 +558,10 @@ const SupportInbox: React.FC = () => {
 												? '!bg-blue-50/60 hover:!bg-blue-50/60'
 												: ''
 										}`}
-										onClick={() =>
-											navigate(
-												getToLink(
-													`support/ticket/${ticket.id}`
-												)
-											)
-										}
+										onClick={() => {
+											setSelectedTicketId(ticket.id);
+											setTicketModalVisible(true);
+										}}
 									>
 										<td
 											className="px-4 py-3"
@@ -628,10 +630,24 @@ const SupportInbox: React.FC = () => {
 					onClose={() => setShowNewModal(false)}
 					onCreated={(ticketId) => {
 						setShowNewModal(false);
-						navigate(getToLink(`support/ticket/${ticketId}`));
+						setSelectedTicketId(ticketId);
+						setTicketModalVisible(true);
 					}}
 				/>
 			)}
+
+			<TicketDetailModal
+				ticketId={selectedTicketId}
+				visible={ticketModalVisible}
+				onClose={() => {
+					setTicketModalVisible(false);
+					setSelectedTicketId(null);
+				}}
+				onUpdate={refetch}
+				onDeleted={refetch}
+				removePortal
+				navigate={navigate}
+			/>
 
 			{bulkModal === 'reply' && (
 				<BulkReplyModal

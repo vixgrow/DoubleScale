@@ -5,20 +5,20 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Modules\Automations\Triggers\Messaging;
+namespace DoubleScale\Modules\Automations\Triggers;
 
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 
-class EmailReceived extends TriggerPro {
+class SmsReceived extends TriggerPro {
 
-	public $name = 'Email Received';
+	public $name = 'Sms Received';
 
-	public $slug = 'email_received';
+	public $slug = 'sms_received';
 
-	public $description = 'Triggers when an email is received from a contact';
+	public $description = 'Triggers when an Sms is received from a contact';
 
 	public $attributes = array();
 
@@ -27,4 +27,4 @@ class EmailReceived extends TriggerPro {
 	public $group = 'messaging';
 }
 
-TriggersManager::instance()->register( new EmailReceived() );
+TriggersManager::instance()->register( new SmsReceived() );

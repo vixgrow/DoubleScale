@@ -5,20 +5,20 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Modules\Automations\Triggers\Messaging;
+namespace DoubleScale\Modules\Automations\Triggers;
 
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 
-class WhatsappReceived extends TriggerPro {
+class EmailReceived extends TriggerPro {
 
-	public $name = 'Whatsapp Received';
+	public $name = 'Email Received';
 
-	public $slug = 'whatsapp_received';
+	public $slug = 'email_received';
 
-	public $description = 'Triggers when a WhatsApp message is received from a contact';
+	public $description = 'Triggers when an email is received from a contact';
 
 	public $attributes = array();
 
@@ -27,4 +27,4 @@ class WhatsappReceived extends TriggerPro {
 	public $group = 'messaging';
 }
 
-TriggersManager::instance()->register( new WhatsappReceived() );
+TriggersManager::instance()->register( new EmailReceived() );

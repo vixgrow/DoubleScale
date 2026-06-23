@@ -104,7 +104,6 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Pmpro/*.php',
 				'includes/Modules/Automations/Triggers/Deal/*.php',
 				'includes/Modules/Automations/Triggers/Link/*.php',
-				'includes/Modules/Automations/Triggers/Messaging/*.php',
 				'includes/Modules/Automations/Triggers/Forms/*.php',
 				'includes/Modules/Automations/Triggers/Booking/*.php',
 				'includes/Modules/Automations/Triggers/Support/*.php',

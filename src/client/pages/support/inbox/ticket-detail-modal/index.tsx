@@ -51,7 +51,6 @@ import {
 import {
 	StatusPill,
 	PriorityPill,
-	ReplyIcon,
 	AttachmentUploader,
 	AttachmentList,
 	CcRecipientsInput,
@@ -69,8 +68,9 @@ import {
 	type TicketStatus,
 } from '@/constants/support';
 import type { ConversationItem } from '@/types/support';
-import { EmailIcon } from '@doublescale/components/booking';
+import { EmailIcon, ReplyIcon } from '@doublescale/components/booking';
 import CommentIcon from '@doublescale/shared/icons/comment';
+
 
 export interface TicketDetailModalProps {
 	ticketId: number | null;
@@ -596,11 +596,11 @@ export const TicketDetailModal: FC<TicketDetailModalProps> = ({
 					paddingBottom: 0,
 				}}
 			>
-				<DialogHeader className="shrink-0 border-b border-border/50 bg-white pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
+				<DialogHeader className="shrink-0  bg-white pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
 					<DialogTitle className="sr-only">
 						{ticket?.title || __('Ticket details', 'doublescale')}
 					</DialogTitle>
-					<div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center justify-between gap-3 px-4 py-3.5 sm:px-6 lg:px-10">
+					<div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 ">
 						<nav
 							className="flex flex-wrap items-center gap-2 text-sm font-medium text-muted-foreground"
 							aria-label={__('Breadcrumb', 'doublescale')}
@@ -611,7 +611,7 @@ export const TicketDetailModal: FC<TicketDetailModalProps> = ({
 									onClick={() =>
 										navigate(getToLink('support'))
 									}
-									className="-mx-2 rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+									className="-mx-2 rounded-md px-2 py-1 text-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
 								>
 									{__('Helpdesk (Inbox)', 'doublescale')}
 								</button>
@@ -1453,45 +1453,46 @@ export const TicketDetailModal: FC<TicketDetailModalProps> = ({
 														{feedback}
 													</div>
 												)}
+												{tab === 'reply' && showCc && (
+													<div className="mt-4">
+														<p className="mb-2 text-sm text-foreground">
+															{__(
+																'CC recipients',
+																'doublescale'
+															)}
+															<span className="text-destructive">
+																{' '}
+																*
+															</span>
+														</p>
+														<CcRecipientsInput
+															value={cc}
+															onChange={setCc}
+															disabled={sending}
+															placeholder={__(
+																'Add CC email',
+																'doublescale'
+															)}
+														/>
+													</div>
+												)}
 												<div className="mt-3 flex items-center justify-between gap-3">
 													{tab === 'reply' ? (
 														showCc ? (
-															<div className="min-w-0 flex-1 rounded border border-border bg-muted/30 p-3">
-																<div className="mb-2 flex items-center justify-between">
-																	<span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-																		{__(
-																			'CC recipients',
-																			'doublescale'
-																		)}
-																	</span>
-																	<button
-																		type="button"
-																		className="text-xs text-muted-foreground hover:text-foreground"
-																		onClick={() => {
-																			setShowCc(
-																				false
-																			);
-																			setCc(
-																				[]
-																			);
-																		}}
-																	>
-																		{__(
-																			'Discard CC',
-																			'doublescale'
-																		)}
-																	</button>
-																</div>
-																<CcRecipientsInput
-																	value={cc}
-																	onChange={
-																		setCc
-																	}
-																	disabled={
-																		sending
-																	}
-																/>
-															</div>
+															<button
+																type="button"
+																className="text-sm font-medium text-destructive hover:underline"
+																onClick={() =>
+																	setShowCc(
+																		false
+																	)
+																}
+															>
+																{__(
+																	'Hide CC →',
+																	'doublescale'
+																)}
+															</button>
 														) : (
 															<button
 																type="button"
@@ -1520,33 +1521,15 @@ export const TicketDetailModal: FC<TicketDetailModalProps> = ({
 																content
 															)
 														}
-														className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 ${
+														className={`inline-flex shrink-0 items-center gap-2 rounded-md p-2 text-sm font-medium text-white disabled:opacity-50 ${
 															tab === 'reply'
 																? 'bg-primary hover:bg-primary/90'
 																: 'bg-[#3A3A99] hover:bg-[#3A3A99]/90'
 														}`}
 													>
-														{tab === 'note' ? (
-															<NoteAddIcon
-																width={14}
-																height={14}
-																color="#ffffff"
-															/>
-														) : (
-															<ReplyIcon
-																width={14}
-																height={14}
-															/>
-														)}
-														{sending
-															? __(
-																	'Sending…',
-																	'doublescale'
-																)
-															: __(
-																	'Send',
-																	'doublescale'
-																)}
+
+                                                        <ReplyIcon/>
+
 													</button>
 												</div>
 											</div>

@@ -224,6 +224,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		if (step.type !== 'action') {
 			return false;
 		}
+		// The "Update Contact" action lives in the CRM/contact group but maps
+		// merge tags into contact fields, so it must keep the Merge Tags button.
+		if (actionKey === 'update_contact_fields') {
+			return false;
+		}
 		const automationActions = ConfigAPI.getAutomationActions();
 		return (
 			automationActions?.crm?.groups?.contact?.actions?.[actionKey] !==

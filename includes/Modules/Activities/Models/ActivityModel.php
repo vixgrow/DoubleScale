@@ -469,6 +469,7 @@ class ActivityModel extends Model {
 				$subject       = $this->data['subject'] ?? '';
 				$contact_email = $this->data['contact_email'] ?? '';
 				$contact_name  = $this->data['contact_name'] ?? '';
+				$is_manual     = self::is_manual_email_log( is_array( $this->data ) ? $this->data : array() );
 
 				$sender = $user_name;
 				if ( __( 'Unknown User', 'doublescale' ) === $sender ) {
@@ -478,11 +479,17 @@ class ActivityModel extends Model {
 					}
 				}
 
-				$message = sprintf(
-					/* translators: %s: user name */
-					__( '%s sent an email', 'doublescale' ),
-					$sender
-				);
+				$message = $is_manual
+					? sprintf(
+						/* translators: %s: user name */
+						__( '%s logged an email', 'doublescale' ),
+						$sender
+					)
+					: sprintf(
+						/* translators: %s: user name */
+						__( '%s sent an email', 'doublescale' ),
+						$sender
+					);
 
 				if ( ! empty( $subject ) ) {
 					$message .= sprintf(
@@ -816,7 +823,41 @@ class ActivityModel extends Model {
 	 * @return bool
 	 */
 	public function is_editable() {
+		if ( ActivityTypes::EMAIL_SENT === $this->activity_type ) {
+			$data = is_array( $this->data ) ? $this->data : array();
+			return self::is_manual_email_log( $data );
+		}
+
 		return ActivityTypes::is_editable_type( $this->activity_type );
+	}
+
+	/**
+	 * Whether an email_sent activity was manually logged (vs sent through the CRM).
+	 *
+	 * Manual logs are created via "Add Log Email"; sent emails are created by the
+	 * inbox send pipeline and carry delivery metadata (message_id / from_email).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $data Activity data payload.
+	 *
+	 * @return bool
+	 */
+	public static function is_manual_email_log( array $data ): bool {
+		if ( isset( $data['source'] ) && 'manual' === $data['source'] ) {
+			return true;
+		}
+
+		if ( isset( $data['source'] ) && 'sent' === $data['source'] ) {
+			return false;
+		}
+
+		// Legacy rows: manual logs store sent_at but never message_id / from_email.
+		if ( ! empty( $data['sent_at'] ) && empty( $data['message_id'] ) && empty( $data['from_email'] ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -897,6 +938,7 @@ class ActivityModel extends Model {
 					'sent_at'       => $data['sent_at'] ?? current_time( 'mysql', true ),
 					'contact_email' => $data['contact_email'] ?? '',
 					'contact_name'  => $data['contact_name'] ?? '',
+					'source'        => 'manual',
 				),
 				'user_id'       => $data['user_id'] ?? get_current_user_id(),
 			)

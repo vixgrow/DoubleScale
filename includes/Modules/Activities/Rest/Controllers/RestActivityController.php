@@ -482,7 +482,7 @@ class RestActivityController extends RestController {
 			'user_id'           => $activity->user_id ? (int) $activity->user_id : null,
 			'user'              => $user,
 			'formatted_message' => $activity->formatted_message,
-			'is_editable'       => in_array( $activity->activity_type, $editable_types, true ),
+			'is_editable'       => $activity->is_editable(),
 			'is_system'         => in_array( $activity->activity_type, $system_types, true ),
 			'comments_count'    => $activity->relationLoaded( 'comments' ) ? $activity->comments->count() : 0,
 			'activity_date'     => (string) $activity->activity_date,

@@ -84,6 +84,7 @@ class EmailIndividualSender {
 							'body'          => $processed_body,
 							'contact_email' => $to,
 							'in_reply_to'   => $in_reply_to,
+							'source'        => 'sent',
 						),
 						static function ( $value ) {
 							return null !== $value;

@@ -224,6 +224,7 @@ final class ActivityManager {
 					'sent_at'       => $data['sent_at'] ?? current_time( 'mysql', true ),
 					'contact_email' => sanitize_email( $data['contact_email'] ?? '' ),
 					'contact_name'  => sanitize_text_field( $data['contact_name'] ?? '' ),
+					'source'        => 'manual',
 				),
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
@@ -524,6 +525,10 @@ final class ActivityManager {
 			return null;
 		}
 
+		if ( ! $activity->is_editable() ) {
+			return null;
+		}
+
 		// Check deal permissions if activity is associated with a deal.
 		if ( $activity->deal_id && ! $this->can_access_deal( $activity->deal_id ) ) {
 			return null;
@@ -556,6 +561,7 @@ final class ActivityManager {
 						'sent_at'       => $sent_at,
 						'contact_email' => $activity->data['contact_email'] ?? '',
 						'contact_name'  => $activity->data['contact_name'] ?? '',
+						'source'        => 'manual',
 					);
 				}
 				break;
@@ -616,6 +622,10 @@ final class ActivityManager {
 
 		// Check if activity is system-generated (immutable).
 		if ( $activity->is_system_activity() ) {
+			return false;
+		}
+
+		if ( ! $activity->is_editable() ) {
 			return false;
 		}
 
@@ -1368,6 +1378,27 @@ final class ActivityManager {
 	}
 
 	/**
+	 * Whether an activity row is editable in the API response.
+	 *
+	 * email_sent is only editable when it was manually logged, not when sent via CRM.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string               $activity_type  Activity type slug.
+	 * @param array<string, mixed> $data           Activity data payload.
+	 * @param array<int, string>   $editable_types Editable type list from ActivityTypes.
+	 *
+	 * @return bool
+	 */
+	private function is_activity_editable( string $activity_type, array $data, array $editable_types ): bool {
+		if ( ActivityTypes::EMAIL_SENT === $activity_type ) {
+			return ActivityModel::is_manual_email_log( $data );
+		}
+
+		return in_array( $activity_type, $editable_types, true );
+	}
+
+	/**
 	 * Transform activity row from SQL result
 	 *
 	 * @since 1.0.0
@@ -1393,7 +1424,7 @@ final class ActivityManager {
 			'user_id'           => $row->user_id ? (int) $row->user_id : null,
 			'user'              => $user,
 			'formatted_message' => $this->format_activity_message( $row->activity_type, $user, $data ),
-			'is_editable'       => in_array( $row->activity_type, $editable_types, true ),
+			'is_editable'       => $this->is_activity_editable( $row->activity_type, $data, $editable_types ),
 			'is_system'         => in_array( $row->activity_type, $system_types, true ),
 			'display_status'    => $row->display_status ?? null,
 			'comments_count'    => (int) $row->comments_count,
@@ -1467,9 +1498,19 @@ final class ActivityManager {
 				$from_email = $data['from_email'] ?? '';
 				$user_name  = ! empty( $from_email ) ? $from_email : __( 'Unknown User', 'doublescale' );
 			}
-			$subject = $data['subject'] ?? '';
-			/* translators: %s: user name */
-			$message = sprintf( __( '%s sent an email', 'doublescale' ), $user_name );
+			$subject   = $data['subject'] ?? '';
+			$is_manual = ActivityModel::is_manual_email_log( $data );
+			$message   = $is_manual
+				? sprintf(
+					/* translators: %s: user name */
+					__( '%s logged an email', 'doublescale' ),
+					$user_name
+				)
+				: sprintf(
+					/* translators: %s: user name */
+					__( '%s sent an email', 'doublescale' ),
+					$user_name
+				);
 			if ( ! empty( $subject ) ) {
 				/* translators: %s: email subject line */
 				$message .= sprintf( __( ' with subject "%s"', 'doublescale' ), $subject );

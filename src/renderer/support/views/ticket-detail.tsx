@@ -1,20 +1,17 @@
 /**
  * Portal: ticket detail view + reply composer.
- *
- * The customer sees their own ticket: status pill, conversation thread
- * (their messages right-aligned via the `is_self` marker the REST shape
- * adds), and a reply textarea. Sending a reply re-opens a closed ticket
- * on the server side — the portal just reflects that by re-fetching.
  */
 
 import { useState } from '@wordpress/element';
+import type { FC } from 'react';
 import { __ } from '@wordpress/i18n';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Circle, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { StatusPill, PriorityPill } from '@/components/support';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import { PRIORITY_LABELS } from '@/constants/support';
+import type { TicketPriority } from '@/constants/support';
 
 import {
 	addPortalReply,
@@ -36,9 +33,18 @@ interface Props {
 	ticketId: number;
 	config: PortalConfig;
 	onBack: () => void;
+	variant?: 'standalone' | 'pane';
+	showMobileBack?: boolean;
 }
 
-const TicketDetail = ({ ticketId, config, onBack }: Props) => {
+const TicketDetail = ({
+	ticketId,
+	config,
+	onBack,
+	variant = 'standalone',
+	showMobileBack = false,
+}: Props) => {
+	const isPane = variant === 'pane';
 	const limits = config.attachment_limits;
 	const ticket = usePortalTicket(ticketId);
 	const conv = usePortalConversation(ticketId);
@@ -69,7 +75,8 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 			conv.refetch();
 			ticket.refetch();
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : __('Reply failed.', 'doublescale');
+			const msg =
+				e instanceof Error ? e.message : __('Reply failed.', 'doublescale');
 			setSendError(msg);
 		} finally {
 			setSending(false);
@@ -78,8 +85,8 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 
 	if (ticket.loading) {
 		return (
-			<div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-				<p className="text-sm text-muted-foreground">
+			<div className={isPane ? 'support-portal-ticket-detail' : shellClass(false)}>
+				<p className="p-5 text-sm text-muted-foreground">
 					{__('Loading ticket…', 'doublescale')}
 				</p>
 			</div>
@@ -88,11 +95,13 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 
 	if (ticket.error || !ticket.data) {
 		return (
-			<div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-				<Button variant="outline" size="sm" onClick={onBack}>
-					<ArrowLeft width={14} height={14} className="mr-1" />
-					{__('Back', 'doublescale')}
-				</Button>
+			<div className={isPane ? 'support-portal-ticket-detail' : shellClass(false)}>
+				{!isPane && (
+					<Button variant="outline" size="sm" onClick={onBack}>
+						<ArrowLeft width={14} height={14} className="mr-1" />
+						{__('Back', 'doublescale')}
+					</Button>
+				)}
 				<div className="mt-4 rounded border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
 					{ticket.error || __('Ticket not found.', 'doublescale')}
 				</div>
@@ -104,25 +113,47 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 	const isClosed = t.status === 'closed' || t.status === 'resolved';
 
 	return (
-		<div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-			<header className="mb-6">
-				<Button variant="outline" size="sm" onClick={onBack}>
-					<ArrowLeft width={14} height={14} className="mr-1" />
-					{__('Back to tickets', 'doublescale')}
-				</Button>
-				<h2 className="m-0 mt-4 text-2xl font-semibold">{t.title}</h2>
-				<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-					<span>#{t.id}</span>
-					<StatusPill status={t.status} />
-					<PriorityPill priority={t.priority} />
+		<div
+			className={
+				isPane
+					? 'support-portal-ticket-detail'
+					: 'support-portal-ticket-detail rounded-xl border border-border bg-card p-6 shadow-sm'
+			}
+		>
+			<header className="support-portal-ticket-detail__header border-b border-border bg-[#F7F8FA] px-5 py-4">
+				{isPane && showMobileBack && (
+					<Button
+						variant="outline"
+						size="sm"
+						className="mb-3 lg:hidden"
+						onClick={onBack}
+					>
+						<ArrowLeft width={14} height={14} className="mr-1" />
+						{__('Back to tickets', 'doublescale')}
+					</Button>
+				)}
+				{!isPane && (
+					<Button variant="outline" size="sm" onClick={onBack}>
+						<ArrowLeft width={14} height={14} className="mr-1" />
+						{__('Back to tickets', 'doublescale')}
+					</Button>
+				)}
+				<div
+					className={`flex flex-wrap items-start justify-between gap-3 ${!isPane ? 'mt-4' : ''}`}
+				>
+					<div className="min-w-0 flex-1">
+						<p className="m-0 text-xs font-medium text-[#667085]">
+							ID:#{t.id}
+						</p>
+						<h2 className="m-0 mt-1 text-base font-semibold leading-snug text-[#09090B]">
+							{t.title}
+						</h2>
+					</div>
+					<TicketHeaderBadges priority={t.priority} />
 				</div>
 			</header>
 
-			<section className="mb-6">
-				<h3 className="m-0 mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-					{__('Conversation', 'doublescale')}
-				</h3>
-
+			<section className="support-portal-ticket-detail__conversation support-portal-conversation-scroll px-5 py-4">
 				{conv.loading && (
 					<p className="text-sm text-muted-foreground">
 						{__('Loading…', 'doublescale')}
@@ -136,81 +167,91 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 				)}
 
 				{!conv.loading && conv.data && conv.data.data.length > 0 && (
-					<ul className="space-y-3">
+					<ul className="space-y-4">
 						{conv.data.data.map((item) => (
-							<ConversationBubble key={item.id} item={item} />
+							<ConversationBubble
+								key={item.id}
+								item={item}
+								customerName={
+									config.user.display_name ||
+									config.user.email ||
+									__('You', 'doublescale')
+								}
+							/>
 						))}
 					</ul>
 				)}
 			</section>
 
-			{isClosed && (
-				<p className="mb-3 rounded border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
-					{__(
-						'This ticket is closed. Sending a reply will re-open it.',
-						'doublescale'
-					)}
+			<section className="support-portal-ticket-detail__composer px-5 py-4">
+				{isClosed && (
+					<p className="mb-3 rounded border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+						{__(
+							'This ticket is closed. Sending a reply will re-open it.',
+							'doublescale'
+						)}
+					</p>
+				)}
+				<p className="mb-2 text-sm text-foreground">
+					{__('Message', 'doublescale')}
+					<span className="text-destructive"> *</span>
 				</p>
-			)}
-
-			<section>
-				<span className="m-0 mb-2 block text-sm font-semibold">
-					{__('Add a reply', 'doublescale')}
-				</span>
-				<SupportRichText
-					message={draft}
-					onChange={setDraft}
-					placeholder={__('Type your reply here…', 'doublescale')}
-				/>
-				<AttachmentUploader
-					pending={pendingAttachments}
-					uploading={uploading}
-					disabled={sending}
-					maxFileCount={limits?.max_file_count}
-					maxFileSizeBytes={limits?.max_file_size_bytes}
-					onValidationError={setSendError}
-					onSelect={async (file) => {
-						setUploading(true);
-						try {
-							const result = await uploadPortalAttachment(
-								ticketId,
-								file,
-								pendingAttachments.length
-							);
-							setPendingAttachments((prev) => [
-								...prev,
-								toPendingAttachment(result, file),
-							]);
-						} catch (e) {
-							setSendError(
-								e instanceof Error
-									? e.message
-									: __('Upload failed.', 'doublescale')
-							);
-						} finally {
-							setUploading(false);
-						}
-					}}
-					onRemove={(hash) =>
-						setPendingAttachments((prev) =>
-							removePendingByHash(prev, hash)
-						)
-					}
-				/>
+				<div className="overflow-hidden rounded-lg border border-border bg-white [&_.editor-inner]:min-h-[80px] [&_.editor-input]:min-h-[80px]">
+					<SupportRichText
+						message={draft}
+						onChange={setDraft}
+						placeholder={__(
+							'Write your reply here…',
+							'doublescale'
+						)}
+					/>
+				</div>
 				{sendError && (
 					<p className="mt-2 text-sm text-destructive">{sendError}</p>
 				)}
-				<div className="mt-3 flex justify-end">
+				<div className="mt-3 flex items-end justify-between gap-3">
+					<AttachmentUploader
+						pending={pendingAttachments}
+						uploading={uploading}
+						disabled={sending}
+						maxFileCount={limits?.max_file_count}
+						maxFileSizeBytes={limits?.max_file_size_bytes}
+						onValidationError={setSendError}
+						onSelect={async (file) => {
+							setUploading(true);
+							try {
+								const result = await uploadPortalAttachment(
+									ticketId,
+									file,
+									pendingAttachments.length
+								);
+								setPendingAttachments((prev) => [
+									...prev,
+									toPendingAttachment(result, file),
+								]);
+							} catch (e) {
+								setSendError(
+									e instanceof Error
+										? e.message
+										: __('Upload failed.', 'doublescale')
+								);
+							} finally {
+								setUploading(false);
+							}
+						}}
+						onRemove={(hash) =>
+							setPendingAttachments((prev) =>
+								removePendingByHash(prev, hash)
+							)
+						}
+					/>
 					<Button
 						onClick={handleSend}
-						disabled={
-							sending || !htmlEditorHasMeaningfulContent(draft)
-						}
+						disabled={sending || !htmlEditorHasMeaningfulContent(draft)}
+						className="h-10 w-10 shrink-0 rounded-lg bg-[#2D3282] p-0 hover:bg-[#2D3282]/90"
+						aria-label={__('Send reply', 'doublescale')}
 					>
-						<Send width={14} height={14} className="mr-1" />
-						{sending
-							? __('Sending…', 'doublescale')
-							: __('Send reply', 'doublescale')}
+						<Send width={16} height={16} className="text-white" />
 					</Button>
 				</div>
 			</section>
@@ -218,53 +259,142 @@ const TicketDetail = ({ ticketId, config, onBack }: Props) => {
 	);
 };
 
-const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
+const shellClass = (isPane: boolean) =>
+	isPane
+		? 'h-full min-h-0'
+		: 'rounded-xl border border-border bg-card p-6 shadow-sm';
+
+const PRIORITY_BADGE: Record<
+	TicketPriority,
+	{ className: string; show: boolean }
+> = {
+	urgent: {
+		show: true,
+		className: 'bg-[#FEE2E2] text-[#DC2626]',
+	},
+	high: {
+		show: true,
+		className: 'bg-[#FAEADF] text-[#CB5301]',
+	},
+	normal: {
+		show: false,
+		className: 'bg-[#EFF6FF] text-[#2563EB]',
+	},
+	low: {
+		show: false,
+		className: 'bg-[#ECFDF3] text-[#16A34A]',
+	},
+};
+
+const PRIORITY_ROW_ICON: Record<TicketPriority, string> = {
+	normal: 'text-[#0D9DFC]',
+	low: 'text-[#16A34A]',
+	high: 'text-[#CB5301]',
+	urgent: 'text-[#DC2626]',
+};
+
+const TicketHeaderBadges: FC<{ priority: TicketPriority }> = ({ priority }) => {
+	const priorityBadge = PRIORITY_BADGE[priority] ?? PRIORITY_BADGE.normal;
+	const circleLabel = priorityBadge.show
+		? PRIORITY_LABELS.normal
+		: PRIORITY_LABELS[priority];
+
+	return (
+		<div className="flex shrink-0 flex-wrap items-center gap-3">
+			{priorityBadge.show && (
+				<span
+					className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityBadge.className}`}
+				>
+					{PRIORITY_LABELS[priority]}
+				</span>
+			)}
+			<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#09090B]">
+				<Circle
+					width={14}
+					height={14}
+					className={
+						priorityBadge.show
+							? PRIORITY_ROW_ICON.normal
+							: (PRIORITY_ROW_ICON[priority] ?? PRIORITY_ROW_ICON.normal)
+					}
+				/>
+				{circleLabel}
+			</span>
+		</div>
+	);
+};
+
+const AvatarInitial: FC<{ name: string }> = ({ name }) => (
+	<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#458DC7] text-xs font-semibold text-white">
+		{name.charAt(0).toUpperCase() || '?'}
+	</div>
+);
+
+const ConversationBubble = ({
+	item,
+	customerName,
+}: {
+	item: PortalConversationItem;
+	customerName: string;
+}) => {
 	const isSelf = item.is_self === true;
 	const isEvent = item.kind === 'event';
-	const content = typeof item.data?.content === 'string' ? item.data.content : '';
+	const content =
+		typeof item.data?.content === 'string' ? item.data.content : '';
+	const authorLabel = isSelf
+		? customerName
+		: item.user?.display_name || __('Support team', 'doublescale');
+	const time = formatMessageTime(item.created_at);
 
 	if (isEvent) {
 		return (
-			<li className="text-center text-xs text-muted-foreground">
-				<span>{describeEvent(item)}</span>
-				<span className="ml-2">{formatDate(item.created_at)}</span>
+			<li className="flex items-center gap-2 px-3 py-1 text-xs text-muted-foreground">
+				<span className="h-px flex-1 bg-border" />
+				<span className="italic">{describeEvent(item)}</span>
+				<span className="h-px flex-1 bg-border" />
+			</li>
+		);
+	}
+
+	if (isSelf) {
+		return (
+			<li className="flex flex-col items-end">
+				<p className="mb-1 max-w-[78%] text-right text-xs font-semibold text-[#09090B]">
+					{authorLabel}
+				</p>
+				<div className="max-w-[78%] rounded-lg bg-[#EBEEF2] px-4 py-3">
+					<div
+						className="prose prose-sm max-w-none text-[#09090B]"
+						dangerouslySetInnerHTML={{ __html: content }}
+					/>
+					<AttachmentList
+						attachments={item.attachments}
+						accentClassName="text-primary"
+					/>
+					<p className="mt-1 text-right text-xs text-[#667085]">{time}</p>
+				</div>
 			</li>
 		);
 	}
 
 	return (
-		<li className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}>
-			<div
-				className={`max-w-[85%] rounded-lg border p-3 text-sm ${
-					isSelf
-						? 'border-primary/20 bg-primary/5'
-						: 'border-border bg-background'
-				}`}
-			>
-				<div className="mb-1 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-					<span className="font-medium">
-						{isSelf
-							? __('You', 'doublescale')
-							: item.user?.display_name ||
-								__('Support team', 'doublescale')}
-					</span>
-					<span>{formatDate(item.created_at)}</span>
+		<li className="flex justify-start gap-2.5">
+			<AvatarInitial name={authorLabel} />
+			<div className="max-w-[78%] min-w-0">
+				<p className="mb-1 text-xs font-semibold text-[#09090B]">
+					{authorLabel}
+				</p>
+				<div className="rounded-lg border border-border/80 bg-white px-4 py-3">
+					<div
+						className="prose prose-sm max-w-none text-[#09090B]"
+						dangerouslySetInnerHTML={{ __html: content }}
+					/>
+					<AttachmentList
+						attachments={item.attachments}
+						accentClassName="text-primary"
+					/>
+					<p className="mt-1 text-right text-xs text-[#667085]">{time}</p>
 				</div>
-				{/*
-				 * Content is stored as wp_kses_post()-filtered HTML
-				 * (whitelisted post-content tags only — no <script>, no <iframe>).
-				 * Rendering as text would show literal `<p>` tags to the user;
-				 * dangerouslySetInnerHTML is safe here because of the server-side
-				 * filter applied at write time in TicketService::sanitize_content().
-				 */}
-				<div
-					className="prose prose-sm max-w-none text-foreground"
-					dangerouslySetInnerHTML={{ __html: content }}
-				/>
-<AttachmentList
-	attachments={item.attachments}
-	accentClassName="text-primary"
-/>
 			</div>
 		</li>
 	);
@@ -287,12 +417,15 @@ const describeEvent = (item: PortalConversationItem): string => {
 	}
 };
 
-const formatDate = (input: string | null): string => {
+const formatMessageTime = (input: string | null): string => {
 	if (!input) {
 		return '';
 	}
 	try {
-		return new Date(input).toLocaleString();
+		return new Date(input).toLocaleTimeString([], {
+			hour: '2-digit',
+			minute: '2-digit',
+		});
 	} catch {
 		return input;
 	}

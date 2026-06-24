@@ -11,6 +11,7 @@ return array(
 	'triggers' => array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\ContactSubscribed::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\ContactUnsubscribed::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\ContactInformationUpdated::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Deal\DealOwnerChange::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Deal\DealStageChange::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Deal\DealStatusChange::class,

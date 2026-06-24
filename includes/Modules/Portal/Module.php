@@ -96,6 +96,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestPortalTimelineController::class,
 			Rest\Controllers\RestPortalPageController::class,
 			Rest\Controllers\RestPortalCalendarController::class,
+			Rest\Controllers\RestPortalContactController::class,
 		);
 	}
 

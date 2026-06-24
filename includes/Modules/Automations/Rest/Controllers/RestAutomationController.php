@@ -27,7 +27,9 @@ use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
+use DoubleScale\Modules\Automations\Services\WorkflowPortabilityManager;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 
 /**
  * RestAutomationController class
@@ -164,6 +166,44 @@ class RestAutomationController extends RestController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'restore_version' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Export a single workflow as a portable JSON envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/export',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'export_workflow' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Import a workflow from a previously exported envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/import',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_workflow' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				),
 			)
 		);
@@ -745,6 +785,113 @@ class RestAutomationController extends RestController {
 	}
 
 	/**
+	 * Gate workflow export / import behind the Pro add-on.
+	 *
+	 * Returns a WP_Error when Pro is not active so the routes still exist (and the
+	 * API surface stays stable) but cannot be used on Free installs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WP_Error|null WP_Error if Pro is inactive, null otherwise.
+	 */
+	private function require_pro_for_portability() {
+		if ( function_exists( 'doublescale_is_pro_addon_active' ) && doublescale_is_pro_addon_active() ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'pro_required',
+			__( 'Importing and exporting workflows requires DoubleScale Pro to be installed and activated.', 'doublescale' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	/**
+	 * Export a single workflow as a portable JSON envelope.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function export_workflow( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$id     = (int) $request->get_param( 'id' );
+			$result = WorkflowPortabilityManager::instance()->export( $id );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Import a workflow from a previously exported envelope.
+	 *
+	 * The new automation is created inactive; any references that could not be
+	 * resolved on this site (missing trigger / action plugins, etc.) are returned
+	 * as `unresolved` so the client can surface them for review.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_workflow( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$payload = $request->get_json_params();
+			$result  = WorkflowPortabilityManager::instance()->import( $payload );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			// Reload with active steps and compute dependency warnings using the
+			// same logic the editor uses, so the client can flag what needs review.
+			$automation = AutomationModel::with(
+				array(
+					'steps' => function ( $query ) {
+						$query->where( 'status', 'active' );
+					},
+				)
+			)->find( $result->id );
+
+			$unresolved = array();
+			if ( $automation ) {
+				$automation = $this->check_and_mark_dependencies( $automation );
+				$unresolved = $automation->_warnings ?? array();
+			}
+
+			return new WP_REST_Response(
+				array(
+					'id'         => (int) $result->id,
+					'name'       => $result->name,
+					'unresolved' => $unresolved,
+				),
+				201
+			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
 	 * Shared undo / redo handler.
 	 *
 	 * @since 1.0.0
@@ -903,6 +1050,233 @@ class RestAutomationController extends RestController {
 	}
 
 	/**
+	 * Duplicate an automation and all of its active workflow steps.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_item( $request ) {
+		try {
+			$id         = (int) $request->get_param( 'id' );
+			$automation = AutomationModel::find( $id );
+
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$automation_data = $automation->toArray();
+			unset( $automation_data['id'], $automation_data['created_at'], $automation_data['updated_at'] );
+
+			$settings = is_array( $automation_data['settings'] ?? null ) ? $automation_data['settings'] : array();
+			unset(
+				$settings['_version_cursor'],
+				$settings['_trigger_label'],
+				$settings['_trigger_warning'],
+				$settings['_trigger_warning_message']
+			);
+			$automation_data['settings']   = $settings;
+			$automation_data['name']       = $automation->name . ' - Copy';
+			$automation_data['status']     = 'inactive';
+			$automation_data['created_by'] = get_current_user_id() ?: null;
+
+			$new_automation = AutomationModel::create( $automation_data );
+			if ( ! $new_automation ) {
+				return new WP_Error( 'error', __( 'Failed to duplicate automation.', 'doublescale' ), array( 'status' => 500 ) );
+			}
+
+			$this->duplicate_automation_steps( $automation->id, $new_automation->id );
+
+			$new_automation = AutomationModel::with(
+				array(
+					'steps' => function ( $query ) {
+						$query->where( 'status', 'active' );
+					},
+				)
+			)->find( $new_automation->id );
+
+			$new_automation = $this->check_and_mark_dependencies( $new_automation );
+
+			return new WP_REST_Response( $new_automation, 201 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Copy all active steps from one automation to another.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $source_automation_id Source automation ID.
+	 * @param int $new_automation_id    New automation ID.
+	 *
+	 * @return void
+	 */
+	private function duplicate_automation_steps( $source_automation_id, $new_automation_id ) {
+		$steps = AutomationStepModel::where( 'automation_id', $source_automation_id )
+			->where( 'status', 'active' )
+			->get()
+			->all();
+
+		if ( empty( $steps ) ) {
+			return;
+		}
+
+		$id_map  = array();
+		$pending = $steps;
+
+		while ( ! empty( $pending ) ) {
+			$progress = false;
+
+			foreach ( $pending as $index => $step ) {
+				$parent_id = (int) $step->parent_id;
+				if ( $parent_id > 0 && ! isset( $id_map[ $parent_id ] ) ) {
+					continue;
+				}
+
+				$settings = is_array( $step->settings ) ? $step->settings : array();
+				$settings = $this->prepare_step_settings_for_duplicate( $settings, (string) $step->action );
+
+				$new_step = AutomationStepModel::create(
+					array(
+						'automation_id' => $new_automation_id,
+						'parent_id'     => $parent_id > 0 ? $id_map[ $parent_id ] : 0,
+						'action'        => $step->action,
+						'type'          => $step->type,
+						'condition'     => $step->condition,
+						'status'        => 'active',
+						'settings'      => $settings,
+						'order'         => (int) $step->order,
+					)
+				);
+
+				$id_map[ (int) $step->id ] = (int) $new_step->id;
+				unset( $pending[ $index ] );
+				$progress = true;
+			}
+
+			if ( ! $progress ) {
+				throw new \Exception( __( 'Could not duplicate workflow steps.', 'doublescale' ) );
+			}
+
+			$pending = array_values( $pending );
+		}
+
+		$new_steps = AutomationStepModel::where( 'automation_id', $new_automation_id )->get();
+		foreach ( $new_steps as $new_step ) {
+			$settings = is_array( $new_step->settings ) ? $new_step->settings : array();
+			$updated  = $this->remap_step_ids_in_settings( $settings, $id_map );
+			if ( $updated !== $settings ) {
+				$new_step->settings = $updated;
+				$new_step->save();
+			}
+		}
+	}
+
+	/**
+	 * Prepare step settings so email/SMS templates are copied instead of shared.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $settings Step settings.
+	 * @param string $action   Step action slug.
+	 *
+	 * @return array
+	 */
+	private function prepare_step_settings_for_duplicate( array $settings, $action ) {
+		foreach (
+			array(
+				'_action_label',
+				'_action_warning',
+				'_action_warning_message',
+				'_goal_label',
+				'_goal_warning',
+				'_goal_warning_message',
+			) as $runtime_key
+		) {
+			unset( $settings[ $runtime_key ] );
+		}
+
+		$channel_map = array(
+			'send_email'    => 'email',
+			'send_sms'      => 'sms',
+			'send_whatsapp' => 'whatsapp',
+		);
+
+		if ( ! isset( $channel_map[ $action ] ) || 'whatsapp' === $channel_map[ $action ] ) {
+			return $settings;
+		}
+
+		if ( empty( $settings['template_ids'] ) || ! is_array( $settings['template_ids'] ) ) {
+			return $settings;
+		}
+
+		$template_id = (int) reset( $settings['template_ids'] );
+		$template    = TrackingTemplateModel::find( $template_id );
+		if ( $template ) {
+			if ( 'email' === $channel_map[ $action ] ) {
+				$settings['subject'] = $settings['subject'] ?? $template->settings['subject'] ?? $template->name ?? '';
+				$settings['body']    = $settings['body'] ?? $template->body ?? '';
+			} else {
+				$settings['body'] = $settings['body'] ?? $template->body ?? '';
+			}
+		}
+
+		unset( $settings['template_ids'] );
+
+		return $settings;
+	}
+
+	/**
+	 * Remap step ID references inside duplicated step settings.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings Step settings.
+	 * @param array $id_map   Map of old step ID => new step ID.
+	 *
+	 * @return array
+	 */
+	private function remap_step_ids_in_settings( array $settings, array $id_map ) {
+		foreach ( $settings as $key => $value ) {
+			$settings[ $key ] = $this->remap_step_ids_in_value( $value, $id_map );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Recursively replace dynamic step ID references in a value.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $value  Setting value.
+	 * @param array $id_map Map of old step ID => new step ID.
+	 *
+	 * @return mixed
+	 */
+	private function remap_step_ids_in_value( $value, array $id_map ) {
+		if ( is_string( $value ) ) {
+			foreach ( $id_map as $old_id => $new_id ) {
+				$value = str_replace( 'dynamic_id_' . $old_id, 'dynamic_id_' . $new_id, $value );
+			}
+
+			return $value;
+		}
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				$value[ $key ] = $this->remap_step_ids_in_value( $item, $id_map );
+			}
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Delete item
 	 *
 	 * @since 1.0.0
@@ -996,7 +1370,7 @@ class RestAutomationController extends RestController {
 					: null;
 
 				if ( ! empty( $form ) && ! empty( $form->is_pro ) && $form->is_pro ) {
-					$has_warnings = true;
+					$has_warnings     = true;
 					$form_pro_message = __( 'Form trigger requires Plugin Pro to be installed and activated.', 'doublescale' );
 					$warnings[]       = array(
 						'type'    => 'trigger',

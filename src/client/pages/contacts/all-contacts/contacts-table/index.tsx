@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 /**
  * internal dependencies
  */
@@ -16,6 +16,10 @@ import { useContactsAPI } from '../useContactsAPI';
 import { useContactsColumns } from '../columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
+import {
+	getSavedContactsColumnVisibility,
+	saveContactsColumnVisibility,
+} from '../contacts-column-visibility';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -48,10 +52,30 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		setPerPage,
 		keywords,
 		setKeywords,
+		showNotice,
 	} = useContactsContext();
 
 	const { fetchContacts, doBulkAction } = useContactsAPI();
 	const { columns } = useContactsColumns();
+	const [columnVisibility, setColumnVisibility] = useState(
+		getSavedContactsColumnVisibility
+	);
+
+	const handleColumnVisibilitySubmit = useCallback(
+		async (visibility: Record<string, boolean>) => {
+			setColumnVisibility(visibility);
+			try {
+				await saveContactsColumnVisibility(visibility);
+			} catch (error: unknown) {
+				const message =
+					error instanceof Error
+						? error.message
+						: __('Failed to save column preferences', 'doublescale');
+				showNotice('error', message);
+			}
+		},
+		[showNotice]
+	);
 
 	const handleApplyFilters = () => {
 		setPage(1);
@@ -66,11 +90,13 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		setPerPage,
 	});
 
-	const tableConfig: DataTableConfig<any> = {
+	const tableConfig: DataTableConfig<any> = useMemo(
+		() => ({
 		toolbarClassName:
 			'min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:gap-1',
 		manageColumns: {
 			enabled: true,
+			onSubmit: handleColumnVisibilitySubmit,
 		},
 		search: {
 			placeholder: __('Search contacts...', 'doublescale'),
@@ -123,25 +149,34 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			},
 			placeholder: __('Date Range', 'doublescale'),
 		},
-		initialColumnVisibility: {
-			contact: true,
-			created_at: true,
-			lists: true,
-			tags: true,
-			status: true,
-			phone: false,
-			country: false,
-			city: false,
-			address_1: false,
-			address_2: false,
-			state: false,
-			zip: false,
-			total_orders: true,
-			total_revenue: true,
-			last_order_date: true,
-			whatsapp_phone: false,
-		},
-	};
+		initialColumnVisibility: columnVisibility,
+		}),
+		[
+			activeTab,
+			bulkAction,
+			columnVisibility,
+			dateRange,
+			doBulkAction,
+			filters,
+			handleColumnVisibilitySubmit,
+			isFiltering,
+			keywords,
+			page,
+			selectedLists,
+			selectedRowKeys,
+			selectedTags,
+			setBulkAction,
+			setDateRange,
+			setFilters,
+			setKeywords,
+			setPage,
+			setSelectedLists,
+			setSelectedRowKeys,
+			setSelectedTags,
+			setShowFilters,
+			showFilters,
+		]
+	);
 
 	useEffect(() => {
 		fetchContacts();

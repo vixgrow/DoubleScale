@@ -78,6 +78,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'leadscoring',
 		'credit_notes',
 		'contracts',
+		'subscriptions',
 		'tasks',
 	);
 
@@ -214,6 +215,12 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 				'description'  => __( 'Manage customer contracts, types, attachments, and e-signatures.', 'doublescale' ),
 				'dependencies' => array( 'contacts', 'sales' ),
 			);
+		case 'subscriptions':
+			return array(
+				'label'        => __( 'Subscriptions', 'doublescale' ),
+				'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales', 'documents' ),
+			);
 		case 'tasks':
 			return array(
 				'label'       => __( 'Tasks', 'doublescale' ),
@@ -345,7 +352,7 @@ function doublescale_standalone_plugin_module_slugs(): array {
 	/**
 	 * @param string[] $slugs Standalone-plugin module slugs.
 	 */
-	return (array) apply_filters( 'doublescale_standalone_plugin_module_slugs', array( 'subscriptions' ) );
+	return (array) apply_filters( 'doublescale_standalone_plugin_module_slugs', array() );
 }
 
 /**
@@ -401,10 +408,9 @@ function doublescale_is_module_active( string $slug ): bool {
 			return $v;
 		}
 
-		// A known child sub-feature whose module class is not registered means its
-		// owning add-on plugin is inactive — report inactive rather than defaulting
-		// to true. (`subscriptions` is the standalone-plugin case: no phantom
-		// toggle, so without the add-on its class never enters the slug→class map.)
+		// A known child sub-feature whose module class is not registered: phantom
+		// toggles resolve via doublescale_phantom_module_is_enabled() above; any
+		// other child without a class (add-on inactive) reports inactive.
 		if ( array_key_exists( $slug, doublescale_child_module_parent_map() ) ) {
 			\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, false );
 

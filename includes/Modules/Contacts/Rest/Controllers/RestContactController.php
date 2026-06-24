@@ -33,6 +33,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
+use DoubleScale\Modules\Contacts\Services\ContactUpdateNotifier;
 use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
@@ -116,6 +117,30 @@ class RestContactController extends RestController {
 						'ids' => array(
 							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/list-preferences',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_list_preferences' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_list_preferences' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'column_visibility' => array(
+							'description' => __( 'Visible columns for the contacts list.', 'doublescale' ),
+							'type'        => 'object',
+							'required'    => true,
 						),
 					),
 				),
@@ -1969,6 +1994,7 @@ class RestContactController extends RestController {
 			}
 
 			$contact_data = $this->prepare_contact( $request );
+			$changes      = ContactUpdateNotifier::collect_field_changes( $contact, $contact_data );
 			$contact->update( $contact_data );
 
 			$sync_lists = $this->sync_lists( $request, $contact );
@@ -1981,6 +2007,17 @@ class RestContactController extends RestController {
 				return $sync_tags;
 			}
 
+			$custom_fields_param = $request->get_param( 'custom_fields' );
+			if (
+				is_array( $custom_fields_param )
+				&& ! empty( $custom_fields_param )
+				&& class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' )
+			) {
+				$contact->load( 'custom_fields' );
+				$normalized = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::normalize_submission( $custom_fields_param );
+				$changes    = ContactUpdateNotifier::merge_custom_field_changes( $contact, $normalized, $changes );
+			}
+
 			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
 			if ( is_wp_error( $sync_custom_fields ) ) {
 				return $sync_custom_fields;
@@ -1991,13 +2028,21 @@ class RestContactController extends RestController {
 				return $sync_notes;
 			}
 
-			// Load relationships — include custom_fields when the model is available.
+			// Load relationships for the response payload.
 			$contact->load( array( 'lists', 'tags' ) );
 			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$contact->load( 'custom_fields' );
 			}
 
-			do_action( 'doublescale_contact_update', $contact );
+			if ( ! empty( $changes ) ) {
+				ContactUpdateNotifier::fire(
+					$contact,
+					array(
+						'updated_by' => 'admin',
+						'changes'    => $changes,
+					)
+				);
+			}
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -2621,6 +2666,103 @@ class RestContactController extends RestController {
 	}
 
 	// all permissions checks
+
+	/**
+	 * User meta key for contacts list column visibility preferences.
+	 *
+	 * @var string
+	 */
+	const LIST_COLUMN_VISIBILITY_META_KEY = 'doublescale_contacts_list_column_visibility';
+
+	/**
+	 * Get saved contacts list column visibility for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID. Defaults to current user.
+	 *
+	 * @return array<string, bool>
+	 */
+	public static function get_list_column_visibility( $user_id = 0 ) {
+		$user_id = $user_id ? (int) $user_id : (int) get_current_user_id();
+		if ( ! $user_id ) {
+			return array();
+		}
+
+		$saved = get_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, true );
+
+		return is_array( $saved ) ? self::sanitize_column_visibility( $saved ) : array();
+	}
+
+	/**
+	 * Get contacts list UI preferences for the current user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_list_preferences( $request ) {
+		return new WP_REST_Response(
+			array(
+				'column_visibility' => self::get_list_column_visibility(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save contacts list UI preferences for the current user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_list_preferences( $request ) {
+		$user_id = (int) get_current_user_id();
+		if ( ! $user_id ) {
+			return new WP_Error( 'unauthorized', __( 'User not logged in.', 'doublescale' ), array( 'status' => 401 ) );
+		}
+
+		$visibility = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
+		update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $visibility );
+
+		return new WP_REST_Response(
+			array(
+				'column_visibility' => $visibility,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Sanitize contacts list column visibility payload.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $visibility Raw visibility map.
+	 *
+	 * @return array<string, bool>
+	 */
+	private static function sanitize_column_visibility( $visibility ) {
+		if ( ! is_array( $visibility ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+		foreach ( $visibility as $column => $visible ) {
+			$key = sanitize_key( (string) $column );
+			if ( '' === $key ) {
+				continue;
+			}
+			$sanitized[ $key ] = (bool) $visible;
+		}
+
+		return $sanitized;
+	}
 
 	/**
 	 * Check if a given request has access to get items

@@ -31,13 +31,16 @@ interface NodeLayoutProps {
 	subtitle: React.ReactNode;
 	onEdit: () => void;
 	onDelete: () => void;
+	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
 	editLabel: string;
 	deleteLabel: string;
+	duplicateLabel?: string;
 	changeTriggerLabel?: string;
 	deleteTitle: string;
 	deleteDescription: string;
 	showDelete?: boolean;
+	showDuplicate?: boolean;
 	showChangeTrigger?: boolean;
 	viewMode?: boolean;
 	analytics?: { contacts: number; conversion_rate: number };
@@ -51,13 +54,16 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 	subtitle,
 	onEdit,
 	onDelete,
+	onDuplicate,
 	onChangeTrigger,
 	editLabel,
 	deleteLabel,
+	duplicateLabel,
 	changeTriggerLabel,
 	deleteTitle,
 	deleteDescription,
 	showDelete = true,
+	showDuplicate = false,
 	showChangeTrigger = false,
 	viewMode = false,
 	analytics,
@@ -86,13 +92,16 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 					<NodeActionsDropdown
 						onEdit={onEdit}
 						onDelete={onDelete}
+						onDuplicate={onDuplicate}
 						onChangeTrigger={onChangeTrigger}
 						editLabel={editLabel}
 						deleteLabel={deleteLabel}
+						duplicateLabel={duplicateLabel}
 						changeTriggerLabel={changeTriggerLabel}
 						deleteTitle={deleteTitle}
 						deleteDescription={deleteDescription}
 						showDelete={showDelete}
+						showDuplicate={showDuplicate}
 						showChangeTrigger={showChangeTrigger}
 					/>
 				)}

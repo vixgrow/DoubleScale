@@ -68,7 +68,7 @@ import {
 	type TicketStatus,
 } from '@/constants/support';
 import type { ConversationItem } from '@/types/support';
-import { EmailIcon, ReplyIcon } from '@doublescale/components/booking';
+import { EmailIcon, ReplyIcon } from '@/components/booking';
 import CommentIcon from '@doublescale/shared/icons/comment';
 
 

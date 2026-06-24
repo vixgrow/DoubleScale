@@ -24,7 +24,7 @@ import StepReorderControls from '../components/step-reorder-controls';
 import AnalyticsPopup from '../components/analytics-popup';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
-import { deleteStep } from '../utils/step-utils';
+import { deleteStep, duplicateStep } from '../utils/step-utils';
 import { getActionLabel, hasActionWarning } from '@doublescale/utils';
 import { ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
@@ -128,6 +128,18 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 		}
 	};
 
+	const handleDuplicate = async () => {
+		if (!viewMode) {
+			await duplicateStep(
+				step,
+				steps,
+				setSteps,
+				createNotice,
+				__('Action duplicated', 'doublescale')
+			);
+		}
+	};
+
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
@@ -192,8 +204,11 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 						subtitle={subtitle}
 						onEdit={handleEdit}
 						onDelete={handleDelete}
+						onDuplicate={handleDuplicate}
 						editLabel={__('Edit Action', 'doublescale')}
 						deleteLabel={__('Delete Action', 'doublescale')}
+						duplicateLabel={__('Duplicate Action', 'doublescale')}
+						showDuplicate={isConfigured}
 						deleteTitle={__('Delete this action?', 'doublescale')}
 						deleteDescription={__(
 							'This will remove the action from your workflow.',

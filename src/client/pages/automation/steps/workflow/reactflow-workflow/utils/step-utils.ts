@@ -116,6 +116,73 @@ export const deleteStep = async (
     }
 };
 
+interface DuplicateStepResponse {
+    new_step_id: number | null;
+    steps: AutomationStep[];
+}
+
+/**
+ * Duplicate a step and insert the copy right after the original.
+ *
+ * Works for action, goal, delay and condition steps. Condition steps are
+ * duplicated together with their entire yes/no branch subtree. The shifting of
+ * sibling orders and the subtree clone are handled server-side; the returned
+ * steps are merged into local state.
+ *
+ * @param step The step to duplicate
+ * @param steps All steps in the workflow
+ * @param setSteps Function to update steps state
+ * @param createNotice Function to show notifications
+ * @param successMessage Optional success message to show
+ * @returns Promise resolving to the id of the created root step, or null on failure
+ */
+export const duplicateStep = async (
+    step: AutomationStep,
+    steps: AutomationStep[],
+    setSteps: (steps: AutomationStep[]) => void,
+    createNotice: (notice: { type: string; message: string }) => void,
+    successMessage: string = __('Step duplicated', 'doublescale')
+): Promise<number | null> => {
+    const insertOrder = step.order + 1;
+
+    // Optimistically shift sibling orders in the same context so the local
+    // ordering matches what the server persists.
+    const shiftedSteps = steps.map((s) => {
+        const inSameContext = step.parent_id
+            ? s.parent_id === step.parent_id && s.condition === step.condition
+            : !s.parent_id || s.parent_id === 0;
+
+        if (inSameContext && s.id !== step.id && s.order >= insertOrder) {
+            return { ...s, order: s.order + 1 };
+        }
+
+        return s;
+    });
+
+    try {
+        const response = (await apiFetch({
+            path: `/doublescale/v1/automation-steps/${step.id}/duplicate`,
+            method: 'POST',
+        })) as DuplicateStepResponse;
+
+        const createdSteps = response?.steps ?? [];
+        setSteps([...shiftedSteps, ...createdSteps]);
+
+        createNotice({
+            type: 'success',
+            message: successMessage,
+        });
+
+        return response?.new_step_id ?? null;
+    } catch (error: any) {
+        createNotice({
+            type: 'error',
+            message: error.message || __('Failed to duplicate step', 'doublescale'),
+        });
+        return null;
+    }
+};
+
 /**
  * Check if a step can be moved in a specific direction
  * 

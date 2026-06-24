@@ -231,7 +231,7 @@ class RestSettingsController extends RestController {
 						),
 						'gdpr_message'         => array(
 							'type'    => 'string',
-							'default' => 'Your email and cart are saved so we can send you email reminders about this order. {{no_thanks text="No Thanks"}}',
+							'default' => 'Your email, phone number, and cart are saved so we can send you reminders about this order. {{no_thanks text="No Thanks"}}',
 						),
 						'tags'                 => array(
 							'type'    => 'array',

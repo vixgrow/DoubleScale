@@ -115,7 +115,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						</div>
 						<div className="text-[#9197A4]">
 							{__(
-								'When entering email addresses, inform customers that their email and cart data are saved to send abandonment reminders',
+								'When customers enter checkout details, inform them that their email, phone number, and cart data may be saved to send abandonment reminders',
 								'doublescale'
 							)}
 						</div>

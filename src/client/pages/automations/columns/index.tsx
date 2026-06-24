@@ -18,6 +18,7 @@ import {
 	SettingsOutlinedIcon,
 	ThreeDotsIcon,
 	DeleteIcon,
+	CopyIcon,
 } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
@@ -162,6 +163,8 @@ interface AutomationColumnsProps {
 	onRenameAutomation: (automation: Automation, name: string) => Promise<void>;
 	navigate: (to: string) => void;
 	onDelete: (id: number) => void;
+	onDuplicate: (id: number) => void;
+	duplicatingAutomationId: number | null;
 }
 
 export const getAutomationColumns = ({
@@ -171,6 +174,8 @@ export const getAutomationColumns = ({
 	onRenameAutomation,
 	navigate,
 	onDelete,
+	onDuplicate,
+	duplicatingAutomationId,
 }: AutomationColumnsProps): ColumnDef<Automation>[] => {
 	const selectionColumn: ColumnDef<Automation> = {
 		id: 'select',
@@ -317,6 +322,13 @@ export const getAutomationColumns = ({
 								>
 									<SettingsOutlinedIcon />
 									{__('Setup', 'doublescale')}
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => onDuplicate(automation.id)}
+									disabled={duplicatingAutomationId === automation.id}
+								>
+									<CopyIcon />
+									{__('Duplicate', 'doublescale')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(automation.id)}

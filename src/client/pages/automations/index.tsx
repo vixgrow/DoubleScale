@@ -61,6 +61,9 @@ const AutomationsList: React.FC = () => {
 	const [renamingAutomationId, setRenamingAutomationId] = useState<
 		number | null
 	>(null);
+	const [duplicatingAutomationId, setDuplicatingAutomationId] = useState<
+		number | null
+	>(null);
 	const [createError, setCreateError] = useState<NoticeMessage | null>(null);
 	const [listError, setListError] = useState<NoticeMessage | null>(null);
 	const navigate = useNavigate();
@@ -288,6 +291,37 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	const duplicateAutomation = async (id: number) => {
+		setDuplicatingAutomationId(id);
+		setListError({
+			type: 'success',
+			message: __('Duplicating workflow...', 'doublescale'),
+		});
+
+		try {
+			const response = (await apiFetch({
+				path: `/doublescale/v1/automations/${id}/duplicate`,
+				method: 'POST',
+			})) as Automation;
+
+			setListError({
+				type: 'success',
+				message: __(
+					'Workflow duplicated successfully',
+					'doublescale'
+				),
+			});
+			navigate(getToLink(`automations/${response.id}`));
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setDuplicatingAutomationId(null);
+		}
+	};
+
 
 	const handleBulkAction = async (action: string) => {
 		switch (action) {
@@ -307,6 +341,8 @@ const AutomationsList: React.FC = () => {
 		onRenameAutomation: handleRenameAutomation,
 		navigate,
 		onDelete: deleteAutomation,
+		onDuplicate: duplicateAutomation,
+		duplicatingAutomationId,
 	});
 
 	const tableConfig: DataTableConfig<Automation> = {

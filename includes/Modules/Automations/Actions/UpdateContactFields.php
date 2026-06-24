@@ -310,12 +310,12 @@ class UpdateContactFields extends Action {
 
 		switch ( $column ) {
 			case 'whatsapp_phone':
-				$normalized = $this->to_e164( $value );
+				$normalized = PhoneValidator::to_e164( $value );
 				return ( null !== $normalized && preg_match( '/^\+[1-9][0-9]{0,14}$/', $normalized ) ) ? $normalized : null;
 
 			case 'phone':
-				$normalized = $this->normalize_phone( $value, false );
-				return ( null !== $normalized && preg_match( '/^\+?[0-9]+$/', $normalized ) ) ? $normalized : null;
+				$normalized = PhoneValidator::normalize_loose( $value );
+				return ( '' !== $normalized && preg_match( '/^\+?[0-9]+$/', $normalized ) ) ? $normalized : null;
 
 			case 'email':
 				return is_email( $value ) ? $value : null;
@@ -326,108 +326,6 @@ class UpdateContactFields extends Action {
 			default:
 				return $value;
 		}
-	}
-
-	/**
-	 * Strip a phone string down to an optional leading "+" plus digits.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $value        Raw phone value.
-	 * @param bool   $require_plus When true, a value without a leading "+" is rejected (E.164).
-	 *
-	 * @return string|null
-	 */
-	private function normalize_phone( $value, $require_plus ) {
-		if ( '' === $value ) {
-			return null;
-		}
-
-		$has_plus = ( '+' === substr( $value, 0, 1 ) );
-		$digits   = preg_replace( '/[^0-9]/', '', $value );
-
-		if ( '' === $digits ) {
-			return null;
-		}
-
-		if ( $has_plus ) {
-			return '+' . $digits;
-		}
-
-		return $require_plus ? null : $digits;
-	}
-
-	/**
-	 * Convert a resolved phone value to E.164.
-	 *
-	 * Numbers that already carry a leading "+" are sanitized as-is. National
-	 * numbers without a country code (e.g. a WooCommerce billing phone like
-	 * "(202) 555-0143") are completed with a derived default calling code so they
-	 * satisfy whatsapp_phone's strict E.164 rule instead of being skipped. When no
-	 * country code can be determined, returns null (caller skips + logs) rather
-	 * than fabricating a wrong prefix that would fail to deliver.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $value Resolved phone value.
-	 *
-	 * @return string|null
-	 */
-	private function to_e164( $value ) {
-		$value = trim( (string) $value );
-		if ( '' === $value ) {
-			return null;
-		}
-
-		// Already international: let PhoneValidator clean + validate it.
-		if ( '+' === substr( $value, 0, 1 ) ) {
-			return PhoneValidator::sanitize( $value );
-		}
-
-		// National number: needs a country calling code to become valid E.164.
-		$code = $this->default_calling_code();
-		if ( '' === $code ) {
-			return null;
-		}
-
-		return PhoneValidator::sanitize( $value, $code );
-	}
-
-	/**
-	 * Best-guess default country calling code (digits only, no "+") used to
-	 * complete plus-less phone numbers into E.164.
-	 *
-	 * Derived from the WooCommerce store base country (e.g. US -> "1"). Sites
-	 * whose customers span multiple countries, or that need a per-contact code,
-	 * can override via the doublescale_update_contact_default_calling_code filter.
-	 * Returns '' when nothing can be determined (caller then skips the value).
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return string
-	 */
-	private function default_calling_code() {
-		$code = '';
-
-		if ( function_exists( 'wc_get_base_location' ) && function_exists( 'WC' ) && WC() && isset( WC()->countries ) ) {
-			$base    = wc_get_base_location();
-			$country = ( is_array( $base ) && ! empty( $base['country'] ) ) ? $base['country'] : '';
-			if ( '' !== $country ) {
-				$code = ltrim( (string) WC()->countries->get_country_calling_code( $country ), '+' );
-			}
-		}
-
-		/**
-		 * Filter the default country calling code (digits only, no "+") used to
-		 * complete national phone numbers into E.164 when writing whatsapp_phone.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $code Derived calling code (e.g. "1", "44"), or '' if none.
-		 */
-		$code = apply_filters( 'doublescale_update_contact_default_calling_code', $code );
-
-		return preg_replace( '/[^0-9]/', '', (string) $code );
 	}
 
 	/**

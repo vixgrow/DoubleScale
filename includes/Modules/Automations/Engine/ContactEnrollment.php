@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Automations\Engine;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Core\Validators\PhoneValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -80,14 +81,74 @@ final class ContactEnrollment {
 	}
 
 	public function maybe_create_contact(): ContactModel {
-		$contact = ContactModel::where( 'email', $this->args['email'] )->first();
+		$contact    = ContactModel::where( 'email', $this->args['email'] )->first();
+		$attributes = $this->prepare_contact_attributes( $contact );
 
 		if ( ! $contact ) {
-			$contact = ContactModel::create( $this->args );
+			$contact = ContactModel::create( $attributes );
 		} else {
-			$contact->update( $this->args );
+			$contact->update( $attributes );
 		}
 
 		return $contact;
+	}
+
+	/**
+	 * Build the contact attribute set from the trigger args.
+	 *
+	 * Normalizes the phone fields so WooCommerce billing/shipping numbers land in
+	 * both `phone` (loose) and `whatsapp_phone` (strict E.164). Empty or
+	 * unverifiable phone values are dropped so they never overwrite a good value
+	 * already on an existing contact.
+	 *
+	 * @param ContactModel|null $existing Existing contact (when updating).
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function prepare_contact_attributes( $existing ): array {
+		$attributes = $this->args;
+
+		// Internal-only keys that are not contact columns.
+		unset( $attributes['data'], $attributes['contact'], $attributes['booking'], $attributes['context'] );
+
+		$country_hint = isset( $attributes['country'] ) ? (string) $attributes['country'] : '';
+
+		// Loose phone column.
+		if ( array_key_exists( 'phone', $attributes ) ) {
+			$phone = PhoneValidator::normalize_loose( $attributes['phone'] );
+			if ( '' === $phone ) {
+				unset( $attributes['phone'] );
+			} else {
+				$attributes['phone'] = $phone;
+			}
+		}
+
+		// Strict E.164 WhatsApp column. Derive it from the loose phone when an
+		// explicit whatsapp_phone was not supplied.
+		$whatsapp_source = $attributes['whatsapp_phone'] ?? ( $attributes['phone'] ?? ( $this->args['phone'] ?? '' ) );
+		$whatsapp        = PhoneValidator::to_e164( $whatsapp_source, $country_hint );
+		if ( null === $whatsapp ) {
+			unset( $attributes['whatsapp_phone'] );
+		} else {
+			$attributes['whatsapp_phone'] = $whatsapp;
+		}
+
+		// `country` is only a hint for E.164 resolution; keep it only if it maps
+		// to a real contact column value (ISO code) and is non-empty.
+		if ( isset( $attributes['country'] ) && '' === trim( (string) $attributes['country'] ) ) {
+			unset( $attributes['country'] );
+		}
+
+		// Never overwrite an existing non-empty phone field with the same-or-empty
+		// incoming value churn; only fill blanks on update.
+		if ( $existing ) {
+			foreach ( array( 'phone', 'whatsapp_phone' ) as $field ) {
+				if ( isset( $attributes[ $field ] ) && ! empty( $existing->{$field} ) ) {
+					unset( $attributes[ $field ] );
+				}
+			}
+		}
+
+		return $attributes;
 	}
 }

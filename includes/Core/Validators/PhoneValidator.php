@@ -136,6 +136,147 @@ class PhoneValidator {
 	}
 
 	/**
+	 * Normalize a raw phone value for the contact `phone` column (loose format).
+	 *
+	 * Keeps an optional leading "+" plus digits. This matches the contact
+	 * `phone` rule (^\+?[0-9]+$) and is intentionally lenient so national
+	 * WooCommerce billing numbers are still stored even without a country code.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $phone Raw phone value.
+	 *
+	 * @return string Normalized value, or '' when nothing usable remains.
+	 */
+	public static function normalize_loose( $phone ) {
+		$phone = trim( (string) $phone );
+		if ( '' === $phone ) {
+			return '';
+		}
+
+		$has_plus = ( '+' === substr( $phone, 0, 1 ) );
+		$digits   = preg_replace( '/[^0-9]/', '', $phone );
+
+		if ( '' === $digits ) {
+			return '';
+		}
+
+		return $has_plus ? '+' . $digits : $digits;
+	}
+
+	/**
+	 * Convert a raw phone value to strict E.164 for the `whatsapp_phone` column.
+	 *
+	 * Numbers already carrying a leading "+" are sanitized as-is. National
+	 * numbers (e.g. "(202) 555-0143") are completed using the supplied country
+	 * code so they satisfy the strict E.164 rule instead of being dropped. The
+	 * country code may be an ISO-3166 alpha-2 country (e.g. "US") or a calling
+	 * code (e.g. "1" / "+1"); WooCommerce, when active, resolves the country to
+	 * its calling code.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $phone        Raw phone value.
+	 * @param string      $country_hint Optional ISO country or calling code used
+	 *                                  to complete plus-less numbers.
+	 *
+	 * @return string|null E.164 value, or null when it cannot be validated.
+	 */
+	public static function to_e164( $phone, $country_hint = '' ) {
+		$phone = trim( (string) $phone );
+		if ( '' === $phone ) {
+			return null;
+		}
+
+		// Already international: clean + validate it directly.
+		if ( '+' === substr( $phone, 0, 1 ) ) {
+			return self::sanitize( $phone );
+		}
+
+		$calling_code = self::resolve_calling_code( $country_hint );
+		if ( '' === $calling_code ) {
+			return null;
+		}
+
+		return self::sanitize( $phone, $calling_code );
+	}
+
+	/**
+	 * Resolve a country/calling-code hint into a bare numeric calling code.
+	 *
+	 * Accepts an ISO-3166 alpha-2 country code (resolved via WooCommerce when
+	 * available) or a raw calling code with/without a leading "+". Falls back to
+	 * the WooCommerce store base country, then the
+	 * doublescale_default_calling_code filter.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hint Country or calling code hint.
+	 *
+	 * @return string Digits-only calling code, or '' when none can be determined.
+	 */
+	public static function resolve_calling_code( $hint = '' ) {
+		$hint = trim( (string) $hint );
+
+		// A two-letter token is treated as an ISO country code.
+		if ( 2 === strlen( $hint ) && ctype_alpha( $hint ) ) {
+			$code = self::country_to_calling_code( strtoupper( $hint ) );
+			if ( '' !== $code ) {
+				return $code;
+			}
+		} elseif ( '' !== $hint ) {
+			// Otherwise treat it as a calling code (strip "+" and non-digits).
+			$code = preg_replace( '/[^0-9]/', '', $hint );
+			if ( '' !== $code ) {
+				return $code;
+			}
+		}
+
+		// Fall back to the WooCommerce store base country.
+		$base_code = '';
+		if ( function_exists( 'wc_get_base_location' ) ) {
+			$base    = wc_get_base_location();
+			$country = ( is_array( $base ) && ! empty( $base['country'] ) ) ? $base['country'] : '';
+			if ( '' !== $country ) {
+				$base_code = self::country_to_calling_code( $country );
+			}
+		}
+
+		/**
+		 * Filter the default calling code (digits only, no "+") used to complete
+		 * national phone numbers into E.164 when writing whatsapp_phone.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $base_code Derived calling code (e.g. "1", "44"), or '' if none.
+		 */
+		$base_code = apply_filters( 'doublescale_default_calling_code', $base_code );
+
+		// Backwards-compatible alias for the previous, action-specific filter name.
+		$base_code = apply_filters( 'doublescale_update_contact_default_calling_code', $base_code );
+
+		return preg_replace( '/[^0-9]/', '', (string) $base_code );
+	}
+
+	/**
+	 * Resolve an ISO-3166 alpha-2 country code to its calling code (digits only).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $country ISO alpha-2 country code (e.g. "US").
+	 *
+	 * @return string Digits-only calling code, or '' when unavailable.
+	 */
+	private static function country_to_calling_code( $country ) {
+		if ( function_exists( 'WC' ) && WC() && isset( WC()->countries ) ) {
+			$code = WC()->countries->get_country_calling_code( $country );
+			return preg_replace( '/[^0-9]/', '', (string) $code );
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get E.164 format description for user-facing messages
 	 *
 	 * @since 1.0.0

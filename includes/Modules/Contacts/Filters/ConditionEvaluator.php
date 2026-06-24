@@ -339,8 +339,16 @@ class ConditionEvaluator {
 
 		switch ( $operator ) {
 			case 'is':
+				// Contact must be in ALL of the specified lists.
+				foreach ( $check_list_ids as $list_id ) {
+					if ( ! in_array( $list_id, $contact_list_ids, true ) ) {
+						return false;
+					}
+				}
+				return true;
+
 			case 'contains':
-				// Contact must be in ANY of the specified lists (matches behavior of original filter)
+				// Contact must be in ANY of the specified lists.
 				foreach ( $check_list_ids as $list_id ) {
 					if ( in_array( $list_id, $contact_list_ids, true ) ) {
 						return true;
@@ -350,7 +358,7 @@ class ConditionEvaluator {
 
 			case 'is_not':
 			case 'does_not_contain':
-				// Contact must NOT be in ANY of the specified lists
+				// Contact must NOT be in ANY of the specified lists.
 				foreach ( $check_list_ids as $list_id ) {
 					if ( in_array( $list_id, $contact_list_ids, true ) ) {
 						return false;
@@ -400,8 +408,16 @@ class ConditionEvaluator {
 
 		switch ( $operator ) {
 			case 'is':
+				// Contact must have ALL of the specified tags.
+				foreach ( $check_tag_ids as $tag_id ) {
+					if ( ! in_array( $tag_id, $contact_tag_ids, true ) ) {
+						return false;
+					}
+				}
+				return true;
+
 			case 'contains':
-				// Contact must have ANY of the specified tags (matches behavior of original filter)
+				// Contact must have ANY of the specified tags.
 				foreach ( $check_tag_ids as $tag_id ) {
 					if ( in_array( $tag_id, $contact_tag_ids, true ) ) {
 						return true;
@@ -411,7 +427,7 @@ class ConditionEvaluator {
 
 			case 'is_not':
 			case 'does_not_contain':
-				// Contact must NOT have ANY of the specified tags
+				// Contact must NOT have ANY of the specified tags.
 				foreach ( $check_tag_ids as $tag_id ) {
 					if ( in_array( $tag_id, $contact_tag_ids, true ) ) {
 						return false;

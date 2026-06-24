@@ -119,12 +119,14 @@ class Tags extends Filter {
 		// Add where clause
 		switch ( $operator ) {
 			case 'is':
-				$query->whereHas(
-					'tags',
-					function ( $query ) use ( $value ) {
-						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
-					}
-				);
+				foreach ( $value as $tag_id ) {
+					$query->whereHas(
+						'tags',
+						function ( $query ) use ( $tag_id ) {
+							$query->where( $query->getModel()->getTable() . '.id', $tag_id );
+						}
+					);
+				}
 				break;
 			case 'is_not':
 				$query->whereDoesntHave(

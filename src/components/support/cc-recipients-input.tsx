@@ -22,6 +22,8 @@ interface CcRecipientsInputProps {
 	/** Cap mirroring the server's MAX_CC. */
 	max?: number;
 	disabled?: boolean;
+	placeholder?: string;
+	className?: string;
 }
 
 export default function CcRecipientsInput({
@@ -29,6 +31,8 @@ export default function CcRecipientsInput({
 	onChange,
 	max = 10,
 	disabled = false,
+	placeholder = __('Add CC email and press Enter…', 'doublescale'),
+	className = '',
 }: CcRecipientsInputProps) {
 	const [draft, setDraft] = useState('');
 	const [error, setError] = useState<string | null>(null);
@@ -65,7 +69,7 @@ export default function CcRecipientsInput({
 	};
 
 	return (
-		<div className="mt-2">
+		<div className={className}>
 			{value.length > 0 && (
 				<div className="flex flex-wrap gap-1.5 mb-2">
 					{value.map((addr, idx) => (
@@ -90,9 +94,10 @@ export default function CcRecipientsInput({
 			)}
 			<Input
 				type="email"
+				className='!rounded-lg !border-border'
 				value={draft}
 				disabled={disabled}
-				placeholder={__('Add CC email and press Enter…', 'doublescale')}
+				placeholder={placeholder}
 				onChange={(e) => {
 					setDraft(e.target.value);
 					if (error) {

@@ -2,11 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Power } from 'lucide-react';
 /**
  * Internal dependencies
@@ -92,8 +94,13 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	};
 
 	// Create a map of processed steps for quick lookup
-	const processedStepsMap = new Map();
+	const processedStepsMap = new Map<
+		number,
+		{ status: string; date: string }
+	>();
+	const executedStepIds = new Set<number>();
 	contact.processes.forEach((process) => {
+		executedStepIds.add(process.step_id);
 		processedStepsMap.set(process.step_id, {
 			status: process.status,
 			date: process.updated_at,
@@ -112,14 +119,24 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	const steps = allSteps.map((step) => {
 		const processed = processedStepsMap.get(step.id);
 		if (processed) {
-			step['process_status'] = processed.status;
+			const isConditionResult =
+				step.type === 'condition' &&
+				(processed.status === 'yes' || processed.status === 'no');
+			step['process_status'] = isConditionResult
+				? 'completed'
+				: processed.status;
 			step['process_date'] = processed.date;
+			if (isConditionResult) {
+				step['condition_result'] = processed.status;
+			}
 		} else {
 			// Handle cases where processes array is empty but automation has a status
 			if (contact.status === 'completed') {
-				// If automation is completed and this step is before or equal to current step, mark as completed
+				// Only infer completion for root-level steps on the main path.
+				// Condition branch children must have their own process record.
 				if (
 					contact.current_step &&
+					step.parent_id === 0 &&
 					step.order <= contact.current_step.order
 				) {
 					step['process_status'] = 'completed';
@@ -149,6 +166,136 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	};
 
 	const organizedSteps = processSteps(0, steps) as OrganizedStep[];
+
+	const segmentNameLookup = useMemo(() => {
+		const lookup: Record<number, string> = {};
+		contact.contact?.tags?.forEach((tag) => {
+			lookup[tag.id] = tag.name;
+		});
+		contact.contact?.lists?.forEach((list) => {
+			lookup[list.id] = list.name;
+		});
+		return lookup;
+	}, [contact.contact?.tags, contact.contact?.lists]);
+
+	const [resolvedSegmentNames, setResolvedSegmentNames] = useState<
+		Record<number, string>
+	>({});
+
+	useEffect(() => {
+		const tagIds = new Set<number>();
+		const listIds = new Set<number>();
+
+		(automation?.steps || []).forEach((step) => {
+			if (
+				(step.action === 'add_tags' || step.action === 'remove_tags') &&
+				Array.isArray(step.settings?.tags)
+			) {
+				step.settings.tags.forEach((id: number) => tagIds.add(Number(id)));
+			}
+			if (
+				(step.action === 'add_lists' || step.action === 'remove_lists') &&
+				Array.isArray(step.settings?.lists)
+			) {
+				step.settings.lists.forEach((id: number) => listIds.add(Number(id)));
+			}
+		});
+
+		const missingTagIds = [...tagIds].filter((id) => !segmentNameLookup[id]);
+		const missingListIds = [...listIds].filter((id) => !segmentNameLookup[id]);
+
+		if (missingTagIds.length === 0 && missingListIds.length === 0) {
+			setResolvedSegmentNames(segmentNameLookup);
+			return;
+		}
+
+		let cancelled = false;
+
+		const fetchNames = async () => {
+			const nextLookup: Record<number, string> = { ...segmentNameLookup };
+
+			try {
+				if (missingTagIds.length > 0) {
+					const response = (await apiFetch({
+						path: addQueryArgs('/doublescale/v1/tags', {
+							ids: missingTagIds,
+						}),
+					})) as { data?: Array<{ id: number; name: string }> };
+					response.data?.forEach((tag) => {
+						nextLookup[tag.id] = tag.name;
+					});
+				}
+
+				if (missingListIds.length > 0) {
+					const response = (await apiFetch({
+						path: addQueryArgs('/doublescale/v1/lists', {
+							ids: missingListIds,
+						}),
+					})) as { data?: Array<{ id: number; name: string }> };
+					response.data?.forEach((list) => {
+						nextLookup[list.id] = list.name;
+					});
+				}
+			} catch {
+				// Fall back to IDs when names cannot be loaded.
+			}
+
+			if (!cancelled) {
+				setResolvedSegmentNames(nextLookup);
+			}
+		};
+
+		fetchNames();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [automation?.steps, segmentNameLookup]);
+
+	const formatSegmentNames = (ids: number[]): string => {
+		return ids
+			.map(
+				(id) =>
+					resolvedSegmentNames[id] ||
+					segmentNameLookup[id] ||
+					`#${id}`
+			)
+			.join(', ');
+	};
+
+	const getSegmentActionDetail = (step: OrganizedStep): string | undefined => {
+		if (!step.action || !step.settings) {
+			return undefined;
+		}
+
+		if (
+			(step.action === 'add_tags' || step.action === 'remove_tags') &&
+			Array.isArray(step.settings.tags) &&
+			step.settings.tags.length > 0
+		) {
+			const names = formatSegmentNames(
+				step.settings.tags.map((id: number) => Number(id))
+			);
+			return step.action === 'add_tags'
+				? `${__('Tags', 'doublescale')}: ${names}`
+				: `${__('Tags removed', 'doublescale')}: ${names}`;
+		}
+
+		if (
+			(step.action === 'add_lists' || step.action === 'remove_lists') &&
+			Array.isArray(step.settings.lists) &&
+			step.settings.lists.length > 0
+		) {
+			const names = formatSegmentNames(
+				step.settings.lists.map((id: number) => Number(id))
+			);
+			return step.action === 'add_lists'
+				? `${__('Lists', 'doublescale')}: ${names}`
+				: `${__('Lists removed', 'doublescale')}: ${names}`;
+		}
+
+		return undefined;
+	};
 
 	// Format datetime helper
 	const formatDelayDatetime = (value?: string | null) => {
@@ -243,53 +390,37 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	};
 
 	// Helper: Determine which condition path was taken
-	const determineConditionPath = (
+	const resolveConditionPath = (
 		step: OrganizedStep,
 		yesChildren: OrganizedStep[],
 		noChildren: OrganizedStep[]
 	): 'yes' | 'no' => {
-		const hasChildrenWithStatus = (children: OrganizedStep[]) =>
-			children.some((child) => child['process_status']);
+		const storedResult = step['condition_result'];
+		if (storedResult === 'yes' || storedResult === 'no') {
+			return storedResult;
+		}
 
-		const hasProcessedChildren = (children: OrganizedStep[]) =>
-			children.some(
-				(child) =>
-					child['process_status'] &&
-					child['process_status'] !== 'pending'
-			);
+		const yesExecuted = yesChildren.some((child) =>
+			executedStepIds.has(child.id)
+		);
+		const noExecuted = noChildren.some((child) =>
+			executedStepIds.has(child.id)
+		);
 
-		// If condition hasn't been processed, default to branch with children or 'yes'
+		if (yesExecuted && !noExecuted) {
+			return 'yes';
+		}
+		if (noExecuted && !yesExecuted) {
+			return 'no';
+		}
+
 		const isConditionProcessed =
 			step['process_status'] && step['process_status'] !== 'pending';
 		if (!isConditionProcessed) {
 			return yesChildren.length > 0 ? 'yes' : 'no';
 		}
 
-		// Check which branch has processed children
-		if (hasProcessedChildren(yesChildren)) return 'yes';
-		if (hasProcessedChildren(noChildren)) return 'no';
-
-		// Check which branch has any status (even pending)
-		if (hasChildrenWithStatus(yesChildren)) return 'yes';
-		if (hasChildrenWithStatus(noChildren)) return 'no';
-
-		// Default to branch with steps or 'yes'
 		return yesChildren.length > 0 ? 'yes' : 'no';
-	};
-
-	// Helper: Determine branch label for steps in condition branches
-	const getBranchLabel = (
-		isInBranch: boolean,
-		isFirstInBranch: boolean,
-		isLastInBranch: boolean
-	): 'started' | 'ended' | 'both' | undefined => {
-		if (!isInBranch) return undefined;
-
-		if (isFirstInBranch && isLastInBranch) return 'both';
-		if (isFirstInBranch) return 'started';
-		if (isLastInBranch) return 'ended';
-
-		return undefined;
 	};
 
 	// Flatten steps into a sequential timeline array
@@ -303,7 +434,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 			date?: string;
 			step?: OrganizedStep;
 			conditionResult?: 'yes' | 'no';
-			branchLabel?: 'started' | 'ended' | 'both';
+			detailText?: string;
 		}> = [];
 
 		// Add trigger as first item
@@ -316,12 +447,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 		});
 
 		// Process organized steps
-		const processStepForTimeline = (
-			step: OrganizedStep,
-			isInBranch = false,
-			isFirstInBranch = false,
-			isLastInBranch = false
-		) => {
+		const processStepForTimeline = (step: OrganizedStep) => {
 			const { yesChildren, noChildren } = organizeChildrenByCondition(
 				step.children || []
 			);
@@ -331,7 +457,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 
 			// Handle condition steps
 			if (step.type === 'condition') {
-				const pathTaken = determineConditionPath(
+				const pathTaken = resolveConditionPath(
 					step,
 					yesChildren,
 					noChildren
@@ -352,10 +478,8 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 				});
 
 				// Process children
-				childrenToProcess.forEach((child, idx) => {
-					const isFirst = idx === 0;
-					const isLast = idx === childrenToProcess.length - 1;
-					processStepForTimeline(child, true, isFirst, isLast);
+				childrenToProcess.forEach((child) => {
+					processStepForTimeline(child);
 				});
 				return;
 			}
@@ -369,11 +493,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 				status,
 				date,
 				step,
-				branchLabel: getBranchLabel(
-					isInBranch,
-					isFirstInBranch,
-					isLastInBranch
-				),
+				detailText: getSegmentActionDetail(step),
 			});
 
 			// Process children if any
@@ -388,21 +508,6 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	};
 
 	const timelineItems = flattenStepsForTimeline();
-
-	// Helper: Get translated branch label text
-	const getBranchLabelText = (
-		branchLabel?: 'started' | 'ended' | 'both'
-	): string | undefined => {
-		if (!branchLabel) return undefined;
-
-		const branchLabelMap = {
-			started: __('Condition Started', 'doublescale'),
-			ended: __('Condition Ended', 'doublescale'),
-			both: `${__('Condition Started', 'doublescale')} & ${__('Ended', 'doublescale')}`,
-		};
-
-		return branchLabelMap[branchLabel];
-	};
 
 	// Helper: Check if timestamp should be shown
 	const shouldShowTimestamp = (item: (typeof timelineItems)[0]): boolean => {
@@ -470,9 +575,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 															: item.status
 													}
 													statuses={statuses}
-													branchLabel={getBranchLabelText(
-														item.branchLabel
-													)}
+													detailText={item.detailText}
 												/>
 											)}
 										</CardContent>

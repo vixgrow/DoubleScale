@@ -122,7 +122,9 @@ class ProcessAutomation {
 			if ( $parent_step && $parent_step->type === 'condition' ) {
 				// Check if the parent condition has been processed
 				$parent_process = $this->automation->processes()->where( 'automation_contact_id', $automation_contact_id )
-					->where( 'step_id', $parent_step->id )->where( 'status', 'completed' )->first();
+					->where( 'step_id', $parent_step->id )
+					->whereIn( 'status', array( 'completed', 'yes', 'no' ) )
+					->first();
 
 				if ( ! $parent_process ) {
 					// Parent condition hasn't been processed yet, so we shouldn't process this step
@@ -262,7 +264,12 @@ class ProcessAutomation {
 			$result             = new Process_Conditions( $automation_contact, $conditions );
 			$check              = $result->check();
 
-			$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'completed' );
+			$this->add_automation_contact_process(
+				$step,
+				$automation_contact->contact_id,
+				$automation_contact->id,
+				$check ? 'yes' : 'no'
+			);
 			if ( $check ) {
 				$this->process_yes_steps( $step, $automation_contact );
 			} else {

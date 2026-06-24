@@ -19,7 +19,7 @@ import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
-import { deleteStep } from '../utils/step-utils';
+import { deleteStep, duplicateStep } from '../utils/step-utils';
 import { ConditionAutomationIcon, ConditionsIcon } from '@doublescale/components';
 import {
 	Tooltip,
@@ -148,6 +148,18 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		}
 	};
 
+	const handleDuplicate = async () => {
+		if (!viewMode) {
+			await duplicateStep(
+				step,
+				steps,
+				setSteps,
+				createNotice,
+				__('Condition duplicated', 'doublescale')
+			);
+		}
+	};
+
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
@@ -176,8 +188,11 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
+					onDuplicate={handleDuplicate}
 					editLabel={__('Edit Condition', 'doublescale')}
 					deleteLabel={__('Delete Condition', 'doublescale')}
+					duplicateLabel={__('Duplicate Condition', 'doublescale')}
+					showDuplicate={!!isConfigured}
 					deleteTitle={__('Delete this condition?', 'doublescale')}
 					deleteDescription={__(
 						'This will also remove all connected steps in both branches.',

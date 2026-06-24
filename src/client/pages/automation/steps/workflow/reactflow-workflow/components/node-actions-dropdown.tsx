@@ -33,20 +33,23 @@ import {
 	automationAlertDialogContentClassName,
 	automationModalOverlayClassName,
 } from '../../automation-dialog-presets';
-import { DeleteIcon } from '@doublescale/components';
+import { CopyIcon, DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
 	editLabel?: string;
 	deleteLabel?: string;
+	duplicateLabel?: string;
 	changeTriggerLabel?: string;
 	deleteTitle?: string;
 	deleteDescription?: string;
 	showEdit?: boolean;
 	showDelete?: boolean;
+	showDuplicate?: boolean;
 	showChangeTrigger?: boolean;
 	disabled?: boolean;
 }
@@ -54,21 +57,27 @@ interface NodeActionsDropdownProps {
 const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
+	onDuplicate,
 	onChangeTrigger,
 	editLabel = __('Edit', 'doublescale'),
 	deleteLabel = __('Delete', 'doublescale'),
+	duplicateLabel = __('Duplicate', 'doublescale'),
 	changeTriggerLabel = __('Change Trigger', 'doublescale'),
 	deleteTitle = __('Delete this item?', 'doublescale'),
 	deleteDescription = __('This action cannot be undone.', 'doublescale'),
 	showEdit = true,
 	showDelete = true,
+	showDuplicate = false,
 	showChangeTrigger = false,
 	disabled = false,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-	if (disabled || (!showEdit && !showDelete && !showChangeTrigger)) {
+	if (
+		disabled ||
+		(!showEdit && !showDelete && !showDuplicate && !showChangeTrigger)
+	) {
 		return null;
 	}
 
@@ -136,6 +145,17 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							>
 								<EditHeaderIcon />
 								<span>{changeTriggerLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showDuplicate && onDuplicate && (
+							<DropdownMenuItem
+								onClick={() => {
+									void onDuplicate();
+								}}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<CopyIcon />
+								<span>{duplicateLabel}</span>
 							</DropdownMenuItem>
 						)}
 						{showDelete && onDelete && (

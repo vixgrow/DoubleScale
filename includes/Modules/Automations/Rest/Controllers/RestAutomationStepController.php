@@ -117,6 +117,18 @@ class RestAutomationStepController extends RestController {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -447,6 +459,266 @@ class RestAutomationStepController extends RestController {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_reorder_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Duplicate an Automation Step (and its children for condition steps).
+	 *
+	 * The copy is inserted immediately after the original within the same
+	 * context (same parent and condition). Trigger and end_automation steps
+	 * cannot be duplicated.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_item( $request ) {
+		try {
+			$source = AutomationStepModel::find( $request->get_param( 'id' ) );
+
+			if ( ! $source ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			if ( in_array( $source->type, array( 'trigger', 'end_automation' ), true ) ) {
+				return new WP_Error( 'rest_automation_step_not_duplicatable', __( 'This step cannot be duplicated.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			$insert_order = (int) $source->order + 1;
+
+			// Shift down siblings in the same context to make room for the copy.
+			$this->shift_context_orders( $source, $insert_order );
+
+			// Collect the source step and all of its descendants (for conditions).
+			$subtree = $this->collect_subtree( $source );
+
+			$id_map      = array();
+			$new_step_id = null;
+
+			foreach ( $subtree as $step ) {
+				$is_root  = ( (int) $step->id === (int) $source->id );
+				$settings = is_array( $step->settings ) ? $step->settings : array();
+				$settings = $this->prepare_settings_for_duplicate( $settings, (string) $step->action );
+
+				$new_step = AutomationStepModel::create(
+					array(
+						'automation_id' => $step->automation_id,
+						'parent_id'     => $is_root
+							? (int) $step->parent_id
+							: ( $id_map[ (int) $step->parent_id ] ?? 0 ),
+						'action'        => $step->action,
+						'type'          => $step->type,
+						'condition'     => $step->condition,
+						'status'        => 'active',
+						'settings'      => $settings,
+						'order'         => $is_root ? $insert_order : (int) $step->order,
+					)
+				);
+
+				$id_map[ (int) $step->id ] = (int) $new_step->id;
+
+				if ( $is_root ) {
+					$new_step_id = (int) $new_step->id;
+				}
+			}
+
+			// Remap any step-ID references that live inside settings.
+			$created_ids = array_values( $id_map );
+			$new_steps   = AutomationStepModel::whereIn( 'id', $created_ids )->get();
+			foreach ( $new_steps as $new_step ) {
+				$settings = is_array( $new_step->settings ) ? $new_step->settings : array();
+				$updated  = $this->remap_step_ids_in_settings( $settings, $id_map );
+				if ( $updated !== $settings ) {
+					$new_step->settings = $updated;
+					$new_step->save();
+				}
+			}
+
+			$this->snapshot_version( $source, __( 'Duplicated step', 'doublescale' ) );
+
+			// Return the freshly created steps with resolved labels.
+			$created = AutomationStepModel::whereIn( 'id', $created_ids )->get();
+			$result  = array();
+			foreach ( $created as $step ) {
+				$result[] = $this->resolve_action_label( $step );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'new_step_id' => $new_step_id,
+					'steps'       => $result,
+				),
+				201
+			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_duplicate_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Shift the order of sibling steps to make room for an inserted step.
+	 *
+	 * Steps in the same context (same parent and condition) whose order is
+	 * greater than or equal to the insertion order are pushed down by one.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param AutomationStepModel $reference   The reference step providing the context.
+	 * @param int                 $insert_order The order the new step will occupy.
+	 *
+	 * @return void
+	 */
+	private function shift_context_orders( $reference, $insert_order ) {
+		$parent_id = (int) $reference->parent_id;
+
+		$query = AutomationStepModel::where( 'automation_id', $reference->automation_id )
+			->where( 'parent_id', $parent_id )
+			->where( 'status', '!=', 'deleted' )
+			->where( 'order', '>=', $insert_order );
+
+		if ( $parent_id > 0 ) {
+			$query->where( 'condition', $reference->condition );
+		}
+
+		$siblings = $query->get();
+		foreach ( $siblings as $sibling ) {
+			$sibling->order = (int) $sibling->order + 1;
+			$sibling->save();
+		}
+	}
+
+	/**
+	 * Collect a step and all of its descendants (depth-first, parents first).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param AutomationStepModel $step The root step.
+	 *
+	 * @return AutomationStepModel[]
+	 */
+	private function collect_subtree( $step ) {
+		$collected = array( $step );
+
+		if ( 'condition' === $step->type ) {
+			$children = AutomationStepModel::where( 'parent_id', $step->id )
+				->where( 'status', 'active' )
+				->orderBy( 'order' )
+				->get();
+
+			foreach ( $children as $child ) {
+				$collected = array_merge( $collected, $this->collect_subtree( $child ) );
+			}
+		}
+
+		return $collected;
+	}
+
+	/**
+	 * Prepare step settings for duplication.
+	 *
+	 * Strips runtime-only keys and, for email/SMS actions, inlines the template
+	 * body/subject and removes template_ids so the model creates a fresh template
+	 * instead of sharing the original.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $settings Step settings.
+	 * @param string $action   Step action slug.
+	 *
+	 * @return array
+	 */
+	private function prepare_settings_for_duplicate( array $settings, $action ) {
+		foreach (
+			array(
+				'_action_label',
+				'_action_warning',
+				'_action_warning_message',
+				'_goal_label',
+				'_goal_warning',
+				'_goal_warning_message',
+				'_condition_warning',
+			) as $runtime_key
+		) {
+			unset( $settings[ $runtime_key ] );
+		}
+
+		$channel_map = array(
+			'send_email'    => 'email',
+			'send_sms'      => 'sms',
+			'send_whatsapp' => 'whatsapp',
+		);
+
+		// WhatsApp templates are pre-approved by Meta, so keep the link as-is.
+		if ( ! isset( $channel_map[ $action ] ) || 'whatsapp' === $channel_map[ $action ] ) {
+			return $settings;
+		}
+
+		if ( empty( $settings['template_ids'] ) || ! is_array( $settings['template_ids'] ) ) {
+			return $settings;
+		}
+
+		$template_id = (int) reset( $settings['template_ids'] );
+		$template    = \DoubleScale\Modules\Tracking\Models\TrackingTemplateModel::find( $template_id );
+		if ( $template ) {
+			if ( 'email' === $channel_map[ $action ] ) {
+				$settings['subject'] = $settings['subject'] ?? $template->settings['subject'] ?? $template->name ?? '';
+				$settings['body']    = $settings['body'] ?? $template->body ?? '';
+			} else {
+				$settings['body'] = $settings['body'] ?? $template->body ?? '';
+			}
+		}
+
+		unset( $settings['template_ids'] );
+
+		return $settings;
+	}
+
+	/**
+	 * Remap step ID references inside duplicated step settings.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings Step settings.
+	 * @param array $id_map   Map of old step ID => new step ID.
+	 *
+	 * @return array
+	 */
+	private function remap_step_ids_in_settings( array $settings, array $id_map ) {
+		foreach ( $settings as $key => $value ) {
+			$settings[ $key ] = $this->remap_step_ids_in_value( $value, $id_map );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Recursively replace dynamic step ID references in a value.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $value  Setting value.
+	 * @param array $id_map Map of old step ID => new step ID.
+	 *
+	 * @return mixed
+	 */
+	private function remap_step_ids_in_value( $value, array $id_map ) {
+		if ( is_string( $value ) ) {
+			foreach ( $id_map as $old_id => $new_id ) {
+				$value = str_replace( 'dynamic_id_' . $old_id, 'dynamic_id_' . $new_id, $value );
+			}
+
+			return $value;
+		}
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				$value[ $key ] = $this->remap_step_ids_in_value( $item, $id_map );
+			}
+		}
+
+		return $value;
 	}
 
 	/**

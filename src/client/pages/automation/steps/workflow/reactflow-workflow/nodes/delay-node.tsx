@@ -23,7 +23,7 @@ import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
-import { deleteStep } from '../utils/step-utils';
+import { deleteStep, duplicateStep } from '../utils/step-utils';
 import { TimerBlockIcon } from '@doublescale/components';
 import {
 	getAction,
@@ -160,6 +160,18 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		}
 	};
 
+	const handleDuplicate = async () => {
+		if (!viewMode) {
+			await duplicateStep(
+				step,
+				steps,
+				setSteps,
+				createNotice,
+				__('Delay duplicated', 'doublescale')
+			);
+		}
+	};
+
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
@@ -195,11 +207,17 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
+					onDuplicate={handleDuplicate}
 					editLabel={sprintf(__('Edit %s', 'doublescale'), actionLabel)}
 					deleteLabel={sprintf(
 						__('Delete %s', 'doublescale'),
 						actionLabel
 					)}
+					duplicateLabel={sprintf(
+						__('Duplicate %s', 'doublescale'),
+						actionLabel
+					)}
+					showDuplicate={isConfigured}
 					deleteTitle={sprintf(
 						__('Delete this %s?', 'doublescale'),
 						actionLabel

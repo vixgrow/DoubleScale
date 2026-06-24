@@ -25,6 +25,7 @@ import {
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
+import { duplicateStep } from '../utils/step-utils';
 import { GoalIcon, GoalsAutomationIcon } from '@doublescale/components';
 import {
 	Tooltip,
@@ -162,6 +163,18 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
+	const handleDuplicate = async () => {
+		if (!viewMode) {
+			await duplicateStep(
+				step,
+				steps,
+				setSteps,
+				createNotice,
+				__('Goal duplicated', 'doublescale')
+			);
+		}
+	};
+
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
@@ -190,8 +203,11 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
+					onDuplicate={handleDuplicate}
 					editLabel={__('Edit Goal', 'doublescale')}
 					deleteLabel={__('Delete Goal', 'doublescale')}
+					duplicateLabel={__('Duplicate Goal', 'doublescale')}
+					showDuplicate={isConfigured}
 					deleteTitle={__('Delete this goal?', 'doublescale')}
 					deleteDescription={__(
 						'This will remove the goal from your workflow.',

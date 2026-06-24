@@ -147,14 +147,20 @@ abstract class Rule {
 		switch ( $operator ) {
 			case 'is':
 				if ( is_array( $value ) ) {
-					return array_diff( $value, $rule_value );
+					$contact_values = array_map( 'intval', $value );
+					$rule_values    = array_map( 'intval', (array) $rule_value );
+					// All selected values must be present on the contact.
+					return empty( array_diff( $rule_values, $contact_values ) );
 				}
 
 				return ($value == $rule_value); // phpcs:ignore
 
 			case 'is_not':
 				if ( is_array( $value ) ) {
-					return ! in_array($rule_value, $value); // phpcs:ignore
+					$contact_values = array_map( 'intval', $value );
+					$rule_values    = array_map( 'intval', (array) $rule_value );
+					// Contact must not have any of the specified values.
+					return empty( array_intersect( $contact_values, $rule_values ) );
 				}
 				return ($value != $rule_value); // phpcs:ignore
 
@@ -172,13 +178,19 @@ abstract class Rule {
 
 			case 'contains':
 				if ( is_array( $value ) ) {
-					return array_intersect( $value, $rule_value );
+					$contact_values = array_map( 'intval', $value );
+					$rule_values    = array_map( 'intval', (array) $rule_value );
+					// At least one selected value must be present on the contact.
+					return ! empty( array_intersect( $contact_values, $rule_values ) );
 				}
 				return strpos( $value, $rule_value ) !== false;
 
 			case 'not_contains':
+			case 'does_not_contain':
 				if ( is_array( $value ) ) {
-					return ! array_intersect( $value, $rule_value );
+					$contact_values = array_map( 'intval', $value );
+					$rule_values    = array_map( 'intval', (array) $rule_value );
+					return empty( array_intersect( $contact_values, $rule_values ) );
 				}
 				return strpos( $value, $rule_value ) === false;
 

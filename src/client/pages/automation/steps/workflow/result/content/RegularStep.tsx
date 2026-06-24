@@ -13,7 +13,7 @@ interface RegularStepProps {
         pending: string;
         skipped: string;
     };
-    branchLabel?: string;
+    detailText?: string;
 }
 
 const RegularStep: React.FC<RegularStepProps> = ({
@@ -21,7 +21,7 @@ const RegularStep: React.FC<RegularStepProps> = ({
     label,
     status,
     statuses,
-    branchLabel,
+    detailText,
 }) => {
     return (
         <>
@@ -29,6 +29,9 @@ const RegularStep: React.FC<RegularStepProps> = ({
                 <div className="doublescale-timeline-card-icon">{icon}</div>
                 <div className="doublescale-timeline-card-title flex-1">{label}</div>
             </div>
+            {detailText && (
+                <p className="text-sm text-muted-foreground mb-3">{detailText}</p>
+            )}
             <div className="flex gap-2 items-center">
                 {status && (
                     <>
@@ -52,11 +55,6 @@ const RegularStep: React.FC<RegularStepProps> = ({
                             );
                         })()}
                     </>
-                )}
-                {branchLabel && (
-                    <div className="capitalize border rounded py-1 px-3 text-sm w-fit bg-[#e4eefd] text-secondary border-secondary">
-                        {branchLabel}
-                    </div>
                 )}
             </div>
         </>

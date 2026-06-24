@@ -119,12 +119,14 @@ class Lists extends Filter {
 		// Add where clause
 		switch ( $operator ) {
 			case 'is':
-				$query->whereHas(
-					'lists',
-					function ( $query ) use ( $value ) {
-						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
-					}
-				);
+				foreach ( $value as $list_id ) {
+					$query->whereHas(
+						'lists',
+						function ( $query ) use ( $list_id ) {
+							$query->where( $query->getModel()->getTable() . '.id', $list_id );
+						}
+					);
+				}
 				break;
 			case 'is_not':
 				$query->whereDoesntHave(

@@ -33,6 +33,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
+use DoubleScale\Modules\Contacts\Services\ContactUpdateNotifier;
 use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
@@ -1969,6 +1970,7 @@ class RestContactController extends RestController {
 			}
 
 			$contact_data = $this->prepare_contact( $request );
+			$changes      = ContactUpdateNotifier::collect_field_changes( $contact, $contact_data );
 			$contact->update( $contact_data );
 
 			$sync_lists = $this->sync_lists( $request, $contact );
@@ -1981,6 +1983,17 @@ class RestContactController extends RestController {
 				return $sync_tags;
 			}
 
+			$custom_fields_param = $request->get_param( 'custom_fields' );
+			if (
+				is_array( $custom_fields_param )
+				&& ! empty( $custom_fields_param )
+				&& class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' )
+			) {
+				$contact->load( 'custom_fields' );
+				$normalized = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::normalize_submission( $custom_fields_param );
+				$changes    = ContactUpdateNotifier::merge_custom_field_changes( $contact, $normalized, $changes );
+			}
+
 			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
 			if ( is_wp_error( $sync_custom_fields ) ) {
 				return $sync_custom_fields;
@@ -1991,13 +2004,21 @@ class RestContactController extends RestController {
 				return $sync_notes;
 			}
 
-			// Load relationships — include custom_fields when the model is available.
+			// Load relationships for the response payload.
 			$contact->load( array( 'lists', 'tags' ) );
 			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$contact->load( 'custom_fields' );
 			}
 
-			do_action( 'doublescale_contact_update', $contact );
+			if ( ! empty( $changes ) ) {
+				ContactUpdateNotifier::fire(
+					$contact,
+					array(
+						'updated_by' => 'admin',
+						'changes'    => $changes,
+					)
+				);
+			}
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {

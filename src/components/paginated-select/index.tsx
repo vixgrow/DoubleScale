@@ -22,6 +22,7 @@ import Select from 'react-select';
  */
 import { Tag } from '@doublescale/components';
 import { reactSelectControl } from '@doublescale/components/react-select-shared-styles';
+import { ScrollableMenuList } from '../react-select-scrollable-menu-list';
 import './style.scss';
 
 interface SelectOption {
@@ -497,6 +498,7 @@ const PaginatedSelect = ({
 								menuList: (base) => ({
 									...base,
 									maxHeight: 200,
+									overscrollBehavior: 'contain',
 								}),
 								option: (base, { isDisabled }) => ({
 									...base,
@@ -518,6 +520,7 @@ const PaginatedSelect = ({
 								}),
 							}}
 							components={{
+								MenuList: ScrollableMenuList,
 								LoadingMessage: () => (
 									<div className="px-3 py-2 text-gray-500">
 										{__('Loading...', 'doublescale')}

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 /**
  * internal dependencies
@@ -143,7 +143,9 @@ const AutomationNameCell: React.FC<AutomationNameCellProps> = ({
 												{warning.plugin_label}
 											</p>
 										)}
-										<p className="text-xs">{warning.message}</p>
+										<p className="text-xs">
+											{warning.message}
+										</p>
 									</div>
 								))}
 							</div>
@@ -162,6 +164,7 @@ interface AutomationColumnsProps {
 	onRenameAutomation: (automation: Automation, name: string) => Promise<void>;
 	navigate: (to: string) => void;
 	onDelete: (id: number) => void;
+	onExport: (automation: Automation) => void;
 }
 
 export const getAutomationColumns = ({
@@ -171,6 +174,7 @@ export const getAutomationColumns = ({
 	onRenameAutomation,
 	navigate,
 	onDelete,
+	onExport,
 }: AutomationColumnsProps): ColumnDef<Automation>[] => {
 	const selectionColumn: ColumnDef<Automation> = {
 		id: 'select',
@@ -301,7 +305,11 @@ export const getAutomationColumns = ({
 					<div className="text-start">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground focus-visible:ring-0">
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6 text-muted-foreground hover:text-foreground focus-visible:ring-0"
+								>
 									<ThreeDotsIcon />
 								</Button>
 							</DropdownMenuTrigger>
@@ -317,6 +325,12 @@ export const getAutomationColumns = ({
 								>
 									<SettingsOutlinedIcon />
 									{__('Setup', 'doublescale')}
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => onExport(automation)}
+								>
+									<Download />
+									{__('Export', 'doublescale')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(automation.id)}

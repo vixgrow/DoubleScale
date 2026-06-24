@@ -27,6 +27,7 @@ use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
+use DoubleScale\Modules\Automations\Services\WorkflowPortabilityManager;
 use DoubleScale\Core\UserRoles\Permissions;
 
 /**
@@ -164,6 +165,32 @@ class RestAutomationController extends RestController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'restore_version' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Export a single workflow as a portable JSON envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/export',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'export_workflow' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Import a workflow from a previously exported envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/import',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_workflow' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				),
 			)
 		);
@@ -739,6 +766,113 @@ class RestAutomationController extends RestController {
 			}
 
 			return $this->history_response( $id );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Gate workflow export / import behind the Pro add-on.
+	 *
+	 * Returns a WP_Error when Pro is not active so the routes still exist (and the
+	 * API surface stays stable) but cannot be used on Free installs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WP_Error|null WP_Error if Pro is inactive, null otherwise.
+	 */
+	private function require_pro_for_portability() {
+		if ( function_exists( 'doublescale_is_pro_addon_active' ) && doublescale_is_pro_addon_active() ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'pro_required',
+			__( 'Importing and exporting workflows requires DoubleScale Pro to be installed and activated.', 'doublescale' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	/**
+	 * Export a single workflow as a portable JSON envelope.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function export_workflow( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$id     = (int) $request->get_param( 'id' );
+			$result = WorkflowPortabilityManager::instance()->export( $id );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Import a workflow from a previously exported envelope.
+	 *
+	 * The new automation is created inactive; any references that could not be
+	 * resolved on this site (missing trigger / action plugins, etc.) are returned
+	 * as `unresolved` so the client can surface them for review.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_workflow( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$payload = $request->get_json_params();
+			$result  = WorkflowPortabilityManager::instance()->import( $payload );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			// Reload with active steps and compute dependency warnings using the
+			// same logic the editor uses, so the client can flag what needs review.
+			$automation = AutomationModel::with(
+				array(
+					'steps' => function ( $query ) {
+						$query->where( 'status', 'active' );
+					},
+				)
+			)->find( $result->id );
+
+			$unresolved = array();
+			if ( $automation ) {
+				$automation = $this->check_and_mark_dependencies( $automation );
+				$unresolved = $automation->_warnings ?? array();
+			}
+
+			return new WP_REST_Response(
+				array(
+					'id'         => (int) $result->id,
+					'name'       => $result->name,
+					'unresolved' => $unresolved,
+				),
+				201
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

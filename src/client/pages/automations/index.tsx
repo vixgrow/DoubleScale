@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
@@ -22,7 +22,14 @@ import type {
 	DataTableConfig,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
-import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner, NoData } from '@doublescale/components';
+import {
+	PageHeader,
+	PlusIcon,
+	GradientAutomationsIcon,
+	NoticeBanner,
+	NoData,
+} from '@doublescale/components';
+import { Upload } from 'lucide-react';
 import { isEmpty } from 'validator';
 import { NoticeMessage } from '@doublescale/client';
 import { formatDateForAPI } from '@doublescale/utils';
@@ -31,6 +38,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
@@ -212,10 +220,7 @@ const AutomationsList: React.FC = () => {
 
 			setListError({
 				type: 'success',
-				message: __(
-					'Automation updated successfully',
-					'doublescale'
-				),
+				message: __('Automation updated successfully', 'doublescale'),
 			});
 		} catch (error: any) {
 			setListError({
@@ -288,6 +293,107 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Workflow import/export is a Pro-only feature.
+	const isPro = isProActive();
+
+	const showProRequiredNotice = () => {
+		setListError({
+			type: 'warning',
+			message: __(
+				'Importing and exporting workflows is available in DoubleScale Pro.',
+				'doublescale'
+			),
+		});
+	};
+
+	// Export a single workflow: fetch its portable envelope and download as JSON.
+	const exportAutomation = async (automationToExport: Automation) => {
+		if (!isPro) {
+			showProRequiredNotice();
+			return;
+		}
+		try {
+			const envelope = await apiFetch({
+				path: `/doublescale/v1/automations/${automationToExport.id}/export`,
+				method: 'GET',
+			});
+
+			const blob = new Blob([JSON.stringify(envelope, null, 2)], {
+				type: 'application/json',
+			});
+			const url = URL.createObjectURL(blob);
+			const slug =
+				(automationToExport.name || 'workflow')
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-+|-+$/g, '') || 'workflow';
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `workflow-${slug}.json`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
+	const handleImportClick = () => {
+		if (!isPro) {
+			showProRequiredNotice();
+			return;
+		}
+		fileInputRef.current?.click();
+	};
+
+	// Import a workflow from a JSON file: POST the parsed envelope, then open the
+	// new (inactive) automation in the editor, which surfaces any unresolved refs.
+	const handleImportFile = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0];
+		// Reset so selecting the same file again still fires onChange.
+		event.target.value = '';
+		if (!file) {
+			return;
+		}
+
+		try {
+			const text = await file.text();
+			let payload: unknown;
+			try {
+				payload = JSON.parse(text);
+			} catch {
+				setListError({
+					type: 'error',
+					message: __(
+						'The selected file is not valid JSON.',
+						'doublescale'
+					),
+				});
+				return;
+			}
+
+			const response = (await apiFetch({
+				path: '/doublescale/v1/automations/import',
+				method: 'POST',
+				data: payload,
+			})) as { id: number; name: string; unresolved: unknown[] };
+
+			navigate(getToLink(`automations/${response.id}`));
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
 
 	const handleBulkAction = async (action: string) => {
 		switch (action) {
@@ -307,6 +413,7 @@ const AutomationsList: React.FC = () => {
 		onRenameAutomation: handleRenameAutomation,
 		navigate,
 		onDelete: deleteAutomation,
+		onExport: exportAutomation,
 	});
 
 	const tableConfig: DataTableConfig<Automation> = {
@@ -344,6 +451,12 @@ const AutomationsList: React.FC = () => {
 					className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
 					actions={[
 						{
+							label: __('Import', 'doublescale'),
+							onClick: handleImportClick,
+							variant: 'outline' as const,
+							icon: <Upload size={16} />,
+						},
+						{
 							label: __('Create Automation', 'doublescale'),
 							onClick: () => {
 								setVisible(true);
@@ -353,6 +466,13 @@ const AutomationsList: React.FC = () => {
 							icon: <PlusIcon />,
 						},
 					]}
+				/>
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="application/json,.json"
+					className="hidden"
+					onChange={handleImportFile}
 				/>
 			</div>
 

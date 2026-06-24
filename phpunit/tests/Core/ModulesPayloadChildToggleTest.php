@@ -176,21 +176,27 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		);
 	}
 
-	public function test_phantom_subscriptions_row_nests_under_sales(): void {
+	public function test_standalone_subscriptions_row_nests_under_sales(): void {
 		$this->set_stored_modules( array( 'sales' => true ) );
 
 		$payload = doublescale_build_modules_list_payload(
 			array( 'sales' => $this->make_module( 'sales' ) )
 		);
 
+		// Subscriptions shipped as its own standalone plugin (DoubleScale-Subscriptions),
+		// so Free always emits a row for it — but as a non-toggleable standalone-plugin
+		// row, NOT a phantom upsell toggle. Activation is owned by the Plugins screen.
 		$subscriptions = $this->row( $payload, 'subscriptions' );
-		$this->assertNotNull( $subscriptions, 'Phantom subscriptions row must be present without Pro' );
-		$this->assertContains( 'sales', $subscriptions['dependencies'], 'Phantom subscriptions row must declare the sales parent' );
-		$this->assertTrue( $subscriptions['is_toggleable'] );
+		$this->assertNotNull( $subscriptions, 'Standalone subscriptions row must be present even when the add-on plugin is inactive' );
+		$this->assertContains( 'sales', $subscriptions['dependencies'], 'Standalone subscriptions row must declare the sales parent' );
+		$this->assertFalse( $subscriptions['is_toggleable'], 'Standalone-plugin rows are not toggled from the Modules screen' );
 	}
 
-	public function test_subscriptions_is_a_registered_phantom_toggle_slug(): void {
-		$this->assertContains( 'subscriptions', doublescale_phantom_module_toggle_slugs() );
+	public function test_subscriptions_is_a_standalone_plugin_module_not_a_phantom_toggle(): void {
+		// Post-split: subscriptions left the phantom-toggle registry for the
+		// standalone-plugin registry (owned by DoubleScale-Subscriptions).
+		$this->assertNotContains( 'subscriptions', doublescale_phantom_module_toggle_slugs() );
+		$this->assertContains( 'subscriptions', doublescale_standalone_plugin_module_slugs() );
 	}
 
 	public function test_credit_notes_is_a_registered_phantom_toggle_slug(): void {
@@ -219,21 +225,23 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
 	}
 
-	public function test_subscriptions_phantom_admin_meta_is_complete(): void {
-		$meta = doublescale_phantom_module_admin_meta( 'subscriptions' );
+	public function test_subscriptions_standalone_meta_is_complete(): void {
+		// Subscriptions is no longer a phantom toggle, so its label/description live
+		// in the standalone-plugin meta. (It is NOT in the phantom meta switch.)
+		$this->assertNull( doublescale_phantom_module_admin_meta( 'subscriptions' ) );
+
+		$meta = doublescale_standalone_plugin_module_meta( 'subscriptions' );
 
 		$this->assertIsArray( $meta );
 		$this->assertArrayHasKey( 'label', $meta );
 		$this->assertArrayHasKey( 'description', $meta );
-		$this->assertContains( 'sales', $meta['dependencies'], 'Upsell row must nest under Sales' );
-		$this->assertContains(
-			'documents',
-			$meta['dependencies'],
-			'Upsell row must signal the Documents requirement (child invoices need it)'
-		);
+		$this->assertContains( 'sales', $meta['dependencies'], 'Standalone row must nest under Sales' );
 	}
 
-	public function test_subscriptions_child_defaults_on_when_sales_on(): void {
+	public function test_subscriptions_row_off_when_addon_plugin_inactive(): void {
+		// With the standalone DoubleScale-Subscriptions plugin not loaded (its module
+		// class never enters the slug→class map), the row reports inactive regardless
+		// of the Sales parent — there is no phantom default-on upsell anymore.
 		$this->set_stored_modules( array( 'sales' => true ) );
 
 		$payload = doublescale_build_modules_list_payload(
@@ -242,7 +250,7 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 
 		$subscriptions = $this->row( $payload, 'subscriptions' );
 		$this->assertNotNull( $subscriptions );
-		$this->assertTrue( $subscriptions['setting_enabled'], 'Child intent defaults to on' );
-		$this->assertTrue( $subscriptions['enabled'], 'Child follows the Sales parent by default' );
+		$this->assertFalse( $subscriptions['enabled'], 'Inactive add-on plugin means the row is not enabled' );
+		$this->assertFalse( $subscriptions['setting_enabled'], 'Standalone rows mirror activation, not a stored toggle intent' );
 	}
 }

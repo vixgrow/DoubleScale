@@ -363,6 +363,29 @@ final class VersionManager {
 	}
 
 	/**
+	 * Build a portable snapshot of an automation by ID.
+	 *
+	 * Public entry point reusing the same serializer that powers undo / redo, so
+	 * the workflow export feature ships the exact shape the editor already knows
+	 * how to restore. Returns the raw `{ automation, steps }` array (bookkeeping
+	 * keys included — the exporter strips those).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $automation_id Automation ID.
+	 *
+	 * @return array|null The snapshot, or null if the automation does not exist.
+	 */
+	public function export_snapshot( $automation_id ) {
+		$automation = AutomationModel::find( $automation_id );
+		if ( ! $automation ) {
+			return null;
+		}
+
+		return $this->build_snapshot( $automation );
+	}
+
+	/**
 	 * Build the JSON snapshot payload for an automation.
 	 *
 	 * @since 1.0.0

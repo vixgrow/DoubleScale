@@ -53,6 +53,10 @@ export type ConfigData = Record<string, unknown> & {
 	whiteLabel?: WhiteLabel;
 	/** Whether the white-label settings tab should be shown (Pro-only). */
 	whiteLabelShowSettings?: boolean;
+	/** Per-user contacts list UI preferences from server bootstrap. */
+	contactsListPreferences?: {
+		column_visibility?: Record<string, boolean>;
+	};
 };
 
 /**

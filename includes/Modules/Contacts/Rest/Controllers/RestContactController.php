@@ -123,6 +123,30 @@ class RestContactController extends RestController {
 			)
 		);
 
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/list-preferences',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_list_preferences' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_list_preferences' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'column_visibility' => array(
+							'description' => __( 'Visible columns for the contacts list.', 'doublescale' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
 		// Get contact
 		register_rest_route(
 			$this->namespace,
@@ -2642,6 +2666,103 @@ class RestContactController extends RestController {
 	}
 
 	// all permissions checks
+
+	/**
+	 * User meta key for contacts list column visibility preferences.
+	 *
+	 * @var string
+	 */
+	const LIST_COLUMN_VISIBILITY_META_KEY = 'doublescale_contacts_list_column_visibility';
+
+	/**
+	 * Get saved contacts list column visibility for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID. Defaults to current user.
+	 *
+	 * @return array<string, bool>
+	 */
+	public static function get_list_column_visibility( $user_id = 0 ) {
+		$user_id = $user_id ? (int) $user_id : (int) get_current_user_id();
+		if ( ! $user_id ) {
+			return array();
+		}
+
+		$saved = get_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, true );
+
+		return is_array( $saved ) ? self::sanitize_column_visibility( $saved ) : array();
+	}
+
+	/**
+	 * Get contacts list UI preferences for the current user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_list_preferences( $request ) {
+		return new WP_REST_Response(
+			array(
+				'column_visibility' => self::get_list_column_visibility(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Save contacts list UI preferences for the current user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_list_preferences( $request ) {
+		$user_id = (int) get_current_user_id();
+		if ( ! $user_id ) {
+			return new WP_Error( 'unauthorized', __( 'User not logged in.', 'doublescale' ), array( 'status' => 401 ) );
+		}
+
+		$visibility = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
+		update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $visibility );
+
+		return new WP_REST_Response(
+			array(
+				'column_visibility' => $visibility,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Sanitize contacts list column visibility payload.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $visibility Raw visibility map.
+	 *
+	 * @return array<string, bool>
+	 */
+	private static function sanitize_column_visibility( $visibility ) {
+		if ( ! is_array( $visibility ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+		foreach ( $visibility as $column => $visible ) {
+			$key = sanitize_key( (string) $column );
+			if ( '' === $key ) {
+				continue;
+			}
+			$sanitized[ $key ] = (bool) $visible;
+		}
+
+		return $sanitized;
+	}
 
 	/**
 	 * Check if a given request has access to get items

@@ -22,6 +22,7 @@ use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
+use DoubleScale\Modules\Contacts\Rest\Controllers\RestContactController;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Core\UserRoles\UserRoles;
 use DoubleScale\Website\License;
@@ -148,6 +149,9 @@ final class AdminConfig {
 				'importers'           => Importers_Manager::instance()->get_options(),
 				'userCapabilities'    => $user_capabilities,
 				'currentUser'         => $current_user,
+				'contactsListPreferences' => array(
+					'column_visibility' => RestContactController::get_list_column_visibility( $current_wp_user->ID ),
+				),
 				'defaultStages'       => class_exists( 'DoubleScale\Pro\Modules\Deals\Services\PipelineManager' )
 					? \DoubleScale\Pro\Modules\Deals\Services\PipelineManager::instance()->get_default_stages()
 					: array(),

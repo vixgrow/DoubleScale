@@ -2,11 +2,33 @@
  * Knowledge Base — group management (create / edit / delete + colour, order,
  * visibility). Delete is blocked server-side (409) when the group still holds
  * articles; we surface that message.
+ *
+ * Built on the shared design system (`@/components/ui/*`) so it matches the rest
+ * of the admin (Inbox, Templates, …) rather than hand-rolled HTML.
  */
 
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
 
 import {
 	createGroup,
@@ -84,72 +106,103 @@ const Groups = () => {
 		<div className="p-6 space-y-4 max-w-3xl">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold">{__('Knowledge Base groups', 'doublescale')}</h1>
-				<button
-					type="button"
-					className="text-sm text-primary hover:underline"
-					onClick={() => navigate(getToLink('knowledgebase'))}
-				>
+				<Button variant="ghost" size="sm" onClick={() => navigate(getToLink('knowledgebase'))}>
 					← {__('Back to articles', 'doublescale')}
-				</button>
+				</Button>
 			</div>
 
-			{error && <p className="text-sm text-red-600">{error}</p>}
+			{error && <p className="text-sm text-destructive">{error}</p>}
 
-			<form className="flex gap-2" onSubmit={add}>
-				<input
-					type="text"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-					placeholder={__('New group name', 'doublescale')}
-					className="flex-1 rounded-md border px-3 py-2 text-sm"
-				/>
-				<button
-					type="submit"
-					disabled={!name.trim()}
-					className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
-				>
-					{__('Add', 'doublescale')}
-				</button>
-			</form>
+			<Card className="p-4">
+				<form className="flex gap-2" onSubmit={add}>
+					<Input
+						type="text"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						placeholder={__('New group name', 'doublescale')}
+						className="flex-1"
+					/>
+					<Button type="submit" disabled={!name.trim()}>
+						{__('Add', 'doublescale')}
+					</Button>
+				</form>
+			</Card>
 
-			{loading && <p className="text-sm text-gray-500">{__('Loading…', 'doublescale')}</p>}
-
-			<ul className="space-y-2">
-				{groups.map((g) => (
-					<li key={g.id} className="flex flex-wrap items-center gap-3 rounded-md border p-3 text-sm">
-						<span className="font-medium">{g.name}</span>
-						<span className="text-gray-400">
-							{/* translators: %d: number of articles. */}
-							({g.count})
-						</span>
-						<input
-							type="color"
-							value={g.color || '#6d78d8'}
-							onChange={(e) => patch(g.id, { color: e.target.value })}
-							className="h-7 w-9 rounded border"
-							title={__('Colour', 'doublescale')}
-						/>
-						<select
-							value={g.visibility}
-							onChange={(e) => patch(g.id, { visibility: e.target.value as KbGroup['visibility'] })}
-							className="rounded-md border px-2 py-1"
-						>
-							{VISIBILITY_OPTIONS.map((o) => (
-								<option key={o.value} value={o.value}>
-									{o.label}
-								</option>
-							))}
-						</select>
-						<button
-							type="button"
-							className="ml-auto text-xs text-red-600 hover:underline"
-							onClick={() => remove(g.id)}
-						>
-							{__('Delete', 'doublescale')}
-						</button>
-					</li>
-				))}
-			</ul>
+			<Card>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>{__('Name', 'doublescale')}</TableHead>
+							<TableHead className="text-right">{__('Articles', 'doublescale')}</TableHead>
+							<TableHead>{__('Colour', 'doublescale')}</TableHead>
+							<TableHead>{__('Visibility', 'doublescale')}</TableHead>
+							<TableHead className="w-px" />
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{loading ? (
+							<TableRow>
+								<TableCell colSpan={5} className="text-center text-muted-foreground">
+									{__('Loading…', 'doublescale')}
+								</TableCell>
+							</TableRow>
+						) : groups.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={5} className="text-center text-muted-foreground">
+									{__('No groups yet.', 'doublescale')}
+								</TableCell>
+							</TableRow>
+						) : (
+							groups.map((g) => (
+								<TableRow key={g.id}>
+									<TableCell className="font-medium">{g.name}</TableCell>
+									<TableCell className="text-right tabular-nums text-muted-foreground">
+										{g.count}
+									</TableCell>
+									<TableCell>
+										<input
+											type="color"
+											value={g.color || '#6d78d8'}
+											onChange={(e) => patch(g.id, { color: e.target.value })}
+											className="h-7 w-9 cursor-pointer rounded border"
+											title={__('Colour', 'doublescale')}
+										/>
+									</TableCell>
+									<TableCell>
+										<Select
+											value={g.visibility}
+											onValueChange={(value) =>
+												patch(g.id, { visibility: value as KbGroup['visibility'] })
+											}
+										>
+											<SelectTrigger className="w-40">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{VISIBILITY_OPTIONS.map((o) => (
+													<SelectItem key={o.value} value={o.value}>
+														{o.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</TableCell>
+									<TableCell className="text-right">
+										<Button
+											variant="ghost"
+											size="sm"
+											className="text-destructive hover:text-destructive"
+											onClick={() => remove(g.id)}
+										>
+											{__('Delete', 'doublescale')}
+										</Button>
+									</TableCell>
+								</TableRow>
+							))
+						)}
+					</TableBody>
+				</Table>
+			</Card>
 		</div>
 	);
 };

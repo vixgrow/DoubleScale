@@ -2,11 +2,35 @@
  * Knowledge Base — articles list (v1 table view; the Kanban board is a later
  * enhancement, the plan's named fallback). Group filter + search + status,
  * with duplicate / delete row actions.
+ *
+ * Built on the shared design system (`@/components/ui/*`) so it matches the rest
+ * of the admin (Inbox, Templates, …) rather than hand-rolled HTML.
  */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
 
 import {
 	deleteArticle,
@@ -22,6 +46,16 @@ const STATUS_LABEL: Record<string, string> = {
 	draft: __('Draft', 'doublescale'),
 	private: __('Internal', 'doublescale'),
 };
+
+/** Status → Badge styling. Greens/ambers are semantic, applied via className on the Badge primitive. */
+const STATUS_BADGE: Record<string, string> = {
+	publish: 'border-transparent bg-emerald-100 text-emerald-700',
+	draft: 'border-transparent bg-gray-100 text-gray-600',
+	private: 'border-transparent bg-amber-100 text-amber-700',
+};
+
+/** Sentinel for the "All statuses" option — Radix Select cannot use an empty-string value. */
+const ALL_STATUSES = 'all';
 
 const ArticlesList = () => {
 	const navigate = useNavigate();
@@ -89,121 +123,135 @@ const ArticlesList = () => {
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold">{__('Knowledge Base', 'doublescale')}</h1>
 				<div className="flex gap-2">
-					<button
-						type="button"
-						className="rounded-md border px-3 py-2 text-sm"
-						onClick={() => navigate(getToLink('knowledgebase/groups'))}
-					>
+					<Button variant="outline" onClick={() => navigate(getToLink('knowledgebase/groups'))}>
 						{__('Groups', 'doublescale')}
-					</button>
-					<button
-						type="button"
-						className="rounded-md border px-3 py-2 text-sm"
-						onClick={() => navigate(getToLink('knowledgebase/settings'))}
-					>
+					</Button>
+					<Button variant="outline" onClick={() => navigate(getToLink('knowledgebase/settings'))}>
 						{__('Settings', 'doublescale')}
-					</button>
-					<button
-						type="button"
-						className="rounded-md bg-primary px-3 py-2 text-sm text-white"
-						onClick={() => navigate(getToLink('knowledgebase/article/new'))}
-					>
+					</Button>
+					<Button onClick={() => navigate(getToLink('knowledgebase/article/new'))}>
 						{__('New article', 'doublescale')}
-					</button>
+					</Button>
 				</div>
 			</div>
 
 			<div className="flex flex-wrap gap-2">
-				<input
+				<Input
 					type="search"
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					placeholder={__('Search…', 'doublescale')}
-					className="rounded-md border px-3 py-2 text-sm"
+					className="w-56"
 				/>
-				<select
-					value={group}
-					onChange={(e) => setGroup(Number(e.target.value))}
-					className="rounded-md border px-3 py-2 text-sm"
+				<Select
+					value={String(group)}
+					onValueChange={(value) => setGroup(Number(value))}
 				>
-					<option value={0}>{__('All groups', 'doublescale')}</option>
-					{groups.map((g) => (
-						<option key={g.id} value={g.id}>
-							{g.name}
-						</option>
-					))}
-				</select>
-				<select
-					value={status}
-					onChange={(e) => setStatus(e.target.value)}
-					className="rounded-md border px-3 py-2 text-sm"
+					<SelectTrigger className="w-44">
+						<SelectValue placeholder={__('All groups', 'doublescale')} />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="0">{__('All groups', 'doublescale')}</SelectItem>
+						{groups.map((g) => (
+							<SelectItem key={g.id} value={String(g.id)}>
+								{g.name}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<Select
+					value={status || ALL_STATUSES}
+					onValueChange={(value) => setStatus(value === ALL_STATUSES ? '' : value)}
 				>
-					<option value="">{__('All statuses', 'doublescale')}</option>
-					<option value="publish">{STATUS_LABEL.publish}</option>
-					<option value="draft">{STATUS_LABEL.draft}</option>
-					<option value="private">{STATUS_LABEL.private}</option>
-				</select>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder={__('All statuses', 'doublescale')} />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={ALL_STATUSES}>{__('All statuses', 'doublescale')}</SelectItem>
+						<SelectItem value="publish">{STATUS_LABEL.publish}</SelectItem>
+						<SelectItem value="draft">{STATUS_LABEL.draft}</SelectItem>
+						<SelectItem value="private">{STATUS_LABEL.private}</SelectItem>
+					</SelectContent>
+				</Select>
 			</div>
 
-			{error && <p className="text-sm text-red-600">{error}</p>}
-			{loading && <p className="text-sm text-gray-500">{__('Loading…', 'doublescale')}</p>}
+			{error && <p className="text-sm text-destructive">{error}</p>}
 
-			{!loading && articles.length === 0 && (
-				<p className="text-sm text-gray-500">{__('No articles yet.', 'doublescale')}</p>
-			)}
-
-			{!loading && articles.length > 0 && (
-				<table className="w-full border-collapse text-sm">
-					<thead>
-						<tr className="border-b text-left text-gray-500">
-							<th className="py-2">{__('Title', 'doublescale')}</th>
-							<th className="py-2">{__('Group', 'doublescale')}</th>
-							<th className="py-2">{__('Status', 'doublescale')}</th>
-							<th className="py-2">{__('Views', 'doublescale')}</th>
-							<th className="py-2" />
-						</tr>
-					</thead>
-					<tbody>
-						{articles.map((a) => (
-							<tr key={a.id} className="border-b hover:bg-gray-50">
-								<td className="py-2">
-									<button
-										type="button"
-										className="font-medium text-primary hover:underline"
-										onClick={() => navigate(getToLink(`knowledgebase/article/${a.id}`))}
-									>
-										{a.title || __('(untitled)', 'doublescale')}
-									</button>
-									{a.members_only && (
-										<span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-700">
-											{__('Members', 'doublescale')}
-										</span>
-									)}
-								</td>
-								<td className="py-2">{groupName[a.group_id] || '—'}</td>
-								<td className="py-2">{STATUS_LABEL[a.status] || a.status}</td>
-								<td className="py-2">{a.views}</td>
-								<td className="py-2 text-right">
-									<button
-										type="button"
-										className="mr-3 text-xs text-gray-500 hover:underline"
-										onClick={() => onDuplicate(a.id)}
-									>
-										{__('Duplicate', 'doublescale')}
-									</button>
-									<button
-										type="button"
-										className="text-xs text-red-600 hover:underline"
-										onClick={() => onDelete(a.id)}
-									>
-										{__('Delete', 'doublescale')}
-									</button>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			)}
+			<Card>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>{__('Title', 'doublescale')}</TableHead>
+							<TableHead>{__('Group', 'doublescale')}</TableHead>
+							<TableHead>{__('Status', 'doublescale')}</TableHead>
+							<TableHead className="text-right">{__('Views', 'doublescale')}</TableHead>
+							<TableHead className="w-px" />
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{loading ? (
+							Array.from({ length: 5 }).map((_, i) => (
+								<TableRow key={`s-${i}`}>
+									<TableCell colSpan={5}>
+										<Skeleton className="h-6 w-full" />
+									</TableCell>
+								</TableRow>
+							))
+						) : articles.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={5} className="text-center text-muted-foreground">
+									{__('No articles yet.', 'doublescale')}
+								</TableCell>
+							</TableRow>
+						) : (
+							articles.map((a) => (
+								<TableRow key={a.id}>
+									<TableCell>
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												className="font-medium text-primary hover:underline"
+												onClick={() => navigate(getToLink(`knowledgebase/article/${a.id}`))}
+											>
+												{a.title || __('(untitled)', 'doublescale')}
+											</button>
+											{a.members_only && (
+												<Badge className="border-transparent bg-amber-100 text-amber-700">
+													{__('Members', 'doublescale')}
+												</Badge>
+											)}
+										</div>
+									</TableCell>
+									<TableCell className="text-muted-foreground">
+										{groupName[a.group_id] || '—'}
+									</TableCell>
+									<TableCell>
+										<Badge className={STATUS_BADGE[a.status]}>
+											{STATUS_LABEL[a.status] || a.status}
+										</Badge>
+									</TableCell>
+									<TableCell className="text-right tabular-nums">{a.views}</TableCell>
+									<TableCell className="text-right">
+										<div className="flex justify-end gap-1">
+											<Button variant="ghost" size="sm" onClick={() => onDuplicate(a.id)}>
+												{__('Duplicate', 'doublescale')}
+											</Button>
+											<Button
+												variant="ghost"
+												size="sm"
+												className="text-destructive hover:text-destructive"
+												onClick={() => onDelete(a.id)}
+											>
+												{__('Delete', 'doublescale')}
+											</Button>
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						)}
+					</TableBody>
+				</Table>
+			</Card>
 		</div>
 	);
 };

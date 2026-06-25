@@ -2,6 +2,9 @@
  * Knowledge Base — article editor. Reuses the Lexical editor (rich toolbar via
  * type="email") for the body; title / status / group / tags / members-only /
  * excerpt round-trip through the `knowledgebase/articles` REST surface.
+ *
+ * Built on the shared design system (`@/components/ui/*`) so it matches the rest
+ * of the admin (Inbox, Templates, …) rather than hand-rolled HTML.
  */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
@@ -9,6 +12,19 @@ import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
 
 import Editor from '@/components/booking/editor';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 
 import {
 	createArticle,
@@ -30,6 +46,9 @@ const EFFECTIVE_LABEL: Record<EffectiveVisibility, string> = {
 	members: __('Logged-in users + staff', 'doublescale'),
 	internal: __('Staff only', 'doublescale'),
 };
+
+/** Sentinel for the "no group" option — Radix Select cannot use an empty-string value. */
+const NO_GROUP = '0';
 
 const ArticleEditor = () => {
 	const navigate = useNavigate();
@@ -154,119 +173,122 @@ const ArticleEditor = () => {
 	};
 
 	if (loading) {
-		return <p className="p-6 text-sm text-gray-500">{__('Loading…', 'doublescale')}</p>;
+		return <p className="p-6 text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</p>;
 	}
 
 	return (
 		<div className="p-6 space-y-4 max-w-4xl">
 			<div className="flex items-center justify-between">
-				<button
-					type="button"
-					className="text-sm text-primary hover:underline"
-					onClick={() => navigate(getToLink('knowledgebase'))}
-				>
+				<Button variant="ghost" size="sm" onClick={() => navigate(getToLink('knowledgebase'))}>
 					← {__('Back', 'doublescale')}
-				</button>
-				<button
-					type="button"
-					disabled={saving}
-					className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
-					onClick={save}
-				>
+				</Button>
+				<Button disabled={saving} onClick={save}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
-				</button>
+				</Button>
 			</div>
 
-			{error && <p className="text-sm text-red-600">{error}</p>}
+			{error && <p className="text-sm text-destructive">{error}</p>}
 
-			<input
+			<Input
 				type="text"
 				value={title}
 				onChange={(e) => setTitle(e.target.value)}
 				placeholder={__('Article title', 'doublescale')}
-				className="w-full rounded-md border px-3 py-2 text-lg font-semibold"
+				className="h-12 text-lg font-semibold"
 			/>
 
 			<div className="grid grid-cols-2 gap-4">
-				<label className="text-sm">
-					<span className="mb-1 block text-gray-500">{__('Status', 'doublescale')}</span>
-					<select
+				<div className="space-y-1.5">
+					<Label>{__('Status', 'doublescale')}</Label>
+					<Select
 						value={status}
-						onChange={(e) => setStatus(e.target.value as 'publish' | 'draft' | 'private')}
-						className="w-full rounded-md border px-3 py-2"
+						onValueChange={(value) => setStatus(value as 'publish' | 'draft' | 'private')}
 					>
-						<option value="draft">{__('Draft', 'doublescale')}</option>
-						<option value="publish">{__('Published', 'doublescale')}</option>
-						<option value="private">{__('Internal (staff only)', 'doublescale')}</option>
-					</select>
-				</label>
-				<label className="text-sm">
-					<span className="mb-1 block text-gray-500">{__('Group', 'doublescale')}</span>
-					<select
-						value={groupId}
-						onChange={(e) => setGroupId(Number(e.target.value))}
-						className="w-full rounded-md border px-3 py-2"
+						<SelectTrigger>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="draft">{__('Draft', 'doublescale')}</SelectItem>
+							<SelectItem value="publish">{__('Published', 'doublescale')}</SelectItem>
+							<SelectItem value="private">{__('Internal (staff only)', 'doublescale')}</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+				<div className="space-y-1.5">
+					<Label>{__('Group', 'doublescale')}</Label>
+					<Select
+						value={String(groupId)}
+						onValueChange={(value) => setGroupId(Number(value))}
 					>
-						<option value={0}>{__('— None —', 'doublescale')}</option>
-						{groups.map((g) => (
-							<option key={g.id} value={g.id}>
-								{g.name}
-							</option>
-						))}
-					</select>
-				</label>
+						<SelectTrigger>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={NO_GROUP}>{__('— None —', 'doublescale')}</SelectItem>
+							{groups.map((g) => (
+								<SelectItem key={g.id} value={String(g.id)}>
+									{g.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
-			<label className="block text-sm">
-				<span className="mb-1 block text-gray-500">{__('Tags (comma separated)', 'doublescale')}</span>
-				<input
+			<div className="space-y-1.5">
+				<Label htmlFor="kb-tags">{__('Tags (comma separated)', 'doublescale')}</Label>
+				<Input
+					id="kb-tags"
 					type="text"
 					value={tags}
 					onChange={(e) => setTags(e.target.value)}
-					className="w-full rounded-md border px-3 py-2"
 				/>
-			</label>
-
-			<label className="flex items-center gap-2 text-sm">
-				<input
-					type="checkbox"
-					checked={membersOnly}
-					onChange={(e) => setMembersOnly(e.target.checked)}
-				/>
-				{__('Members only (logged-in users + staff)', 'doublescale')}
-			</label>
-
-			<div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
-				<span>
-					{__('Who can see this:', 'doublescale')}{' '}
-					<strong className="text-gray-800">{EFFECTIVE_LABEL[effectiveVisibility]}</strong>
-				</span>
-				{groupTightensVisibility && (
-					<span className="ml-1 text-amber-700">
-						{__('— restricted by its group, not the toggle above.', 'doublescale')}
-					</span>
-				)}
-				<span className="mt-1 block text-gray-500">
-					{__(
-						'Effective visibility is the strictest of the status, this toggle, and the article’s group. A “private” status or an internal/members group overrides a more open choice here.',
-						'doublescale'
-					)}
-				</span>
 			</div>
 
-			<label className="block text-sm">
-				<span className="mb-1 block text-gray-500">{__('Excerpt', 'doublescale')}</span>
-				<textarea
+			<div className="flex items-center gap-3">
+				<Switch
+					id="kb-members-only"
+					checked={membersOnly}
+					onCheckedChange={setMembersOnly}
+				/>
+				<Label htmlFor="kb-members-only" className="font-normal">
+					{__('Members only (logged-in users + staff)', 'doublescale')}
+				</Label>
+			</div>
+
+			<Card>
+				<CardContent className="py-3 text-xs text-muted-foreground">
+					<span>
+						{__('Who can see this:', 'doublescale')}{' '}
+						<strong className="text-foreground">{EFFECTIVE_LABEL[effectiveVisibility]}</strong>
+					</span>
+					{groupTightensVisibility && (
+						<span className="ml-1 text-amber-700">
+							{__('— restricted by its group, not the toggle above.', 'doublescale')}
+						</span>
+					)}
+					<span className="mt-1 block">
+						{__(
+							'Effective visibility is the strictest of the status, this toggle, and the article’s group. A “private” status or an internal/members group overrides a more open choice here.',
+							'doublescale'
+						)}
+					</span>
+				</CardContent>
+			</Card>
+
+			<div className="space-y-1.5">
+				<Label htmlFor="kb-excerpt">{__('Excerpt', 'doublescale')}</Label>
+				<Textarea
+					id="kb-excerpt"
 					value={excerpt}
 					onChange={(e) => setExcerpt(e.target.value)}
 					rows={2}
-					className="w-full rounded-md border px-3 py-2"
 				/>
-			</label>
+			</div>
 
-			<div className="text-sm">
-				<span className="mb-1 block text-gray-500">{__('Body', 'doublescale')}</span>
-				<div className="rounded-md border">
+			<div className="space-y-1.5">
+				<Label>{__('Body', 'doublescale')}</Label>
+				<div className="rounded-lg border">
 					<Editor message={content} onChange={setContent} type="email" />
 				</div>
 			</div>

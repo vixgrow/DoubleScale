@@ -47,9 +47,10 @@ import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
+import Support from '../support';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
 import { Receipt, Trophy } from 'lucide-react';
-import { ProFeatureNotice } from '@doublescale/components';
+import { ProFeatureNotice, HelpdeskIcon } from '@doublescale/components';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -66,6 +67,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const isDealsModuleEnabled = ConfigAPI.isModuleEnabled('deals');
 	const isTasksModuleEnabled = ConfigAPI.isModuleEnabled('tasks');
 	const isAutomationsModuleEnabled = ConfigAPI.isModuleEnabled('automations');
+	const isSupportModuleEnabled = ConfigAPI.isModuleEnabled('support');
 	// The contact Sales tab lists proposals/invoices — hidden while the
 	// documents feature is gated or when every document sub-feature is off.
 	const isSalesModuleEnabled =
@@ -146,6 +148,15 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			label: 'WhatsApp',
 			icon: <WhatsAppIcon width={24} height={24} />,
 		},
+		...(isSupportModuleEnabled
+			? [
+					{
+						value: 'support',
+						label: 'Helpdesk',
+						icon: <HelpdeskIcon width={24} height={24} />,
+					},
+				]
+			: []),
 		...(isDealsModuleEnabled
 			? [{ value: 'deals', label: 'Deals', icon: <DealsIcon /> }]
 			: []),
@@ -270,6 +281,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				</CardContent>
 			),
 		},
+		...(isSupportModuleEnabled
+			? [
+					{
+						value: 'support',
+						children: (
+							<CardContent className="pt-6">
+								<Support
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
 		...(isDealsModuleEnabled
 			? [
 					{

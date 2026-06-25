@@ -51,20 +51,21 @@ final class Module extends AbstractModule {
 	}
 
 	/**
-	 * TEMPORARY: the Client Portal needs adjustments before it ships, so force it
-	 * off. {@see ModuleRegistry} skips both register() and boot() for a disabled
-	 * module, which disables every portal surface at once — the
-	 * `[doublescale_client_portal]` shortcode + renderer bundle, the page
-	 * auto-provisioner, the section/calendar filters, and all `/portal/*` REST
-	 * routes (registered in {@see AbstractModule::boot()}).
+	 * Master on/off switch for the entire Client Portal subsystem. The portal is
+	 * a non-toggleable host shell, so this single lever decides everything:
+	 * `return true` enables every portal surface; `return false` disables them
+	 * all at once — {@see ModuleRegistry} skips register()+boot() for a disabled
+	 * module, dropping the `[doublescale_client_portal]` shortcode + renderer
+	 * bundle, the page auto-provisioner, the section/calendar filters, and all
+	 * `/portal/*` REST routes (registered in {@see AbstractModule::boot()}).
 	 *
-	 * No code is removed. To re-enable the portal, delete this override to restore
-	 * the always-on host-shell behaviour.
+	 * Enabled. (It was previously force-disabled as a pre-ship gate.) Flip back to
+	 * `return false;` to disable every portal surface in one line.
 	 *
 	 * @return bool
 	 */
 	public function is_enabled(): bool {
-		return false;
+		return true;
 	}
 
 	public function version(): string {

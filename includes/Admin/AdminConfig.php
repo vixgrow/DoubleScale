@@ -73,9 +73,8 @@ final class AdminConfig {
 			'doublescale_booking_agent'           => Permissions::user_has_role( UserRoles::BOOKING_AGENT ),
 			'doublescale_view_support'            => Permissions::has_support_access(),
 			'doublescale_manage_all_tickets'      => Permissions::can_manage_all_tickets(),
-			// Mailbox/settings gate (manager-tier): admins, CRM Managers, and
-			// Support Managers. Support Agents + Sales roles are excluded.
 			'doublescale_manage_support_settings' => Permissions::can_access_support_settings(),
+			'doublescale_manage_knowledgebase'    => current_user_can( 'doublescale_manage_knowledgebase' ),
 		);
 
 		if ( class_exists( \DoubleScale\Modules\Booking\Capabilities::class ) ) {

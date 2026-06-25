@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
+use DoubleScale\Modules\Documents\Constants\DiscountType;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
@@ -318,6 +319,11 @@ class RestProposalController extends RestController {
 			);
 		}
 
+		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'proposal', $proposal );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$params = $request->get_json_params();
 		if ( ! is_array( $params ) ) {
 			$params = $request->get_params();
@@ -369,6 +375,11 @@ class RestProposalController extends RestController {
 			return $payload;
 		}
 
+		$discount_check = DiscountType::validate_payload( $payload );
+		if ( is_wp_error( $discount_check ) ) {
+			return $discount_check;
+		}
+
 		if ( ! Capabilities::can_manage_all_sales() ) {
 			$payload['assigned_user_id'] = get_current_user_id();
 		}
@@ -400,9 +411,19 @@ class RestProposalController extends RestController {
 			return $forbidden;
 		}
 
+		$gate = apply_filters( 'doublescale_sales_update_gate', null, 'proposal', $proposal );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$payload = $this->sanitize_payload( $request, false );
 		if ( is_wp_error( $payload ) ) {
 			return $payload;
+		}
+
+		$discount_check = DiscountType::validate_payload( $payload, $proposal );
+		if ( is_wp_error( $discount_check ) ) {
+			return $discount_check;
 		}
 
 		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['assigned_user_id'] ) ) {
@@ -411,6 +432,8 @@ class RestProposalController extends RestController {
 
 		$proposal->fill( $payload );
 		$proposal->save();
+
+		do_action( 'doublescale_sales_proposal_updated', $proposal );
 
 		return new WP_REST_Response( ProposalShaper::shape_admin( $proposal->fresh( array( 'contact', 'assigned_user' ) ), true ), 200 );
 	}
@@ -434,6 +457,8 @@ class RestProposalController extends RestController {
 		if ( $forbidden ) {
 			return $forbidden;
 		}
+
+		do_action( 'doublescale_sales_proposal_deleted', $proposal );
 
 		$proposal->delete();
 
@@ -462,6 +487,11 @@ class RestProposalController extends RestController {
 
 		if ( ProposalStatus::DECLINED === (string) $proposal->status ) {
 			return new WP_Error( 'invalid_status', __( 'Declined proposals cannot be converted to invoices.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$gate = apply_filters( 'doublescale_sales_convert_proposal_gate', null, $proposal );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
 		}
 
 		$invoice = ( new ConvertProposalToInvoice() )->convert( $proposal );

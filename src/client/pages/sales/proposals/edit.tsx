@@ -20,7 +20,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { LineItemsEditor, SendDocumentDialog } from '@/components/sales';
+import { LineItemsEditor, SendDocumentDialog, ApprovalStatusBanner, computeLineItemsTotals } from '@/components/sales';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	isApprovalWorkflowEnabled,
+	requiresReapprovalAfterEdit,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
+import {
+	getDiscountValidationError,
+	isPercentDiscountType,
+	parseDiscountInput,
+} from '@/components/sales/sales-discount-utils';
 import {
 	normalizeSalesContact,
 	proposalFieldsFromContact,
@@ -28,9 +41,11 @@ import {
 import {
 	createProposal,
 	sendProposal,
+	submitProposalForApproval,
 	updateProposal,
 	useAssignableSalesUsers,
 	useProposal,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary, LineItem } from '@/types/sales';
 import { CURRENCIES, DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
@@ -58,7 +73,8 @@ const ProposalEdit: React.FC = () => {
 	const isNew = !idParam || idParam === 'new';
 	const proposalId = !isNew && idParam ? Number(idParam) : null;
 
-	const { data: existing, loading } = useProposal(proposalId);
+	const { data: existing, loading, refetch } = useProposal(proposalId);
+	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 
 	const [subject, setSubject] = useState('');
@@ -245,10 +261,43 @@ const ProposalEdit: React.FC = () => {
 			setError(__('Email is required.', 'doublescale'));
 			return false;
 		}
+
+		const subtotal = computeLineItemsTotals(lineItems, 'none', 0, 0).subtotal;
+		const discountError = getDiscountValidationError(discountType, discountValue, subtotal);
+		if (discountError) {
+			setError(discountError);
+			return false;
+		}
+
 		return true;
 	};
 
 	const [sendOpen, setSendOpen] = useState(false);
+	const [submittingApproval, setSubmittingApproval] = useState(false);
+
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, existing ?? undefined);
+	const approval = existing?.approval ?? null;
+	const fieldsLocked = !canEditSalesDocument(workflowEnabled, approval, existing ?? undefined);
+	const showReapprovalWarning = requiresReapprovalAfterEdit(
+		workflowEnabled,
+		approval,
+		existing ?? undefined
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'proposal',
+		status,
+		approval,
+		existing ?? undefined
+	);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'proposal',
+		status,
+		approval,
+		status === 'declined',
+		existing ?? undefined
+	);
 
 	const persistProposal = async (): Promise<number | null> => {
 		if (!validateForm()) {
@@ -270,7 +319,14 @@ const ProposalEdit: React.FC = () => {
 			}
 			return id ?? null;
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			setError(
+				formatSalesRestError(err, __('Save failed.', 'doublescale'), {
+					approval_pending: __(
+						'This proposal is pending approval and cannot be edited.',
+						'doublescale'
+					),
+				})
+			);
 			return null;
 		} finally {
 			setSaving(false);
@@ -296,10 +352,37 @@ const ProposalEdit: React.FC = () => {
 			await sendProposal(id, message);
 			navigate(getToLink(`sales/proposals/${id}`));
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+			setError(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This proposal must be approved before it can be sent. Use Submit for Approval first.',
+						'doublescale'
+					),
+				})
+			);
 		} finally {
 			setSaving(false);
 			setSendOpen(false);
+		}
+	};
+
+	const handleSubmitForApproval = async () => {
+		const id = await persistProposal();
+		if (!id) {
+			return;
+		}
+
+		setSubmittingApproval(true);
+		setError(null);
+		try {
+			await submitProposalForApproval(id);
+			await refetch();
+		} catch (err: unknown) {
+			setError(
+				formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale'))
+			);
+		} finally {
+			setSubmittingApproval(false);
 		}
 	};
 
@@ -324,6 +407,12 @@ const ProposalEdit: React.FC = () => {
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
+			<ApprovalStatusBanner
+				approval={approval}
+				showReapprovalWarning={showReapprovalWarning}
+			/>
+
+			<fieldset disabled={fieldsLocked} className="space-y-6 border-0 p-0 m-0 min-w-0">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
 				<div className="space-y-4">
 					<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
@@ -410,9 +499,12 @@ const ProposalEdit: React.FC = () => {
 							<Input
 								type="number"
 								min={0}
+								max={isPercentDiscountType(discountType) ? 100 : undefined}
 								step="0.01"
 								value={discountValue}
-								onChange={(e) => setDiscountValue(Number(e.target.value))}
+								onChange={(e) =>
+									setDiscountValue(parseDiscountInput(e.target.value))
+								}
 							/>
 						</FormField>
 					) : null}
@@ -523,21 +615,36 @@ const ProposalEdit: React.FC = () => {
 				onDiscountValueChange={setDiscountValue}
 				onAdjustmentChange={setAdjustment}
 				hideDiscountTypeSelect
+				readOnly={fieldsLocked}
 			/>
+			</fieldset>
 
 			<div className="flex justify-end gap-2">
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/proposals'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave()} disabled={saving}>
+				<Button
+					variant="outline"
+					onClick={() => void handleSave()}
+					disabled={saving || submittingApproval || fieldsLocked}
+				>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 				</Button>
-				<Button
-					onClick={() => setSendOpen(true)}
-					disabled={saving || status === 'declined'}
-				>
-					{__('Save & Send', 'doublescale')}
-				</Button>
+				{showSubmitApproval ? (
+					<Button
+						onClick={() => void handleSubmitForApproval()}
+						disabled={saving || submittingApproval}
+					>
+						{submittingApproval
+							? __('Submitting…', 'doublescale')
+							: __('Save & Submit for Approval', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button onClick={() => setSendOpen(true)} disabled={saving || submittingApproval}>
+						{__('Save & Send', 'doublescale')}
+					</Button>
+				) : null}
 			</div>
 
 			<SendDocumentDialog

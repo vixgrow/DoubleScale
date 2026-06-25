@@ -18,7 +18,7 @@ use DoubleScale\Core\UserRoles\UserRoles;
  */
 class Capabilities {
 
-	private const CAPS_SYNC_VERSION = '2026-06-10-sales-v1';
+	private const CAPS_SYNC_VERSION = '2026-06-25-sales-approval-v1';
 
 	/**
 	 * @return string[]
@@ -28,6 +28,7 @@ class Capabilities {
 			'doublescale_view_sales',
 			'doublescale_manage_all_sales',
 			'doublescale_manage_own_sales',
+			'doublescale_approve_sales',
 		);
 	}
 
@@ -87,6 +88,17 @@ class Capabilities {
 	}
 
 	/**
+	 * Whether a user may approve sales documents for sending.
+	 *
+	 * @param int $user_id User id (0 = current user).
+	 * @return bool
+	 */
+	public static function can_approve_sales( int $user_id = 0 ): bool {
+		return self::user_can( 'doublescale_approve_sales', $user_id )
+			|| self::user_can( 'doublescale_manage', $user_id );
+	}
+
+	/**
 	 * @return array<string, bool>
 	 */
 	public static function get_role_capability_map(): array {
@@ -94,6 +106,7 @@ class Capabilities {
 			UserRoles::SALES_MANAGER => array(
 				'doublescale_view_sales'       => true,
 				'doublescale_manage_all_sales' => true,
+				'doublescale_approve_sales'    => true,
 			),
 			UserRoles::SALES_REP => array(
 				'doublescale_view_sales'       => true,
@@ -102,6 +115,7 @@ class Capabilities {
 			UserRoles::CRM_MANAGER => array(
 				'doublescale_view_sales'       => true,
 				'doublescale_manage_all_sales' => true,
+				'doublescale_approve_sales'    => true,
 			),
 		);
 	}

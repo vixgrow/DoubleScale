@@ -2,6 +2,7 @@
     "RestActivityController",
     "RestAdminCalendarController",
     "RestAiController",
+    "RestApprovalController",
     "RestAttachmentController",
     "RestAutoCloseController",
     "RestAutomationContactController",

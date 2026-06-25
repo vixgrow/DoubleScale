@@ -133,6 +133,7 @@ const configData: ConfigData = {
 	addons: (serverData.addons as Addons | undefined) ?? {},
 	storeNonce: (serverData.storeNonce as string | undefined) ?? '',
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
+	salesApprovalWorkflowEnabled: Boolean(serverData.salesApprovalWorkflowEnabled),
 	aiConfigured: Boolean(serverData.aiConfigured),
 	// White-label is a Pro feature; the free server never injects it, so this
 	// stays undefined on free. Kept here so shared components can safely call

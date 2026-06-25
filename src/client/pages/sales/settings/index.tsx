@@ -20,7 +20,8 @@ import type { SalesSettings } from '@/types/sales';
 import { TaxesManager } from './taxes-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
 import { SalesEmailIntroField } from './sales-email-intro-field';
-import { InvoicesProGate, PaymentsProGate } from '../pro-gates';
+import { ApprovalWorkflowSettings } from './approval-workflow-settings';
+import { ApprovalsProGate, InvoicesProGate, PaymentsProGate } from '../pro-gates';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 
 const SALES_EMAIL_MERGE_TAG_HINT = __(
@@ -53,7 +54,7 @@ const SalesSettingsPage: React.FC = () => {
 	}, [data]);
 
 	useEffect(() => {
-		if (!documentsEnabled && tab === 'payments') {
+		if (!documentsEnabled && (tab === 'payments' || tab === 'approvals')) {
 			setTab('general');
 		}
 	}, [documentsEnabled, tab]);
@@ -71,6 +72,16 @@ const SalesSettingsPage: React.FC = () => {
 		try {
 			await updateSalesSettings(form);
 			await refetch();
+			if (typeof window !== 'undefined') {
+				const w = window as Window & {
+					doublescaleConfig?: { salesApprovalWorkflowEnabled?: boolean };
+				};
+				if (w.doublescaleConfig) {
+					w.doublescaleConfig.salesApprovalWorkflowEnabled = Boolean(
+						form.approval_workflow_enabled
+					);
+				}
+			}
 			setNotice(__('Settings saved.', 'doublescale'));
 		} catch (err: unknown) {
 			setNotice(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
@@ -108,7 +119,7 @@ const SalesSettingsPage: React.FC = () => {
 					<h1 className="text-2xl font-semibold">{__('Sales Settings', 'doublescale')}</h1>
 					<p className="text-sm text-muted-foreground mt-1">
 						{__(
-							'Emails, payment gateways, taxes, and customer experience for proposals, contracts, invoices, and credit notes.',
+							'Emails, payments, taxes, approvals, and customer experience for proposals, contracts, invoices, and credit notes.',
 							'doublescale'
 						)}
 					</p>
@@ -128,6 +139,9 @@ const SalesSettingsPage: React.FC = () => {
 					<TabsTrigger value="general">{__('General', 'doublescale')}</TabsTrigger>
 					{documentsEnabled ? (
 						<TabsTrigger value="payments">{__('Payments', 'doublescale')}</TabsTrigger>
+					) : null}
+					{documentsEnabled ? (
+						<TabsTrigger value="approvals">{__('Approvals', 'doublescale')}</TabsTrigger>
 					) : null}
 					<TabsTrigger value="taxes">{__('Taxes', 'doublescale')}</TabsTrigger>
 				</TabsList>
@@ -287,6 +301,16 @@ const SalesSettingsPage: React.FC = () => {
 							<PaymentGatewaysSettings form={form} patch={patch} />
 						) : (
 							<PaymentsProGate />
+						)}
+					</TabsContent>
+				) : null}
+
+				{documentsEnabled ? (
+					<TabsContent value="approvals" className="mt-6">
+						{isProActive ? (
+							<ApprovalWorkflowSettings form={form} patch={patch} />
+						) : (
+							<ApprovalsProGate />
 						)}
 					</TabsContent>
 				) : null}

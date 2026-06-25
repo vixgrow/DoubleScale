@@ -13,7 +13,16 @@ import {
 	ConfirmDialog,
 	ProposalDocumentPreview,
 	SendDocumentDialog,
+	ApprovalStatusBanner,
 } from '@/components/sales';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	canWithdrawApproval,
+	isApprovalWorkflowEnabled,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
 import {
 	convertProposalToInvoice,
 	deleteProposal,
@@ -21,7 +30,10 @@ import {
 	downloadProposalPdf,
 	fetchProposalSignature,
 	sendProposal,
+	submitProposalForApproval,
+	withdrawProposalApproval,
 	useProposal,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ProposalSignature } from '@/types/sales';
 
@@ -31,6 +43,7 @@ const ProposalView: React.FC = () => {
 	const proposalId = params?.id ? Number(params.id) : null;
 
 	const { data: proposal, loading, error, refetch } = useProposal(proposalId);
+	const { data: salesSettings } = useSalesSettings();
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [convertOpen, setConvertOpen] = useState(false);
@@ -101,7 +114,48 @@ const ProposalView: React.FC = () => {
 			setNotice(__('Proposal sent to the customer.', 'doublescale'));
 			setSendOpen(false);
 		} catch (err: unknown) {
-			setNotice(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+			setNotice(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This proposal must be approved before it can be sent. Submit it for approval first.',
+						'doublescale'
+					),
+				})
+			);
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleSubmitForApproval = async () => {
+		if (!proposalId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await submitProposalForApproval(proposalId);
+			await refetch();
+			setNotice(__('Proposal submitted for approval.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleWithdrawApproval = async () => {
+		if (!proposalId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await withdrawProposalApproval(proposalId);
+			await refetch();
+			setNotice(__('Approval request withdrawn. You can edit and re-submit.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to withdraw approval request.', 'doublescale')));
 		} finally {
 			setBusy(false);
 		}
@@ -136,7 +190,12 @@ const ProposalView: React.FC = () => {
 			navigate(getToLink(`sales/invoices/${result.invoice.id}`));
 		} catch (err: unknown) {
 			setNotice(
-				err instanceof Error ? err.message : __('Convert to invoice failed.', 'doublescale')
+				formatSalesRestError(err, __('Convert to invoice failed.', 'doublescale'), {
+					approval_required: __(
+						'This proposal must be approved before it can be converted to an invoice.',
+						'doublescale'
+					),
+				})
 			);
 		} finally {
 			setBusy(false);
@@ -194,7 +253,24 @@ const ProposalView: React.FC = () => {
 	}
 
 	const showConvert = proposal.status !== 'declined' && !proposal.invoice_id;
-	const showSend = proposal.status !== 'declined';
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, proposal);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'proposal',
+		proposal.status,
+		proposal.approval,
+		proposal.status === 'declined',
+		proposal
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'proposal',
+		proposal.status,
+		proposal.approval,
+		proposal
+	);
+	const canEdit = canEditSalesDocument(workflowEnabled, proposal.approval, proposal);
+	const showWithdraw = canWithdrawApproval(proposal);
 	const convertWarning =
 		proposal.status !== 'accepted'
 			? __('This will mark the proposal as Accepted.', 'doublescale')
@@ -205,6 +281,9 @@ const ProposalView: React.FC = () => {
 			{notice ? (
 				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
 			) : null}
+
+			<ApprovalStatusBanner approval={proposal.approval} />
+
 			<div className="flex items-center justify-between gap-4">
 				<Button variant="ghost" onClick={() => navigate(getToLink('sales/proposals'))}>
 					<ArrowLeft className="h-4 w-4 mr-1" />
@@ -225,8 +304,18 @@ const ProposalView: React.FC = () => {
 							{__('Copy Link', 'doublescale')}
 						</Button>
 					) : null}
+					{showSubmitApproval ? (
+						<Button onClick={() => void handleSubmitForApproval()} disabled={busy}>
+							{__('Submit for Approval', 'doublescale')}
+						</Button>
+					) : null}
+					{showWithdraw ? (
+						<Button variant="outline" onClick={() => void handleWithdrawApproval()} disabled={busy}>
+							{__('Withdraw Request', 'doublescale')}
+						</Button>
+					) : null}
 					{showSend ? (
-						<Button variant="outline" onClick={() => setSendOpen(true)}>
+						<Button onClick={() => setSendOpen(true)}>
 							<Send className="h-4 w-4 mr-1" />
 							{__('Send to Customer', 'doublescale')}
 						</Button>
@@ -247,13 +336,15 @@ const ProposalView: React.FC = () => {
 							{__('Convert to Invoice', 'doublescale')}
 						</Button>
 					) : null}
-					<Button
-						variant="outline"
-						onClick={() => navigate(getToLink(`sales/proposals/${proposal.id}/edit`))}
-					>
-						<Pencil className="h-4 w-4 mr-1" />
-						{__('Edit', 'doublescale')}
-					</Button>
+					{canEdit ? (
+						<Button
+							variant="outline"
+							onClick={() => navigate(getToLink(`sales/proposals/${proposal.id}/edit`))}
+						>
+							<Pencil className="h-4 w-4 mr-1" />
+							{__('Edit', 'doublescale')}
+						</Button>
+					) : null}
 					<Button variant="destructive" onClick={() => setDeleteOpen(true)}>
 						<Trash2 className="h-4 w-4 mr-1" />
 						{__('Delete', 'doublescale')}

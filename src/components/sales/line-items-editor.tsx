@@ -4,6 +4,10 @@
 
 import React, { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	isPercentDiscountType,
+	parseDiscountInput,
+} from './sales-discount-utils';
 import { Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -86,6 +90,7 @@ interface LineItemsEditorProps {
 	onAdjustmentChange?: (value: number) => void;
 	/** When true, discount type is controlled outside (e.g. proposal header). */
 	hideDiscountTypeSelect?: boolean;
+	readOnly?: boolean;
 }
 
 export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
@@ -99,6 +104,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 	onDiscountValueChange,
 	onAdjustmentChange,
 	hideDiscountTypeSelect = false,
+	readOnly = false,
 }) => {
 	const { data: salesTaxes, loading: taxesLoading } = useSalesTaxes();
 
@@ -179,10 +185,12 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<Label>{__('Items', 'doublescale')}</Label>
-				<Button type="button" variant="outline" size="sm" onClick={addItem}>
-					<Plus className="h-4 w-4 mr-1" />
-					{__('Add Item', 'doublescale')}
-				</Button>
+				{!readOnly ? (
+					<Button type="button" variant="outline" size="sm" onClick={addItem}>
+						<Plus className="h-4 w-4 mr-1" />
+						{__('Add Item', 'doublescale')}
+					</Button>
+				) : null}
 			</div>
 
 			<div className="space-y-3">
@@ -199,6 +207,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 									updateItem(index, { description: e.target.value })
 								}
 								placeholder={__('Item name', 'doublescale')}
+								disabled={readOnly}
 							/>
 						</div>
 						<div className="md:col-span-2 space-y-2">
@@ -209,6 +218,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 									updateItem(index, { long_description: e.target.value })
 								}
 								rows={2}
+								disabled={readOnly}
 							/>
 						</div>
 						<div className="md:col-span-2 space-y-2">
@@ -221,11 +231,13 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								onChange={(e) =>
 									updateItem(index, { qty: Number(e.target.value) })
 								}
+								disabled={readOnly}
 							/>
 							<Input
 								value={item.unit || ''}
 								onChange={(e) => updateItem(index, { unit: e.target.value })}
 								placeholder={__('Unit', 'doublescale')}
+								disabled={readOnly}
 							/>
 						</div>
 						<div className="md:col-span-2 space-y-2">
@@ -238,6 +250,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								onChange={(e) =>
 									updateItem(index, { rate: Number(e.target.value) })
 								}
+								disabled={readOnly}
 							/>
 							<div className="text-sm text-muted-foreground pt-1">
 								{__('Amount', 'doublescale')}: {formatMoney(computeAmount(item))}
@@ -250,7 +263,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								selected={selectedTaxOptions(item)}
 								onChange={(selected) => handleTaxChange(index, selected)}
 								placeholder={__('No Tax', 'doublescale')}
-								disabled={taxesLoading}
+								disabled={readOnly || taxesLoading}
 								isLoading={taxesLoading}
 								className="h-10"
 							/>
@@ -262,17 +275,20 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 									onCheckedChange={(checked) =>
 										updateItem(index, { optional: Boolean(checked) })
 									}
+									disabled={readOnly}
 								/>
 								<Label>{__('Optional', 'doublescale')}</Label>
 							</div>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								onClick={() => removeItem(index)}
-							>
-								<Trash2 className="h-4 w-4" />
-							</Button>
+							{!readOnly ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									onClick={() => removeItem(index)}
+								>
+									<Trash2 className="h-4 w-4" />
+								</Button>
+							) : null}
 						</div>
 					</div>
 				))}
@@ -292,6 +308,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								className="border rounded px-2 py-1 text-sm"
 								value={discountType}
 								onChange={(e) => onDiscountTypeChange(e.target.value)}
+								disabled={readOnly}
 							>
 								<option value="none">{__('No discount', 'doublescale')}</option>
 								<option value="percent">{__('Percent', 'doublescale')}</option>
@@ -301,11 +318,13 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								<Input
 									type="number"
 									min={0}
+									max={isPercentDiscountType(discountType) ? 100 : undefined}
 									step="0.01"
 									value={discountValue}
 									onChange={(e) =>
-										onDiscountValueChange(Number(e.target.value))
+										onDiscountValueChange(parseDiscountInput(e.target.value))
 									}
+									disabled={readOnly}
 									placeholder={
 										discountType === 'percent'
 											? __('%', 'doublescale')
@@ -337,6 +356,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 								onChange={(e) =>
 									onAdjustmentChange(Number(e.target.value))
 								}
+								disabled={readOnly}
 							/>
 						</div>
 					) : null}

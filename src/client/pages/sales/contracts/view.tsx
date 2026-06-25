@@ -14,15 +14,26 @@ import {
 	ContractStatusPill,
 	SendDocumentDialog,
 	ContractAttachmentsPanel,
+	ApprovalStatusBanner,
 } from '@/components/sales';
 import PageTabs from '@/components/page-tabs';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	canWithdrawApproval,
+	isApprovalWorkflowEnabled,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
 import {
 	deleteContract,
 	downloadContractPdf,
 	fetchContractSignature,
 	sendContract,
+	submitContractForApproval,
+	withdrawContractApproval,
 	useContract,
-	formatRestError,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContractSignature } from '@/types/sales';
 import { CONTRACT_STATUS_LABELS } from '@/constants/sales';
@@ -45,6 +56,7 @@ const ContractView: React.FC = () => {
 	const contractId = params?.id ? Number(params.id) : null;
 
 	const { data: contract, loading, error, refetch } = useContract(contractId);
+	const { data: salesSettings } = useSalesSettings();
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
@@ -114,7 +126,48 @@ const ContractView: React.FC = () => {
 			setNotice(__('Contract sent to the customer.', 'doublescale'));
 			setSendOpen(false);
 		} catch (err: unknown) {
-			setNotice(formatRestError(err));
+			setNotice(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This contract must be approved before it can be sent. Submit it for approval first.',
+						'doublescale'
+					),
+				})
+			);
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleSubmitForApproval = async () => {
+		if (!contractId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await submitContractForApproval(contractId);
+			await refetch();
+			setNotice(__('Contract submitted for approval.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleWithdrawApproval = async () => {
+		if (!contractId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await withdrawContractApproval(contractId);
+			await refetch();
+			setNotice(__('Approval request withdrawn. You can edit and re-submit.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to withdraw approval request.', 'doublescale')));
 		} finally {
 			setBusy(false);
 		}
@@ -171,7 +224,24 @@ const ContractView: React.FC = () => {
 		);
 	}
 
-	const showSend = contract.status !== 'expired';
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, contract);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'contract',
+		contract.status,
+		contract.approval,
+		contract.status === 'expired',
+		contract
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'contract',
+		contract.status,
+		contract.approval,
+		contract
+	);
+	const canEdit = canEditSalesDocument(workflowEnabled, contract.approval, contract);
+	const showWithdraw = canWithdrawApproval(contract);
 
 	const informationTab = (
 		<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -223,6 +293,9 @@ const ContractView: React.FC = () => {
 			{notice ? (
 				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
 			) : null}
+
+			<ApprovalStatusBanner approval={contract.approval} />
+
 			<div className="flex items-center justify-between gap-4">
 				<Button variant="ghost" onClick={() => navigate(getToLink('sales/contracts'))}>
 					<ArrowLeft className="h-4 w-4 mr-1" />
@@ -239,19 +312,31 @@ const ContractView: React.FC = () => {
 							{__('Copy Link', 'doublescale')}
 						</Button>
 					) : null}
+					{showSubmitApproval ? (
+						<Button onClick={() => void handleSubmitForApproval()} disabled={busy}>
+							{__('Submit for Approval', 'doublescale')}
+						</Button>
+					) : null}
+					{showWithdraw ? (
+						<Button variant="outline" onClick={() => void handleWithdrawApproval()} disabled={busy}>
+							{__('Withdraw Request', 'doublescale')}
+						</Button>
+					) : null}
 					{showSend ? (
 						<Button variant="outline" onClick={() => setSendOpen(true)}>
 							<Send className="h-4 w-4 mr-1" />
 							{__('Send to Customer', 'doublescale')}
 						</Button>
 					) : null}
-					<Button
-						variant="outline"
-						onClick={() => navigate(getToLink(`sales/contracts/${contract.id}/edit`))}
-					>
-						<Pencil className="h-4 w-4 mr-1" />
-						{__('Edit', 'doublescale')}
-					</Button>
+					{canEdit ? (
+						<Button
+							variant="outline"
+							onClick={() => navigate(getToLink(`sales/contracts/${contract.id}/edit`))}
+						>
+							<Pencil className="h-4 w-4 mr-1" />
+							{__('Edit', 'doublescale')}
+						</Button>
+					) : null}
 					<Button variant="destructive" onClick={() => setDeleteOpen(true)}>
 						<Trash2 className="h-4 w-4 mr-1" />
 						{__('Delete', 'doublescale')}

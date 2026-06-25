@@ -341,6 +341,42 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
+				NotificationCategories::SALES_APPROVAL_REQUESTED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_APPROVAL_APPROVED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_APPROVAL_REJECTED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_APPROVAL_INVALIDATED => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_APPROVAL_WITHDRAWN => array(
+					'bell'    => true,
+					'email'   => false,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::SALES_APPROVAL_PENDING_RESET => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
 				// System.
 				// NotificationCategories::SYSTEM_GENERAL               => array(
 				// 'bell'    => true,

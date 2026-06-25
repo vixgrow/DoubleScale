@@ -2,6 +2,7 @@
     "RestActivityController": "DoubleScale\\Modules\\Activities\\Rest\\Controllers\\RestActivityController",
     "RestAdminCalendarController": "DoubleScale\\Core\\Rest\\Controllers\\RestAdminCalendarController",
     "RestAiController": "DoubleScale\\Pro\\Modules\\Ai\\Rest\\Controllers\\RestAiController",
+    "RestApprovalController": "DoubleScale\\Pro\\Modules\\Sales\\Approvals\\Rest\\Controllers\\RestApprovalController",
     "RestAttachmentController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestAttachmentController",
     "RestAutoCloseController": "DoubleScale\\Pro\\Modules\\Support\\Rest\\Controllers\\RestAutoCloseController",
     "RestAutomationContactController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationContactController",

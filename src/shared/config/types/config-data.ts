@@ -38,6 +38,8 @@ export type ConfigData = Record<string, unknown> & {
 	currency: string;
 	urlDoubleScalePro: string;
 	modules: ModuleInfo[];
+	/** Sales approval workflow toggle from server settings (admin bootstrap). */
+	salesApprovalWorkflowEnabled: boolean;
 	/** Add-on plugin catalog + install state from the store. */
 	addons: Addons;
 	/** Nonce for in-app store / installer requests. */

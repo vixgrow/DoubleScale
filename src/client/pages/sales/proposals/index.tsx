@@ -18,7 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { ConfirmDialog, ProposalStatusPill } from '@/components/sales';
-import { deleteProposal, useProposals } from '@/hooks/sales';
+import {
+	canEditSalesDocument,
+	isApprovalWorkflowEnabled,
+} from '@/components/sales/sales-approval-utils';
+import { deleteProposal, useProposals, useSalesSettings } from '@/hooks/sales';
 import type { Proposal } from '@/types/sales';
 
 const formatMoney = (value: number, currency = 'USD') =>
@@ -51,6 +55,7 @@ const ProposalsList: React.FC = () => {
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
+	const { data: salesSettings } = useSalesSettings();
 
 	const proposals = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
@@ -190,19 +195,25 @@ const ProposalsList: React.FC = () => {
 													<Eye className="h-4 w-4" />
 													{__('View', 'doublescale')}
 												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(
-																`sales/proposals/${proposal.id}/edit`
+												{canEditSalesDocument(
+													isApprovalWorkflowEnabled(salesSettings, proposal),
+													proposal.approval,
+													proposal
+												) ? (
+													<DropdownMenuItem
+														className="cursor-pointer gap-2"
+														onSelect={() =>
+															navigate(
+																getToLink(
+																	`sales/proposals/${proposal.id}/edit`
+																)
 															)
-														)
-													}
-												>
-													<Pencil className="h-4 w-4" />
-													{__('Edit', 'doublescale')}
-												</DropdownMenuItem>
+														}
+													>
+														<Pencil className="h-4 w-4" />
+														{__('Edit', 'doublescale')}
+													</DropdownMenuItem>
+												) : null}
 												<DropdownMenuItem
 													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
 													onSelect={() => setDeleteId(proposal.id)}

@@ -37,6 +37,7 @@ final class SalesSettings {
 			'subscription_email_subject'    => __( 'Your subscription: {{sales:subscription_name}}', 'doublescale' ),
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
+			'approval_workflow_enabled'     => false,
 			'default_offline_payment_modes' => array(
 				PaymentMode::BANK_TRANSFER,
 				PaymentMode::CASH,
@@ -187,6 +188,7 @@ final class SalesSettings {
 
 		$bool_keys = array(
 			'require_signature_on_accept',
+			'approval_workflow_enabled',
 		);
 		foreach ( $bool_keys as $key ) {
 			if ( array_key_exists( $key, $merged ) ) {

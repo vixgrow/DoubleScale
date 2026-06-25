@@ -91,6 +91,8 @@ final class AdminConfig {
 			}
 		}
 
+		$user_capabilities['doublescale_manage'] = current_user_can( 'doublescale_manage' );
+
 		$current_wp_user = wp_get_current_user();
 		$current_user    = array(
 			'id'           => $current_wp_user->ID,
@@ -171,6 +173,10 @@ final class AdminConfig {
 				'modules'             => self::get_modules_config(),
 				/** Temporary release gate for Sales proposals/invoices — see doublescale_sales_documents_ready(). */
 				'salesDocumentsReady' => doublescale_sales_documents_ready(),
+				/** Pro approval workflow toggle — see SalesSettings::get( 'approval_workflow_enabled' ). */
+				'salesApprovalWorkflowEnabled' => class_exists( \DoubleScale\Modules\Sales\Services\SalesSettings::class )
+					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
+					: false,
 			)
 		);
 

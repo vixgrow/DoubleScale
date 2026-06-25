@@ -86,7 +86,7 @@ final class ProposalShaper {
 			}
 		}
 
-		return $data;
+		return apply_filters( 'doublescale_sales_proposal_admin_shape', $data, $proposal );
 	}
 
 	/**

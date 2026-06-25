@@ -457,6 +457,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 									},
 							  ]
 							: []),
+						...(applyFilters('doublescale_sales_nav_submenu_extra', []) as Array<{
+							path: string;
+							label: string;
+							requiredCapability?: string[];
+						}>),
 						...(isSalesDocumentsReady() &&
 						config.isModuleToggleEnabled('contracts')
 							? [

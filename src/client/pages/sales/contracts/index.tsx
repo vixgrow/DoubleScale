@@ -30,7 +30,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { ConfirmDialog, ContractStatusPill } from '@/components/sales';
-import { deleteContract, useContracts, useContractSummary } from '@/hooks/sales';
+import {
+	canEditSalesDocument,
+	isApprovalWorkflowEnabled,
+} from '@/components/sales/sales-approval-utils';
+import { deleteContract, useContracts, useContractSummary, useSalesSettings } from '@/hooks/sales';
 import { CONTRACT_STATUS_LABELS } from '@/constants/sales';
 import type { Contract } from '@/types/sales';
 
@@ -65,6 +69,7 @@ const ContractsList: React.FC = () => {
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
+	const { data: salesSettings } = useSalesSettings();
 
 	const { data: summary, refetch: refetchSummary } = useContractSummary();
 
@@ -329,17 +334,23 @@ const ContractsList: React.FC = () => {
 													<Eye className="h-4 w-4" />
 													{__('View', 'doublescale')}
 												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(`sales/contracts/${contract.id}/edit`)
-														)
-													}
-												>
-													<Pencil className="h-4 w-4" />
-													{__('Edit', 'doublescale')}
-												</DropdownMenuItem>
+												{canEditSalesDocument(
+													isApprovalWorkflowEnabled(salesSettings, contract),
+													contract.approval,
+													contract
+												) ? (
+													<DropdownMenuItem
+														className="cursor-pointer gap-2"
+														onSelect={() =>
+															navigate(
+																getToLink(`sales/contracts/${contract.id}/edit`)
+															)
+														}
+													>
+														<Pencil className="h-4 w-4" />
+														{__('Edit', 'doublescale')}
+													</DropdownMenuItem>
+												) : null}
 												<DropdownMenuItem
 													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
 													onSelect={() => setDeleteId(contract.id)}

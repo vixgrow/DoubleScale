@@ -21,7 +21,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { LineItemsEditor, SendDocumentDialog } from '@/components/sales';
+import { LineItemsEditor, SendDocumentDialog, ApprovalStatusBanner, computeLineItemsTotals } from '@/components/sales';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	isApprovalWorkflowEnabled,
+	requiresReapprovalAfterEdit,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
+import {
+	getDiscountValidationError,
+	isPercentDiscountType,
+	parseDiscountInput,
+} from '@/components/sales/sales-discount-utils';
 import {
 	formatContactAddressBlock,
 	normalizeSalesContact,
@@ -29,6 +42,7 @@ import {
 import {
 	createInvoice,
 	sendInvoice,
+	submitInvoiceForApproval,
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
@@ -68,7 +82,7 @@ const InvoiceEdit: React.FC = () => {
 	const isNew = !idParam || idParam === 'new';
 	const invoiceId = !isNew && idParam ? Number(idParam) : null;
 
-	const { data: existing, loading } = useInvoice(invoiceId);
+	const { data: existing, loading, refetch } = useInvoice(invoiceId);
 	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 
@@ -227,6 +241,31 @@ const InvoiceEdit: React.FC = () => {
 	};
 
 	const [sendOpen, setSendOpen] = useState(false);
+	const [submittingApproval, setSubmittingApproval] = useState(false);
+
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, existing ?? undefined);
+	const approval = existing?.approval ?? null;
+	const fieldsLocked = !canEditSalesDocument(workflowEnabled, approval, existing ?? undefined);
+	const showReapprovalWarning = requiresReapprovalAfterEdit(
+		workflowEnabled,
+		approval,
+		existing ?? undefined
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'invoice',
+		status,
+		approval,
+		existing ?? undefined
+	);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'invoice',
+		status,
+		approval,
+		status === 'paid',
+		existing ?? undefined
+	);
 
 	const buildPayload = () => ({
 		status,
@@ -247,9 +286,24 @@ const InvoiceEdit: React.FC = () => {
 		line_items: lineItems,
 	});
 
-	const persistInvoice = async (): Promise<number | null> => {
+	const validateForm = (): boolean => {
 		if (!contact) {
 			setError(__('Please select a customer.', 'doublescale'));
+			return false;
+		}
+
+		const subtotal = computeLineItemsTotals(lineItems, 'none', 0, 0).subtotal;
+		const discountError = getDiscountValidationError(discountType, discountValue, subtotal);
+		if (discountError) {
+			setError(discountError);
+			return false;
+		}
+
+		return true;
+	};
+
+	const persistInvoice = async (): Promise<number | null> => {
+		if (!validateForm()) {
 			return null;
 		}
 
@@ -266,7 +320,14 @@ const InvoiceEdit: React.FC = () => {
 			}
 			return id ?? null;
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			setError(
+				formatSalesRestError(err, __('Save failed.', 'doublescale'), {
+					approval_pending: __(
+						'This invoice is pending approval and cannot be edited.',
+						'doublescale'
+					),
+				})
+			);
 			return null;
 		} finally {
 			setSaving(false);
@@ -292,10 +353,35 @@ const InvoiceEdit: React.FC = () => {
 			await sendInvoice(id, message);
 			navigate(getToLink(`sales/invoices/${id}`));
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+			setError(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This invoice must be approved before it can be sent. Use Submit for Approval first.',
+						'doublescale'
+					),
+				})
+			);
 		} finally {
 			setSaving(false);
 			setSendOpen(false);
+		}
+	};
+
+	const handleSubmitForApproval = async () => {
+		const id = await persistInvoice();
+		if (!id) {
+			return;
+		}
+
+		setSubmittingApproval(true);
+		setError(null);
+		try {
+			await submitInvoiceForApproval(id);
+			await refetch();
+		} catch (err: unknown) {
+			setError(formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
+		} finally {
+			setSubmittingApproval(false);
 		}
 	};
 
@@ -318,6 +404,12 @@ const InvoiceEdit: React.FC = () => {
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
+			<ApprovalStatusBanner
+				approval={approval}
+				showReapprovalWarning={showReapprovalWarning}
+			/>
+
+			<fieldset disabled={fieldsLocked} className="space-y-6 border-0 p-0 m-0 min-w-0">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div className="space-y-4">
 					<FormField label={__('Customer', 'doublescale')} required className="!mb-0">
@@ -464,9 +556,12 @@ const InvoiceEdit: React.FC = () => {
 							<Input
 								type="number"
 								min={0}
+								max={isPercentDiscountType(discountType) ? 100 : undefined}
 								step="0.01"
 								value={discountValue}
-								onChange={(e) => setDiscountValue(Number(e.target.value))}
+								onChange={(e) =>
+									setDiscountValue(parseDiscountInput(e.target.value))
+								}
 							/>
 						</FormField>
 					) : null}
@@ -529,6 +624,7 @@ const InvoiceEdit: React.FC = () => {
 				adjustment={adjustment}
 				onAdjustmentChange={setAdjustment}
 				hideDiscountTypeSelect
+				readOnly={fieldsLocked}
 			/>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -545,17 +641,34 @@ const InvoiceEdit: React.FC = () => {
 					<Textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={5} />
 				</div>
 			</div>
+			</fieldset>
 
 			<div className="flex justify-end gap-2">
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/invoices'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave()} disabled={saving}>
+				<Button
+					variant="outline"
+					onClick={() => void handleSave()}
+					disabled={saving || submittingApproval || fieldsLocked}
+				>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 				</Button>
-				<Button onClick={() => setSendOpen(true)} disabled={saving || status === 'paid'}>
-					{__('Save & Send', 'doublescale')}
-				</Button>
+				{showSubmitApproval ? (
+					<Button
+						onClick={() => void handleSubmitForApproval()}
+						disabled={saving || submittingApproval}
+					>
+						{submittingApproval
+							? __('Submitting…', 'doublescale')
+							: __('Save & Submit for Approval', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button onClick={() => setSendOpen(true)} disabled={saving || submittingApproval}>
+						{__('Save & Send', 'doublescale')}
+					</Button>
+				) : null}
 			</div>
 
 			<SendDocumentDialog

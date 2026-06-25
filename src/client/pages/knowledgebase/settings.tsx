@@ -76,6 +76,12 @@ const Settings = () => {
 					<option value="portal">{__('Portal — logged-in users only', 'doublescale')}</option>
 					<option value="disabled">{__('Disabled — no front-end KB', 'doublescale')}</option>
 				</select>
+				<span className="mt-1 block text-xs text-gray-500">
+					{__(
+						'The front door for the whole KB site. Per-article and per-group visibility apply on top of this.',
+						'doublescale'
+					)}
+				</span>
 			</label>
 
 			<label className="block text-sm">
@@ -88,6 +94,12 @@ const Settings = () => {
 					<option value="public">{__('Public', 'doublescale')}</option>
 					<option value="members">{__('Members only', 'doublescale')}</option>
 				</select>
+				<span className="mt-1 block text-xs text-gray-500">
+					{__(
+						'Only sets the starting position of the “Members only” toggle for newly created articles. You can change it per article, and a status or group can still restrict it further.',
+						'doublescale'
+					)}
+				</span>
 			</label>
 
 			<label className="block text-sm">

@@ -43,7 +43,10 @@ const Groups = () => {
 		load();
 	}, []);
 
-	const add = async () => {
+	const add = async (e?: { preventDefault?: () => void }) => {
+		// Wrapped in a <form>, so guard against the native submit reload and also
+		// support pressing Enter in the name field (not only clicking "Add").
+		e?.preventDefault?.();
 		if (!name.trim()) {
 			return;
 		}
@@ -52,8 +55,8 @@ const Groups = () => {
 			await createGroup({ name: name.trim() });
 			setName('');
 			load();
-		} catch (e) {
-			setError((e as { message?: string })?.message || __('Failed to create group.', 'doublescale'));
+		} catch (e2) {
+			setError((e2 as { message?: string })?.message || __('Failed to create group.', 'doublescale'));
 		}
 	};
 
@@ -92,7 +95,7 @@ const Groups = () => {
 
 			{error && <p className="text-sm text-red-600">{error}</p>}
 
-			<div className="flex gap-2">
+			<form className="flex gap-2" onSubmit={add}>
 				<input
 					type="text"
 					value={name}
@@ -100,10 +103,14 @@ const Groups = () => {
 					placeholder={__('New group name', 'doublescale')}
 					className="flex-1 rounded-md border px-3 py-2 text-sm"
 				/>
-				<button type="button" className="rounded-md bg-primary px-4 py-2 text-sm text-white" onClick={add}>
+				<button
+					type="submit"
+					disabled={!name.trim()}
+					className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
+				>
 					{__('Add', 'doublescale')}
 				</button>
-			</div>
+			</form>
 
 			{loading && <p className="text-sm text-gray-500">{__('Loading…', 'doublescale')}</p>}
 

@@ -4,7 +4,7 @@
  * excerpt round-trip through the `knowledgebase/articles` REST surface.
  */
 
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
 
@@ -13,10 +13,23 @@ import Editor from '@/components/booking/editor';
 import {
 	createArticle,
 	getArticle,
+	getSettings,
 	listGroups,
 	updateArticle,
 	type KbGroup,
 } from './api';
+
+/** Visibility ranks — higher is more restrictive (mirrors PHP Services\Visibility). */
+const VIS_RANK: Record<string, number> = { public: 0, members: 1, internal: 2 };
+
+type EffectiveVisibility = 'draft' | 'public' | 'members' | 'internal';
+
+const EFFECTIVE_LABEL: Record<EffectiveVisibility, string> = {
+	draft: __('Draft — not shown on the front end', 'doublescale'),
+	public: __('Everyone (public)', 'doublescale'),
+	members: __('Logged-in users + staff', 'doublescale'),
+	internal: __('Staff only', 'doublescale'),
+};
 
 const ArticleEditor = () => {
 	const navigate = useNavigate();
@@ -40,6 +53,56 @@ const ArticleEditor = () => {
 			.then((res) => setGroups(res.data))
 			.catch(() => undefined);
 	}, []);
+
+	// New articles inherit the "Default new-article visibility" setting as the
+	// starting position of the Members-only toggle (the author can still override).
+	useEffect(() => {
+		if (!isNew) {
+			return;
+		}
+		getSettings()
+			.then((s) => setMembersOnly(s.default_visibility === 'members'))
+			.catch(() => undefined);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isNew]);
+
+	const groupById = useMemo(() => {
+		const map: Record<number, KbGroup> = {};
+		groups.forEach((g) => {
+			map[g.id] = g;
+		});
+		return map;
+	}, [groups]);
+
+	// Effective visibility = the STRICTEST of status, the members-only flag, and
+	// the selected group folded through its ancestors (mirrors PHP Visibility).
+	const effectiveVisibility = useMemo((): EffectiveVisibility => {
+		if (status === 'draft') {
+			return 'draft';
+		}
+		if (status === 'private') {
+			return 'internal';
+		}
+		let rank = membersOnly ? VIS_RANK.members : VIS_RANK.public;
+		const seen = new Set<number>();
+		let cursor: KbGroup | undefined = groupId ? groupById[groupId] : undefined;
+		while (cursor && !seen.has(cursor.id)) {
+			seen.add(cursor.id);
+			rank = Math.max(rank, VIS_RANK[cursor.visibility] ?? 0);
+			cursor = cursor.parent ? groupById[cursor.parent] : undefined;
+		}
+		return rank >= VIS_RANK.internal ? 'internal' : rank === VIS_RANK.members ? 'members' : 'public';
+	}, [status, membersOnly, groupId, groupById]);
+
+	// True when the group (or an ancestor) restricts further than the article's
+	// own status/toggle — the author can't see why from the toggle alone.
+	const groupTightensVisibility = useMemo(() => {
+		if (status !== 'publish') {
+			return false;
+		}
+		const ownRank = membersOnly ? VIS_RANK.members : VIS_RANK.public;
+		return VIS_RANK[effectiveVisibility] > ownRank;
+	}, [status, membersOnly, effectiveVisibility]);
 
 	useEffect(() => {
 		if (isNew) {
@@ -172,6 +235,24 @@ const ArticleEditor = () => {
 				/>
 				{__('Members only (logged-in users + staff)', 'doublescale')}
 			</label>
+
+			<div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
+				<span>
+					{__('Who can see this:', 'doublescale')}{' '}
+					<strong className="text-gray-800">{EFFECTIVE_LABEL[effectiveVisibility]}</strong>
+				</span>
+				{groupTightensVisibility && (
+					<span className="ml-1 text-amber-700">
+						{__('— restricted by its group, not the toggle above.', 'doublescale')}
+					</span>
+				)}
+				<span className="mt-1 block text-gray-500">
+					{__(
+						'Effective visibility is the strictest of the status, this toggle, and the article’s group. A “private” status or an internal/members group overrides a more open choice here.',
+						'doublescale'
+					)}
+				</span>
+			</div>
 
 			<label className="block text-sm">
 				<span className="mb-1 block text-gray-500">{__('Excerpt', 'doublescale')}</span>

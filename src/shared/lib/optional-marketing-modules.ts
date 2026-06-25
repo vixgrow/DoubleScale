@@ -33,6 +33,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'campaigns',
 	'booking',
 	'support',
+	'knowledgebase',
 ] as const;
 
 /**
@@ -153,6 +154,14 @@ function placeholderFor(
 				label: __('Helpdesk', 'doublescale'),
 				description: __(
 					'Ticket-based customer helpdesk with mailbox channels, email piping, and a customer portal.',
+					'doublescale'
+				),
+			};
+		case 'knowledgebase':
+			return {
+				label: __('Knowledge Base', 'doublescale'),
+				description: __(
+					'Self-hosted help center: public, portal, and staff-internal articles with search and ticket deflection.',
 					'doublescale'
 				),
 			};

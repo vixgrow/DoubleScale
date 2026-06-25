@@ -43,6 +43,8 @@ export interface PortalRendererConfig {
 	public_rest_url?: string;
 	custom_fields_enabled?: boolean;
 	attachment_limits?: unknown;
+	/** Injected by the Knowledge Base module: its public REST base. */
+	knowledgebase_rest_url?: string;
 }
 
 export interface PortalSection {

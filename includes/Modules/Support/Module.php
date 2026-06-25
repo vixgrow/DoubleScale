@@ -247,7 +247,13 @@ final class Module extends AbstractModule {
 		foreach ( $submenu[ $menu_slug ] as $key => $item ) {
 			// Each submenu item is [ title, capability, slug, page_title? ].
 			$slug = isset( $item[2] ) ? (string) $item[2] : '';
-			if ( false === strpos( $slug, 'path=support' ) ) {
+			// Keep Support's own pages AND the Knowledge Base — a support-only
+			// Support Manager holds `doublescale_manage_knowledgebase`, so trimming
+			// `path=knowledgebase` here would hide the menu for the very role we
+			// just empowered to author the helpdesk KB.
+			$is_support_page = false !== strpos( $slug, 'path=support' );
+			$is_kb_page      = false !== strpos( $slug, 'path=knowledgebase' );
+			if ( ! $is_support_page && ! $is_kb_page ) {
 				unset( $submenu[ $menu_slug ][ $key ] );
 			}
 		}

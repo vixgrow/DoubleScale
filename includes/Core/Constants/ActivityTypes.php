@@ -71,6 +71,14 @@ class ActivityTypes {
 	const BOOKING_REJECTED    = 'booking_rejected';
 
 	/**
+	 * Knowledge Base activity types — written to the contact timeline when a
+	 * resolved contact (portal user or an identified guest) reads a published
+	 * article. Agent-facing context only; deliberately NOT whitelisted into the
+	 * portal timeline ({@see \DoubleScale\Modules\Knowledgebase\Services\ContactViewTracker}).
+	 */
+	const KB_ARTICLE_VIEWED = 'kb_article_viewed';
+
+	/**
 	 * Get all valid activity types
 	 *
 	 * @since 1.0.0
@@ -105,6 +113,7 @@ class ActivityTypes {
 			self::SUPPORT_REPLY,
 			self::SUPPORT_NOTE,
 			self::SUPPORT_EVENT,
+			self::KB_ARTICLE_VIEWED,
 		);
 	}
 
@@ -240,6 +249,7 @@ class ActivityTypes {
 			/* translators: %s: user name */
 			self::SUPPORT_NOTE      => sprintf( __( '%s added an internal note', 'doublescale' ), $user_name ),
 			self::SUPPORT_EVENT     => __( 'Ticket activity', 'doublescale' ),
+			self::KB_ARTICLE_VIEWED => __( 'Viewed a knowledge base article', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
@@ -283,6 +293,7 @@ class ActivityTypes {
 			self::SUPPORT_REPLY       => __( 'Ticket Reply', 'doublescale' ),
 			self::SUPPORT_NOTE        => __( 'Ticket Note', 'doublescale' ),
 			self::SUPPORT_EVENT       => __( 'Ticket Activity', 'doublescale' ),
+			self::KB_ARTICLE_VIEWED   => __( 'Article Viewed', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

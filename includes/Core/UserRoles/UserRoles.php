@@ -408,7 +408,7 @@ final class UserRoles {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $role Role name
+	 * @param int $user_id User ID.
 	 */
 	public static function remove_role_and_capabilities( $user_id ) {
 		$user  = get_user_by( 'ID', $user_id );
@@ -432,17 +432,17 @@ final class UserRoles {
 	 */
 	private static function get_capabilities() {
 		return array(
-			'common'              => array(
+			'common'               => array(
 				'doublescale_access',           // Basic CRM access (top-level menu + REST)
 				'read',                         // For Wordpress
 				'view_admin_dashboard',         // WP/WC: lets the user reach wp-admin
-				                                // even when they don't have edit_posts
-				                                // or manage_woocommerce. Required so
-				                                // `WC_Admin::prevent_admin_access` and
-				                                // `wc_disable_admin_bar` don't kick
-				                                // CRM/Support users out to `/my-account/`.
+												// even when they don't have edit_posts
+												// or manage_woocommerce. Required so
+												// `WC_Admin::prevent_admin_access` and
+												// `wc_disable_admin_bar` don't kick
+												// CRM/Support users out to `/my-account/`.
 			),
-			'crm_common'          => array(
+			'crm_common'           => array(
 				'doublescale_view_contacts',    // View contacts
 				'doublescale_view_deals',       // View deals
 				'doublescale_view_activities',  // View activities
@@ -453,10 +453,30 @@ final class UserRoles {
 				// only sees the Support module if an admin ALSO assigns them a
 				// support role. See get_capabilities() support_* entries.
 			),
-			'support_common'      => array(
+			'support_common'       => array(
 				'doublescale_view_support',     // View support tickets (own-scope by default)
 			),
-			self::SALES_REP       => array(
+			'knowledgebase_common' => array(
+				// Authoring gate used by the KB REST controllers + admin menu.
+				'doublescale_manage_knowledgebase',
+				// CPT primitive caps. The `doublescale_kb` post type registers with
+				// capability_type=array('doublescale_kb','doublescale_kbs') and
+				// map_meta_cap=true, so WP_Query / wp_insert_post / wp_update_post /
+				// wp_delete_post check these literal caps. Granting them to the
+				// authoring roles is what lets a CRM/Support Manager (not only the
+				// site Administrator) see `private` internal articles and CRUD them.
+				'edit_doublescale_kbs',
+				'edit_others_doublescale_kbs',
+				'edit_private_doublescale_kbs',
+				'edit_published_doublescale_kbs',
+				'publish_doublescale_kbs',
+				'read_private_doublescale_kbs',
+				'delete_doublescale_kbs',
+				'delete_private_doublescale_kbs',
+				'delete_published_doublescale_kbs',
+				'delete_others_doublescale_kbs',
+			),
+			self::SALES_REP        => array(
 				'doublescale_edit_own_deals',     // Edit own deals
 				'doublescale_create_deals',       // Create new deals (assigned to self)
 				'doublescale_edit_own_contacts',  // Edit own contacts
@@ -466,7 +486,7 @@ final class UserRoles {
 				'doublescale_manage_own_sales',   // Manage own proposals/invoices
 				// Support caps removed — granted only by support roles.
 			),
-			self::SALES_MANAGER   => array(
+			self::SALES_MANAGER    => array(
 				'doublescale_manage_deals',       // Manage all deals (CRUD for all deals)
 				'doublescale_view_all_deals',     // View all deals (assigned to anyone)
 				'doublescale_create_activities',  // Create activities
@@ -477,7 +497,7 @@ final class UserRoles {
 				'doublescale_manage_all_sales',   // Manage all proposals/invoices
 				// Support caps removed — granted only by support roles.
 			),
-			self::CRM_MANAGER     => array(
+			self::CRM_MANAGER      => array(
 				'doublescale_manage',             // Full CRM management
 				'doublescale_manage_users',       // Manage CRM users
 				'doublescale_manage_settings',    // Manage CRM settings
@@ -500,18 +520,18 @@ final class UserRoles {
 				'doublescale_manage_all_sales',   // Manage all proposals/invoices
 				'list_users',                  // For Wordpress List users
 			),
-			self::SUPPORT_AGENT   => array(
+			self::SUPPORT_AGENT    => array(
 				'doublescale_reply_own_tickets',  // Reply on tickets assigned to self
 			),
-			self::SUPPORT_MANAGER => array(
+			self::SUPPORT_MANAGER  => array(
 				'doublescale_manage_all_tickets', // See and manage every support ticket
 				'doublescale_reply_own_tickets',  // Reply on tickets assigned to self
 			),
 			// Booking caps (doublescale_booking_*) are assigned by
 			// {@see \DoubleScale\Modules\Booking\Capabilities}. These entries
 			// only grant admin-shell access (menu + REST bootstrap).
-			self::BOOKING_MANAGER => array(),
-			self::BOOKING_AGENT   => array(),
+			self::BOOKING_MANAGER  => array(),
+			self::BOOKING_AGENT    => array(),
 		);
 	}
 
@@ -530,6 +550,7 @@ final class UserRoles {
 					$caps['common'],
 					$caps['crm_common'],
 					$caps['support_common'],
+					$caps['knowledgebase_common'],
 					$caps[ self::CRM_MANAGER ],
 					$caps[ self::SALES_MANAGER ],
 					$caps[ self::SALES_REP ],
@@ -927,6 +948,7 @@ final class UserRoles {
 				array_merge(
 					$caps['common'],
 					$caps['crm_common'],
+					$caps['knowledgebase_common'],
 					$caps[ self::CRM_MANAGER ],
 					$caps[ self::SALES_REP ]
 				)
@@ -992,6 +1014,7 @@ final class UserRoles {
 				array_merge(
 					$caps['common'],
 					$caps['support_common'],
+					$caps['knowledgebase_common'],
 					$caps[ self::SUPPORT_MANAGER ]
 				)
 			)
@@ -1091,7 +1114,7 @@ final class UserRoles {
 	 * Bump this string when the role-to-capability map changes so existing
 	 * installs re-run {@see add_roles_and_capabilities()} on next boot.
 	 */
-	private const ROLES_PROVISION_VERSION = '2026-06-10-booking-roles';
+	private const ROLES_PROVISION_VERSION = '2026-06-25-kb-caps';
 
 	/**
 	 * Allow logged-in users with any DoubleScale role to bypass WooCommerce's

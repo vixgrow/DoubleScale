@@ -14,6 +14,7 @@ const Tickets = lazy(() => import('./tickets'));
 const Bookings = lazy(() => import('./bookings'));
 const Documents = lazy(() => import('./documents'));
 const Subscriptions = lazy(() => import('./subscriptions'));
+const KnowledgeBase = lazy(() => import('./knowledgebase'));
 
 export const SECTION_REGISTRY: Record<string, ComponentType> = {
 	calendar: Calendar,
@@ -21,6 +22,7 @@ export const SECTION_REGISTRY: Record<string, ComponentType> = {
 	bookings: Bookings,
 	documents: Documents,
 	subscriptions: Subscriptions,
+	knowledgebase: KnowledgeBase,
 };
 
 export const hasSection = (slug: string): boolean =>

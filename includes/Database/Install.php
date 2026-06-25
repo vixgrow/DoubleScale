@@ -123,6 +123,8 @@ class Install {
 			\DoubleScale\Core\UserRoles\UserRoles::add_roles_and_capabilities();
 		}
 
+		self::seed_knowledgebase_module();
+
 		self::update_doublescale_version();
 
 		delete_transient( 'doublescale_installing' );
@@ -130,6 +132,35 @@ class Install {
 
 	private static function update_doublescale_version(): void {
 		update_option( 'doublescale_version', DOUBLESCALE_VERSION );
+	}
+
+	/**
+	 * Seed the Knowledge Base module ON once so it ships discoverable.
+	 *
+	 * A registered *toggleable* module ships OFF by default (a slug absent from
+	 * `doublescale_enabled_modules` resolves to disabled), and nothing else
+	 * auto-enables it. We seed `knowledgebase => true` exactly once — guarded by
+	 * the one-shot `doublescale_kb_seed_done` flag and only when the key is
+	 * absent — so a fresh install AND an existing install upgrading past the KB
+	 * release both pick it up, while a user who later disables KB is never
+	 * silently re-enabled on the next upgrade.
+	 *
+	 * @return void
+	 */
+	private static function seed_knowledgebase_module(): void {
+		if ( get_option( 'doublescale_kb_seed_done' ) ) {
+			return;
+		}
+
+		$enabled = get_option( 'doublescale_enabled_modules', array() );
+		$enabled = is_array( $enabled ) ? $enabled : array();
+
+		if ( ! array_key_exists( 'knowledgebase', $enabled ) ) {
+			$enabled['knowledgebase'] = true;
+			update_option( 'doublescale_enabled_modules', $enabled );
+		}
+
+		update_option( 'doublescale_kb_seed_done', 1, false );
 	}
 
 	/**

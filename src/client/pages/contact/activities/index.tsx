@@ -93,6 +93,8 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     booking_cancelled: <XCircle className="w-4 h-4" />,
     booking_completed: <CheckCircleIcon />,
     booking_rejected: <Ban className="w-4 h-4" />,
+    // Knowledge Base
+    kb_article_viewed: <Eye className="w-4 h-4" />,
     // Task types
     task: <TaskDoneIcon color="#CB5301" />,
     call: <CallActivityIcon width={16} height={16} />,
@@ -127,6 +129,8 @@ const activityBadgeClass: Record<string, string> = {
         'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
     email_opened: 'border-primary/40 bg-primary/10 text-primary',
     email_clicked: 'border-primary/40 bg-primary/10 text-primary',
+    kb_article_viewed:
+        'border-indigo-500/40 bg-indigo-500/10 text-indigo-900 dark:text-indigo-100',
     sms_clicked:
         'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
     whatsapp_clicked:

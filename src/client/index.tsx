@@ -28,6 +28,12 @@ if (config.isModuleEnabled('support')) {
 	require('./pages/support');
 }
 
+// Knowledge Base module pages — same side-effect pattern.
+if (config.isModuleEnabled('knowledgebase')) {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+	require('./pages/knowledgebase');
+}
+
 // Sales module pages — always register; visibility gated by requiresModule + navbar.
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 require('./pages/sales');

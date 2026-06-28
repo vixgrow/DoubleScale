@@ -1140,6 +1140,117 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * Attach WooCommerce orders to paginated contacts for list columns.
+	 *
+	 * Matches orders by billing email and registered customer ID (same rules as
+	 * wc_get_orders with a customer email), sorts newest-first, and sets revenue.
+	 *
+	 * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $contacts Paginated contacts.
+	 * @return void
+	 */
+	private function attach_wc_orders_to_contacts( $contacts ) {
+		if (
+			! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' )
+			|| ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' )
+			|| ! class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
+			|| ! \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
+		) {
+			return;
+		}
+
+		$items = $contacts->items();
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		$emails               = array();
+		$customer_ids         = array();
+		$email_by_customer_id = array();
+
+		foreach ( $items as $contact ) {
+			if ( empty( $contact->email ) ) {
+				continue;
+			}
+			$emails[] = $contact->email;
+			$user     = get_user_by( 'email', $contact->email );
+			if ( $user ) {
+				$customer_ids[]                         = (int) $user->ID;
+				$email_by_customer_id[ (int) $user->ID ] = $contact->email;
+			}
+		}
+
+		$emails       = array_values( array_unique( $emails ) );
+		$customer_ids = array_values( array_unique( $customer_ids ) );
+
+		if ( empty( $emails ) && empty( $customer_ids ) ) {
+			return;
+		}
+
+		$orders_query = \DoubleScale\Modules\Campaigns\Models\WcOrderModel::query()
+			->orderBy( 'date_created_gmt', 'desc' );
+
+		$orders_query->where(
+			function ( $query ) use ( $emails, $customer_ids ) {
+				if ( ! empty( $emails ) ) {
+					$query->whereIn( 'billing_email', $emails );
+				}
+				if ( ! empty( $customer_ids ) ) {
+					$query->orWhereIn( 'customer_id', $customer_ids );
+				}
+			}
+		);
+
+		$all_orders      = $orders_query->get();
+		$orders_by_email = array();
+
+		foreach ( $all_orders as $order ) {
+			$assigned_email = null;
+			if ( in_array( $order->billing_email, $emails, true ) ) {
+				$assigned_email = $order->billing_email;
+			} elseif ( isset( $email_by_customer_id[ (int) $order->customer_id ] ) ) {
+				$assigned_email = $email_by_customer_id[ (int) $order->customer_id ];
+			}
+
+			if ( ! $assigned_email ) {
+				continue;
+			}
+
+			if ( ! isset( $orders_by_email[ $assigned_email ] ) ) {
+				$orders_by_email[ $assigned_email ] = array();
+			}
+
+			$orders_by_email[ $assigned_email ][ (int) $order->id ] = $order;
+		}
+
+		$currency = \get_woocommerce_currency();
+
+		foreach ( $items as $contact ) {
+			if ( empty( $contact->email ) ) {
+				continue;
+			}
+
+			$contact_orders = array_values( $orders_by_email[ $contact->email ] ?? array() );
+			usort(
+				$contact_orders,
+				function ( $a, $b ) {
+					return strtotime( (string) $b->date_created_gmt ) <=> strtotime( (string) $a->date_created_gmt );
+				}
+			);
+
+			$contact->setRelation( 'orders', collect( $contact_orders ) );
+
+			$revenue = 0.0;
+			foreach ( $contact_orders as $order ) {
+				$revenue += (float) $order->total_amount;
+			}
+
+			if ( ! empty( $contact_orders ) ) {
+				$contact->revenue = $revenue . ' ' . $currency;
+			}
+		}
+	}
+
+	/**
 	 * Get default purchase history structure
 	 *
 	 * @return array
@@ -1732,13 +1843,6 @@ class RestContactController extends RestController {
 			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$relationships[] = 'custom_fields';
 			}
-			if (
-				doublescale_is_plugin_active( 'woocommerce/woocommerce.php' )
-				&& class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
-				&& \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
-			) {
-				$relationships[] = 'orders';
-			}
 			$contacts = $query->with( $relationships );
 
 			// Apply date range filters
@@ -1817,19 +1921,7 @@ class RestContactController extends RestController {
 			// Note: paginate() returns total in the response, so filtered_total comes from pagination
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			// Compute revenue after pagination so eager-loaded orders are available.
-			if ( doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-				$currency = \get_woocommerce_currency();
-				foreach ( $contacts as $contact ) {
-					if ( $contact->relationLoaded( 'orders' ) ) {
-						$revenue = 0;
-						foreach ( $contact->orders as $order ) {
-							$revenue += $order->total_amount;
-						}
-						$contact->revenue = $revenue . ' ' . $currency;
-					}
-				}
-			}
+			$this->attach_wc_orders_to_contacts( $contacts );
 
 			$filtered_total = $contacts->total();
 

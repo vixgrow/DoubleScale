@@ -11,7 +11,7 @@ import { isEmail } from 'validator';
 /**
  * internal dependencies
  */
-import type { Contact, ContactsResponse } from '@doublescale/client';
+import type { Contact, ContactsResponse, Order } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
 import { formatDateForAPI } from '@doublescale/utils';
 import { useContactsContext } from './contexts';
@@ -304,6 +304,16 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 export const useContactOrderDetails = () => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
 
+	const getOrderDate = (order: Order): string => {
+		if (typeof order.date_created_gmt === 'string' && order.date_created_gmt.trim()) {
+			return order.date_created_gmt;
+		}
+		if (order.date?.date) {
+			return order.date.date;
+		}
+		return '';
+	};
+
 	const getContactOrderDetails = (contact: Contact) => {
 		const details = {
 			orders: 0,
@@ -321,7 +331,19 @@ export const useContactOrderDetails = () => {
 
 		details.orders = contact.orders.length;
 		details.revenue = contact.revenue || '-';
-		details.lastOrderDate = contact.orders[0].date_created_gmt;
+
+		const latestOrderDate = contact.orders.reduce((latest, order) => {
+			const orderDate = getOrderDate(order);
+			if (!orderDate) {
+				return latest;
+			}
+			if (!latest || new Date(orderDate).getTime() > new Date(latest).getTime()) {
+				return orderDate;
+			}
+			return latest;
+		}, '');
+
+		details.lastOrderDate = latestOrderDate || contact.orders[0]?.date_created_gmt || '-';
 
 		return details;
 	};

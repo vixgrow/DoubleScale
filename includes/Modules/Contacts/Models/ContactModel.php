@@ -211,7 +211,8 @@ class ContactModel extends Model {
 		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' );
+		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' )
+			->orderBy( 'date_created_gmt', 'desc' );
 	}
 
 	/**

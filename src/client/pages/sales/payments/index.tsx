@@ -17,7 +17,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog } from '@/components/sales';
+import { ConfirmDialog, isSalesRepOnly } from '@/components/sales';
 import { deletePayment, usePayments } from '@/hooks/sales';
 import { PAYMENT_MODE_LABELS } from '@/constants/sales';
 import type { PaymentListItem } from '@/types/sales';
@@ -48,6 +48,7 @@ const PaymentsList: React.FC = () => {
 	const [search, setSearch] = useState('');
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
+	const paymentReadOnly = isSalesRepOnly();
 
 	const { data, loading, error, refetch } = usePayments({
 		page,
@@ -208,13 +209,15 @@ const PaymentsList: React.FC = () => {
 													<Eye className="h-4 w-4" />
 													{__('View', 'doublescale')}
 												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-													onSelect={() => setDeleteId(payment.id)}
-												>
-													<Trash2 className="h-4 w-4" />
-													{__('Delete', 'doublescale')}
-												</DropdownMenuItem>
+												{!paymentReadOnly ? (
+													<DropdownMenuItem
+														className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
+														onSelect={() => setDeleteId(payment.id)}
+													>
+														<Trash2 className="h-4 w-4" />
+														{__('Delete', 'doublescale')}
+													</DropdownMenuItem>
+												) : null}
 											</DropdownMenuContent>
 										</DropdownMenu>
 									</td>

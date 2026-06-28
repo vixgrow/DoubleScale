@@ -162,6 +162,18 @@ class Capabilities {
 	}
 
 	/**
+	 * Whether the current user is restricted to own sales records only (Sales Rep).
+	 *
+	 * @return bool
+	 */
+	public static function is_sales_rep_only(): bool {
+		return self::current_user_can( 'doublescale_manage_own_sales' )
+			&& ! self::can_manage_all_sales()
+			&& ! self::can_approve_sales()
+			&& ! self::current_user_can( 'doublescale_manage' );
+	}
+
+	/**
 	 * @param int $user_id User id.
 	 * @return bool
 	 */

@@ -44,6 +44,9 @@ final class KnowledgebaseSettings {
 			'track_contact_views'     => true,
 			'default_visibility'      => 'public',
 			'restricted_redirect_url' => '',
+			// Body editor for the admin article editor: the bespoke Lexical editor
+			// (default) or the embedded Gutenberg block editor (opt-in MVP).
+			'editor'                  => 'lexical',
 		);
 	}
 
@@ -118,6 +121,9 @@ final class KnowledgebaseSettings {
 
 		$redirect                       = isset( $input['restricted_redirect_url'] ) ? esc_url_raw( (string) $input['restricted_redirect_url'] ) : (string) $current['restricted_redirect_url'];
 		$out['restricted_redirect_url'] = $redirect;
+
+		$editor        = isset( $input['editor'] ) ? (string) $input['editor'] : (string) $current['editor'];
+		$out['editor'] = in_array( $editor, array( 'lexical', 'blocks' ), true ) ? $editor : 'lexical';
 
 		return $out;
 	}

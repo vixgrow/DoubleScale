@@ -226,6 +226,7 @@ class AdminLoader {
 		// Enqueue WordPress media library for admin pages that need it.
 		if ( self::is_admin_page() ) {
 			wp_enqueue_media();
+			self::maybe_enqueue_block_editor_styles();
 
 			if ( ! wp_style_is( 'doublescale-admin-loader', 'registered' ) ) {
 				wp_register_style(
@@ -239,6 +240,32 @@ class AdminLoader {
 			// printed, so enqueuing there lands loader.css in the footer and causes
 			// a brief unstyled flash of the loading screen.
 			wp_enqueue_style( 'doublescale-admin-loader' );
+		}
+	}
+
+	/**
+	 * Enqueue the WordPress block-editor stylesheets for the embedded Knowledge
+	 * Base Gutenberg editor — only when that editor is the selected KB body editor.
+	 *
+	 * Scripts are wired automatically: importing `@wordpress/block-editor` et al.
+	 * makes the DependencyExtraction webpack plugin add the `wp-*` script handles
+	 * (which WordPress registers in admin) to `index.asset.php`. Stylesheets are
+	 * NOT extracted that way, so the core editor CSS is enqueued here. The
+	 * `'blocks'` gate keeps the global resets / `.components-*` rules off installs
+	 * that never opted into the block editor, limiting style-bleed risk.
+	 *
+	 * @since 1.0.0
+	 */
+	private static function maybe_enqueue_block_editor_styles(): void {
+		$settings_class = '\DoubleScale\Modules\Knowledgebase\Services\KnowledgebaseSettings';
+		if ( ! class_exists( $settings_class ) || 'blocks' !== $settings_class::get( 'editor' ) ) {
+			return;
+		}
+
+		foreach ( array( 'wp-components', 'wp-block-editor', 'wp-block-library', 'wp-edit-blocks', 'wp-format-library' ) as $handle ) {
+			if ( wp_style_is( $handle, 'registered' ) ) {
+				wp_enqueue_style( $handle );
+			}
 		}
 	}
 

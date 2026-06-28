@@ -14,6 +14,7 @@ import config from '@doublescale/config';
 import { X, Search, History } from 'lucide-react';
 
 import Editor from '@/components/booking/editor';
+import KbBlockEditor from './block-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -99,9 +100,14 @@ const ArticleEditor = () => {
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
 
-	// Bumped to force the Lexical editor to re-mount with new body content
-	// (it reads `message` only on mount), e.g. after restoring a revision.
+	// Bumped to force the body editor to re-mount with new content (both Lexical
+	// and the block editor read their seed only on mount), e.g. after restoring a
+	// revision or when content arrives from the async article load.
 	const [editorKey, setEditorKey] = useState(0);
+
+	// Which body editor to render — driven by the KB `editor` setting. Defaults to
+	// Lexical so the (slower) settings fetch can never flash an unwanted editor.
+	const [editorMode, setEditorMode] = useState<'lexical' | 'blocks'>('lexical');
 
 	// Revision history panel state.
 	const [showRevisions, setShowRevisions] = useState(false);
@@ -129,14 +135,17 @@ const ArticleEditor = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [title, isNew, slugEdited]);
 
-	// New articles inherit the "Default new-article visibility" setting as the
-	// starting position of the Members-only toggle (the author can still override).
+	// Resolve the body editor (Lexical vs. block editor) from KB settings — needed
+	// for every article. New articles additionally inherit the "Default new-article
+	// visibility" setting as the starting Members-only toggle (still overridable).
 	useEffect(() => {
-		if (!isNew) {
-			return;
-		}
 		getSettings()
-			.then((s) => setMembersOnly(s.default_visibility === 'members'))
+			.then((s) => {
+				setEditorMode(s.editor === 'blocks' ? 'blocks' : 'lexical');
+				if (isNew) {
+					setMembersOnly(s.default_visibility === 'members');
+				}
+			})
 			.catch(() => undefined);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isNew]);
@@ -644,7 +653,11 @@ const ArticleEditor = () => {
 			<div className="space-y-1.5">
 				<Label>{__('Body', 'doublescale')}</Label>
 				<div className="rounded-lg border">
-					<Editor key={editorKey} message={content} onChange={setContent} type="email" />
+					{editorMode === 'blocks' ? (
+						<KbBlockEditor key={editorKey} initialHTML={content} onChange={setContent} />
+					) : (
+						<Editor key={editorKey} message={content} onChange={setContent} type="email" />
+					)}
 				</div>
 			</div>
 		</div>

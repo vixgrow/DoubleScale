@@ -79,6 +79,7 @@ export interface KbSettings {
 	track_contact_views: boolean;
 	default_visibility: 'public' | 'members';
 	restricted_redirect_url: string;
+	editor: 'lexical' | 'blocks';
 }
 
 export const listArticles = (params: {

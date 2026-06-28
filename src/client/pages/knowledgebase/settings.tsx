@@ -218,6 +218,27 @@ const Settings = () => {
 							</SelectContent>
 						</Select>
 					</div>
+					<div className="space-y-1.5">
+						<Label>{__('Article editor', 'doublescale')}</Label>
+						<Select
+							value={settings.editor}
+							onValueChange={(value) => update('editor', value as KbSettings['editor'])}
+						>
+							<SelectTrigger className="w-56">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="lexical">{__('Rich text (default)', 'doublescale')}</SelectItem>
+								<SelectItem value="blocks">{__('Block editor (beta)', 'doublescale')}</SelectItem>
+							</SelectContent>
+						</Select>
+						<p className="text-xs text-muted-foreground">
+							{__(
+								'Block editor embeds the WordPress Gutenberg editor for article bodies. Beta — switch back to Rich text anytime.',
+								'doublescale'
+							)}
+						</p>
+					</div>
 				</CardContent>
 			</Card>
 

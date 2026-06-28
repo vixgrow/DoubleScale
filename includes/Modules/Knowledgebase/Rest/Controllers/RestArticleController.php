@@ -19,6 +19,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Knowledgebase\PostTypes\KnowledgebasePostType;
 use DoubleScale\Modules\Knowledgebase\Repositories\ArticleRepository;
 use DoubleScale\Modules\Knowledgebase\Services\ArticleService;
+use DoubleScale\Modules\Knowledgebase\Services\KnowledgebaseSettings;
 use WP_Error;
 use WP_Post;
 use WP_REST_Request;
@@ -267,7 +268,7 @@ class RestArticleController extends RestController {
 			return $id;
 		}
 
-		$this->apply_relations( (int) $id, $request );
+		$this->apply_relations( (int) $id, $request, true );
 
 		return new WP_REST_Response( $this->service->to_full( $this->articles->find( (int) $id ), array( 'include_related' => true ) ), 201 );
 	}
@@ -479,17 +480,32 @@ class RestArticleController extends RestController {
 	/**
 	 * Apply taxonomy terms, members-only flag, related IDs, and featured image.
 	 *
-	 * @param int             $id      Article ID.
-	 * @param WP_REST_Request $request Request.
+	 * @param int             $id        Article ID.
+	 * @param WP_REST_Request $request   Request.
+	 * @param bool            $is_create Whether this is a create (applies the default-group fallback).
 	 * @return void
 	 */
-	private function apply_relations( int $id, WP_REST_Request $request ): void {
+	private function apply_relations( int $id, WP_REST_Request $request, bool $is_create = false ): void {
 		$group_ids = $request->get_param( 'group_ids' );
 		$tags      = $request->get_param( 'tags' );
-		if ( is_array( $group_ids ) || is_array( $tags ) ) {
+
+		$resolved_groups = is_array( $group_ids )
+			? array_values( array_filter( array_map( 'intval', $group_ids ) ) )
+			: null;
+
+		// On create, an article whose author picked no group lands in the
+		// configured default group (when one is set and still exists).
+		if ( $is_create && empty( $resolved_groups ) ) {
+			$default_group = (int) KnowledgebaseSettings::get( 'default_group' );
+			if ( $default_group > 0 && term_exists( $default_group, KnowledgebasePostType::TAXONOMY_GROUP ) ) {
+				$resolved_groups = array( $default_group );
+			}
+		}
+
+		if ( null !== $resolved_groups || is_array( $tags ) ) {
 			$this->articles->set_terms(
 				$id,
-				is_array( $group_ids ) ? array_map( 'intval', $group_ids ) : $this->existing_group_ids( $id ),
+				null !== $resolved_groups ? $resolved_groups : $this->existing_group_ids( $id ),
 				is_array( $tags ) ? $tags : $this->existing_tags( $id )
 			);
 		}

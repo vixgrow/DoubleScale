@@ -61,6 +61,7 @@ import {
 } from '@/components/support';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import KbArticleInserter from './kb-article-inserter';
 import {
 	TICKET_STATUSES,
 	TICKET_PRIORITIES,
@@ -1324,6 +1325,24 @@ export const TicketDetailModal: FC<TicketDetailModalProps> = ({
 																		'doublescale'
 																	)
 														}
+													/>
+												</div>
+												<div className="mt-2">
+													<KbArticleInserter
+														subject={ticket?.title}
+														onInsert={(article) => {
+															const title = (
+																article.title ||
+																__('Untitled article', 'doublescale')
+															)
+																.replace(/&/g, '&amp;')
+																.replace(/</g, '&lt;')
+																.replace(/>/g, '&gt;');
+															const link = `<p><a href="${article.url}">${title}</a></p>`;
+															setContent((prev) =>
+																prev && prev.trim() ? `${prev}${link}` : link
+															);
+														}}
 													/>
 												</div>
 												{tab === 'reply' &&

@@ -57,6 +57,16 @@ final class KnowledgebasePostType {
 	public const META_MEMBERS_ONLY = '_doublescale_kb_members_only';
 
 	/**
+	 * Post meta: "Was this helpful?" — yes counter.
+	 */
+	public const META_HELPFUL = '_doublescale_kb_helpful';
+
+	/**
+	 * Post meta: "Was this helpful?" — no counter.
+	 */
+	public const META_NOT_HELPFUL = '_doublescale_kb_not_helpful';
+
+	/**
 	 * Term meta: hex colour for a group.
 	 */
 	public const TERM_META_COLOR = '_doublescale_kb_color';
@@ -216,6 +226,22 @@ final class KnowledgebasePostType {
 				},
 			)
 		);
+
+		foreach ( array( self::META_HELPFUL, self::META_NOT_HELPFUL ) as $counter_key ) {
+			register_post_meta(
+				self::POST_TYPE,
+				$counter_key,
+				array(
+					'type'          => 'integer',
+					'single'        => true,
+					'default'       => 0,
+					'show_in_rest'  => false,
+					'auth_callback' => static function () {
+						return current_user_can( 'doublescale_manage_knowledgebase' );
+					},
+				)
+			);
+		}
 	}
 
 	/**

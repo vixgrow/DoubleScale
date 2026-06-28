@@ -26,6 +26,9 @@ interface KbArticleFull extends KbArticleSummary {
 	content: string;
 	breadcrumbs: Array<{ label: string; url: string }>;
 	tags: string[];
+	feedback_enabled?: boolean;
+	helpful?: number;
+	not_helpful?: number;
 }
 
 const KB_BASE = '/doublescale/v1/knowledgebase/public';
@@ -37,6 +40,53 @@ const fetchArticles = (search: string): Promise<{ data: KbArticleSummary[] }> =>
 
 const fetchArticle = (slug: string): Promise<KbArticleFull> =>
 	apiFetch<KbArticleFull>({ path: `${KB_BASE}/articles/${slug}` });
+
+const submitFeedback = (slug: string, helpful: boolean): Promise<unknown> =>
+	apiFetch({
+		path: `${KB_BASE}/articles/${slug}/feedback`,
+		method: 'POST',
+		data: { helpful },
+	});
+
+/** "Was this helpful?" control shown under a portal article when enabled. */
+const FeedbackControl = ({ slug }: { slug: string }) => {
+	const [voted, setVoted] = useState(false);
+
+	const vote = (helpful: boolean) => {
+		setVoted(true);
+		submitFeedback(slug, helpful).catch(() => undefined);
+	};
+
+	if (voted) {
+		return (
+			<p className="text-sm text-muted-foreground">
+				{__('Thanks for your feedback!', 'doublescale')}
+			</p>
+		);
+	}
+
+	return (
+		<div className="flex items-center gap-3 border-t border-border pt-4">
+			<span className="text-sm text-foreground">
+				{__('Was this article helpful?', 'doublescale')}
+			</span>
+			<button
+				type="button"
+				onClick={() => vote(true)}
+				className="rounded border border-border px-3 py-1 text-sm hover:border-primary"
+			>
+				{__('👍 Yes', 'doublescale')}
+			</button>
+			<button
+				type="button"
+				onClick={() => vote(false)}
+				className="rounded border border-border px-3 py-1 text-sm hover:border-primary"
+			>
+				{__('👎 No', 'doublescale')}
+			</button>
+		</div>
+	);
+};
 
 const ArticleReader = ({
 	slug,
@@ -76,6 +126,7 @@ const ArticleReader = ({
 				className="doublescale-kb-article prose max-w-none"
 				dangerouslySetInnerHTML={{ __html: data.content }}
 			/>
+			{data.feedback_enabled && <FeedbackControl slug={data.slug} />}
 		</div>
 	);
 };

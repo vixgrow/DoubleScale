@@ -71,6 +71,37 @@ class ArticleService {
 	}
 
 	/**
+	 * Record a "Was this helpful?" vote on an article (postmeta counters).
+	 *
+	 * A minimal, table-free helpful/not-helpful tally — the phase-2 daily
+	 * analytics aggregate is a separate, deferred concern.
+	 *
+	 * @param int  $post_id Article ID.
+	 * @param bool $helpful Whether the reader found it helpful.
+	 * @return array{helpful:int, not_helpful:int} The updated counts.
+	 */
+	public function record_feedback( int $post_id, bool $helpful ): array {
+		$key   = $helpful ? KnowledgebasePostType::META_HELPFUL : KnowledgebasePostType::META_NOT_HELPFUL;
+		$count = (int) get_post_meta( $post_id, $key, true ) + 1;
+		update_post_meta( $post_id, $key, $count );
+
+		return $this->feedback_counts( $post_id );
+	}
+
+	/**
+	 * Current helpful / not-helpful counts for an article.
+	 *
+	 * @param int $post_id Article ID.
+	 * @return array{helpful:int, not_helpful:int}
+	 */
+	public function feedback_counts( int $post_id ): array {
+		return array(
+			'helpful'     => (int) get_post_meta( $post_id, KnowledgebasePostType::META_HELPFUL, true ),
+			'not_helpful' => (int) get_post_meta( $post_id, KnowledgebasePostType::META_NOT_HELPFUL, true ),
+		);
+	}
+
+	/**
 	 * Duplicate an article as a fresh draft (title/body/excerpt/terms copied).
 	 *
 	 * @param WP_Post $source Source article.
@@ -277,6 +308,20 @@ class ArticleService {
 
 		$tags            = wp_get_post_terms( $post->ID, KnowledgebasePostType::TAXONOMY_TAG, array( 'fields' => 'names' ) );
 		$payload['tags'] = is_wp_error( $tags ) ? array() : array_values( $tags );
+
+		$payload['featured_image']     = (int) get_post_thumbnail_id( $post->ID );
+		$payload['featured_image_url'] = (string) get_the_post_thumbnail_url( $post->ID, 'large' );
+
+		// Raw, author-curated related IDs (distinct from the resolved `related`
+		// list below, which also folds in the same-group fallback) — the editor
+		// pre-populates its related-picker from these.
+		$related_ids            = (array) get_post_meta( $post->ID, KnowledgebasePostType::META_RELATED, true );
+		$payload['related_ids'] = array_values( array_filter( array_map( 'intval', $related_ids ) ) );
+
+		$payload['feedback_enabled'] = (bool) KnowledgebaseSettings::get( 'enable_feedback' );
+		$counts                      = $this->feedback_counts( (int) $post->ID );
+		$payload['helpful']          = $counts['helpful'];
+		$payload['not_helpful']      = $counts['not_helpful'];
 
 		if ( ! empty( $opts['include_related'] ) ) {
 			$limit              = isset( $opts['related_limit'] ) ? (int) $opts['related_limit'] : 4;

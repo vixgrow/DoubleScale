@@ -136,6 +136,12 @@ final class Module extends AbstractModule {
 		// Public SEO shortcode.
 		( new KnowledgebaseShortcode() )->register();
 
+		// "Was this helpful?" control on the themed single-article page. The CPT
+		// serves its own template, so the control is appended via the_content +
+		// a tiny enqueued script rather than a React mount.
+		add_filter( 'the_content', array( $this, 'append_feedback_control' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_feedback_assets' ) );
+
 		// AIAssistant knowledge-source wiring (no-op if the AI plugin is absent).
 		( new KnowledgebaseAiProvider() )->register();
 
@@ -191,5 +197,103 @@ final class Module extends AbstractModule {
 		$config['knowledgebase_rest_url'] = esc_url_raw( rest_url( 'doublescale/v1/knowledgebase/public' ) );
 
 		return $config;
+	}
+
+	/**
+	 * Append the "Was this helpful?" control to the themed single-article page.
+	 *
+	 * Visibility is already enforced upstream by {@see FrontendGuard} on
+	 * `template_redirect`, so reaching the loop body means the viewer is cleared.
+	 *
+	 * @param string $content The post content.
+	 * @return string
+	 */
+	public function append_feedback_control( string $content ): string {
+		if ( is_admin()
+			|| ! is_singular( KnowledgebasePostType::POST_TYPE )
+			|| ! in_the_loop()
+			|| ! is_main_query()
+			|| ! KnowledgebaseSettings::get( 'enable_feedback' ) ) {
+			return $content;
+		}
+
+		$post_id     = get_the_ID();
+		$helpful     = (int) get_post_meta( $post_id, KnowledgebasePostType::META_HELPFUL, true );
+		$not_helpful = (int) get_post_meta( $post_id, KnowledgebasePostType::META_NOT_HELPFUL, true );
+		$slug        = get_post_field( 'post_name', $post_id );
+
+		ob_start();
+		?>
+		<div class="doublescale-kb-feedback" data-kb-slug="<?php echo esc_attr( $slug ); ?>">
+			<p class="doublescale-kb-feedback__prompt"><?php esc_html_e( 'Was this article helpful?', 'doublescale' ); ?></p>
+			<div class="doublescale-kb-feedback__actions">
+				<button type="button" class="doublescale-kb-feedback__btn" data-kb-vote="1">
+					<?php
+					/* translators: %d: number of readers who found the article helpful. */
+					echo esc_html( sprintf( __( '👍 Yes (%d)', 'doublescale' ), $helpful ) );
+					?>
+				</button>
+				<button type="button" class="doublescale-kb-feedback__btn" data-kb-vote="0">
+					<?php
+					/* translators: %d: number of readers who did not find the article helpful. */
+					echo esc_html( sprintf( __( '👎 No (%d)', 'doublescale' ), $not_helpful ) );
+					?>
+				</button>
+			</div>
+			<p class="doublescale-kb-feedback__thanks" hidden><?php esc_html_e( 'Thanks for your feedback!', 'doublescale' ); ?></p>
+		</div>
+		<?php
+		return $content . (string) ob_get_clean();
+	}
+
+	/**
+	 * Enqueue the tiny feedback script on single-article pages (feedback on only).
+	 *
+	 * @return void
+	 */
+	public function enqueue_feedback_assets(): void {
+		if ( ! is_singular( KnowledgebasePostType::POST_TYPE ) || ! KnowledgebaseSettings::get( 'enable_feedback' ) ) {
+			return;
+		}
+
+		wp_register_script( 'doublescale-kb-feedback', '', array(), DOUBLESCALE_VERSION, true );
+		wp_enqueue_script( 'doublescale-kb-feedback' );
+
+		$config = wp_json_encode(
+			array(
+				'root'  => esc_url_raw( rest_url() ),
+				'nonce' => is_user_logged_in() ? wp_create_nonce( 'wp_rest' ) : '',
+			)
+		);
+
+		$js = <<<JS
+window.DoubleScaleKbFeedback = {$config};
+(function () {
+	var box = document.querySelector('.doublescale-kb-feedback');
+	if (!box) { return; }
+	var slug = box.getAttribute('data-kb-slug');
+	var cfg = window.DoubleScaleKbFeedback || {};
+	box.addEventListener('click', function (e) {
+		var btn = e.target.closest('[data-kb-vote]');
+		if (!btn) { return; }
+		var helpful = btn.getAttribute('data-kb-vote') === '1';
+		box.querySelectorAll('[data-kb-vote]').forEach(function (b) { b.disabled = true; });
+		var headers = { 'Content-Type': 'application/json' };
+		if (cfg.nonce) { headers['X-WP-Nonce'] = cfg.nonce; }
+		fetch(cfg.root + 'doublescale/v1/knowledgebase/public/articles/' + encodeURIComponent(slug) + '/feedback', {
+			method: 'POST', headers: headers, credentials: 'same-origin',
+			body: JSON.stringify({ helpful: helpful })
+		}).then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+			.then(function () {
+				var thanks = box.querySelector('.doublescale-kb-feedback__thanks');
+				if (thanks) { thanks.hidden = false; }
+			}).catch(function () {
+				box.querySelectorAll('[data-kb-vote]').forEach(function (b) { b.disabled = false; });
+			});
+	});
+})();
+JS;
+
+		wp_add_inline_script( 'doublescale-kb-feedback', $js );
 	}
 }

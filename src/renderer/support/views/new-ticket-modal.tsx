@@ -31,6 +31,7 @@ import {
 	uploadPortalAttachmentTemp,
 	usePortalMailboxes,
 } from '../api';
+import { useKbDeflection, KbDeflectionSuggestions } from '../kb-deflection';
 import {
 	PRIORITY_LABELS,
 	TICKET_PRIORITIES,
@@ -74,6 +75,10 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const [pendingAttachments, setPendingAttachments] = useState<
 		PendingAttachment[]
 	>([]);
+
+	// Live KB deflection: suggest self-serve answers as the customer types the
+	// subject. Defensive — yields [] (renders nothing) if the KB module is off.
+	const kbSuggestions = useKbDeflection(title);
 
 	const handleAttachmentSelect = async (file: File) => {
 		setUploading(true);
@@ -200,6 +205,8 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 							)}
 						/>
 					</div>
+
+					<KbDeflectionSuggestions articles={kbSuggestions} />
 
 					{showMailboxSelect && (
 						<div>

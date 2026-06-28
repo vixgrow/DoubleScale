@@ -7,9 +7,10 @@
  * of the admin (Inbox, Templates, …) rather than hand-rolled HTML.
  */
 
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
+import { X, Search } from 'lucide-react';
 
 import Editor from '@/components/booking/editor';
 import { Button } from '@/components/ui/button';
@@ -30,10 +31,16 @@ import {
 	createArticle,
 	getArticle,
 	getSettings,
+	listArticles,
 	listGroups,
 	updateArticle,
+	type KbArticleSummary,
 	type KbGroup,
 } from './api';
+
+/** Minimal WP media frame typing (wp.media is enqueued by AdminLoader). */
+type MediaFrame = { on: (e: string, cb: () => void) => void; open: () => void; state: () => { get: (k: string) => { first: () => { toJSON: () => { id: number; url: string } } } } };
+type WpMedia = (opts: Record<string, unknown>) => MediaFrame;
 
 /** Visibility ranks — higher is more restrictive (mirrors PHP Services\Visibility). */
 const VIS_RANK: Record<string, number> = { public: 0, members: 1, internal: 2 };
@@ -62,10 +69,18 @@ const ArticleEditor = () => {
 	const [groupId, setGroupId] = useState(0);
 	const [tags, setTags] = useState('');
 	const [membersOnly, setMembersOnly] = useState(false);
+	const [related, setRelated] = useState<Array<{ id: number; title: string }>>([]);
+	const [featuredImageId, setFeaturedImageId] = useState(0);
+	const [featuredImageUrl, setFeaturedImageUrl] = useState('');
 	const [groups, setGroups] = useState<KbGroup[]>([]);
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
+
+	// Related-article picker search state.
+	const [relQuery, setRelQuery] = useState('');
+	const [relResults, setRelResults] = useState<KbArticleSummary[]>([]);
+	const relRequestId = useRef(0);
 
 	useEffect(() => {
 		listGroups()
@@ -137,11 +152,76 @@ const ArticleEditor = () => {
 				setGroupId(a.group_ids[0] || 0);
 				setTags((a.tags || []).join(', '));
 				setMembersOnly(a.members_only);
+				setFeaturedImageId(a.featured_image || 0);
+				setFeaturedImageUrl(a.featured_image_url || '');
+				const titleById: Record<number, string> = {};
+				(a.related || []).forEach((r) => {
+					titleById[r.id] = r.title;
+				});
+				setRelated((a.related_ids || []).map((rid) => ({ id: rid, title: titleById[rid] || `#${rid}` })));
 			})
 			.catch((e) => setError((e as { message?: string })?.message || __('Failed to load.', 'doublescale')))
 			.finally(() => setLoading(false));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
+
+	// Debounced search for the related-article picker (published articles only).
+	useEffect(() => {
+		const q = relQuery.trim();
+		if (q.length < 2) {
+			setRelResults([]);
+			return;
+		}
+		const reqId = ++relRequestId.current;
+		const timer = setTimeout(() => {
+			listArticles({ search: q, status: 'publish' })
+				.then((res) => {
+					if (reqId === relRequestId.current) {
+						setRelResults(res.data || []);
+					}
+				})
+				.catch(() => {
+					if (reqId === relRequestId.current) {
+						setRelResults([]);
+					}
+				});
+		}, 300);
+		return () => clearTimeout(timer);
+	}, [relQuery]);
+
+	const addRelated = (a: KbArticleSummary) => {
+		setRelated((prev) => (prev.some((r) => r.id === a.id) ? prev : [...prev, { id: a.id, title: a.title }]));
+		setRelQuery('');
+		setRelResults([]);
+	};
+
+	const removeRelated = (rid: number) =>
+		setRelated((prev) => prev.filter((r) => r.id !== rid));
+
+	// Open the WordPress media frame to choose a featured image (attachment ID).
+	const openMediaFrame = () => {
+		const wp = (window as { wp?: { media?: WpMedia } }).wp;
+		if (!wp?.media) {
+			return;
+		}
+		const frame = wp.media({
+			title: __('Select featured image', 'doublescale'),
+			button: { text: __('Use this image', 'doublescale') },
+			multiple: false,
+			library: { type: 'image' },
+		});
+		frame.on('select', () => {
+			const attachment = frame.state().get('selection').first().toJSON();
+			setFeaturedImageId(attachment.id);
+			setFeaturedImageUrl(attachment.url);
+		});
+		frame.open();
+	};
+
+	const currentId = isNew ? 0 : Number(id);
+	const relCandidates = relResults.filter(
+		(a) => a.id !== currentId && !related.some((r) => r.id === a.id)
+	);
 
 	const save = async () => {
 		setSaving(true);
@@ -157,6 +237,8 @@ const ArticleEditor = () => {
 				.map((t) => t.trim())
 				.filter(Boolean),
 			members_only: membersOnly,
+			related: related.map((r) => r.id),
+			featured_image_id: featuredImageId,
 		};
 		try {
 			if (isNew) {
@@ -243,6 +325,97 @@ const ArticleEditor = () => {
 					value={tags}
 					onChange={(e) => setTags(e.target.value)}
 				/>
+			</div>
+
+			<div className="space-y-1.5">
+				<Label>{__('Featured image', 'doublescale')}</Label>
+				{featuredImageUrl ? (
+					<div className="flex items-center gap-3">
+						<img
+							src={featuredImageUrl}
+							alt=""
+							className="h-16 w-16 rounded border object-cover"
+						/>
+						<Button type="button" variant="outline" size="sm" onClick={openMediaFrame}>
+							{__('Replace', 'doublescale')}
+						</Button>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() => {
+								setFeaturedImageId(0);
+								setFeaturedImageUrl('');
+							}}
+						>
+							{__('Remove', 'doublescale')}
+						</Button>
+					</div>
+				) : (
+					<Button type="button" variant="outline" size="sm" onClick={openMediaFrame}>
+						{__('Set featured image', 'doublescale')}
+					</Button>
+				)}
+			</div>
+
+			<div className="space-y-1.5">
+				<Label htmlFor="kb-related">{__('Related articles', 'doublescale')}</Label>
+				{related.length > 0 && (
+					<div className="flex flex-wrap gap-1.5">
+						{related.map((r) => (
+							<span
+								key={r.id}
+								className="inline-flex items-center gap-1 rounded bg-muted px-2 py-1 text-xs"
+							>
+								{r.title}
+								<button
+									type="button"
+									onClick={() => removeRelated(r.id)}
+									className="text-muted-foreground hover:text-foreground"
+									aria-label={__('Remove related article', 'doublescale')}
+								>
+									<X width={12} height={12} />
+								</button>
+							</span>
+						))}
+					</div>
+				)}
+				<div className="relative">
+					<Search
+						width={14}
+						height={14}
+						className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+					/>
+					<Input
+						id="kb-related"
+						type="text"
+						value={relQuery}
+						onChange={(e) => setRelQuery(e.target.value)}
+						placeholder={__('Search articles to link…', 'doublescale')}
+						className="pl-7"
+					/>
+					{relCandidates.length > 0 && (
+						<div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover p-1 shadow-lg">
+							<ul className="max-h-48 overflow-y-auto">
+								{relCandidates.map((a) => (
+									<li key={a.id}>
+										<button
+											type="button"
+											onClick={() => addRelated(a)}
+											className="block w-full truncate rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+											title={a.title}
+										>
+											{a.title || __('(untitled)', 'doublescale')}
+										</button>
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</div>
+				<p className="text-xs text-muted-foreground">
+					{__('Leave empty to auto-suggest same-group articles.', 'doublescale')}
+				</p>
 			</div>
 
 			<div className="flex items-center gap-3">

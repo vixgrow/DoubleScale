@@ -33,6 +33,24 @@ export interface KbArticleFull extends KbArticleSummary {
 	tags: string[];
 	group_ids: number[];
 	related?: KbArticleSummary[];
+	related_ids?: number[];
+	featured_image?: number;
+	featured_image_url?: string;
+	feedback_enabled?: boolean;
+	helpful?: number;
+	not_helpful?: number;
+}
+
+export interface KbArticleInput {
+	title?: string;
+	content?: string;
+	excerpt?: string;
+	status?: 'publish' | 'draft' | 'private';
+	group_ids?: number[];
+	tags?: string[];
+	members_only?: boolean;
+	related?: number[];
+	featured_image_id?: number;
 }
 
 export interface KbGroup {
@@ -70,15 +88,10 @@ export const listArticles = (params: {
 export const getArticle = (id: number): Promise<KbArticleFull> =>
 	apiFetch({ path: `${BASE}/articles/${id}` });
 
-export const createArticle = (
-	data: Partial<KbArticleFull> & { group_ids?: number[]; tags?: string[]; members_only?: boolean }
-): Promise<KbArticleFull> =>
+export const createArticle = (data: KbArticleInput): Promise<KbArticleFull> =>
 	apiFetch({ path: `${BASE}/articles`, method: 'POST', data });
 
-export const updateArticle = (
-	id: number,
-	data: Partial<KbArticleFull> & { group_ids?: number[]; tags?: string[]; members_only?: boolean }
-): Promise<KbArticleFull> =>
+export const updateArticle = (id: number, data: KbArticleInput): Promise<KbArticleFull> =>
 	apiFetch({ path: `${BASE}/articles/${id}`, method: 'PUT', data });
 
 export const deleteArticle = (id: number): Promise<{ deleted: boolean }> =>

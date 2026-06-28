@@ -106,6 +106,18 @@ class RestPublicArticleController extends RestController {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/articles/(?P<slug>[a-z0-9\-]+)/feedback',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'feedback' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
 	}
 
 	/**
@@ -204,6 +216,40 @@ class RestPublicArticleController extends RestController {
 		);
 
 		return new WP_REST_Response( $this->service->to_full( $post, $opts ), 200 );
+	}
+
+	/**
+	 * POST /public/articles/{slug}/feedback — record a "Was this helpful?" vote.
+	 *
+	 * Gated on the `enable_feedback` setting, rate-limited, and visibility-checked
+	 * so a guest can only vote on an article they may actually read.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function feedback( $request ) {
+		$gate = $this->guard_request();
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
+		if ( ! KnowledgebaseSettings::get( 'enable_feedback' ) ) {
+			return new WP_Error( 'feedback_disabled', __( 'Article feedback is disabled.', 'doublescale' ), array( 'status' => 403 ) );
+		}
+
+		$post = $this->articles->find_by_slug( (string) $request['slug'], array( 'publish' ) );
+		if ( ! $post instanceof WP_Post ) {
+			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! Visibility::viewer_can_see( Visibility::effective_visibility( $post ) ) ) {
+			return new WP_Error( 'not_authorized', __( 'You are not allowed to view this article.', 'doublescale' ), array( 'status' => 403 ) );
+		}
+
+		$helpful = filter_var( $request->get_param( 'helpful' ), FILTER_VALIDATE_BOOLEAN );
+		$counts  = $this->service->record_feedback( (int) $post->ID, $helpful );
+
+		return new WP_REST_Response( $counts, 200 );
 	}
 
 	/**

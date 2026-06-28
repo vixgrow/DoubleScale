@@ -23,6 +23,7 @@ use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
+use DoubleScale\Core\Validators\PhoneValidator;
 
 /**
  * ContactModel class
@@ -112,7 +113,7 @@ class ContactModel extends Model {
 		// Use WordPress is_email() in save() instead of Illuminate's "email" rule: the scoped
 		// Egulias RFC lexer triggers PCRE errors on PHP 8.2+ (preg_split unknown \p property),
 		// which makes every address fail validation.
-		'email'          => 'required',
+		'email'          => 'nullable',
 		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
 		'whatsapp_phone' => 'nullable|regex:/^\+[1-9][0-9]{0,14}$/',
 		'zip'            => 'nullable|numeric',
@@ -126,11 +127,12 @@ class ContactModel extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required'       => 'Contact email field is required.',
-		'email.email'          => 'Invalid email address.',
-		'phone.regex'          => 'Invalid phone number.',
-		'whatsapp_phone.regex' => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
-		'zip.numeric'          => 'Invalid zip code.',
+		'email.required'            => 'Contact email field is required.',
+		'email.email'               => 'Invalid email address.',
+		'contact.identifier_required' => 'Contact must have an email address or phone number.',
+		'phone.regex'               => 'Invalid phone number.',
+		'whatsapp_phone.regex'      => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'zip.numeric'               => 'Invalid zip code.',
 	);
 
 	/**
@@ -488,7 +490,107 @@ class ContactModel extends Model {
 	 * @return ContactModel
 	 */
 	public static function get_by_email( $email ) {
+		$email = self::normalize_email( $email );
+		if ( null === $email ) {
+			return null;
+		}
+
 		return self::where( 'email', $email )->first();
+	}
+
+	/**
+	 * Normalize an email value for storage and lookup.
+	 *
+	 * @param mixed $email Raw email value.
+	 * @return string|null Trimmed email, or null when empty.
+	 */
+	public static function normalize_email( $email ) {
+		if ( ! is_string( $email ) ) {
+			return null;
+		}
+
+		$email = trim( $email );
+		return '' === $email ? null : $email;
+	}
+
+	/**
+	 * Find an existing contact by email, phone, or WhatsApp number.
+	 *
+	 * @param array<string, mixed> $data Contact attributes.
+	 * @param int|null             $exclude_id Contact ID to exclude (updates).
+	 *
+	 * @return ContactModel|null
+	 */
+	public static function find_by_identifiers( array $data, $exclude_id = null ) {
+		$email = self::normalize_email( $data['email'] ?? null );
+		if ( null !== $email ) {
+			$query = self::where( 'email', $email );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			$contact = $query->first();
+			if ( $contact ) {
+				return $contact;
+			}
+		}
+
+		$phone = self::normalize_phone_field( $data['phone'] ?? null );
+		if ( '' !== $phone ) {
+			$query = self::where( 'phone', $phone );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			$contact = $query->first();
+			if ( $contact ) {
+				return $contact;
+			}
+		}
+
+		$whatsapp = self::normalize_whatsapp_field( $data['whatsapp_phone'] ?? null );
+		if ( '' !== $whatsapp ) {
+			$query = self::where( 'whatsapp_phone', $whatsapp );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			return $query->first();
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param mixed $phone Raw phone value.
+	 * @return string Normalized phone or empty string.
+	 */
+	public static function normalize_phone_field( $phone ) {
+		return PhoneValidator::normalize_loose( $phone );
+	}
+
+	/**
+	 * @param mixed        $phone        Raw WhatsApp value.
+	 * @param string|null  $country_hint Optional country hint for E.164 resolution.
+	 * @return string Normalized E.164 value or empty string.
+	 */
+	public static function normalize_whatsapp_field( $phone, $country_hint = null ) {
+		$whatsapp = PhoneValidator::to_e164( $phone, (string) ( $country_hint ?? '' ) );
+		return null === $whatsapp ? '' : $whatsapp;
+	}
+
+	/**
+	 * Whether the contact has at least one usable identifier (email or phone).
+	 *
+	 * @param string|null $email
+	 * @param string      $phone
+	 * @param string      $whatsapp_phone
+	 * @return bool
+	 */
+	public static function has_identifier( $email, $phone = '', $whatsapp_phone = '' ) {
+		if ( null !== self::normalize_email( $email ) ) {
+			return true;
+		}
+
+		return '' !== self::normalize_phone_field( $phone )
+			|| '' !== self::normalize_whatsapp_field( $whatsapp_phone );
 	}
 
 	/**
@@ -834,12 +936,26 @@ class ContactModel extends Model {
 
 		if ( ! empty( $this->rules ) ) {
 			$this->trim();
-			$email = $this->attributes['email'] ?? '';
-			if ( ! is_string( $email ) || '' === $email ) {
-				throw new \Exception( esc_html( $this->messages['email.required'] ) );
+			$this->normalize_contact_identifiers();
+
+			$email          = self::normalize_email( $this->resolve_identifier_value( 'email' ) );
+			$phone          = (string) $this->resolve_identifier_value( 'phone' );
+			$whatsapp_phone = (string) $this->resolve_identifier_value( 'whatsapp_phone' );
+
+			if ( ! self::has_identifier( $email, $phone, $whatsapp_phone ) ) {
+				throw new \Exception( esc_html( $this->messages['contact.identifier_required'] ) );
 			}
-			if ( ! is_email( $email ) ) {
+
+			if ( null !== $email && ! is_email( $email ) ) {
 				throw new \Exception( esc_html( $this->messages['email.email'] ) );
+			}
+
+			if ( '' !== $phone && ! preg_match( '/^\+?[0-9]+$/', $phone ) ) {
+				throw new \Exception( esc_html( $this->messages['phone.regex'] ) );
+			}
+
+			if ( '' !== $whatsapp_phone && ! preg_match( '/^\+[1-9][0-9]{0,14}$/', $whatsapp_phone ) ) {
+				throw new \Exception( esc_html( $this->messages['whatsapp_phone.regex'] ) );
 			}
 		}
 
@@ -872,18 +988,100 @@ class ContactModel extends Model {
 	 * @return ContactModel
 	 */
 	public static function createOrUpdate( $data ) {
-		$contact = self::where( 'email', $data['email'] ?? '' )->first();
+		$normalized = self::normalize_contact_data( $data );
+		$contact    = self::find_by_identifiers( $normalized );
 
 		if ( ! $contact ) {
 			// Use create() to ensure events fire
-			return self::create( $data );
+			return self::create( $normalized );
 		}
 
 		// For updates, use fill + save to trigger saved event
-		$contact->fill( $data );
+		$contact->fill( $normalized );
 		$contact->save();
 
 		return $contact;
+	}
+
+	/**
+	 * Normalize identifier fields before create/update.
+	 *
+	 * @param array<string, mixed> $data Raw contact data.
+	 * @return array<string, mixed>
+	 */
+	public static function normalize_contact_data( array $data ) {
+		if ( array_key_exists( 'email', $data ) ) {
+			$data['email'] = self::normalize_email( $data['email'] );
+		}
+
+		if ( array_key_exists( 'phone', $data ) ) {
+			$phone = self::normalize_phone_field( $data['phone'] );
+			if ( '' === $phone ) {
+				unset( $data['phone'] );
+			} else {
+				$data['phone'] = $phone;
+			}
+		}
+
+		if ( array_key_exists( 'whatsapp_phone', $data ) ) {
+			$country_hint = isset( $data['country'] ) ? (string) $data['country'] : '';
+			$whatsapp     = self::normalize_whatsapp_field( $data['whatsapp_phone'], $country_hint );
+			if ( '' === $whatsapp ) {
+				unset( $data['whatsapp_phone'] );
+			} else {
+				$data['whatsapp_phone'] = $whatsapp;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Normalize identifier columns on the current model instance.
+	 *
+	 * @return void
+	 */
+	private function normalize_contact_identifiers() {
+		if ( array_key_exists( 'email', $this->attributes ) ) {
+			$this->attributes['email'] = self::normalize_email( $this->attributes['email'] );
+		}
+
+		if ( array_key_exists( 'phone', $this->attributes ) ) {
+			$phone = self::normalize_phone_field( $this->attributes['phone'] );
+			if ( '' === $phone ) {
+				$this->attributes['phone'] = null;
+			} else {
+				$this->attributes['phone'] = $phone;
+			}
+		}
+
+		if ( array_key_exists( 'whatsapp_phone', $this->attributes ) ) {
+			$country_hint = isset( $this->attributes['country'] ) ? (string) $this->attributes['country'] : '';
+			$whatsapp     = self::normalize_whatsapp_field( $this->attributes['whatsapp_phone'], $country_hint );
+			if ( '' === $whatsapp ) {
+				$this->attributes['whatsapp_phone'] = null;
+			} else {
+				$this->attributes['whatsapp_phone'] = $whatsapp;
+			}
+		}
+	}
+
+	/**
+	 * Resolve an identifier field from pending attributes or the stored record.
+	 *
+	 * @param string $field Field name.
+	 * @return mixed
+	 */
+	private function resolve_identifier_value( $field ) {
+		if ( array_key_exists( $field, $this->attributes ) ) {
+			return $this->attributes[ $field ];
+		}
+
+		if ( $this->exists && isset( $this->original[ $field ] ) ) {
+			return $this->original[ $field ];
+		}
+
+		return '';
 	}
 
 	/**

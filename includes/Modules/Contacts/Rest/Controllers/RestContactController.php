@@ -608,9 +608,8 @@ class RestContactController extends RestController {
 					),
 				),
 				'email'           => array(
-					'description'  => __( 'Email of the contact.', 'doublescale' ),
+					'description'  => __( 'Email of the contact (optional when a phone number is provided).', 'doublescale' ),
 					'type'         => 'string',
-					'required'     => true,
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_email',
 					),
@@ -1967,17 +1966,27 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response $response The response data.
 	 */
 	public function create_item( $request ) {
-		$email = $request->get_param( 'email' );
-
-		// Check if email already exists
-		$contact = ContactModel::where( 'email', $email )->first();
-		if ( $contact ) {
-			return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
-		}
-
 		try {
 			$contact_data = $this->prepare_contact( $request );
-			$contact      = ContactModel::create( $contact_data );
+
+			if ( ! ContactModel::has_identifier(
+				$contact_data['email'] ?? null,
+				$contact_data['phone'] ?? '',
+				$contact_data['whatsapp_phone'] ?? ''
+			) ) {
+				return new WP_Error(
+					'missing_identifier',
+					__( 'Contact must have an email address or phone number.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$existing = ContactModel::find_by_identifiers( $contact_data );
+			if ( $existing ) {
+				return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
+			}
+
+			$contact = ContactModel::create( $contact_data );
 
 			$sync_lists = $this->sync_lists( $request, $contact );
 			if ( is_wp_error( $sync_lists ) ) {
@@ -2106,6 +2115,12 @@ class RestContactController extends RestController {
 			}
 
 			$contact_data = $this->prepare_contact( $request );
+
+			$duplicate = ContactModel::find_by_identifiers( $contact_data, (int) $contact_id );
+			if ( $duplicate ) {
+				return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
+			}
+
 			$changes      = ContactUpdateNotifier::collect_field_changes( $contact, $contact_data );
 			$contact->update( $contact_data );
 
@@ -2266,7 +2281,7 @@ class RestContactController extends RestController {
 			}
 		}
 
-		return $contact;
+		return ContactModel::normalize_contact_data( $contact );
 	}
 
 	/**

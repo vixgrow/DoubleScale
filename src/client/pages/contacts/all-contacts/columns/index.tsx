@@ -91,6 +91,12 @@ export const useContactsColumns = () => {
 				);
 				const avatarUrl = (contact as any).avatar_url;
 
+				const contactSubtitle =
+					contact.email ||
+					contact.phone ||
+					contact.whatsapp_phone ||
+					'';
+
 				return (
 					<Button
 						variant="ghost"
@@ -104,7 +110,7 @@ export const useContactsColumns = () => {
 								{avatarUrl ? (
 									<AvatarImage
 										src={avatarUrl}
-										alt={fullName || contact.email}
+										alt={fullName || contactSubtitle}
 										className="rounded-full"
 									/>
 								) : null}
@@ -118,9 +124,11 @@ export const useContactsColumns = () => {
 										{fullName}
 									</div>
 								)}
-								<div className="text-xs text-muted-foreground">
-									{contact.email}
-								</div>
+								{contactSubtitle && (
+									<div className="text-xs text-muted-foreground">
+										{contactSubtitle}
+									</div>
+								)}
 							</div>
 						</div>
 					</Button>

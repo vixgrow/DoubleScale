@@ -17,9 +17,11 @@ import { formatDateForAPI } from '@doublescale/utils';
 import { useContactsContext } from './contexts';
 
 interface ContactPayload {
-	email: string;
+	email?: string;
 	first_name: string;
 	last_name: string;
+	phone?: string;
+	whatsapp_phone?: string;
 }
 
 interface UseContactsAPIOptions {
@@ -81,20 +83,61 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			typeof contactPayload.email === 'string'
 				? contactPayload.email.trim()
 				: '';
+		const phone =
+			typeof contactPayload.phone === 'string'
+				? contactPayload.phone.trim()
+				: '';
+		const whatsappPhone =
+			typeof contactPayload.whatsapp_phone === 'string'
+				? contactPayload.whatsapp_phone.trim()
+				: '';
 
-		if (!email || !isEmail(email)) {
-			setCreateContactVisible(false);
-			showNotice('error', __('Invalid email', 'doublescale'));
+		const hasEmail = email !== '' && isEmail(email);
+		const hasPhone = phone !== '' || whatsappPhone !== '';
+
+		if (!hasEmail && !hasPhone) {
+			showNotice(
+				'error',
+				__(
+					'Contact must have an email address or phone number.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
+		if (email !== '' && !isEmail(email)) {
+			showNotice('error', __('Invalid email address', 'doublescale'));
 			return;
 		}
 
 		setIsSaving(true);
 
 		try {
+			const payload: ContactPayload = {
+				...contactPayload,
+				first_name: contactPayload.first_name,
+				last_name: contactPayload.last_name,
+			};
+
+			if (hasEmail) {
+				payload.email = email;
+			} else {
+				delete payload.email;
+			}
+
+			if (phone !== '') {
+				payload.phone = phone;
+			}
+
+			if (whatsappPhone !== '') {
+				payload.whatsapp_phone = whatsappPhone;
+			}
+
 			const response = (await apiFetch({
 				path: '/doublescale/v1/contacts',
 				method: 'POST',
-				data: { ...contactPayload, email },
+				data: payload,
 			})) as Contact;
 
 			// Close the create contact modal

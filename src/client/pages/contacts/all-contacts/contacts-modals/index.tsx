@@ -137,7 +137,7 @@ export const CreateContactModal: React.FC = () => {
 
 					<div className="space-y-2">
 						<Label htmlFor="ds-create-contact-email" className="text-sm font-medium">
-							{__('Email', 'doublescale')}
+							{__('Email (optional)', 'doublescale')}
 						</Label>
 						<Input
 							id="ds-create-contact-email"
@@ -158,7 +158,7 @@ export const CreateContactModal: React.FC = () => {
 
 					<div>
 						<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-							{__('Phone (optional)', 'doublescale')}
+							{__('Phone', 'doublescale')}
 						</p>
 						<div className="mt-4 space-y-4">
 							<div className="space-y-2">
@@ -208,7 +208,7 @@ export const CreateContactModal: React.FC = () => {
 								/>
 								<p className="text-xs text-muted-foreground">
 									{__(
-										'Used for WhatsApp messaging. Include country code (e.g. +15550102030).',
+										'Provide an email and/or phone number. Used for WhatsApp messaging when set; include country code (e.g. +15550102030).',
 										'doublescale'
 									)}
 								</p>

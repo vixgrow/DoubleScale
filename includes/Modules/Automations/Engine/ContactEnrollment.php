@@ -81,7 +81,8 @@ final class ContactEnrollment {
 	}
 
 	public function maybe_create_contact(): ContactModel {
-		$contact    = ContactModel::where( 'email', $this->args['email'] )->first();
+		$lookup     = ContactModel::normalize_contact_data( $this->args );
+		$contact    = ContactModel::find_by_identifiers( $lookup );
 		$attributes = $this->prepare_contact_attributes( $contact );
 
 		if ( ! $contact ) {

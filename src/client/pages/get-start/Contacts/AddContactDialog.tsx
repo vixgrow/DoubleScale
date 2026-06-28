@@ -13,34 +13,34 @@ import ContactAddIcon from '@doublescale/shared/icons/contact-add';
 import { CustomDialogHeader } from '@doublescale/components';
 
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
 import { Loader2 } from 'lucide-react';
 import { isEmail } from 'validator';
 
-// Mock Icons (replace with your actual icons)
-
+type AddContactFormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+};
 
 export function AddContactDialog({ open, onClose, onSubmit, isLoading = false }) {
-  // const [notice, setNotice] = useState<NoticeMessage | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({
-    defaultValues: { firstName: '', lastName: '', email: '' },
+  } = useForm<AddContactFormData>({
+    defaultValues: { firstName: '', lastName: '', email: '', phone: '' },
   });
 
-  const handleFormSubmit = async (data) => {
+  const handleFormSubmit = async (data: AddContactFormData) => {
     await onSubmit?.(data);
-    // Don't close or reset here - let the parent handle it after successful creation
   };
 
   const handleCancel = () => {
     onClose();
     reset();
   };
-
 
   const onFormSubmit = handleSubmit(handleFormSubmit);
 
@@ -92,19 +92,17 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className=' text-base leading-6'>Email<span className=' text-[#EF4444]'>*</span></Label>
+            <Label htmlFor="email" className=' text-base leading-6'>{__('Email (optional)', 'doublescale')}</Label>
             <Input
               id="email"
-
               placeholder="LowaroooDavig@gmail.com"
               {...register('email', {
-                required: 'Email is required',
                 setValueAs: (value) =>
                   typeof value === 'string' ? value.trim() : value,
                 validate: (value) => {
                   const v = typeof value === 'string' ? value : '';
                   if (!v) {
-                    return 'Email is required';
+                    return true;
                   }
                   return isEmail(v) || 'Invalid email address';
                 },
@@ -115,6 +113,26 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
             {errors.email && (
               <p className="text-red-500 text-xs">{errors.email.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone" className=' text-base leading-6'>{__('Phone', 'doublescale')}</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder={__('+1 555 010 2030', 'doublescale')}
+              {...register('phone', {
+                setValueAs: (value) =>
+                  typeof value === 'string' ? value.trim() : value,
+              })}
+              className='h-10 py-3 shadow-none !rounded-[8px] !border-border focus-visible:!outline-none focus-visible:!ring-2 focus-visible:!ring-brandPrimary/20 focus-visible:!border-brandPrimary  !bg-white'
+            />
+            <p className="text-xs text-muted-foreground">
+              {__(
+                'Provide an email and/or phone number to create the contact.',
+                'doublescale'
+              )}
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

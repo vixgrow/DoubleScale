@@ -87,7 +87,16 @@ class ArticleRepository {
 	public function insert( array $data ) {
 		$data['post_type'] = KnowledgebasePostType::POST_TYPE;
 
-		return wp_insert_post( $data, true );
+		$result = wp_insert_post( $data, true );
+
+		// Seed the view counter so the postmeta row always exists. "Most viewed"
+		// ordering uses meta_value_num, which INNER-JOINs postmeta and would
+		// otherwise silently drop never-viewed articles from the ranking.
+		if ( ! is_wp_error( $result ) && $result ) {
+			add_post_meta( (int) $result, KnowledgebasePostType::META_VIEWS, 0, true );
+		}
+
+		return $result;
 	}
 
 	/**

@@ -22,9 +22,19 @@ interface KbArticleSummary {
 	reading_time: number;
 }
 
+interface TocEntry {
+	level: number;
+	text: string;
+	anchor: string;
+}
+
 interface KbArticleFull extends KbArticleSummary {
 	content: string;
+	content_html: string;
+	show_toc?: boolean;
+	toc?: TocEntry[];
 	breadcrumbs: Array<{ label: string; url: string }>;
+	related?: KbArticleSummary[];
 	tags: string[];
 	feedback_enabled?: boolean;
 	helpful?: number;
@@ -91,9 +101,11 @@ const FeedbackControl = ({ slug }: { slug: string }) => {
 const ArticleReader = ({
 	slug,
 	onBack,
+	onOpen,
 }: {
 	slug: string;
 	onBack: () => void;
+	onOpen: (slug: string) => void;
 }) => {
 	const { data, loading, error } = useAsync(() => fetchArticle(slug), [slug]);
 
@@ -107,6 +119,10 @@ const ArticleReader = ({
 		return null;
 	}
 
+	const toc = data.toc || [];
+	const related = data.related || [];
+	const tags = data.tags || [];
+
 	return (
 		<div className="space-y-4">
 			<button
@@ -116,16 +132,94 @@ const ArticleReader = ({
 			>
 				← {__('Back to articles', 'doublescale')}
 			</button>
+
+			{/* Breadcrumbs are plain labels here: the portal has no group-archive
+			    route, so linking out to the public taxonomy archive would eject the
+			    user from the portal. */}
+			{data.breadcrumbs && data.breadcrumbs.length > 0 && (
+				<nav
+					className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground"
+					aria-label={__('Breadcrumb', 'doublescale')}
+				>
+					{data.breadcrumbs.map((crumb, i) => (
+						<span key={`${crumb.label}-${i}`} className="flex items-center gap-1">
+							{i > 0 && <span aria-hidden="true">›</span>}
+							<span>{crumb.label}</span>
+						</span>
+					))}
+				</nav>
+			)}
+
 			<h1 className="text-2xl font-semibold text-foreground">{data.title}</h1>
 			<p className="text-xs uppercase tracking-wide text-muted-foreground">
 				{/* translators: %d: estimated reading time in minutes. */}
 				{data.reading_time} {__('min read', 'doublescale')}
 			</p>
-			{/* Body HTML is sanitised server-side via wp_kses_post() on save. */}
+
+			{data.show_toc && toc.length > 0 && (
+				<nav
+					className="rounded-lg border border-border bg-muted/30 p-4"
+					aria-label={__('Table of contents', 'doublescale')}
+				>
+					<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+						{__('On this page', 'doublescale')}
+					</p>
+					<ul className="space-y-1">
+						{toc.map((item) => (
+							<li
+								key={item.anchor}
+								className={item.level >= 3 ? 'pl-4 text-sm' : 'text-sm'}
+							>
+								<a href={`#${item.anchor}`} className="text-primary hover:underline">
+									{item.text}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			)}
+
+			{/* Body HTML is sanitised server-side via wp_kses_post() on save;
+			    content_html adds heading anchors so the TOC links resolve. */}
 			<div
 				className="doublescale-kb-article prose max-w-none"
-				dangerouslySetInnerHTML={{ __html: data.content }}
+				dangerouslySetInnerHTML={{ __html: data.content_html || data.content }}
 			/>
+
+			{tags.length > 0 && (
+				<div className="flex flex-wrap gap-1.5">
+					{tags.map((tag) => (
+						<span
+							key={tag}
+							className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+						>
+							{tag}
+						</span>
+					))}
+				</div>
+			)}
+
+			{related.length > 0 && (
+				<section className="border-t border-border pt-4">
+					<h2 className="mb-2 text-base font-semibold text-foreground">
+						{__('Related articles', 'doublescale')}
+					</h2>
+					<ul className="space-y-1.5">
+						{related.map((item) => (
+							<li key={item.id}>
+								<button
+									type="button"
+									onClick={() => onOpen(item.slug)}
+									className="text-left text-sm font-medium text-primary hover:underline"
+								>
+									{item.title}
+								</button>
+							</li>
+						))}
+					</ul>
+				</section>
+			)}
+
 			{data.feedback_enabled && <FeedbackControl slug={data.slug} />}
 		</div>
 	);
@@ -159,7 +253,13 @@ const KnowledgeBase = () => {
 	}
 
 	if (selected) {
-		return <ArticleReader slug={selected} onBack={() => setSelected(null)} />;
+		return (
+			<ArticleReader
+				slug={selected}
+				onBack={() => setSelected(null)}
+				onOpen={(s) => setSelected(s)}
+			/>
+		);
 	}
 
 	return (

@@ -154,9 +154,22 @@ class ArticleService {
 	 * @return array<int, array{level:int, text:string, anchor:string}>
 	 */
 	public function table_of_contents( string $content ): array {
-		$toc = array();
+		return $this->parse_headings( $content );
+	}
+
+	/**
+	 * Parse `<h2>`/`<h3>` headings into ordered {level, text, anchor} entries,
+	 * skipping empty headings and de-duplicating anchors. This is the single
+	 * source of truth for both the TOC list and {@see inject_heading_anchors()},
+	 * so the rendered heading ids and the TOC links can never drift.
+	 *
+	 * @param string $content Body HTML.
+	 * @return array<int, array{level:int, text:string, anchor:string}>
+	 */
+	private function parse_headings( string $content ): array {
+		$headings = array();
 		if ( ! preg_match_all( '/<h([23])[^>]*>(.*?)<\/h\1>/is', $content, $matches, PREG_SET_ORDER ) ) {
-			return $toc;
+			return $headings;
 		}
 
 		$seen = array();
@@ -172,14 +185,57 @@ class ArticleService {
 			} else {
 				$seen[ $anchor ] = 0;
 			}
-			$toc[] = array(
+			$headings[] = array(
 				'level'  => (int) $match[1],
 				'text'   => $text,
 				'anchor' => $anchor,
 			);
 		}
 
-		return $toc;
+		return $headings;
+	}
+
+	/**
+	 * Inject `id="<anchor>"` into each `<h2>`/`<h3>` so the TOC links resolve.
+	 *
+	 * Anchors are pulled from {@see parse_headings()} in document order, so they
+	 * always match the TOC. Empty headings are skipped (they have no TOC entry),
+	 * and a heading that already carries an `id` is left untouched — but the
+	 * anchor cursor still advances for it so the remaining headings stay aligned.
+	 * Display-only: callers run this on a copy, never persisting it back into
+	 * `post_content`.
+	 *
+	 * @param string $content Body HTML.
+	 * @return string
+	 */
+	public function inject_heading_anchors( string $content ): string {
+		$headings = $this->parse_headings( $content );
+		if ( empty( $headings ) ) {
+			return $content;
+		}
+
+		$anchors = array_column( $headings, 'anchor' );
+		$index   = 0;
+
+		return (string) preg_replace_callback(
+			'/<h([23])([^>]*)>(.*?)<\/h\1>/is',
+			static function ( $heading ) use ( &$index, $anchors ): string {
+				$text = trim( wp_strip_all_tags( $heading[3] ) );
+				if ( '' === $text ) {
+					return $heading[0];
+				}
+
+				$anchor = $anchors[ $index ] ?? '';
+				++$index;
+
+				if ( '' === $anchor || preg_match( '/\sid\s*=/i', $heading[2] ) ) {
+					return $heading[0];
+				}
+
+				return '<h' . $heading[1] . ' id="' . esc_attr( $anchor ) . '"' . $heading[2] . '>' . $heading[3] . '</h' . $heading[1] . '>';
+			},
+			$content
+		);
 	}
 
 	/**
@@ -300,11 +356,15 @@ class ArticleService {
 	 * @return array<string, mixed>
 	 */
 	public function to_full( WP_Post $post, array $opts = array() ): array {
-		$payload                = $this->to_summary( $post );
-		$payload['content']     = $post->post_content;
-		$payload['toc']         = $this->table_of_contents( $post->post_content );
-		$payload['breadcrumbs'] = $this->breadcrumbs( $post );
-		$payload['group_ids']   = Visibility::group_terms_for_post( $post->ID );
+		$payload = $this->to_summary( $post );
+		// `content` stays raw for the authoring editor; `content_html` carries the
+		// reader copy with heading anchors injected so the TOC links resolve.
+		$payload['content']      = $post->post_content;
+		$payload['content_html'] = $this->inject_heading_anchors( $post->post_content );
+		$payload['toc']          = $this->table_of_contents( $post->post_content );
+		$payload['show_toc']     = (bool) KnowledgebaseSettings::get( 'show_toc' );
+		$payload['breadcrumbs']  = $this->breadcrumbs( $post );
+		$payload['group_ids']    = Visibility::group_terms_for_post( $post->ID );
 
 		$tags            = wp_get_post_terms( $post->ID, KnowledgebasePostType::TAXONOMY_TAG, array( 'fields' => 'names' ) );
 		$payload['tags'] = is_wp_error( $tags ) ? array() : array_values( $tags );

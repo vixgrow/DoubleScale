@@ -30,7 +30,9 @@ use DoubleScale\Modules\Knowledgebase\Integrations\KnowledgebaseAiProvider;
 use DoubleScale\Modules\Knowledgebase\PostTypes\KnowledgebasePostType;
 use DoubleScale\Modules\Knowledgebase\Renderer\FrontendGuard;
 use DoubleScale\Modules\Knowledgebase\Renderer\KnowledgebaseShortcode;
+use DoubleScale\Modules\Knowledgebase\Services\ArticleService;
 use DoubleScale\Modules\Knowledgebase\Services\KnowledgebaseSettings;
+use WP_Post;
 
 /**
  * Module class.
@@ -136,10 +138,11 @@ final class Module extends AbstractModule {
 		// Public SEO shortcode.
 		( new KnowledgebaseShortcode() )->register();
 
-		// "Was this helpful?" control on the themed single-article page. The CPT
-		// serves its own template, so the control is appended via the_content +
-		// a tiny enqueued script rather than a React mount.
-		add_filter( 'the_content', array( $this, 'append_feedback_control' ) );
+		// Reading aids (breadcrumbs, table of contents, related) + the "Was this
+		// helpful?" control on the themed single-article page. The CPT serves its
+		// own template, so these are appended via the_content + a tiny enqueued
+		// script rather than a React mount.
+		add_filter( 'the_content', array( $this, 'augment_single_article' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_feedback_assets' ) );
 
 		// AIAssistant knowledge-source wiring (no-op if the AI plugin is absent).
@@ -200,7 +203,10 @@ final class Module extends AbstractModule {
 	}
 
 	/**
-	 * Append the "Was this helpful?" control to the themed single-article page.
+	 * Augment the themed single-article page with breadcrumbs + a table of
+	 * contents (before the body) and a related-articles block + the "Was this
+	 * helpful?" control (after it). Each block honours its own setting, so
+	 * disabling feedback no longer hides the reading aids (and vice versa).
 	 *
 	 * Visibility is already enforced upstream by {@see FrontendGuard} on
 	 * `template_redirect`, so reaching the loop body means the viewer is cleared.
@@ -208,23 +214,134 @@ final class Module extends AbstractModule {
 	 * @param string $content The post content.
 	 * @return string
 	 */
-	public function append_feedback_control( string $content ): string {
+	public function augment_single_article( string $content ): string {
 		if ( is_admin()
 			|| ! is_singular( KnowledgebasePostType::POST_TYPE )
 			|| ! in_the_loop()
-			|| ! is_main_query()
-			|| ! KnowledgebaseSettings::get( 'enable_feedback' ) ) {
+			|| ! is_main_query() ) {
 			return $content;
 		}
 
-		$post_id     = get_the_ID();
-		$helpful     = (int) get_post_meta( $post_id, KnowledgebasePostType::META_HELPFUL, true );
-		$not_helpful = (int) get_post_meta( $post_id, KnowledgebasePostType::META_NOT_HELPFUL, true );
-		$slug        = get_post_field( 'post_name', $post_id );
+		$post = get_post();
+		if ( ! $post instanceof WP_Post ) {
+			return $content;
+		}
+
+		$service = new ArticleService();
+		$before  = '';
+		$after   = '';
+
+		$crumbs = $service->breadcrumbs( $post );
+		if ( ! empty( $crumbs ) ) {
+			$before .= $this->render_breadcrumbs( $crumbs );
+		}
+
+		if ( KnowledgebaseSettings::get( 'show_toc' ) ) {
+			// Derive the TOC and the heading anchors from the same string so the
+			// links always resolve, whatever the_content filters did before us.
+			$toc = $service->table_of_contents( $content );
+			if ( ! empty( $toc ) ) {
+				$before .= $this->render_toc( $toc );
+			}
+		}
+
+		$content = $service->inject_heading_anchors( $content );
+
+		if ( KnowledgebaseSettings::get( 'show_related' ) ) {
+			$related = $service->related( $post, (int) KnowledgebaseSettings::get( 'related_count' ) );
+			if ( ! empty( $related ) ) {
+				$after .= $this->render_related( $related );
+			}
+		}
+
+		if ( KnowledgebaseSettings::get( 'enable_feedback' ) ) {
+			$after .= $this->render_feedback_control( $post );
+		}
+
+		return $before . $content . $after;
+	}
+
+	/**
+	 * Render the breadcrumb trail (Group › … › current group) as links.
+	 *
+	 * @param array<int, array{label:string, url:string}> $crumbs Crumbs.
+	 * @return string
+	 */
+	private function render_breadcrumbs( array $crumbs ): string {
+		ob_start();
+		?>
+		<nav class="doublescale-kb-breadcrumbs" aria-label="<?php esc_attr_e( 'Breadcrumb', 'doublescale' ); ?>">
+			<?php foreach ( $crumbs as $crumb ) : ?>
+				<?php if ( ! empty( $crumb['url'] ) ) : ?>
+					<a class="doublescale-kb-breadcrumbs__item" href="<?php echo esc_url( $crumb['url'] ); ?>"><?php echo esc_html( $crumb['label'] ); ?></a>
+				<?php else : ?>
+					<span class="doublescale-kb-breadcrumbs__item"><?php echo esc_html( $crumb['label'] ); ?></span>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</nav>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the auto table of contents (links to in-page heading anchors).
+	 *
+	 * @param array<int, array{level:int, text:string, anchor:string}> $toc Entries.
+	 * @return string
+	 */
+	private function render_toc( array $toc ): string {
+		ob_start();
+		?>
+		<nav class="doublescale-kb-toc" aria-label="<?php esc_attr_e( 'Table of contents', 'doublescale' ); ?>">
+			<p class="doublescale-kb-toc__title"><?php esc_html_e( 'On this page', 'doublescale' ); ?></p>
+			<ul class="doublescale-kb-toc__list">
+				<?php foreach ( $toc as $item ) : ?>
+					<li class="doublescale-kb-toc__item doublescale-kb-toc__item--h<?php echo esc_attr( (string) $item['level'] ); ?>">
+						<a href="#<?php echo esc_attr( $item['anchor'] ); ?>"><?php echo esc_html( $item['text'] ); ?></a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</nav>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the related-articles block.
+	 *
+	 * @param array<int, WP_Post> $related Related articles.
+	 * @return string
+	 */
+	private function render_related( array $related ): string {
+		ob_start();
+		?>
+		<section class="doublescale-kb-related" aria-label="<?php esc_attr_e( 'Related articles', 'doublescale' ); ?>">
+			<h2 class="doublescale-kb-related__title"><?php esc_html_e( 'Related articles', 'doublescale' ); ?></h2>
+			<ul class="doublescale-kb-related__list">
+				<?php foreach ( $related as $item ) : ?>
+					<li class="doublescale-kb-related__item">
+						<a href="<?php echo esc_url( (string) get_permalink( $item ) ); ?>"><?php echo esc_html( get_the_title( $item ) ); ?></a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the "Was this helpful?" control.
+	 *
+	 * @param WP_Post $post The article.
+	 * @return string
+	 */
+	private function render_feedback_control( WP_Post $post ): string {
+		$helpful     = (int) get_post_meta( $post->ID, KnowledgebasePostType::META_HELPFUL, true );
+		$not_helpful = (int) get_post_meta( $post->ID, KnowledgebasePostType::META_NOT_HELPFUL, true );
 
 		ob_start();
 		?>
-		<div class="doublescale-kb-feedback" data-kb-slug="<?php echo esc_attr( $slug ); ?>">
+		<div class="doublescale-kb-feedback" data-kb-slug="<?php echo esc_attr( $post->post_name ); ?>">
 			<p class="doublescale-kb-feedback__prompt"><?php esc_html_e( 'Was this article helpful?', 'doublescale' ); ?></p>
 			<div class="doublescale-kb-feedback__actions">
 				<button type="button" class="doublescale-kb-feedback__btn" data-kb-vote="1">
@@ -243,7 +360,7 @@ final class Module extends AbstractModule {
 			<p class="doublescale-kb-feedback__thanks" hidden><?php esc_html_e( 'Thanks for your feedback!', 'doublescale' ); ?></p>
 		</div>
 		<?php
-		return $content . (string) ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**

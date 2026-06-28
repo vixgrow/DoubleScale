@@ -212,6 +212,13 @@ class RestArticleController extends RestController {
 			);
 		}
 
+		// Support Agents reach this endpoint (read OR-in) for the reply picker /
+		// suggested articles, but must never see drafts or internal articles —
+		// restrict non-managers to published, overriding any requested status.
+		if ( ! $this->can_manage() ) {
+			$args['post_status'] = array( 'publish' );
+		}
+
 		$query = $this->articles->query( $args );
 		$data  = array_map( array( $this->service, 'to_summary' ), $query->posts );
 
@@ -242,6 +249,12 @@ class RestArticleController extends RestController {
 
 		$post = $this->articles->find( (int) $request['id'] );
 		if ( ! $post ) {
+			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		// Agents (read-only) may fetch published articles for the reply picker,
+		// but draft / internal bodies are authoring-only.
+		if ( ! $this->can_manage() && 'publish' !== $post->post_status ) {
 			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
@@ -398,6 +411,10 @@ class RestArticleController extends RestController {
 
 		$post = $this->articles->find( (int) $request['id'] );
 		if ( ! $post ) {
+			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! $this->can_manage() && 'publish' !== $post->post_status ) {
 			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 

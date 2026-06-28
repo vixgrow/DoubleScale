@@ -29,7 +29,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 
-import { getSettings, saveSettings, type KbSettings } from './api';
+import { getSettings, listGroups, saveSettings, type KbGroup, type KbSettings } from './api';
 
 /** The boolean feature flags, rendered as a stack of Switch rows. */
 const TOGGLES: Array<[keyof KbSettings, string]> = [
@@ -43,6 +43,7 @@ const TOGGLES: Array<[keyof KbSettings, string]> = [
 const Settings = () => {
 	const navigate = useNavigate();
 	const [settings, setSettings] = useState<KbSettings | null>(null);
+	const [groups, setGroups] = useState<KbGroup[]>([]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
 	const [saved, setSaved] = useState(false);
@@ -51,6 +52,9 @@ const Settings = () => {
 		getSettings()
 			.then(setSettings)
 			.catch((e) => setError((e as { message?: string })?.message || __('Failed to load.', 'doublescale')));
+		listGroups()
+			.then((res) => setGroups(res.data))
+			.catch(() => undefined);
 	}, []);
 
 	const update = <K extends keyof KbSettings>(key: K, value: KbSettings[K]) => {
@@ -194,6 +198,25 @@ const Settings = () => {
 							onChange={(e) => update('related_count', Number(e.target.value))}
 							className="w-32"
 						/>
+					</div>
+					<div className="space-y-1.5">
+						<Label>{__('Default group for new articles', 'doublescale')}</Label>
+						<Select
+							value={String(settings.default_group)}
+							onValueChange={(value) => update('default_group', Number(value))}
+						>
+							<SelectTrigger className="w-56">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="0">{__('— None —', 'doublescale')}</SelectItem>
+								{groups.map((g) => (
+									<SelectItem key={g.id} value={String(g.id)}>
+										{g.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 				</CardContent>
 			</Card>

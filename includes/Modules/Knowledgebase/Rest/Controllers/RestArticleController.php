@@ -173,6 +173,30 @@ class RestArticleController extends RestController {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/revisions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'revisions' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/revisions/(?P<revision_id>\d+)/restore',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'restore_revision' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -422,6 +446,80 @@ class RestArticleController extends RestController {
 		$data  = array_map( array( $this->service, 'to_summary' ), $this->service->related( $post, $limit ) );
 
 		return new WP_REST_Response( array( 'data' => array_values( $data ) ), 200 );
+	}
+
+	/**
+	 * GET /articles/{id}/revisions — list this article's stored revisions.
+	 *
+	 * The CPT supports revisions but has no wp-admin screen (`show_ui=false`),
+	 * so this is the only surface for them. Authoring-gated.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function revisions( $request ) {
+		$disabled = $this->require_module( 'knowledgebase' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$id = (int) $request['id'];
+		if ( ! $this->articles->find( $id ) ) {
+			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$revisions = wp_get_post_revisions(
+			$id,
+			array(
+				'orderby' => 'date',
+				'order'   => 'DESC',
+			)
+		);
+
+		$data = array();
+		foreach ( $revisions as $revision ) {
+			$data[] = array(
+				'id'       => (int) $revision->ID,
+				'date'     => $revision->post_modified_gmt,
+				'author'   => get_the_author_meta( 'display_name', (int) $revision->post_author ),
+				'title'    => $revision->post_title,
+				'content'  => $revision->post_content,
+				'autosave' => (bool) wp_is_post_autosave( $revision ),
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * POST /articles/{id}/revisions/{revision_id}/restore — roll the article back
+	 * to a stored revision and return the refreshed article.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function restore_revision( $request ) {
+		$disabled = $this->require_module( 'knowledgebase' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$id          = (int) $request['id'];
+		$revision_id = (int) $request['revision_id'];
+		if ( ! $this->articles->find( $id ) ) {
+			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$revision = wp_get_post_revision( $revision_id );
+		if ( ! $revision || (int) $revision->post_parent !== $id ) {
+			return new WP_Error( 'invalid_revision', __( 'That revision does not belong to this article.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		if ( ! wp_restore_post_revision( $revision_id ) ) {
+			return new WP_Error( 'restore_failed', __( 'Could not restore the revision.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+
+		return new WP_REST_Response( $this->service->to_full( $this->articles->find( $id ), array( 'include_related' => true ) ), 200 );
 	}
 
 	/**

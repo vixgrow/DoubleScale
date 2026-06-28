@@ -100,6 +100,21 @@ export const deleteArticle = (id: number): Promise<{ deleted: boolean }> =>
 export const duplicateArticle = (id: number): Promise<KbArticleSummary> =>
 	apiFetch({ path: `${BASE}/articles/${id}/duplicate`, method: 'POST' });
 
+export interface KbRevision {
+	id: number;
+	date: string;
+	author: string;
+	title: string;
+	content: string;
+	autosave: boolean;
+}
+
+export const listRevisions = (id: number): Promise<{ data: KbRevision[] }> =>
+	apiFetch({ path: `${BASE}/articles/${id}/revisions` });
+
+export const restoreRevision = (id: number, revisionId: number): Promise<KbArticleFull> =>
+	apiFetch({ path: `${BASE}/articles/${id}/revisions/${revisionId}/restore`, method: 'POST' });
+
 export const listGroups = (): Promise<{ data: KbGroup[] }> =>
 	apiFetch({ path: `${BASE}/groups` });
 

@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
-import { X, Search } from 'lucide-react';
+import { X, Search, History } from 'lucide-react';
 
 import Editor from '@/components/booking/editor';
 import { Button } from '@/components/ui/button';
@@ -33,9 +33,13 @@ import {
 	getSettings,
 	listArticles,
 	listGroups,
+	listRevisions,
+	restoreRevision,
 	updateArticle,
+	type KbArticleFull,
 	type KbArticleSummary,
 	type KbGroup,
+	type KbRevision,
 } from './api';
 
 /** Minimal WP media frame typing (wp.media is enqueued by AdminLoader). */
@@ -76,6 +80,16 @@ const ArticleEditor = () => {
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
+
+	// Bumped to force the Lexical editor to re-mount with new body content
+	// (it reads `message` only on mount), e.g. after restoring a revision.
+	const [editorKey, setEditorKey] = useState(0);
+
+	// Revision history panel state.
+	const [showRevisions, setShowRevisions] = useState(false);
+	const [revisions, setRevisions] = useState<KbRevision[]>([]);
+	const [revLoading, setRevLoading] = useState(false);
+	const [previewRevId, setPreviewRevId] = useState(0);
 
 	// Related-article picker search state.
 	const [relQuery, setRelQuery] = useState('');
@@ -138,28 +152,33 @@ const ArticleEditor = () => {
 		return VIS_RANK[effectiveVisibility] > ownRank;
 	}, [status, membersOnly, effectiveVisibility]);
 
+	// Apply a full article payload to the editor fields. Shared by the initial
+	// load and by revision-restore (which returns the refreshed article).
+	const applyArticle = (a: KbArticleFull) => {
+		setTitle(a.title);
+		setContent(a.content);
+		setExcerpt(a.excerpt);
+		setStatus(a.status);
+		setGroupId(a.group_ids[0] || 0);
+		setTags((a.tags || []).join(', '));
+		setMembersOnly(a.members_only);
+		setFeaturedImageId(a.featured_image || 0);
+		setFeaturedImageUrl(a.featured_image_url || '');
+		const titleById: Record<number, string> = {};
+		(a.related || []).forEach((r) => {
+			titleById[r.id] = r.title;
+		});
+		setRelated((a.related_ids || []).map((rid) => ({ id: rid, title: titleById[rid] || `#${rid}` })));
+		setEditorKey((k) => k + 1);
+	};
+
 	useEffect(() => {
 		if (isNew) {
 			return;
 		}
 		setLoading(true);
 		getArticle(Number(id))
-			.then((a) => {
-				setTitle(a.title);
-				setContent(a.content);
-				setExcerpt(a.excerpt);
-				setStatus(a.status);
-				setGroupId(a.group_ids[0] || 0);
-				setTags((a.tags || []).join(', '));
-				setMembersOnly(a.members_only);
-				setFeaturedImageId(a.featured_image || 0);
-				setFeaturedImageUrl(a.featured_image_url || '');
-				const titleById: Record<number, string> = {};
-				(a.related || []).forEach((r) => {
-					titleById[r.id] = r.title;
-				});
-				setRelated((a.related_ids || []).map((rid) => ({ id: rid, title: titleById[rid] || `#${rid}` })));
-			})
+			.then(applyArticle)
 			.catch((e) => setError((e as { message?: string })?.message || __('Failed to load.', 'doublescale')))
 			.finally(() => setLoading(false));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,6 +242,45 @@ const ArticleEditor = () => {
 		(a) => a.id !== currentId && !related.some((r) => r.id === a.id)
 	);
 
+	// Revision history: list, open the panel, and restore a prior version.
+	const loadRevisions = () => {
+		setRevLoading(true);
+		listRevisions(Number(id))
+			.then((res) => setRevisions(res.data || []))
+			.catch(() => setRevisions([]))
+			.finally(() => setRevLoading(false));
+	};
+
+	const toggleRevisions = () => {
+		const next = !showRevisions;
+		setShowRevisions(next);
+		if (next) {
+			loadRevisions();
+		}
+	};
+
+	const onRestore = async (revId: number) => {
+		// eslint-disable-next-line no-alert
+		if (!window.confirm(__('Restore this revision? Unsaved changes will be lost.', 'doublescale'))) {
+			return;
+		}
+		setError('');
+		try {
+			const restored = await restoreRevision(Number(id), revId);
+			applyArticle(restored);
+			setShowRevisions(false);
+			setPreviewRevId(0);
+		} catch (e) {
+			setError((e as { message?: string })?.message || __('Failed to restore revision.', 'doublescale'));
+		}
+	};
+
+	// post_modified_gmt arrives as "YYYY-MM-DD HH:MM:SS" (UTC, no zone marker).
+	const formatRevDate = (raw: string): string => {
+		const parsed = new Date(`${raw.replace(' ', 'T')}Z`);
+		return Number.isNaN(parsed.getTime()) ? raw : parsed.toLocaleString();
+	};
+
 	const save = async () => {
 		setSaving(true);
 		setError('');
@@ -264,12 +322,72 @@ const ArticleEditor = () => {
 				<Button variant="ghost" size="sm" onClick={() => navigate(getToLink('knowledgebase'))}>
 					← {__('Back', 'doublescale')}
 				</Button>
-				<Button disabled={saving} onClick={save}>
-					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
-				</Button>
+				<div className="flex items-center gap-2">
+					{!isNew && (
+						<Button variant="outline" size="sm" onClick={toggleRevisions}>
+							<History width={14} height={14} className="mr-1" />
+							{__('Revisions', 'doublescale')}
+						</Button>
+					)}
+					<Button disabled={saving} onClick={save}>
+						{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
+					</Button>
+				</div>
 			</div>
 
 			{error && <p className="text-sm text-destructive">{error}</p>}
+
+			{showRevisions && (
+				<Card>
+					<CardContent className="space-y-2 py-4">
+						<div className="flex items-center justify-between">
+							<p className="text-sm font-medium">{__('Revision history', 'doublescale')}</p>
+							<Button variant="ghost" size="sm" onClick={() => setShowRevisions(false)}>
+								<X width={14} height={14} />
+							</Button>
+						</div>
+						{revLoading ? (
+							<p className="text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</p>
+						) : revisions.length === 0 ? (
+							<p className="text-sm text-muted-foreground">
+								{__('No revisions yet. WordPress saves one each time you update the article.', 'doublescale')}
+							</p>
+						) : (
+							<ul className="divide-y divide-border">
+								{revisions.map((rev) => (
+									<li key={rev.id} className="py-2">
+										<div className="flex items-center justify-between gap-2">
+											<button
+												type="button"
+												className="text-left text-sm hover:underline"
+												onClick={() => setPreviewRevId(previewRevId === rev.id ? 0 : rev.id)}
+											>
+												<span className="font-medium">{formatRevDate(rev.date)}</span>
+												<span className="text-muted-foreground"> · {rev.author}</span>
+												{rev.autosave && (
+													<span className="ml-1 text-xs text-amber-600">
+														{__('(autosave)', 'doublescale')}
+													</span>
+												)}
+											</button>
+											<Button variant="outline" size="sm" onClick={() => onRestore(rev.id)}>
+												{__('Restore', 'doublescale')}
+											</Button>
+										</div>
+										{previewRevId === rev.id && (
+											<div
+												className="prose prose-sm mt-2 max-h-64 max-w-none overflow-y-auto rounded border border-border bg-muted/30 p-3 text-sm"
+												// Revision body is the article's own sanitised content.
+												dangerouslySetInnerHTML={{ __html: rev.content }}
+											/>
+										)}
+									</li>
+								))}
+							</ul>
+						)}
+					</CardContent>
+				</Card>
+			)}
 
 			<Input
 				type="text"
@@ -462,7 +580,7 @@ const ArticleEditor = () => {
 			<div className="space-y-1.5">
 				<Label>{__('Body', 'doublescale')}</Label>
 				<div className="rounded-lg border">
-					<Editor message={content} onChange={setContent} type="email" />
+					<Editor key={editorKey} message={content} onChange={setContent} type="email" />
 				</div>
 			</div>
 		</div>

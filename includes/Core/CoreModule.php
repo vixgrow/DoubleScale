@@ -62,6 +62,7 @@ final class CoreModule extends AbstractModule {
 	public function restControllers(): array {
 		return array(
 			Rest\Controllers\RestGeneralController::class,
+			Rest\Controllers\RestListPreferencesController::class,
 			Rest\Controllers\RestAdminCalendarController::class,
 			Rest\Controllers\RestModulesController::class,
 			Rest\Controllers\RestPluginsController::class,

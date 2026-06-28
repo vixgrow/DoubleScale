@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 /**
  * Internal dependencies
@@ -39,16 +39,26 @@ import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
+import {
+	getListPreferences,
+	parseSavedDateRange,
+	serializeDateRange,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [page, setPage] = useState<number>(1);
-	const [perPage, setPerPage] = useState<number>(10);
+	const [perPage, setPerPage] = useState<number>(
+		() => getListPreferences('automations').per_page ?? 10
+	);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [data, setData] = useState<Automations>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [keyword, setKeyword] = useState<string>('');
+	const [keyword, setKeyword] = useState<string>(
+		() => getListPreferences('automations').keyword ?? ''
+	);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [automation, setAutomation] = useState({
@@ -59,10 +69,21 @@ const AutomationsList: React.FC = () => {
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
-	}>({
-		from: null,
-		to: null,
-	});
+	}>(() =>
+		parseSavedDateRange(getListPreferences('automations').date_range)
+	);
+
+	useListPreferencesPersistence(
+		'automations',
+		useMemo(
+			() => ({
+				per_page: perPage,
+				keyword,
+				date_range: serializeDateRange(dateRange),
+			}),
+			[dateRange, keyword, perPage]
+		)
+	);
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
 		number | null
 	>(null);

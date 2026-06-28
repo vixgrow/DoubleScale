@@ -15,6 +15,7 @@ namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\ListPreferences\ListPreferencesManager;
 use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use Exception;
@@ -140,7 +141,26 @@ class RestContactController extends RestController {
 						'column_visibility' => array(
 							'description' => __( 'Visible columns for the contacts list.', 'doublescale' ),
 							'type'        => 'object',
-							'required'    => true,
+						),
+						'per_page'          => array(
+							'description' => __( 'Items per page for the contacts list.', 'doublescale' ),
+							'type'        => 'integer',
+						),
+						'show_filters'      => array(
+							'description' => __( 'Whether the contacts filter panel is open.', 'doublescale' ),
+							'type'        => 'boolean',
+						),
+						'filters'           => array(
+							'description' => __( 'Applied contact filters.', 'doublescale' ),
+							'type'        => 'array',
+						),
+						'keyword'           => array(
+							'description' => __( 'Contacts search keyword.', 'doublescale' ),
+							'type'        => 'string',
+						),
+						'date_range'        => array(
+							'description' => __( 'Contacts date range filter.', 'doublescale' ),
+							'type'        => 'object',
 						),
 					),
 				),
@@ -2781,6 +2801,11 @@ class RestContactController extends RestController {
 			return array();
 		}
 
+		$prefs = ListPreferencesManager::get( 'contacts', $user_id );
+		if ( ! empty( $prefs['column_visibility'] ) && is_array( $prefs['column_visibility'] ) ) {
+			return $prefs['column_visibility'];
+		}
+
 		$saved = get_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, true );
 
 		return is_array( $saved ) ? self::sanitize_column_visibility( $saved ) : array();
@@ -2796,9 +2821,16 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function get_list_preferences( $request ) {
+		$prefs = ListPreferencesManager::get( 'contacts' );
+
 		return new WP_REST_Response(
 			array(
-				'column_visibility' => self::get_list_column_visibility(),
+				'column_visibility' => $prefs['column_visibility'] ?? self::get_list_column_visibility(),
+				'per_page'          => $prefs['per_page'] ?? null,
+				'show_filters'      => $prefs['show_filters'] ?? null,
+				'filters'           => $prefs['filters'] ?? array(),
+				'keyword'           => $prefs['keyword'] ?? '',
+				'date_range'        => $prefs['date_range'] ?? null,
 			),
 			200
 		);
@@ -2819,15 +2851,36 @@ class RestContactController extends RestController {
 			return new WP_Error( 'unauthorized', __( 'User not logged in.', 'doublescale' ), array( 'status' => 401 ) );
 		}
 
-		$visibility = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
-		update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $visibility );
+		$params = array();
+		if ( null !== $request->get_param( 'column_visibility' ) ) {
+			$params['column_visibility'] = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
+		}
+		if ( null !== $request->get_param( 'per_page' ) ) {
+			$params['per_page'] = $request->get_param( 'per_page' );
+		}
+		if ( null !== $request->get_param( 'show_filters' ) ) {
+			$params['show_filters'] = $request->get_param( 'show_filters' );
+		}
+		if ( null !== $request->get_param( 'filters' ) ) {
+			$params['filters'] = $request->get_param( 'filters' );
+		}
+		if ( null !== $request->get_param( 'keyword' ) ) {
+			$params['keyword'] = $request->get_param( 'keyword' );
+		}
+		if ( null !== $request->get_param( 'date_range' ) ) {
+			$params['date_range'] = $request->get_param( 'date_range' );
+		}
 
-		return new WP_REST_Response(
-			array(
-				'column_visibility' => $visibility,
-			),
-			200
-		);
+		$updated = ListPreferencesManager::update( 'contacts', $params, $user_id );
+		if ( false === $updated ) {
+			return new WP_Error( 'update_failed', __( 'Failed to save list preferences.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+
+		if ( isset( $updated['column_visibility'] ) ) {
+			update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $updated['column_visibility'] );
+		}
+
+		return new WP_REST_Response( $updated, 200 );
 	}
 
 	/**

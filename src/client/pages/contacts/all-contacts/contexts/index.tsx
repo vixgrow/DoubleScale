@@ -1,11 +1,17 @@
 /**
  * external dependencies
  */
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 /**
  * DoubleScale dependencies
  */
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	getListPreferences,
+	parseSavedDateRange,
+	serializeDateRange,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 /**
  * internal dependencies
  */
@@ -91,30 +97,34 @@ export interface ContactsActions {
 	closeNotice: () => void;
 }
 
-const initialState: ContactsState = {
-	loading: true,
-	data: [],
-	total: 0,
-	page: 1,
-	perPage: 10,
-	keywords: '',
-	totalRecords: 0,
-	hasRecords: false,
-	showFilters: false,
-	filters: [],
-	isFiltering: false,
-	dateRange: { from: null, to: null },
-	selectedRowKeys: [],
-	selectedLists: [],
-	selectedTags: [],
-	bulkAction: '',
-	isApplying: false,
-	createContactVisible: false,
-	importModalVisible: false,
-	exportModalVisible: false,
-	isSaving: false,
-	notice: null,
-};
+function buildContactsInitialState(): ContactsState {
+	const saved = getListPreferences('contacts');
+
+	return {
+		loading: true,
+		data: [],
+		total: 0,
+		page: 1,
+		perPage: saved.per_page ?? 10,
+		keywords: saved.keyword ?? '',
+		totalRecords: 0,
+		hasRecords: false,
+		showFilters: saved.show_filters ?? false,
+		filters: (saved.filters as FilterType[]) ?? [],
+		isFiltering: false,
+		dateRange: parseSavedDateRange(saved.date_range),
+		selectedRowKeys: [],
+		selectedLists: [],
+		selectedTags: [],
+		bulkAction: '',
+		isApplying: false,
+		createContactVisible: false,
+		importModalVisible: false,
+		exportModalVisible: false,
+		isSaving: false,
+		notice: null,
+	};
+}
 
 const ContactsContext = createContext<
 	(ContactsState & ContactsActions) | undefined
@@ -123,7 +133,7 @@ const ContactsContext = createContext<
 export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
-	const [state, setState] = useState<ContactsState>(initialState);
+	const [state, setState] = useState<ContactsState>(buildContactsInitialState);
 	const navigate = useNavigate();
 
 	const updateState = (updates: Partial<ContactsState>) => {
@@ -167,6 +177,25 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 	};
 
 	const value = { ...state, ...actions };
+
+	const persistenceValues = useMemo(
+		() => ({
+			per_page: state.perPage,
+			show_filters: state.showFilters,
+			filters: state.filters,
+			keyword: state.keywords,
+			date_range: serializeDateRange(state.dateRange),
+		}),
+		[
+			state.dateRange,
+			state.filters,
+			state.keywords,
+			state.perPage,
+			state.showFilters,
+		]
+	);
+
+	useListPreferencesPersistence('contacts', persistenceValues);
 
 	return (
 		<ContactsContext.Provider value={value}>

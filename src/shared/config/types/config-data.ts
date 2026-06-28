@@ -59,6 +59,26 @@ export type ConfigData = Record<string, unknown> & {
 	contactsListPreferences?: {
 		column_visibility?: Record<string, boolean>;
 	};
+	/** Per-user list table UI preferences keyed by list slug. */
+	listPreferences?: Partial<
+		Record<
+			string,
+			{
+				per_page?: number;
+				column_visibility?: Record<string, boolean>;
+				show_filters?: boolean;
+				filters?: unknown[];
+				keyword?: string;
+				date_range?: { from: string | null; to: string | null };
+				campaign_filters?: {
+					status?: string;
+					type?: string;
+					createDate?: { from: string | null; to: string | null };
+					updatedAt?: { from: string | null; to: string | null };
+				};
+			}
+		>
+	>;
 };
 
 /**

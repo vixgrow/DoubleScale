@@ -100,6 +100,16 @@ export const deleteArticle = (id: number): Promise<{ deleted: boolean }> =>
 export const duplicateArticle = (id: number): Promise<KbArticleSummary> =>
 	apiFetch({ path: `${BASE}/articles/${id}/duplicate`, method: 'POST' });
 
+/**
+ * Bulk-persist `menu_order` for a set of articles. Order is only meaningful
+ * within a single group, so callers send sequential 0..n-1 values for the
+ * articles currently shown under one group filter.
+ */
+export const reorderArticles = (
+	items: { id: number; order: number }[]
+): Promise<{ reordered: boolean }> =>
+	apiFetch({ path: `${BASE}/articles/reorder`, method: 'POST', data: { items } });
+
 export interface KbRevision {
 	id: number;
 	date: string;
@@ -126,6 +136,16 @@ export const updateGroup = (id: number, data: Partial<KbGroup>): Promise<KbGroup
 
 export const deleteGroup = (id: number): Promise<{ deleted: boolean }> =>
 	apiFetch({ path: `${BASE}/groups/${id}`, method: 'DELETE' });
+
+/**
+ * Bulk-persist display order for a set of groups. The server stores `order` term
+ * meta per item; order is only meaningful among siblings of the same parent, so
+ * callers send sequential 0..n-1 values for one sibling set at a time.
+ */
+export const reorderGroups = (
+	items: { id: number; order: number }[]
+): Promise<{ reordered: boolean }> =>
+	apiFetch({ path: `${BASE}/groups/reorder`, method: 'POST', data: { items } });
 
 export const getSettings = (): Promise<KbSettings> =>
 	apiFetch({ path: `${BASE}/settings` });

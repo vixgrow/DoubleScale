@@ -468,13 +468,9 @@ class RestArticleController extends RestController {
 			return new WP_Error( 'not_found', __( 'Article not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
-		$revisions = wp_get_post_revisions(
-			$id,
-			array(
-				'orderby' => 'date',
-				'order'   => 'DESC',
-			)
-		);
+		// Default ordering is `date ID` DESC — keep the ID tiebreaker so revisions
+		// saved within the same second still sort newest-first deterministically.
+		$revisions = wp_get_post_revisions( $id, array( 'order' => 'DESC' ) );
 
 		$data = array();
 		foreach ( $revisions as $revision ) {

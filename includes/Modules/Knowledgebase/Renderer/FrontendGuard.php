@@ -96,6 +96,15 @@ final class FrontendGuard {
 			return;
 		}
 
+		// Order the themed archive / taxonomy listings by the admin-curated
+		// `menu_order` (matching the REST + portal surfaces) so drag-reordering in
+		// the admin is reflected for anonymous visitors too. WordPress would
+		// otherwise default these to date DESC. An explicit request orderby wins.
+		if ( ! $query->get( 'orderby' ) ) {
+			$query->set( 'orderby', 'menu_order' );
+			$query->set( 'order', 'ASC' );
+		}
+
 		$clearance = Visibility::viewer_clearance();
 		if ( Visibility::INTERNAL === $clearance ) {
 			return;

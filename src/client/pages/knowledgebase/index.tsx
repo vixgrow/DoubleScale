@@ -66,6 +66,19 @@ registerAdminPage('knowledgebase-article', {
 	requiresModule: 'knowledgebase',
 });
 
+// Same articles list, pre-filtered to one group. Reached from the article-count
+// link on the Groups page; this is also the surface where article drag-reorder
+// is enabled (ordering is only meaningful within a single group).
+registerAdminPage('knowledgebase-group', {
+	path: 'knowledgebase/group/:groupId',
+	component: wrap(ArticlesList),
+	label: __('Knowledge Base', 'doublescale'),
+	hidden: true,
+	icon: <BookIcon width={24} height={24} />,
+	requiredCapability: CAPABILITY,
+	requiresModule: 'knowledgebase',
+});
+
 registerAdminPage('knowledgebase-groups', {
 	path: 'knowledgebase/groups',
 	component: wrap(Groups),

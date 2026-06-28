@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
+import config from '@doublescale/config';
 import { X, Search, History } from 'lucide-react';
 
 import Editor from '@/components/booking/editor';
@@ -61,12 +62,29 @@ const EFFECTIVE_LABEL: Record<EffectiveVisibility, string> = {
 /** Sentinel for the "no group" option — Radix Select cannot use an empty-string value. */
 const NO_GROUP = '0';
 
+/** Public rewrite base for KB articles (mirrors KnowledgebasePostType::PUBLIC_SLUG). */
+const KB_PERMALINK_BASE = 'knowledgebase';
+
+/** Rough client-side mirror of WP's sanitize_title for a live preview; the
+ *  server re-sanitises and dedupes (wp_unique_post_slug) on save. */
+const slugify = (s: string): string =>
+	s
+		.toLowerCase()
+		.trim()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+
 const ArticleEditor = () => {
 	const navigate = useNavigate();
 	const { id } = useParams<{ id: string }>();
 	const isNew = !id || id === 'new';
 
 	const [title, setTitle] = useState('');
+	const [slug, setSlug] = useState('');
+	// Once the slug is loaded (existing article) or hand-edited, stop auto-deriving
+	// it from the title so a title tweak never silently rewrites a live URL.
+	const [slugEdited, setSlugEdited] = useState(false);
+	const [articleUrl, setArticleUrl] = useState('');
 	const [content, setContent] = useState('');
 	const [excerpt, setExcerpt] = useState('');
 	const [status, setStatus] = useState<'publish' | 'draft' | 'private'>('draft');
@@ -101,6 +119,15 @@ const ArticleEditor = () => {
 			.then((res) => setGroups(res.data))
 			.catch(() => undefined);
 	}, []);
+
+	// New articles get a live slug derived from the title until the author edits
+	// the permalink field themselves (BetterDocs-style auto-then-override).
+	useEffect(() => {
+		if (isNew && !slugEdited) {
+			setSlug(slugify(title));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [title, isNew, slugEdited]);
 
 	// New articles inherit the "Default new-article visibility" setting as the
 	// starting position of the Members-only toggle (the author can still override).
@@ -156,6 +183,9 @@ const ArticleEditor = () => {
 	// load and by revision-restore (which returns the refreshed article).
 	const applyArticle = (a: KbArticleFull) => {
 		setTitle(a.title);
+		setSlug(a.slug || '');
+		setSlugEdited(true);
+		setArticleUrl(a.url || '');
 		setContent(a.content);
 		setExcerpt(a.excerpt);
 		setStatus(a.status);
@@ -286,6 +316,7 @@ const ArticleEditor = () => {
 		setError('');
 		const payload = {
 			title,
+			slug: slug.trim() || undefined,
 			content,
 			excerpt,
 			status,
@@ -311,6 +342,9 @@ const ArticleEditor = () => {
 			setSaving(false);
 		}
 	};
+
+	const siteUrl = useMemo(() => config.getSiteUrl().replace(/\/+$/, ''), []);
+	const permalinkPreview = `${siteUrl}/${KB_PERMALINK_BASE}/${slug || 'article-slug'}/`;
 
 	if (loading) {
 		return <p className="p-6 text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</p>;
@@ -396,6 +430,36 @@ const ArticleEditor = () => {
 				placeholder={__('Article title', 'doublescale')}
 				className="h-12 text-lg font-semibold"
 			/>
+
+			<div className="space-y-1.5">
+				<Label htmlFor="kb-slug">{__('Permalink', 'doublescale')}</Label>
+				<Input
+					id="kb-slug"
+					type="text"
+					value={slug}
+					onChange={(e) => {
+						setSlug(e.target.value);
+						setSlugEdited(true);
+					}}
+					placeholder={__('article-slug', 'doublescale')}
+				/>
+				<p className="break-all text-xs text-muted-foreground">
+					{permalinkPreview}
+					{!isNew && articleUrl && (
+						<>
+							{' · '}
+							<a
+								href={articleUrl}
+								target="_blank"
+								rel="noreferrer"
+								className="text-primary hover:underline"
+							>
+								{__('View', 'doublescale')}
+							</a>
+						</>
+					)}
+				</p>
+			</div>
 
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-1.5">

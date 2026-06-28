@@ -566,6 +566,15 @@ class RestArticleController extends RestController {
 		if ( null !== $request->get_param( 'title' ) ) {
 			$data['post_title'] = sanitize_text_field( (string) $request->get_param( 'title' ) );
 		}
+		// Optional editor-supplied slug. Empty is ignored so WordPress falls back to
+		// auto-deriving from the title; `wp_insert_post`/`wp_update_post` run
+		// wp_unique_post_slug() on `post_name`, so collisions are deduped by core.
+		if ( null !== $request->get_param( 'slug' ) ) {
+			$slug = sanitize_title( (string) $request->get_param( 'slug' ) );
+			if ( '' !== $slug ) {
+				$data['post_name'] = $slug;
+			}
+		}
 		if ( null !== $request->get_param( 'content' ) ) {
 			$data['post_content'] = $this->service->sanitize_body( (string) $request->get_param( 'content' ) );
 		}

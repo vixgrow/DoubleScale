@@ -45,6 +45,7 @@ export interface KbArticleFull extends KbArticleSummary {
 
 export interface KbArticleInput {
 	title?: string;
+	slug?: string;
 	content?: string;
 	excerpt?: string;
 	status?: 'publish' | 'draft' | 'private';

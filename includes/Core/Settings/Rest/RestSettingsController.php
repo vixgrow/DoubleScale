@@ -213,6 +213,11 @@ class RestSettingsController extends RestController {
 							'type'    => 'boolean',
 							'default' => false,
 						),
+						'create_contacts_in_crm' => array(
+							'type'        => 'boolean',
+							'default'     => false,
+							'description' => __( 'Create CRM contacts from abandoned carts for list/tag assignment. When off, contacts are only created by active abandoned-cart automations.', 'doublescale' ),
+						),
 						'wait_period'          => array(
 							'type'    => 'integer',
 							'default' => 1,

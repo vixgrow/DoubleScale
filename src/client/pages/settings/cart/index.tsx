@@ -19,6 +19,7 @@ interface CartSettingsProps {
 const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 	const {
 		enable_cart_tracking,
+		create_contacts_in_crm = false,
 		wait_period,
 		cool_off_period,
 		lost_cart_days,
@@ -140,9 +141,45 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						)}
 					</div>
 					<div className="flex flex-col gap-2 border-b pb-5">
+						<div className="flex items-center justify-between w-full">
+							<div className="text-xl font-medium w-full">
+								{__('CRM contacts', 'doublescale')}
+							</div>
+							<div className="flex items-center gap-2">
+								<Switch
+									checked={create_contacts_in_crm}
+									onCheckedChange={(checked: boolean) =>
+										handleFieldChange(
+											'create_contacts_in_crm',
+											checked
+										)
+									}
+								/>
+								<Label>
+									{__('Create contacts in CRM', 'doublescale')}
+								</Label>
+							</div>
+						</div>
+						<div className="text-[#9197A4]">
+							{__(
+								'Create CRM contacts from abandoned carts so you can assign lists and tags below. When off, contacts are only created by active Abandoned Cart automations that match your rules.',
+								'doublescale'
+							)}
+						</div>
+					</div>
+					<div className="flex flex-col gap-2 border-b pb-5">
 						<div className="text-xl font-medium">
 							{__('Add Lists on Cart Abandoned', 'doublescale')}
 						</div>
+						{!create_contacts_in_crm && (
+							<div className="text-secondary flex items-center gap-2">
+								<AlertIcon />
+								{__(
+									'Enable CRM contacts above to apply these lists and tags when a cart is abandoned.',
+									'doublescale'
+								)}
+							</div>
+						)}
 						<div className="flex items-center gap-5">
 							<Field
 								label={__('Lists', 'doublescale')}
@@ -169,6 +206,15 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						<div className="text-xl font-medium">
 							{__('Lost Cart', 'doublescale')}
 						</div>
+						{!create_contacts_in_crm && (
+							<div className="text-secondary flex items-center gap-2">
+								<AlertIcon />
+								{__(
+									'Enable CRM contacts above to apply these lists and tags when a cart is marked lost.',
+									'doublescale'
+								)}
+							</div>
+						)}
 						<div className="flex items-center gap-5">
 							<Field
 								label={__('Add Lists on Cart Lost', 'doublescale')}

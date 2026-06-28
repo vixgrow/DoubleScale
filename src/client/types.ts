@@ -776,6 +776,7 @@ export type Settings = {
 	};
 	cart: {
 		enable_cart_tracking: boolean;
+		create_contacts_in_crm: boolean;
 		wait_period: number;
 		cool_off_period: number;
 		lost_cart_days: number;

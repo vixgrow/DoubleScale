@@ -1804,6 +1804,37 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * Build a REST error when a contact identifier is already in use.
+	 *
+	 * @param array{field: string, contact: ContactModel}|null $conflict Conflict details.
+	 *
+	 * @return WP_Error|null
+	 */
+	private function identifier_conflict_error( $conflict ) {
+		if ( ! $conflict || empty( $conflict['field'] ) ) {
+			return null;
+		}
+
+		$messages = array(
+			'email'          => __( 'A contact with this email address already exists.', 'doublescale' ),
+			'phone'          => __( 'A contact with this phone number already exists.', 'doublescale' ),
+			'whatsapp_phone' => __( 'A contact with this WhatsApp number already exists.', 'doublescale' ),
+		);
+
+		$field = (string) $conflict['field'];
+		$code  = $field . '_exists';
+
+		return new WP_Error(
+			$code,
+			$messages[ $field ] ?? __( 'Contact already exists.', 'doublescale' ),
+			array(
+				'status' => 400,
+				'field'  => $field,
+			)
+		);
+	}
+
+	/**
 	 * Permission check for unified messages endpoint
 	 *
 	 * @param WP_REST_Request $request
@@ -1977,9 +2008,9 @@ class RestContactController extends RestController {
 				);
 			}
 
-			$existing = ContactModel::find_by_identifiers( $contact_data );
+			$existing = ContactModel::find_identifier_conflict( $contact_data );
 			if ( $existing ) {
-				return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
+				return $this->identifier_conflict_error( $existing );
 			}
 
 			$contact = ContactModel::create( $contact_data );
@@ -2112,9 +2143,9 @@ class RestContactController extends RestController {
 
 			$contact_data = $this->prepare_contact( $request );
 
-			$duplicate = ContactModel::find_by_identifiers( $contact_data, (int) $contact_id );
+			$duplicate = ContactModel::find_identifier_conflict( $contact_data, (int) $contact_id );
 			if ( $duplicate ) {
-				return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
+				return $this->identifier_conflict_error( $duplicate );
 			}
 
 			$changes      = ContactUpdateNotifier::collect_field_changes( $contact, $contact_data );

@@ -39,10 +39,14 @@ export const CreateContactModal: React.FC = () => {
 	};
 
 	const [contactForm, setContactForm] = useState(emptyContact);
+	const [fieldErrors, setFieldErrors] = useState<
+		Partial<Record<'email' | 'phone' | 'whatsapp_phone', string>>
+	>({});
 
 	useEffect(() => {
 		if (!createContactVisible) {
 			setContactForm(emptyContact);
+			setFieldErrors({});
 		}
 	}, [createContactVisible]);
 
@@ -56,6 +60,15 @@ export const CreateContactModal: React.FC = () => {
 	const closeModal = () => {
 		setCreateContactVisible(false);
 		setContactForm(emptyContact);
+		setFieldErrors({});
+	};
+
+	const handleCreateContact = async () => {
+		setFieldErrors({});
+		const result = await createContact(contactForm);
+		if (!result.success && result.field) {
+			setFieldErrors({ [result.field]: result.message });
+		}
 	};
 
 	const inputClass =
@@ -147,13 +160,21 @@ export const CreateContactModal: React.FC = () => {
 							inputMode="email"
 							placeholder={__('name@company.com', 'doublescale')}
 							value={contactForm.email}
-							onChange={(e) =>
+							onChange={(e) => {
+								setFieldErrors((prev) => {
+									const next = { ...prev };
+									delete next.email;
+									return next;
+								});
 								setContactForm((prev) => ({
 									...prev,
 									email: e.target.value,
-								}))
-							}
+								}));
+							}}
 						/>
+						{fieldErrors.email && (
+							<p className="text-xs text-destructive">{fieldErrors.email}</p>
+						)}
 					</div>
 
 					<div>
@@ -176,6 +197,11 @@ export const CreateContactModal: React.FC = () => {
 										const v = e.target.value;
 										const phoneRegex = /^[0-9+\-\s()]*$/;
 										if (phoneRegex.test(v) || v === '') {
+											setFieldErrors((prev) => {
+												const next = { ...prev };
+												delete next.phone;
+												return next;
+											});
 											setContactForm((prev) => ({
 												...prev,
 												phone: v,
@@ -183,6 +209,11 @@ export const CreateContactModal: React.FC = () => {
 										}
 									}}
 								/>
+								{fieldErrors.phone && (
+									<p className="text-xs text-destructive">
+										{fieldErrors.phone}
+									</p>
+								)}
 							</div>
 							<div className="space-y-2">
 								<Label htmlFor="ds-create-contact-whatsapp" className="text-sm font-medium">
@@ -199,6 +230,11 @@ export const CreateContactModal: React.FC = () => {
 										const v = e.target.value;
 										const phoneRegex = /^[0-9+\-\s()]*$/;
 										if (phoneRegex.test(v) || v === '') {
+											setFieldErrors((prev) => {
+												const next = { ...prev };
+												delete next.whatsapp_phone;
+												return next;
+											});
 											setContactForm((prev) => ({
 												...prev,
 												whatsapp_phone: v,
@@ -206,6 +242,11 @@ export const CreateContactModal: React.FC = () => {
 										}
 									}}
 								/>
+								{fieldErrors.whatsapp_phone && (
+									<p className="text-xs text-destructive">
+										{fieldErrors.whatsapp_phone}
+									</p>
+								)}
 								<p className="text-xs text-muted-foreground">
 									{__(
 										'Provide an email and/or phone number. Used for WhatsApp messaging when set; include country code (e.g. +15550102030).',
@@ -232,7 +273,7 @@ export const CreateContactModal: React.FC = () => {
 						variant="default"
 						size="lg"
 						className="h-11 rounded-xl px-8 font-semibold shadow-sm sm:min-w-[160px]"
-						onClick={() => createContact(contactForm)}
+						onClick={handleCreateContact}
 						disabled={isSaving}
 					>
 						{isSaving

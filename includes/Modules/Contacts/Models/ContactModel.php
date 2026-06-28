@@ -127,12 +127,15 @@ class ContactModel extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required'            => 'Contact email field is required.',
-		'email.email'               => 'Invalid email address.',
+		'email.required'              => 'Contact email field is required.',
+		'email.email'                 => 'Invalid email address.',
+		'email.unique'                => 'A contact with this email address already exists.',
 		'contact.identifier_required' => 'Contact must have an email address or phone number.',
-		'phone.regex'               => 'Invalid phone number.',
-		'whatsapp_phone.regex'      => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
-		'zip.numeric'               => 'Invalid zip code.',
+		'phone.regex'                 => 'Invalid phone number.',
+		'phone.unique'                => 'A contact with this phone number already exists.',
+		'whatsapp_phone.regex'        => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'whatsapp_phone.unique'       => 'A contact with this WhatsApp number already exists.',
+		'zip.numeric'                 => 'Invalid zip code.',
 	);
 
 	/**
@@ -522,6 +525,20 @@ class ContactModel extends Model {
 	 * @return ContactModel|null
 	 */
 	public static function find_by_identifiers( array $data, $exclude_id = null ) {
+		$conflict = self::find_identifier_conflict( $data, $exclude_id );
+
+		return $conflict ? $conflict['contact'] : null;
+	}
+
+	/**
+	 * Find an identifier conflict for email, phone, or WhatsApp number.
+	 *
+	 * @param array<string, mixed> $data       Contact attributes.
+	 * @param int|null             $exclude_id Contact ID to exclude (updates).
+	 *
+	 * @return array{field: string, contact: ContactModel}|null
+	 */
+	public static function find_identifier_conflict( array $data, $exclude_id = null ) {
 		$email = self::normalize_email( $data['email'] ?? null );
 		if ( null !== $email ) {
 			$query = self::where( 'email', $email );
@@ -530,7 +547,10 @@ class ContactModel extends Model {
 			}
 			$contact = $query->first();
 			if ( $contact ) {
-				return $contact;
+				return array(
+					'field'   => 'email',
+					'contact' => $contact,
+				);
 			}
 		}
 
@@ -542,17 +562,27 @@ class ContactModel extends Model {
 			}
 			$contact = $query->first();
 			if ( $contact ) {
-				return $contact;
+				return array(
+					'field'   => 'phone',
+					'contact' => $contact,
+				);
 			}
 		}
 
-		$whatsapp = self::normalize_whatsapp_field( $data['whatsapp_phone'] ?? null );
+		$country_hint = isset( $data['country'] ) ? (string) $data['country'] : '';
+		$whatsapp     = self::normalize_whatsapp_field( $data['whatsapp_phone'] ?? null, $country_hint );
 		if ( '' !== $whatsapp ) {
 			$query = self::where( 'whatsapp_phone', $whatsapp );
 			if ( null !== $exclude_id ) {
 				$query->where( 'id', '!=', $exclude_id );
 			}
-			return $query->first();
+			$contact = $query->first();
+			if ( $contact ) {
+				return array(
+					'field'   => 'whatsapp_phone',
+					'contact' => $contact,
+				);
+			}
 		}
 
 		return null;
@@ -956,6 +986,21 @@ class ContactModel extends Model {
 
 			if ( '' !== $whatsapp_phone && ! preg_match( '/^\+[1-9][0-9]{0,14}$/', $whatsapp_phone ) ) {
 				throw new \Exception( esc_html( $this->messages['whatsapp_phone.regex'] ) );
+			}
+
+			$conflict = self::find_identifier_conflict(
+				array(
+					'email'          => $email,
+					'phone'          => $phone,
+					'whatsapp_phone' => $whatsapp_phone,
+					'country'        => $this->resolve_identifier_value( 'country' ),
+				),
+				$this->exists ? (int) $this->id : null
+			);
+			if ( $conflict ) {
+				$message_key = $conflict['field'] . '.unique';
+				$message     = $this->messages[ $message_key ] ?? 'Contact already exists.';
+				throw new \Exception( esc_html( $message ) );
 			}
 		}
 

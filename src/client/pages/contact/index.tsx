@@ -16,6 +16,8 @@ import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
  */
 import './style.scss';
 import { Contact as ContactType, NoticeMessage } from '@doublescale/client';
+import { mapContactIdentifierError } from '@doublescale/shared/utils/contact-identifier-errors';
+import type { ContactUpdateResult } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import { Provider } from './state/context';
@@ -114,9 +116,11 @@ const Contact: React.FC<ContactProps> = ({
 		}
 	};
 
-	const updateContact = async (updatedData?: Partial<ContactType>) => {
+	const updateContact = async (
+		updatedData?: Partial<ContactType>
+	): Promise<ContactUpdateResult> => {
 		if (!contact) {
-			return;
+			return { success: false, message: __('Contact not found.', 'doublescale') };
 		}
 
 		setIsUpdating(true);
@@ -154,12 +158,19 @@ const Contact: React.FC<ContactProps> = ({
 				type: 'success',
 				message: __('Contact updated successfully', 'doublescale'),
 			});
+			return { success: true };
 		} catch (error: any) {
 			console.error('Update contact error:', error);
+			const mapped = mapContactIdentifierError(error);
 			setNotice({
 				type: 'error',
-				message: error.message,
+				message: mapped.message,
 			});
+			return {
+				success: false,
+				message: mapped.message,
+				field: mapped.field,
+			};
 		} finally {
 			setIsUpdating(false);
 		}

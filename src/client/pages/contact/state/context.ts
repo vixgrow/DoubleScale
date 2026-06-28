@@ -13,7 +13,16 @@ import type {
 	LMSCourse,
 	NoticeMessage,
 } from '@doublescale/client';
+import type { ContactIdentifierField } from '@doublescale/shared/utils/contact-identifier-errors';
 import type { EmailAnalytics, PurchaseHistory } from './types';
+
+export type ContactUpdateResult =
+	| { success: true }
+	| {
+			success: false;
+			message: string;
+			field?: ContactIdentifierField;
+	  };
 
 /**
  * Context type definition for contact page state.
@@ -23,7 +32,9 @@ export type ContactContextType = {
 	contact: Contact | null;
 	isLoading: boolean;
 	setContact: (contact: Contact) => void;
-	updateContact: (updatedData?: Partial<Contact>) => void;
+	updateContact: (
+		updatedData?: Partial<Contact>
+	) => Promise<ContactUpdateResult>;
 	isUpdating: boolean;
 	showNotice?: (notice: NoticeMessage) => void;
 	notes: Note[];
@@ -48,7 +59,7 @@ const defaultContextValue: ContactContextType = {
 	setContact: (_contact: Contact) => {
 		throw new Error('setContact() not implemented');
 	},
-	updateContact: (_updatedData?: Partial<Contact>) => {
+	updateContact: async (_updatedData?: Partial<Contact>) => {
 		throw new Error('updateContact() not implemented');
 	},
 	notes: [],

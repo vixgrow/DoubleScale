@@ -60,9 +60,15 @@ function ContactsContent({ onSkip: _onSkip, onPrevious, onNext }: ContactsConten
 			};
 
 			// Use existing createContact method which handles success/error notifications
-			await createContact(contactPayload);
+			const result = await createContact(contactPayload);
+			if (!result.success) {
+				createNotice({
+					type: 'error',
+					message: result.message,
+				});
+				return;
+			}
 
-			// Refresh contacts list
 			await fetchContacts();
 
 			// Show a success notice in the onboarding flow

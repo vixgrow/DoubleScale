@@ -14,6 +14,10 @@ import { isEmail } from 'validator';
 import type { Contact, ContactsResponse, Order } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
 import { formatDateForAPI } from '@doublescale/utils';
+import {
+	mapContactIdentifierError,
+	type ContactIdentifierField,
+} from '@doublescale/shared/utils/contact-identifier-errors';
 import { useContactsContext } from './contexts';
 
 interface ContactPayload {
@@ -23,6 +27,14 @@ interface ContactPayload {
 	phone?: string;
 	whatsapp_phone?: string;
 }
+
+export type CreateContactResult =
+	| { success: true; contact: Contact }
+	| {
+			success: false;
+			message: string;
+			field?: ContactIdentifierField;
+	  };
 
 interface UseContactsAPIOptions {
 	readonly openDialogOnCreate?: boolean;
@@ -78,7 +90,9 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		}
 	};
 
-	const createContact = async (contactPayload: ContactPayload) => {
+	const createContact = async (
+		contactPayload: ContactPayload
+	): Promise<CreateContactResult> => {
 		const email =
 			typeof contactPayload.email === 'string'
 				? contactPayload.email.trim()
@@ -96,19 +110,18 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		const hasPhone = phone !== '' || whatsappPhone !== '';
 
 		if (!hasEmail && !hasPhone) {
-			showNotice(
-				'error',
-				__(
-					'Contact must have an email address or phone number.',
-					'doublescale'
-				)
+			const message = __(
+				'Contact must have an email address or phone number.',
+				'doublescale'
 			);
-			return;
+			showNotice('error', message);
+			return { success: false, message };
 		}
 
 		if (email !== '' && !isEmail(email)) {
-			showNotice('error', __('Invalid email address', 'doublescale'));
-			return;
+			const message = __('Invalid email address', 'doublescale');
+			showNotice('error', message);
+			return { success: false, message, field: 'email' };
 		}
 
 		setIsSaving(true);
@@ -154,14 +167,16 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 				openContactDialog(response.id.toString());
 			}
 
-			// Refresh contacts list
 			fetchContacts();
+			return { success: true, contact: response };
 		} catch (error: any) {
-			setCreateContactVisible(false);
-			showNotice(
-				'error',
-				error.message || __('Failed to create Contact', 'doublescale')
-			);
+			const mapped = mapContactIdentifierError(error);
+			showNotice('error', mapped.message);
+			return {
+				success: false,
+				message: mapped.message,
+				field: mapped.field,
+			};
 		} finally {
 			setIsSaving(false);
 		}

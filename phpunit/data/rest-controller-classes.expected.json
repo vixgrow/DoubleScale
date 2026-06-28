@@ -39,6 +39,7 @@
     "RestLeadScoringRuleLevelController",
     "RestLinkTriggerController",
     "RestListController",
+    "RestListPreferencesController",
     "RestLogController",
     "RestMailboxController",
     "RestMessagingController",

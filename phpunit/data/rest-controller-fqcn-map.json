@@ -39,6 +39,7 @@
     "RestLeadScoringRuleLevelController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleLevelController",
     "RestLinkTriggerController": "DoubleScale\\Pro\\Modules\\LinkTriggers\\Rest\\Controllers\\RestLinkTriggerController",
     "RestListController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestListController",
+    "RestListPreferencesController": "DoubleScale\\Core\\Rest\\Controllers\\RestListPreferencesController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
     "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
     "RestMessagingController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestMessagingController",

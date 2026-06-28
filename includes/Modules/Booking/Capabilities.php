@@ -334,13 +334,13 @@ class Capabilities {
 			return true;
 		}
 
-		$booking = BookingModel::find( $booking_id );
+		$booking = BookingModel::with( 'event', 'calendar', 'hosts' )->find( $booking_id );
 
 		if ( ! $booking ) {
 			return false;
 		}
 
-		return $booking->getOwnerUserId() === get_current_user_id();
+		return $booking->userCanAccessAsStaff( get_current_user_id() );
 	}
 
 	public static function can_read_booking( $booking_id ) {
@@ -352,13 +352,13 @@ class Capabilities {
 			return true;
 		}
 
-		$booking = BookingModel::with( 'event', 'calendar' )->find( $booking_id );
+		$booking = BookingModel::with( 'event', 'calendar', 'hosts' )->find( $booking_id );
 
 		if ( ! $booking ) {
 			return false;
 		}
 
-		if ( current_user_can( 'doublescale_booking_read_own_bookings' ) && $booking->getOwnerUserId() === get_current_user_id() ) {
+		if ( current_user_can( 'doublescale_booking_read_own_bookings' ) && $booking->userCanAccessAsStaff( get_current_user_id() ) ) {
 			return true;
 		}
 

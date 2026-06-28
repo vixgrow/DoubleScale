@@ -176,14 +176,60 @@ class BookingModel extends Model {
 		return $this->getTimezoneAttribute() ?? 'UTC';
 	}
 
+	/**
+	 * WordPress user ID that owns the booking's event/calendar (team owner).
+	 *
+	 * @return int|null
+	 */
 	public function getOwnerUserId() {
 		if ( $this->event_id && $this->event ) {
-			return $this->event->user_id;
+			$user_id = $this->event->user_id;
+			return ( null !== $user_id && '' !== $user_id ) ? (int) $user_id : null;
 		}
 		if ( $this->calendar ) {
-			return $this->calendar->user_id;
+			$user_id = $this->calendar->user_id;
+			return ( null !== $user_id && '' !== $user_id ) ? (int) $user_id : null;
 		}
 		return null;
+	}
+
+	/**
+	 * Whether the user may view/manage this booking under own-scope permissions.
+	 *
+	 * Mirrors {@see \DoubleScale\Modules\Booking\Rest\Controllers\RestBookingController::apply_user_filter()}:
+	 * personal host-calendar owners, team-event assigned hosts, and calendar owners.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return bool
+	 */
+	public function userCanAccessAsStaff( int $user_id ): bool {
+		if ( $user_id <= 0 ) {
+			return false;
+		}
+
+		$owner_id = $this->getOwnerUserId();
+		if ( null !== $owner_id && $owner_id === $user_id ) {
+			return true;
+		}
+
+		if ( ! $this->relationLoaded( 'calendar' ) ) {
+			$this->load( 'calendar' );
+		}
+		$calendar = $this->calendar;
+		if ( $calendar && 'host' === $calendar->type && (int) $calendar->user_id === $user_id ) {
+			return true;
+		}
+
+		if ( ! $this->relationLoaded( 'hosts' ) ) {
+			$this->load( 'hosts' );
+		}
+		foreach ( $this->hosts as $host ) {
+			if ( (int) $host->ID === $user_id ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public function changeStatus( $status ) {

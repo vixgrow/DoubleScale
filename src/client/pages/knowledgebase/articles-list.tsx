@@ -3,13 +3,38 @@
  * enhancement, the plan's named fallback). Group filter + search + status,
  * with duplicate / delete row actions.
  *
+ * When filtered to a single group (and not searching), rows become drag-sortable
+ * so editors can curate article order — the public listing, portal reader, and
+ * themed archive all sort by `menu_order`. Ordering is only meaningful within one
+ * group, so drag is disabled in the "All groups" / search views.
+ *
  * Built on the shared design system (`@/components/ui/*`) so it matches the rest
  * of the admin (Inbox, Templates, …) rather than hand-rolled HTML.
  */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
+import type { ReactNode } from 'react';
+import {
+	DndContext,
+	closestCenter,
+	KeyboardSensor,
+	PointerSensor,
+	useSensor,
+	useSensors,
+	type DragEndEvent,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+	SortableContext,
+	arrayMove,
+	sortableKeyboardCoordinates,
+	useSortable,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +62,7 @@ import {
 	duplicateArticle,
 	listArticles,
 	listGroups,
+	reorderArticles,
 	type KbArticleSummary,
 	type KbGroup,
 } from './api';
@@ -57,15 +83,129 @@ const STATUS_BADGE: Record<string, string> = {
 /** Sentinel for the "All statuses" option — Radix Select cannot use an empty-string value. */
 const ALL_STATUSES = 'all';
 
+interface ArticleCellsProps {
+	article: KbArticleSummary;
+	groupLabel: string;
+	onOpen: (id: number) => void;
+	onOpenGroup: (groupId: number) => void;
+	onDuplicate: (id: number) => void;
+	onDelete: (id: number) => void;
+}
+
+/** The article's data cells, shared by the plain and drag-sortable row variants. */
+const ArticleCells = ({
+	article: a,
+	groupLabel,
+	onOpen,
+	onOpenGroup,
+	onDuplicate,
+	onDelete,
+}: ArticleCellsProps) => (
+	<>
+		<TableCell>
+			<div className="flex items-center gap-2">
+				<button
+					type="button"
+					className="font-medium text-primary hover:underline"
+					onClick={() => onOpen(a.id)}
+				>
+					{a.title || __('(untitled)', 'doublescale')}
+				</button>
+				{a.members_only && (
+					<Badge className="border-transparent bg-amber-100 text-amber-700">
+						{__('Members', 'doublescale')}
+					</Badge>
+				)}
+			</div>
+		</TableCell>
+		<TableCell>
+			{a.group_id > 0 ? (
+				<button
+					type="button"
+					className="flex items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
+					onClick={() => onOpenGroup(a.group_id)}
+					title={__('Filter to this group', 'doublescale')}
+				>
+					{a.group_color && (
+						<span
+							aria-hidden="true"
+							className="h-2.5 w-2.5 shrink-0 rounded-full border border-border"
+							style={{ backgroundColor: a.group_color }}
+						/>
+					)}
+					{groupLabel || __('(group)', 'doublescale')}
+				</button>
+			) : (
+				<span className="text-muted-foreground">—</span>
+			)}
+		</TableCell>
+		<TableCell>
+			<Badge className={STATUS_BADGE[a.status]}>{STATUS_LABEL[a.status] || a.status}</Badge>
+		</TableCell>
+		<TableCell className="text-right tabular-nums">{a.views}</TableCell>
+		<TableCell className="text-right">
+			<div className="flex justify-end gap-1">
+				<Button variant="ghost" size="sm" onClick={() => onDuplicate(a.id)}>
+					{__('Duplicate', 'doublescale')}
+				</Button>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="text-destructive hover:text-destructive"
+					onClick={() => onDelete(a.id)}
+				>
+					{__('Delete', 'doublescale')}
+				</Button>
+			</div>
+		</TableCell>
+	</>
+);
+
+/** A drag-sortable row: handle-only listeners keep the inline title/actions clickable. */
+const SortableArticleRow = ({ id, children }: { id: number; children: ReactNode }) => {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+		opacity: isDragging ? 0.5 : 1,
+	};
+	return (
+		<TableRow ref={setNodeRef} style={style}>
+			<TableCell className="w-8 pr-0">
+				<button
+					type="button"
+					className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+					aria-label={__('Drag to reorder', 'doublescale')}
+					{...attributes}
+					{...listeners}
+				>
+					<GripVertical className="h-4 w-4" />
+				</button>
+			</TableCell>
+			{children}
+		</TableRow>
+	);
+};
+
 const ArticlesList = () => {
 	const navigate = useNavigate();
+	const { groupId } = useParams<{ groupId?: string }>();
 	const [articles, setArticles] = useState<KbArticleSummary[]>([]);
 	const [groups, setGroups] = useState<KbGroup[]>([]);
 	const [search, setSearch] = useState('');
-	const [group, setGroup] = useState(0);
+	const [group, setGroup] = useState(groupId ? Number(groupId) : 0);
 	const [status, setStatus] = useState('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
+
+	// Drilling in from the Groups page (or navigating between group links) seeds
+	// the filter from the route param. We only follow the param when present so a
+	// manual filter change on the base route isn't clobbered.
+	useEffect(() => {
+		if (groupId !== undefined) {
+			setGroup(Number(groupId));
+		}
+	}, [groupId]);
 
 	const load = async () => {
 		setLoading(true);
@@ -104,6 +244,43 @@ const ArticlesList = () => {
 		return map;
 	}, [groups]);
 
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+	);
+
+	// Article order (menu_order) is only meaningful within one group, so drag is
+	// enabled only when a single group is selected and there's no active search.
+	const canReorder = group !== 0 && search.trim() === '';
+	const colCount = canReorder ? 6 : 5;
+
+	const onDragEnd = async (event: DragEndEvent) => {
+		const { active, over } = event;
+		if (!over || active.id === over.id) {
+			return;
+		}
+		const from = articles.findIndex((a) => a.id === Number(active.id));
+		const to = articles.findIndex((a) => a.id === Number(over.id));
+		if (from === -1 || to === -1 || from === to) {
+			return;
+		}
+
+		const next = arrayMove(articles, from, to);
+		setArticles(next); // Optimistic — the list is already the single-group set.
+		setError('');
+		try {
+			await reorderArticles(next.map((a, i) => ({ id: a.id, order: i })));
+		} catch (e) {
+			setError(
+				(e as { message?: string })?.message || __('Failed to reorder articles.', 'doublescale')
+			);
+			load(); // Reconcile to server truth, reverting the optimistic move.
+		}
+	};
+
+	const onOpen = (id: number) => navigate(getToLink(`knowledgebase/article/${id}`));
+	const onOpenGroup = (gid: number) => navigate(getToLink(`knowledgebase/group/${gid}`));
+
 	const onDuplicate = async (id: number) => {
 		await duplicateArticle(id);
 		load();
@@ -120,15 +297,19 @@ const ArticlesList = () => {
 
 	return (
 		<div className="p-6 space-y-4">
+			{groupId !== undefined && (
+				<Button
+					variant="ghost"
+					size="sm"
+					className="-ml-2 w-fit"
+					onClick={() => navigate(getToLink('knowledgebase'))}
+				>
+					← {__('Back to articles', 'doublescale')}
+				</Button>
+			)}
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold">{__('Knowledge Base', 'doublescale')}</h1>
 				<div className="flex gap-2">
-					<Button variant="outline" onClick={() => navigate(getToLink('knowledgebase/groups'))}>
-						{__('Groups', 'doublescale')}
-					</Button>
-					<Button variant="outline" onClick={() => navigate(getToLink('knowledgebase/settings'))}>
-						{__('Settings', 'doublescale')}
-					</Button>
 					<Button onClick={() => navigate(getToLink('knowledgebase/article/new'))}>
 						{__('New article', 'doublescale')}
 					</Button>
@@ -143,10 +324,7 @@ const ArticlesList = () => {
 					placeholder={__('Search…', 'doublescale')}
 					className="w-56"
 				/>
-				<Select
-					value={String(group)}
-					onValueChange={(value) => setGroup(Number(value))}
-				>
+				<Select value={String(group)} onValueChange={(value) => setGroup(Number(value))}>
 					<SelectTrigger className="w-44">
 						<SelectValue placeholder={__('All groups', 'doublescale')} />
 					</SelectTrigger>
@@ -175,12 +353,21 @@ const ArticlesList = () => {
 				</Select>
 			</div>
 
+			{group !== 0 && (
+				<p className="text-sm text-muted-foreground">
+					{canReorder
+						? __('Drag the handle to reorder articles in this group.', 'doublescale')
+						: __('Clear the search to drag-reorder articles in this group.', 'doublescale')}
+				</p>
+			)}
+
 			{error && <p className="text-sm text-destructive">{error}</p>}
 
 			<Card>
 				<Table>
 					<TableHeader>
 						<TableRow>
+							{canReorder && <TableHead className="w-8" />}
 							<TableHead>{__('Title', 'doublescale')}</TableHead>
 							<TableHead>{__('Group', 'doublescale')}</TableHead>
 							<TableHead>{__('Status', 'doublescale')}</TableHead>
@@ -192,60 +379,53 @@ const ArticlesList = () => {
 						{loading ? (
 							Array.from({ length: 5 }).map((_, i) => (
 								<TableRow key={`s-${i}`}>
-									<TableCell colSpan={5}>
+									<TableCell colSpan={colCount}>
 										<Skeleton className="h-6 w-full" />
 									</TableCell>
 								</TableRow>
 							))
 						) : articles.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={5} className="text-center text-muted-foreground">
+								<TableCell colSpan={colCount} className="text-center text-muted-foreground">
 									{__('No articles yet.', 'doublescale')}
 								</TableCell>
 							</TableRow>
+						) : canReorder ? (
+							<DndContext
+								sensors={sensors}
+								collisionDetection={closestCenter}
+								modifiers={[restrictToVerticalAxis]}
+								onDragEnd={onDragEnd}
+							>
+								<SortableContext
+									items={articles.map((a) => a.id)}
+									strategy={verticalListSortingStrategy}
+								>
+									{articles.map((a) => (
+										<SortableArticleRow key={a.id} id={a.id}>
+											<ArticleCells
+												article={a}
+												groupLabel={groupName[a.group_id]}
+												onOpen={onOpen}
+												onOpenGroup={onOpenGroup}
+												onDuplicate={onDuplicate}
+												onDelete={onDelete}
+											/>
+										</SortableArticleRow>
+									))}
+								</SortableContext>
+							</DndContext>
 						) : (
 							articles.map((a) => (
 								<TableRow key={a.id}>
-									<TableCell>
-										<div className="flex items-center gap-2">
-											<button
-												type="button"
-												className="font-medium text-primary hover:underline"
-												onClick={() => navigate(getToLink(`knowledgebase/article/${a.id}`))}
-											>
-												{a.title || __('(untitled)', 'doublescale')}
-											</button>
-											{a.members_only && (
-												<Badge className="border-transparent bg-amber-100 text-amber-700">
-													{__('Members', 'doublescale')}
-												</Badge>
-											)}
-										</div>
-									</TableCell>
-									<TableCell className="text-muted-foreground">
-										{groupName[a.group_id] || '—'}
-									</TableCell>
-									<TableCell>
-										<Badge className={STATUS_BADGE[a.status]}>
-											{STATUS_LABEL[a.status] || a.status}
-										</Badge>
-									</TableCell>
-									<TableCell className="text-right tabular-nums">{a.views}</TableCell>
-									<TableCell className="text-right">
-										<div className="flex justify-end gap-1">
-											<Button variant="ghost" size="sm" onClick={() => onDuplicate(a.id)}>
-												{__('Duplicate', 'doublescale')}
-											</Button>
-											<Button
-												variant="ghost"
-												size="sm"
-												className="text-destructive hover:text-destructive"
-												onClick={() => onDelete(a.id)}
-											>
-												{__('Delete', 'doublescale')}
-											</Button>
-										</div>
-									</TableCell>
+									<ArticleCells
+										article={a}
+										groupLabel={groupName[a.group_id]}
+										onOpen={onOpen}
+										onOpenGroup={onOpenGroup}
+										onDuplicate={onDuplicate}
+										onDelete={onDelete}
+									/>
 								</TableRow>
 							))
 						)}

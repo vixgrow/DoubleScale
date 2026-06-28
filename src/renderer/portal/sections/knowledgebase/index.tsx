@@ -20,6 +20,9 @@ interface KbArticleSummary {
 	slug: string;
 	excerpt: string;
 	reading_time: number;
+	group_id?: number;
+	group_name?: string;
+	group_color?: string;
 }
 
 interface TocEntry {
@@ -97,6 +100,26 @@ const FeedbackControl = ({ slug }: { slug: string }) => {
 		</div>
 	);
 };
+
+/** A single tappable article card, shared by the grouped and search-result views. */
+const ArticleCard = ({
+	article,
+	onOpen,
+}: {
+	article: KbArticleSummary;
+	onOpen: (slug: string) => void;
+}) => (
+	<button
+		type="button"
+		onClick={() => onOpen(article.slug)}
+		className="block w-full rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary"
+	>
+		<p className="font-semibold text-foreground">{article.title}</p>
+		{article.excerpt && (
+			<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{article.excerpt}</p>
+		)}
+	</button>
+);
 
 const ArticleReader = ({
 	slug,
@@ -240,6 +263,32 @@ const KnowledgeBase = () => {
 		[search]
 	);
 
+	// Group the browse view by the article's primary group so each group's colour
+	// gets a header. Groups appear in article (menu_order) order; ungrouped
+	// articles collect under "Other". Search results stay flat (they span groups).
+	const grouped = useMemo(() => {
+		const list = data?.data || [];
+		const map = new Map<
+			number,
+			{ id: number; name: string; color: string; articles: KbArticleSummary[] }
+		>();
+		list.forEach((a) => {
+			const key = a.group_id || 0;
+			let bucket = map.get(key);
+			if (!bucket) {
+				bucket = {
+					id: key,
+					name: a.group_name || __('Other', 'doublescale'),
+					color: a.group_color || '',
+					articles: [],
+				};
+				map.set(key, bucket);
+			}
+			bucket.articles.push(a);
+		});
+		return Array.from(map.values());
+	}, [data]);
+
 	if (!available) {
 		return (
 			<EmptyState
@@ -282,27 +331,44 @@ const KnowledgeBase = () => {
 				/>
 			)}
 
-			{!loading && !error && data && data.data.length > 0 && (
+			{!loading && !error && data && data.data.length > 0 && search.trim() && (
 				<ul className="space-y-2">
 					{data.data.map((article) => (
 						<li key={article.id}>
-							<button
-								type="button"
-								onClick={() => setSelected(article.slug)}
-								className="block w-full rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary"
-							>
-								<p className="font-semibold text-foreground">
-									{article.title}
-								</p>
-								{article.excerpt && (
-									<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-										{article.excerpt}
-									</p>
-								)}
-							</button>
+							<ArticleCard article={article} onOpen={(s) => setSelected(s)} />
 						</li>
 					))}
 				</ul>
+			)}
+
+			{!loading && !error && data && data.data.length > 0 && !search.trim() && (
+				<div className="space-y-6">
+					{grouped.map((g) => (
+						<section key={g.id} className="space-y-2">
+							<div
+								className="flex items-center gap-2 border-l-4 border-border pl-3"
+								style={g.color ? { borderLeftColor: g.color } : undefined}
+							>
+								{g.color && (
+									<span
+										aria-hidden="true"
+										className="h-3 w-3 shrink-0 rounded-full"
+										style={{ backgroundColor: g.color }}
+									/>
+								)}
+								<h2 className="text-base font-semibold text-foreground">{g.name}</h2>
+								<span className="text-xs text-muted-foreground">({g.articles.length})</span>
+							</div>
+							<ul className="space-y-2">
+								{g.articles.map((article) => (
+									<li key={article.id}>
+										<ArticleCard article={article} onOpen={(s) => setSelected(s)} />
+									</li>
+								))}
+							</ul>
+						</section>
+					))}
+				</div>
 			)}
 		</div>
 	);

@@ -138,7 +138,7 @@ final class KnowledgebaseShortcode {
 
 		$color = (string) get_term_meta( $group->term_id, KnowledgebasePostType::TERM_META_COLOR, true );
 		?>
-		<section class="doublescale-kb__group">
+		<section class="doublescale-kb__group"<?php echo $color ? ' style="border-left:4px solid ' . esc_attr( $color ) . ';padding-left:12px"' : ''; ?>>
 			<h2 class="doublescale-kb__group-title"<?php echo $color ? ' style="color:' . esc_attr( $color ) . '"' : ''; ?>>
 				<?php echo esc_html( $group->name ); ?>
 			</h2>

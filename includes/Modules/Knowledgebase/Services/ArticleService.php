@@ -327,7 +327,21 @@ class ArticleService {
 	 * @return array<string, mixed>
 	 */
 	public function to_summary( WP_Post $post ): array {
-		$groups = Visibility::group_terms_for_post( $post->ID );
+		$groups   = Visibility::group_terms_for_post( $post->ID );
+		$group_id = ! empty( $groups ) ? (int) $groups[0] : 0;
+
+		// Carry the primary group's name + colour so the portal can render
+		// coloured group headers (and the admin a swatch) without a separate
+		// public groups request.
+		$group_name  = '';
+		$group_color = '';
+		if ( $group_id ) {
+			$term = get_term( $group_id, KnowledgebasePostType::TAXONOMY_GROUP );
+			if ( $term && ! is_wp_error( $term ) ) {
+				$group_name  = $term->name;
+				$group_color = (string) get_term_meta( $group_id, KnowledgebasePostType::TERM_META_COLOR, true );
+			}
+		}
 
 		return array(
 			'id'           => (int) $post->ID,
@@ -339,7 +353,9 @@ class ArticleService {
 			'members_only' => Visibility::is_members_only( $post->ID ),
 			'visibility'   => Visibility::effective_visibility( $post ),
 			'views'        => (int) get_post_meta( $post->ID, KnowledgebasePostType::META_VIEWS, true ),
-			'group_id'     => ! empty( $groups ) ? $groups[0] : 0,
+			'group_id'     => $group_id,
+			'group_name'   => $group_name,
+			'group_color'  => $group_color,
 			'reading_time' => $this->reading_time( $post->post_content ),
 			'author'       => get_the_author_meta( 'display_name', (int) $post->post_author ),
 			'modified'     => $post->post_modified_gmt,

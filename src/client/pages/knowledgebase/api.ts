@@ -26,6 +26,8 @@ export interface KbArticleSummary {
 	author: string;
 	modified: string;
 	url: string;
+	group_name?: string;
+	group_color?: string;
 }
 
 export interface KbArticleFull extends KbArticleSummary {

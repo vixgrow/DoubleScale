@@ -94,7 +94,8 @@ const CRM_NAV_ITEM_ORDER: Record<string, number> = {
 	sales: 1,
 	booking: 2,
 	support: 3,
-	tasks: 4,
+	knowledgebase: 4,
+	tasks: 5,
 };
 
 const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
@@ -112,6 +113,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	sales: 'crm',
 	booking: 'crm',
 	support: 'crm',
+	knowledgebase: 'crm',
 	tasks: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
@@ -150,6 +152,7 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	tasks: 'tasks',
 	forms: 'forms',
 	support: 'support',
+	knowledgebase: 'knowledgebase',
 };
 
 /**
@@ -561,6 +564,23 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					].filter((sub) =>
 						hasRequiredCapability(sub.requiredCapability)
 					);
+				}
+
+				if (item.path === 'knowledgebase') {
+					// Sidebar sub-nav mirroring Helpdesk: the parent path IS the
+					// articles list, so the first child links back to it. Groups /
+					// Settings are the routes the in-page header buttons used to open.
+					navItem.subMenu = [
+						{ path: 'knowledgebase', label: __('Articles', 'doublescale') },
+						{
+							path: 'knowledgebase/groups',
+							label: __('Groups', 'doublescale'),
+						},
+						{
+							path: 'knowledgebase/settings',
+							label: __('Settings', 'doublescale'),
+						},
+					];
 				}
 
 				if (navItem.subMenu) {

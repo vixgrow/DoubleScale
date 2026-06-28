@@ -38,7 +38,6 @@ import {
 	getListPreferences,
 	parseSavedCampaignFilters,
 	parseSavedDateRange,
-	serializeCampaignFilters,
 	serializeDateRange,
 	type ListPreferenceKey,
 } from '@doublescale/services/list-preferences-service';
@@ -78,9 +77,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	}>(() => parseSavedDateRange(getListPreferences(listPreferenceKey).date_range));
 	const [step, setStep] = useState<CampaignModalStep>(null);
 	const [campaignFilters, setCampaignFilters] = useState(() =>
-		parseSavedCampaignFilters(
-			getListPreferences(listPreferenceKey).campaign_filters
-		)
+		parseSavedCampaignFilters(null)
 	);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
@@ -99,9 +96,8 @@ const Campaigns: React.FC<CampaignsProps> = ({
 				per_page: perPage,
 				keyword: keywords,
 				date_range: serializeDateRange(dateRange),
-				campaign_filters: serializeCampaignFilters(campaignFilters),
 			}),
-			[campaignFilters, dateRange, keywords, perPage]
+			[dateRange, keywords, perPage]
 		)
 	);
 

@@ -73,6 +73,16 @@ final class ListPreferencesManager {
 			}
 		}
 
+		if ( isset( $all['contacts']['filters'] ) ) {
+			unset( $all['contacts']['filters'] );
+		}
+
+		foreach ( array( 'email_campaigns', 'sms_campaigns' ) as $campaign_list_key ) {
+			if ( isset( $all[ $campaign_list_key ]['campaign_filters'] ) ) {
+				unset( $all[ $campaign_list_key ]['campaign_filters'] );
+			}
+		}
+
 		return $all;
 	}
 
@@ -94,9 +104,21 @@ final class ListPreferencesManager {
 
 		$all = self::get_all( $user_id );
 
-		return isset( $all[ $list_key ] ) && is_array( $all[ $list_key ] )
-			? $all[ $list_key ]
-			: array();
+		if ( ! isset( $all[ $list_key ] ) || ! is_array( $all[ $list_key ] ) ) {
+			return array();
+		}
+
+		$prefs = $all[ $list_key ];
+
+		if ( 'contacts' === $list_key ) {
+			unset( $prefs['filters'] );
+		}
+
+		if ( in_array( $list_key, array( 'email_campaigns', 'sms_campaigns' ), true ) ) {
+			unset( $prefs['campaign_filters'] );
+		}
+
+		return $prefs;
 	}
 
 	/**
@@ -124,6 +146,14 @@ final class ListPreferencesManager {
 		$all     = self::get_all( $user_id );
 		$current = isset( $all[ $list_key ] ) && is_array( $all[ $list_key ] ) ? $all[ $list_key ] : array();
 		$merged  = array_merge( $current, self::sanitize_preferences( $preferences ) );
+
+		if ( 'contacts' === $list_key ) {
+			unset( $merged['filters'] );
+		}
+
+		if ( in_array( $list_key, array( 'email_campaigns', 'sms_campaigns' ), true ) ) {
+			unset( $merged['campaign_filters'] );
+		}
 
 		$all[ $list_key ] = $merged;
 		update_user_meta( $user_id, self::META_KEY, $all );
@@ -178,14 +208,6 @@ final class ListPreferencesManager {
 
 		if ( array_key_exists( 'date_range', $preferences ) ) {
 			$sanitized['date_range'] = self::sanitize_date_range( $preferences['date_range'] );
-		}
-
-		if ( array_key_exists( 'filters', $preferences ) ) {
-			$sanitized['filters'] = self::sanitize_contact_filters( $preferences['filters'] );
-		}
-
-		if ( array_key_exists( 'campaign_filters', $preferences ) ) {
-			$sanitized['campaign_filters'] = self::sanitize_campaign_filters( $preferences['campaign_filters'] );
 		}
 
 		return $sanitized;
@@ -260,171 +282,5 @@ final class ListPreferencesManager {
 		}
 
 		return gmdate( 'c', $timestamp );
-	}
-
-	/**
-	 * Sanitize contact filter rows.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param mixed $filters Raw filters.
-	 *
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function sanitize_contact_filters( $filters ) {
-		if ( ! is_array( $filters ) ) {
-			return array();
-		}
-
-		if ( empty( $filters ) ) {
-			return array();
-		}
-
-		// Advanced filters use nested OR groups (each inner array is an AND group).
-		if ( self::is_nested_contact_filters( $filters ) ) {
-			$sanitized = array();
-			foreach ( $filters as $and_group ) {
-				if ( ! is_array( $and_group ) ) {
-					continue;
-				}
-
-				$group_rows = array();
-				foreach ( $and_group as $row ) {
-					$clean = self::sanitize_contact_filter_row( $row );
-					if ( null !== $clean ) {
-						$group_rows[] = $clean;
-					}
-				}
-
-				if ( ! empty( $group_rows ) ) {
-					$sanitized[] = $group_rows;
-				}
-			}
-
-			return $sanitized;
-		}
-
-		$sanitized = array();
-		foreach ( $filters as $filter ) {
-			$clean = self::sanitize_contact_filter_row( $filter );
-			if ( null !== $clean ) {
-				$sanitized[] = $clean;
-			}
-		}
-
-		return $sanitized;
-	}
-
-	/**
-	 * Whether filters are nested OR groups (advanced filter / RulesBuilder shape).
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array<int, mixed> $filters Raw filters.
-	 *
-	 * @return bool
-	 */
-	private static function is_nested_contact_filters( array $filters ) {
-		foreach ( $filters as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			if ( array_key_exists( 'filter', $item ) || array_key_exists( 'rule', $item ) ) {
-				return false;
-			}
-
-			foreach ( $item as $row ) {
-				if ( is_array( $row ) && ( array_key_exists( 'filter', $row ) || array_key_exists( 'rule', $row ) ) ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Sanitize a single contact filter / rule row.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param mixed $row Raw filter row.
-	 *
-	 * @return array<string, mixed>|null
-	 */
-	private static function sanitize_contact_filter_row( $row ) {
-		if ( ! is_array( $row ) ) {
-			return null;
-		}
-
-		// RulesBuilder (advanced filters) shape — preserve keys the UI reads back.
-		if ( isset( $row['rule'] ) || isset( $row['selectedGroup'] ) ) {
-			return array(
-				'rule'          => sanitize_key( (string) ( $row['rule'] ?? '' ) ),
-				'operator'      => sanitize_key( (string) ( $row['operator'] ?? '' ) ),
-				'value'         => self::sanitize_filter_value( $row['value'] ?? '' ),
-				'selectedGroup' => sanitize_key( (string) ( $row['selectedGroup'] ?? ( $row['group'] ?? '' ) ) ),
-			);
-		}
-
-		if ( isset( $row['filter'] ) || isset( $row['group'] ) ) {
-			return array(
-				'group'    => sanitize_key( (string) ( $row['group'] ?? '' ) ),
-				'filter'   => sanitize_key( (string) ( $row['filter'] ?? '' ) ),
-				'operator' => sanitize_key( (string) ( $row['operator'] ?? '' ) ),
-				'value'    => self::sanitize_filter_value( $row['value'] ?? '' ),
-			);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Sanitize campaign filter payload.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param mixed $filters Raw campaign filters.
-	 *
-	 * @return array<string, mixed>
-	 */
-	private static function sanitize_campaign_filters( $filters ) {
-		if ( ! is_array( $filters ) ) {
-			return array();
-		}
-
-		return array(
-			'status'     => sanitize_key( (string) ( $filters['status'] ?? 'all' ) ),
-			'type'       => sanitize_key( (string) ( $filters['type'] ?? 'all' ) ),
-			'createDate' => self::sanitize_date_range( $filters['createDate'] ?? null ),
-			'updatedAt'  => self::sanitize_date_range( $filters['updatedAt'] ?? null ),
-		);
-	}
-
-	/**
-	 * Sanitize a filter value.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param mixed $value Raw filter value.
-	 *
-	 * @return mixed
-	 */
-	private static function sanitize_filter_value( $value ) {
-		if ( is_array( $value ) ) {
-			return array_map(
-				static function ( $item ) {
-					return is_scalar( $item ) ? sanitize_text_field( (string) $item ) : $item;
-				},
-				$value
-			);
-		}
-
-		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) ) {
-			return $value;
-		}
-
-		return sanitize_text_field( (string) $value );
 	}
 }

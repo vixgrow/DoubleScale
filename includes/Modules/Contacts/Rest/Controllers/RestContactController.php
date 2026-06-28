@@ -150,10 +150,6 @@ class RestContactController extends RestController {
 							'description' => __( 'Whether the contacts filter panel is open.', 'doublescale' ),
 							'type'        => 'boolean',
 						),
-						'filters'           => array(
-							'description' => __( 'Applied contact filters.', 'doublescale' ),
-							'type'        => 'array',
-						),
 						'keyword'           => array(
 							'description' => __( 'Contacts search keyword.', 'doublescale' ),
 							'type'        => 'string',
@@ -2843,7 +2839,6 @@ class RestContactController extends RestController {
 				'column_visibility' => $prefs['column_visibility'] ?? self::get_list_column_visibility(),
 				'per_page'          => $prefs['per_page'] ?? null,
 				'show_filters'      => $prefs['show_filters'] ?? null,
-				'filters'           => $prefs['filters'] ?? array(),
 				'keyword'           => $prefs['keyword'] ?? '',
 				'date_range'        => $prefs['date_range'] ?? null,
 			),
@@ -2875,9 +2870,6 @@ class RestContactController extends RestController {
 		}
 		if ( null !== $request->get_param( 'show_filters' ) ) {
 			$params['show_filters'] = $request->get_param( 'show_filters' );
-		}
-		if ( null !== $request->get_param( 'filters' ) ) {
-			$params['filters'] = $request->get_param( 'filters' );
 		}
 		if ( null !== $request->get_param( 'keyword' ) ) {
 			$params['keyword'] = $request->get_param( 'keyword' );

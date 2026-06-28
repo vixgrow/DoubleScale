@@ -110,7 +110,7 @@ function buildContactsInitialState(): ContactsState {
 		totalRecords: 0,
 		hasRecords: false,
 		showFilters: saved.show_filters ?? false,
-		filters: (saved.filters as FilterType[]) ?? [],
+		filters: [],
 		isFiltering: false,
 		dateRange: parseSavedDateRange(saved.date_range),
 		selectedRowKeys: [],
@@ -182,13 +182,11 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		() => ({
 			per_page: state.perPage,
 			show_filters: state.showFilters,
-			filters: state.filters,
 			keyword: state.keywords,
 			date_range: serializeDateRange(state.dateRange),
 		}),
 		[
 			state.dateRange,
-			state.filters,
 			state.keywords,
 			state.perPage,
 			state.showFilters,

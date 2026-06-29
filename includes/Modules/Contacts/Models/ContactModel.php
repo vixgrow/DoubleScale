@@ -24,7 +24,9 @@ use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Validators\PhoneValidator;
+use DoubleScale\Core\Constants\EddOrderStatus;
 use DoubleScale\Core\Constants\OrderStatus;
+use DoubleScale\Modules\Campaigns\Models\EddOrderModel;
 
 /**
  * ContactModel class
@@ -230,10 +232,59 @@ class ContactModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function edd_orders() {
-		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\EddOrderModel' ) ) {
+		if ( ! class_exists( EddOrderModel::class ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\EddOrderModel::class, 'email', 'email' );
+		return $this->hasMany( EddOrderModel::class, 'email', 'email' );
+	}
+
+	/**
+	 * Build an EDD orders query scoped to this contact.
+	 *
+	 * Matches billing email, linked EDD customer ID, and WordPress user ID so
+	 * orders are not missed when identifiers differ across records.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function edd_orders_query() {
+		if ( ! class_exists( EddOrderModel::class ) ) {
+			return ActivityModel::query()->whereRaw( '1 = 0' );
+		}
+
+		$email = $this->email;
+
+		return EddOrderModel::query()->where(
+			function ( $query ) use ( $email ) {
+				$query->where( 'email', $email );
+
+				if ( function_exists( 'edd_get_customer_by' ) ) {
+					$customer = edd_get_customer_by( 'email', $email );
+					if ( $customer && ! empty( $customer->id ) ) {
+						$query->orWhere( 'customer_id', (int) $customer->id );
+					}
+				}
+
+				$user = get_user_by( 'email', $email );
+				if ( $user ) {
+					$query->orWhere( 'user_id', (int) $user->ID );
+				}
+			}
+		);
+	}
+
+	/**
+	 * EDD sale orders that count toward purchase history totals.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function edd_revenue_orders_query() {
+		return $this->edd_orders_query()
+			->where( 'type', 'sale' )
+			->whereIn( 'status', EddOrderStatus::get_revenue_statuses() );
 	}
 
 	/**

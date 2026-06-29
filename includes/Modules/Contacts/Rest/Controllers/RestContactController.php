@@ -1372,7 +1372,71 @@ class RestContactController extends RestController {
 	}
 
 	/**
-	 * Get EDD purchase history for a contact
+	 * Pick the currency with the most sale orders and return headline EDD revenue stats.
+	 *
+	 * Net revenue includes refund rows (negative totals) grouped by order currency.
+	 *
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\EddOrderModel> $sale_orders   Revenue-counting sale orders.
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\EddOrderModel> $refund_orders Refund orders for the contact.
+	 * @return array{currency: string, revenue: float, average: float, revenue_by_currency: array<string, float>}
+	 */
+	private function summarize_edd_order_revenue( array $sale_orders, array $refund_orders = array() ) {
+		$revenue_by_currency = array();
+		$count_by_currency   = array();
+		$default_currency    = function_exists( 'edd_get_option' ) ? edd_get_option( 'currency', 'USD' ) : 'USD';
+
+		foreach ( $sale_orders as $order ) {
+			$currency = $order->currency ?: $default_currency;
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+				$count_by_currency[ $currency ]   = 0;
+			}
+
+			$revenue_by_currency[ $currency ] += (float) $order->total;
+			++$count_by_currency[ $currency ];
+		}
+
+		foreach ( $refund_orders as $order ) {
+			$currency = $order->currency ?: $default_currency;
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+			}
+
+			$revenue_by_currency[ $currency ] += (float) $order->total;
+		}
+
+		$dominant_currency = '';
+		$dominant_count    = -1;
+		foreach ( $count_by_currency as $currency => $count ) {
+			if ( $count > $dominant_count ) {
+				$dominant_currency = $currency;
+				$dominant_count    = $count;
+			}
+		}
+
+		$revenue = 0.0;
+		$average = 0.0;
+		if ( '' !== $dominant_currency ) {
+			$revenue = $revenue_by_currency[ $dominant_currency ];
+			$average = $dominant_count > 0 ? ( $revenue / $dominant_count ) : 0.0;
+		}
+
+		return array(
+			'currency'            => $dominant_currency ?: $default_currency,
+			'revenue'             => $revenue,
+			'average'             => $average,
+			'revenue_by_currency' => $revenue_by_currency,
+		);
+	}
+
+	/**
+	 * Get EDD purchase history for a contact.
+	 *
+	 * Queries by email, EDD customer ID, and WordPress user ID. Only sale orders
+	 * with net revenue statuses appear in totals and the order list. Revenue is
+	 * net of refund rows and grouped by order currency.
 	 *
 	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
@@ -1389,21 +1453,38 @@ class RestContactController extends RestController {
 		$per_page = (int) $request->get_param( 'edd_per_page' );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$base_query  = $contact->edd_orders();
-		$total_count = $base_query->count();
+		$result['currency'] = edd_get_option( 'currency', 'USD' );
+
+		$revenue_query = $contact->edd_revenue_orders_query();
+		$total_count   = (clone $revenue_query)->count();
 
 		if ( $total_count === 0 ) {
 			return $result;
 		}
 
-		$paid_query = $contact->edd_orders()->whereIn( 'status', array( 'complete', 'edd_subscription' ) );
+		$paginated_orders = (clone $revenue_query)
+			->orderBy( 'date_created', 'desc' )
+			->skip( $offset )
+			->take( $per_page )
+			->get();
 
-		$result['orders']     = $base_query->orderBy( 'date_created', 'desc' )->skip( $offset )->take( $per_page )->get();
-		$result['total']      = $total_count;
-		$result['revenue']    = $paid_query->sum( 'total' );
-		$result['average']    = $paid_query->avg( 'total' );
-		$result['last_order'] = $contact->edd_orders()->orderBy( 'date_created', 'desc' )->value( 'date_created' );
-		$result['currency']   = edd_get_option( 'currency', 'USD' );
+		$all_sale_orders = (clone $revenue_query)->get();
+		$refund_orders   = $contact->edd_orders_query()
+			->where( 'type', 'refund' )
+			->get()
+			->all();
+
+		$revenue_summary = $this->summarize_edd_order_revenue( $all_sale_orders->all(), $refund_orders );
+
+		$result['currency']            = $revenue_summary['currency'];
+		$result['revenue']             = $revenue_summary['revenue'];
+		$result['average']             = $revenue_summary['average'];
+		$result['revenue_by_currency'] = $revenue_summary['revenue_by_currency'];
+		$result['orders']              = $paginated_orders;
+		$result['total']               = $total_count;
+		$result['last_order']          = (clone $revenue_query)
+			->orderBy( 'date_created', 'desc' )
+			->value( 'date_created' );
 
 		return $result;
 	}

@@ -235,7 +235,11 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				{
 					key: 'edd-total-revenue',
 					icon: <TotalRevenueIcon />,
-					value: `${Number(purchaseHistory.edd.revenue || 0).toFixed(2)} ${purchaseHistory.edd.currency}`,
+					value: formatRevenueByCurrency(
+						purchaseHistory.edd.revenue_by_currency,
+						purchaseHistory.edd.revenue,
+						purchaseHistory.edd.currency
+					),
 					label: __('Total Revenue', 'doublescale'),
 					iconBgClass: 'bg-emerald-50',
 					iconColor: 'text-emerald-600',
@@ -243,7 +247,11 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				{
 					key: 'edd-average-order',
 					icon: <AnalyticsReportsIcon width={40} height={40} />,
-					value: `${Number(purchaseHistory.edd.average || 0).toFixed(2)} ${purchaseHistory.edd.currency}`,
+					value: formatAverageOrderValue(
+						purchaseHistory.edd.revenue_by_currency,
+						purchaseHistory.edd.average,
+						purchaseHistory.edd.currency
+					),
 					label: __('Average Order Value', 'doublescale'),
 					iconBgClass: 'bg-violet-50',
 					iconColor: 'text-violet-600',

@@ -12,6 +12,13 @@ export type List = {
 	updated_at: string;
 };
 
+export type ContactList = List & {
+	pivot: {
+		taxonomy_type: string;
+		status: string;
+	};
+};
+
 export type Tag = {
 	id: number;
 	name: string;
@@ -53,7 +60,7 @@ export type Contact = {
 	source: string;
 	created_at: string;
 	updated_at: string;
-	lists: List[];
+	lists: ContactList[];
 	tags: Tag[];
 	notes: Note[];
 	orders?: Order[];

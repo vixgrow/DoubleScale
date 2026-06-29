@@ -140,7 +140,7 @@ const InfoCard: React.FC = () => {
 		const value = customField?.pivot?.value || '';
 
 		// Convert string values to appropriate types
-		if (fieldType === 'boolean' || fieldType === 'checkbox') {
+		if (fieldType === 'boolean') {
 			return value === 'true';
 		}
 
@@ -321,18 +321,21 @@ const InfoCard: React.FC = () => {
 			return __('—', 'doublescale');
 		}
 
-		if (fieldType === 'boolean' || fieldType === 'checkbox') {
+		if (fieldType === 'boolean') {
 			return value === true || value === 'true'
 				? __('Yes', 'doublescale')
 				: __('No', 'doublescale');
 		}
 
-		if (fieldType === 'select' && options) {
+		if ((fieldType === 'select' || fieldType === 'radio') && options) {
 			const option = options.find((opt) => opt.value === value);
 			return option ? option.label : value;
 		}
 
-		if (fieldType === 'multiselect' && Array.isArray(value)) {
+		if (
+			(fieldType === 'multiselect' || fieldType === 'checkbox') &&
+			Array.isArray(value)
+		) {
 			if (value.length === 0) return __('—', 'doublescale');
 			if (options) {
 				return value
@@ -608,16 +611,20 @@ const InfoCard: React.FC = () => {
 														// Get formatted value for multiselect
 														const formattedValue =
 															customField.type ===
-															'multiselect'
+																'multiselect' ||
+															customField.type ===
+																'checkbox'
 																? getMultiselectValue(
 																		fieldValue as string
 																	)
 																: fieldValue;
 
-														// Get options for select/multiselect fields
+														// Get options for select/multiselect/radio/checkbox fields
 														const fieldOptions = [
 															'select',
 															'multiselect',
+															'radio',
+															'checkbox',
 														].includes(
 															customField.type
 														)

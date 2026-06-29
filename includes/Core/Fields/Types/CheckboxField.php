@@ -39,7 +39,7 @@ class CheckboxField extends FieldType {
 	 *
 	 * @var boolean
 	 */
-	protected $is_value_array = false;
+	protected $is_value_array = true;
 
 	/**
 	 * Sanitize
@@ -49,7 +49,10 @@ class CheckboxField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return $value === 'true' || $value === true ? 'true' : 'false';
+		if ( is_array( $value ) ) {
+			return array_map( 'sanitize_text_field', $value );
+		}
+		return sanitize_text_field( $value );
 	}
 
 	/**
@@ -60,10 +63,14 @@ class CheckboxField extends FieldType {
 	 * @return boolean
 	 */
 	public function validate_value( $value ) {
-		if ( $value !== 'true' && $value !== 'false' && $value !== true && $value !== false ) {
+		if ( empty( $value ) && $this->is_required ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'This field must be true or false';
+			$this->validation_err = 'This field is required';
+			return;
 		}
+
+		// For checkbox fields, validation of options should be done against the field's attributes
+		// This is handled in the CustomFieldModel validation
 	}
 }
 

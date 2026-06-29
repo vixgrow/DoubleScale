@@ -404,6 +404,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						},
 						{ path: 'smtp/logs', label: __('Logs', 'doublescale') },
 						{ path: 'smtp/alerts', label: __('Alerts', 'doublescale') },
+						{
+							path: 'smtp/bounce',
+							label: __('Bounce Handler', 'doublescale'),
+						},
 					];
 				}
 

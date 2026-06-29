@@ -4,19 +4,19 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native CRM, sales, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
+WordPress-native CRM, sales pipeline, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin.
 
-**Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
 == Description ==
 
 **DoubleScale is the operating system for a WordPress-native business.** It replaces the stack most teams cobble together — CRM + Mailchimp + Calendly + ClickUp + a transactional email provider + a helpdesk + a reporting dashboard — with **one plugin** that lives inside wp-admin and stores everything in your own database.
 
 You shouldn't need eight separate logins, eight billing relationships, and eight half-broken integrations to run a small business. DoubleScale unifies them around a single contact record, so a form submit can fire an automation, book a meeting, open a support thread, score the lead, alert the assigned rep, and send the receipt — all from the same data model.
+**Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
 = What's inside one plugin =
 
@@ -240,6 +240,36 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.6 = 24 Jun 2026
+- Add PayPal payment gateway support for online invoice payments
+- Improve Outlook SMTP connections with Microsoft Graph for inbound email retrieval
+- Add email attachment handling and display in contact email activity
+- Allow editing logged email activity from the contact timeline
+- Improve phone number handling across contact management and import
+- Revamp customer support portal ticket list and detail views
+- Add ticket detail modal to the admin support inbox with CC recipient improvements
+- Add contacts list column visibility preferences
+- Add automation workflow duplication and step duplicate actions (Pro)
+- Add automation workflow import and export (Pro)
+- Add Contact Information Updated trigger and Update Contact Fields automation action
+- Add User Billing Phone merge tag and new invoice/proposal/credit note notification merge tags
+- Add credit note triggers and rules to sales automations
+- Improve custom field validation and normalization
+- Update GDPR messaging and customer notifications in abandoned cart settings
+- Improve dashboard redirects and module-aware navigation for user roles
+- Add ScrollableMenuList for long dropdown menus across the admin UI
+
+= 1.2.5 = 23 Jun 2026
+- Fix sent email text block styling so color, font size, and font family match the email builder preview
+- Add phone number field mapping for customer import
+- Redesign support inbox with filter dialog, improved bulk actions, and refreshed styling
+- Improve booking event cards, date/time picker, and event action dialogs for mobile
+- Enhance booking email notifications with safe HTML intros and merge tag support
+- Add credit note merge tags and configurable email intro in Sales settings
+- Improve booking ShareModal layout and responsiveness for embed and share links
+- Update Card, StatusPill, and EmailNotification components for layout consistency
+- Fix automation trigger paths for messaging components
+
 = 1.2.4 = 22 Jun 2026
 - Fix email builder text block font size so the canvas matches the Font Size field (remove heading multiplier scaling)
 - Apply consistent default font sizes when switching text styles (H1, H2, H3, paragraph, small)

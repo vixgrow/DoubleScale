@@ -3,7 +3,7 @@
  * Plugin Name:       DoubleScale | All-In-One Business Growth Platform
  * Plugin URI:        https://www.doublescale.io/
  * Description:       DoubleScale | All-In-One Business Growth Platform
- * Version:           1.2.4
+ * Version:           1.2.6
  * Author:            vixgrowy
  * Author URI:        https://www.vixgrow.com
  * License:           GPL v2 or later

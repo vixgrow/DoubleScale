@@ -334,7 +334,7 @@ const AddConnectionHint: React.FC<{ forEmailBox: boolean }> = ({
 	return (
 		<button
 			type="button"
-			onClick={() => navigate(getToLink('settings/smtp'))}
+			onClick={() => navigate(getToLink('smtp/settings'))}
 			className="text-xs text-primary hover:underline inline-flex items-center gap-1"
 		>
 			{forEmailBox

@@ -11,16 +11,30 @@ import { isEmail } from 'validator';
 /**
  * internal dependencies
  */
-import type { Contact, ContactsResponse } from '@doublescale/client';
+import type { Contact, ContactsResponse, Order } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
 import { formatDateForAPI } from '@doublescale/utils';
+import {
+	mapContactIdentifierError,
+	type ContactIdentifierField,
+} from '@doublescale/shared/utils/contact-identifier-errors';
 import { useContactsContext } from './contexts';
 
 interface ContactPayload {
-	email: string;
+	email?: string;
 	first_name: string;
 	last_name: string;
+	phone?: string;
+	whatsapp_phone?: string;
 }
+
+export type CreateContactResult =
+	| { success: true; contact: Contact }
+	| {
+			success: false;
+			message: string;
+			field?: ContactIdentifierField;
+	  };
 
 interface UseContactsAPIOptions {
 	readonly openDialogOnCreate?: boolean;
@@ -76,25 +90,67 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		}
 	};
 
-	const createContact = async (contactPayload: ContactPayload) => {
+	const createContact = async (
+		contactPayload: ContactPayload
+	): Promise<CreateContactResult> => {
 		const email =
 			typeof contactPayload.email === 'string'
 				? contactPayload.email.trim()
 				: '';
+		const phone =
+			typeof contactPayload.phone === 'string'
+				? contactPayload.phone.trim()
+				: '';
+		const whatsappPhone =
+			typeof contactPayload.whatsapp_phone === 'string'
+				? contactPayload.whatsapp_phone.trim()
+				: '';
 
-		if (!email || !isEmail(email)) {
-			setCreateContactVisible(false);
-			showNotice('error', __('Invalid email', 'doublescale'));
-			return;
+		const hasEmail = email !== '' && isEmail(email);
+		const hasPhone = phone !== '' || whatsappPhone !== '';
+
+		if (!hasEmail && !hasPhone) {
+			const message = __(
+				'Contact must have an email address or phone number.',
+				'doublescale'
+			);
+			showNotice('error', message);
+			return { success: false, message };
+		}
+
+		if (email !== '' && !isEmail(email)) {
+			const message = __('Invalid email address', 'doublescale');
+			showNotice('error', message);
+			return { success: false, message, field: 'email' };
 		}
 
 		setIsSaving(true);
 
 		try {
+			const payload: ContactPayload = {
+				...contactPayload,
+				first_name: contactPayload.first_name,
+				last_name: contactPayload.last_name,
+			};
+
+			if (hasEmail) {
+				payload.email = email;
+			} else {
+				delete payload.email;
+			}
+
+			if (phone !== '') {
+				payload.phone = phone;
+			}
+
+			if (whatsappPhone !== '') {
+				payload.whatsapp_phone = whatsappPhone;
+			}
+
 			const response = (await apiFetch({
 				path: '/doublescale/v1/contacts',
 				method: 'POST',
-				data: { ...contactPayload, email },
+				data: payload,
 			})) as Contact;
 
 			// Close the create contact modal
@@ -111,14 +167,16 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 				openContactDialog(response.id.toString());
 			}
 
-			// Refresh contacts list
 			fetchContacts();
+			return { success: true, contact: response };
 		} catch (error: any) {
-			setCreateContactVisible(false);
-			showNotice(
-				'error',
-				error.message || __('Failed to create Contact', 'doublescale')
-			);
+			const mapped = mapContactIdentifierError(error);
+			showNotice('error', mapped.message);
+			return {
+				success: false,
+				message: mapped.message,
+				field: mapped.field,
+			};
 		} finally {
 			setIsSaving(false);
 		}
@@ -304,6 +362,16 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 export const useContactOrderDetails = () => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
 
+	const getOrderDate = (order: Order): string => {
+		if (typeof order.date_created_gmt === 'string' && order.date_created_gmt.trim()) {
+			return order.date_created_gmt;
+		}
+		if (order.date?.date) {
+			return order.date.date;
+		}
+		return '';
+	};
+
 	const getContactOrderDetails = (contact: Contact) => {
 		const details = {
 			orders: 0,
@@ -321,7 +389,19 @@ export const useContactOrderDetails = () => {
 
 		details.orders = contact.orders.length;
 		details.revenue = contact.revenue || '-';
-		details.lastOrderDate = contact.orders[0].date_created_gmt;
+
+		const latestOrderDate = contact.orders.reduce((latest, order) => {
+			const orderDate = getOrderDate(order);
+			if (!orderDate) {
+				return latest;
+			}
+			if (!latest || new Date(orderDate).getTime() > new Date(latest).getTime()) {
+				return orderDate;
+			}
+			return latest;
+		}, '');
+
+		details.lastOrderDate = latestOrderDate || contact.orders[0]?.date_created_gmt || '-';
 
 		return details;
 	};

@@ -6,9 +6,17 @@ export type List = {
 	slug: string;
 	description: string | null;
 	status: string;
+	is_public: boolean;
 	contacts_count: number;
 	created_at: string;
 	updated_at: string;
+};
+
+export type ContactList = List & {
+	pivot: {
+		taxonomy_type: string;
+		status: string;
+	};
 };
 
 export type Tag = {
@@ -52,7 +60,7 @@ export type Contact = {
 	source: string;
 	created_at: string;
 	updated_at: string;
-	lists: List[];
+	lists: ContactList[];
 	tags: Tag[];
 	notes: Note[];
 	orders?: Order[];
@@ -776,6 +784,7 @@ export type Settings = {
 	};
 	cart: {
 		enable_cart_tracking: boolean;
+		create_contacts_in_crm: boolean;
 		wait_period: number;
 		cool_off_period: number;
 		lost_cart_days: number;

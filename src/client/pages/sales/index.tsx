@@ -250,4 +250,13 @@ if (isSalesDocumentsReady()) {
 		requiredCapability: ['doublescale_manage_all_sales', 'doublescale_crm_manager'],
 		...salesPageDefaults,
 	});
+
+	registerAdminPage('sales-approvals', {
+		path: 'sales/approvals',
+		component: () => null,
+		label: __('Approvals', 'doublescale'),
+		hidden: true,
+		requiredCapability: ['doublescale_approve_sales', 'doublescale_manage_all_sales'],
+		...documentsPageDefaults,
+	});
 }

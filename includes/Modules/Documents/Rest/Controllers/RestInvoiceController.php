@@ -13,6 +13,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Capabilities;
+use DoubleScale\Modules\Documents\Constants\DiscountType;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
@@ -284,6 +285,11 @@ class RestInvoiceController extends RestController {
 			return $payload;
 		}
 
+		$discount_check = DiscountType::validate_payload( $payload );
+		if ( is_wp_error( $discount_check ) ) {
+			return $discount_check;
+		}
+
 		if ( ! Capabilities::can_manage_all_sales() ) {
 			$payload['sale_agent_user_id'] = get_current_user_id();
 		}
@@ -315,9 +321,19 @@ class RestInvoiceController extends RestController {
 			return $forbidden;
 		}
 
+		$gate = apply_filters( 'doublescale_sales_update_gate', null, 'invoice', $invoice );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$payload = $this->sanitize_payload( $request, false );
 		if ( is_wp_error( $payload ) ) {
 			return $payload;
+		}
+
+		$discount_check = DiscountType::validate_payload( $payload, $invoice );
+		if ( is_wp_error( $discount_check ) ) {
+			return $discount_check;
 		}
 
 		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['sale_agent_user_id'] ) ) {
@@ -326,6 +342,8 @@ class RestInvoiceController extends RestController {
 
 		$invoice->fill( $payload );
 		$invoice->save();
+
+		do_action( 'doublescale_sales_invoice_updated', $invoice );
 
 		return new WP_REST_Response( InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ), 200 );
 	}
@@ -349,6 +367,8 @@ class RestInvoiceController extends RestController {
 		if ( $forbidden ) {
 			return $forbidden;
 		}
+
+		do_action( 'doublescale_sales_invoice_deleted', $invoice );
 
 		$invoice->delete();
 
@@ -385,6 +405,11 @@ class RestInvoiceController extends RestController {
 				__( 'Create a WordPress page with the [doublescale_invoice] shortcode before sending invoices.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
+		}
+
+		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'invoice', $invoice );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
 		}
 
 		$params = $request->get_json_params();

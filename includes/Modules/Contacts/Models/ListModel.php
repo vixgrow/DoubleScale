@@ -21,6 +21,31 @@ use DoubleScale\Core\Abstracts\TaxonomyModel;
 class ListModel extends TaxonomyModel {
 
 	/**
+	 * Fillable columns (extends taxonomy defaults).
+	 *
+	 * @var array
+	 */
+	protected $fillable = array(
+		'type',
+		'name',
+		'slug',
+		'description',
+		'status',
+		'is_public',
+		'created_at',
+		'updated_at',
+	);
+
+	/**
+	 * Attribute casts.
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'is_public' => 'boolean',
+	);
+
+	/**
 	 * Boot model: unified `terms` table + global scope for lists.
 	 *
 	 * @since 1.0.0

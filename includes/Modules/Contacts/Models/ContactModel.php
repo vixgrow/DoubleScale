@@ -23,6 +23,10 @@ use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
+use DoubleScale\Core\Validators\PhoneValidator;
+use DoubleScale\Core\Constants\EddOrderStatus;
+use DoubleScale\Core\Constants\OrderStatus;
+use DoubleScale\Modules\Campaigns\Models\EddOrderModel;
 
 /**
  * ContactModel class
@@ -112,7 +116,7 @@ class ContactModel extends Model {
 		// Use WordPress is_email() in save() instead of Illuminate's "email" rule: the scoped
 		// Egulias RFC lexer triggers PCRE errors on PHP 8.2+ (preg_split unknown \p property),
 		// which makes every address fail validation.
-		'email'          => 'required',
+		'email'          => 'nullable',
 		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
 		'whatsapp_phone' => 'nullable|regex:/^\+[1-9][0-9]{0,14}$/',
 		'zip'            => 'nullable|numeric',
@@ -126,11 +130,15 @@ class ContactModel extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required'       => 'Contact email field is required.',
-		'email.email'          => 'Invalid email address.',
-		'phone.regex'          => 'Invalid phone number.',
-		'whatsapp_phone.regex' => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
-		'zip.numeric'          => 'Invalid zip code.',
+		'email.required'              => 'Contact email field is required.',
+		'email.email'                 => 'Invalid email address.',
+		'email.unique'                => 'A contact with this email address already exists.',
+		'contact.identifier_required' => 'Contact must have an email address or phone number.',
+		'phone.regex'                 => 'Invalid phone number.',
+		'phone.unique'                => 'A contact with this phone number already exists.',
+		'whatsapp_phone.regex'        => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'whatsapp_phone.unique'       => 'A contact with this WhatsApp number already exists.',
+		'zip.numeric'                 => 'Invalid zip code.',
 	);
 
 	/**
@@ -143,7 +151,7 @@ class ContactModel extends Model {
 	public function lists() {
 		return $this->belongsToMany( ListModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
 			->wherePivot( 'taxonomy_type', 'list' )
-			->withPivot( 'taxonomy_type' );
+			->withPivot( 'taxonomy_type', 'status' );
 	}
 
 	/**
@@ -211,7 +219,9 @@ class ContactModel extends Model {
 		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' );
+		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' )
+			->whereIn( 'status', OrderStatus::get_revenue_statuses() )
+			->orderBy( 'date_created_gmt', 'desc' );
 	}
 
 	/**
@@ -222,10 +232,59 @@ class ContactModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function edd_orders() {
-		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\EddOrderModel' ) ) {
+		if ( ! class_exists( EddOrderModel::class ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\EddOrderModel::class, 'email', 'email' );
+		return $this->hasMany( EddOrderModel::class, 'email', 'email' );
+	}
+
+	/**
+	 * Build an EDD orders query scoped to this contact.
+	 *
+	 * Matches billing email, linked EDD customer ID, and WordPress user ID so
+	 * orders are not missed when identifiers differ across records.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function edd_orders_query() {
+		if ( ! class_exists( EddOrderModel::class ) ) {
+			return ActivityModel::query()->whereRaw( '1 = 0' );
+		}
+
+		$email = $this->email;
+
+		return EddOrderModel::query()->where(
+			function ( $query ) use ( $email ) {
+				$query->where( 'email', $email );
+
+				if ( function_exists( 'edd_get_customer_by' ) ) {
+					$customer = edd_get_customer_by( 'email', $email );
+					if ( $customer && ! empty( $customer->id ) ) {
+						$query->orWhere( 'customer_id', (int) $customer->id );
+					}
+				}
+
+				$user = get_user_by( 'email', $email );
+				if ( $user ) {
+					$query->orWhere( 'user_id', (int) $user->ID );
+				}
+			}
+		);
+	}
+
+	/**
+	 * EDD sale orders that count toward purchase history totals.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function edd_revenue_orders_query() {
+		return $this->edd_orders_query()
+			->where( 'type', 'sale' )
+			->whereIn( 'status', EddOrderStatus::get_revenue_statuses() );
 	}
 
 	/**
@@ -487,7 +546,134 @@ class ContactModel extends Model {
 	 * @return ContactModel
 	 */
 	public static function get_by_email( $email ) {
+		$email = self::normalize_email( $email );
+		if ( null === $email ) {
+			return null;
+		}
+
 		return self::where( 'email', $email )->first();
+	}
+
+	/**
+	 * Normalize an email value for storage and lookup.
+	 *
+	 * @param mixed $email Raw email value.
+	 * @return string|null Trimmed email, or null when empty.
+	 */
+	public static function normalize_email( $email ) {
+		if ( ! is_string( $email ) ) {
+			return null;
+		}
+
+		$email = trim( $email );
+		return '' === $email ? null : $email;
+	}
+
+	/**
+	 * Find an existing contact by email, phone, or WhatsApp number.
+	 *
+	 * @param array<string, mixed> $data Contact attributes.
+	 * @param int|null             $exclude_id Contact ID to exclude (updates).
+	 *
+	 * @return ContactModel|null
+	 */
+	public static function find_by_identifiers( array $data, $exclude_id = null ) {
+		$conflict = self::find_identifier_conflict( $data, $exclude_id );
+
+		return $conflict ? $conflict['contact'] : null;
+	}
+
+	/**
+	 * Find an identifier conflict for email, phone, or WhatsApp number.
+	 *
+	 * @param array<string, mixed> $data       Contact attributes.
+	 * @param int|null             $exclude_id Contact ID to exclude (updates).
+	 *
+	 * @return array{field: string, contact: ContactModel}|null
+	 */
+	public static function find_identifier_conflict( array $data, $exclude_id = null ) {
+		$email = self::normalize_email( $data['email'] ?? null );
+		if ( null !== $email ) {
+			$query = self::where( 'email', $email );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			$contact = $query->first();
+			if ( $contact ) {
+				return array(
+					'field'   => 'email',
+					'contact' => $contact,
+				);
+			}
+		}
+
+		$phone = self::normalize_phone_field( $data['phone'] ?? null );
+		if ( '' !== $phone ) {
+			$query = self::where( 'phone', $phone );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			$contact = $query->first();
+			if ( $contact ) {
+				return array(
+					'field'   => 'phone',
+					'contact' => $contact,
+				);
+			}
+		}
+
+		$country_hint = isset( $data['country'] ) ? (string) $data['country'] : '';
+		$whatsapp     = self::normalize_whatsapp_field( $data['whatsapp_phone'] ?? null, $country_hint );
+		if ( '' !== $whatsapp ) {
+			$query = self::where( 'whatsapp_phone', $whatsapp );
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+			$contact = $query->first();
+			if ( $contact ) {
+				return array(
+					'field'   => 'whatsapp_phone',
+					'contact' => $contact,
+				);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param mixed $phone Raw phone value.
+	 * @return string Normalized phone or empty string.
+	 */
+	public static function normalize_phone_field( $phone ) {
+		return PhoneValidator::normalize_loose( $phone );
+	}
+
+	/**
+	 * @param mixed        $phone        Raw WhatsApp value.
+	 * @param string|null  $country_hint Optional country hint for E.164 resolution.
+	 * @return string Normalized E.164 value or empty string.
+	 */
+	public static function normalize_whatsapp_field( $phone, $country_hint = null ) {
+		$whatsapp = PhoneValidator::to_e164( $phone, (string) ( $country_hint ?? '' ) );
+		return null === $whatsapp ? '' : $whatsapp;
+	}
+
+	/**
+	 * Whether the contact has at least one usable identifier (email or phone).
+	 *
+	 * @param string|null $email
+	 * @param string      $phone
+	 * @param string      $whatsapp_phone
+	 * @return bool
+	 */
+	public static function has_identifier( $email, $phone = '', $whatsapp_phone = '' ) {
+		if ( null !== self::normalize_email( $email ) ) {
+			return true;
+		}
+
+		return '' !== self::normalize_phone_field( $phone )
+			|| '' !== self::normalize_whatsapp_field( $whatsapp_phone );
 	}
 
 	/**
@@ -724,6 +910,129 @@ class ContactModel extends Model {
 	}
 
 	/**
+	 * Check whether the contact is subscribed to a specific list.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $list_id List ID.
+	 * @return bool
+	 */
+	public function is_subscribed_to_list( $list_id ) {
+		$list = $this->lists()->whereKey( (int) $list_id )->first();
+		if ( ! $list ) {
+			return false;
+		}
+
+		$status = $list->pivot->status ?? 'subscribed';
+
+		return 'subscribed' === $status;
+	}
+
+	/**
+	 * Unsubscribe from a list while retaining membership.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $list_id List ID.
+	 * @param string $reason  Optional reason.
+	 * @return bool
+	 */
+	public function unsubscribe_from_list( $list_id, $reason = '' ) {
+		$list_id = (int) $list_id;
+		if ( $list_id <= 0 ) {
+			return false;
+		}
+
+		$list = ListModel::find( $list_id );
+		if ( ! $list ) {
+			return false;
+		}
+
+		if ( ! $this->lists()->whereKey( $list_id )->exists() ) {
+			return false;
+		}
+
+		if ( ! $this->is_subscribed_to_list( $list_id ) ) {
+			return true;
+		}
+
+		$this->lists()->updateExistingPivot( $list_id, array( 'status' => 'unsubscribed' ) );
+
+		/* translators: %s: list name */
+		$note_text = sprintf( __( 'Unsubscribed from list: %s', 'doublescale' ), $list->name );
+		if ( ! empty( $reason ) ) {
+			/* translators: %s: unsubscribe reason */
+			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'doublescale' ), $reason );
+		}
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'List Unsubscribed', 'doublescale' ),
+					'type'  => 'system',
+					'note'  => $note_text,
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
+
+		do_action( 'doublescale_contact_list_unsubscribed', $this, $list_id );
+
+		return true;
+	}
+
+	/**
+	 * Resubscribe to a list (attach first when not a member).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $list_id List ID.
+	 * @return bool
+	 */
+	public function resubscribe_to_list( $list_id ) {
+		$list_id = (int) $list_id;
+		if ( $list_id <= 0 ) {
+			return false;
+		}
+
+		$list = ListModel::find( $list_id );
+		if ( ! $list ) {
+			return false;
+		}
+
+		if ( ! $this->lists()->whereKey( $list_id )->exists() ) {
+			$this->add_lists( array( $list_id ) );
+			return true;
+		}
+
+		if ( $this->is_subscribed_to_list( $list_id ) ) {
+			return true;
+		}
+
+		$this->lists()->updateExistingPivot( $list_id, array( 'status' => 'subscribed' ) );
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'List Subscribed', 'doublescale' ),
+					'type'  => 'system',
+					/* translators: %s: list name */
+					'note'  => sprintf( __( 'Subscribed to list: %s', 'doublescale' ), $list->name ),
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
+
+		do_action( 'doublescale_contact_list_subscribed', $this, $list_id );
+
+		return true;
+	}
+
+	/**
 	 * Sync lists
 	 *
 	 * @since 1.0.0
@@ -738,7 +1047,13 @@ class ContactModel extends Model {
 		$lists_to_remove = array_diff( $existing_lists, $lists );
 
 		if ( ! empty( $lists_to_add ) ) {
-			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			$this->lists()->attach(
+				$lists_to_add,
+				array(
+					'taxonomy_type' => 'list',
+					'status'        => 'subscribed',
+				)
+			);
 			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 
@@ -762,7 +1077,13 @@ class ContactModel extends Model {
 		$lists_to_add   = array_diff( $lists, $existing_lists );
 
 		if ( ! empty( $lists_to_add ) ) {
-			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			$this->lists()->attach(
+				$lists_to_add,
+				array(
+					'taxonomy_type' => 'list',
+					'status'        => 'subscribed',
+				)
+			);
 			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 	}
@@ -833,12 +1154,41 @@ class ContactModel extends Model {
 
 		if ( ! empty( $this->rules ) ) {
 			$this->trim();
-			$email = $this->attributes['email'] ?? '';
-			if ( ! is_string( $email ) || '' === $email ) {
-				throw new \Exception( esc_html( $this->messages['email.required'] ) );
+			$this->normalize_contact_identifiers();
+
+			$email          = self::normalize_email( $this->resolve_identifier_value( 'email' ) );
+			$phone          = (string) $this->resolve_identifier_value( 'phone' );
+			$whatsapp_phone = (string) $this->resolve_identifier_value( 'whatsapp_phone' );
+
+			if ( ! self::has_identifier( $email, $phone, $whatsapp_phone ) ) {
+				throw new \Exception( esc_html( $this->messages['contact.identifier_required'] ) );
 			}
-			if ( ! is_email( $email ) ) {
+
+			if ( null !== $email && ! is_email( $email ) ) {
 				throw new \Exception( esc_html( $this->messages['email.email'] ) );
+			}
+
+			if ( '' !== $phone && ! preg_match( '/^\+?[0-9]+$/', $phone ) ) {
+				throw new \Exception( esc_html( $this->messages['phone.regex'] ) );
+			}
+
+			if ( '' !== $whatsapp_phone && ! preg_match( '/^\+[1-9][0-9]{0,14}$/', $whatsapp_phone ) ) {
+				throw new \Exception( esc_html( $this->messages['whatsapp_phone.regex'] ) );
+			}
+
+			$conflict = self::find_identifier_conflict(
+				array(
+					'email'          => $email,
+					'phone'          => $phone,
+					'whatsapp_phone' => $whatsapp_phone,
+					'country'        => $this->resolve_identifier_value( 'country' ),
+				),
+				$this->exists ? (int) $this->id : null
+			);
+			if ( $conflict ) {
+				$message_key = $conflict['field'] . '.unique';
+				$message     = $this->messages[ $message_key ] ?? 'Contact already exists.';
+				throw new \Exception( esc_html( $message ) );
 			}
 		}
 
@@ -871,18 +1221,100 @@ class ContactModel extends Model {
 	 * @return ContactModel
 	 */
 	public static function createOrUpdate( $data ) {
-		$contact = self::where( 'email', $data['email'] ?? '' )->first();
+		$normalized = self::normalize_contact_data( $data );
+		$contact    = self::find_by_identifiers( $normalized );
 
 		if ( ! $contact ) {
 			// Use create() to ensure events fire
-			return self::create( $data );
+			return self::create( $normalized );
 		}
 
 		// For updates, use fill + save to trigger saved event
-		$contact->fill( $data );
+		$contact->fill( $normalized );
 		$contact->save();
 
 		return $contact;
+	}
+
+	/**
+	 * Normalize identifier fields before create/update.
+	 *
+	 * @param array<string, mixed> $data Raw contact data.
+	 * @return array<string, mixed>
+	 */
+	public static function normalize_contact_data( array $data ) {
+		if ( array_key_exists( 'email', $data ) ) {
+			$data['email'] = self::normalize_email( $data['email'] );
+		}
+
+		if ( array_key_exists( 'phone', $data ) ) {
+			$phone = self::normalize_phone_field( $data['phone'] );
+			if ( '' === $phone ) {
+				unset( $data['phone'] );
+			} else {
+				$data['phone'] = $phone;
+			}
+		}
+
+		if ( array_key_exists( 'whatsapp_phone', $data ) ) {
+			$country_hint = isset( $data['country'] ) ? (string) $data['country'] : '';
+			$whatsapp     = self::normalize_whatsapp_field( $data['whatsapp_phone'], $country_hint );
+			if ( '' === $whatsapp ) {
+				unset( $data['whatsapp_phone'] );
+			} else {
+				$data['whatsapp_phone'] = $whatsapp;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Normalize identifier columns on the current model instance.
+	 *
+	 * @return void
+	 */
+	private function normalize_contact_identifiers() {
+		if ( array_key_exists( 'email', $this->attributes ) ) {
+			$this->attributes['email'] = self::normalize_email( $this->attributes['email'] );
+		}
+
+		if ( array_key_exists( 'phone', $this->attributes ) ) {
+			$phone = self::normalize_phone_field( $this->attributes['phone'] );
+			if ( '' === $phone ) {
+				$this->attributes['phone'] = null;
+			} else {
+				$this->attributes['phone'] = $phone;
+			}
+		}
+
+		if ( array_key_exists( 'whatsapp_phone', $this->attributes ) ) {
+			$country_hint = isset( $this->attributes['country'] ) ? (string) $this->attributes['country'] : '';
+			$whatsapp     = self::normalize_whatsapp_field( $this->attributes['whatsapp_phone'], $country_hint );
+			if ( '' === $whatsapp ) {
+				$this->attributes['whatsapp_phone'] = null;
+			} else {
+				$this->attributes['whatsapp_phone'] = $whatsapp;
+			}
+		}
+	}
+
+	/**
+	 * Resolve an identifier field from pending attributes or the stored record.
+	 *
+	 * @param string $field Field name.
+	 * @return mixed
+	 */
+	private function resolve_identifier_value( $field ) {
+		if ( array_key_exists( $field, $this->attributes ) ) {
+			return $this->attributes[ $field ];
+		}
+
+		if ( $this->exists && isset( $this->original[ $field ] ) ) {
+			return $this->original[ $field ];
+		}
+
+		return '';
 	}
 
 	/**
@@ -956,15 +1388,32 @@ class ContactModel extends Model {
 						return;
 					}
 
-					$orders  = $contact->orders;
-					$revenue = 0;
+					$orders              = $contact->orders;
+					$revenue_by_currency = array();
 
 					foreach ( $orders as $order ) {
-						$revenue += $order->total_amount;
+						$currency = $order->currency ?: \get_woocommerce_currency();
+						if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+							$revenue_by_currency[ $currency ] = 0.0;
+						}
+						$revenue_by_currency[ $currency ] += (float) $order->total_amount;
 					}
 
-					$currency         = \get_woocommerce_currency();
-					$contact->revenue = $revenue . ' ' . $currency;
+					if ( empty( $revenue_by_currency ) ) {
+						return;
+					}
+
+					if ( 1 === count( $revenue_by_currency ) ) {
+						$currency = array_key_first( $revenue_by_currency );
+						$contact->revenue = number_format( $revenue_by_currency[ $currency ], 2, '.', '' ) . ' ' . $currency;
+						return;
+					}
+
+					$parts = array();
+					foreach ( $revenue_by_currency as $currency => $amount ) {
+						$parts[] = number_format( $amount, 2, '.', '' ) . ' ' . $currency;
+					}
+					$contact->revenue = implode( ' · ', $parts );
 				}
 			);
 		}

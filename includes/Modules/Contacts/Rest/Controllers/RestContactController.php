@@ -15,6 +15,7 @@ namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\ListPreferences\ListPreferencesManager;
 use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use Exception;
@@ -38,6 +39,7 @@ use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\OrderStatus;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager;
 
@@ -140,7 +142,22 @@ class RestContactController extends RestController {
 						'column_visibility' => array(
 							'description' => __( 'Visible columns for the contacts list.', 'doublescale' ),
 							'type'        => 'object',
-							'required'    => true,
+						),
+						'per_page'          => array(
+							'description' => __( 'Items per page for the contacts list.', 'doublescale' ),
+							'type'        => 'integer',
+						),
+						'show_filters'      => array(
+							'description' => __( 'Whether the contacts filter panel is open.', 'doublescale' ),
+							'type'        => 'boolean',
+						),
+						'keyword'           => array(
+							'description' => __( 'Contacts search keyword.', 'doublescale' ),
+							'type'        => 'string',
+						),
+						'date_range'        => array(
+							'description' => __( 'Contacts date range filter.', 'doublescale' ),
+							'type'        => 'object',
 						),
 					),
 				),
@@ -588,9 +605,8 @@ class RestContactController extends RestController {
 					),
 				),
 				'email'           => array(
-					'description'  => __( 'Email of the contact.', 'doublescale' ),
+					'description'  => __( 'Email of the contact (optional when a phone number is provided).', 'doublescale' ),
 					'type'         => 'string',
-					'required'     => true,
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_email',
 					),
@@ -1140,6 +1156,205 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * Attach WooCommerce orders to paginated contacts for list columns.
+	 *
+	 * Matches orders by billing email and registered customer ID (same rules as
+	 * wc_get_orders with a customer email), sorts newest-first, and sets revenue
+	 * from completed and processing orders only.
+	 *
+	 * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $contacts Paginated contacts.
+	 * @return void
+	 */
+	private function attach_wc_orders_to_contacts( $contacts ) {
+		if (
+			! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' )
+			|| ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' )
+			|| ! class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
+			|| ! \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
+		) {
+			return;
+		}
+
+		$items = $contacts->items();
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		$emails               = array();
+		$customer_ids         = array();
+		$email_by_customer_id = array();
+
+		foreach ( $items as $contact ) {
+			if ( empty( $contact->email ) ) {
+				continue;
+			}
+			$emails[] = $contact->email;
+			$user     = get_user_by( 'email', $contact->email );
+			if ( $user ) {
+				$customer_ids[]                         = (int) $user->ID;
+				$email_by_customer_id[ (int) $user->ID ] = $contact->email;
+			}
+		}
+
+		$emails       = array_values( array_unique( $emails ) );
+		$customer_ids = array_values( array_unique( $customer_ids ) );
+
+		if ( empty( $emails ) && empty( $customer_ids ) ) {
+			return;
+		}
+
+		$orders_query = \DoubleScale\Modules\Campaigns\Models\WcOrderModel::query()
+			->whereIn( 'status', OrderStatus::get_revenue_statuses() )
+			->orderBy( 'date_created_gmt', 'desc' );
+
+		$orders_query->where(
+			function ( $query ) use ( $emails, $customer_ids ) {
+				if ( ! empty( $emails ) ) {
+					$query->whereIn( 'billing_email', $emails );
+				}
+				if ( ! empty( $customer_ids ) ) {
+					$query->orWhereIn( 'customer_id', $customer_ids );
+				}
+			}
+		);
+
+		$all_orders      = $orders_query->get();
+		$orders_by_email = array();
+
+		foreach ( $all_orders as $order ) {
+			$assigned_email = null;
+			if ( in_array( $order->billing_email, $emails, true ) ) {
+				$assigned_email = $order->billing_email;
+			} elseif ( isset( $email_by_customer_id[ (int) $order->customer_id ] ) ) {
+				$assigned_email = $email_by_customer_id[ (int) $order->customer_id ];
+			}
+
+			if ( ! $assigned_email ) {
+				continue;
+			}
+
+			if ( ! isset( $orders_by_email[ $assigned_email ] ) ) {
+				$orders_by_email[ $assigned_email ] = array();
+			}
+
+			$orders_by_email[ $assigned_email ][ (int) $order->id ] = $order;
+		}
+
+		foreach ( $items as $contact ) {
+			if ( empty( $contact->email ) ) {
+				continue;
+			}
+
+			$contact_orders = array_values( $orders_by_email[ $contact->email ] ?? array() );
+			usort(
+				$contact_orders,
+				function ( $a, $b ) {
+					return strtotime( (string) $b->date_created_gmt ) <=> strtotime( (string) $a->date_created_gmt );
+				}
+			);
+
+			$contact->setRelation( 'orders', collect( $contact_orders ) );
+
+			if ( ! empty( $contact_orders ) ) {
+				$contact->revenue = $this->format_wc_revenue_display(
+					$this->sum_wc_model_revenue_by_currency( $contact_orders )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Sum HPOS order rows by currency.
+	 *
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\WcOrderModel> $orders Orders to sum.
+	 * @return array<string, float>
+	 */
+	private function sum_wc_model_revenue_by_currency( array $orders ) {
+		$revenue_by_currency = array();
+
+		foreach ( $orders as $order ) {
+			$currency = $order->currency ?: get_woocommerce_currency();
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+			}
+			$revenue_by_currency[ $currency ] += (float) $order->total_amount;
+		}
+
+		return $revenue_by_currency;
+	}
+
+	/**
+	 * Format revenue for display (single or multi-currency).
+	 *
+	 * @param array<string, float> $revenue_by_currency Revenue keyed by currency code.
+	 * @return string
+	 */
+	private function format_wc_revenue_display( array $revenue_by_currency ) {
+		if ( empty( $revenue_by_currency ) ) {
+			return '';
+		}
+
+		if ( 1 === count( $revenue_by_currency ) ) {
+			$currency = array_key_first( $revenue_by_currency );
+
+			return number_format( $revenue_by_currency[ $currency ], 2, '.', '' ) . ' ' . $currency;
+		}
+
+		$parts = array();
+		foreach ( $revenue_by_currency as $currency => $amount ) {
+			$parts[] = number_format( $amount, 2, '.', '' ) . ' ' . $currency;
+		}
+
+		return implode( ' · ', $parts );
+	}
+
+	/**
+	 * Pick the currency with the most orders and return headline revenue stats.
+	 *
+	 * @param array<int, \WC_Order> $orders Paid orders.
+	 * @return array{currency: string, revenue: float, average: float, revenue_by_currency: array<string, float>}
+	 */
+	private function summarize_wc_order_revenue( array $orders ) {
+		$revenue_by_currency = array();
+		$count_by_currency   = array();
+
+		foreach ( $orders as $order ) {
+			$currency = $order->get_currency() ?: get_woocommerce_currency();
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+				$count_by_currency[ $currency ]   = 0;
+			}
+
+			$revenue_by_currency[ $currency ] += floatval( $order->get_total() );
+			++$count_by_currency[ $currency ];
+		}
+
+		$dominant_currency = '';
+		$dominant_count    = -1;
+		foreach ( $count_by_currency as $currency => $count ) {
+			if ( $count > $dominant_count ) {
+				$dominant_currency = $currency;
+				$dominant_count    = $count;
+			}
+		}
+
+		$revenue = 0.0;
+		$average = 0.0;
+		if ( '' !== $dominant_currency ) {
+			$revenue = $revenue_by_currency[ $dominant_currency ];
+			$average = $dominant_count > 0 ? ( $revenue / $dominant_count ) : 0.0;
+		}
+
+		return array(
+			'currency'            => $dominant_currency ?: get_woocommerce_currency(),
+			'revenue'             => $revenue,
+			'average'             => $average,
+			'revenue_by_currency' => $revenue_by_currency,
+		);
+	}
+
+	/**
 	 * Get default purchase history structure
 	 *
 	 * @return array
@@ -1157,7 +1372,71 @@ class RestContactController extends RestController {
 	}
 
 	/**
-	 * Get EDD purchase history for a contact
+	 * Pick the currency with the most sale orders and return headline EDD revenue stats.
+	 *
+	 * Net revenue includes refund rows (negative totals) grouped by order currency.
+	 *
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\EddOrderModel> $sale_orders   Revenue-counting sale orders.
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\EddOrderModel> $refund_orders Refund orders for the contact.
+	 * @return array{currency: string, revenue: float, average: float, revenue_by_currency: array<string, float>}
+	 */
+	private function summarize_edd_order_revenue( array $sale_orders, array $refund_orders = array() ) {
+		$revenue_by_currency = array();
+		$count_by_currency   = array();
+		$default_currency    = function_exists( 'edd_get_option' ) ? edd_get_option( 'currency', 'USD' ) : 'USD';
+
+		foreach ( $sale_orders as $order ) {
+			$currency = $order->currency ?: $default_currency;
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+				$count_by_currency[ $currency ]   = 0;
+			}
+
+			$revenue_by_currency[ $currency ] += (float) $order->total;
+			++$count_by_currency[ $currency ];
+		}
+
+		foreach ( $refund_orders as $order ) {
+			$currency = $order->currency ?: $default_currency;
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+			}
+
+			$revenue_by_currency[ $currency ] += (float) $order->total;
+		}
+
+		$dominant_currency = '';
+		$dominant_count    = -1;
+		foreach ( $count_by_currency as $currency => $count ) {
+			if ( $count > $dominant_count ) {
+				$dominant_currency = $currency;
+				$dominant_count    = $count;
+			}
+		}
+
+		$revenue = 0.0;
+		$average = 0.0;
+		if ( '' !== $dominant_currency ) {
+			$revenue = $revenue_by_currency[ $dominant_currency ];
+			$average = $dominant_count > 0 ? ( $revenue / $dominant_count ) : 0.0;
+		}
+
+		return array(
+			'currency'            => $dominant_currency ?: $default_currency,
+			'revenue'             => $revenue,
+			'average'             => $average,
+			'revenue_by_currency' => $revenue_by_currency,
+		);
+	}
+
+	/**
+	 * Get EDD purchase history for a contact.
+	 *
+	 * Queries by email, EDD customer ID, and WordPress user ID. Only sale orders
+	 * with net revenue statuses appear in totals and the order list. Revenue is
+	 * net of refund rows and grouped by order currency.
 	 *
 	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
@@ -1174,21 +1453,38 @@ class RestContactController extends RestController {
 		$per_page = (int) $request->get_param( 'edd_per_page' );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$base_query  = $contact->edd_orders();
-		$total_count = $base_query->count();
+		$result['currency'] = edd_get_option( 'currency', 'USD' );
+
+		$revenue_query = $contact->edd_revenue_orders_query();
+		$total_count   = (clone $revenue_query)->count();
 
 		if ( $total_count === 0 ) {
 			return $result;
 		}
 
-		$paid_query = $contact->edd_orders()->whereIn( 'status', array( 'complete', 'edd_subscription' ) );
+		$paginated_orders = (clone $revenue_query)
+			->orderBy( 'date_created', 'desc' )
+			->skip( $offset )
+			->take( $per_page )
+			->get();
 
-		$result['orders']     = $base_query->orderBy( 'date_created', 'desc' )->skip( $offset )->take( $per_page )->get();
-		$result['total']      = $total_count;
-		$result['revenue']    = $paid_query->sum( 'total' );
-		$result['average']    = $paid_query->avg( 'total' );
-		$result['last_order'] = $contact->edd_orders()->orderBy( 'date_created', 'desc' )->value( 'date_created' );
-		$result['currency']   = edd_get_option( 'currency', 'USD' );
+		$all_sale_orders = (clone $revenue_query)->get();
+		$refund_orders   = $contact->edd_orders_query()
+			->where( 'type', 'refund' )
+			->get()
+			->all();
+
+		$revenue_summary = $this->summarize_edd_order_revenue( $all_sale_orders->all(), $refund_orders );
+
+		$result['currency']            = $revenue_summary['currency'];
+		$result['revenue']             = $revenue_summary['revenue'];
+		$result['average']             = $revenue_summary['average'];
+		$result['revenue_by_currency'] = $revenue_summary['revenue_by_currency'];
+		$result['orders']              = $paginated_orders;
+		$result['total']               = $total_count;
+		$result['last_order']          = (clone $revenue_query)
+			->orderBy( 'date_created', 'desc' )
+			->value( 'date_created' );
 
 		return $result;
 	}
@@ -1217,9 +1513,9 @@ class RestContactController extends RestController {
 	 * Get WooCommerce purchase history for a contact.
 	 *
 	 * Queries by email so a single call covers user-linked, guest, and
-	 * email-mismatched orders. Revenue is grouped by order currency to avoid
-	 * summing across currencies (e.g., AUD orders mislabeled as the store
-	 * default USD).
+	 * email-mismatched orders. Only completed and processing orders are included
+	 * in totals, the order list, and revenue. Revenue is grouped by order
+	 * currency to avoid summing across currencies.
 	 *
 	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
@@ -1235,8 +1531,12 @@ class RestContactController extends RestController {
 		$page          = (int) $request->get_param( 'woo_page' );
 		$per_page      = (int) $request->get_param( 'woo_per_page' );
 		$offset        = ( $page - 1 ) * $per_page;
-		$paid_statuses = array( 'wc-completed', 'wc-processing' );
+		$paid_statuses = OrderStatus::get_revenue_statuses();
 		$email         = $contact->email;
+		$order_query   = array(
+			'customer' => $email,
+			'status'   => $paid_statuses,
+		);
 
 		// wc_get_orders() with a string $customer matches BOTH _customer_user
 		// (resolved to a user by email) and billing_email — which catches
@@ -1244,10 +1544,12 @@ class RestContactController extends RestController {
 		// where the user changed their account email after purchase.
 		$total_count = count(
 			wc_get_orders(
-				array(
-					'customer' => $email,
-					'limit'    => -1,
-					'return'   => 'ids',
+				array_merge(
+					$order_query,
+					array(
+						'limit'  => -1,
+						'return' => 'ids',
+					)
 				)
 			)
 		);
@@ -1261,12 +1563,14 @@ class RestContactController extends RestController {
 		}
 
 		$wc_orders = wc_get_orders(
-			array(
-				'customer' => $email,
-				'limit'    => $per_page,
-				'offset'   => $offset,
-				'orderby'  => 'date',
-				'order'    => 'DESC',
+			array_merge(
+				$order_query,
+				array(
+					'limit'   => $per_page,
+					'offset'  => $offset,
+					'orderby' => 'date',
+					'order'   => 'DESC',
+				)
 			)
 		);
 
@@ -1287,51 +1591,22 @@ class RestContactController extends RestController {
 		);
 
 		$paid_orders = wc_get_orders(
-			array(
-				'customer' => $email,
-				'status'   => $paid_statuses,
-				'limit'    => -1,
+			array_merge(
+				$order_query,
+				array(
+					'limit' => -1,
+				)
 			)
 		);
 
-		// Group paid revenue by order currency. Summing across currencies
-		// produces a meaningless total, so the headline cards report only
-		// the dominant currency and the full breakdown is exposed via
-		// revenue_by_currency for richer UI rendering later.
-		$revenue_by_currency = array();
-		$count_by_currency   = array();
-		foreach ( $paid_orders as $order ) {
-			$currency = $order->get_currency() ?: get_woocommerce_currency();
+		$revenue_summary = $this->summarize_wc_order_revenue( $paid_orders );
 
-			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
-				$revenue_by_currency[ $currency ] = 0.0;
-				$count_by_currency[ $currency ]   = 0;
-			}
-
-			$revenue_by_currency[ $currency ] += floatval( $order->get_total() );
-			++$count_by_currency[ $currency ];
-		}
-
-		$dominant_currency = '';
-		$dominant_count    = -1;
-		foreach ( $count_by_currency as $currency => $count ) {
-			if ( $count > $dominant_count ) {
-				$dominant_currency = $currency;
-				$dominant_count    = $count;
-			}
-		}
-
-		if ( '' !== $dominant_currency ) {
-			$result['currency'] = $dominant_currency;
-			$result['revenue']  = $revenue_by_currency[ $dominant_currency ];
-			$result['average']  = $count_by_currency[ $dominant_currency ] > 0
-				? ( $revenue_by_currency[ $dominant_currency ] / $count_by_currency[ $dominant_currency ] )
-				: 0;
-		}
-
+		$result['currency']            = $revenue_summary['currency'];
+		$result['revenue']             = $revenue_summary['revenue'];
+		$result['average']             = $revenue_summary['average'];
+		$result['revenue_by_currency'] = $revenue_summary['revenue_by_currency'];
 		$result['orders']              = $formatted_orders;
 		$result['total']               = $total_count;
-		$result['revenue_by_currency'] = $revenue_by_currency;
 		$result['last_order']          = ! empty( $wc_orders ) && $wc_orders[0]->get_date_created()
 			? $wc_orders[0]->get_date_created()->format( 'Y-m-d H:i:s' )
 			: null;
@@ -1678,6 +1953,37 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * Build a REST error when a contact identifier is already in use.
+	 *
+	 * @param array{field: string, contact: ContactModel}|null $conflict Conflict details.
+	 *
+	 * @return WP_Error|null
+	 */
+	private function identifier_conflict_error( $conflict ) {
+		if ( ! $conflict || empty( $conflict['field'] ) ) {
+			return null;
+		}
+
+		$messages = array(
+			'email'          => __( 'A contact with this email address already exists.', 'doublescale' ),
+			'phone'          => __( 'A contact with this phone number already exists.', 'doublescale' ),
+			'whatsapp_phone' => __( 'A contact with this WhatsApp number already exists.', 'doublescale' ),
+		);
+
+		$field = (string) $conflict['field'];
+		$code  = $field . '_exists';
+
+		return new WP_Error(
+			$code,
+			$messages[ $field ] ?? __( 'Contact already exists.', 'doublescale' ),
+			array(
+				'status' => 400,
+				'field'  => $field,
+			)
+		);
+	}
+
+	/**
 	 * Permission check for unified messages endpoint
 	 *
 	 * @param WP_REST_Request $request
@@ -1731,13 +2037,6 @@ class RestContactController extends RestController {
 			$relationships = array( 'lists', 'tags', 'notes' );
 			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$relationships[] = 'custom_fields';
-			}
-			if (
-				doublescale_is_plugin_active( 'woocommerce/woocommerce.php' )
-				&& class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
-				&& \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
-			) {
-				$relationships[] = 'orders';
 			}
 			$contacts = $query->with( $relationships );
 
@@ -1817,19 +2116,7 @@ class RestContactController extends RestController {
 			// Note: paginate() returns total in the response, so filtered_total comes from pagination
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			// Compute revenue after pagination so eager-loaded orders are available.
-			if ( doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-				$currency = \get_woocommerce_currency();
-				foreach ( $contacts as $contact ) {
-					if ( $contact->relationLoaded( 'orders' ) ) {
-						$revenue = 0;
-						foreach ( $contact->orders as $order ) {
-							$revenue += $order->total_amount;
-						}
-						$contact->revenue = $revenue . ' ' . $currency;
-					}
-				}
-			}
+			$this->attach_wc_orders_to_contacts( $contacts );
 
 			$filtered_total = $contacts->total();
 
@@ -1855,17 +2142,27 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response $response The response data.
 	 */
 	public function create_item( $request ) {
-		$email = $request->get_param( 'email' );
-
-		// Check if email already exists
-		$contact = ContactModel::where( 'email', $email )->first();
-		if ( $contact ) {
-			return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
-		}
-
 		try {
 			$contact_data = $this->prepare_contact( $request );
-			$contact      = ContactModel::create( $contact_data );
+
+			if ( ! ContactModel::has_identifier(
+				$contact_data['email'] ?? null,
+				$contact_data['phone'] ?? '',
+				$contact_data['whatsapp_phone'] ?? ''
+			) ) {
+				return new WP_Error(
+					'missing_identifier',
+					__( 'Contact must have an email address or phone number.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$existing = ContactModel::find_identifier_conflict( $contact_data );
+			if ( $existing ) {
+				return $this->identifier_conflict_error( $existing );
+			}
+
+			$contact = ContactModel::create( $contact_data );
 
 			$sync_lists = $this->sync_lists( $request, $contact );
 			if ( is_wp_error( $sync_lists ) ) {
@@ -1994,6 +2291,12 @@ class RestContactController extends RestController {
 			}
 
 			$contact_data = $this->prepare_contact( $request );
+
+			$duplicate = ContactModel::find_identifier_conflict( $contact_data, (int) $contact_id );
+			if ( $duplicate ) {
+				return $this->identifier_conflict_error( $duplicate );
+			}
+
 			$changes      = ContactUpdateNotifier::collect_field_changes( $contact, $contact_data );
 			$contact->update( $contact_data );
 
@@ -2154,7 +2457,7 @@ class RestContactController extends RestController {
 			}
 		}
 
-		return $contact;
+		return ContactModel::normalize_contact_data( $contact );
 	}
 
 	/**
@@ -2689,6 +2992,11 @@ class RestContactController extends RestController {
 			return array();
 		}
 
+		$prefs = ListPreferencesManager::get( 'contacts', $user_id );
+		if ( ! empty( $prefs['column_visibility'] ) && is_array( $prefs['column_visibility'] ) ) {
+			return $prefs['column_visibility'];
+		}
+
 		$saved = get_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, true );
 
 		return is_array( $saved ) ? self::sanitize_column_visibility( $saved ) : array();
@@ -2704,9 +3012,15 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function get_list_preferences( $request ) {
+		$prefs = ListPreferencesManager::get( 'contacts' );
+
 		return new WP_REST_Response(
 			array(
-				'column_visibility' => self::get_list_column_visibility(),
+				'column_visibility' => $prefs['column_visibility'] ?? self::get_list_column_visibility(),
+				'per_page'          => $prefs['per_page'] ?? null,
+				'show_filters'      => $prefs['show_filters'] ?? null,
+				'keyword'           => $prefs['keyword'] ?? '',
+				'date_range'        => $prefs['date_range'] ?? null,
 			),
 			200
 		);
@@ -2727,15 +3041,33 @@ class RestContactController extends RestController {
 			return new WP_Error( 'unauthorized', __( 'User not logged in.', 'doublescale' ), array( 'status' => 401 ) );
 		}
 
-		$visibility = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
-		update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $visibility );
+		$params = array();
+		if ( null !== $request->get_param( 'column_visibility' ) ) {
+			$params['column_visibility'] = $this->sanitize_column_visibility( $request->get_param( 'column_visibility' ) );
+		}
+		if ( null !== $request->get_param( 'per_page' ) ) {
+			$params['per_page'] = $request->get_param( 'per_page' );
+		}
+		if ( null !== $request->get_param( 'show_filters' ) ) {
+			$params['show_filters'] = $request->get_param( 'show_filters' );
+		}
+		if ( null !== $request->get_param( 'keyword' ) ) {
+			$params['keyword'] = $request->get_param( 'keyword' );
+		}
+		if ( null !== $request->get_param( 'date_range' ) ) {
+			$params['date_range'] = $request->get_param( 'date_range' );
+		}
 
-		return new WP_REST_Response(
-			array(
-				'column_visibility' => $visibility,
-			),
-			200
-		);
+		$updated = ListPreferencesManager::update( 'contacts', $params, $user_id );
+		if ( false === $updated ) {
+			return new WP_Error( 'update_failed', __( 'Failed to save list preferences.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+
+		if ( isset( $updated['column_visibility'] ) ) {
+			update_user_meta( $user_id, self::LIST_COLUMN_VISIBILITY_META_KEY, $updated['column_visibility'] );
+		}
+
+		return new WP_REST_Response( $updated, 200 );
 	}
 
 	/**

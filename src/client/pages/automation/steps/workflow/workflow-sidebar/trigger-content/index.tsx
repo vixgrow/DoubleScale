@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import WebhookFields from '../../webhook-fields';
 import FormFields from '../../form-fields';
 import Fields from '@/components/fields';
+import TriggerDocumentationCallout from '../../../../../automations/components/trigger-documentation-callout';
 import { getTrigger } from '@doublescale/utils';
 import type { Automation } from '@doublescale/client';
 import { Switch } from '@/components/ui/switch';
@@ -97,6 +98,16 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 
 	return (
 		<div className="flex flex-col gap-5 min-h-[80vh]">
+			{trigger.documentation && (
+				<TriggerDocumentationCallout
+					documentation={trigger.documentation}
+				/>
+			)}
+			{trigger.description && !trigger.documentation && (
+				<p className="text-sm leading-6 text-muted-foreground">
+					{trigger.description}
+				</p>
+			)}
 			{trigger.fields && (
 				<div className="doublescale-workflow-sidebar__fields-container">
 					{getTriggerFieldsComponent()}

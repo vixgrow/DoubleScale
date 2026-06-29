@@ -17,6 +17,7 @@ namespace DoubleScale\Modules\Contacts\Abstracts;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;
@@ -155,6 +156,13 @@ abstract class Importer {
 	public $credentials;
 
 	/**
+	 * Whether the imported phone should also be saved as WhatsApp number.
+	 *
+	 * @var bool
+	 */
+	protected $phone_is_whatsapp = true;
+
+	/**
 	 * Constructor
 	 *
 	 * @param array $args args
@@ -175,6 +183,9 @@ abstract class Importer {
 		$this->lists                 = $args['lists'] ?? array();
 		$this->tags                  = $args['tags'] ?? array();
 		$this->credentials           = $args['credentials'] ?? array();
+		$this->phone_is_whatsapp     = PhoneAsWhatsappSetting::is_enabled(
+			$args[ PhoneAsWhatsappSetting::SETTING_KEY ] ?? null
+		);
 	}
 
 	/**
@@ -520,7 +531,7 @@ abstract class Importer {
 							continue;
 						}
 						// for updating attributes if these values are not in the attributes array
-						if ( $custom_field->type === 'select' || $custom_field->type === 'multiselect' ) {
+						if ( in_array( $custom_field->type, array( 'select', 'multiselect', 'radio', 'checkbox' ), true ) ) {
 							$custom_field->attributes = array_merge( $custom_field->attributes, $attributes );
 							$custom_field->attributes = array_unique( $custom_field->attributes );
 							$custom_field->save();

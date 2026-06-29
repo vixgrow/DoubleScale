@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 /**
  * Internal dependencies
  */
@@ -34,6 +34,12 @@ import { ListDialog } from './lists-dialog';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
+import {
+	getListPreferences,
+	parseSavedDateRange,
+	serializeDateRange,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -47,11 +53,15 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage, setPerPage] = useState<number>(10);
+	const [perPage, setPerPage] = useState<number>(
+		() => getListPreferences('lists').per_page ?? 10
+	);
 	const [page, setPage] = useState<number>(1);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
-	const [keyword, setKeyword] = useState<string>('');
+	const [keyword, setKeyword] = useState<string>(
+		() => getListPreferences('lists').keyword ?? ''
+	);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -59,6 +69,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [list, setList] = useState({
 		name: '',
 		description: '',
+		is_public: true,
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
@@ -67,10 +78,19 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
-	}>({
-		from: null,
-		to: null,
-	});
+	}>(() => parseSavedDateRange(getListPreferences('lists').date_range));
+
+	useListPreferencesPersistence(
+		'lists',
+		useMemo(
+			() => ({
+				per_page: perPage,
+				keyword,
+				date_range: serializeDateRange(dateRange),
+			}),
+			[dateRange, keyword, perPage]
+		)
+	);
 
 	// Helper functions
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -144,7 +164,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			});
 
 			setVisible(false);
-			setList({ name: '', description: '' });
+			setList({ name: '', description: '', is_public: true });
 			showNotice(
 				'success',
 				__(
@@ -222,14 +242,14 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	// Event handlers
 	const handleOpenCreateModal = () => {
 		setSelectedList(null);
-		setList({ name: '', description: '' });
+		setList({ name: '', description: '', is_public: true });
 		setVisible(true);
 	};
 
 	const handleCloseModal = () => {
 		setVisible(false);
 		setSelectedList(null);
-		setList({ name: '', description: '' });
+		setList({ name: '', description: '', is_public: true });
 	};
 
 	const handleEditList = (listToEdit: ContactList) => {

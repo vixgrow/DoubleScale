@@ -38,6 +38,8 @@ export type ConfigData = Record<string, unknown> & {
 	currency: string;
 	urlDoubleScalePro: string;
 	modules: ModuleInfo[];
+	/** Sales approval workflow toggle from server settings (admin bootstrap). */
+	salesApprovalWorkflowEnabled: boolean;
 	/** Add-on plugin catalog + install state from the store. */
 	addons: Addons;
 	/** Nonce for in-app store / installer requests. */
@@ -57,6 +59,26 @@ export type ConfigData = Record<string, unknown> & {
 	contactsListPreferences?: {
 		column_visibility?: Record<string, boolean>;
 	};
+	/** Per-user list table UI preferences keyed by list slug. */
+	listPreferences?: Partial<
+		Record<
+			string,
+			{
+				per_page?: number;
+				column_visibility?: Record<string, boolean>;
+				show_filters?: boolean;
+				filters?: unknown[];
+				keyword?: string;
+				date_range?: { from: string | null; to: string | null };
+				campaign_filters?: {
+					status?: string;
+					type?: string;
+					createDate?: { from: string | null; to: string | null };
+					updatedAt?: { from: string | null; to: string | null };
+				};
+			}
+		>
+	>;
 };
 
 /**
@@ -257,6 +279,13 @@ export type Rule = {
 	is_automation?: boolean;
 };
 
+export type TriggerDocumentation = {
+	title?: string;
+	intro?: string;
+	steps?: string[];
+	tip?: string;
+};
+
 export type Trigger = {
 	label: string;
 	description: string;
@@ -268,10 +297,13 @@ export type Trigger = {
 				[key: string]: string;
 			};
 			multiple?: boolean;
+			helperText?: string;
 		};
 	};
 	is_form?: boolean;
 	is_pro?: boolean;
+	is_featured?: boolean;
+	documentation?: TriggerDocumentation;
 };
 
 export type TriggersGroup = {

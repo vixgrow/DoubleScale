@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
@@ -34,6 +34,14 @@ import { formatDateForAPI } from '@doublescale/utils';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
 import { moduleFetch } from '@doublescale/services/module-fetch';
+import {
+	getListPreferences,
+	parseSavedCampaignFilters,
+	parseSavedDateRange,
+	serializeDateRange,
+	type ListPreferenceKey,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
 export type CampaignChannel = 'email' | 'sms';
 
@@ -46,12 +54,18 @@ const Campaigns: React.FC<CampaignsProps> = ({
 }) => {
 	// Main "campaigns" route is email-only (SMS lives on navbar "sms-campaigns").
 	const channel: CampaignChannel = channelProp ?? 'email';
+	const listPreferenceKey: ListPreferenceKey =
+		channel === 'sms' ? 'sms_campaigns' : 'email_campaigns';
 
 	const [loading, setLoading] = useState(true);
 	const [campaignType, setCampaignType] = useState<CampaignType>('standard');
-	const [keywords, setKeywords] = useState<string>('');
+	const [keywords, setKeywords] = useState<string>(
+		() => getListPreferences(listPreferenceKey).keyword ?? ''
+	);
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(10);
+	const [perPage, setPerPage] = useState(
+		() => getListPreferences(listPreferenceKey).per_page ?? 10
+	);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -60,17 +74,11 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
-	}>({
-		from: null,
-		to: null,
-	});
+	}>(() => parseSavedDateRange(getListPreferences(listPreferenceKey).date_range));
 	const [step, setStep] = useState<CampaignModalStep>(null);
-	const [campaignFilters, setCampaignFilters] = useState({
-		status: 'all',
-		type: 'all',
-		createDate: { from: null, to: null },
-		updatedAt: { from: null, to: null },
-	});
+	const [campaignFilters, setCampaignFilters] = useState(() =>
+		parseSavedCampaignFilters(null)
+	);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
 
@@ -80,6 +88,18 @@ const Campaigns: React.FC<CampaignsProps> = ({
 		proSmsBridge?.TwilioConfigModal ?? (() => null);
 
 	const navigate = useNavigate();
+
+	useListPreferencesPersistence(
+		listPreferenceKey,
+		useMemo(
+			() => ({
+				per_page: perPage,
+				keyword: keywords,
+				date_range: serializeDateRange(dateRange),
+			}),
+			[dateRange, keywords, perPage]
+		)
+	);
 
 	// Check SMS provider status
 	const {

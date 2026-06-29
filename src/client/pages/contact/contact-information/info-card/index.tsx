@@ -80,20 +80,37 @@ const InfoCard: React.FC = () => {
 		{ id: 'custom' as TabType, label: __('Custom Fields', 'doublescale') },
 	];
 
+	const [fieldErrors, setFieldErrors] = useState<
+		Partial<Record<NonNullable<EditingField>, string>>
+	>({});
+
 	const handleEdit = (field: EditingField, currentValue: string) => {
 		setEditingField(field);
 		setEditValue(currentValue || '');
+		setFieldErrors((prev) => {
+			if (!field) {
+				return prev;
+			}
+			const next = { ...prev };
+			delete next[field];
+			return next;
+		});
 	};
 
 	const handleSave = async () => {
 		if (editingField && contact && !isSaving) {
 			setIsSaving(true);
 			try {
-				await updateContact({
+				const result = await updateContact({
 					[editingField]: editValue,
 				});
-				setEditingField(null);
-				setEditValue('');
+				if (result.success) {
+					setEditingField(null);
+					setEditValue('');
+					setFieldErrors({});
+				} else if (result.field) {
+					setFieldErrors({ [result.field]: result.message });
+				}
 			} catch (error) {
 				console.error('Failed to update field:', error);
 			} finally {
@@ -105,6 +122,7 @@ const InfoCard: React.FC = () => {
 	const handleCancel = () => {
 		setEditingField(null);
 		setEditValue('');
+		setFieldErrors({});
 	};
 
 	const toggleGroupCollapse = (groupId: number) => {
@@ -122,7 +140,7 @@ const InfoCard: React.FC = () => {
 		const value = customField?.pivot?.value || '';
 
 		// Convert string values to appropriate types
-		if (fieldType === 'boolean' || fieldType === 'checkbox') {
+		if (fieldType === 'boolean') {
 			return value === 'true';
 		}
 
@@ -303,18 +321,21 @@ const InfoCard: React.FC = () => {
 			return __('—', 'doublescale');
 		}
 
-		if (fieldType === 'boolean' || fieldType === 'checkbox') {
+		if (fieldType === 'boolean') {
 			return value === true || value === 'true'
 				? __('Yes', 'doublescale')
 				: __('No', 'doublescale');
 		}
 
-		if (fieldType === 'select' && options) {
+		if ((fieldType === 'select' || fieldType === 'radio') && options) {
 			const option = options.find((opt) => opt.value === value);
 			return option ? option.label : value;
 		}
 
-		if (fieldType === 'multiselect' && Array.isArray(value)) {
+		if (
+			(fieldType === 'multiselect' || fieldType === 'checkbox') &&
+			Array.isArray(value)
+		) {
 			if (value.length === 0) return __('—', 'doublescale');
 			if (options) {
 				return value
@@ -384,6 +405,13 @@ const InfoCard: React.FC = () => {
 						value={editValue}
 						onChange={(e) => {
 							const newValue = e.target.value;
+							if (fieldName) {
+								setFieldErrors((prev) => {
+									const next = { ...prev };
+									delete next[fieldName];
+									return next;
+								});
+							}
 							// For phone fields, only allow numbers and +
 							if (fieldName === 'phone' || fieldName === 'whatsapp_phone') {
 								const phoneRegex = /^[0-9+]*$/;
@@ -410,6 +438,9 @@ const InfoCard: React.FC = () => {
 					<div className="max-w-full truncate text-sm font-medium leading-snug text-foreground">
 						{value || __('—', 'doublescale')}
 					</div>
+				)}
+				{fieldName && fieldErrors[fieldName] && (
+					<p className="text-xs text-destructive">{fieldErrors[fieldName]}</p>
 				)}
             </div>
         );
@@ -580,16 +611,20 @@ const InfoCard: React.FC = () => {
 														// Get formatted value for multiselect
 														const formattedValue =
 															customField.type ===
-															'multiselect'
+																'multiselect' ||
+															customField.type ===
+																'checkbox'
 																? getMultiselectValue(
 																		fieldValue as string
 																	)
 																: fieldValue;
 
-														// Get options for select/multiselect fields
+														// Get options for select/multiselect/radio/checkbox fields
 														const fieldOptions = [
 															'select',
 															'multiselect',
+															'radio',
+															'checkbox',
 														].includes(
 															customField.type
 														)

@@ -17,7 +17,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { CheckCircle, XCircle, Loader2, Settings, ExternalLink, Phone, MessageCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Settings, ExternalLink, Phone, MessageCircle, Info } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -148,6 +148,42 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 					)}
 				</AlertDescription>
 			</Alert>
+
+			<Card className="shadow-sm border-blue-200 bg-blue-50/40">
+				<CardHeader className="pb-3">
+					<CardTitle className="text-base flex items-center gap-2">
+						<Info className="w-4 h-4 text-blue-600" />
+						{__('How WhatsApp unsubscribe works', 'doublescale')}
+					</CardTitle>
+					<CardDescription>
+						{__(
+							'Understand how contacts opt out and whether you need to add unsubscribe text to your messages.',
+							'doublescale'
+						)}
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-3 text-sm text-gray-700">
+					<p>
+						{__(
+							'When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp. You do not need to configure anything for this.',
+							'doublescale'
+						)}
+					</p>
+					<p>
+						<strong>{__('Do I need to add "Reply STOP to unsubscribe"?', 'doublescale')}</strong>{' '}
+						{__(
+							'Unlike SMS, DoubleScale does not append this sentence to WhatsApp messages. Messages are sent using Meta-approved templates, so include unsubscribe instructions directly in your template body when you create or edit templates in Meta Business Manager.',
+							'doublescale'
+						)}
+					</p>
+					<p>
+						{__(
+							'Contacts can resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP. The reply must be that keyword only (not part of a longer sentence).',
+							'doublescale'
+						)}
+					</p>
+				</CardContent>
+			</Card>
 
 			{/* Connection Status Card */}
 			<Card className="shadow-sm">

@@ -16,8 +16,9 @@ namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Validators\PhoneValidator;
+use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
-use DoubleScale\Core\Models\UserModel;
 
 /**
  * WcCustomers Importer class
@@ -55,6 +56,15 @@ class WcCustomers extends Importer {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return PhoneAsWhatsappSetting::get_fields_entry();
+	}
+
+	/**
 	 * Run importer
 	 */
 	public function run() {
@@ -65,15 +75,19 @@ class WcCustomers extends Importer {
 		$table_name = $wpdb->prefix . 'wc_customer_lookup';
 		$total      = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
 		$mapping    = array(
-			'first_name' => 'first_name',
-			'last_name'  => 'last_name',
-			'email'      => 'email',
-			'phone'      => 'phone',
-			'city'       => 'city',
-			'state'      => 'state',
-			'zip'        => 'postcode',
-			'country'    => 'country',
+			'first_name'      => 'first_name',
+			'last_name'       => 'last_name',
+			'email'           => 'email',
+			'phone'           => 'phone',
+			'city'            => 'city',
+			'state'           => 'state',
+			'zip'             => 'postcode',
+			'country'         => 'country',
 		);
+
+		if ( PhoneAsWhatsappSetting::is_enabled( $this->phone_is_whatsapp ) ) {
+			$mapping['whatsapp_phone'] = 'whatsapp_phone';
+		}
 
 		$result = $this->import_with_offset(
 			$total,
@@ -83,6 +97,12 @@ class WcCustomers extends Importer {
 
 				foreach ( $rows as $row ) {
 					$row->phone = $this->get_customer_phone( $row );
+
+					if ( PhoneAsWhatsappSetting::is_enabled( $this->phone_is_whatsapp ) ) {
+						$country_hint        = isset( $row->country ) ? (string) $row->country : '';
+						$whatsapp            = '' !== $row->phone ? PhoneValidator::to_e164( $row->phone, $country_hint ) : null;
+						$row->whatsapp_phone = null !== $whatsapp ? $whatsapp : '';
+					}
 				}
 
 				return $rows;

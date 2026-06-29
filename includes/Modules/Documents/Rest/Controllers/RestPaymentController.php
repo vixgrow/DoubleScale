@@ -106,6 +106,9 @@ class RestPaymentController extends RestController {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		unset( $request );
+		if ( Capabilities::is_sales_rep_only() ) {
+			return false;
+		}
 		return Capabilities::can_view_sales()
 			&& ( Capabilities::can_manage_all_sales() || Capabilities::current_user_can( 'doublescale_manage_own_sales' ) );
 	}

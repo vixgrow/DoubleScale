@@ -30,18 +30,27 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { SendDocumentDialog, ContractAttachmentsPanel } from '@/components/sales';
+import { SendDocumentDialog, ContractAttachmentsPanel, ApprovalStatusBanner } from '@/components/sales';
 import PageTabs from '@/components/page-tabs';
 import { normalizeSalesContact } from '@/components/sales/contact-sales-fields';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	isApprovalWorkflowEnabled,
+	requiresReapprovalAfterEdit,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
 import {
 	createContract,
 	createContractType,
 	sendContract,
+	submitContractForApproval,
 	updateContract,
 	useAssignableSalesUsers,
 	useContract,
 	useContractTypes,
-	formatRestError,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary } from '@/types/sales';
 import { CONTRACT_STATUSES, CURRENCIES } from '@/constants/sales';
@@ -69,7 +78,8 @@ const ContractEdit: React.FC = () => {
 	const isNew = !idParam || idParam === 'new';
 	const contractId = !isNew && idParam ? Number(idParam) : null;
 
-	const { data: existing, loading } = useContract(contractId);
+	const { data: existing, loading, refetch } = useContract(contractId);
+	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 	const { data: contractTypes, refetch: refetchTypes } = useContractTypes();
 
@@ -203,7 +213,14 @@ const ContractEdit: React.FC = () => {
 			}
 			return id ?? null;
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			setError(
+				formatSalesRestError(err, __('Save failed.', 'doublescale'), {
+					approval_pending: __(
+						'This contract is pending approval and cannot be edited.',
+						'doublescale'
+					),
+				})
+			);
 			return null;
 		} finally {
 			setSaving(false);
@@ -229,10 +246,63 @@ const ContractEdit: React.FC = () => {
 			await sendContract(id, message);
 			navigate(getToLink(`sales/contracts/${id}`));
 		} catch (err: unknown) {
-			setError(formatRestError(err));
+			setError(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This contract must be approved before it can be sent. Use Submit for Approval first.',
+						'doublescale'
+					),
+				})
+			);
 		} finally {
 			setSaving(false);
 			setSendOpen(false);
+		}
+	};
+
+	const [submittingApproval, setSubmittingApproval] = useState(false);
+
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, existing ?? undefined);
+	const approval = existing?.approval ?? null;
+	const fieldsLocked = !canEditSalesDocument(workflowEnabled, approval, existing ?? undefined);
+	const showReapprovalWarning = requiresReapprovalAfterEdit(
+		workflowEnabled,
+		approval,
+		existing ?? undefined
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'contract',
+		status,
+		approval,
+		existing ?? undefined
+	);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'contract',
+		status,
+		approval,
+		status === 'expired',
+		existing ?? undefined
+	);
+
+	const handleSubmitForApproval = async () => {
+		const id = await persistContract();
+		if (!id) {
+			return;
+		}
+
+		setSubmittingApproval(true);
+		setError(null);
+		try {
+			await submitContractForApproval(id);
+			await refetch();
+		} catch (err: unknown) {
+			setError(
+				formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale'))
+			);
+		} finally {
+			setSubmittingApproval(false);
 		}
 	};
 
@@ -466,6 +536,12 @@ const ContractEdit: React.FC = () => {
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
+			<ApprovalStatusBanner
+				approval={approval}
+				showReapprovalWarning={showReapprovalWarning}
+			/>
+
+			<fieldset disabled={fieldsLocked} className="space-y-6 border-0 p-0 m-0 min-w-0">
 			<PageTabs
 				defaultValue="information"
 				tabsVariant="underline"
@@ -498,17 +574,31 @@ const ContractEdit: React.FC = () => {
 					},
 				]}
 			/>
+			</fieldset>
 
 			<div className="flex justify-end gap-2">
 				<Button variant="outline" onClick={() => navigate(getToLink('sales/contracts'))}>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave()} disabled={saving}>
+				<Button variant="outline" onClick={() => void handleSave()} disabled={saving || fieldsLocked}>
 					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 				</Button>
-				<Button onClick={() => setSendOpen(true)} disabled={saving || status === 'expired'}>
-					{__('Save & Send', 'doublescale')}
-				</Button>
+				{showSubmitApproval ? (
+					<Button
+						variant="outline"
+						onClick={() => void handleSubmitForApproval()}
+						disabled={saving || submittingApproval}
+					>
+						{submittingApproval
+							? __('Submitting…', 'doublescale')
+							: __('Submit for Approval', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button onClick={() => setSendOpen(true)} disabled={saving || status === 'expired'}>
+						{__('Save & Send', 'doublescale')}
+					</Button>
+				) : null}
 			</div>
 
 			<SendDocumentDialog

@@ -71,6 +71,33 @@ export interface LineItemTax {
 	rate: number;
 }
 
+export interface DocumentApproval {
+	id: number;
+	document_type: 'proposal' | 'invoice';
+	document_id: number;
+	status: 'pending' | 'approved' | 'rejected';
+	status_label: string;
+	requested_by_user_id: number;
+	requested_by_name: string;
+	requested_at: string;
+	reviewed_by_user_id: number | null;
+	reviewed_by_name: string | null;
+	reviewed_at: string | null;
+	rejection_reason: string | null;
+}
+
+export interface ApprovalQueueItem extends DocumentApproval {
+	document: Proposal | Invoice | Contract | CreditNoteQueueDocument | null;
+}
+
+/** Minimal credit note fields returned on the approvals queue. */
+export interface CreditNoteQueueDocument {
+	id: number;
+	credit_note_number: string;
+	status?: string;
+	contact?: ContactSummary | null;
+}
+
 export interface LineItem {
 	description: string;
 	long_description?: string;
@@ -124,6 +151,12 @@ export interface Proposal {
 	updated_at: string | null;
 	contact?: ContactSummary | null;
 	assigned_user?: UserSummary | null;
+	approval?: DocumentApproval | null;
+	/** Set by Pro approval workflow shape filter (authoritative for button gating). */
+	approval_workflow_enabled?: boolean;
+	can_bypass_sales_approval?: boolean;
+	can_edit_sales_document?: boolean;
+	can_withdraw_sales_approval?: boolean;
 }
 
 export interface Contract {
@@ -156,6 +189,11 @@ export interface Contract {
 	contact?: ContactSummary | null;
 	assigned_user?: UserSummary | null;
 	contract_type?: ContractType | null;
+	approval?: DocumentApproval | null;
+	approval_workflow_enabled?: boolean;
+	can_bypass_sales_approval?: boolean;
+	can_edit_sales_document?: boolean;
+	can_withdraw_sales_approval?: boolean;
 }
 
 export interface ContractSignature {
@@ -254,6 +292,12 @@ export interface Invoice {
 		proposal_number: string;
 		subject: string;
 	} | null;
+	approval?: DocumentApproval | null;
+	/** Set by Pro approval workflow shape filter (authoritative for button gating). */
+	approval_workflow_enabled?: boolean;
+	can_bypass_sales_approval?: boolean;
+	can_edit_sales_document?: boolean;
+	can_withdraw_sales_approval?: boolean;
 }
 
 export interface ContactInvoicePayment extends InvoicePayment {
@@ -389,6 +433,7 @@ export interface SalesSettings {
 	contract_signed_email_intro: string;
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
+	approval_workflow_enabled?: boolean;
 	enabled_online_gateways: string[];
 	default_offline_payment_modes: string[];
 	default_online_payment_gateways: string[];

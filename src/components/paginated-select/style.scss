@@ -4,3 +4,11 @@
 	box-shadow: none !important;
 	border: none !important;
 }
+
+.doublescale-paginated-select--inline-menu {
+	position: relative;
+
+	.react-select-container {
+		position: relative;
+	}
+}

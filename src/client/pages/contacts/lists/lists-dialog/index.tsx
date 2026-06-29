@@ -24,14 +24,16 @@ import {
 	DialogFooter,
 } from '@/components/ui/dialog';
 
+import { Checkbox } from '@/components/ui/checkbox';
+
 interface ListDialogProps {
 	visible: boolean;
 	selectedList: ContactList | null;
-	list: { name: string; description: string };
+	list: { name: string; description: string; is_public: boolean };
 	isSaving: boolean;
 	onClose: () => void;
 	onSubmit: () => void;
-	onListChange: (list: { name: string; description: string }) => void;
+	onListChange: (list: { name: string; description: string; is_public: boolean }) => void;
 	onSelectedListChange: (list: ContactList) => void;
 }
 
@@ -60,6 +62,18 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 			onListChange({ ...list, description: value });
 		}
 	};
+
+	const handleIsPublicChange = (checked: boolean) => {
+		if (selectedList) {
+			onSelectedListChange({ ...selectedList, is_public: checked });
+		} else {
+			onListChange({ ...list, is_public: checked });
+		}
+	};
+
+	const isPublic = selectedList
+		? selectedList.is_public !== false
+		: list.is_public !== false;
 
 	const handleOpenChange = (open: boolean) => {
 		if (!open) {
@@ -106,6 +120,24 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						type="textarea"
 						placeholder={__('Enter List Description', 'doublescale')}
 					/>
+					<div className="flex items-center gap-3">
+						<Checkbox
+							id="list-is-public"
+							checked={isPublic}
+							onCheckedChange={(checked) =>
+								handleIsPublicChange(checked === true)
+							}
+						/>
+						<label
+							htmlFor="list-is-public"
+							className="text-sm font-medium leading-none cursor-pointer"
+						>
+							{__(
+								'Show on subscription preference page',
+								'doublescale'
+							)}
+						</label>
+					</div>
 				</div>
 
 				<DialogFooter className="mt-6 w-full">

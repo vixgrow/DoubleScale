@@ -90,13 +90,8 @@ class InvoiceShaper {
 			}
 		}
 
-		return $data;
+		return apply_filters( 'doublescale_sales_invoice_admin_shape', $data, $invoice );
 	}
-
-	/**
-	 * @param InvoiceModel $invoice Invoice.
-	 * @return array
-	 */
 	public static function shape_public( InvoiceModel $invoice ): array {
 		$contact = $invoice->relationLoaded( 'contact' ) ? $invoice->contact : null;
 

@@ -442,6 +442,48 @@ class NotificationCategories {
 	const SALES_CONTRACT_SIGNED = 'sales_contract_signed';
 
 	/**
+	 * Sales subcategory: Document submitted for internal approval.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_REQUESTED = 'sales_approval_requested';
+
+	/**
+	 * Sales subcategory: Document approved by a reviewer.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_APPROVED = 'sales_approval_approved';
+
+	/**
+	 * Sales subcategory: Document rejected by a reviewer.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_REJECTED = 'sales_approval_rejected';
+
+	/**
+	 * Sales subcategory: Prior approval voided because the document was edited.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_INVALIDATED = 'sales_approval_invalidated';
+
+	/**
+	 * Sales subcategory: Pending approval withdrawn by the requester.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_WITHDRAWN = 'sales_approval_withdrawn';
+
+	/**
+	 * Sales subcategory: Pending approval reset because a manager edited the document.
+	 *
+	 * @var string
+	 */
+	const SALES_APPROVAL_PENDING_RESET = 'sales_approval_pending_reset';
+
+	/**
 	 * Get all available notification categories
 	 *
 	 * Returns basic category info (label, description). For UI display with
@@ -798,6 +840,30 @@ class NotificationCategories {
 				self::SALES_CONTRACT_SIGNED   => array(
 					'label'       => __( 'Contract Signed', 'doublescale' ),
 					'description' => __( 'Notifications when a customer signs a contract.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_REQUESTED => array(
+					'label'       => __( 'Approval Requested', 'doublescale' ),
+					'description' => __( 'Notifications when a sales document is submitted for approval.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_APPROVED  => array(
+					'label'       => __( 'Document Approved', 'doublescale' ),
+					'description' => __( 'Notifications when a submitted sales document is approved.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_REJECTED  => array(
+					'label'       => __( 'Document Rejected', 'doublescale' ),
+					'description' => __( 'Notifications when a submitted sales document is rejected.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_INVALIDATED => array(
+					'label'       => __( 'Approval Invalidated', 'doublescale' ),
+					'description' => __( 'Notifications when an approved document is edited and must be reviewed again.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_WITHDRAWN => array(
+					'label'       => __( 'Approval Withdrawn', 'doublescale' ),
+					'description' => __( 'Notifications when a sales rep withdraws a pending approval request.', 'doublescale' ),
+				),
+				self::SALES_APPROVAL_PENDING_RESET => array(
+					'label'       => __( 'Approval Request Reset', 'doublescale' ),
+					'description' => __( 'Notifications when a pending request is cleared because a manager edited the document.', 'doublescale' ),
 				),
 			),
 			self::SYSTEM         => array(

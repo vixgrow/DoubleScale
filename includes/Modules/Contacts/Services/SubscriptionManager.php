@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Core\Settings\Settings;
 
 /**
@@ -225,9 +226,10 @@ class SubscriptionManager {
 	public function unsubscribe_ajax() {
 		check_ajax_referer( 'doublescale-unsubscribe', 'nonce' );
 
-		$id      = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
-		$channel = isset( $_POST['channel'] ) ? sanitize_text_field( wp_unslash( $_POST['channel'] ) ) : 'email';
-		$reason  = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : 'other';
+		$id              = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
+		$channel         = isset( $_POST['channel'] ) ? sanitize_text_field( wp_unslash( $_POST['channel'] ) ) : 'email';
+		$reason          = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : 'other';
+		$unsubscribe_all = ! empty( $_POST['unsubscribe_all'] );
 
 		if ( ! $id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale' ) ) );
@@ -239,37 +241,71 @@ class SubscriptionManager {
 				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale' ) ) );
 			}
 
-			// Try to find the most recent tracking record for source context
-			$source_type = null;
-			$source_id   = null;
-			$mode        = null;
+			$list_status = isset( $_POST['list_status'] ) && is_array( $_POST['list_status'] )
+				? wp_unslash( $_POST['list_status'] )
+				: array();
 
-			// Map channel to mode
-			$mode_map = array(
-				'email'    => 1,
-				'sms'      => 2,
-				'whatsapp' => 3,
-			);
-			$mode     = $mode_map[ $channel ] ?? null;
+			$public_list_ids = ListModel::query()
+				->where( 'is_public', 1 )
+				->pluck( 'id' )
+				->map(
+					function ( $list_id ) {
+						return (int) $list_id;
+					}
+				)
+				->all();
 
-			if ( $mode ) {
-				$recent_tracking = \DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel::where( 'contact_id', $contact->id )
-					->where( 'mode', $mode )
-					->orderBy( 'created_at', 'desc' )
-					->first();
+			foreach ( $public_list_ids as $list_id ) {
+				$desired_status = isset( $list_status[ $list_id ] )
+					? sanitize_text_field( (string) $list_status[ $list_id ] )
+					: 'unsubscribed';
 
-				if ( $recent_tracking && $recent_tracking->source_type && $recent_tracking->source_id ) {
-					$source_type = $recent_tracking->source_type; // 1=Campaign, 2=Automation
-					$source_id   = $recent_tracking->source_id;
+				$is_member = $contact->lists()->whereKey( $list_id )->exists();
+
+				if ( 'subscribed' === $desired_status ) {
+					if ( ! $contact->is_subscribed_to_list( $list_id ) ) {
+						$contact->resubscribe_to_list( $list_id );
+					}
+				} elseif ( $is_member && $contact->is_subscribed_to_list( $list_id ) ) {
+					$contact->unsubscribe_from_list( $list_id, $reason );
 				}
 			}
 
-			// Unsubscribe using mode
-			$contact->unsubscribe_from_mode( $mode, $reason, $source_type, $source_id );
+			if ( $unsubscribe_all ) {
+				$source_type = null;
+				$source_id   = null;
+				$mode        = null;
 
-			// Return success HTML page
+				$mode_map = array(
+					'email'    => 1,
+					'sms'      => 2,
+					'whatsapp' => 3,
+				);
+				$mode     = $mode_map[ $channel ] ?? null;
+
+				if ( $mode && class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel' ) ) {
+					$recent_tracking = \DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel::where( 'contact_id', $contact->id )
+						->where( 'mode', $mode )
+						->orderBy( 'created_at', 'desc' )
+						->first();
+
+					if ( $recent_tracking && $recent_tracking->source_type && $recent_tracking->source_id ) {
+						$source_type = $recent_tracking->source_type;
+						$source_id   = $recent_tracking->source_id;
+					}
+				}
+
+				if ( $mode ) {
+					$contact->unsubscribe_from_mode( $mode, $reason, $source_type, $source_id );
+				}
+			} elseif ( ! $contact->is_subscribed_to_channel( $channel ) ) {
+				$contact->subscribe_to_channel( $channel );
+			}
+
+			$contact->refresh();
+
 			ob_start();
-			$this->render_styled_unsubscribe_page( false );
+			$this->render_styled_unsubscribe_page( false, $unsubscribe_all );
 			$html = ob_get_clean();
 
 			wp_send_json_success(
@@ -301,16 +337,20 @@ class SubscriptionManager {
 			return;
 		}
 
-		// Check if already unsubscribed from this channel
-		if ( ! $contact->is_subscribed_to_channel( $channel ) ) {
-			// Already unsubscribed - show styled page
+		$public_lists = ListModel::query()
+			->where( 'is_public', 1 )
+			->orderBy( 'name' )
+			->get();
+
+		$has_public_lists = $public_lists->isNotEmpty();
+
+		if ( ! $contact->is_subscribed_to_channel( $channel ) && ! $has_public_lists ) {
 			$this->render_styled_unsubscribe_page( true );
 			exit;
 		}
 
-		// Not yet unsubscribed - show confirmation form
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_unsubscribe_form() is escaped internally.
-		echo $this->get_unsubscribe_form( $contact, $channel );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_preference_form() is escaped internally.
+		echo $this->get_preference_form( $contact, $channel, $public_lists );
 		exit;
 	}
 
@@ -341,6 +381,164 @@ class SubscriptionManager {
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_footer() method
 		echo $this->get_footer();
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get preference form with per-list subscription controls.
+	 *
+	 * @param ContactModel                            $contact      Contact.
+	 * @param string                                  $channel      Channel (email, sms, whatsapp).
+	 * @param \Illuminate\Support\Collection|array    $public_lists Public lists collection.
+	 *
+	 * @return string
+	 */
+	public function get_preference_form( $contact, $channel = 'email', $public_lists = array() ) {
+		$channel_label = ContactModel::get_channel_label( $channel );
+		$site_name     = get_bloginfo( 'name' );
+		$globally_out  = ! $contact->is_subscribed_to_channel( $channel );
+
+		$this->register_scripts();
+
+		wp_enqueue_style( 'doublescale-unsubscribe-form' );
+		wp_enqueue_script( 'doublescale-unsubscribe-form' );
+		wp_add_inline_script(
+			'doublescale-unsubscribe-form',
+			'window.doublescaleUnsubscribeForm = ' . wp_json_encode(
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'i18n'    => array(
+						'processing'   => __( 'Processing...', 'doublescale' ),
+						'confirm'      => __( 'Save Preferences', 'doublescale' ),
+						'genericError' => __( 'An error occurred. Please try again.', 'doublescale' ),
+					),
+				)
+			) . ';',
+			'before'
+		);
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html <?php language_attributes(); ?>>
+		<head>
+			<meta charset="<?php bloginfo( 'charset' ); ?>">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<meta name="robots" content="noindex, nofollow">
+			<title>
+			<?php
+				/* translators: %s: site name */
+				echo esc_html( sprintf( __( 'Email Preferences - %s', 'doublescale' ), $site_name ) );
+			?>
+			</title>
+			<?php wp_head(); ?>
+		</head>
+		<body>
+			<div class="unsubscribe-container">
+				<div class="icon-wrapper">
+					<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</div>
+
+				<h3><?php esc_html_e( 'Manage your email preferences', 'doublescale' ); ?></h3>
+
+				<p class="intro-text">
+					<?php esc_html_e( 'Choose which lists you want to receive emails from, or unsubscribe from all communications.', 'doublescale' ); ?>
+				</p>
+
+				<div class="error-message" id="error-message"></div>
+
+				<form id="doublescale-unsubscribe-form">
+					<input type="hidden" name="id" value="<?php echo esc_attr( $contact->hash_id ); ?>">
+					<input type="hidden" name="channel" value="<?php echo esc_attr( $channel ); ?>">
+					<input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'doublescale-unsubscribe' ) ); ?>">
+					<input type="hidden" name="action" value="doublescale_unsubscribe">
+
+					<div class="doublescale-form-item">
+						<label for="contact_info">
+							<?php echo 'email' === $channel ? esc_html__( 'Email', 'doublescale' ) : esc_html__( 'Phone', 'doublescale' ); ?>
+						</label>
+						<input
+							type="text"
+							name="contact_info"
+							value="<?php echo esc_attr( $this->hide_contact_info( $contact, $channel ) ); ?>"
+							disabled
+						>
+					</div>
+
+					<?php if ( ! empty( $public_lists ) ) : ?>
+					<div class="doublescale-form-item">
+						<label><?php esc_html_e( 'Email lists', 'doublescale' ); ?></label>
+						<div class="doublescale-list-checklist">
+							<?php foreach ( $public_lists as $list_item ) : ?>
+								<?php
+								$is_subscribed = $contact->is_subscribed_to_list( $list_item->id );
+								?>
+								<label class="doublescale-list-checklist-item">
+									<input
+										type="checkbox"
+										class="list-preference-checkbox"
+										data-list-id="<?php echo esc_attr( (string) $list_item->id ); ?>"
+										<?php checked( $is_subscribed ); ?>
+									>
+									<span><?php echo esc_html( $list_item->name ); ?></span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
+
+					<div class="doublescale-form-item doublescale-unsubscribe-all">
+						<label class="doublescale-list-checklist-item doublescale-unsubscribe-all-item">
+							<input
+								type="checkbox"
+								name="unsubscribe_all"
+								id="unsubscribe_all"
+								value="1"
+								<?php checked( $globally_out ); ?>
+							>
+							<span>
+							<?php
+								/* translators: %s: channel name (emails, messages, etc.) */
+								printf( esc_html__( 'Unsubscribe from all %s', 'doublescale' ), esc_html( $channel_label ) );
+							?>
+							</span>
+						</label>
+					</div>
+
+					<div class="doublescale-form-item" id="reason-field">
+						<label for="reason"><?php esc_html_e( 'Reason (optional)', 'doublescale' ); ?></label>
+						<div class="doublescale-form-radio-group">
+							<label>
+								<input type="radio" name="reason" value="spam">
+								<?php
+									/* translators: %s: channel name (emails, messages, etc.) */
+									echo esc_html( sprintf( __( 'I consider these %s to be spam', 'doublescale' ), $channel_label ) );
+								?>
+							</label>
+							<label>
+								<input type="radio" name="reason" value="not-interested">
+								<?php
+									/* translators: %s: channel name (emails, messages, etc.) */
+									echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'doublescale' ), $channel_label ) );
+								?>
+							</label>
+							<label>
+								<input type="radio" name="reason" value="other" checked>
+								<?php esc_html_e( 'Other', 'doublescale' ); ?>
+							</label>
+						</div>
+					</div>
+
+					<button type="submit"><?php esc_html_e( 'Save Preferences', 'doublescale' ); ?></button>
+				</form>
+			</div>
+
+			<?php wp_footer(); ?>
+		</body>
+		</html>
+		<?php
 		return ob_get_clean();
 	}
 
@@ -545,10 +743,17 @@ class SubscriptionManager {
 	 * Render styled unsubscribe success page
 	 *
 	 * @param bool $already_unsubscribed Whether user was already unsubscribed.
+	 * @param bool $unsubscribed_all     Whether global unsubscribe was applied.
 	 */
-	private function render_styled_unsubscribe_page( $already_unsubscribed = false ) {
+	private function render_styled_unsubscribe_page( $already_unsubscribed = false, $unsubscribed_all = true ) {
 		$site_name = get_bloginfo( 'name' );
-		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'doublescale' ) : __( 'You\'re Unsubscribed', 'doublescale' );
+		if ( $already_unsubscribed ) {
+			$title = __( 'Already Unsubscribed', 'doublescale' );
+		} elseif ( $unsubscribed_all ) {
+			$title = __( 'You\'re Unsubscribed', 'doublescale' );
+		} else {
+			$title = __( 'Preferences Saved', 'doublescale' );
+		}
 
 		// Called via the AJAX response path before `wp_enqueue_scripts` runs;
 		// register handles lazily so the enqueue actually sticks.
@@ -583,13 +788,15 @@ class SubscriptionManager {
 					<?php
 					if ( $already_unsubscribed ) {
 						esc_html_e( 'You have already unsubscribed from our mailing list.', 'doublescale' );
-					} else {
+					} elseif ( $unsubscribed_all ) {
 						esc_html_e( 'You have been successfully unsubscribed from our mailing list. We\'re sorry to see you go, but we respect your decision.', 'doublescale' );
+					} else {
+						esc_html_e( 'Your email preferences have been updated successfully.', 'doublescale' );
 					}
 					?>
 				</p>
 
-				<?php if ( ! $already_unsubscribed ) : ?>
+				<?php if ( ! $already_unsubscribed && $unsubscribed_all ) : ?>
 				<p class="message">
 					<?php esc_html_e( 'You will no longer receive emails from us.', 'doublescale' ); ?>
 				</p>

@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -37,15 +37,25 @@ import { formatDateForAPI } from '@doublescale/utils';
 import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 import Form from '../form';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	getListPreferences,
+	parseSavedDateRange,
+	serializeDateRange,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(10);
+	const [perPage, setPerPage] = useState(
+		() => getListPreferences('forms').per_page ?? 10
+	);
 	const [forms, setForms] = useState<Forms>([]);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [keyword, setKeyword] = useState('');
+	const [keyword, setKeyword] = useState(
+		() => getListPreferences('forms').keyword ?? ''
+	);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
@@ -74,10 +84,19 @@ const FormsList: React.FC = () => {
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
-	}>({
-		from: null,
-		to: null,
-	});
+	}>(() => parseSavedDateRange(getListPreferences('forms').date_range));
+
+	useListPreferencesPersistence(
+		'forms',
+		useMemo(
+			() => ({
+				per_page: perPage,
+				keyword,
+				date_range: serializeDateRange(dateRange),
+			}),
+			[dateRange, keyword, perPage]
+		)
+	);
 
 	const serverSideTable = useServerSideTable({
 		page,

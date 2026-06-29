@@ -9,7 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 
 /**
  * Internal dependencies
@@ -36,6 +36,12 @@ import { useTagsColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
+import {
+	getListPreferences,
+	parseSavedDateRange,
+	serializeDateRange,
+} from '@doublescale/services/list-preferences-service';
+import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -49,9 +55,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage, setPerPage] = useState<number>(10);
+	const [perPage, setPerPage] = useState<number>(
+		() => getListPreferences('tags').per_page ?? 10
+	);
 	const [page, setPage] = useState<number>(1);
-	const [keyword, setKeyword] = useState<string>('');
+	const [keyword, setKeyword] = useState<string>(
+		() => getListPreferences('tags').keyword ?? ''
+	);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [visible, setVisible] = useState<boolean>(false);
@@ -72,10 +82,19 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
-	}>({
-		from: null,
-		to: null,
-	});
+	}>(() => parseSavedDateRange(getListPreferences('tags').date_range));
+
+	useListPreferencesPersistence(
+		'tags',
+		useMemo(
+			() => ({
+				per_page: perPage,
+				keyword,
+				date_range: serializeDateRange(dateRange),
+			}),
+			[dateRange, keyword, perPage]
+		)
+	);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {

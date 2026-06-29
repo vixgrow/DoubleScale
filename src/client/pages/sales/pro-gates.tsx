@@ -54,3 +54,20 @@ export const ContractsProGate = () => (
 		]}
 	/>
 );
+
+export const ApprovalsProGate = () => (
+	<ProFeatureNotice
+		featureName={__('Approval Workflow', 'doublescale')}
+		description={__(
+			'Require internal review before proposals and invoices are sent to customers with DoubleScale Pro.',
+			'doublescale'
+		)}
+		features={[
+			__('Sales reps submit documents for manager approval', 'doublescale'),
+			__('Approvals Center queue for CRM and Sales Managers', 'doublescale'),
+			__('Approve or reject with a required reason', 'doublescale'),
+			__('Lock pricing while a document is pending review', 'doublescale'),
+			__('Bell and email notifications for reviewers and reps', 'doublescale'),
+		]}
+	/>
+);

@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import { Field } from '..';
 import { Button } from '@/components/ui/button';
+import { getCustomFieldAttributesMeta } from '@doublescale/shared/utils/custom-fields-validation';
 
 interface CustomFieldEntry {
 	custom_field_id: string;
@@ -72,6 +73,20 @@ const DealCustomFieldChange = ({
 
 	const fieldType = selectedOption?.label?.type || 'text';
 
+	const fieldOptions = selectedOption?.label?.attributes
+		? getCustomFieldAttributesMeta(selectedOption.label.attributes).options.map(
+				(option) => ({
+					label: option,
+					value: option,
+				})
+			)
+		: [];
+
+	const isArrayFieldType =
+		fieldType === 'multiselect' ||
+		fieldType === 'checkbox' ||
+		fieldType === 'multi-select';
+
 	const selectedValue = customFields.find(
 		(field) => field.value === currentFieldId
 	);
@@ -115,7 +130,7 @@ const DealCustomFieldChange = ({
 							option.value === currentFieldId
 					);
 
-					if (fieldOption?.label?.type === 'multi-select') {
+					if (isArrayFieldType) {
 						setCurrentFieldValue([]);
 					} else {
 						setCurrentFieldValue('');
@@ -308,23 +323,13 @@ const DealCustomFieldChange = ({
 								type={fieldType}
 								value={currentFieldValue}
 								onChange={(value) => {
-									if (
-										fieldType === 'multi-select' &&
-										!Array.isArray(value)
-									) {
-										setCurrentFieldValue(
-											value ? [value] : []
-										);
+									if (isArrayFieldType && !Array.isArray(value)) {
+										setCurrentFieldValue(value ? [value] : []);
 									} else {
 										setCurrentFieldValue(value);
 									}
 								}}
-								options={selectedOption?.label?.attributes?.map(
-									(attribute) => ({
-										label: attribute,
-										value: attribute,
-									})
-								)}
+								options={fieldOptions}
 							/>
 						</div>
 					)}

@@ -38,7 +38,7 @@ class ContactsTable extends Migration {
 	public function get_query() {
 		$query = 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			hash_id VARCHAR(191) NOT NULL,
-			email VARCHAR(191) NOT NULL,
+			email VARCHAR(191) NULL,
 			first_name VARCHAR(255),
 			last_name VARCHAR(255),
 			phone VARCHAR(255),
@@ -57,8 +57,8 @@ class ContactsTable extends Migration {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
 			UNIQUE KEY email (email),
-			KEY phone (phone),
-			KEY whatsapp_phone (whatsapp_phone),
+			UNIQUE KEY phone (phone),
+			UNIQUE KEY whatsapp_phone (whatsapp_phone),
 			KEY email_status (email_status),
 			KEY sms_status (sms_status),
 			KEY whatsapp_status (whatsapp_status)';

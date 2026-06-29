@@ -10,13 +10,56 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { Contact } from '@doublescale/client';
+import { CONTACT_STATUS } from '@doublescale/client';
 import { convertDate } from '@doublescale/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { SortIcon, TimeAgoCell } from '@doublescale/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 import { useContactsContext } from '../contexts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+const pillBaseClasses =
+	'inline-flex items-center text-xs font-medium rounded-full border py-0.5 px-2.5';
+
+const statusClasses = (status: string): string => {
+	switch (status.toLowerCase()) {
+		case 'subscribed':
+			return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+		case 'unsubscribed':
+			return 'text-amber-700 bg-amber-50 border-amber-200';
+		case 'bounced':
+			return 'text-primary bg-primary/5 border-primary/20';
+		case 'blocked':
+		case 'unverified':
+			return 'text-destructive bg-destructive/5 border-destructive/20';
+		default:
+			return 'text-muted-foreground bg-muted/50 border-border';
+	}
+};
+
+const channelStatusShort = (status: string): string => {
+	switch (status.toLowerCase()) {
+		case 'subscribed':
+			return '✓';
+		case 'unsubscribed':
+			return 'Unsub';
+		case 'bounced':
+			return 'Bounced';
+		case 'blocked':
+			return 'Blocked';
+		case 'unverified':
+			return 'Unverified';
+		default:
+			return status || '—';
+	}
+};
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName: string, lastName: string): string => {
@@ -91,6 +134,12 @@ export const useContactsColumns = () => {
 				);
 				const avatarUrl = (contact as any).avatar_url;
 
+				const contactSubtitle =
+					contact.email ||
+					contact.phone ||
+					contact.whatsapp_phone ||
+					'';
+
 				return (
 					<Button
 						variant="ghost"
@@ -104,7 +153,7 @@ export const useContactsColumns = () => {
 								{avatarUrl ? (
 									<AvatarImage
 										src={avatarUrl}
-										alt={fullName || contact.email}
+										alt={fullName || contactSubtitle}
 										className="rounded-full"
 									/>
 								) : null}
@@ -118,9 +167,11 @@ export const useContactsColumns = () => {
 										{fullName}
 									</div>
 								)}
-								<div className="text-xs text-muted-foreground">
-									{contact.email}
-								</div>
+								{contactSubtitle && (
+									<div className="text-xs text-muted-foreground">
+										{contactSubtitle}
+									</div>
+								)}
 							</div>
 						</div>
 					</Button>
@@ -191,48 +242,113 @@ export const useContactsColumns = () => {
 				</div>
 			),
 			cell: ({ row }) => {
-				const contact = row.original as any;
+				const contact = row.original;
+				const lists = contact.lists ?? [];
+				const subscribedCount = lists.filter(
+					(l) =>
+						l.pivot?.status !== CONTACT_STATUS.EMAIL.UNSUBSCRIBED
+				).length;
+				const totalLists = lists.length;
 
-				const emailStatus = contact.email_status || '';
-				const smsStatus = contact.sms_status || '';
-				const whatsappStatus = contact.whatsapp_status || '';
+				const channels = [
+					{
+						key: 'email',
+						label: __('Email', 'doublescale'),
+						status: contact.email_status,
+						show: !!contact.email,
+					},
+					{
+						key: 'sms',
+						label: __('SMS', 'doublescale'),
+						status: contact.sms_status,
+						show: !!contact.phone,
+					},
+					{
+						key: 'whatsapp',
+						label: __('WA', 'doublescale'),
+						status: contact.whatsapp_status,
+						show: !!contact.whatsapp_phone,
+					},
+				];
 
-				const isSubscribed =
-					emailStatus.toLowerCase() === 'subscribed' ||
-					smsStatus.toLowerCase() === 'subscribed' ||
-					whatsappStatus.toLowerCase() === 'subscribed';
-
-				const status = isSubscribed ? 'subscribed' : 'unsubscribed';
-				let statusClasses = '';
-
-				switch (status.toLowerCase()) {
-					case 'subscribed':
-						statusClasses =
-							'text-emerald-700 bg-emerald-50 border-emerald-200';
-						break;
-					case 'unsubscribed':
-						statusClasses =
-							'text-amber-700 bg-amber-50 border-amber-200';
-						break;
-					case 'bounced':
-						statusClasses =
-							'text-primary bg-primary/5 border-primary/20';
-						break;
-					case 'unverified':
-						statusClasses =
-							'text-destructive bg-destructive/5 border-destructive/20';
-						break;
-					default:
-						statusClasses =
-							'text-muted-foreground bg-muted/50 border-border';
+				const hasChannelPills = channels.some((c) => c.show);
+				if (!hasChannelPills && totalLists === 0) {
+					return <span className="text-muted-foreground">—</span>;
 				}
 
 				return (
-					<span
-						className={`inline-flex items-center text-xs font-medium capitalize rounded-full border py-0.5 px-2.5 ${statusClasses}`}
-					>
-						{status}
-					</span>
+					<div className="flex flex-wrap gap-1">
+						{channels
+							.filter((c) => c.show)
+							.map(({ key, label, status }) => {
+								const normalized = (
+									status || ''
+								).toLowerCase();
+								const ariaLabel = `${label}: ${normalized || 'unknown'}`;
+								return (
+									<span
+										key={key}
+										className={`${pillBaseClasses} ${statusClasses(status)}`}
+										title={ariaLabel}
+										aria-label={ariaLabel}
+									>
+										{label} · {channelStatusShort(status)}
+									</span>
+								);
+							})}
+						{totalLists > 0 && (
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<span
+											className={`${pillBaseClasses} cursor-default ${
+												subscribedCount < totalLists
+													? statusClasses(
+															'unsubscribed'
+														)
+													: statusClasses(
+															'subscribed'
+														)
+											}`}
+										>
+											{__('Lists:', 'doublescale')}{' '}
+											{subscribedCount}/{totalLists}
+										</span>
+									</TooltipTrigger>
+									<TooltipContent
+										side="top"
+										className="max-w-xs"
+									>
+										<div className="space-y-1.5">
+											{lists.map((list) => {
+												const listStatus =
+													list.pivot?.status ??
+													CONTACT_STATUS.EMAIL
+														.SUBSCRIBED;
+												return (
+													<div
+														key={list.id}
+														className="flex items-center justify-between gap-3"
+													>
+														<span className="text-xs">
+															{list.name}
+														</span>
+														<span
+															className={`${pillBaseClasses} ${statusClasses(listStatus)}`}
+														>
+															{channelStatusShort(
+																listStatus
+															)}
+														</span>
+													</div>
+												);
+											})}
+										</div>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						)}
+					</div>
 				);
 			},
 		},

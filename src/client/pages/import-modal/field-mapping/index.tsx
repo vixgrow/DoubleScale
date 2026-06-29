@@ -177,6 +177,24 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 					/>
 				);
 				break;
+			case 'switch':
+			case 'toggle':
+			case 'checkbox':
+				return (
+					<div key={key}>
+						<Field
+							type="switch"
+							label={field.label}
+							helperText={field.tooltip || (field as { helperText?: string }).helperText}
+							value={
+								values[key] === undefined || values[key] === null
+									? true
+									: values[key]
+							}
+							onChange={(value) => updateValues(key, value)}
+						/>
+					</div>
+				);
 			case 'contact_mapped_fields':
 				const fields =
 					source === 'csv' && fileData

@@ -18,7 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { ConfirmDialog, InvoiceStatusPill } from '@/components/sales';
-import { deleteInvoice, useInvoices, useInvoiceSummary } from '@/hooks/sales';
+import {
+	canEditSalesDocument,
+	isApprovalWorkflowEnabled,
+} from '@/components/sales/sales-approval-utils';
+import { deleteInvoice, useInvoices, useInvoiceSummary, useSalesSettings } from '@/hooks/sales';
 import { INVOICE_STATUS_LABELS, type InvoiceStatus } from '@/constants/sales';
 import type { Invoice } from '@/types/sales';
 
@@ -59,6 +63,7 @@ const InvoicesList: React.FC = () => {
 	});
 
 	const { data: summary, refetch: refetchSummary } = useInvoiceSummary();
+	const { data: salesSettings } = useSalesSettings();
 
 	const invoices = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
@@ -234,19 +239,25 @@ const InvoicesList: React.FC = () => {
 													<Eye className="h-4 w-4" />
 													{__('View', 'doublescale')}
 												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(
-																`sales/invoices/${invoice.id}/edit`
+												{canEditSalesDocument(
+													isApprovalWorkflowEnabled(salesSettings, invoice),
+													invoice.approval,
+													invoice
+												) ? (
+													<DropdownMenuItem
+														className="cursor-pointer gap-2"
+														onSelect={() =>
+															navigate(
+																getToLink(
+																	`sales/invoices/${invoice.id}/edit`
+																)
 															)
-														)
-													}
-												>
-													<Pencil className="h-4 w-4" />
-													{__('Edit', 'doublescale')}
-												</DropdownMenuItem>
+														}
+													>
+														<Pencil className="h-4 w-4" />
+														{__('Edit', 'doublescale')}
+													</DropdownMenuItem>
+												) : null}
 												<DropdownMenuItem
 													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
 													onSelect={() => setDeleteId(invoice.id)}

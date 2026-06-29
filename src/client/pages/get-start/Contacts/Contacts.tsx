@@ -35,6 +35,7 @@ interface ContactFormData {
 	firstName: string;
 	lastName: string;
 	email: string;
+	phone: string;
 }
 
 // Component داخلي يستخدم الـ Context
@@ -55,12 +56,19 @@ function ContactsContent({ onSkip: _onSkip, onPrevious, onNext }: ContactsConten
 				first_name: data.firstName,
 				last_name: data.lastName,
 				email: data.email,
+				phone: data.phone,
 			};
 
 			// Use existing createContact method which handles success/error notifications
-			await createContact(contactPayload);
+			const result = await createContact(contactPayload);
+			if (!result.success) {
+				createNotice({
+					type: 'error',
+					message: result.message,
+				});
+				return;
+			}
 
-			// Refresh contacts list
 			await fetchContacts();
 
 			// Show a success notice in the onboarding flow

@@ -16,16 +16,28 @@ import {
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
+	ApprovalStatusBanner,
 } from '@/components/sales';
+import {
+	canEditSalesDocument,
+	canSubmitForApproval,
+	canWithdrawApproval,
+	isApprovalWorkflowEnabled,
+	showDirectSendAction,
+	formatSalesRestError,
+} from '@/components/sales/sales-approval-utils';
 import {
 	deleteInvoice,
 	deleteInvoicePayment,
 	downloadInvoicePdf,
 	recordInvoicePayment,
 	sendInvoice,
+	submitInvoiceForApproval,
+	withdrawInvoiceApproval,
 	useInvoice,
 	useInvoicePayments,
 	useSalesOnlinePaymentGateways,
+	useSalesSettings,
 } from '@/hooks/sales';
 import type { Invoice } from '@/types/sales';
 
@@ -35,6 +47,7 @@ const InvoiceView: React.FC = () => {
 	const invoiceId = params?.id ? Number(params.id) : null;
 
 	const { data: fetched, loading, error, refetch } = useInvoice(invoiceId);
+	const { data: salesSettings } = useSalesSettings();
 	const [invoice, setInvoice] = useState<Invoice | null>(null);
 	const { data: payments, loading: paymentsLoading, refetch: refetchPayments } =
 		useInvoicePayments(invoiceId);
@@ -107,7 +120,48 @@ const InvoiceView: React.FC = () => {
 			setNotice(__('Invoice sent to the customer.', 'doublescale'));
 			setSendOpen(false);
 		} catch (err: unknown) {
-			setNotice(err instanceof Error ? err.message : __('Send failed.', 'doublescale'));
+			setNotice(
+				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
+					approval_required: __(
+						'This invoice must be approved before it can be sent. Submit it for approval first.',
+						'doublescale'
+					),
+				})
+			);
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleSubmitForApproval = async () => {
+		if (!invoiceId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await submitInvoiceForApproval(invoiceId);
+			await refetch();
+			setNotice(__('Invoice submitted for approval.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleWithdrawApproval = async () => {
+		if (!invoiceId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await withdrawInvoiceApproval(invoiceId);
+			await refetch();
+			setNotice(__('Approval request withdrawn. You can edit and re-submit.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, __('Failed to withdraw approval request.', 'doublescale')));
 		} finally {
 			setBusy(false);
 		}
@@ -173,7 +227,24 @@ const InvoiceView: React.FC = () => {
 		);
 	}
 
-	const showSend = invoice.status !== 'paid';
+	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, invoice);
+	const showSend = showDirectSendAction(
+		workflowEnabled,
+		'invoice',
+		invoice.status,
+		invoice.approval,
+		invoice.status === 'paid',
+		invoice
+	);
+	const showSubmitApproval = canSubmitForApproval(
+		workflowEnabled,
+		'invoice',
+		invoice.status,
+		invoice.approval,
+		invoice
+	);
+	const canEdit = canEditSalesDocument(workflowEnabled, invoice.approval, invoice);
+	const showWithdraw = canWithdrawApproval(invoice);
 
 	const handleDownloadPdf = async () => {
 		if (!invoiceId || !invoice) {
@@ -195,6 +266,9 @@ const InvoiceView: React.FC = () => {
 			{notice ? (
 				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
 			) : null}
+
+			<ApprovalStatusBanner approval={invoice.approval} />
+
 			<div className="flex items-center justify-between gap-4">
 				<Button variant="ghost" onClick={() => navigate(getToLink('sales/invoices'))}>
 					<ArrowLeft className="h-4 w-4 mr-1" />
@@ -209,6 +283,16 @@ const InvoiceView: React.FC = () => {
 						<Button variant="outline" onClick={() => void handleCopyLink()}>
 							<Copy className="h-4 w-4 mr-1" />
 							{__('Copy Link', 'doublescale')}
+						</Button>
+					) : null}
+					{showSubmitApproval ? (
+						<Button onClick={() => void handleSubmitForApproval()} disabled={busy}>
+							{__('Submit for Approval', 'doublescale')}
+						</Button>
+					) : null}
+					{showWithdraw ? (
+						<Button variant="outline" onClick={() => void handleWithdrawApproval()} disabled={busy}>
+							{__('Withdraw Request', 'doublescale')}
 						</Button>
 					) : null}
 					{showSend ? (
@@ -230,13 +314,15 @@ const InvoiceView: React.FC = () => {
 						<CreditCard className="h-4 w-4 mr-1" />
 						{__('Record Payment', 'doublescale')}
 					</Button>
-					<Button
-						variant="outline"
-						onClick={() => navigate(getToLink(`sales/invoices/${invoice.id}/edit`))}
-					>
-						<Pencil className="h-4 w-4 mr-1" />
-						{__('Edit', 'doublescale')}
-					</Button>
+					{canEdit ? (
+						<Button
+							variant="outline"
+							onClick={() => navigate(getToLink(`sales/invoices/${invoice.id}/edit`))}
+						>
+							<Pencil className="h-4 w-4 mr-1" />
+							{__('Edit', 'doublescale')}
+						</Button>
+					) : null}
 					<Button variant="destructive" onClick={() => setDeleteOpen(true)}>
 						<Trash2 className="h-4 w-4 mr-1" />
 						{__('Delete', 'doublescale')}

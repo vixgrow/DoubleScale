@@ -7,6 +7,7 @@
 
 namespace DoubleScale\Modules\Automations\Engine;
 
+use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -81,7 +82,8 @@ final class ContactEnrollment {
 	}
 
 	public function maybe_create_contact(): ContactModel {
-		$contact    = ContactModel::where( 'email', $this->args['email'] )->first();
+		$lookup     = ContactModel::normalize_contact_data( $this->args );
+		$contact    = ContactModel::find_by_identifiers( $lookup );
 		$attributes = $this->prepare_contact_attributes( $contact );
 
 		if ( ! $contact ) {
@@ -124,13 +126,18 @@ final class ContactEnrollment {
 		}
 
 		// Strict E.164 WhatsApp column. Derive it from the loose phone when an
-		// explicit whatsapp_phone was not supplied.
-		$whatsapp_source = $attributes['whatsapp_phone'] ?? ( $attributes['phone'] ?? ( $this->args['phone'] ?? '' ) );
-		$whatsapp        = PhoneValidator::to_e164( $whatsapp_source, $country_hint );
-		if ( null === $whatsapp ) {
-			unset( $attributes['whatsapp_phone'] );
+		// explicit whatsapp_phone was not supplied and the automation allows it.
+		$phone_is_whatsapp = PhoneAsWhatsappSetting::is_enabled( $this->automation );
+		if ( $phone_is_whatsapp ) {
+			$whatsapp_source = $attributes['whatsapp_phone'] ?? ( $attributes['phone'] ?? ( $this->args['phone'] ?? '' ) );
+			$whatsapp        = PhoneValidator::to_e164( $whatsapp_source, $country_hint );
+			if ( null === $whatsapp ) {
+				unset( $attributes['whatsapp_phone'] );
+			} else {
+				$attributes['whatsapp_phone'] = $whatsapp;
+			}
 		} else {
-			$attributes['whatsapp_phone'] = $whatsapp;
+			unset( $attributes['whatsapp_phone'] );
 		}
 
 		// `country` is only a hint for E.164 resolution; keep it only if it maps

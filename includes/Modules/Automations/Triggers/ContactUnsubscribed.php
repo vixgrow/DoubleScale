@@ -36,7 +36,7 @@ class ContactUnsubscribed extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when a contact unsubscribed.';
+	public $description = 'Fires when a contact unsubscribes from Email, SMS, or WhatsApp. Filter by channel in automation settings (Pro).';
 
 	/**
 	 * Trigger Attributes

@@ -319,7 +319,7 @@ const ContactInformation: React.FC = () => {
 						</div>
 					</div>
 
-					{contact.email_status === 'unverified' && (
+					{contact.email && contact.email_status === 'unverified' && (
 						<div className="relative mt-4 flex justify-center">
 							<Button
 								size="sm"

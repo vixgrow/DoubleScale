@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { isObject } from 'lodash';
 import Select from 'react-select';
-import { Copy, HelpCircle, Circle } from 'lucide-react';
+import { Copy, HelpCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -31,7 +31,6 @@ import APISelect from '@/components/api-select';
 import APIMappedFields from '@/components/api-mapped-fields';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Slider } from '@/components/ui/slider';
 import PipelineStageChange from '@/components/pipeline-stage-change';
@@ -314,8 +313,7 @@ const Field: React.FC<FieldProps> = ({
 					type={type === 'phone' ? 'tel' : type}
 					className={cn(
 						'!rounded-lg !border-border h-12',
-						status === 'error' &&
-							'border-destructive focus-visible:ring-destructive/20',
+						status === 'error' && 'border-destructive',
 						disabled && 'bg-muted cursor-not-allowed opacity-70',
 						className
 					)}
@@ -333,8 +331,7 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					className={cn(
 						'!rounded-lg !border-border',
-						status === 'error' &&
-							'border-destructive focus-visible:ring-destructive/20',
+						status === 'error' && 'border-destructive',
 						className
 					)}
 					placeholder={placeholder}
@@ -482,45 +479,80 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
-		case 'checkbox':
+		case 'checkbox': {
+			const checkboxOptions = options || [];
+			const selectedCheckboxValues = Array.isArray(value)
+				? value.map((item) => String(item).trim()).filter(Boolean)
+				: typeof value === 'string' && value
+					? value
+							.split(',')
+							.map((item) => item.trim())
+							.filter(Boolean)
+					: [];
 			fieldContent = (
-				<Checkbox
-					checked={value}
-					onCheckedChange={(checked) => onChange(checked)}
-				/>
+				<div className="space-y-1">
+					{checkboxOptions.map((option) => {
+						const optionValue = String(option.value);
+						const selected = selectedCheckboxValues.includes(
+							optionValue
+						);
+						return (
+							<label
+								key={optionValue}
+								className="flex items-center gap-2 text-sm"
+							>
+								<input
+									type="checkbox"
+									disabled={disabled}
+									checked={selected}
+									onChange={(e) => {
+										const current = [...selectedCheckboxValues];
+										if (e.target.checked) {
+											current.push(optionValue);
+										} else {
+											const idx = current.indexOf(optionValue);
+											if (idx >= 0) {
+												current.splice(idx, 1);
+											}
+										}
+										onChange(current);
+									}}
+								/>
+								{option.label}
+							</label>
+						);
+					})}
+				</div>
 			);
 			break;
-		case 'radio':
-			// Radio button works like checkbox - yes/no toggle
-			const isRadioChecked =
-				value === true ||
-				value === 'true' ||
-				value === 'yes' ||
-				value === '1';
+		}
+		case 'radio': {
+			const radioOptions = options || [];
+			const radioGroupName = `ds-radio-${String(label || 'group').replace(/\s+/g, '-')}`;
 			fieldContent = (
-				<button
-					type="button"
-					onClick={() => {
-						// Toggle between checked and unchecked
-						onChange(isRadioChecked ? 'no' : 'yes');
-					}}
-					className={cn(
-						'aspect-square h-4 w-4 rounded-full border-2 border-primary text-white shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
-						isRadioChecked
-							? 'border-secondary bg-secondary'
-							: 'border-primary bg-transparent'
-					)}
-					aria-checked={isRadioChecked ? 'true' : 'false'}
-					role="radio"
-				>
-					{isRadioChecked && (
-						<div className="flex items-center justify-center h-full">
-							<Circle className="h-[0.8rem] w-[0.6rem] fill-current" />
-						</div>
-					)}
-				</button>
+				<div className="space-y-1">
+					{radioOptions.map((option) => {
+						const optionValue = String(option.value);
+						return (
+							<label
+								key={optionValue}
+								className="flex items-center gap-2 text-sm"
+							>
+								<input
+									type="radio"
+									name={radioGroupName}
+									disabled={disabled}
+									checked={String(value) === optionValue}
+									onChange={() => onChange(optionValue)}
+								/>
+								{option.label}
+							</label>
+						);
+					})}
+				</div>
 			);
 			break;
+		}
 		case 'switch':
 			fieldContent = (
 				<Switch
@@ -757,44 +789,6 @@ const Field: React.FC<FieldProps> = ({
 					<div className="doublescale-field-input">
 						{fieldContent}
 					</div>
-				</div>
-				{helperText && renderHelperText(helperText)}
-			</div>
-		);
-	}
-
-	// Special layout for checkbox - checkbox before label
-	if (type === 'checkbox') {
-		return (
-			<div className="doublescale-field" style={style || {}}>
-				<div className="flex items-center gap-3">
-					<div className="doublescale-field-input">
-						{fieldContent}
-					</div>
-					{label && (
-						<div className="doublescale-field-label text-foreground font-normal text-sm">
-							{renderLabelWithTooltip()}
-						</div>
-					)}
-				</div>
-				{helperText && renderHelperText(helperText)}
-			</div>
-		);
-	}
-
-	// Special layout for radio - radio before label (like checkbox)
-	if (type === 'radio') {
-		return (
-			<div className="doublescale-field" style={style || {}}>
-				<div className="flex items-center gap-3">
-					<div className="doublescale-field-input">
-						{fieldContent}
-					</div>
-					{label && (
-						<div className="doublescale-field-label text-foreground font-normal text-sm">
-							{renderLabelWithTooltip()}
-						</div>
-					)}
 				</div>
 				{helperText && renderHelperText(helperText)}
 			</div>

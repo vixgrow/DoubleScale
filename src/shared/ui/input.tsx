@@ -14,8 +14,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
 					'flex h-10 w-full items-center rounded-lg border border-border bg-white px-3 py-2 text-sm text-foreground transition-colors',
 					// Placeholder
 					'placeholder:text-muted-foreground',
-					// Focus — use focus: (not focus-visible:) to match SelectTrigger and avoid WP admin overrides.
-					'focus:outline-none focus:ring-2 focus:ring-brandPrimary/20 focus:border-brandPrimary',
+					// Focus — no ring/outline; WP admin adds a blue box-shadow on :focus otherwise.
+					'focus:outline-none focus:ring-0 focus:!shadow-none',
+					'focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:!shadow-none',
 					// Disabled
 					'disabled:cursor-not-allowed disabled:opacity-50',
 					// File input internals

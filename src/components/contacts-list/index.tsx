@@ -317,6 +317,12 @@ const ContactList: React.FC<ContactListProps> = ({
 							);
 							const avatarUrl = (contact as any).avatar_url;
 
+							const contactSubtitle =
+								contact.email ||
+								contact.phone ||
+								contact.whatsapp_phone ||
+								'';
+
 							return (
 								<div
 									key={contact.id}
@@ -327,7 +333,7 @@ const ContactList: React.FC<ContactListProps> = ({
 										{avatarUrl ? (
 											<AvatarImage
 												src={avatarUrl}
-												alt={fullName || contact.email}
+												alt={fullName || contactSubtitle}
 												className="rounded-full"
 											/>
 										) : null}
@@ -343,9 +349,11 @@ const ContactList: React.FC<ContactListProps> = ({
 												{fullName}
 											</div>
 										)}
-										<div className="text-sm text-muted-foreground truncate">
-											{contact.email}
-										</div>
+										{contactSubtitle && (
+											<div className="text-sm text-muted-foreground truncate">
+												{contactSubtitle}
+											</div>
+										)}
 									</div>
 								</div>
 							);

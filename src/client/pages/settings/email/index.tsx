@@ -84,7 +84,7 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
                     <div className="text-[#09090B] font-normal text-base mb-2">
                         {__('Email Footer', 'doublescale')}
                     </div>
-                    <div>
+                    <div className="send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
                         <Editor
                             message={email_footer}
                             onChange={(content) =>
@@ -114,7 +114,7 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
                     <Label className="text-[#09090B] font-normal text-base">
                         {__('Email Content', 'doublescale')}
                     </Label>
-                    <div className="mt-2">
+                    <div className="send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
                         <Editor
                             message={email_content}
                             onChange={(content) =>
@@ -159,7 +159,7 @@ const ProEmailSettings: React.FC<EmailSettingsProps> = ({
                             <Label className="text-[#09090B] font-normal text-base">
                                 {__('Confirmation Message', 'doublescale')}
                             </Label>
-                            <div className="mt-2">
+                            <div className="send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
                                 <Editor
                                     message={confirmation_message}
                                     onChange={(content) =>

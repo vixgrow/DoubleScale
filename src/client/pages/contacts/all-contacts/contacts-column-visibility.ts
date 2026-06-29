@@ -1,7 +1,10 @@
 /**
  * WordPress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
+import {
+	getListPreferences,
+	updateListPreferences,
+} from '@doublescale/services/list-preferences-service';
 
 export const DEFAULT_CONTACTS_COLUMN_VISIBILITY: Record<string, boolean> = {
 	contact: true,
@@ -36,29 +39,23 @@ export function mergeContactsColumnVisibility(
 }
 
 export function getSavedContactsColumnVisibility(): Record<string, boolean> {
-	const config = (
+	const prefs = getListPreferences('contacts');
+	const legacy = (
 		typeof window !== 'undefined' ? window.doublescaleConfig : undefined
-	) as { contactsListPreferences?: { column_visibility?: Record<string, boolean> } } | undefined;
+	) as
+		| { contactsListPreferences?: { column_visibility?: Record<string, boolean> } }
+		| undefined;
 
 	return mergeContactsColumnVisibility(
-		config?.contactsListPreferences?.column_visibility
+		prefs.column_visibility ??
+			legacy?.contactsListPreferences?.column_visibility
 	);
 }
 
 export async function saveContactsColumnVisibility(
 	visibility: Record<string, boolean>
 ): Promise<void> {
-	await apiFetch({
-		path: '/doublescale/v1/contacts/list-preferences',
-		method: 'PUT',
-		data: {
-			column_visibility: visibility,
-		},
+	await updateListPreferences('contacts', {
+		column_visibility: visibility,
 	});
-
-	if (typeof window !== 'undefined' && window.doublescaleConfig) {
-		window.doublescaleConfig.contactsListPreferences = {
-			column_visibility: visibility,
-		};
-	}
 }

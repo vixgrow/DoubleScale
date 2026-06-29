@@ -78,7 +78,6 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'leadscoring',
 		'credit_notes',
 		'contracts',
-		'subscriptions',
 		'tasks',
 	);
 
@@ -215,12 +214,6 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 				'description'  => __( 'Manage customer contracts, types, attachments, and e-signatures.', 'doublescale' ),
 				'dependencies' => array( 'contacts', 'sales' ),
 			);
-		case 'subscriptions':
-			return array(
-				'label'        => __( 'Subscriptions', 'doublescale' ),
-				'description'  => __( 'Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge.', 'doublescale' ),
-				'dependencies' => array( 'contacts', 'sales', 'documents' ),
-			);
 		case 'tasks':
 			return array(
 				'label'       => __( 'Tasks', 'doublescale' ),
@@ -349,10 +342,14 @@ function doublescale_build_modules_list_payload( array $all ): array {
  * @return string[]
  */
 function doublescale_standalone_plugin_module_slugs(): array {
+	$slugs = array(
+		'subscriptions',
+	);
+
 	/**
 	 * @param string[] $slugs Standalone-plugin module slugs.
 	 */
-	return (array) apply_filters( 'doublescale_standalone_plugin_module_slugs', array() );
+	return (array) apply_filters( 'doublescale_standalone_plugin_module_slugs', $slugs );
 }
 
 /**

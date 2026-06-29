@@ -22,6 +22,7 @@ use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
+use DoubleScale\Core\ListPreferences\ListPreferencesManager;
 use DoubleScale\Modules\Contacts\Rest\Controllers\RestContactController;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Core\UserRoles\UserRoles;
@@ -91,6 +92,8 @@ final class AdminConfig {
 			}
 		}
 
+		$user_capabilities['doublescale_manage'] = current_user_can( 'doublescale_manage' );
+
 		$current_wp_user = wp_get_current_user();
 		$current_user    = array(
 			'id'           => $current_wp_user->ID,
@@ -149,6 +152,7 @@ final class AdminConfig {
 				'importers'           => Importers_Manager::instance()->get_options(),
 				'userCapabilities'    => $user_capabilities,
 				'currentUser'         => $current_user,
+				'listPreferences'       => ListPreferencesManager::get_all( $current_wp_user->ID ),
 				'contactsListPreferences' => array(
 					'column_visibility' => RestContactController::get_list_column_visibility( $current_wp_user->ID ),
 				),
@@ -171,6 +175,10 @@ final class AdminConfig {
 				'modules'             => self::get_modules_config(),
 				/** Temporary release gate for Sales proposals/invoices — see doublescale_sales_documents_ready(). */
 				'salesDocumentsReady' => doublescale_sales_documents_ready(),
+				/** Pro approval workflow toggle — see SalesSettings::get( 'approval_workflow_enabled' ). */
+				'salesApprovalWorkflowEnabled' => class_exists( \DoubleScale\Modules\Sales\Services\SalesSettings::class )
+					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
+					: false,
 			)
 		);
 

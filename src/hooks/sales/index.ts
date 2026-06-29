@@ -39,6 +39,8 @@ import type {
 	SalesAssignableUser,
 	SalesSettings,
 	SalesTax,
+	DocumentApproval,
+	ApprovalQueueItem,
 } from '@/types/sales';
 
 export const formatRestError = (err: unknown): string => {
@@ -863,3 +865,95 @@ export const fetchProposalSignature = (proposalId: number) =>
 	apiFetch<ProposalSignature>({
 		path: `${NAMESPACE}/proposals/${proposalId}/signature`,
 	});
+
+export const submitProposalForApproval = (proposalId: number) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/proposals/${proposalId}/submit-approval`,
+		method: 'POST',
+	});
+
+export const submitInvoiceForApproval = (invoiceId: number) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/submit-approval`,
+		method: 'POST',
+	});
+
+export const submitContractForApproval = (contractId: number) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/contracts/${contractId}/submit-approval`,
+		method: 'POST',
+	});
+
+export const submitCreditNoteForApproval = (creditNoteId: number) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/credit-notes/${creditNoteId}/submit-approval`,
+		method: 'POST',
+	});
+
+export const withdrawProposalApproval = (proposalId: number) =>
+	apiFetch<{ withdrawn: boolean }>({
+		path: `${NAMESPACE}/proposals/${proposalId}/withdraw-approval`,
+		method: 'POST',
+	});
+
+export const withdrawInvoiceApproval = (invoiceId: number) =>
+	apiFetch<{ withdrawn: boolean }>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/withdraw-approval`,
+		method: 'POST',
+	});
+
+export const withdrawContractApproval = (contractId: number) =>
+	apiFetch<{ withdrawn: boolean }>({
+		path: `${NAMESPACE}/contracts/${contractId}/withdraw-approval`,
+		method: 'POST',
+	});
+
+export const withdrawCreditNoteApproval = (creditNoteId: number) =>
+	apiFetch<{ withdrawn: boolean }>({
+		path: `${NAMESPACE}/credit-notes/${creditNoteId}/withdraw-approval`,
+		method: 'POST',
+	});
+
+export const approveSalesDocument = (approvalId: number) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/approvals/${approvalId}/approve`,
+		method: 'POST',
+	});
+
+export const rejectSalesDocument = (approvalId: number, reason: string) =>
+	apiFetch<{ data: DocumentApproval }>({
+		path: `${NAMESPACE}/approvals/${approvalId}/reject`,
+		method: 'POST',
+		data: { reason },
+	});
+
+export const useApprovalQueue = (page = 1, perPage = 20) => {
+	const [data, setData] = useState<ApprovalQueueItem[]>([]);
+	const [meta, setMeta] = useState({ total: 0, page: 1, per_page: perPage });
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		const url = addQueryArgs(`${NAMESPACE}/approvals`, { page, per_page: perPage });
+		return apiFetch<{ data: ApprovalQueueItem[]; meta: typeof meta }>({ path: url })
+			.then((response) => {
+				setData(response.data ?? []);
+				setMeta(response.meta ?? { total: 0, page, per_page: perPage });
+				return response;
+			})
+			.catch((err: unknown) => {
+				const message = formatRestError(err);
+				setError(message);
+				throw err;
+			})
+			.finally(() => setLoading(false));
+	}, [page, perPage]);
+
+	useEffect(() => {
+		void refetch();
+	}, [refetch]);
+
+	return { data, meta, loading, error, refetch };
+};

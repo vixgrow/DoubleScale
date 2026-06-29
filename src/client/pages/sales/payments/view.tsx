@@ -10,8 +10,13 @@ import { useParams } from '@doublescale/navigation';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ConfirmDialog, PaymentForm, PaymentReceiptPreview } from '@/components/sales';
-import { deletePayment, updatePayment, usePayment } from '@/hooks/sales';
+import {
+	ConfirmDialog,
+	isSalesRepOnly,
+	PaymentForm,
+	PaymentReceiptPreview,
+} from '@/components/sales';
+import { deletePayment, formatRestError, updatePayment, usePayment } from '@/hooks/sales';
 import type { RecordPaymentPayload } from '@/types/sales';
 
 const PaymentView: React.FC = () => {
@@ -23,6 +28,8 @@ const PaymentView: React.FC = () => {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [saveError, setSaveError] = useState<string | null>(null);
+	const paymentReadOnly = isSalesRepOnly();
 
 	const handleDelete = async () => {
 		if (!paymentId) {
@@ -44,12 +51,13 @@ const PaymentView: React.FC = () => {
 		}
 		setBusy(true);
 		setNotice(null);
+		setSaveError(null);
 		try {
 			await updatePayment(paymentId, payload);
 			await refetch();
 			setNotice(__('Payment saved.', 'doublescale'));
 		} catch (err: unknown) {
-			setNotice(err instanceof Error ? err.message : __('Save failed.', 'doublescale'));
+			setSaveError(formatRestError(err));
 		} finally {
 			setBusy(false);
 		}
@@ -76,7 +84,9 @@ const PaymentView: React.FC = () => {
 	return (
 		<div className="p-6 space-y-6 max-w-5xl">
 			{notice ? (
-				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
+				<div className="text-sm rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700">
+					{notice}
+				</div>
 			) : null}
 
 			<div className="flex items-center justify-between gap-4">
@@ -84,15 +94,17 @@ const PaymentView: React.FC = () => {
 					<ArrowLeft className="h-4 w-4 mr-1" />
 					{__('Payments', 'doublescale')}
 				</Button>
-				<Button
-					variant="outline"
-					className="text-red-600 hover:text-red-700"
-					onClick={() => setDeleteOpen(true)}
-					disabled={busy}
-				>
-					<Trash2 className="h-4 w-4 mr-1" />
-					{__('Delete', 'doublescale')}
-				</Button>
+				{!paymentReadOnly ? (
+					<Button
+						variant="outline"
+						className="text-red-600 hover:text-red-700"
+						onClick={() => setDeleteOpen(true)}
+						disabled={busy}
+					>
+						<Trash2 className="h-4 w-4 mr-1" />
+						{__('Delete', 'doublescale')}
+					</Button>
+				) : null}
 			</div>
 
 			<Tabs defaultValue="receipt">
@@ -109,7 +121,13 @@ const PaymentView: React.FC = () => {
 
 				<TabsContent value="payment" className="mt-6">
 					<div className="border rounded-lg bg-white p-6 shadow-sm">
-						<PaymentForm payment={payment} busy={busy} onSubmit={handleSave} />
+						<PaymentForm
+							payment={payment}
+							busy={busy}
+							error={saveError}
+							readOnly={paymentReadOnly}
+							onSubmit={handleSave}
+						/>
 					</div>
 				</TabsContent>
 			</Tabs>

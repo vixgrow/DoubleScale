@@ -454,11 +454,17 @@ const WhatsAppTemplateStep: React.FC = () => {
 						<Separator />
 
 						{/* Info boxes */}
-						<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+						<div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
 							<p className="text-sm text-gray-700">
 								<strong>{__('Unsubscribe:', 'doublescale')}</strong>{' '}
 								{__(
-									'Recipients can reply STOP to unsubscribe from WhatsApp messages. This is handled automatically.',
+									'When a contact replies STOP, UNSUBSCRIBE, or similar keywords, DoubleScale automatically unsubscribes them from WhatsApp — no extra setup required.',
+									'doublescale'
+								)}
+							</p>
+							<p className="text-sm text-gray-600">
+								{__(
+									'Unlike SMS, the "Reply STOP to unsubscribe" sentence is not added automatically. Include it in your Meta message template if you want recipients to see opt-out instructions.',
 									'doublescale'
 								)}
 							</p>

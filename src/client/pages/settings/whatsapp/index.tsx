@@ -165,7 +165,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 				<CardContent className="space-y-3 text-sm text-gray-700">
 					<p>
 						{__(
-							'When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, or QUIT — DoubleScale automatically marks them as unsubscribed from WhatsApp. You do not need to configure anything for this.',
+							'When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp. You do not need to configure anything for this.',
 							'doublescale'
 						)}
 					</p>
@@ -178,7 +178,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 					</p>
 					<p>
 						{__(
-							'Contacts can resubscribe by replying with START, SUBSCRIBE, or YES.',
+							'Contacts can resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP. The reply must be that keyword only (not part of a longer sentence).',
 							'doublescale'
 						)}
 					</p>

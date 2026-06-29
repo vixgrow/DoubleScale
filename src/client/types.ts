@@ -6,6 +6,7 @@ export type List = {
 	slug: string;
 	description: string | null;
 	status: string;
+	is_public: boolean;
 	contacts_count: number;
 	created_at: string;
 	updated_at: string;

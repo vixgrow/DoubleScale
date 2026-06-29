@@ -123,7 +123,8 @@ class Lists extends Filter {
 					$query->whereHas(
 						'lists',
 						function ( $query ) use ( $list_id ) {
-							$query->where( $query->getModel()->getTable() . '.id', $list_id );
+							$query->where( $query->getModel()->getTable() . '.id', $list_id )
+								->wherePivot( 'status', 'subscribed' );
 						}
 					);
 				}
@@ -132,7 +133,8 @@ class Lists extends Filter {
 				$query->whereDoesntHave(
 					'lists',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
+							->wherePivot( 'status', 'subscribed' );
 					}
 				);
 				break;
@@ -140,7 +142,8 @@ class Lists extends Filter {
 				$query->whereHas(
 					'lists',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
+							->wherePivot( 'status', 'subscribed' );
 					}
 				);
 				break;
@@ -148,15 +151,26 @@ class Lists extends Filter {
 				$query->whereDoesntHave(
 					'lists',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
+							->wherePivot( 'status', 'subscribed' );
 					}
 				);
 				break;
 			case 'is_empty':
-				$query->whereDoesntHave( 'lists' );
+				$query->whereDoesntHave(
+					'lists',
+					function ( $query ) {
+						$query->wherePivot( 'status', 'subscribed' );
+					}
+				);
 				break;
 			case 'is_not_empty':
-				$query->whereHas( 'lists' );
+				$query->whereHas(
+					'lists',
+					function ( $query ) {
+						$query->wherePivot( 'status', 'subscribed' );
+					}
+				);
 				break;
 		}
 

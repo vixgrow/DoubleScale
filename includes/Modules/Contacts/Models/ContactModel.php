@@ -151,7 +151,7 @@ class ContactModel extends Model {
 	public function lists() {
 		return $this->belongsToMany( ListModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
 			->wherePivot( 'taxonomy_type', 'list' )
-			->withPivot( 'taxonomy_type' );
+			->withPivot( 'taxonomy_type', 'status' );
 	}
 
 	/**
@@ -910,6 +910,129 @@ class ContactModel extends Model {
 	}
 
 	/**
+	 * Check whether the contact is subscribed to a specific list.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $list_id List ID.
+	 * @return bool
+	 */
+	public function is_subscribed_to_list( $list_id ) {
+		$list = $this->lists()->whereKey( (int) $list_id )->first();
+		if ( ! $list ) {
+			return false;
+		}
+
+		$status = $list->pivot->status ?? 'subscribed';
+
+		return 'subscribed' === $status;
+	}
+
+	/**
+	 * Unsubscribe from a list while retaining membership.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $list_id List ID.
+	 * @param string $reason  Optional reason.
+	 * @return bool
+	 */
+	public function unsubscribe_from_list( $list_id, $reason = '' ) {
+		$list_id = (int) $list_id;
+		if ( $list_id <= 0 ) {
+			return false;
+		}
+
+		$list = ListModel::find( $list_id );
+		if ( ! $list ) {
+			return false;
+		}
+
+		if ( ! $this->lists()->whereKey( $list_id )->exists() ) {
+			return false;
+		}
+
+		if ( ! $this->is_subscribed_to_list( $list_id ) ) {
+			return true;
+		}
+
+		$this->lists()->updateExistingPivot( $list_id, array( 'status' => 'unsubscribed' ) );
+
+		/* translators: %s: list name */
+		$note_text = sprintf( __( 'Unsubscribed from list: %s', 'doublescale' ), $list->name );
+		if ( ! empty( $reason ) ) {
+			/* translators: %s: unsubscribe reason */
+			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'doublescale' ), $reason );
+		}
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'List Unsubscribed', 'doublescale' ),
+					'type'  => 'system',
+					'note'  => $note_text,
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
+
+		do_action( 'doublescale_contact_list_unsubscribed', $this, $list_id );
+
+		return true;
+	}
+
+	/**
+	 * Resubscribe to a list (attach first when not a member).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $list_id List ID.
+	 * @return bool
+	 */
+	public function resubscribe_to_list( $list_id ) {
+		$list_id = (int) $list_id;
+		if ( $list_id <= 0 ) {
+			return false;
+		}
+
+		$list = ListModel::find( $list_id );
+		if ( ! $list ) {
+			return false;
+		}
+
+		if ( ! $this->lists()->whereKey( $list_id )->exists() ) {
+			$this->add_lists( array( $list_id ) );
+			return true;
+		}
+
+		if ( $this->is_subscribed_to_list( $list_id ) ) {
+			return true;
+		}
+
+		$this->lists()->updateExistingPivot( $list_id, array( 'status' => 'subscribed' ) );
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'List Subscribed', 'doublescale' ),
+					'type'  => 'system',
+					/* translators: %s: list name */
+					'note'  => sprintf( __( 'Subscribed to list: %s', 'doublescale' ), $list->name ),
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
+
+		do_action( 'doublescale_contact_list_subscribed', $this, $list_id );
+
+		return true;
+	}
+
+	/**
 	 * Sync lists
 	 *
 	 * @since 1.0.0
@@ -924,7 +1047,13 @@ class ContactModel extends Model {
 		$lists_to_remove = array_diff( $existing_lists, $lists );
 
 		if ( ! empty( $lists_to_add ) ) {
-			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			$this->lists()->attach(
+				$lists_to_add,
+				array(
+					'taxonomy_type' => 'list',
+					'status'        => 'subscribed',
+				)
+			);
 			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 
@@ -948,7 +1077,13 @@ class ContactModel extends Model {
 		$lists_to_add   = array_diff( $lists, $existing_lists );
 
 		if ( ! empty( $lists_to_add ) ) {
-			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			$this->lists()->attach(
+				$lists_to_add,
+				array(
+					'taxonomy_type' => 'list',
+					'status'        => 'subscribed',
+				)
+			);
 			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 	}

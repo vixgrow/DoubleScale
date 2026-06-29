@@ -69,6 +69,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [list, setList] = useState({
 		name: '',
 		description: '',
+		is_public: true,
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
@@ -163,7 +164,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			});
 
 			setVisible(false);
-			setList({ name: '', description: '' });
+			setList({ name: '', description: '', is_public: true });
 			showNotice(
 				'success',
 				__(
@@ -241,14 +242,14 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	// Event handlers
 	const handleOpenCreateModal = () => {
 		setSelectedList(null);
-		setList({ name: '', description: '' });
+		setList({ name: '', description: '', is_public: true });
 		setVisible(true);
 	};
 
 	const handleCloseModal = () => {
 		setVisible(false);
 		setSelectedList(null);
-		setList({ name: '', description: '' });
+		setList({ name: '', description: '', is_public: true });
 	};
 
 	const handleEditList = (listToEdit: ContactList) => {

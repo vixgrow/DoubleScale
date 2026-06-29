@@ -162,6 +162,10 @@ class RestImportExportController extends RestController {
 								'type' => 'string',
 							),
 						),
+						'phone_is_whatsapp'     => array(
+							'required' => false,
+							'type'     => 'boolean',
+						),
 					),
 				),
 			)
@@ -638,6 +642,7 @@ class RestImportExportController extends RestController {
 		$send_double_optin     = $request->get_param( 'send_double_optin' ) ?? false;
 		$credentials           = $request->get_param( 'credentials' ) ?? array();
 		$membership_filter     = $request->get_param( 'membership_filter' ) ?? array();
+		$phone_is_whatsapp     = $request->get_param( 'phone_is_whatsapp' );
 		$result                = array();
 
 		$args = array(
@@ -655,6 +660,7 @@ class RestImportExportController extends RestController {
 			'mapping'               => $mapping,
 			'credentials'           => $credentials,
 			'membership_filter'     => $membership_filter,
+			'phone_is_whatsapp'     => $phone_is_whatsapp,
 		);
 
 		try {

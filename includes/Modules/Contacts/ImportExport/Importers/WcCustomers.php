@@ -17,6 +17,7 @@ namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Validators\PhoneValidator;
+use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
 
 /**
@@ -55,6 +56,15 @@ class WcCustomers extends Importer {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return PhoneAsWhatsappSetting::get_fields_entry();
+	}
+
+	/**
 	 * Run importer
 	 */
 	public function run() {
@@ -69,12 +79,15 @@ class WcCustomers extends Importer {
 			'last_name'       => 'last_name',
 			'email'           => 'email',
 			'phone'           => 'phone',
-			'whatsapp_phone'  => 'whatsapp_phone',
 			'city'            => 'city',
 			'state'           => 'state',
 			'zip'             => 'postcode',
 			'country'         => 'country',
 		);
+
+		if ( PhoneAsWhatsappSetting::is_enabled( $this->phone_is_whatsapp ) ) {
+			$mapping['whatsapp_phone'] = 'whatsapp_phone';
+		}
 
 		$result = $this->import_with_offset(
 			$total,
@@ -85,9 +98,11 @@ class WcCustomers extends Importer {
 				foreach ( $rows as $row ) {
 					$row->phone = $this->get_customer_phone( $row );
 
-					$country_hint = isset( $row->country ) ? (string) $row->country : '';
-					$whatsapp     = '' !== $row->phone ? PhoneValidator::to_e164( $row->phone, $country_hint ) : null;
-					$row->whatsapp_phone = null !== $whatsapp ? $whatsapp : '';
+					if ( PhoneAsWhatsappSetting::is_enabled( $this->phone_is_whatsapp ) ) {
+						$country_hint        = isset( $row->country ) ? (string) $row->country : '';
+						$whatsapp            = '' !== $row->phone ? PhoneValidator::to_e164( $row->phone, $country_hint ) : null;
+						$row->whatsapp_phone = null !== $whatsapp ? $whatsapp : '';
+					}
 				}
 
 				return $rows;

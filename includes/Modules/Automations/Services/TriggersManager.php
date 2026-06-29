@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Exception;
+use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Modules\Automations\Abstracts\Trigger;
 
 /**
@@ -454,10 +455,15 @@ final class TriggersManager {
 	 * @param Trigger $trigger Trigger instance.
 	 */
 	private function store_trigger_in_sources( Trigger $trigger ): void {
+		$fields = $trigger->get_fields();
+		if ( 'woocommerce' === $trigger->source ) {
+			$fields = array_merge( $fields, PhoneAsWhatsappSetting::get_fields_entry() );
+		}
+
 		$row = array(
 			'label'       => $trigger->name,
 			'description' => $trigger->description,
-			'fields'      => $trigger->get_fields(),
+			'fields'      => $fields,
 			'is_pro'      => $trigger->is_pro,
 			'is_disabled' => false,
 		);

@@ -608,7 +608,8 @@ export const useImportActions = () => {
 			state.wizardStep >= 2 &&
 			(importer?.is_integration
 				? ['fluentcrm', 'wpfunnelkit'].includes(state.source)
-				: ['memberpress'].includes(state.source) && !isEmpty(importer?.fields)) &&
+				: (['memberpress', 'wc_customers'].includes(state.source) &&
+						!isEmpty(importer?.fields))) &&
 			!state.sourceData &&
 			!state.isFetching &&
 			hasFetchedRef.current !== state.source;

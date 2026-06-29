@@ -69,7 +69,11 @@ export const buildCustomFieldAttributesPayload = (
 	options: string[],
 	required: boolean
 ): Record<string, unknown> | string[] | null => {
-	const needsOptions = type === 'select' || type === 'multiselect';
+	const needsOptions =
+		type === 'select' ||
+		type === 'multiselect' ||
+		type === 'radio' ||
+		type === 'checkbox';
 	const validOptions = options.map((option) => option.trim()).filter(Boolean);
 
 	if (needsOptions) {
@@ -90,14 +94,14 @@ export const isEmptyCrmCustomFieldValue = (
 	value: unknown,
 	type: string
 ): boolean => {
-	if (type === 'multiselect') {
+	if (type === 'multiselect' || type === 'checkbox') {
 		if (!Array.isArray(value)) {
 			return !value || String(value).trim() === '';
 		}
 		return value.length === 0;
 	}
 
-	if (type === 'checkbox' || type === 'boolean') {
+	if (type === 'boolean') {
 		if (value === true || value === 'true') {
 			return false;
 		}
@@ -121,11 +125,11 @@ export const isValidCrmCustomFieldValue = (
 
 	const { options } = getCustomFieldAttributesMeta(field.attributes);
 
-	if (field.type === 'select') {
+	if (field.type === 'select' || field.type === 'radio') {
 		return options.includes(String(value).trim());
 	}
 
-	if (field.type === 'multiselect') {
+	if (field.type === 'multiselect' || field.type === 'checkbox') {
 		const selected = Array.isArray(value)
 			? value.map((item) => String(item).trim()).filter(Boolean)
 			: String(value)

@@ -101,7 +101,7 @@ class Fields extends Rule {
 			'select'      => 'select',
 			'multiselect' => 'multiselect',
 			'radio'       => 'select',
-			'checkbox'    => 'select',
+			'checkbox'    => 'multiselect',
 			'boolean'     => 'select',
 		);
 
@@ -147,6 +147,7 @@ class Fields extends Rule {
 				);
 
 			case 'multiselect':
+			case 'checkbox':
 				return array(
 					'contains'         => __( 'Contains', 'doublescale' ),
 					'does_not_contain' => __( 'Does not contain', 'doublescale' ),
@@ -154,7 +155,6 @@ class Fields extends Rule {
 					'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 				);
 
-			case 'checkbox':
 			case 'boolean':
 				return array(
 					'is' => __( 'Is', 'doublescale' ),
@@ -193,7 +193,7 @@ class Fields extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		if ( in_array( $this->custom_field->type, array( 'checkbox', 'boolean' ), true ) ) {
+		if ( 'boolean' === $this->custom_field->type ) {
 			return array(
 				'true'  => __( 'Checked', 'doublescale' ),
 				'false' => __( 'Unchecked', 'doublescale' ),
@@ -243,7 +243,7 @@ class Fields extends Rule {
 
 		$value = $contact->get_custom_field( $this->custom_field->id );
 
-		if ( $this->custom_field->type === 'multiselect' && is_string( $value ) ) {
+		if ( in_array( $this->custom_field->type, array( 'multiselect', 'checkbox' ), true ) && is_string( $value ) ) {
 			return array_map( 'trim', explode( ',', $value ) );
 		}
 

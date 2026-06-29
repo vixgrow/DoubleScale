@@ -531,7 +531,7 @@ abstract class Importer {
 							continue;
 						}
 						// for updating attributes if these values are not in the attributes array
-						if ( $custom_field->type === 'select' || $custom_field->type === 'multiselect' ) {
+						if ( in_array( $custom_field->type, array( 'select', 'multiselect', 'radio', 'checkbox' ), true ) ) {
 							$custom_field->attributes = array_merge( $custom_field->attributes, $attributes );
 							$custom_field->attributes = array_unique( $custom_field->attributes );
 							$custom_field->save();

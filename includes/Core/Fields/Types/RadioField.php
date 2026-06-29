@@ -50,7 +50,7 @@ class RadioField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return (bool) $value;
+		return sanitize_text_field( $value );
 	}
 
 	/**
@@ -61,16 +61,14 @@ class RadioField extends FieldType {
 	 * @return boolean
 	 */
 	public function validate_value( $value ) {
-		if ( $this->is_required && empty( $value ) ) {
+		if ( empty( $value ) && $this->is_required ) {
 			$this->is_valid       = false;
 			$this->validation_err = 'This field is required';
 			return;
 		}
 
-		if ( ! is_bool( $value ) ) {
-			$this->is_valid       = false;
-			$this->validation_err = 'Value must be a radio';
-		}
+		// For radio fields, validation of options should be done against the field's attributes
+		// This is handled in the CustomFieldModel validation
 	}
 }
 

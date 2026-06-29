@@ -36,7 +36,7 @@ class ContactSubscribed extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when a contact subscribed.';
+	public $description = 'Fires when a contact subscribes to Email, SMS, or WhatsApp. Filter by channel in automation settings (Pro).';
 
 	/**
 	 * Trigger Attributes

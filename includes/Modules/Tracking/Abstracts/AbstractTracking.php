@@ -197,8 +197,9 @@ abstract class AbstractTracking {
 		// Process webhook through provider (handles signature verification and parsing)
 		$webhook_result = $provider->process_webhook( $this->channel, $webhook_data );
 
-		// Check if webhook is valid
-		if ( ! isset( $webhook_result['valid'] ) || ! $webhook_result['valid'] ) {
+		$results = $this->normalize_webhook_results( $webhook_result );
+
+		if ( empty( $results ) ) {
 			$error = $webhook_result['error_message'] ?? 'Invalid webhook';
 			doublescale_get_logger()->info(
 				ucfirst( $this->channel ) . ' webhook validation failed',
@@ -212,53 +213,87 @@ abstract class AbstractTracking {
 			wp_die( 'Bad Request', 'Bad Request', 400 );
 		}
 
-		// Extract standardized webhook data
-		$message_id    = $webhook_result['message_id'] ?? '';
-		$status        = $webhook_result['status'] ?? '';
-		$error_code    = $webhook_result['error_code'] ?? '';
-		$error_message = $webhook_result['error_message'] ?? '';
-		$metadata      = $webhook_result['metadata'] ?? array();
+		foreach ( $results as $result ) {
+			if ( empty( $result['valid'] ) ) {
+				continue;
+			}
 
-		// Handle incoming messages - delegate to MessagingIncoming handler.
-		if ( 'received' === $status ) {
-			$this->process_incoming_message( $provider, $webhook_data );
-			wp_die( 'OK' );
+			$message_id    = $result['message_id'] ?? '';
+			$status        = $result['status'] ?? '';
+			$error_code    = $result['error_code'] ?? '';
+			$error_message = $result['error_message'] ?? '';
+			$metadata      = $result['metadata'] ?? array();
+
+			// Handle incoming messages - delegate to MessagingIncoming handler.
+			if ( 'received' === $status ) {
+				$parsed_incoming = $metadata['parsed_incoming'] ?? null;
+				$this->process_incoming_message( $provider, $webhook_data, $parsed_incoming );
+				continue;
+			}
+
+			if ( empty( $message_id ) || empty( $status ) ) {
+				doublescale_get_logger()->info(
+					ucfirst( $this->channel ) . ' webhook missing required fields',
+					array(
+						'message_id' => $message_id,
+						'status'     => $status,
+						'code'       => "{$this->channel}_webhook_missing_data",
+					)
+				);
+				continue;
+			}
+
+			// Find tracking record by provider's message ID
+			$campaign_model_class = $this->get_campaign_model_class();
+			$tracking_record      = $campaign_model_class::where( 'external_id', $message_id )
+				->where( 'mode', $this->get_campaign_mode() )
+				->first();
+
+			if ( ! $tracking_record ) {
+				doublescale_get_logger()->info(
+					ucfirst( $this->channel ) . ' webhook: tracking record not found',
+					array(
+						'message_id' => $message_id,
+						'status'     => $status,
+						'code'       => "{$this->channel}_webhook_tracking_not_found",
+					)
+				);
+				continue;
+			}
+
+			// Update tracking record status based on webhook data
+			$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message, $metadata );
 		}
-
-		if ( empty( $message_id ) || empty( $status ) ) {
-			doublescale_get_logger()->info(
-				ucfirst( $this->channel ) . ' webhook missing required fields',
-				array(
-					'message_id' => $message_id,
-					'status'     => $status,
-					'code'       => "{$this->channel}_webhook_missing_data",
-				)
-			);
-			wp_die( 'Bad Request', 'Bad Request', 400 );
-		}
-
-		// Find tracking record by provider's message ID
-		$campaign_model_class = $this->get_campaign_model_class();
-		$tracking_record      = $campaign_model_class::where( 'external_id', $message_id )
-			->where( 'mode', $this->get_campaign_mode() )
-			->first();
-
-		if ( ! $tracking_record ) {
-			doublescale_get_logger()->info(
-				ucfirst( $this->channel ) . ' webhook: tracking record not found',
-				array(
-					'message_id' => $message_id,
-					'status'     => $status,
-					'code'       => "{$this->channel}_webhook_tracking_not_found",
-				)
-			);
-			wp_die( 'OK' ); // Acknowledge but don't process
-		}
-
-		// Update tracking record status based on webhook data
-		$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message, $metadata );
 
 		wp_die( 'OK' ); // Acknowledge successful processing
+	}
+
+	/**
+	 * Normalize provider webhook response into a list of individual results.
+	 *
+	 * Providers may return a single result array or a batch wrapper with a
+	 * `results` key when multiple changes are present in one POST.
+	 *
+	 * @param array $webhook_result Raw provider response.
+	 * @return array<int, array> List of valid webhook result arrays.
+	 */
+	protected function normalize_webhook_results( array $webhook_result ): array {
+		if ( ! empty( $webhook_result['results'] ) && is_array( $webhook_result['results'] ) ) {
+			return array_values(
+				array_filter(
+					$webhook_result['results'],
+					static function ( $result ) {
+						return is_array( $result ) && ! empty( $result['valid'] );
+					}
+				)
+			);
+		}
+
+		if ( ! empty( $webhook_result['valid'] ) ) {
+			return array( $webhook_result );
+		}
+
+		return array();
 	}
 
 	/**
@@ -267,11 +302,12 @@ abstract class AbstractTracking {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object $provider     Message provider instance.
-	 * @param array  $webhook_data Raw webhook data.
+	 * @param object     $provider       Message provider instance.
+	 * @param array      $webhook_data   Raw webhook data.
+	 * @param array|null $parsed_incoming Optional pre-parsed inbound message data.
 	 * @return void
 	 */
-	protected function process_incoming_message( $provider, $webhook_data ) {
+	protected function process_incoming_message( $provider, $webhook_data, $parsed_incoming = null ) {
 		// Check if MessagingIncoming class exists (Pro feature).
 		if ( ! class_exists( '\DoubleScale\Pro\Modules\Inbox\Incoming\MessagingIncoming' )
 			&& ! class_exists( '\DoubleScale\Modules\Inbox\Incoming\MessagingIncoming' ) ) {
@@ -285,8 +321,10 @@ abstract class AbstractTracking {
 			return;
 		}
 
-		// Parse incoming message data using provider.
-		$parsed_data = $provider->parse_incoming_webhook( $webhook_data );
+		// Parse incoming message data using provider (unless already parsed).
+		$parsed_data = is_array( $parsed_incoming )
+			? $parsed_incoming
+			: $provider->parse_incoming_webhook( $webhook_data );
 
 		// Validate required fields.
 		if ( empty( $parsed_data['from_number'] ) || empty( $parsed_data['message_id'] ) ) {

@@ -468,6 +468,15 @@ final class TriggersManager {
 			'is_disabled' => false,
 		);
 
+		if ( ! empty( $trigger->is_featured ) ) {
+			$row['is_featured'] = true;
+		}
+
+		$documentation = $trigger->get_documentation();
+		if ( ! empty( $documentation ) ) {
+			$row['documentation'] = $documentation;
+		}
+
 		if ( 'forms' === $trigger->source ) {
 			$row['is_form'] = true;
 			$form           = null;

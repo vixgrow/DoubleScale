@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
+use DoubleScale\Modules\Automations\Triggers\TagsAppliedDocs;
 
 /**
  * TagsApplied trigger stub.
@@ -36,7 +37,12 @@ class TagsApplied extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when a tag is applied to a contact.';
+	public $description = 'Fires when selected tags are applied to a contact. Ideal for chaining automations — see the guide when you select this trigger.';
+
+	/**
+	 * @var bool
+	 */
+	public $is_featured = true;
 
 	/**
 	 * Trigger Attributes
@@ -58,6 +64,13 @@ class TagsApplied extends TriggerPro {
 	 * @var string
 	 */
 	public $group = 'contact';
+
+	/**
+	 * @return array{title: string, intro: string, steps: array<int, string>, tip: string}
+	 */
+	public function get_documentation() {
+		return TagsAppliedDocs::get();
+	}
 
 	/**
 	 * Load Hooks

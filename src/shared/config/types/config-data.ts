@@ -279,6 +279,13 @@ export type Rule = {
 	is_automation?: boolean;
 };
 
+export type TriggerDocumentation = {
+	title?: string;
+	intro?: string;
+	steps?: string[];
+	tip?: string;
+};
+
 export type Trigger = {
 	label: string;
 	description: string;
@@ -290,10 +297,13 @@ export type Trigger = {
 				[key: string]: string;
 			};
 			multiple?: boolean;
+			helperText?: string;
 		};
 	};
 	is_form?: boolean;
 	is_pro?: boolean;
+	is_featured?: boolean;
+	documentation?: TriggerDocumentation;
 };
 
 export type TriggersGroup = {

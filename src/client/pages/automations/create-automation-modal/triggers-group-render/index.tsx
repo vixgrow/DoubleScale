@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useEffect, useMemo, useState } from 'react';
 import { map } from 'lodash';
+import { Star } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -37,7 +38,8 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
-import type { TriggersGroup } from '@doublescale/config';
+import TriggerDocumentationCallout from '../../components/trigger-documentation-callout';
+import type { TriggersGroup, Trigger } from '@doublescale/config';
 import type { IconProps } from '@doublescale/config';
 import config from '@doublescale/config';
 import { isProActive as checkProActive } from '@doublescale/hooks/use-is-pro-active';
@@ -270,6 +272,39 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		setSelectedProTrigger(null);
 	};
 
+	const sortTriggers = (
+		triggers: TriggersGroup['triggers'] | undefined
+	): Array<[string, Trigger]> => {
+		if (!triggers) {
+			return [];
+		}
+
+		return Object.entries(triggers).sort(([, a], [, b]) => {
+			if (a.is_featured && !b.is_featured) {
+				return -1;
+			}
+			if (!a.is_featured && b.is_featured) {
+				return 1;
+			}
+			return (a.label ?? '').localeCompare(b.label ?? '');
+		});
+	};
+
+	const selectedTriggerDocumentation = useMemo(() => {
+		if (!value) {
+			return null;
+		}
+
+		for (const group of groupsList) {
+			const trigger = group.triggers?.[value];
+			if (trigger?.documentation) {
+				return trigger.documentation;
+			}
+		}
+
+		return null;
+	}, [groupsList, value]);
+
 	return (
 		<>
 			<div className="flex flex-col gap-4">
@@ -343,32 +378,54 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 						{!isCollapsed && (
 							<CardContent className="p-0">
 								<div className="flex flex-col divide-y divide-neutral-200">
-									{map(
-										group.triggers,
-										(trigger, triggerKey) => {
+									{sortTriggers(group.triggers).map(
+										([triggerKey, trigger]) => {
 											const isSelected =
 												value === triggerKey;
+											const isFeatured =
+												!!trigger.is_featured;
 											const triggerButton = (
 												<div
 													key={triggerKey}
 													className={cn(
 														'flex items-center justify-between gap-4 px-4 py-3.5 transition-colors',
+														isFeatured &&
+															'border-l-4 border-l-amber-400 bg-amber-50/40',
 														isSelected
-															? 'bg-brandPrimary/5'
-															: 'hover:bg-neutral-50/60'
+															? isFeatured
+																? 'bg-amber-50'
+																: 'bg-brandPrimary/5'
+															: !isFeatured &&
+																	'hover:bg-neutral-50/60'
 													)}
 												>
 													<div className="flex min-w-0 flex-1 items-center gap-2">
+														{isFeatured && (
+															<Star
+																className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500"
+																aria-hidden
+															/>
+														)}
 														<span
 															className={cn(
 																'text-sm leading-6',
 																isSelected
 																	? 'font-medium text-brandPrimary'
-																	: 'text-foreground'
+																	: isFeatured
+																		? 'font-medium text-amber-950'
+																		: 'text-foreground'
 															)}
 														>
 															{trigger.label}
 														</span>
+														{isFeatured && (
+															<span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+																{__(
+																	'Powerful',
+																	'doublescale'
+																)}
+															</span>
+														)}
 														{trigger.is_pro &&
 															!isProActive && (
 																<span className="inline-flex shrink-0">
@@ -449,6 +506,11 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 					</Card>
 					);
 				})}
+				{selectedTriggerDocumentation && (
+					<TriggerDocumentationCallout
+						documentation={selectedTriggerDocumentation}
+					/>
+				)}
 			</div>
 
 			{/* PRO Modal */}

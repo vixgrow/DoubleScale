@@ -70,6 +70,22 @@ abstract class Trigger {
 	public $is_pro = false;
 
 	/**
+	 * Highlight this trigger in the automation UI (recommended / powerful).
+	 *
+	 * @var bool
+	 */
+	public $is_featured = false;
+
+	/**
+	 * Optional in-product documentation shown when configuring the trigger.
+	 *
+	 * @return array{title?: string, intro?: string, steps?: array<int, string>, tip?: string}
+	 */
+	public function get_documentation() {
+		return array();
+	}
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0

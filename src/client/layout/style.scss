@@ -594,6 +594,18 @@ body {
 	}
 }
 
+// Remove WP admin focus ring/box-shadow on native inputs (dialogs portal outside .doublescale-layout).
+#doublescale-admin-root,
+[data-radix-dialog-content] {
+	input:not([type='checkbox']):not([type='radio']):focus,
+	input:not([type='checkbox']):not([type='radio']):focus-visible,
+	textarea:focus,
+	textarea:focus-visible {
+		outline: none !important;
+		box-shadow: none !important;
+	}
+}
+
 // Hide scrollbar utility
 .hide-scrollbar {
 	-ms-overflow-style: none;

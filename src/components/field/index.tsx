@@ -314,8 +314,7 @@ const Field: React.FC<FieldProps> = ({
 					type={type === 'phone' ? 'tel' : type}
 					className={cn(
 						'!rounded-lg !border-border h-12',
-						status === 'error' &&
-							'border-destructive focus-visible:ring-destructive/20',
+						status === 'error' && 'border-destructive',
 						disabled && 'bg-muted cursor-not-allowed opacity-70',
 						className
 					)}
@@ -333,8 +332,7 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					className={cn(
 						'!rounded-lg !border-border',
-						status === 'error' &&
-							'border-destructive focus-visible:ring-destructive/20',
+						status === 'error' && 'border-destructive',
 						className
 					)}
 					placeholder={placeholder}

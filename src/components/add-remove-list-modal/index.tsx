@@ -12,7 +12,6 @@ import React, { useState, useEffect } from 'react';
 import {
 	Dialog,
 	DialogContent,
-	DialogOverlay,
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
@@ -104,9 +103,18 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 	const content = getModalContent();
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="max-w-md z-[150200]">
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) {
+					handleClose();
+				}
+			}}
+		>
+			<DialogContent
+				className="z-[150200] max-w-md overflow-visible"
+				overlayClassName="z-[150200]"
+			>
 				<DialogHeader className="flex flex-row items-center justify-between pb-4">
 					<DialogTitle>
 						<CustomDialogHeader
@@ -133,6 +141,7 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 								'No lists available',
 								'doublescale'
 							)}
+							renderMenuInPortal={false}
 							className="doublescale-add-remove-lists-modal-select"
 						/>
 					</div>

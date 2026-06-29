@@ -15,7 +15,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import Select from 'react-select';
+import Select, { components, type OptionProps, type GroupBase } from 'react-select';
 
 /**
  * Internal dependencies
@@ -48,6 +48,8 @@ interface Props {
 	noOptionsMessage?: string;
 	perPage?: number;
 	className?: string;
+	/** Keep false inside Radix dialogs so scroll/clicks work on the menu. */
+	renderMenuInPortal?: boolean;
 }
 
 const PaginatedSelect = ({
@@ -58,6 +60,7 @@ const PaginatedSelect = ({
 	noOptionsMessage,
 	perPage = 10,
 	className = '',
+	renderMenuInPortal = true,
 }: Props) => {
 	// Separate state: savedItems for selected values display, options for dropdown
 	const [savedItems, setSavedItems] = useState<DataItem[]>([]);
@@ -441,7 +444,9 @@ const PaginatedSelect = ({
 	}, [options, isLoadingMore, hasMore]);
 
 	return (
-		<div className={`doublescale-paginated-select ${className}`}>
+		<div
+			className={`doublescale-paginated-select ${renderMenuInPortal ? '' : 'doublescale-paginated-select--inline-menu'} ${className}`}
+		>
 			<div className="flex flex-col gap-[10px]">
 				<div className="flex justify-between gap-[10px]">
 					<div className="flex flex-col gap-[10px] flex-1">
@@ -464,12 +469,20 @@ const PaginatedSelect = ({
 							onMenuScrollToBottom={loadMoreOptions}
 							placeholder={placeholder}
 							isLoading={isLoading}
-							menuPortalTarget={
-								typeof document !== 'undefined'
-									? document.body
-									: null
-							}
-							menuPosition="fixed"
+							{...(!renderMenuInPortal
+								? { blurInputOnSelect: false }
+								: {})}
+							{...(renderMenuInPortal
+								? {
+										menuPortalTarget:
+											typeof document !== 'undefined'
+												? document.body
+												: null,
+										menuPosition: 'fixed' as const,
+									}
+								: {
+										menuPosition: 'absolute' as const,
+									})}
 							filterOption={() => true}
 							isOptionDisabled={(option) =>
 								(option as any).isDisabled || false
@@ -512,15 +525,55 @@ const PaginatedSelect = ({
 								menu: (base) => ({
 									...base,
 									color: 'black',
-									zIndex: 160010,
+									zIndex: renderMenuInPortal ? 160010 : 50,
 								}),
-								menuPortal: (base) => ({
-									...base,
-									zIndex: 160010,
-								}),
+								...(renderMenuInPortal
+									? {
+											menuPortal: (base) => ({
+												...base,
+												zIndex: 160010,
+											}),
+										}
+									: {}),
 							}}
 							components={{
-								MenuList: ScrollableMenuList,
+								...(!renderMenuInPortal
+									? {
+											Option: (
+												optionProps: OptionProps<
+													SelectOption,
+													false,
+													GroupBase<SelectOption>
+												>
+											) => {
+												const { innerProps, ...rest } =
+													optionProps;
+												return (
+													<components.Option
+														{...rest}
+														innerProps={{
+															...innerProps,
+															onMouseDown: (
+																event
+															) => {
+																event.preventDefault();
+																event.stopPropagation();
+																innerProps.onMouseDown?.(
+																	event
+																);
+															},
+														}}
+													/>
+												);
+											},
+										}
+									: {}),
+								MenuList: (menuListProps) => (
+									<ScrollableMenuList
+										{...menuListProps}
+										preventFocusSteal={!renderMenuInPortal}
+									/>
+								),
 								LoadingMessage: () => (
 									<div className="px-3 py-2 text-gray-500">
 										{__('Loading...', 'doublescale')}

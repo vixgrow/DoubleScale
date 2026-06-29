@@ -10,13 +10,26 @@ import { components, type GroupBase, type MenuListProps } from 'react-select';
 export function ScrollableMenuList<
 	Option,
 	IsMulti extends boolean = false,
->(props: MenuListProps<Option, IsMulti, GroupBase<Option>>) {
-	const { innerProps, ...rest } = props;
+>(
+	props: MenuListProps<Option, IsMulti, GroupBase<Option>> & {
+		preventFocusSteal?: boolean;
+	}
+) {
+	const { innerProps, preventFocusSteal, ...rest } = props;
 	return (
 		<components.MenuList
 			{...rest}
 			innerProps={{
 				...innerProps,
+				onMouseDown: (event) => {
+					if (preventFocusSteal) {
+						// Keep focus inside react-select so Radix dialog does not
+						// swallow the click before the option is selected.
+						event.preventDefault();
+						event.stopPropagation();
+					}
+					innerProps.onMouseDown?.(event);
+				},
 				onWheel: (event) => {
 					event.stopPropagation();
 					innerProps.onWheel?.(event);

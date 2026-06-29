@@ -13,7 +13,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -95,9 +94,18 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 	const content = getModalContent();
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="max-w-md z-[150200]">
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) {
+					handleClose();
+				}
+			}}
+		>
+			<DialogContent
+				className="z-[150200] max-w-md overflow-visible"
+				overlayClassName="z-[150200]"
+			>
 				<DialogHeader className="flex flex-row items-center justify-between pb-4">
 					<DialogTitle>
 						<CustomDialogHeader
@@ -124,6 +132,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 								'No tags available',
 								'doublescale'
 							)}
+							renderMenuInPortal={false}
 							className="doublescale-add-remove-tags-modal-select"
 						/>
 					</div>

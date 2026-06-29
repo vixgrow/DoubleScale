@@ -24,6 +24,7 @@ use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Validators\PhoneValidator;
+use DoubleScale\Core\Constants\OrderStatus;
 
 /**
  * ContactModel class
@@ -217,6 +218,7 @@ class ContactModel extends Model {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
 		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' )
+			->whereIn( 'status', OrderStatus::get_revenue_statuses() )
 			->orderBy( 'date_created_gmt', 'desc' );
 	}
 
@@ -1200,15 +1202,32 @@ class ContactModel extends Model {
 						return;
 					}
 
-					$orders  = $contact->orders;
-					$revenue = 0;
+					$orders              = $contact->orders;
+					$revenue_by_currency = array();
 
 					foreach ( $orders as $order ) {
-						$revenue += $order->total_amount;
+						$currency = $order->currency ?: \get_woocommerce_currency();
+						if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+							$revenue_by_currency[ $currency ] = 0.0;
+						}
+						$revenue_by_currency[ $currency ] += (float) $order->total_amount;
 					}
 
-					$currency         = \get_woocommerce_currency();
-					$contact->revenue = $revenue . ' ' . $currency;
+					if ( empty( $revenue_by_currency ) ) {
+						return;
+					}
+
+					if ( 1 === count( $revenue_by_currency ) ) {
+						$currency = array_key_first( $revenue_by_currency );
+						$contact->revenue = number_format( $revenue_by_currency[ $currency ], 2, '.', '' ) . ' ' . $currency;
+						return;
+					}
+
+					$parts = array();
+					foreach ( $revenue_by_currency as $currency => $amount ) {
+						$parts[] = number_format( $amount, 2, '.', '' ) . ' ' . $currency;
+					}
+					$contact->revenue = implode( ' · ', $parts );
 				}
 			);
 		}

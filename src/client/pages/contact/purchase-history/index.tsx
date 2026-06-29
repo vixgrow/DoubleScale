@@ -41,6 +41,32 @@ interface PurchaseStatsCardItem {
 	iconColor: string;
 }
 
+const formatRevenueByCurrency = (
+	revenueByCurrency: Record<string, number> | undefined,
+	fallbackRevenue: number,
+	fallbackCurrency: string
+): string => {
+	if (revenueByCurrency && Object.keys(revenueByCurrency).length > 1) {
+		return Object.entries(revenueByCurrency)
+			.map(([currency, amount]) => `${Number(amount).toFixed(2)} ${currency}`)
+			.join(' · ');
+	}
+
+	return `${Number(fallbackRevenue || 0).toFixed(2)} ${fallbackCurrency}`;
+};
+
+const formatAverageOrderValue = (
+	revenueByCurrency: Record<string, number> | undefined,
+	average: number,
+	currency: string
+): string => {
+	const value = `${Number(average || 0).toFixed(2)} ${currency}`;
+	if (revenueByCurrency && Object.keys(revenueByCurrency).length > 1) {
+		return `${value} (${currency})`;
+	}
+	return value;
+};
+
 const PurchaseStatsCards = ({ cards }: { cards: PurchaseStatsCardItem[] }) => {
 	if (cards.length === 0) {
 		return null;
@@ -172,7 +198,11 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				{
 					key: 'woo-total-revenue',
 					icon: <TotalRevenueIcon />,
-					value: `${Number(purchaseHistory.wc.revenue || 0).toFixed(2)} ${purchaseHistory.wc.currency}`,
+					value: formatRevenueByCurrency(
+						purchaseHistory.wc.revenue_by_currency,
+						purchaseHistory.wc.revenue,
+						purchaseHistory.wc.currency
+					),
 					label: __('Total Revenue', 'doublescale'),
 					iconBgClass: 'bg-emerald-50',
 					iconColor: 'text-emerald-600',
@@ -180,7 +210,11 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				{
 					key: 'woo-average-order',
 					icon: <AnalyticsReportsIcon width={40} height={40} />,
-					value: `${Number(purchaseHistory.wc.average || 0).toFixed(2)} ${purchaseHistory.wc.currency}`,
+					value: formatAverageOrderValue(
+						purchaseHistory.wc.revenue_by_currency,
+						purchaseHistory.wc.average,
+						purchaseHistory.wc.currency
+					),
 					label: __('Average Order Value', 'doublescale'),
 					iconBgClass: 'bg-violet-50',
 					iconColor: 'text-violet-600',

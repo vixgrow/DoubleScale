@@ -61,6 +61,30 @@ class OrderStatus {
 	const CHECKOUT_DRAFT = 'wc-checkout-draft';
 
 	/**
+	 * Statuses that count toward contact revenue and purchase history totals.
+	 *
+	 * Excludes drafts, pending, on-hold, cancelled, refunded, and failed orders.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function get_revenue_statuses() {
+		return array(
+			self::COMPLETED,
+			self::PROCESSING,
+		);
+	}
+
+	/**
+	 * Whether an order status counts toward revenue.
+	 *
+	 * @param string $status Order status slug (e.g. wc-completed).
+	 * @return bool
+	 */
+	public static function is_revenue_status( $status ) {
+		return in_array( $status, self::get_revenue_statuses(), true );
+	}
+
+	/**
 	 * Get all statuses
 	 *
 	 * @return array

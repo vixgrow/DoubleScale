@@ -39,6 +39,7 @@ use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\OrderStatus;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager;
 
@@ -1158,7 +1159,8 @@ class RestContactController extends RestController {
 	 * Attach WooCommerce orders to paginated contacts for list columns.
 	 *
 	 * Matches orders by billing email and registered customer ID (same rules as
-	 * wc_get_orders with a customer email), sorts newest-first, and sets revenue.
+	 * wc_get_orders with a customer email), sorts newest-first, and sets revenue
+	 * from completed and processing orders only.
 	 *
 	 * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $contacts Paginated contacts.
 	 * @return void
@@ -1202,6 +1204,7 @@ class RestContactController extends RestController {
 		}
 
 		$orders_query = \DoubleScale\Modules\Campaigns\Models\WcOrderModel::query()
+			->whereIn( 'status', OrderStatus::get_revenue_statuses() )
 			->orderBy( 'date_created_gmt', 'desc' );
 
 		$orders_query->where(
@@ -1237,8 +1240,6 @@ class RestContactController extends RestController {
 			$orders_by_email[ $assigned_email ][ (int) $order->id ] = $order;
 		}
 
-		$currency = \get_woocommerce_currency();
-
 		foreach ( $items as $contact ) {
 			if ( empty( $contact->email ) ) {
 				continue;
@@ -1254,15 +1255,103 @@ class RestContactController extends RestController {
 
 			$contact->setRelation( 'orders', collect( $contact_orders ) );
 
-			$revenue = 0.0;
-			foreach ( $contact_orders as $order ) {
-				$revenue += (float) $order->total_amount;
-			}
-
 			if ( ! empty( $contact_orders ) ) {
-				$contact->revenue = $revenue . ' ' . $currency;
+				$contact->revenue = $this->format_wc_revenue_display(
+					$this->sum_wc_model_revenue_by_currency( $contact_orders )
+				);
 			}
 		}
+	}
+
+	/**
+	 * Sum HPOS order rows by currency.
+	 *
+	 * @param array<int, \DoubleScale\Modules\Campaigns\Models\WcOrderModel> $orders Orders to sum.
+	 * @return array<string, float>
+	 */
+	private function sum_wc_model_revenue_by_currency( array $orders ) {
+		$revenue_by_currency = array();
+
+		foreach ( $orders as $order ) {
+			$currency = $order->currency ?: get_woocommerce_currency();
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+			}
+			$revenue_by_currency[ $currency ] += (float) $order->total_amount;
+		}
+
+		return $revenue_by_currency;
+	}
+
+	/**
+	 * Format revenue for display (single or multi-currency).
+	 *
+	 * @param array<string, float> $revenue_by_currency Revenue keyed by currency code.
+	 * @return string
+	 */
+	private function format_wc_revenue_display( array $revenue_by_currency ) {
+		if ( empty( $revenue_by_currency ) ) {
+			return '';
+		}
+
+		if ( 1 === count( $revenue_by_currency ) ) {
+			$currency = array_key_first( $revenue_by_currency );
+
+			return number_format( $revenue_by_currency[ $currency ], 2, '.', '' ) . ' ' . $currency;
+		}
+
+		$parts = array();
+		foreach ( $revenue_by_currency as $currency => $amount ) {
+			$parts[] = number_format( $amount, 2, '.', '' ) . ' ' . $currency;
+		}
+
+		return implode( ' · ', $parts );
+	}
+
+	/**
+	 * Pick the currency with the most orders and return headline revenue stats.
+	 *
+	 * @param array<int, \WC_Order> $orders Paid orders.
+	 * @return array{currency: string, revenue: float, average: float, revenue_by_currency: array<string, float>}
+	 */
+	private function summarize_wc_order_revenue( array $orders ) {
+		$revenue_by_currency = array();
+		$count_by_currency   = array();
+
+		foreach ( $orders as $order ) {
+			$currency = $order->get_currency() ?: get_woocommerce_currency();
+
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+				$count_by_currency[ $currency ]   = 0;
+			}
+
+			$revenue_by_currency[ $currency ] += floatval( $order->get_total() );
+			++$count_by_currency[ $currency ];
+		}
+
+		$dominant_currency = '';
+		$dominant_count    = -1;
+		foreach ( $count_by_currency as $currency => $count ) {
+			if ( $count > $dominant_count ) {
+				$dominant_currency = $currency;
+				$dominant_count    = $count;
+			}
+		}
+
+		$revenue = 0.0;
+		$average = 0.0;
+		if ( '' !== $dominant_currency ) {
+			$revenue = $revenue_by_currency[ $dominant_currency ];
+			$average = $dominant_count > 0 ? ( $revenue / $dominant_count ) : 0.0;
+		}
+
+		return array(
+			'currency'            => $dominant_currency ?: get_woocommerce_currency(),
+			'revenue'             => $revenue,
+			'average'             => $average,
+			'revenue_by_currency' => $revenue_by_currency,
+		);
 	}
 
 	/**
@@ -1343,9 +1432,9 @@ class RestContactController extends RestController {
 	 * Get WooCommerce purchase history for a contact.
 	 *
 	 * Queries by email so a single call covers user-linked, guest, and
-	 * email-mismatched orders. Revenue is grouped by order currency to avoid
-	 * summing across currencies (e.g., AUD orders mislabeled as the store
-	 * default USD).
+	 * email-mismatched orders. Only completed and processing orders are included
+	 * in totals, the order list, and revenue. Revenue is grouped by order
+	 * currency to avoid summing across currencies.
 	 *
 	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
@@ -1361,8 +1450,12 @@ class RestContactController extends RestController {
 		$page          = (int) $request->get_param( 'woo_page' );
 		$per_page      = (int) $request->get_param( 'woo_per_page' );
 		$offset        = ( $page - 1 ) * $per_page;
-		$paid_statuses = array( 'wc-completed', 'wc-processing' );
+		$paid_statuses = OrderStatus::get_revenue_statuses();
 		$email         = $contact->email;
+		$order_query   = array(
+			'customer' => $email,
+			'status'   => $paid_statuses,
+		);
 
 		// wc_get_orders() with a string $customer matches BOTH _customer_user
 		// (resolved to a user by email) and billing_email — which catches
@@ -1370,10 +1463,12 @@ class RestContactController extends RestController {
 		// where the user changed their account email after purchase.
 		$total_count = count(
 			wc_get_orders(
-				array(
-					'customer' => $email,
-					'limit'    => -1,
-					'return'   => 'ids',
+				array_merge(
+					$order_query,
+					array(
+						'limit'  => -1,
+						'return' => 'ids',
+					)
 				)
 			)
 		);
@@ -1387,12 +1482,14 @@ class RestContactController extends RestController {
 		}
 
 		$wc_orders = wc_get_orders(
-			array(
-				'customer' => $email,
-				'limit'    => $per_page,
-				'offset'   => $offset,
-				'orderby'  => 'date',
-				'order'    => 'DESC',
+			array_merge(
+				$order_query,
+				array(
+					'limit'   => $per_page,
+					'offset'  => $offset,
+					'orderby' => 'date',
+					'order'   => 'DESC',
+				)
 			)
 		);
 
@@ -1413,51 +1510,22 @@ class RestContactController extends RestController {
 		);
 
 		$paid_orders = wc_get_orders(
-			array(
-				'customer' => $email,
-				'status'   => $paid_statuses,
-				'limit'    => -1,
+			array_merge(
+				$order_query,
+				array(
+					'limit' => -1,
+				)
 			)
 		);
 
-		// Group paid revenue by order currency. Summing across currencies
-		// produces a meaningless total, so the headline cards report only
-		// the dominant currency and the full breakdown is exposed via
-		// revenue_by_currency for richer UI rendering later.
-		$revenue_by_currency = array();
-		$count_by_currency   = array();
-		foreach ( $paid_orders as $order ) {
-			$currency = $order->get_currency() ?: get_woocommerce_currency();
+		$revenue_summary = $this->summarize_wc_order_revenue( $paid_orders );
 
-			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
-				$revenue_by_currency[ $currency ] = 0.0;
-				$count_by_currency[ $currency ]   = 0;
-			}
-
-			$revenue_by_currency[ $currency ] += floatval( $order->get_total() );
-			++$count_by_currency[ $currency ];
-		}
-
-		$dominant_currency = '';
-		$dominant_count    = -1;
-		foreach ( $count_by_currency as $currency => $count ) {
-			if ( $count > $dominant_count ) {
-				$dominant_currency = $currency;
-				$dominant_count    = $count;
-			}
-		}
-
-		if ( '' !== $dominant_currency ) {
-			$result['currency'] = $dominant_currency;
-			$result['revenue']  = $revenue_by_currency[ $dominant_currency ];
-			$result['average']  = $count_by_currency[ $dominant_currency ] > 0
-				? ( $revenue_by_currency[ $dominant_currency ] / $count_by_currency[ $dominant_currency ] )
-				: 0;
-		}
-
+		$result['currency']            = $revenue_summary['currency'];
+		$result['revenue']             = $revenue_summary['revenue'];
+		$result['average']             = $revenue_summary['average'];
+		$result['revenue_by_currency'] = $revenue_summary['revenue_by_currency'];
 		$result['orders']              = $formatted_orders;
 		$result['total']               = $total_count;
-		$result['revenue_by_currency'] = $revenue_by_currency;
 		$result['last_order']          = ! empty( $wc_orders ) && $wc_orders[0]->get_date_created()
 			? $wc_orders[0]->get_date_created()->format( 'Y-m-d H:i:s' )
 			: null;

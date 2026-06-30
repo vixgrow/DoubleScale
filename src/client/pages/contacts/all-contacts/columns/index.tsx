@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 /**
  * external dependencies
  */
@@ -311,14 +311,26 @@ export const useContactsColumns = () => {
 														)
 											}`}
 										>
-											{__('Lists:', 'doublescale')}{' '}
-											{subscribedCount}/{totalLists}
+											{sprintf(
+												__(
+													'Lists: %1$d subscribed / %2$d assigned',
+													'doublescale'
+												),
+												subscribedCount,
+												totalLists
+											)}
 										</span>
 									</TooltipTrigger>
 									<TooltipContent
 										side="top"
 										className="max-w-xs"
 									>
+										<p className="mb-2 text-xs opacity-80">
+											{__(
+												'Subscribed lists receive emails; assigned lists include all lists this contact belongs to.',
+												'doublescale'
+											)}
+										</p>
 										<div className="space-y-1.5">
 											{lists.map((list) => {
 												const listStatus =

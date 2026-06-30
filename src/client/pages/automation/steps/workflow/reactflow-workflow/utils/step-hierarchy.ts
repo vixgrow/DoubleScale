@@ -8,6 +8,11 @@ import { __ } from '@wordpress/i18n';
  */
 import { Node, Edge } from '@xyflow/react';
 
+import {
+	findStepAnalytics,
+	toNodeAnalytics,
+} from './analytics-utils';
+
 /**
  * Internal dependencies
  */
@@ -78,7 +83,7 @@ const processStepHierarchy = (
 		);
 
 		// Get step analytics
-		const stepAnalytics = analyticsData.find((a) => a.step_id === step.id);
+		const stepAnalytics = findStepAnalytics(analyticsData, step.id);
 
 		// Add step node
 		initialNodes.push({
@@ -90,7 +95,7 @@ const processStepHierarchy = (
 				automation,
 				selectedStepId,
 				viewMode,
-				analytics: stepAnalytics || { contacts: 0, conversion_rate: 0 },
+				analytics: toNodeAnalytics(stepAnalytics),
 				onStepClick: (stepData: OrganizedStep) => {
 					if (onStepClick) {
 						onStepClick(stepData);

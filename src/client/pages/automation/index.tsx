@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -40,12 +41,11 @@ import {
 	AccordingRightIcon,
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
-import Config from '@doublescale/config';
-import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
 } from '@doublescale/services/module-fetch';
+import { mapFunnelResponseToAnalytics } from './steps/workflow/reactflow-workflow/utils/analytics-utils';
 import ArrowRightIcon from '@doublescale/shared/icons/arrow-right';
 
 /** Ensures `steps` is always an array (PHP may serialize keyed arrays as objects). */
@@ -126,7 +126,7 @@ const Automation: React.FC = () => {
 
 			// Fetch analytics + version history once when automation loads
 			if (!skipLoading) {
-				fetchAnalyticsData(normalized.id);
+				await fetchAnalyticsData(normalized.id);
 				void refreshVersions(normalized.id);
 			}
 
@@ -152,42 +152,35 @@ const Automation: React.FC = () => {
 
 		try {
 			setAnalyticsLoading(true);
-			const response = (await moduleFetch<any>(
-				'automations',
-				{
-					path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
-				},
-				{ requirePro: true }
-			)) as any | null;
+			const response = (await apiFetch({
+				path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
+			})) as {
+				funnel_data?: Array<{
+					step_id: number | null;
+					value?: number;
+					percentage?: number;
+					step_type?: string;
+				}>;
+			};
 
-			if (!response) {
-				// Pro is inactive: funnel data is simply unavailable — no toast,
-				// the Reports tab already renders an upgrade prompt.
-				// If automations module itself is off (different issue), show a notice.
-				if (isProActive()) {
-					createNotice({
-						type: 'error',
-						message: getModuleFetchBlockedNotice('automations'),
-					});
-				}
+			if (response?.funnel_data) {
+				setAnalyticsData(mapFunnelResponseToAnalytics(response.funnel_data));
+			} else {
 				setAnalyticsData([]);
-				return;
-			}
-
-			if (response.funnel_data) {
-				// Transform funnel data to analytics format
-				const analytics = response.funnel_data.map((item: any) => ({
-					step_id: item.step_id,
-					contacts: item.value || 0,
-					conversion_rate: item.percentage || 0,
-					step_type: item.step_type,
-				}));
-				setAnalyticsData(analytics);
 			}
 		} catch (error: unknown) {
-			const err = error as { code?: string };
+			const err = error as { code?: string; message?: string };
 			if (err?.code !== 'rest_no_route') {
 				console.error('Failed to fetch analytics data:', error);
+				createNotice({
+					type: 'error',
+					message:
+						err?.message ||
+						__(
+							'Failed to load automation report analytics.',
+							'doublescale'
+						),
+				});
 			}
 			setAnalyticsData([]);
 		} finally {
@@ -779,14 +772,21 @@ const Automation: React.FC = () => {
 											<button
 												key={tab.id}
 												type="button"
-												onClick={() =>
-													setActiveTab(
-														tab.id as
-															| 'workflow'
-															| 'contacts'
-															| 'reports'
-													)
+												onClick={() => {
+												const tabId = tab.id as
+													| 'workflow'
+													| 'contacts'
+													| 'reports';
+												setActiveTab(tabId);
+												if (
+													tabId === 'reports' &&
+													automation?.id
+												) {
+													void fetchAnalyticsData(
+														automation.id
+													);
 												}
+											}}
 												className={`inline-flex shrink-0 items-center gap-2 rounded-lg p-2 text-sm font-medium shadow-none transition-colors ${
 													isActive
 														? 'bg-[#EEF] text-brandPrimary'

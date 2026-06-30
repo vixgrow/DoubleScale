@@ -52,6 +52,12 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 		<Provider value={contextValue}>
 			<div className="h-full min-h-0 overflow-hidden flex flex-col">
 				<ReactFlowWorkflow
+					key={analyticsData
+						.map(
+							(item) =>
+								`${item.step_id}:${item.contacts}:${item.conversion_rate}`
+						)
+						.join('|') || 'empty'}
 					currentStep={null}
 					isTriggerVisible={false}
 					isSidebarOpen={false}

@@ -3,6 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 
+import {
+	findEntranceAnalytics,
+	findStepAnalytics,
+	toNodeAnalytics,
+} from './analytics-utils';
+
 const initializeTrigger = (
 	automation,
 	steps,
@@ -30,8 +36,8 @@ const initializeTrigger = (
 	};
 	
 	// Get trigger analytics
-	const triggerAnalytics = analyticsData.find((a) => a.step_id === null || a.step_type === 'trigger');
-	
+	const triggerAnalytics = findEntranceAnalytics(analyticsData);
+
 	initialNodes.push({
 		id: 'trigger',
 		type: 'trigger',
@@ -41,7 +47,7 @@ const initializeTrigger = (
 			onTriggerClick, 
 			isTriggerVisible, 
 			viewMode,
-			analytics: triggerAnalytics 
+			analytics: toNodeAnalytics(triggerAnalytics),
 		},
 	});
 

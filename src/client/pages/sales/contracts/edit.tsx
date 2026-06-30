@@ -9,8 +9,7 @@ import { ExternalLink, Plus } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
-import { RichTextEditor } from '@/components/rich-text-editor';
+import { FormField, TagField, InfiniteScrollSelect, Editor } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,6 +56,9 @@ import { CONTRACT_STATUSES, CURRENCIES } from '@/constants/sales';
 
 const selectClass =
 	'w-full border border-input rounded-md px-3 py-2 text-sm bg-background';
+
+const contractEditorWrapperClassName =
+	'send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full';
 
 const contactOptionLabel = (contact: ContactSummary): string => {
 	const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ').trim();
@@ -545,7 +547,7 @@ const ContractEdit: React.FC = () => {
 			<PageTabs
 				defaultValue="information"
 				tabsVariant="underline"
-				tabsListWrapperClassName="border-b border-border px-0 py-0 rounded-none bg-transparent"
+				tabsListWrapperClassName="border-b mb-4 border-border px-0 py-0 rounded-none bg-transparent"
 				tabsListClassName="bg-transparent gap-6"
 				enableHorizontalScroll
 				tabsList={[
@@ -559,7 +561,9 @@ const ContractEdit: React.FC = () => {
 						value: 'content',
 						children: (
 							<FormField label={__('Contract Body', 'doublescale')} className="!mb-0">
-								<RichTextEditor content={description} onChange={setDescription} />
+								<div className={contractEditorWrapperClassName}>
+									<Editor message={description} onChange={setDescription} />
+								</div>
 							</FormField>
 						),
 					},

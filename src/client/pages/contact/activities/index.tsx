@@ -30,12 +30,15 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import './style.scss';
 import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon, SMSIcon, WhatsAppIcon } from '@doublescale/components';
-import { ActivityActionsDropdown } from './activity-action-dropdown';
+import { ActivityActionsDropdown, EmailActivityActionsDropdown } from './activity-action-dropdown';
 import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
-import type { Note } from '@doublescale/client';
+import EmailDetails from '../emails/email-details-dialog';
+import type { CampaignEmail, Note } from '@doublescale/client';
+import { isManualEmailLog } from '@doublescale/utils/email-activity';
+import { fetchContactEmailByActivityId } from '@doublescale/utils/fetch-contact-email-by-activity';
 
 // Pro plugin components - loaded via WordPress filters at runtime
 // Pro plugin registers these via addFilter('doublescale_pro_component', ...)
@@ -188,6 +191,7 @@ const TaskDialogWrapper: React.FC<{
             mode="edit"
             task={task}
             presetContactId={contact_id}
+            nestedModal={true}
             isSubmitting={isSubmitting}
             onSubmit={async (data: any) => {
                 setIsSubmitting(true);
@@ -221,6 +225,8 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [selectedTask, setSelectedTask] = useState<any>(null);
     const [taskDialogOpen, setTaskDialogOpen] = useState(false);
     const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+    const [selectedCampaignEmail, setSelectedCampaignEmail] = useState<CampaignEmail | null>(null);
+    const [isLoadingEmailAction, setIsLoadingEmailAction] = useState(false);
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [filters, setFilters] = useState({
@@ -316,6 +322,27 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         }
     };
 
+    const handleOpenEmailActivity = async (activity: Activity) => {
+        if (isLoadingEmailAction) {
+            return;
+        }
+
+        setIsLoadingEmailAction(true);
+        try {
+            const email = await fetchContactEmailByActivityId(contact_id, activity.id);
+            if (!email) {
+                showNotice('error', __('Email details could not be loaded', 'doublescale'));
+                return;
+            }
+            setSelectedCampaignEmail(email);
+        } catch (error) {
+            console.error('Failed to load email:', error);
+            showNotice('error', __('Failed to load email', 'doublescale'));
+        } finally {
+            setIsLoadingEmailAction(false);
+        }
+    };
+
     const handleNoteSave = (note: Note) => {
         // Note was created, refresh activities
         fetchActivities();
@@ -380,16 +407,22 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         }
     };
 
-    const isEditableActivity = (activityType: string) => {
-        // Only these activity types can be edited (matches PHP Activity_Types::get_editable_types())
+    const isEditableActivity = (activityType: string, data?: Record<string, unknown>) => {
+        if (activityType === ACTIVITY_TYPES.EMAIL_SENT) {
+            return isManualEmailLog(data);
+        }
+
         const editableTypes: string[] = [
             ACTIVITY_TYPES.NOTE,
-            ACTIVITY_TYPES.EMAIL_SENT,
             ACTIVITY_TYPES.CALL_LOGGED,
             ACTIVITY_TYPES.MEETING_SCHEDULED,
         ];
         return editableTypes.includes(activityType);
     };
+
+    const isCrmSentEmailActivity = (activity: Activity) =>
+        activity.activity_type === ACTIVITY_TYPES.EMAIL_SENT &&
+        !isManualEmailLog(activity.data);
 
     const getActivityIcon = (activityType: string) => {
         return activityTypeIcons[activityType] || <User className="w-4 h-4" />;
@@ -802,7 +835,13 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                 </div>
                                                 {/* Actions */}
                                                 <div className="flex max-sm:flex-col max-sm:items-start shrink-0 items-center gap-2 sm:gap-3">
-                                                    {!isTask && activity && isEditableActivity(item.icon_type) && (
+                                                    {!isTask && activity && isCrmSentEmailActivity(activity) && (
+                                                        <EmailActivityActionsDropdown
+                                                            onView={() => handleOpenEmailActivity(activity)}
+                                                            onResend={() => handleOpenEmailActivity(activity)}
+                                                        />
+                                                    )}
+                                                    {!isTask && activity && isEditableActivity(item.icon_type, activity.data) && (
                                                         <ActivityActionsDropdown
                                                             onEdit={() => handleEditActivity(activity)}
                                                             onDelete={() => handleDeleteActivity(itemId!)}
@@ -957,6 +996,15 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     showNotice={showNotice}
                 />
             )}
+
+            <EmailDetails
+                campaignEmail={selectedCampaignEmail}
+                onClose={() => setSelectedCampaignEmail(null)}
+                onResendSuccess={() => {
+                    setSelectedCampaignEmail(null);
+                    fetchActivities();
+                }}
+            />
 
             {/* Task Dialog (Pro plugin) */}
             {selectedTask && <TaskDialogWrapper

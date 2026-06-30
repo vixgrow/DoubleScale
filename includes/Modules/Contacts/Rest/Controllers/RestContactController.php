@@ -473,6 +473,11 @@ class RestContactController extends RestController {
 							'type'        => 'integer',
 							'default'     => 1,
 						),
+						'activity_id' => array(
+							'description' => __( 'Filter individual message by linked activity ID.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => false,
+						),
 					),
 				),
 			)
@@ -1720,8 +1725,15 @@ class RestContactController extends RestController {
 
 			// Get ALL messages (campaigns + individual) for this channel
 			$messages_query = CommunicationTrackingModel::where( 'contact_id', $contact_id )
-				->where( 'mode', $tracking_mode )
-				->with(
+				->where( 'mode', $tracking_mode );
+
+			$activity_id = (int) $request->get_param( 'activity_id' );
+			if ( $activity_id > 0 ) {
+				$messages_query->where( 'source_type', MessageSourceTypes::INDIVIDUAL )
+					->where( 'source_id', $activity_id );
+			}
+
+			$messages_query->with(
 					array(
 						'campaign'                    => function ( $query ) {
 							$query->select( 'id', 'name', 'type' );

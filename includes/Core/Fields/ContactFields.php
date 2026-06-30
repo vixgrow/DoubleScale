@@ -139,6 +139,10 @@ class ContactFields {
 				'name' => __( 'Phone', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
+			'whatsapp_phone' => array(
+				'name' => __( 'WhatsApp Phone', 'doublescale' ),
+				'type' => $this->types['phone'],
+			),
 		);
 
 		if ( class_exists( CustomFieldModel::class ) ) {

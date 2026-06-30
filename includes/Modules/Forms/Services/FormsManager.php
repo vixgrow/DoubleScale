@@ -117,6 +117,7 @@ final class FormsManager {
 			'fields_settings' => $form->get_form_fields_settings(),
 			'is_enabled'      => $form->is_enabled(),
 			'is_pro'          => $form->is_pro,
+			'platform'        => $form->platform ?? 'wordpress',
 		);
 	}
 
@@ -173,6 +174,7 @@ final class FormsManager {
 				'fields_settings' => $form->get_form_fields_settings(),
 				'is_enabled'      => $form->is_enabled(),
 				'is_pro'          => $form->is_pro,
+				'platform'        => $form->platform ?? 'wordpress',
 			);
 
 			$form->load_hooks();

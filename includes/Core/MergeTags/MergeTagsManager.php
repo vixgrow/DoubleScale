@@ -137,10 +137,10 @@ final class MergeTagsManager {
 	 * Register Forms Merge Tags
 	 */
 	public function register_forms_merge_tags() {
-		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
 			return;
 		}
-		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			// Ensure the form group is properly initialized with its name
 			// This handles the case where set_groups() ran before forms were loaded
@@ -393,8 +393,8 @@ final class MergeTagsManager {
 				'triggers'  => array( 'post_published' ),
 			),
 		);
-		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
-			$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		if ( class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 			foreach ( $forms as $form ) {
 				$this->groups[ $form->slug ] = array(
 					'name'        => $form->name,

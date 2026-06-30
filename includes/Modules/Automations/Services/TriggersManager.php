@@ -401,11 +401,11 @@ final class TriggersManager {
 			return;
 		}
 
-		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
 			return;
 		}
 		$this->sources['forms']['groups'] = array();
-		$forms                            = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		$forms                            = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 
 		$skip_slugs = array();
 		if ( class_exists( '\DoubleScale\Modules\Automations\Triggers\Forms\AbstractFormSubmittedTrigger' ) ) {
@@ -480,13 +480,13 @@ final class TriggersManager {
 		if ( 'forms' === $trigger->source ) {
 			$row['is_form'] = true;
 			$form           = null;
-			if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
-				$form = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $trigger->slug );
+			if ( class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+				$form = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $trigger->slug );
 			}
 			if ( $form ) {
 				$row['is_disabled'] = ! $form->is_enabled();
 			} else {
-				$row['is_disabled'] = ! $this->is_form_vendor_plugin_active( $trigger->slug );
+				$row['is_disabled'] = ! $this->is_form_integration_available( $trigger->slug );
 			}
 			if ( ! isset( $this->sources['forms']['groups'][ $trigger->group ] ) ) {
 				$this->sources['forms']['groups'][ $trigger->group ] = array(
@@ -496,12 +496,34 @@ final class TriggersManager {
 				);
 			}
 			$this->sources['forms']['groups'][ $trigger->group ]['is_disabled']                = $row['is_disabled'];
+			if ( $row['is_disabled'] && 'typeform' === $trigger->slug ) {
+				$this->sources['forms']['groups'][ $trigger->group ]['disabled_reason'] = 'typeform_not_connected';
+			}
 			$this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
 
 			return;
 		}
 
 		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+	}
+
+	/**
+	 * Whether a form trigger is available (WP plugin installed or SaaS integration connected).
+	 */
+	private function is_form_integration_available( string $slug ): bool {
+		if ( 'typeform' === $slug ) {
+			if ( ! class_exists( '\DoubleScale\Core\Managers\IntegrationsManager' ) ) {
+				return false;
+			}
+			try {
+				$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'typeform' );
+				return $integration && $integration->is_connected();
+			} catch ( \Exception $e ) {
+				return false;
+			}
+		}
+
+		return $this->is_form_vendor_plugin_active( $slug );
 	}
 
 	/**

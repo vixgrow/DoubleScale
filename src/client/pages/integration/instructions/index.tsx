@@ -8,6 +8,7 @@ import { applyFilters } from '@wordpress/hooks';
  * Internal dependencies
  */
 import SlackInstructions from './slack-instructions';
+import TypeformInstructions from './typeform-instructions';
 
 interface InstructionsProps {
     slug: string;
@@ -31,6 +32,8 @@ const Instructions: React.FC<InstructionsProps> = ({ slug, label, description })
     switch (slug) {
         case 'slack':
             return <SlackInstructions />;
+        case 'typeform':
+            return <TypeformInstructions />;
         default:
             // Default fallback for other integrations
             return (

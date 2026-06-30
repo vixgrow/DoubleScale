@@ -63,6 +63,7 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\NinjaformsFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\QuillformsFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\SureformsFormSubmitted::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\TypeformFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\WpformsFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\WsformFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Pmpro\CheckoutCompleted::class,

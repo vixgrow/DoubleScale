@@ -21,6 +21,7 @@ import type { MappedFields } from '@doublescale/client';
 import { Card, CardContent } from '@doublescale/components/ui/card';
 import { Skeleton } from '@doublescale/components/ui/skeleton';
 import MappingDialog from './mapping-dialog';
+import { TypeformIntegrationWarning } from '@/components/typeform-integration-warning';
 
 interface FormFieldsProps {
 	values: { [key: string]: any };
@@ -134,6 +135,7 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 
 	return (
 		<div className="flex flex-col gap-5">
+			{form_type === 'typeform' && <TypeformIntegrationWarning />}
 			<div className="doublescale-fields">
 				{form_type &&
 					map(formOptions, (options, key) => {

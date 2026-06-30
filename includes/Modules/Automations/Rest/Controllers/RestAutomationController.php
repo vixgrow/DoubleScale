@@ -466,8 +466,8 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 
 		// If we have a specific form_id and trigger_id, register field rules for that form only
@@ -536,8 +536,8 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 
 		// If we have a specific form_id and trigger_id, register merge tags for that form only
@@ -981,11 +981,11 @@ class RestAutomationController extends RestController {
 			$is_form = false;
 			$trigger = TriggersManager::instance()->get_trigger( $automation->trigger );
 			if ( empty( $trigger ) ) {
-				if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
+				if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
 					$automation->delete();
 					throw new \Exception( 'Trigger not found.' );
 				}
-				$form = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger );
+				$form = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger );
 				if ( empty( $form ) ) {
 					$automation->delete();
 					throw new \Exception( 'Trigger not found.' );
@@ -1365,8 +1365,8 @@ class RestAutomationController extends RestController {
 			};
 
 			if ( empty( $trigger ) ) {
-				$form = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-					? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger )
+				$form = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger )
 					: null;
 
 				if ( ! empty( $form ) && ! empty( $form->is_pro ) && $form->is_pro ) {
@@ -1379,7 +1379,11 @@ class RestAutomationController extends RestController {
 					);
 					$update_trigger_settings( $automation->trigger, true, $form_pro_message );
 				} elseif ( empty( $form ) || ! $form->is_enabled() ) {
-					$form_inactive_message = __( 'Trigger requires a plugin that is not currently active.', 'doublescale' );
+					if ( 'typeform' === $automation->trigger ) {
+						$form_inactive_message = __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' );
+					} else {
+						$form_inactive_message = __( 'Trigger requires a plugin that is not currently active.', 'doublescale' );
+					}
 					$has_warnings          = true;
 					$warnings[]            = array(
 						'type'    => 'trigger',
@@ -1739,6 +1743,13 @@ class RestAutomationController extends RestController {
 					'plugin_label' => __( 'Double Scale Pro', 'doublescale' ),
 				);
 			}
+
+			if ( 'typeform' === ( $trigger->slug ?? '' ) ) {
+				$typeform_check = $this->check_typeform_integration_dependency();
+				if ( ! $typeform_check['is_active'] ) {
+					return $typeform_check;
+				}
+			}
 		}
 
 		if ( 'sales' === ( $trigger->source ?? '' ) ) {
@@ -1766,6 +1777,43 @@ class RestAutomationController extends RestController {
 			'is_pro'       => false,
 			'message'      => '',
 			'plugin_label' => '',
+		);
+	}
+
+	/**
+	 * Typeform automations require Integrations credentials (not a WordPress plugin).
+	 *
+	 * @return array{is_active:bool,is_pro:bool,message:string,plugin_label:string}
+	 */
+	private function check_typeform_integration_dependency() {
+		if ( ! class_exists( '\DoubleScale\Core\Managers\IntegrationsManager' ) ) {
+			return array(
+				'is_active'    => false,
+				'is_pro'       => false,
+				'message'      => __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' ),
+				'plugin_label' => __( 'Typeform', 'doublescale' ),
+			);
+		}
+
+		try {
+			$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'typeform' );
+			if ( $integration && $integration->is_connected() ) {
+				return array(
+					'is_active'    => true,
+					'is_pro'       => false,
+					'message'      => '',
+					'plugin_label' => '',
+				);
+			}
+		} catch ( \Exception $e ) {
+			// Fall through to disconnected message.
+		}
+
+		return array(
+			'is_active'    => false,
+			'is_pro'       => false,
+			'message'      => __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' ),
+			'plugin_label' => __( 'Typeform', 'doublescale' ),
 		);
 	}
 
@@ -2067,8 +2115,8 @@ class RestAutomationController extends RestController {
 		);
 
 		// set forms
-		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 		foreach ( $forms as $form ) {
 			$plugin_dependencies[ $form->slug ] = array(

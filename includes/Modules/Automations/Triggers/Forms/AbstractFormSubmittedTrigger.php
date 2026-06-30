@@ -42,6 +42,7 @@ abstract class AbstractFormSubmittedTrigger extends TriggerPro {
 			'wsform',
 			'eform',
 			'jetformbuilder',
+			'typeform',
 		);
 	}
 }

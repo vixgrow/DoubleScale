@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -96,9 +96,9 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 
 **Automation integrations:**
 
-* **E-commerce** — WooCommerce (orders, subscriptions, memberships, cart abandonment, reviews, wishlists), Easy Digital Downloads, SureCart
-* **Forms** — Contact Form 7, WPForms, Fluent Forms, Quill Forms (free); Elementor Forms, Gravity Forms, Ninja Forms, Formidable, Forminator, MetForm, WS Form, Bit Form, SureForms, eForm, JetFormBuilder (Pro)
-* **LMS** — LearnDash, Tutor LMS, LifterLMS, LearnPress
+* **E-commerce** — [WooCommerce](https://doublescale.io/integrations/woocommerce/) (orders, subscriptions, memberships, cart abandonment, reviews, wishlists), Easy Digital Downloads, SureCart
+* **Forms** — [Contact Form 7](https://doublescale.io/integrations/contact-form-007/), [WPForms](https://doublescale.io/integrations/wpforms/), [Fluent Forms](https://doublescale.io/integrations/fluent-forms/), [Quill Forms](https://doublescale.io/integrations/quill-forms/) (free); [Elementor Forms](https://doublescale.io/integrations/elementor/), [Gravity Forms](https://doublescale.io/integrations/gravity-forms/), [Ninja Forms](https://doublescale.io/integrations/ninja-forms/), [Formidable](https://doublescale.io/integrations/formidable-forms/), [Forminator](https://doublescale.io/integrations/forminator-forms/), [MetForm](https://doublescale.io/integrations/metform/), [WS Form](https://doublescale.io/docs/), [Bit Form](https://doublescale.io/docs/), [SureForms](https://doublescale.io/docs/), [eForm](https://doublescale.io/docs/), [JetFormBuilder](https://doublescale.io/docs/) (Pro)
+* **LMS** — [LearnDash](https://doublescale.io/integrations/learndash/), Tutor LMS, LifterLMS, LearnPress
 * **Membership** — MemberPress, Paid Memberships Pro
 * **Media** — Presto Player
 * **Messaging** — Email received, SMS received, WhatsApp received
@@ -189,7 +189,7 @@ Yes — that's exactly the design. Each module is built to feel like a dedicated
 
 = How is this different from "marketing automation" plugins like FluentCRM or Groundhogg? =
 
-Most WordPress CRMs cover contacts + email + automation. DoubleScale covers that **plus** booking, tasks, a multi-channel helpdesk inbox, SMTP routing, and a full analytics layer — in the same plugin, around the same contact record. You're not bolting on FluentBooking + WP Mail SMTP + a separate helpdesk; it's all built in.
+Most WordPress CRMs cover contacts + email + automation. DoubleScale covers that **plus** booking, tasks, a multi-channel helpdesk inbox, SMTP routing, and a full analytics layer — in the same plugin, around the same contact record. You're not bolting on FluentBooking + WP Mail SMTP + a separate helpdesk; it's all built in. See the full [DoubleScale vs FluentCRM comparison](https://doublescale.io/compare/vs-fluentcrm/).
 
 = Is there a contact limit? =
 
@@ -201,7 +201,7 @@ In your WordPress database. The CRM, deals, email content, support threads, and 
 
 = Do you support WooCommerce? =
 
-Yes — natively. Orders, customers, abandoned carts, and product purchases flow into the CRM. Trigger campaigns or automations from cart events. Set up abandoned-cart recovery in minutes.
+Yes — natively. Orders, customers, abandoned carts, and product purchases flow into the CRM. Trigger campaigns or automations from cart events. Set up abandoned-cart recovery in minutes. See the full [DoubleScale WooCommerce CRM integration guide](https://doublescale.io/integrations/woocommerce/).
 
 = Can I send SMS or WhatsApp? =
 
@@ -221,7 +221,7 @@ DoubleScale adds seven scoped WordPress roles — CRM Manager, Sales Manager, Sa
 
 = Which form plugins work? =
 
-15 form builders. Four ship in the free plugin — Contact Form 7, WPForms, Fluent Forms, and Quill Forms. Eleven more are available with Pro — Elementor Forms, Gravity Forms, Ninja Forms, Formidable, Forminator, MetForm, WS Form, Bit Form, SureForms, eForm, and JetFormBuilder. Form submissions create or update contacts with tags, lists, and field mapping.
+15 form builders. Four ship in the free plugin — [Contact Form 7](https://doublescale.io/integrations/contact-form-007/), [WPForms](https://doublescale.io/integrations/wpforms/), [Fluent Forms](https://doublescale.io/integrations/fluent-forms/), and [Quill Forms](https://doublescale.io/integrations/quill-forms/). Eleven more are available with Pro — [Elementor Forms](https://doublescale.io/integrations/elementor/), [Gravity Forms](https://doublescale.io/integrations/gravity-forms/), [Ninja Forms](https://doublescale.io/integrations/ninja-forms/), [Formidable](https://doublescale.io/integrations/formidable-forms/), [Forminator](https://doublescale.io/integrations/forminator-forms/), [MetForm](https://doublescale.io/integrations/metform/), [WS Form](https://doublescale.io/docs/), [Bit Form](https://doublescale.io/docs/), [SureForms](https://doublescale.io/docs/), [eForm](https://doublescale.io/docs/), and [JetFormBuilder](https://doublescale.io/docs/). Form submissions create or update contacts with tags, lists, and field mapping.
 
 = How do imports work? =
 
@@ -240,6 +240,27 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.7 = 30 Jun 2026
+- Add sales document approval workflow with discount validation for proposals, contracts, and invoices
+- Add sales rep permissions and read-only payment handling
+- Add per-user list preferences for contacts, tags, and lists views
+- Add optional email and phone support for contacts with unique phone and WhatsApp number enforcement
+- Add Phone-as-WhatsApp setting for contact management
+- Add WooCommerce order integration and revenue tracking on contact profiles
+- Add WooCommerce customer import WhatsApp phone mapping
+- Add EDD order status constants and improved revenue queries
+- Add CRM contact creation option for abandoned cart recovery
+- Add subscription management enhancements with public list visibility and list status
+- Add ContactSubscribed goal and trigger improvements with subscription type handling
+- Add automation trigger documentation callouts and featured trigger status
+- Add booking access permission improvements and user role checks
+- Add WhatsApp opt-out and resubscription keyword settings with enhanced unsubscribe messaging
+- Improve webhook processing and result normalization
+- Improve Checkbox and Radio custom field validation and sanitization
+- Improve contact list column visibility, status display, and bulk list/tag modals
+- Improve input, dialog, and email settings UI with focus management and consistent styling
+- Improve WordPress.org readme with integration and comparison page links
+
 = 1.2.6 = 24 Jun 2026
 - Add PayPal payment gateway support for online invoice payments
 - Improve Outlook SMTP connections with Microsoft Graph for inbound email retrieval
@@ -531,4 +552,24 @@ DoubleScale is translation-ready. English ships by default; additional locales w
 
 == Compare ==
 
+See how DoubleScale stacks up against popular CRM and marketing automation tools:
+
 * **DoubleScale vs FluentCRM:** [doublescale.io/compare/vs-fluentcrm](https://doublescale.io/compare/vs-fluentcrm/)
+* **DoubleScale vs HubSpot:** [doublescale.io/compare/vs-hubspot](https://doublescale.io/compare/vs-hubspot/)
+* **DoubleScale vs ActiveCampaign:** [doublescale.io/compare/vs-activecampaign](https://doublescale.io/compare/vs-activecampaign/)
+* **DoubleScale vs Pipedrive:** [doublescale.io/compare/vs-pipedrive](https://doublescale.io/compare/vs-pipedrive/)
+* **DoubleScale vs GoHighLevel:** [doublescale.io/compare/vs-gohighlevel](https://doublescale.io/compare/vs-gohighlevel/)
+* **DoubleScale vs FunnelKit:** [doublescale.io/compare/vs-funnelkit](https://doublescale.io/compare/vs-funnelkit/)
+* **DoubleScale vs Brevo:** [doublescale.io/compare/vs-brevo](https://doublescale.io/compare/vs-brevo/)
+* **DoubleScale vs MailerLite:** [doublescale.io/compare/vs-mailerlite](https://doublescale.io/compare/vs-mailerlite/)
+* **DoubleScale vs Omnisend:** [doublescale.io/compare/vs-omnisend](https://doublescale.io/compare/vs-omnisend/)
+
+== Integrations ==
+
+Detailed setup guides for connecting DoubleScale with your existing WordPress tools:
+
+**E-commerce & CRM**
+
+* **WooCommerce CRM Integration:** [doublescale.io/integrations/woocommerce](https://doublescale.io/integrations/woocommerce/)
+* **LearnDash CRM Integration:** [doublescale.io/integrations/learndash](https://doublescale.io/integrations/learndash/)
+

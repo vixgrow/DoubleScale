@@ -4,16 +4,23 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { ArrowDown, ArrowUp, Filter } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
 import { hasActiveTextSelection } from '../utils/selectionGuards';
-import { ContactsIcon, CopyIcon, DeleteIcon, FiltersIcon } from '@doublescale/components';
+import { ContactsIcon, CopyIcon, DeleteIcon, FiltersIcon, SaveAsTemplateIcon } from '@doublescale/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { DropIndicator } from './DropIndicator';
 import ConditionalSectionGate from './ConditionalSectionGate';
+import { SaveAsBlockDialog } from './SaveAsBlockDialog';
+import { createSavedBlock } from '../api/savedBlocks';
+import {
+	stripSectionMetaForSave,
+	wrapSectionAsSavedBlockContent,
+} from '../utils/savedBlockUtils';
+import type { SavedBlockCategory } from '../types/common';
 
 interface SectionRendererProps {
 	section: EmailSection;
@@ -23,6 +30,8 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 	const [showConditionsModal, setShowConditionsModal] = useState(false);
+	const [showSaveAsBlockDialog, setShowSaveAsBlockDialog] = useState(false);
+	const [isSavingBlock, setIsSavingBlock] = useState(false);
 
 	const {
 		attributes,
@@ -100,6 +109,25 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		}
 	};
 
+	const handleSaveAsBlock = async (
+		blockName: string,
+		category: SavedBlockCategory,
+		thumbnailUrl?: string
+	) => {
+		setIsSavingBlock(true);
+		try {
+			const sectionToSave = stripSectionMetaForSave(section);
+			await createSavedBlock({
+				name: blockName,
+				category,
+				content: wrapSectionAsSavedBlockContent(sectionToSave),
+				thumbnail: thumbnailUrl,
+			});
+		} finally {
+			setIsSavingBlock(false);
+		}
+	};
+
 	// Margin as padding in the builder so it stays inside the canvas (margin collapses when unselected).
 	const sectionStyles = section.styles ?? {};
 	const {
@@ -137,7 +165,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 			{/* Section Controls */}
 			{isSelected && (
-				<div className="absolute -top-[1.5px] h-[230px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2">
+				<div className="absolute -top-[1.5px] h-[290px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2">
 					<Button
 						variant="ghost"
 						size="lg"
@@ -156,6 +184,26 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						title={__('Duplicate', 'doublescale')}
 					>
 						<CopyIcon width={24} height={24} />
+					</Button>
+					<div className="border-b-2 border-accent"></div>
+					<Button
+						variant="ghost"
+						size="lg"
+						className="h-6 w-6 p-0 text-primary"
+						onClick={(e) => {
+							e.stopPropagation();
+							if (isProActive) {
+								setShowSaveAsBlockDialog(true);
+							}
+						}}
+						disabled={!isProActive}
+						title={
+							isProActive
+								? __('Save as Block', 'doublescale')
+								: __('Save as Block (Pro Feature)', 'doublescale')
+						}
+					>
+						<SaveAsTemplateIcon width={24} height={24} />
 					</Button>
 					<div className="border-b-2 border-accent"></div>
 					<Button
@@ -222,6 +270,13 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 				sectionId={section.id}
 				visible={showConditionsModal}
 				onClose={() => setShowConditionsModal(false)}
+			/>
+
+			<SaveAsBlockDialog
+				isOpen={showSaveAsBlockDialog}
+				onClose={() => setShowSaveAsBlockDialog(false)}
+				onSave={handleSaveAsBlock}
+				isSaving={isSavingBlock}
 			/>
 		</div>
 	);

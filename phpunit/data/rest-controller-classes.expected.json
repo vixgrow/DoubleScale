@@ -72,6 +72,7 @@
     "RestSalesSettingsController",
     "RestSalesTaxController",
     "RestSalesUsersController",
+    "RestSavedBlockController",
     "RestSettingsController",
     "RestSettingsControllerPro",
     "RestSiteVerificationController",

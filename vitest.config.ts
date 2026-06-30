@@ -13,6 +13,10 @@ export default defineConfig({
 			// entries from tsconfig.json paths. Add more here as new test files
 			// reach into deeper parts of the source tree.
 			'@doublescale/shared': path.join(srcDir, 'shared'),
+			'@doublescale/utils/idGenerator': path.join(
+				srcDir,
+				'builder/utils/idGenerator.ts'
+			),
 			'@doublescale/utils': path.join(srcDir, 'shared/utils'),
 			'@doublescale/services': path.join(srcDir, 'shared/services'),
 			'@doublescale/components': path.join(srcDir, 'components'),

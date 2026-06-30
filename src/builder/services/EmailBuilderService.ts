@@ -10,6 +10,7 @@ import {
   generateColumnId,
   generateSectionId,
 } from '@/builder/utils/idGenerator';
+import { regenerateSectionIds } from '@/builder/utils/savedBlockUtils';
 import { getRegisteredBlocks } from '@/stores/blocks-registry';
 import type {
   BlockType,
@@ -69,18 +70,7 @@ export class EmailBuilderService {
    * Duplicates a section with new IDs
    */
   static duplicateSection(section: EmailSection): EmailSection {
-    return {
-      ...section,
-      id: generateSectionId(),
-      columns: section.columns.map((column) => ({
-        ...column,
-        id: generateColumnId(),
-        blocks: column.blocks.map((block) => ({
-          ...block,
-          id: generateBlockId(),
-        })),
-      })),
-    };
+    return regenerateSectionIds(section);
   }
 
   /**

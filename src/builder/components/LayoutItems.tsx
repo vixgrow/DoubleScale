@@ -18,6 +18,7 @@ import HeroImageLibrary from '../blocks/libraries/HeroImage';
 import EmailBodyLibrary from '../blocks/libraries/EmailBody';
 import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
 import FooterLibrary from '../blocks/libraries/Footer';
+import SavedBlocksLibrary from '../blocks/libraries/SavedBlocks';
 
 export interface LayoutItemsProps {
 	/**
@@ -64,6 +65,11 @@ const LayoutItems = ({
 			id: 'footer',
 			title: __('Footer', 'doublescale'),
 			component: FooterLibrary,
+		},
+		{
+			id: 'my-blocks',
+			title: __('My Blocks', 'doublescale'),
+			component: SavedBlocksLibrary,
 		},
 	];
 

@@ -37,10 +37,16 @@ export interface EmailColumn {
 	styles?: Record<string, any>;
 }
 
+export interface EmailSectionMeta {
+	savedBlockId?: number;
+	savedBlockVersion?: number;
+}
+
 export interface EmailSection {
 	id: string;
 	columns: EmailColumn[];
 	styles?: Record<string, any>;
+	meta?: EmailSectionMeta;
 	conditions?: Array<{
 		group: string;
 		filter: string;

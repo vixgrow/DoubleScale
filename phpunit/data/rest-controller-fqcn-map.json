@@ -72,6 +72,7 @@
     "RestSalesSettingsController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestSalesSettingsController",
     "RestSalesTaxController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestSalesTaxController",
     "RestSalesUsersController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestSalesUsersController",
+    "RestSavedBlockController": "DoubleScale\\Pro\\Modules\\EmailBlocks\\Rest\\Controllers\\RestSavedBlockController",
     "RestSettingsController": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsController",
     "RestSettingsControllerPro": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsControllerPro",
     "RestSiteVerificationController": "DoubleScale\\Core\\Rest\\Controllers\\RestSiteVerificationController",

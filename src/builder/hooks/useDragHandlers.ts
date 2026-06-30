@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { getRegisteredBlocks } from '@/stores/blocks-registry';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { TemplateConfig, TemplateType } from '../types/common';
+import type { SavedBlock } from '../types/common';
 import {
   handleTemplateDropOnCanvas,
   markAsTemplateBlock,
 } from '@doublescale/utils/dragAndDropHelpers';
 import { generateBlockId, generateColumnId, generateSectionId } from '@doublescale/utils/idGenerator';
 import { isTemplateSection } from '@doublescale/utils/templateUtils';
+import { buildSectionFromSavedBlock } from '../utils/savedBlockUtils';
 
 // Helper: Auto-select and scroll to a block
 const selectAndScrollToBlock = (
@@ -67,9 +69,44 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
       'hero-image-template',
       'image-gallery-template',
       'preheader-template',
+      'saved-block-template',
     ];
 
     const activeType = active.data?.current?.type as TemplateType;
+
+    // Saved blocks are full sections — handle before flat block-list templates.
+    if (activeType === 'saved-block-template' && active.data?.current) {
+      const savedBlock = active.data.current.template as SavedBlock;
+      const overData = over.data?.current;
+
+      if (!savedBlock?.content) {
+        return;
+      }
+
+      const newSection = buildSectionFromSavedBlock(
+        savedBlock.id,
+        savedBlock.content
+      );
+
+      if (overData?.type === 'section-drop-zone') {
+        dispatch(STORE_KEY).addSection(newSection, overData.index);
+      } else {
+        dispatch(STORE_KEY).addSection(newSection);
+      }
+
+      const firstColumn = newSection.columns[0];
+      const firstBlock = firstColumn?.blocks[0];
+      if (firstBlock && firstColumn) {
+        selectAndScrollToBlock(
+          dispatch,
+          firstBlock.id,
+          newSection.id,
+          firstColumn.id
+        );
+      }
+      return;
+    }
+
     if (templateTypes.includes(activeType) && active.data?.current) {
       const template = active.data.current.template as TemplateConfig;
       const overData = over.data?.current;

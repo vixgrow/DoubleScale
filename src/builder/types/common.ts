@@ -53,11 +53,17 @@ export interface EmailColumn {
 	blocks: EmailBlock[];
 }
 
+export interface EmailSectionMeta {
+	savedBlockId?: number;
+	savedBlockVersion?: number;
+}
+
 export interface EmailSection {
 	id: string;
 	columns: EmailColumn[];
 	layout?: LayoutConfig;
 	styles?: SectionStyles;
+	meta?: EmailSectionMeta;
 }
 
 export interface SectionStyles {
@@ -80,7 +86,32 @@ export type TemplateType =
 	| 'email-body-template'
 	| 'hero-image-template'
 	| 'image-gallery-template'
-	| 'preheader-template';
+	| 'preheader-template'
+	| 'saved-block-template';
+
+export interface SavedBlockContent {
+	version: number;
+	section: EmailSection;
+}
+
+export type SavedBlockCategory =
+	| 'header'
+	| 'footer'
+	| 'hero'
+	| 'cta'
+	| 'gallery'
+	| 'custom';
+
+export interface SavedBlock {
+	id: number;
+	name: string;
+	category: SavedBlockCategory;
+	content: SavedBlockContent;
+	thumbnail?: string;
+	created_by: number;
+	created_at: string;
+	updated_at: string;
+}
 
 export interface TemplateConfig {
 	id: string;
@@ -224,7 +255,8 @@ export type DragType =
 	| 'email-body-template'
 	| 'hero-image-template'
 	| 'image-gallery-template'
-	| 'preheader-template';
+	| 'preheader-template'
+	| 'saved-block-template';
 
 export interface DropTarget {
 	id: string;

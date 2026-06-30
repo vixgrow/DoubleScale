@@ -17,7 +17,8 @@ interface DraggableTemplateProps {
 		| 'email-body'
 		| 'hero-image'
 		| 'image-gallery'
-		| 'preheader';
+		| 'preheader'
+		| 'saved-block';
 	disabled?: boolean;
 }
 

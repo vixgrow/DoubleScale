@@ -359,7 +359,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 
 	return (
 
-			<div className="overflow-hidden rounded-xl border border-border bg-white p-6 ">
+			<div className="overflow-visible rounded-xl border border-border bg-white p-6 ">
 				<div className="mb-5">
 					<h3 className="text-xl font-semibold leading-8 text-primaryText">
 						{__('Map form fields', 'doublescale')}
@@ -427,6 +427,12 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 											options={emailOptions}
 											styles={mappingSelectStyles}
 											isSearchable={false}
+											menuPortalTarget={
+												typeof document !== 'undefined'
+													? document.body
+													: null
+											}
+											menuPosition="fixed"
 										/>
 									) : (
 										<div className="min-w-0">
@@ -519,6 +525,12 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 											'doublescale'
 										)}
 										isSearchable={true}
+										menuPortalTarget={
+											typeof document !== 'undefined'
+												? document.body
+												: null
+										}
+										menuPosition="fixed"
 									/>
 								</div>
 

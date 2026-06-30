@@ -72,6 +72,7 @@ export function getMappingSelectStyles(): StylesConfig<
 			...base,
 			paddingTop: 4,
 			paddingBottom: 4,
+			maxHeight: 280,
 		}),
 		option: (base, state) => ({
 			...base,

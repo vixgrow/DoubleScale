@@ -33,3 +33,7 @@ export { PaymentForm } from './payment-form';
 export { RecordPaymentDialog } from './record-payment-dialog';
 export { PaymentsList } from './payments-list';
 export { InvoiceOnlinePayment, InvoiceStripePayment } from './invoice-online-payment';
+export { default as InvoiceForm } from './invoice-form';
+export { InvoiceFormDialog } from './invoice-form-dialog';
+export type { InvoiceFormProps } from './invoice-form';
+export type { InvoiceFormDialogProps } from './invoice-form-dialog';

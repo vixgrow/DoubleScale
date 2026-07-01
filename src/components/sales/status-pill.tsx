@@ -23,11 +23,11 @@ const proposalClasses: Record<ProposalStatus, string> = {
 };
 
 const invoiceClasses: Record<InvoiceStatus, string> = {
-	draft: 'bg-slate-100 text-slate-700',
-	unpaid: 'bg-red-100 text-red-700',
-	partially_paid: 'bg-amber-100 text-amber-800',
-	paid: 'bg-green-100 text-green-700',
-	overdue: 'bg-orange-100 text-orange-800',
+	draft: 'bg-[#ECECEC] text-[#6B6C76]',
+	unpaid: 'bg-[#FAEADF] text-[#CB5301]',
+	partially_paid: 'bg-[#F7F4C3] text-[#896900]',
+	paid: 'bg-[#E4FAEC] text-[#16A34A]',
+	overdue: 'bg-[#FBE8E8] text-[#C30A0A]',
 };
 
 const contractClasses: Record<ContractStatus, string> = {

@@ -20,7 +20,7 @@ const TagField = ({ value, onChange }: Props) => {
 			value={value}
 			onChange={onChange}
 			endpoint="/doublescale/v1/tags"
-			placeholder={__('Select tag', 'doublescale')}
+			placeholder={__('Select Tag', 'doublescale')}
 			noOptionsMessage={__('No tags available', 'doublescale')}
 			className="doublescale-tag-field"
 		/>

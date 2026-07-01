@@ -345,12 +345,15 @@ export interface PaginatedResponse<T> {
 		current_page: number;
 		last_page: number;
 	};
+	total_count?: number;
 }
 
 export interface ProposalFilters {
 	status?: string;
 	contact_id?: number;
 	search?: string;
+	from?: string;
+	to?: string;
 	sort_by?: string;
 	sort_order?: 'asc' | 'desc';
 	per_page?: number;

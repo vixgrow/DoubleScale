@@ -41,6 +41,13 @@ import RulesBuilder from '@/components/rules-builder';
 import type { RuleItem } from '@/components/rules-builder';
 import { Delete, getFilteredRulesGroups, getInitialRule } from '@/utils';
 import { Lock, Trash2 } from 'lucide-react';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -198,6 +205,31 @@ export function DataTableActions<TData>({
 					className="ml-2 max-sm:ml-0 max-sm:w-full sm:w-auto lg:ml-0"
 				/>
 			)}
+			{config.selectFilters?.map((filter) => (
+				<Select
+					key={filter.id}
+					value={filter.value}
+					onValueChange={(value) => {
+						filter.onChange(value);
+						if (setPage) {
+							setPage(1);
+						}
+					}}
+				>
+					<SelectTrigger
+						className={`${actionButtonClassName} max-sm:w-full sm:w-[180px]`}
+					>
+						<SelectValue placeholder={filter.placeholder} />
+					</SelectTrigger>
+					<SelectContent>
+						{filter.options.map((option) => (
+							<SelectItem key={option.value} value={option.value}>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			))}
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
 			{config.bulkActions?.enabled && (
 				<div className="max-sm:w-full max-sm:[&_button]:w-full sm:w-auto sm:[&_button]:w-auto">

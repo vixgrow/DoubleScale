@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, TagField, InfiniteScrollSelect } from '@doublescale/components';
+import { FormField, TagField, InfiniteScrollSelect, PanelLayout } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,7 +51,7 @@ import type { ContactSummary, LineItem } from '@/types/sales';
 import { CURRENCIES, DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
 
 const selectClass =
-	'w-full border border-input rounded-md px-3 py-2 text-sm bg-background';
+	'w-full border !border-border !rounded-lg px-3 py-2 text-sm bg-background';
 
 const contactOptionLabel = (contact: ContactSummary): string => {
 	const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ').trim();
@@ -96,18 +96,7 @@ const ProposalEdit: React.FC = () => {
 	const [phone, setPhone] = useState('');
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
 	const [tagIds, setTagIds] = useState<number[]>([]);
-	const [lineItems, setLineItems] = useState<LineItem[]>([
-		{
-			description: '',
-			long_description: '',
-			qty: 1,
-			unit: '',
-			rate: 0,
-			tax: [],
-			amount: 0,
-			optional: false,
-		},
-	]);
+	const [lineItems, setLineItems] = useState<LineItem[]>([]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const hydratedContactIdRef = useRef<number | null>(null);
@@ -211,18 +200,7 @@ const ProposalEdit: React.FC = () => {
 				: []
 		);
 		hydratedContactIdRef.current = existing.contact_id ?? null;
-		setLineItems(
-			existing.line_items?.length
-				? existing.line_items
-				: [
-						{
-							description: '',
-							qty: 1,
-							rate: 0,
-							amount: 0,
-						},
-					]
-		);
+		setLineItems(existing.line_items?.length ? existing.line_items : []);
 	}, [existing]);
 
 	const buildPayload = () => ({
@@ -386,24 +364,41 @@ const ProposalEdit: React.FC = () => {
 		}
 	};
 
+	const assigneeReadOnly = assignableUsers.length <= 1;
+
+	const handleClose = () => navigate(getToLink('sales/proposals'));
+
+	const pageTitle = isNew
+		? __('Create New Proposal', 'doublescale')
+		: __('Edit Proposal', 'doublescale');
+
+	const breadcrumbItems = [
+		{ label: __('Sales (Proposals)', 'doublescale'), href: 'sales/proposals' },
+		{ label: pageTitle },
+	];
+
+	const panelShell = (children: JSX.Element) => (
+		<PanelLayout
+			items={breadcrumbItems}
+			showPanelClose
+			onClosePanel={handleClose}
+			handleNavigate={(href) => navigate(getToLink(href))}
+		>
+			{children}
+		</PanelLayout>
+	);
+
 	if (!isNew && loading) {
-		return (
-			<div className="p-6 text-muted-foreground">{__('Loading…', 'doublescale')}</div>
+		return panelShell(
+			<div className="py-12 text-center text-muted-foreground">
+				{__('Loading…', 'doublescale')}
+			</div>
 		);
 	}
 
-	const assigneeReadOnly = assignableUsers.length <= 1;
-
-	return (
-		<div className="p-6 space-y-6 max-w-6xl">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">
-					{isNew ? __('New Proposal', 'doublescale') : __('Edit Proposal', 'doublescale')}
-				</h1>
-				<Button variant="outline" onClick={() => navigate(getToLink('sales/proposals'))}>
-					{__('Back', 'doublescale')}
-				</Button>
-			</div>
+	return panelShell(
+		<div className="space-y-6">
+			<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
@@ -412,9 +407,9 @@ const ProposalEdit: React.FC = () => {
 				showReapprovalWarning={showReapprovalWarning}
 			/>
 
-			<fieldset disabled={fieldsLocked} className="space-y-6 border-0 p-0 m-0 min-w-0">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-				<div className="space-y-4">
+			<fieldset disabled={fieldsLocked} className="m-0 min-w-0 space-y-0 border-0 p-0">
+			<div className="grid grid-cols-1 lg:grid-cols-2 mb-6">
+				<div className="space-y-4 lg:border-r lg:border-[#DEE1E6] lg:pr-8">
 					<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
 						<Input value={subject} onChange={(e) => setSubject(e.target.value)} />
 					</FormField>
@@ -435,7 +430,7 @@ const ProposalEdit: React.FC = () => {
 						/>
 					</FormField>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Date', 'doublescale')} required className="!mb-0">
 							<DatePicker
 								value={date}
@@ -458,7 +453,7 @@ const ProposalEdit: React.FC = () => {
 						</FormField>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
 							<select
 								className={selectClass}
@@ -505,6 +500,7 @@ const ProposalEdit: React.FC = () => {
 								onChange={(e) =>
 									setDiscountValue(parseDiscountInput(e.target.value))
 								}
+								className="!rounded-lg !border-border "
 							/>
 						</FormField>
 					) : null}
@@ -514,8 +510,8 @@ const ProposalEdit: React.FC = () => {
 					</FormField>
 				</div>
 
-				<div className="space-y-4">
-					<div className="grid grid-cols-2 gap-3">
+				<div className="space-y-4 lg:pl-8 pt-6 lg:pt-0">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Status', 'doublescale')} className="!mb-0">
 							<select
 								className={selectClass}
@@ -533,7 +529,7 @@ const ProposalEdit: React.FC = () => {
 							{usersLoading ? (
 								<div className="text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</div>
 							) : assigneeReadOnly ? (
-								<div className="border rounded px-3 py-2 bg-slate-50 text-sm h-10 flex items-center">
+								<div className="border rounded-lg border-border px-3 py-2 bg-slate-50 text-sm h-10 flex items-center">
 									{assignableUsers.find((u) => u.id === assignedUserId)?.display_name ||
 										assignableUsers[0]?.display_name ||
 										'—'}
@@ -545,7 +541,7 @@ const ProposalEdit: React.FC = () => {
 										setAssignedUserId(next === 'unassigned' ? null : Number(next))
 									}
 								>
-									<SelectTrigger className="w-full">
+									<SelectTrigger className="w-full !rounded-lg !border-border">
 										<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
 									</SelectTrigger>
 									<SelectContent>
@@ -571,7 +567,7 @@ const ProposalEdit: React.FC = () => {
 						<Textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={3} />
 					</FormField>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('City', 'doublescale')} className="!mb-0">
 							<Input value={city} onChange={(e) => setCity(e.target.value)} />
 						</FormField>
@@ -580,7 +576,7 @@ const ProposalEdit: React.FC = () => {
 						</FormField>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Country', 'doublescale')} className="!mb-0">
 							<Input
 								value={country}
@@ -593,9 +589,9 @@ const ProposalEdit: React.FC = () => {
 						</FormField>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Email', 'doublescale')} required className="!mb-0">
-							<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+							<Input type="email" value={email} className="!rounded-lg !border-border" onChange={(e) => setEmail(e.target.value)} />
 						</FormField>
 						<FormField label={__('Phone', 'doublescale')} className="!mb-0">
 							<Input value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -604,6 +600,7 @@ const ProposalEdit: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="border-t border-[#DEE1E6] pt-6">
 			<LineItemsEditor
 				items={lineItems}
 				onChange={setLineItems}
@@ -617,34 +614,38 @@ const ProposalEdit: React.FC = () => {
 				hideDiscountTypeSelect
 				readOnly={fieldsLocked}
 			/>
+			</div>
 			</fieldset>
 
-			<div className="flex justify-end gap-2">
-				<Button variant="outline" onClick={() => navigate(getToLink('sales/proposals'))}>
+			<div className="flex flex-col-reverse gap-3 sm:flex-row items-center sm:justify-between">
+				<Button variant="outline" onClick={handleClose} className='border-primary text-primary bg-white'>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button
-					variant="outline"
-					onClick={() => void handleSave()}
-					disabled={saving || submittingApproval || fieldsLocked}
-				>
-					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
-				</Button>
-				{showSubmitApproval ? (
+				<div className="flex flex-wrap justify-center sm:justify-end gap-2">
 					<Button
-						onClick={() => void handleSubmitForApproval()}
-						disabled={saving || submittingApproval}
+						variant="outline"
+						className="border-primary text-primary bg-white"
+						onClick={() => void handleSave()}
+						disabled={saving || submittingApproval || fieldsLocked}
 					>
-						{submittingApproval
-							? __('Submitting…', 'doublescale')
-							: __('Save & Submit for Approval', 'doublescale')}
+						{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
 					</Button>
-				) : null}
-				{showSend ? (
-					<Button onClick={() => setSendOpen(true)} disabled={saving || submittingApproval}>
-						{__('Save & Send', 'doublescale')}
-					</Button>
-				) : null}
+					{showSubmitApproval ? (
+						<Button
+							onClick={() => void handleSubmitForApproval()}
+							disabled={saving || submittingApproval}
+						>
+							{submittingApproval
+								? __('Submitting…', 'doublescale')
+								: __('Save & Submit for Approval', 'doublescale')}
+						</Button>
+					) : null}
+					{showSend ? (
+						<Button onClick={() => setSendOpen(true)} disabled={saving || submittingApproval}>
+							{__('Save & Send', 'doublescale')}
+						</Button>
+					) : null}
+				</div>
 			</div>
 
 			<SendDocumentDialog

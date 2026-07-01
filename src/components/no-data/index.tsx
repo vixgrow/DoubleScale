@@ -40,7 +40,11 @@ export const NoData: React.FC<NoDataProps> = ({
 					{subtitle}
 				</p>
 				{onClick && buttonLabel && (
-					<Button onClick={onClick} size="default" className={className}>
+					<Button
+						onClick={onClick}
+						size="default"
+						className={className}
+					>
 						{buttonIcon || <PlusIcon />}
 						{buttonLabel}
 					</Button>

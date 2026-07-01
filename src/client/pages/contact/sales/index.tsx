@@ -10,7 +10,7 @@ import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { Button } from '@/components/ui/button';
-import { InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
+import { InvoiceFormDialog, InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
 import {
 	useContactSalesPayments,
 	useInvoices,
@@ -47,13 +47,14 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
-	const { data: invoicesData, loading: invoicesLoading } = useInvoices({
+	const { data: invoicesData, loading: invoicesLoading, refetch: refetchInvoices } = useInvoices({
 		contact_id,
 		per_page: 10,
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
 	const [paymentsPage] = useState(1);
+	const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
 	const { data: paymentsData, loading: paymentsLoading } = useContactSalesPayments(
 		contact_id,
 		paymentsPage,
@@ -139,7 +140,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 					<Button
 						size="sm"
 						variant="outline"
-						onClick={() => go('sales/invoices/new', { contact_id })}
+						onClick={() => setInvoiceDialogOpen(true)}
 					>
 						<Plus className="h-4 w-4 mr-1" />
 						{__('New Invoice', 'doublescale')}
@@ -253,6 +254,13 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 				<PaymentsProGate />
 			)
 			) : null}
+
+			<InvoiceFormDialog
+				open={invoiceDialogOpen}
+				onOpenChange={setInvoiceDialogOpen}
+				initialContactId={contact_id}
+				onSaved={() => void refetchInvoices()}
+			/>
 		</div>
 	);
 };

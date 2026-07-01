@@ -8,9 +8,9 @@ import {
 	isPercentDiscountType,
 	parseDiscountInput,
 } from './sales-discount-utils';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
-import { DeleteIcon, GradientProposalItemsIcon, PlusIcon } from '@doublescale/components';
+import { DeleteIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import { useSalesTaxes } from '@/hooks/sales';
 import type { LineItem, LineItemTax, SalesTax } from '@/types/sales';
+import NovicesIcon from '@doublescale/shared/icons/novices';
 
 const emptyItem = (): LineItem => ({
 	description: '',
@@ -38,6 +39,22 @@ const emptyItem = (): LineItem => ({
 	amount: 0,
 	optional: false,
 });
+
+export const formatSalesAmount = (value: number, currency = 'USD') => {
+	const amount = new Intl.NumberFormat(undefined, {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	}).format(value);
+	const suffix =
+		currency === 'USD'
+			? 'US$'
+			: currency === 'EUR'
+				? 'EUR'
+				: currency === 'GBP'
+					? 'GBP'
+					: currency;
+	return `${amount} ${suffix}`;
+};
 
 export const computeAmount = (item: LineItem): number => {
 	const qty = Number(item.qty) || 0;
@@ -102,6 +119,117 @@ interface LineItemsEditorProps {
 	readOnly?: boolean;
 }
 
+const addItemButtonClass =
+	'rounded-lg border-[#262666] bg-white text-[#262666] hover:bg-[#F7F8FA]';
+
+interface TotalsSummaryProps {
+	totals: ReturnType<typeof computeLineItemsTotals>;
+	currency: string;
+	discountType: string;
+	discountValue: number;
+	adjustment: number;
+	hideDiscountTypeSelect: boolean;
+	readOnly: boolean;
+	onDiscountTypeChange?: (value: string) => void;
+	onDiscountValueChange?: (value: number) => void;
+	onAdjustmentChange?: (value: number) => void;
+	showAdjustmentField?: boolean;
+}
+
+const TotalsSummary: React.FC<TotalsSummaryProps> = ({
+	totals,
+	currency,
+	discountType,
+	discountValue,
+	adjustment,
+	hideDiscountTypeSelect,
+	readOnly,
+	onDiscountTypeChange,
+	onDiscountValueChange,
+	onAdjustmentChange,
+	showAdjustmentField = false,
+}) => (
+	<div className="flex w-full justify-end pt-4">
+		<div className="w-full min-w-[240px] max-w-[280px] rounded-2xl border border-[#E5E7EB] bg-[#F7F8FA] p-4">
+			{!hideDiscountTypeSelect && onDiscountTypeChange && onDiscountValueChange ? (
+				<div className="mb-3 grid grid-cols-2 gap-2">
+					<select
+						className="rounded-lg border border-[#D0D0D0] bg-white px-2 py-1.5 text-sm"
+						value={discountType}
+						onChange={(e) => onDiscountTypeChange(e.target.value)}
+						disabled={readOnly}
+					>
+						<option value="none">{__('No discount', 'doublescale')}</option>
+						<option value="percent">{__('Percent', 'doublescale')}</option>
+						<option value="fixed">{__('Fixed', 'doublescale')}</option>
+					</select>
+					{discountType !== 'none' ? (
+						<Input
+							type="number"
+							min={0}
+							max={isPercentDiscountType(discountType) ? 100 : undefined}
+							step="0.01"
+							value={discountValue}
+							onChange={(e) =>
+								onDiscountValueChange(parseDiscountInput(e.target.value))
+							}
+							disabled={readOnly}
+							placeholder={
+								discountType === 'percent'
+									? __('%', 'doublescale')
+									: __('Amount', 'doublescale')
+							}
+						/>
+					) : (
+						<div />
+					)}
+				</div>
+			) : null}
+			<div className="space-y-3 text-sm">
+				<div className="flex items-center justify-between gap-6">
+					<span className="text-[#6B7280]">{__('Sub Total', 'doublescale')}</span>
+					<span className="font-semibold text-[#111827]">
+						{formatSalesAmount(totals.subtotal, currency)}
+					</span>
+				</div>
+				{totals.discount > 0 ? (
+					<div className="flex items-center justify-between gap-6">
+						<span className="text-[#6B7280]">{__('Discount', 'doublescale')}</span>
+						<span className="font-semibold text-[#111827]">
+							-{formatSalesAmount(totals.discount, currency)}
+						</span>
+					</div>
+				) : null}
+				<div className="flex items-center justify-between gap-6">
+					<span className="text-[#6B7280]">{__('Tax', 'doublescale')}</span>
+					<span className="font-semibold text-[#111827]">
+						{formatSalesAmount(totals.totalTax, currency)}
+					</span>
+				</div>
+				{onAdjustmentChange && showAdjustmentField ? (
+					<div className="space-y-1 border-t border-[#E5E7EB] pt-3">
+						<Label className="text-[#6B7280]">{__('Adjustment', 'doublescale')}</Label>
+						<Input
+							type="number"
+							step="0.01"
+							value={adjustment}
+							onChange={(e) => onAdjustmentChange(Number(e.target.value))}
+							disabled={readOnly}
+							className="bg-white"
+						/>
+					</div>
+				) : null}
+				<div className="flex items-center justify-between gap-6 border-t border-[#E5E7EB] pt-3">
+					<span className="text-[#6B7280]">{__('Total', 'doublescale')}</span>
+					<span className="text-base font-semibold text-[#111827]">
+						{formatSalesAmount(totals.total, currency)}
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+);
+
 export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 	items,
 	onChange,
@@ -154,11 +282,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 		onChange(items.filter((_, i) => i !== index));
 	};
 
-	const formatMoney = (value: number) =>
-		new Intl.NumberFormat(undefined, {
-			style: 'currency',
-			currency,
-		}).format(value);
+	const showEmptyState = items.length === 0 && !readOnly;
 
 	const selectedTaxOptions = (item: LineItem) =>
 		(item.tax || [])
@@ -190,248 +314,206 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 		updateItem(index, { tax: taxes });
 	};
 
-	const addItemButton = !readOnly ? (
-		<Button type="button" variant="outline" size="sm" onClick={addItem} className="border-primary text-primary bg-white">
-			<Plus className="mr-1 h-4 w-4" />
-			{__('Add Item', 'doublescale')}
-		</Button>
-	) : null;
+	const itemsHeader = (
+		<div className="flex items-center justify-between">
+			<Label className="text-sm !p-0 font-medium text-[#29292E]">
+				{__('Items', 'doublescale')}
+			</Label>
+			{!readOnly ? (
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					className={addItemButtonClass}
+					onClick={addItem}
+				>
+					<Plus className="mr-1 h-4 w-4" />
+					{__('Add Item', 'doublescale')}
+				</Button>
+			) : null}
+		</div>
+	);
 
-	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<Label className="text-base font-semibold text-foreground pt-0">
-					{__('Items', 'doublescale')}
-				</Label>
-				{items.length > 0 ? addItemButton : null}
-			</div>
+	const totalsBlock = (
+		<TotalsSummary
+			totals={totals}
+			currency={currency}
+			discountType={discountType}
+			discountValue={discountValue}
+			adjustment={adjustment}
+			hideDiscountTypeSelect={hideDiscountTypeSelect}
+			readOnly={readOnly}
+			onDiscountTypeChange={onDiscountTypeChange}
+			onDiscountValueChange={onDiscountValueChange}
+			onAdjustmentChange={onAdjustmentChange}
+			showAdjustmentField={items.length > 0}
+		/>
+	);
 
-			{items.length === 0 ? (
-				<div className="flex flex-col items-center justify-center rounded-xl border border-[#DEE1E6] bg-background px-4 py-16 text-center">
-					<div className="mb-5">
-						<GradientProposalItemsIcon />
-					</div>
-					<p className="mb-6 max-w-lg text-xl font-semibold text-accent-foreground">
+	if (showEmptyState) {
+		return (
+			<div className="space-y-4">
+				{itemsHeader}
+				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-12 text-center">
+					<NovicesIcon width={70} height={70} />
+					<p className="mt-4 text-sm text-[#6B6C76]">
 						{__(
 							'No items found—this space is ready for adding items',
 							'doublescale'
 						)}
 					</p>
-					{addItemButton ? (
-						<Button type="button" variant="outline" onClick={addItem} className="border-primary text-primary bg-white">
-							<PlusIcon />
-							{__('Add Item', 'doublescale')}
-						</Button>
-					) : null}
+					<Button
+						type="button"
+						variant="outline"
+						className={`mt-5 ${addItemButtonClass}`}
+						onClick={addItem}
+					>
+						<Plus className="mr-1 h-4 w-4" />
+						{__('Add Item', 'doublescale')}
+					</Button>
 				</div>
-			) : (
-				<div className="overflow-hidden rounded-xl border border-[#DEE1E6]">
-					<Table>
-						<TableHeader className="bg-[#F8F8F8]">
-							<TableRow>
-								<TableHead className="min-w-[120px]">{__('Item', 'doublescale')}</TableHead>
-								<TableHead className="min-w-[140px]">
-									{__('Description', 'doublescale')}
+				{totalsBlock}
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-4">
+			{itemsHeader}
+
+			<div className="overflow-hidden rounded-xl border border-[#DEE1E6]">
+				<Table>
+					<TableHeader className="bg-[#F8F8F8]">
+						<TableRow>
+							<TableHead className="min-w-[120px]">{__('Item', 'doublescale')}</TableHead>
+							<TableHead className="min-w-[140px]">
+								{__('Description', 'doublescale')}
+							</TableHead>
+							<TableHead className="w-20">{__('Qty', 'doublescale')}</TableHead>
+							<TableHead className="w-24">{__('Rate', 'doublescale')}</TableHead>
+							<TableHead className="w-28">{__('Amount', 'doublescale')}</TableHead>
+							<TableHead className="w-24">{__('Unit', 'doublescale')}</TableHead>
+							<TableHead className="min-w-[120px]">{__('Tax', 'doublescale')}</TableHead>
+							<TableHead className="w-24 text-center">
+								{__('Optional', 'doublescale')}
+							</TableHead>
+							{!readOnly ? (
+								<TableHead className="w-16 text-center">
+									{__('Actions', 'doublescale')}
 								</TableHead>
-								<TableHead className="w-20">{__('Qty', 'doublescale')}</TableHead>
-								<TableHead className="w-24">{__('Rate', 'doublescale')}</TableHead>
-								<TableHead className="w-28">{__('Amount', 'doublescale')}</TableHead>
-								<TableHead className="w-24">{__('Unit', 'doublescale')}</TableHead>
-								<TableHead className="min-w-[120px]">{__('Tax', 'doublescale')}</TableHead>
-								<TableHead className="w-24 text-center">
-									{__('Optional', 'doublescale')}
-								</TableHead>
+							) : null}
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{items.map((item, index) => (
+							<TableRow key={`line-item-${index}`} className="py-3">
+								<TableCell className="align-middle">
+									<Input
+										value={item.description}
+										onChange={(e) =>
+											updateItem(index, { description: e.target.value })
+										}
+										placeholder={__('Item', 'doublescale')}
+										disabled={readOnly}
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<Textarea
+										value={item.long_description || ''}
+										onChange={(e) =>
+											updateItem(index, {
+												long_description: e.target.value,
+											})
+										}
+										rows={2}
+										disabled={readOnly}
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<Input
+										type="number"
+										min={0}
+										step="0.01"
+										value={item.qty}
+										onChange={(e) =>
+											updateItem(index, { qty: Number(e.target.value) })
+										}
+										disabled={readOnly}
+										className="!rounded-lg !border-border"
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<Input
+										type="number"
+										min={0}
+										step="0.01"
+										value={item.rate}
+										onChange={(e) =>
+											updateItem(index, { rate: Number(e.target.value) })
+										}
+										placeholder={__('ex: 1,2,3', 'doublescale')}
+										disabled={readOnly}
+										className="!rounded-lg !border-border"
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
+										{formatSalesAmount(computeAmount(item), currency)}
+									</div>
+								</TableCell>
+								<TableCell className="align-middle">
+									<Input
+										value={item.unit || ''}
+										onChange={(e) =>
+											updateItem(index, { unit: e.target.value })
+										}
+										disabled={readOnly}
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<MultiSelect
+										options={taxOptions}
+										selected={selectedTaxOptions(item)}
+										onChange={(selected) => handleTaxChange(index, selected)}
+										placeholder={__('No Tax', 'doublescale')}
+										disabled={readOnly || taxesLoading}
+										isLoading={taxesLoading}
+										className="h-10"
+									/>
+								</TableCell>
+								<TableCell className="align-middle">
+									<div className="flex h-10 items-center justify-center">
+										<Switch
+											checked={Boolean(item.optional)}
+											onCheckedChange={(checked) =>
+												updateItem(index, { optional: Boolean(checked) })
+											}
+											disabled={readOnly}
+										/>
+									</div>
+								</TableCell>
 								{!readOnly ? (
-									<TableHead className="w-16 text-center">
-										{__('Actions', 'doublescale')}
-									</TableHead>
-								) : null}
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{items.map((item, index) => (
-								<TableRow key={`line-item-${index}`} className='py-3'>
-									<TableCell className="align-middle">
-										<Input
-											value={item.description}
-											onChange={(e) =>
-												updateItem(index, { description: e.target.value })
-											}
-											placeholder={__('Item', 'doublescale')}
-											disabled={readOnly}
-										/>
-									</TableCell>
-									<TableCell className="align-middle">
-										<Textarea
-											value={item.long_description || ''}
-											onChange={(e) =>
-												updateItem(index, {
-													long_description: e.target.value,
-												})
-											}
-											rows={2}
-											disabled={readOnly}
-										/>
-									</TableCell>
-									<TableCell className="align-middle">
-										<Input
-											type="number"
-											min={0}
-											step="0.01"
-											value={item.qty}
-											onChange={(e) =>
-												updateItem(index, { qty: Number(e.target.value) })
-											}
-											disabled={readOnly}
-											className="!rounded-lg !border-border"
-										/>
-									</TableCell>
-									<TableCell className="align-middle">
-										<Input
-											type="number"
-											min={0}
-											step="0.01"
-											value={item.rate}
-											onChange={(e) =>
-												updateItem(index, { rate: Number(e.target.value) })
-											}
-											placeholder={__('ex: 1,2,3', 'doublescale')}
-											disabled={readOnly}
-											className="!rounded-lg !border-border"
-										/>
-									</TableCell>
-									<TableCell className="align-middle">
-										<div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
-											{formatMoney(computeAmount(item))}
-										</div>
-									</TableCell>
-									<TableCell className="align-middle">
-										<Input
-											value={item.unit || ''}
-											onChange={(e) =>
-												updateItem(index, { unit: e.target.value })
-											}
-											disabled={readOnly}
-										/>
-									</TableCell>
-									<TableCell className="align-middle">
-										<MultiSelect
-											options={taxOptions}
-											selected={selectedTaxOptions(item)}
-											onChange={(selected) => handleTaxChange(index, selected)}
-											placeholder={__('No Tax', 'doublescale')}
-											disabled={readOnly || taxesLoading}
-											isLoading={taxesLoading}
-											className="h-10"
-										/>
-									</TableCell>
 									<TableCell className="align-middle">
 										<div className="flex h-10 items-center justify-center">
-											<Switch
-												checked={Boolean(item.optional)}
-												onCheckedChange={(checked) =>
-													updateItem(index, { optional: Boolean(checked) })
-												}
-												disabled={readOnly}
-											/>
+											<Button
+												type="button"
+												variant="ghost"
+												className="text-destructive hover:text-destructive"
+												onClick={() => removeItem(index)}
+												aria-label={__('Remove item', 'doublescale')}
+											>
+												<DeleteIcon />
+											</Button>
 										</div>
 									</TableCell>
-									{!readOnly ? (
-										<TableCell className="align-middle">
-											<div className="flex h-10 items-center justify-center">
-												<Button
-													type="button"
-													variant="ghost"
-													className="text-destructive hover:text-destructive"
-													onClick={() => removeItem(index)}
-													aria-label={__('Remove item', 'doublescale')}
-												>
-													<DeleteIcon />
-												</Button>
-											</div>
-										</TableCell>
-									) : null}
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</div>
-			)}
-
-			<div className="flex justify-end">
-				<div className="w-full max-w-sm space-y-4 rounded-xl border border-[#DEE1E6] bg-background p-4">
-					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground font-medium">{__('Sub Total', 'doublescale')}</span>
-						<span className="font-semibold">{formatMoney(totals.subtotal)}</span>
-					</div>
-					{!hideDiscountTypeSelect &&
-					onDiscountTypeChange &&
-					onDiscountValueChange ? (
-						<div className="grid grid-cols-2 gap-2">
-							<select
-								className="!rounded-lg border !border-border px-2 py-1 text-sm"
-								value={discountType}
-								onChange={(e) => onDiscountTypeChange(e.target.value)}
-								disabled={readOnly}
-							>
-								<option value="none">{__('No discount', 'doublescale')}</option>
-								<option value="percent">{__('Percent', 'doublescale')}</option>
-								<option value="fixed">{__('Fixed', 'doublescale')}</option>
-							</select>
-							{discountType !== 'none' ? (
-								<Input
-									type="number"
-									min={0}
-									max={isPercentDiscountType(discountType) ? 100 : undefined}
-									step="0.01"
-									value={discountValue}
-									onChange={(e) =>
-										onDiscountValueChange(parseDiscountInput(e.target.value))
-									}
-									disabled={readOnly}
-									placeholder={
-										discountType === 'percent'
-											? __('%', 'doublescale')
-											: __('Amount', 'doublescale')
-									}
-									className="!rounded-lg !border-border"
-								/>
-							) : (
-								<div />
-							)}
-						</div>
-					) : null}
-					{totals.discount > 0 ? (
-						<div className="flex justify-between text-sm text-foreground">
-							<span className="text-muted-foreground font-medium">{__('Discount', 'doublescale')}</span>
-							<span className="font-semibold">- {formatMoney(totals.discount)}</span>
-						</div>
-					) : null}
-					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground font-medium">{__('Tax', 'doublescale')}</span>
-						<span className="font-semibold">{formatMoney(totals.totalTax)}</span>
-					</div>
-					{onAdjustmentChange ? (
-						<div className="flex items-center justify-between text-sm">
-							<Label className="text-muted-foreground font-medium">{__('Adjustment', 'doublescale')}</Label>
-							<Input
-								type="number"
-								step="0.01"
-								value={adjustment}
-								onChange={(e) =>
-									onAdjustmentChange(Number(e.target.value))
-								}
-								disabled={readOnly}
-								className="!rounded-lg !border-border w-24"
-							/>
-						</div>
-					) : null}
-					<div className="flex justify-between border-t pt-2 font-semibold">
-						<span className="text-muted-foreground font-medium">{__('Total', 'doublescale')}</span>
-						<span className="font-semibold">{formatMoney(totals.total)}</span>
-					</div>
-				</div>
+								) : null}
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
 			</div>
+
+			{totalsBlock}
 		</div>
 	);
 };

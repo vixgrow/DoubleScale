@@ -11,8 +11,10 @@ interface MessageStatsCardProps {
 	borderColorClass?: string;
 	className?: string;
 	iconColor?: string;
+	/** Pill colors for percentage when layout is centered-badge */
+	percentageBadgeClass?: string;
 	/** Vertical analytics layout: icon on top, label, then value */
-	layout?: 'default' | 'centered';
+	layout?: 'default' | 'centered' | 'centered-badge';
 }
 
 export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
@@ -24,8 +26,49 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 	borderColorClass = '',
 	className = '',
 	iconColor = 'text-primary',
+	percentageBadgeClass = 'bg-primary/10 text-primary',
 	layout = 'default',
 }) => {
+	if (layout === 'centered-badge') {
+		return (
+			<div
+				className={cn(
+					'flex flex-1 flex-col gap-3 items-center rounded-xl border border-[#D0D0D0] bg-card p-3.5 text-center transition-all',
+					borderColorClass,
+					className
+				)}
+			>
+				<div
+					className={cn(
+						iconBgClass,
+						'flex p-1.5 shrink-0 items-center justify-center rounded-full',
+						iconColor
+					)}
+				>
+					{icon}
+				</div>
+				<div className="flex flex-wrap items-center justify-center gap-2">
+					<span className="text-[16px] leading-5 text-[#6B6C76]">
+						{label}
+					</span>
+					{percentage !== undefined && (
+						<span
+							className={cn(
+								'rounded-md px-2 py-1 text-xs font-medium tabular-nums',
+								percentageBadgeClass
+							)}
+						>
+							{percentage.toFixed(2)}%
+						</span>
+					)}
+				</div>
+				<span className="text-xl leading-7 font-bold tabular-nums text-[#29292E]">
+					{value}
+				</span>
+			</div>
+		);
+	}
+
 	if (layout === 'centered') {
 		return (
 			<div

@@ -496,8 +496,8 @@ final class TriggersManager {
 				);
 			}
 			$this->sources['forms']['groups'][ $trigger->group ]['is_disabled']                = $row['is_disabled'];
-			if ( $row['is_disabled'] && 'typeform' === $trigger->slug ) {
-				$this->sources['forms']['groups'][ $trigger->group ]['disabled_reason'] = 'typeform_not_connected';
+			if ( $row['is_disabled'] && in_array( $trigger->slug, array( 'typeform', 'jotform' ), true ) ) {
+				$this->sources['forms']['groups'][ $trigger->group ]['disabled_reason'] = $trigger->slug . '_not_connected';
 			}
 			$this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
 
@@ -511,12 +511,12 @@ final class TriggersManager {
 	 * Whether a form trigger is available (WP plugin installed or SaaS integration connected).
 	 */
 	private function is_form_integration_available( string $slug ): bool {
-		if ( 'typeform' === $slug ) {
+		if ( in_array( $slug, array( 'typeform', 'jotform' ), true ) ) {
 			if ( ! class_exists( '\DoubleScale\Core\Managers\IntegrationsManager' ) ) {
 				return false;
 			}
 			try {
-				$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'typeform' );
+				$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( $slug );
 				return $integration && $integration->is_connected();
 			} catch ( \Exception $e ) {
 				return false;

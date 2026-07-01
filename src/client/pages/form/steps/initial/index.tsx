@@ -19,6 +19,7 @@ import { Field } from '@doublescale/components';
 import FormTypeSelector from '../form-types-cards';
 import InitialShimmer from './initial-shimmer';
 import { TypeformIntegrationWarning } from '@/components/typeform-integration-warning';
+import { JotformIntegrationWarning } from '@/components/jotform-integration-warning';
 
 const Initial: React.FC = () => {
 	const { form, updateForm, isLoading } = useFormContext();
@@ -89,6 +90,9 @@ const Initial: React.FC = () => {
 					</div>
 					{form.form_type === 'typeform' && (
 						<TypeformIntegrationWarning className="mt-4" />
+					)}
+					{form.form_type === 'jotform' && (
+						<JotformIntegrationWarning className="mt-4" />
 					)}
 					<div className="flex flex-col sm:flex-row gap-5 items-start mt-5">
 						<Field

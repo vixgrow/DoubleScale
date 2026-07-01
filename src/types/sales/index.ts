@@ -2,7 +2,11 @@
  * REST DTO shapes for the sales module.
  */
 
-import type { InvoiceStatus, ProposalStatus, ContractStatus } from '@/constants/sales';
+import type {
+	InvoiceStatus,
+	ProposalStatus,
+	ContractStatus,
+} from '@/constants/sales';
 
 export interface ContactSummary {
 	id: number;
@@ -125,11 +129,11 @@ export interface Proposal {
 	discount_type: string;
 	discount_value: number;
 	tag_ids: number[];
-		line_items: LineItem[];
-		subtotal: number;
-		adjustment: number;
-		total: number;
-		to_name: string | null;
+	line_items: LineItem[];
+	subtotal: number;
+	adjustment: number;
+	total: number;
+	to_name: string | null;
 	address: string | null;
 	city: string | null;
 	state: string | null;
@@ -268,9 +272,9 @@ export interface Invoice {
 	discount_type: string;
 	discount_value: number;
 	tag_ids: number[];
-		line_items: LineItem[];
-		subtotal: number;
-		total_tax: number;
+	line_items: LineItem[];
+	subtotal: number;
+	total_tax: number;
 	adjustment: number;
 	total: number;
 	amount_paid: number;
@@ -407,15 +411,24 @@ export interface InvoiceSummary {
 }
 
 export type CreateProposalPayload = Partial<
-	Omit<Proposal, 'id' | 'proposal_number' | 'hash' | 'created_at' | 'updated_at'>
+	Omit<
+		Proposal,
+		'id' | 'proposal_number' | 'hash' | 'created_at' | 'updated_at'
+	>
 > & { contact_id: number };
 
 export type CreateContractPayload = Partial<
-	Omit<Contract, 'id' | 'contract_number' | 'hash' | 'created_at' | 'updated_at'>
+	Omit<
+		Contract,
+		'id' | 'contract_number' | 'hash' | 'created_at' | 'updated_at'
+	>
 > & { contact_id: number };
 
 export type CreateInvoicePayload = Partial<
-	Omit<Invoice, 'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'>
+	Omit<
+		Invoice,
+		'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'
+	>
 > & { contact_id: number };
 
 export interface SalesRepNotificationTemplate {

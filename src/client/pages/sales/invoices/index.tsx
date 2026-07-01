@@ -3,31 +3,78 @@
  */
 
 import React, { useState } from '@wordpress/element';
+import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Eye, MoreVertical, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { Button } from '@/components/ui/button';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+} from '@/components/ui/select';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog, InvoiceStatusPill } from '@/components/sales';
+import { ConfirmDialog, InvoiceFormDialog, InvoiceStatusPill } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	isApprovalWorkflowEnabled,
 } from '@/components/sales/sales-approval-utils';
 import { deleteInvoice, useInvoices, useInvoiceSummary, useSalesSettings } from '@/hooks/sales';
-import { INVOICE_STATUS_LABELS, type InvoiceStatus } from '@/constants/sales';
+import { INVOICE_STATUS_LABELS, INVOICE_STATUSES, type InvoiceStatus } from '@/constants/sales';
 import type { Invoice } from '@/types/sales';
+import {
+	DashboardContentCard,
+	DraftIcon,
+	MessageStatsCard,
+	NoData,
+	NovicesIcon,
+	OutstandingInvoicesIcon,
+	PageHeader,
+	PainInvoicesIcon,
+	PartiallyPaidIcon,
+	PastInvoicesIcon,
+	UnpaidIcon,
+} from '@doublescale/components';
+import type { IconProps } from '@doublescale/config';
 
 const formatMoney = (value: number, currency = 'USD') =>
 	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
+
+const formatTableAmount = (value: number, currency = 'USD') => {
+	const amount = new Intl.NumberFormat(undefined, {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	}).format(value);
+	const suffix =
+		currency === 'USD' ? 'US$' : currency === 'EUR' ? 'EUR' : currency === 'GBP' ? 'GBP' : currency;
+	return `${amount} ${suffix}`;
+};
+
+const toDateString = (date: Date | null | undefined): string => {
+	if (!date) {
+		return '';
+	}
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+};
+
+const parseDateString = (value: string): Date | null => {
+	if (!value) {
+		return null;
+	}
+	const [y, m, d] = value.split('-').map(Number);
+	if (!y || !m || !d) {
+		return null;
+	}
+	return new Date(y, m - 1, d);
+};
 
 const contactName = (invoice: Invoice): string => {
 	const c = invoice.contact;
@@ -46,18 +93,64 @@ const summaryCards: InvoiceStatus[] = [
 	'draft',
 ];
 
+const statusSummaryConfig: Record<
+	InvoiceStatus,
+	{
+		Icon: ComponentType<IconProps>;
+		iconBgClass: string;
+		percentageBadgeClass: string;
+	}
+> = {
+	unpaid: {
+		Icon: UnpaidIcon,
+		iconBgClass: 'bg-[#CB5301]',
+		percentageBadgeClass: 'bg-[#FAEADF] text-[#CB5301]',
+	},
+	paid: {
+		Icon: PainInvoicesIcon,
+		iconBgClass: 'bg-[#16A34A]',
+		percentageBadgeClass: 'bg-[#E4FAEC] text-[#16A34A]',
+	},
+	partially_paid: {
+		Icon: PartiallyPaidIcon,
+		iconBgClass: 'bg-[#FFD242]',
+		percentageBadgeClass: 'bg-[#F7F4C3] text-[#896900]',
+	},
+	overdue: {
+		Icon: PastInvoicesIcon,
+		iconBgClass: 'bg-[#C30A0A]',
+		percentageBadgeClass: 'bg-[#FBE8E8] text-[#C30A0A]',
+	},
+	draft: {
+		Icon: DraftIcon,
+		iconBgClass: 'bg-[#6B6C76]',
+		percentageBadgeClass: 'bg-[#ECECEC] text-[#6B6C76]',
+	},
+};
+
 const InvoicesList: React.FC = () => {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(25);
 	const [search, setSearch] = useState('');
+	const [statusFilter, setStatusFilter] = useState('');
+	const [invoiceDateFrom, setInvoiceDateFrom] = useState('');
+	const [invoiceDateTo, setInvoiceDateTo] = useState('');
+	const [dueDateFrom, setDueDateFrom] = useState('');
+	const [dueDateTo, setDueDateTo] = useState('');
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
+	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
 	const { data, loading, error, refetch } = useInvoices({
 		page,
 		per_page: perPage,
 		search: search || undefined,
+		status: statusFilter || undefined,
+		invoice_date_from: invoiceDateFrom || undefined,
+		invoice_date_to: invoiceDateTo || undefined,
+		due_date_from: dueDateFrom || undefined,
+		due_date_to: dueDateTo || undefined,
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
@@ -67,6 +160,15 @@ const InvoicesList: React.FC = () => {
 
 	const invoices = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
+	const hasFilters = Boolean(
+		search ||
+			statusFilter ||
+			invoiceDateFrom ||
+			invoiceDateTo ||
+			dueDateFrom ||
+			dueDateTo
+	);
+	const showEmptyState = !loading && total === 0 && !hasFilters;
 
 	const table = useServerSideTable({
 		page,
@@ -96,186 +198,311 @@ const InvoicesList: React.FC = () => {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">{__('Invoices', 'doublescale')}</h1>
-					<p className="text-sm text-muted-foreground">
-						{__('Track billing, payments, and outstanding amounts.', 'doublescale')}
-					</p>
-				</div>
-				<div className="flex gap-2">
-					<Button variant="outline" size="icon" onClick={refreshAll}>
-						<RefreshCw className="h-4 w-4" />
-					</Button>
-					<Button onClick={() => navigate(getToLink('sales/invoices/new'))}>
-						<Plus className="h-4 w-4 mr-1" />
-						{__('Create New Invoice', 'doublescale')}
-					</Button>
-				</div>
-			</div>
+		<div className="space-y-6">
+
+			<PageHeader title={__('Invoices', 'doublescale')}
+			actions={[
+				{
+					label: __('Create New Invoice', 'doublescale'),
+					onClick: () => setCreateDialogOpen(true),
+					icon: <Plus className="h-4 w-4 mr-1" />,
+				}
+			]}
+			rowClassName="flex-row items-center justify-between w-full [&_h1]:min-w-0"
+			className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
+			/>
 
 			{summary ? (
-				<>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-sm text-muted-foreground">{__('Paid Invoices', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{formatMoney(summary.paid_total)}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-sm text-muted-foreground">{__('Past Due Invoices', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{formatMoney(summary.overdue_total)}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-sm text-muted-foreground">{__('Outstanding Invoices', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{formatMoney(summary.outstanding_total)}</div>
-						</div>
+				<DashboardContentCard
+				title={__('Analytics Overview', 'doublescale')}
+				cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+				contentClassName="flex min-h-0 flex-1 flex-col"
+			>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 ">
+
+						<MessageStatsCard
+						label={__('Paid Invoices', 'doublescale')}
+						layout="centered"
+						value={formatMoney(summary.paid_total)}
+						icon={<PainInvoicesIcon width={29} height={29} />}
+						iconBgClass="bg-[#16A34A]"
+						className="bg-[#F7F8FA]"
+						iconColor="text-white"
+						/>
+						<MessageStatsCard
+						label={__('Past Invoices', 'doublescale')}
+						layout="centered"
+						value={formatMoney(summary.past_total)}
+						icon={<PastInvoicesIcon width={29} height={29} />}
+						iconBgClass="bg-[#C30A0A]"
+						className="bg-[#F7F8FA]"
+						iconColor="text-white"
+						/>
+						<MessageStatsCard
+						label={__('Outstanding Invoices', 'doublescale')}
+						layout="centered"
+						value={formatMoney(summary.outstanding_total)}
+						icon={<OutstandingInvoicesIcon width={29} height={29} />}
+						iconBgClass="bg-[#262666]"
+						className="bg-[#F7F8FA]"
+						iconColor="text-white"
+						/>
+
 					</div>
 
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+					<div className="grid grid-cols-2 md:grid-cols-5 gap-4">
 						{summaryCards.map((status) => {
 							const row = summary.by_status?.[status];
+							const { Icon, iconBgClass, percentageBadgeClass } =
+								statusSummaryConfig[status];
 							return (
-								<div key={status} className="border rounded-lg p-3 bg-white">
-									<div className="text-xs text-muted-foreground mb-1">
-										{INVOICE_STATUS_LABELS[status]}
-									</div>
-									<div className="text-lg font-semibold">
-										{row?.count ?? 0} / {summary.total_count}
-									</div>
-									<div className="text-xs text-muted-foreground">
-										{(row?.percent ?? 0).toFixed(2)}%
-									</div>
-								</div>
+								<MessageStatsCard
+									key={status}
+									label={INVOICE_STATUS_LABELS[status]}
+									layout="centered-badge"
+									value={`${row?.count ?? 0} / ${summary.total_count}`}
+									percentage={row?.percent ?? 0}
+									icon={<Icon width={29} height={29} />}
+									iconBgClass={iconBgClass}
+									percentageBadgeClass={percentageBadgeClass}
+									className="bg-[#F7F8FA]"
+									iconColor="text-white"
+								/>
 							);
 						})}
 					</div>
-				</>
+				</DashboardContentCard>
 			) : null}
 
-			<div className="flex justify-end">
-				<Input
-					className="max-w-sm"
-					placeholder={__('Search invoices…', 'doublescale')}
-					value={search}
-					onChange={(e) => {
-						setSearch(e.target.value);
-						setPage(1);
-					}}
-				/>
-			</div>
+			<div className="overflow-hidden p-6 rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+				<div className="flex flex-col gap-3  sm:flex-row sm:items-center sm:justify-between">
+					<div className="relative min-w-0 flex-1 md:max-w-xl">
+						<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B6C76]" />
+						<Input
+							className="h-9 rounded-lg border-[#D0D0D0] pl-9 text-sm"
+							placeholder={__('Search invoices…', 'doublescale')}
+							value={search}
+							onChange={(e) => {
+								setSearch(e.target.value);
+								setPage(1);
+							}}
+						/>
+					</div>
+					<div className="flex flex-wrap items-center gap-2">
+						{/* <DateRangePicker
+							value={{
+								from: parseDateString(invoiceDateFrom),
+								to: parseDateString(invoiceDateTo),
+							}}
+							onChange={(range) => {
+								setInvoiceDateFrom(toDateString(range.from));
+								setInvoiceDateTo(toDateString(range.to));
+								setPage(1);
+							}}
+							placeholder={__('Date', 'doublescale')}
+							className="h-9 w-[8.5rem] max-w-[8.5rem] shrink-0 rounded-lg border-[#D0D0D0] bg-white px-2 lg:w-[8.5rem] xl:w-[8.5rem]"
+						/>
+						<DateRangePicker
+							value={{
+								from: parseDateString(dueDateFrom),
+								to: parseDateString(dueDateTo),
+							}}
+							onChange={(range) => {
+								setDueDateFrom(toDateString(range.from));
+								setDueDateTo(toDateString(range.to));
+								setPage(1);
+							}}
+							placeholder={__('Due Date', 'doublescale')}
+							className="h-9 w-[8.5rem] max-w-[8.5rem] shrink-0 rounded-lg border-[#D0D0D0] bg-white px-2 lg:w-[8.5rem] xl:w-[8.5rem]"
+						/> */}
+						<Select
+							value={statusFilter || 'all'}
+							onValueChange={(value) => {
+								setStatusFilter(value === 'all' ? '' : value);
+								setPage(1);
+							}}
+						>
+							<SelectTrigger className="h-10 w-[130px] rounded-lg border-[#D0D0D0] bg-white px-4 text-sm font-normal text-[#29292E]">
+								{statusFilter
+									? INVOICE_STATUS_LABELS[statusFilter as InvoiceStatus]
+									: __('Status', 'doublescale')}
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">{__('All Statuses', 'doublescale')}</SelectItem>
+								{INVOICE_STATUSES.map((status) => (
+									<SelectItem key={status} value={status}>
+										{INVOICE_STATUS_LABELS[status]}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
 
-			{error ? <div className="text-sm text-red-600">{error}</div> : null}
+				{error ? (
+					<div className="px-6 pt-4 text-sm text-red-600">{error}</div>
+				) : null}
 
-			<div className="border rounded-lg overflow-hidden bg-white">
-				<table className="w-full text-sm">
-					<thead className="bg-slate-50 border-b">
-						<tr>
-							<th className="text-left px-4 py-3">{__('Invoice #', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Amount', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Date', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Customer', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Due Date', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Status', 'doublescale')}</th>
-							<th className="w-12 px-2 py-3" />
-						</tr>
-					</thead>
-					<tbody>
-						{loading ? (
-							<tr>
-								<td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-									{__('Loading…', 'doublescale')}
-								</td>
-							</tr>
-						) : invoices.length === 0 ? (
-							<tr>
-								<td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-									{__('No invoices found.', 'doublescale')}
-								</td>
-							</tr>
-						) : (
-							invoices.map((invoice) => (
-								<tr
-									key={invoice.id}
-									className="border-b hover:bg-slate-50 cursor-pointer"
-									onClick={() =>
-										navigate(getToLink(`sales/invoices/${invoice.id}`))
-									}
-								>
-									<td className="px-4 py-3 font-medium">{invoice.invoice_number}</td>
-									<td className="px-4 py-3">
-										{formatMoney(invoice.total, invoice.currency)}
-									</td>
-									<td className="px-4 py-3">{invoice.invoice_date || '—'}</td>
-									<td className="px-4 py-3">{contactName(invoice)}</td>
-									<td className="px-4 py-3">{invoice.due_date || '—'}</td>
-									<td className="px-4 py-3">
-										<InvoiceStatusPill status={invoice.status} />
-									</td>
-									<td
-										className="px-2 py-3"
-										onClick={(e) => e.stopPropagation()}
-									>
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													aria-label={__('Actions', 'doublescale')}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end" className="min-w-[10rem]">
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(`sales/invoices/${invoice.id}`)
-														)
-													}
-												>
-													<Eye className="h-4 w-4" />
-													{__('View', 'doublescale')}
-												</DropdownMenuItem>
-												{canEditSalesDocument(
-													isApprovalWorkflowEnabled(salesSettings, invoice),
-													invoice.approval,
-													invoice
-												) ? (
-													<DropdownMenuItem
-														className="cursor-pointer gap-2"
-														onSelect={() =>
-															navigate(
-																getToLink(
-																	`sales/invoices/${invoice.id}/edit`
-																)
-															)
-														}
-													>
-														<Pencil className="h-4 w-4" />
-														{__('Edit', 'doublescale')}
-													</DropdownMenuItem>
-												) : null}
-												<DropdownMenuItem
-													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-													onSelect={() => setDeleteId(invoice.id)}
-												>
-													<Trash2 className="h-4 w-4" />
-													{__('Delete', 'doublescale')}
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</td>
-								</tr>
-							))
+				{loading ? (
+					<div className="px-6 py-16 text-center text-sm text-muted-foreground">
+						{__('Loading…', 'doublescale')}
+					</div>
+				) : showEmptyState ? (
+					<NoData
+						icon={<NovicesIcon />}
+						title={__('No invoices yet', 'doublescale')}
+						subtitle={__(
+							'Create a new invoice to get started',
+							'doublescale'
 						)}
-					</tbody>
-				</table>
+						buttonLabel={__('Create New Invoice', 'doublescale')}
+
+						onClick={() => setCreateDialogOpen(true)}
+
+					/>
+				) : (
+					<>
+						<div className="overflow-x-auto">
+							<table className="w-full text-sm">
+								<thead className="border-b border-[#ECECEC]">
+									<tr className="text-left text-[#6B6C76]">
+										<th className="px-6 py-3 font-medium">
+											{__('Invoice #', 'doublescale')}
+										</th>
+										<th className="px-4 py-3 font-medium">
+											{__('Customer', 'doublescale')}
+										</th>
+										<th className="px-4 py-3 font-medium">
+											{__('Amount', 'doublescale')}
+										</th>
+										<th className="px-4 py-3 font-medium">
+											{__('Status', 'doublescale')}
+										</th>
+										<th className="px-4 py-3 font-medium">
+											{__('Date', 'doublescale')}
+										</th>
+										<th className="px-4 py-3 font-medium">
+											{__('Due Date', 'doublescale')}
+										</th>
+										<th className="px-6 py-3 font-medium text-right">
+											{__('Actions', 'doublescale')}
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{invoices.length === 0 ? (
+										<tr>
+											<td
+												colSpan={7}
+												className="px-6 py-16 text-center text-muted-foreground"
+											>
+												{__('No invoices found.', 'doublescale')}
+											</td>
+										</tr>
+									) : (
+										invoices.map((invoice) => {
+											const canEdit = canEditSalesDocument(
+												isApprovalWorkflowEnabled(salesSettings, invoice),
+												invoice.approval,
+												invoice
+											);
+
+											return (
+												<tr
+													key={invoice.id}
+													className="border-b border-[#ECECEC] last:border-b-0 hover:bg-[#F7F8FA]"
+												>
+													<td className="px-6 py-4 font-medium text-[#29292E]">
+														{invoice.invoice_number}
+													</td>
+													<td className="px-4 py-4 text-[#29292E]">
+														{contactName(invoice)}
+													</td>
+													<td className="px-4 py-4 text-[#29292E]">
+														{formatTableAmount(
+															invoice.total,
+															invoice.currency
+														)}
+													</td>
+													<td className="px-4 py-4">
+														<InvoiceStatusPill status={invoice.status} />
+													</td>
+													<td className="px-4 py-4 text-[#29292E]">
+														{invoice.invoice_date || '—'}
+													</td>
+													<td className="px-4 py-4 text-[#29292E]">
+														{invoice.due_date || '—'}
+													</td>
+													<td className="px-6 py-4">
+														<div className="flex items-center justify-end gap-1">
+															<Button
+																type="button"
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																aria-label={__('View', 'doublescale')}
+																onClick={() =>
+																	navigate(
+																		getToLink(
+																			`sales/invoices/${invoice.id}`
+																		)
+																	)
+																}
+															>
+																<Eye className="h-4 w-4" />
+															</Button>
+															{canEdit ? (
+																<Button
+																	type="button"
+																	variant="ghost"
+																	size="icon"
+																	className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																	aria-label={__('Edit', 'doublescale')}
+																	onClick={() =>
+																		navigate(
+																			getToLink(
+																				`sales/invoices/${invoice.id}/edit`
+																			)
+																		)
+																	}
+																>
+																	<Pencil className="h-4 w-4" />
+																</Button>
+															) : null}
+															<Button
+																type="button"
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8 text-[#DC2626] hover:bg-red-50 hover:text-[#DC2626]"
+																aria-label={__('Delete', 'doublescale')}
+																onClick={() => setDeleteId(invoice.id)}
+															>
+																<Trash2 className="h-4 w-4" />
+															</Button>
+														</div>
+													</td>
+												</tr>
+											);
+										})
+									)}
+								</tbody>
+							</table>
+						</div>
+
+						{invoices.length > 0 ? (
+							<div className="border-t border-[#ECECEC] px-4 py-4">
+								<DataTablePagination table={table} totalRecords={total} />
+							</div>
+						) : null}
+					</>
+				)}
 			</div>
 
-			<DataTablePagination table={table} totalRecords={total} />
+			<InvoiceFormDialog
+				open={createDialogOpen}
+				onOpenChange={setCreateDialogOpen}
+				onSaved={() => refreshAll()}
+			/>
 
 			<ConfirmDialog
 				open={deleteId !== null}

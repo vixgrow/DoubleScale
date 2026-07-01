@@ -533,6 +533,7 @@ abstract class Form {
 	 * @return void
 	 */
 	public function process_automations( $args ) {
+		
 		try {
 			$this->submission = $args;
 

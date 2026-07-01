@@ -24,6 +24,7 @@ import {
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { useTypeformIntegrationStatus } from '@/hooks/use-typeform-integration-status';
+import { useJotformIntegrationStatus } from '@/hooks/use-jotform-integration-status';
 import ConfigAPI from '@doublescale/config';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 //@ts-ignore
@@ -84,11 +85,13 @@ const ALL_FORM_TYPES: Record<string, FormTypeDefaults> = {
 	eform: { label: 'eForm', is_pro: true, platform: 'wordpress' },
 	jetformbuilder: { label: 'JetFormBuilder', is_pro: true, platform: 'wordpress' },
 	typeform: { label: 'Typeform', is_pro: true, platform: 'saas' },
+	jotform: { label: 'Jotform', is_pro: true, platform: 'saas' },
 };
 
 /** SaaS form slug → Integrations screen slug */
 const SAAS_FORM_INTEGRATIONS: Record<string, string> = {
 	typeform: 'typeform',
+	jotform: 'jotform',
 };
 
 const getProPluginUrl = () =>
@@ -118,6 +121,7 @@ const getFormIcon = (sourceKey: string) => {
 		bitform: bitForms,
 		sureforms: sureForms,
 		typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
+		jotform: `${proPluginUrl}assets/images/jotform/jotform.svg`,
 	};
 
 	return (
@@ -140,6 +144,8 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 	const proAddonActive = isProActive();
 	const { isConnected: isTypeformConnected, isLoading: isTypeformStatusLoading } =
 		useTypeformIntegrationStatus();
+	const { isConnected: isJotformConnected, isLoading: isJotformStatusLoading } =
+		useJotformIntegrationStatus();
 
 	const mergedForms = { ...forms };
 	for (const [slug, defaults] of Object.entries(ALL_FORM_TYPES)) {
@@ -191,6 +197,12 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 				return Boolean(formType.is_enabled);
 			}
 			return isTypeformConnected;
+		}
+		if (integrationSlug === 'jotform') {
+			if (isJotformStatusLoading) {
+				return Boolean(formType.is_enabled);
+			}
+			return isJotformConnected;
 		}
 		const integrations = ConfigAPI.getIntegrations();
 		return Boolean(integrations[integrationSlug]?.is_connected);

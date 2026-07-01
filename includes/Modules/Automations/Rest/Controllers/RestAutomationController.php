@@ -998,6 +998,18 @@ class RestAutomationController extends RestController {
 				$trigger->set_settings( $automation );
 			}
 
+			/**
+			 * Fires after an automation is created (and its trigger settings stored).
+			 *
+			 * SaaS form integrations (Typeform, Jotform) use this to register the
+			 * inbound webhook for the automation's selected form, so the trigger
+			 * works without a separate Forms → SaaS Forms connection.
+			 *
+			 * @param AutomationModel $automation Saved automation.
+			 * @param string|null     $old_status Previous status (null on create).
+			 */
+			do_action( 'doublescale_automation_saved', $automation, null );
+
 			return new WP_REST_Response( $automation, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
@@ -1031,6 +1043,9 @@ class RestAutomationController extends RestController {
 			if ( isset( $automation_data['status'] ) && 'paused' === $automation_data['status'] && 'paused' !== $old_status ) {
 				do_action( 'doublescale_automation_paused', $automation, 'manual' );
 			}
+
+			/** @see create_item() for the hook contract. */
+			do_action( 'doublescale_automation_saved', $automation, $old_status );
 
 			// Capture a version for undo / redo (skipped while restoring).
 			VersionManager::instance()->snapshot( $automation->id, __( 'Updated automation', 'doublescale' ) );
@@ -1294,6 +1309,14 @@ class RestAutomationController extends RestController {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
+			/**
+			 * Fires before an automation is deleted. SaaS form integrations use
+			 * this to remove an inbound webhook that is no longer needed.
+			 *
+			 * @param AutomationModel $automation Automation about to be deleted.
+			 */
+			do_action( 'doublescale_automation_deleted', $automation );
+
 			$automation->delete();
 
 			return new WP_REST_Response( null, 204 );
@@ -1324,6 +1347,8 @@ class RestAutomationController extends RestController {
 			}
 
 			foreach ( $automations as $automation ) {
+				/** @see delete_item() for the hook contract. */
+				do_action( 'doublescale_automation_deleted', $automation );
 				$automation->delete();
 			}
 
@@ -1381,6 +1406,8 @@ class RestAutomationController extends RestController {
 				} elseif ( empty( $form ) || ! $form->is_enabled() ) {
 					if ( 'typeform' === $automation->trigger ) {
 						$form_inactive_message = __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' );
+					} elseif ( 'jotform' === $automation->trigger ) {
+						$form_inactive_message = __( 'Connect Jotform in Integrations with an API key before using this trigger.', 'doublescale' );
 					} else {
 						$form_inactive_message = __( 'Trigger requires a plugin that is not currently active.', 'doublescale' );
 					}
@@ -1744,10 +1771,11 @@ class RestAutomationController extends RestController {
 				);
 			}
 
-			if ( 'typeform' === ( $trigger->slug ?? '' ) ) {
-				$typeform_check = $this->check_typeform_integration_dependency();
-				if ( ! $typeform_check['is_active'] ) {
-					return $typeform_check;
+			$trigger_slug = $trigger->slug ?? '';
+			if ( in_array( $trigger_slug, array( 'typeform', 'jotform' ), true ) ) {
+				$saas_check = $this->check_saas_form_integration_dependency( $trigger_slug );
+				if ( ! $saas_check['is_active'] ) {
+					return $saas_check;
 				}
 			}
 		}
@@ -1781,22 +1809,32 @@ class RestAutomationController extends RestController {
 	}
 
 	/**
-	 * Typeform automations require Integrations credentials (not a WordPress plugin).
+	 * SaaS form automations (Typeform, Jotform) require Integrations credentials
+	 * (not a WordPress plugin).
 	 *
+	 * @param string $slug Integration slug (e.g. 'typeform', 'jotform').
 	 * @return array{is_active:bool,is_pro:bool,message:string,plugin_label:string}
 	 */
-	private function check_typeform_integration_dependency() {
+	private function check_saas_form_integration_dependency( $slug ) {
+		if ( 'jotform' === $slug ) {
+			$label   = __( 'Jotform', 'doublescale' );
+			$message = __( 'Connect Jotform in Integrations with an API key before using this trigger.', 'doublescale' );
+		} else {
+			$label   = __( 'Typeform', 'doublescale' );
+			$message = __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' );
+		}
+
 		if ( ! class_exists( '\DoubleScale\Core\Managers\IntegrationsManager' ) ) {
 			return array(
 				'is_active'    => false,
 				'is_pro'       => false,
-				'message'      => __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' ),
-				'plugin_label' => __( 'Typeform', 'doublescale' ),
+				'message'      => $message,
+				'plugin_label' => $label,
 			);
 		}
 
 		try {
-			$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'typeform' );
+			$integration = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( $slug );
 			if ( $integration && $integration->is_connected() ) {
 				return array(
 					'is_active'    => true,
@@ -1812,8 +1850,8 @@ class RestAutomationController extends RestController {
 		return array(
 			'is_active'    => false,
 			'is_pro'       => false,
-			'message'      => __( 'Connect Typeform in Integrations with a personal access token before using this trigger.', 'doublescale' ),
-			'plugin_label' => __( 'Typeform', 'doublescale' ),
+			'message'      => $message,
+			'plugin_label' => $label,
 		);
 	}
 

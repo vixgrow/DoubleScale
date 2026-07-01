@@ -59,6 +59,7 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\ForminatorFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\GravityformsFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\JetformbuilderFormSubmitted::class,
+		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\JotformFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\MetformFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\NinjaformsFormSubmitted::class,
 		\DoubleScale\Pro\Modules\Automations\Triggers\Forms\QuillformsFormSubmitted::class,

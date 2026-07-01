@@ -109,6 +109,14 @@ final class IntegrationsManager {
 				'settings'     => array(),
 				'is_pro'       => true,
 			),
+			'jotform'       => array(
+				'label'        => __( 'Jotform', 'doublescale' ),
+				'description'  => __( 'Connect your Jotform account with an API key.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
 		);
 	}
 }

@@ -175,6 +175,18 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
+		if (group.disabled_reason === 'jotform_not_connected') {
+			return __(
+				'Connect Jotform in Integrations with an API key to use this trigger.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Jotform') {
+			return __(
+				'Connect Jotform in Integrations with an API key to use this trigger.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'Deal') {
 			return __(
 				'The Pipelines & Deals module is turned off. Enable it under Settings → Modules to use these triggers.',

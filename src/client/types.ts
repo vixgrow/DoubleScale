@@ -960,6 +960,13 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	selectFilters?: Array<{
+		id: string;
+		placeholder: string;
+		value: string;
+		onChange: (value: string) => void;
+		options: Array<{ value: string; label: string }>;
+	}>;
 	campaignFilters?: {
 		filters: {
 			status: string;

@@ -11,10 +11,10 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { GradientProposalsIcon, CustomDialogHeader } from '@doublescale/components';
 
 interface SendDocumentDialogProps {
 	open: boolean;
@@ -45,10 +45,9 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-md">
+			<DialogContent className="max-w-lg z-[150200] bg-white">
 				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
-					<p className="text-sm text-muted-foreground">{description}</p>
+					<CustomDialogHeader title={title} subtitle={description} icon={<GradientProposalsIcon />}/>
 				</DialogHeader>
 				<div className="space-y-2">
 					<Label htmlFor="send-custom-message">
@@ -66,8 +65,8 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 						disabled={busy}
 					/>
 				</div>
-				<DialogFooter>
-					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+				<DialogFooter className="flex sm:justify-end gap-2">
+					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy} className="border-primary text-primary bg-white">
 						{__('Cancel', 'doublescale')}
 					</Button>
 					<Button

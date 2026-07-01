@@ -154,6 +154,8 @@ class RestProposalController extends RestController {
 			'status'     => array( 'type' => 'string' ),
 			'contact_id' => array( 'type' => 'integer' ),
 			'search'     => array( 'type' => 'string' ),
+			'from'       => array( 'type' => 'string' ),
+			'to'         => array( 'type' => 'string' ),
 			'sort_by'    => array(
 				'type'    => 'string',
 				'enum'    => array( 'created_at', 'updated_at', 'date', 'total' ),
@@ -205,6 +207,12 @@ class RestProposalController extends RestController {
 
 		$query = ProposalModel::query()->with( array( 'contact', 'assigned_user' ) );
 
+		if ( ! Capabilities::can_manage_all_sales() ) {
+			$query->where( 'assigned_user_id', get_current_user_id() );
+		}
+
+		$total_count = (int) $query->count();
+
 		$status = $request->get_param( 'status' );
 		if ( null !== $status && '' !== $status ) {
 			$statuses = array_values( array_filter( array_map( 'trim', explode( ',', (string) $status ) ) ) );
@@ -219,10 +227,6 @@ class RestProposalController extends RestController {
 			$query->where( 'contact_id', (int) $contact_id );
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
-			$query->where( 'assigned_user_id', get_current_user_id() );
-		}
-
 		$search = $request->get_param( 'search' );
 		if ( is_string( $search ) && '' !== trim( $search ) ) {
 			$like = '%' . str_replace( array( '%', '_' ), array( '\\%', '\\_' ), trim( $search ) ) . '%';
@@ -233,6 +237,16 @@ class RestProposalController extends RestController {
 						->orWhere( 'to_name', 'LIKE', $like );
 				}
 			);
+		}
+
+		$from = $request->get_param( 'from' );
+		if ( is_string( $from ) && '' !== trim( $from ) ) {
+			$query->where( 'created_at', '>=', trim( $from ) );
+		}
+
+		$to = $request->get_param( 'to' );
+		if ( is_string( $to ) && '' !== trim( $to ) ) {
+			$query->where( 'created_at', '<=', trim( $to ) );
 		}
 
 		$sort_by    = in_array( $request->get_param( 'sort_by' ), array( 'created_at', 'updated_at', 'date', 'total' ), true )
@@ -259,6 +273,7 @@ class RestProposalController extends RestController {
 					'current_page' => $page,
 					'last_page'    => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
 				),
+				'total_count' => $total_count,
 			),
 			200
 		);

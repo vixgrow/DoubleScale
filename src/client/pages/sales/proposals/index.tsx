@@ -2,49 +2,38 @@
  * Proposals list page.
  */
 
-import React, { useState } from '@wordpress/element';
+import React, { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Eye, MoreVertical, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
+import type { DataTableConfig } from '@doublescale/client';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { formatDateForAPI } from '@doublescale/utils';
+import { GradientProposalsIcon, NoData, PageHeader, PlusIcon } from '@doublescale/components';
+import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog, ProposalStatusPill } from '@/components/sales';
+import { ConfirmDialog } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	isApprovalWorkflowEnabled,
 } from '@/components/sales/sales-approval-utils';
+import { PROPOSAL_STATUSES, PROPOSAL_STATUS_LABELS } from '@/constants/sales';
 import { deleteProposal, useProposals, useSalesSettings } from '@/hooks/sales';
 import type { Proposal } from '@/types/sales';
-
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
-
-const contactName = (proposal: Proposal): string => {
-	if (proposal.to_name) {
-		return proposal.to_name;
-	}
-	const c = proposal.contact;
-	if (!c) {
-		return '—';
-	}
-	const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
-	return name || c.email || '—';
-};
+import { getProposalColumns } from './columns';
 
 const ProposalsList: React.FC = () => {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(25);
+	const [perPage, setPerPage] = useState(10);
 	const [search, setSearch] = useState('');
+	const [status, setStatus] = useState('all');
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({ from: null, to: null });
+	const [hasRecords, setHasRecords] = useState(false);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
 
@@ -52,6 +41,9 @@ const ProposalsList: React.FC = () => {
 		page,
 		per_page: perPage,
 		search: search || undefined,
+		status: status !== 'all' ? status : undefined,
+		from: formatDateForAPI(dateRange.from),
+		to: formatDateForAPI(dateRange.to),
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
@@ -60,6 +52,12 @@ const ProposalsList: React.FC = () => {
 	const proposals = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
 
+	useEffect(() => {
+		if (!loading) {
+			setHasRecords((data?.total_count ?? 0) > 0);
+		}
+	}, [loading, data?.total_count]);
+
 	const table = useServerSideTable({
 		page,
 		perPage,
@@ -67,6 +65,58 @@ const ProposalsList: React.FC = () => {
 		setPage,
 		setPerPage,
 	});
+
+	const goToCreate = () => navigate(getToLink('sales/proposals/new'));
+
+	const canEdit = (proposal: Proposal) =>
+		canEditSalesDocument(
+			isApprovalWorkflowEnabled(salesSettings, proposal),
+			proposal.approval,
+			proposal
+		);
+
+	const columns = useMemo(
+		() =>
+			getProposalColumns({
+				navigate,
+				onDelete: setDeleteId,
+				canEdit,
+			}),
+		[navigate, salesSettings]
+	);
+
+	const tableConfig: DataTableConfig<Proposal> = useMemo(
+		() => ({
+			manageColumns: { enabled: false },
+			search: {
+				placeholder: __('Search Proposals...', 'doublescale'),
+				onChange: setSearch,
+				value: search,
+			},
+			dateRange: {
+				enabled: true,
+				value: dateRange,
+				onDateChange: setDateRange,
+				placeholder: __('Created at', 'doublescale'),
+			},
+			selectFilters: [
+				{
+					id: 'status',
+					placeholder: __('Status', 'doublescale'),
+					value: status,
+					onChange: setStatus,
+					options: [
+						{ value: 'all', label: __('All statuses', 'doublescale') },
+						...PROPOSAL_STATUSES.map((proposalStatus) => ({
+							value: proposalStatus,
+							label: PROPOSAL_STATUS_LABELS[proposalStatus],
+						})),
+					],
+				},
+			],
+		}),
+		[dateRange, search, status]
+	);
 
 	const confirmDelete = async () => {
 		if (!deleteId) {
@@ -83,155 +133,65 @@ const ProposalsList: React.FC = () => {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">{__('Proposals', 'doublescale')}</h1>
-					<p className="text-sm text-muted-foreground">
-						{__('Create and manage customer proposals.', 'doublescale')}
-					</p>
-				</div>
-				<div className="flex gap-2">
-					<Button variant="outline" size="icon" onClick={() => void refetch()}>
-						<RefreshCw className="h-4 w-4" />
-					</Button>
-					<Button onClick={() => navigate(getToLink('sales/proposals/new'))}>
-						<Plus className="h-4 w-4 mr-1" />
-						{__('New Proposal', 'doublescale')}
-					</Button>
-				</div>
-			</div>
-
-			<div className="flex justify-end">
-				<Input
-					className="max-w-sm"
-					placeholder={__('Search proposals…', 'doublescale')}
-					value={search}
-					onChange={(e) => {
-						setSearch(e.target.value);
-						setPage(1);
-					}}
-				/>
-			</div>
+		<div className="space-y-6">
+			<PageHeader
+				title={__('Proposals', 'doublescale')}
+				subtitle={__('Sales', 'doublescale')}
+				rowClassName="flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between w-full [&_h1]:min-w-0"
+				className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
+				actions={[
+					{
+						label: '',
+						onClick: () => void refetch(),
+						variant: 'outline' as const,
+						size: 'icon' as const,
+						icon: <RefreshCw className="h-4 w-4" />,
+						'aria-label': __('Refresh', 'doublescale'),
+					},
+					{
+						label: __('Create New Proposal', 'doublescale'),
+						onClick: goToCreate,
+						variant: 'default' as const,
+						icon: <PlusIcon />,
+					},
+				]}
+			/>
 
 			{error ? (
 				<div className="text-sm text-red-600">{error}</div>
 			) : null}
 
-			<div className="border rounded-lg overflow-hidden bg-white">
-				<table className="w-full text-sm">
-					<thead className="bg-slate-50 border-b">
-						<tr>
-							<th className="text-left px-4 py-3">{__('Proposal #', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Subject', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('To', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Total', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Date', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Open Till', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Status', 'doublescale')}</th>
-							<th className="w-12 px-2 py-3" />
-						</tr>
-					</thead>
-					<tbody>
-						{loading ? (
-							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-									{__('Loading…', 'doublescale')}
-								</td>
-							</tr>
-						) : proposals.length === 0 ? (
-							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-									{__('No proposals found.', 'doublescale')}
-								</td>
-							</tr>
-						) : (
-							proposals.map((proposal) => (
-								<tr
-									key={proposal.id}
-									className="border-b hover:bg-slate-50 cursor-pointer"
-									onClick={() =>
-										navigate(getToLink(`sales/proposals/${proposal.id}`))
-									}
-								>
-									<td className="px-4 py-3 font-medium">{proposal.proposal_number}</td>
-									<td className="px-4 py-3">{proposal.subject}</td>
-									<td className="px-4 py-3">{contactName(proposal)}</td>
-									<td className="px-4 py-3">
-										{formatMoney(proposal.total, proposal.currency)}
-									</td>
-									<td className="px-4 py-3">{proposal.date || '—'}</td>
-									<td className="px-4 py-3">{proposal.open_till || '—'}</td>
-									<td className="px-4 py-3">
-										<ProposalStatusPill
-											status={proposal.status}
-											expired={proposal.is_expired}
-										/>
-									</td>
-									<td
-										className="px-2 py-3"
-										onClick={(e) => e.stopPropagation()}
-									>
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													aria-label={__('Actions', 'doublescale')}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end" className="min-w-[10rem]">
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(`sales/proposals/${proposal.id}`)
-														)
-													}
-												>
-													<Eye className="h-4 w-4" />
-													{__('View', 'doublescale')}
-												</DropdownMenuItem>
-												{canEditSalesDocument(
-													isApprovalWorkflowEnabled(salesSettings, proposal),
-													proposal.approval,
-													proposal
-												) ? (
-													<DropdownMenuItem
-														className="cursor-pointer gap-2"
-														onSelect={() =>
-															navigate(
-																getToLink(
-																	`sales/proposals/${proposal.id}/edit`
-																)
-															)
-														}
-													>
-														<Pencil className="h-4 w-4" />
-														{__('Edit', 'doublescale')}
-													</DropdownMenuItem>
-												) : null}
-												<DropdownMenuItem
-													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-													onSelect={() => setDeleteId(proposal.id)}
-												>
-													<Trash2 className="h-4 w-4" />
-													{__('Delete', 'doublescale')}
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</td>
-								</tr>
-							))
+			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+				{loading && !hasRecords ? (
+					<div className="py-20 text-center text-sm text-muted-foreground">
+						{__('Loading…', 'doublescale')}
+					</div>
+				) : loading || hasRecords ? (
+					<>
+						<DataTable
+							columns={columns}
+							data={proposals}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<DataTablePagination table={table} />
+					</>
+				) : (
+					<NoData
+						icon={<GradientProposalsIcon />}
+						title={__('No proposals yet', 'doublescale')}
+						subtitle={__(
+							'Create a new proposal to get started',
+							'doublescale'
 						)}
-					</tbody>
-				</table>
+						buttonLabel={__('Create New Proposal', 'doublescale')}
+						onClick={goToCreate}
+					/>
+				)}
 			</div>
-
-			<DataTablePagination table={table} totalRecords={total} />
 
 			<ConfirmDialog
 				open={deleteId !== null}
@@ -242,10 +202,10 @@ const ProposalsList: React.FC = () => {
 				}}
 				title={__('Delete Proposal', 'doublescale')}
 				description={__(
-					'Are you sure you want to delete this proposal? This action cannot be undone.',
+					'Do you really want to delete this proposal?',
 					'doublescale'
 				)}
-				confirmLabel={__('Delete', 'doublescale')}
+				confirmLabel={__('Confirm', 'doublescale')}
 				destructive
 				busy={deleting}
 				onConfirm={confirmDelete}

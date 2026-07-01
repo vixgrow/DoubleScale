@@ -153,8 +153,12 @@ final class MergeTagsManager {
 				);
 			}
 
-			$this->register( new \DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsFieldBackend( $form->slug ) );
-			$this->register( new \DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsMetadataBackEnd( $form->slug ) );
+			if ( class_exists( '\DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsFieldBackend' ) ) {
+				$this->register( new \DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsFieldBackend( $form->slug ) );
+			}
+			if ( class_exists( '\DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsMetadataBackEnd' ) ) {
+				$this->register( new \DoubleScale\Pro\Modules\Forms\MergeTags\Forms\FormsMetadataBackEnd( $form->slug ) );
+			}
 		}
 	}
 

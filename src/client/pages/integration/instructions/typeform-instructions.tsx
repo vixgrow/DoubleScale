@@ -25,7 +25,7 @@ const TYPEFORM_WEBHOOKS_HELP_URL =
 const TYPEFORM_ADMIN_URL = 'https://admin.typeform.com/';
 
 const linkClass =
-	'text-secondary font-semibold hover:underline inline-flex items-center gap-1';
+	'text-primary font-semibold hover:underline inline-flex items-center gap-1';
 
 const ExternalHref: React.FC<{ href: string; children: React.ReactNode }> = ({
 	href,
@@ -52,7 +52,7 @@ const TypeformInstructions: React.FC = () => {
 			).doublescalePro?.proPluginUrl) ||
 		ConfigAPI.getPluginDirUrl();
 
-	const logoUrl = `${proPluginUrl}assets/images/typeform/typeform.svg`;
+	const logoUrl = `${proPluginUrl}assets/images/typeform/typeform.png`;
 
 	return (
 		<div className="space-y-4">

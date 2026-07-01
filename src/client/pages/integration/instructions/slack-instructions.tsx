@@ -72,7 +72,7 @@ const SlackInstructions: React.FC = () => {
 						href="https://api.slack.com/apps"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-secondary font-semibold hover:underline"
+						className="text-primary font-semibold hover:underline"
 					>
 						{__('Slack', 'doublescale')}
 					</a>{' '}
@@ -110,7 +110,7 @@ const SlackInstructions: React.FC = () => {
 						</div>
 						<button
 							onClick={handleCopy}
-							className="absolute top-2 right-2 px-3 py-1.5 bg-secondary text-white text-sm rounded hover:bg-secondary/90 transition-colors"
+							className="absolute top-2 right-2 px-3 py-1.5 bg-secondary text-primary text-sm rounded hover:bg-secondary/90 transition-colors"
 						>
 							{copied
 								? __('Copied!', 'doublescale')

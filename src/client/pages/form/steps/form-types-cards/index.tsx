@@ -121,7 +121,7 @@ const getFormIcon = (sourceKey: string) => {
 		bitform: bitForms,
 		sureforms: sureForms,
 		typeform: `${proPluginUrl}assets/images/typeform/typeform.png`,
-		jotform: `${proPluginUrl}assets/images/jotform/jotform.svg`,
+		jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
 	};
 
 	return (

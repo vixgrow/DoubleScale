@@ -54,7 +54,7 @@ const integrationImages: Record<string, string> = {
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
 	typeform: `${proPluginUrl}assets/images/typeform/typeform.png`,
-	jotform: `${proPluginUrl}assets/images/jotform/jotform.svg`,
+	jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
 };
 
 const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'typeform', 'jotform', 'zapier', 'make'];

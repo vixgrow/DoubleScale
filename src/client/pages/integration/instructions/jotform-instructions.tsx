@@ -24,7 +24,7 @@ const JOTFORM_WEBHOOKS_HELP_URL =
 const JOTFORM_ADMIN_URL = 'https://www.jotform.com/myforms/';
 
 const linkClass =
-	'text-secondary font-semibold hover:underline inline-flex items-center gap-1';
+	'text-primary font-semibold hover:underline inline-flex items-center gap-1';
 
 const ExternalHref: React.FC<{ href: string; children: React.ReactNode }> = ({
 	href,
@@ -51,7 +51,7 @@ const JotformInstructions: React.FC = () => {
 			).doublescalePro?.proPluginUrl) ||
 		ConfigAPI.getPluginDirUrl();
 
-	const logoUrl = `${proPluginUrl}assets/images/jotform/jotform.svg`;
+	const logoUrl = `${proPluginUrl}assets/images/jotform/jotform.png`;
 
 	return (
 		<div className="space-y-4">

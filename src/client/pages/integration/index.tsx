@@ -36,6 +36,7 @@ import Instructions from './instructions';
 import { Button } from '@doublescale/components/ui/button';
 import { NoticeBanner } from '@doublescale/components';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import ConfigAPI from '@doublescale/config';
 
 interface IntegrationProps {
 	open: boolean;
@@ -118,13 +119,36 @@ const Integration: React.FC<IntegrationProps> = ({
 		setIsSaving(true);
 
 		try {
-			await apiFetch({
+			const response = await apiFetch<{
+				settings?: Record<string, unknown>;
+				is_connected?: boolean;
+			}>({
 				path: `/doublescale/v1/integrations/${slug}`,
 				method: 'POST',
 				data: {
 					settings: isAppBased ? { app: fieldsValue } : fieldsValue,
 				},
 			});
+
+			const connected =
+				typeof response?.is_connected === 'boolean'
+					? response.is_connected
+					: !isAppBased && Object.keys(fieldsValue).length > 0;
+
+			const globalIntegrations = ConfigAPI.getIntegrations();
+			if (globalIntegrations[slug]) {
+				ConfigAPI.setIntegrations({
+					...globalIntegrations,
+					[slug]: {
+						...globalIntegrations[slug],
+						settings: (response?.settings ?? fieldsValue) as Record<
+							string,
+							unknown
+						>,
+						is_connected: connected,
+					},
+				});
+			}
 
 			if (isAppBased) {
 				await getAuthUrl();

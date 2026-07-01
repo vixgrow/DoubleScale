@@ -93,6 +93,22 @@ final class IntegrationsManager {
 				'settings'     => array(),
 				'is_pro'       => true,
 			),
+			'paypal'        => array(
+				'label'        => __( 'PayPal', 'doublescale' ),
+				'description'  => __( 'Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
+			'typeform'      => array(
+				'label'        => __( 'Typeform', 'doublescale' ),
+				'description'  => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
 		);
 	}
 }

@@ -163,6 +163,18 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
+		if (group.disabled_reason === 'typeform_not_connected') {
+			return __(
+				'Connect Typeform in Integrations with a personal access token to use this trigger.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Typeform') {
+			return __(
+				'Connect Typeform in Integrations with a personal access token to use this trigger.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'Deal') {
 			return __(
 				'The Pipelines & Deals module is turned off. Enable it under Settings → Modules to use these triggers.',

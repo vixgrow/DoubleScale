@@ -77,13 +77,13 @@ final class RulesManager {
 	 * Register Forms Rules
 	 */
 	public function register_forms_rules() {
-		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
-			|| ! class_exists( '\DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			|| ! class_exists( '\DoubleScale\Pro\Modules\Automations\Rules\Forms\FormFieldRuleBackend' ) ) {
 			return;
 		}
-		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
-			$this->register( new \DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend( $form ) );
+			$this->register( new \DoubleScale\Pro\Modules\Automations\Rules\Forms\FormFieldRuleBackend( $form ) );
 		}
 	}
 
@@ -322,8 +322,8 @@ final class RulesManager {
 			),
 		);
 
-		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
-			$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		if ( class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 			foreach ( $forms as $form ) {
 				$this->groups[ $form->slug ] = array(
 					'name'        => $form->name,

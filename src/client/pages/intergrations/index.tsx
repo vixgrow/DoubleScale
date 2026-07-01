@@ -53,9 +53,10 @@ const integrationImages: Record<string, string> = {
 	'meta-whatsapp': metaWhatsappImg,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
+	typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
 };
 
-const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'zapier', 'make'];
+const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'typeform', 'zapier', 'make'];
 
 const ADDON_INTEGRATIONS = ['zapier', 'make'];
 
@@ -110,6 +111,23 @@ const Integrations: React.FC = () => {
 							: Object.keys(response.settings || {}).length > 0,
 				},
 			}));
+
+			const connected =
+				typeof response.is_connected === 'boolean'
+					? response.is_connected
+					: Object.keys(response.settings || {}).length > 0;
+			const globalIntegrations = ConfigAPI.getIntegrations();
+			if (globalIntegrations[integrationKey]) {
+				ConfigAPI.setIntegrations({
+					...globalIntegrations,
+					[integrationKey]: {
+						...globalIntegrations[integrationKey],
+						// @ts-ignore
+						settings: response.settings,
+						is_connected: connected,
+					},
+				});
+			}
 		} catch (error) {
 			console.error('Failed to refresh integration:', error);
 		}

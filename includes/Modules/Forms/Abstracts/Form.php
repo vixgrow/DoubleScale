@@ -72,6 +72,13 @@ abstract class Form {
 	public $is_pro = false;
 
 	/**
+	 * Platform category: wordpress plugin or external saas form builder.
+	 *
+	 * @var string
+	 */
+	public $platform = 'wordpress';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

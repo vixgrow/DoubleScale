@@ -470,6 +470,8 @@ export type Form = {
 		};
 	};
 	is_enabled: boolean;
+	is_pro?: boolean;
+	platform?: 'wordpress' | 'saas';
 };
 
 export type Forms = {

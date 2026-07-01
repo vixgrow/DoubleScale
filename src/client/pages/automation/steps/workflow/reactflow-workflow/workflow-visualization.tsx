@@ -46,6 +46,7 @@ import { deleteStep } from './utils/step-utils';
 
 // NodeProcess component
 import { initializeTrigger, addFinalAddStep } from './utils/node-process';
+import { getNodeAnalyticsForId } from './utils/analytics-utils';
 
 // StepHierarchy component
 import { processStepHierarchy } from './utils/step-hierarchy';
@@ -321,7 +322,47 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		onDeleteStep,
 		currentStep?.id,
 		isTriggerVisible,
+		viewMode,
+		analyticsData,
 	]);
+
+	// React Flow can keep stale node.data when analytics arrive after the first layout pass.
+	// Patch analytics onto existing nodes whenever report data changes in view mode.
+	useEffect(() => {
+		if (!viewMode || !analyticsData.length) {
+			return;
+		}
+
+		setNodes((currentNodes) => {
+			let changed = false;
+
+			const nextNodes = currentNodes.map((node) => {
+				const analytics = getNodeAnalyticsForId(node.id, analyticsData);
+				if (!analytics || !node.data) {
+					return node;
+				}
+
+				const existing = (node.data as { analytics?: { contacts?: number; conversion_rate?: number } }).analytics;
+				if (
+					existing?.contacts === analytics.contacts &&
+					existing?.conversion_rate === analytics.conversion_rate
+				) {
+					return node;
+				}
+
+				changed = true;
+				return {
+					...node,
+					data: {
+						...node.data,
+						analytics,
+					},
+				};
+			});
+
+			return changed ? nextNodes : currentNodes;
+		});
+	}, [analyticsData, viewMode, setNodes]);
 
 	useEffect(() => {
 		initialViewportSetRef.current = false;

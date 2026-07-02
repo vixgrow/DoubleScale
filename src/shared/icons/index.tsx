@@ -299,3 +299,7 @@ export { default as UnpaidIcon } from './unpaid';
 export { default as PartiallyPaidIcon } from './partially-paid';
 export { default as DraftIcon } from './draft';
 export { default as NovicesIcon } from './novices';
+export { default as UserIcon } from './user';
+export { default as RecordIcon } from './record';
+export { default as DownloadIcon } from './download';
+export { default as DollerIcon } from './doller';

@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
+import { X } from 'lucide-react';
 import Breadcrumb from '../breadcrumb';
-import CloseIcon from '@doublescale/shared/icons/close';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { getToLink, useNavigate } from '@doublescale/navigation';
@@ -72,69 +72,36 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 		});
 
 	return (
-		<div className="fixed inset-0 z-[150000] flex h-full w-full flex-col overflow-y-auto bg-white">
+		<div className="fixed inset-0 z-[150000] flex h-full w-full flex-col overflow-hidden bg-white">
 			{/* Header Section - Fixed */}
 			<div
-				className={`flex-none bg-white p-4 px-6 md:px-8 ${type === 'campaign' ? 'z-10' : ''}`}
+				className={`shrink-0 rounded-b-md bg-white px-6 py-3 ${type === 'campaign' ? 'z-10' : ''}`}
 			>
-				<div className="flex flex-col">
-					{shouldShowPanelClose && (
-						<div className="flex justify-end sm:hidden">
+				<div className="flex items-center justify-between gap-4">
+					<Breadcrumb items={items} handleNavigate={handleNavigate} />
+
+					<div className="flex shrink-0 items-center gap-2">
+						{panelbtns.map((btn, index) => (
+							<div key={index}>{btn}</div>
+						))}
+						{shouldShowPanelClose && (
 							<Button
 								type="button"
 								variant="ghost"
 								size="icon"
 								onClick={handleClosePanel}
-								className="h-10 w-10 shrink-0 rounded-lg"
-								aria-label={__(
-									'Close campaign panel',
-									'doublescale'
-								)}
+								className="h-9 w-9 shrink-0 rounded-lg text-[#29292E] hover:bg-muted/60"
+								aria-label={__('Close panel', 'doublescale')}
 							>
-								<CloseIcon
-									width={48}
-									height={48}
-									color="#000"
-								/>
+								<X className="h-5 w-5" strokeWidth={2} />
 							</Button>
-						</div>
-					)}
-					<div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-						<Breadcrumb
-							items={items}
-							handleNavigate={handleNavigate}
-						/>
-
-						<div className="flex shrink-0 items-center gap-2">
-							{panelbtns.map((btn, index) => (
-								<div key={index}>{btn}</div>
-							))}
-							{shouldShowPanelClose && (
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon"
-									onClick={handleClosePanel}
-									className="hidden h-10 w-10 shrink-0 rounded-lg sm:inline-flex"
-									aria-label={__(
-										'Close campaign panel',
-										'doublescale'
-									)}
-								>
-									<CloseIcon
-										width={48}
-										height={48}
-										color="#000"
-									/>
-								</Button>
-							)}
-						</div>
+						)}
 					</div>
 				</div>
 			</div>
 
 			{/* Scrollable Content Section */}
-			<div className="w-full max-w-none bg-[#F7F8FA] p-6">
+			<div className="min-h-0 flex-1 overflow-y-auto bg-[#F7F8FA] p-6">
 				<div
 					className="overflow-hidden rounded-[20px] bg-white p-6
 							shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"

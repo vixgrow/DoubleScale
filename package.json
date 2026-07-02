@@ -132,7 +132,7 @@
 	},
 	"scripts": {
 		"dev": "wp-scripts start --config webpack.config.js",
-		"build": "rm -rf build/client build/renderer node_modules/.cache/webpack && wp-scripts build --config webpack.config.js",
+		"build": "rm -rf build/client build/renderer node_modules/.cache/webpack && NODE_OPTIONS=--max-old-space-size=4096 wp-scripts build --config webpack.config.js",
 		"zip": "bash bin/build-zip.sh",
 		"test": "vitest",
 		"test:run": "vitest run",

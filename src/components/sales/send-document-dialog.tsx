@@ -45,7 +45,10 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-lg z-[150200] bg-white">
+			<DialogContent
+				className="max-w-lg z-[150220] bg-white"
+				overlayClassName="z-[150210] bg-black/45 backdrop-blur-[1px]"
+			>
 				<DialogHeader>
 					<CustomDialogHeader title={title} subtitle={description} icon={<GradientProposalsIcon />}/>
 				</DialogHeader>

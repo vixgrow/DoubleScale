@@ -3,6 +3,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import type { NoticeMessage } from '@doublescale/client';
 import { __ } from '@wordpress/i18n';
 import { User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
@@ -16,6 +17,7 @@ import {
 	DollerIcon,
 	DownloadIcon,
 	EditHeaderIcon,
+	NoticeBanner,
 	PanelLayout,
 	PurchaseHistoryIcon,
 	RecordIcon,
@@ -34,6 +36,7 @@ import {
 } from '@/components/ui/table';
 import {
 	ConfirmDialog,
+	InvoiceFormDialog,
 	InvoiceOnlinePayment,
 	InvoiceStatusPill,
 	PaymentsList,
@@ -187,8 +190,13 @@ const InvoiceView: React.FC = () => {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
+	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
-	const [notice, setNotice] = useState<string | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const showNotice = (type: NoticeMessage['type'], message: string) => {
+		setNotice({ type, message });
+	};
+	const closeNotice = () => setNotice(null);
 
 	useEffect(() => {
 		if (fetched) {
@@ -260,10 +268,11 @@ const InvoiceView: React.FC = () => {
 			const result = await sendInvoice(invoiceId, message);
 			setInvoice(result.invoice);
 			await refetch();
-			setNotice(__('Invoice sent to the customer.', 'doublescale'));
+			showNotice('success', __('Invoice sent to the customer.', 'doublescale'));
 			setSendOpen(false);
 		} catch (err: unknown) {
-			setNotice(
+			showNotice(
+				'error',
 				formatSalesRestError(err, __('Send failed.', 'doublescale'), {
 					approval_required: __(
 						'This invoice must be approved before it can be sent. Submit it for approval first.',
@@ -285,9 +294,9 @@ const InvoiceView: React.FC = () => {
 		try {
 			await submitInvoiceForApproval(invoiceId);
 			await refetch();
-			setNotice(__('Invoice submitted for approval.', 'doublescale'));
+			showNotice('success', __('Invoice submitted for approval.', 'doublescale'));
 		} catch (err: unknown) {
-			setNotice(formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
+			showNotice('error', formatSalesRestError(err, __('Failed to submit for approval.', 'doublescale')));
 		} finally {
 			setBusy(false);
 		}
@@ -302,9 +311,12 @@ const InvoiceView: React.FC = () => {
 		try {
 			await withdrawInvoiceApproval(invoiceId);
 			await refetch();
-			setNotice(__('Approval request withdrawn. You can edit and re-submit.', 'doublescale'));
+			showNotice(
+				'success',
+				__('Approval request withdrawn. You can edit and re-submit.', 'doublescale')
+			);
 		} catch (err: unknown) {
-			setNotice(formatSalesRestError(err, __('Failed to withdraw approval request.', 'doublescale')));
+			showNotice('error', formatSalesRestError(err, __('Failed to withdraw approval request.', 'doublescale')));
 		} finally {
 			setBusy(false);
 		}
@@ -312,7 +324,8 @@ const InvoiceView: React.FC = () => {
 
 	const handleCopyLink = async () => {
 		if (!invoice?.public_url) {
-			setNotice(
+			showNotice(
+				'warning',
 				__(
 					'Add a WordPress page with the [doublescale_invoice] shortcode first.',
 					'doublescale'
@@ -322,9 +335,9 @@ const InvoiceView: React.FC = () => {
 		}
 		try {
 			await navigator.clipboard.writeText(invoice.public_url);
-			setNotice(__('Public link copied.', 'doublescale'));
+			showNotice('success', __('Public link copied.', 'doublescale'));
 		} catch {
-			setNotice(invoice.public_url);
+			showNotice('success', invoice.public_url);
 		}
 	};
 
@@ -333,11 +346,18 @@ const InvoiceView: React.FC = () => {
 			return;
 		}
 		setBusy(true);
+		setNotice(null);
 		try {
 			const result = await recordInvoicePayment(invoiceId, payload);
 			setInvoice(result.invoice);
 			await refetchPayments();
 			setPaymentOpen(false);
+			showNotice('success', __('Payment recorded successfully.', 'doublescale'));
+		} catch (err: unknown) {
+			showNotice(
+				'error',
+				formatSalesRestError(err, __('Failed to record payment.', 'doublescale'))
+			);
 		} finally {
 			setBusy(false);
 		}
@@ -347,9 +367,11 @@ const InvoiceView: React.FC = () => {
 		if (!invoiceId) {
 			return;
 		}
+		setNotice(null);
 		const result = await deleteInvoicePayment(invoiceId, paymentId);
 		setInvoice(result.invoice);
 		await refetchPayments();
+		showNotice('success', __('Payment deleted successfully.', 'doublescale'));
 	};
 
 	const handleDownloadPdf = async () => {
@@ -361,7 +383,10 @@ const InvoiceView: React.FC = () => {
 		try {
 			await downloadInvoicePdf(invoiceId, invoice.invoice_number);
 		} catch (err: unknown) {
-			setNotice(err instanceof Error ? err.message : __('PDF download failed.', 'doublescale'));
+			showNotice(
+				'error',
+				err instanceof Error ? err.message : __('PDF download failed.', 'doublescale')
+			);
 		} finally {
 			setBusy(false);
 		}
@@ -407,9 +432,7 @@ const InvoiceView: React.FC = () => {
 	return panelShell(
 		<div className="space-y-6">
 			{notice ? (
-				<div className="rounded border bg-slate-50 px-3 py-2 text-sm text-slate-700">
-					{notice}
-				</div>
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			) : null}
 
 			<ApprovalStatusBanner approval={invoice.approval} />
@@ -539,9 +562,7 @@ const InvoiceView: React.FC = () => {
 								variant="outline"
 								size="icon"
 								className="h-10 w-10 shrink-0 border-[#0D9DFC] bg-white text-[#0D9DFC] hover:bg-[#DBEAFE]"
-								onClick={() =>
-									navigate(getToLink(`sales/invoices/${invoice.id}/edit`))
-								}
+								onClick={() => setEditOpen(true)}
 								aria-label={__('Edit', 'doublescale')}
 							>
 								<EditHeaderIcon color="#0D9DFC" width={24} height={24} />
@@ -743,7 +764,7 @@ const InvoiceView: React.FC = () => {
 				onOpenChange={setDeleteOpen}
 				title={__('Delete Invoice', 'doublescale')}
 				description={__(
-					'Are you sure you want to delete this invoice? This action cannot be undone.',
+					'Do you really want to delete this invoice?',
 					'doublescale'
 				)}
 				confirmLabel={__('Delete', 'doublescale')}
@@ -758,6 +779,17 @@ const InvoiceView: React.FC = () => {
 				invoice={invoice}
 				busy={busy}
 				onSubmit={handleRecordPayment}
+			/>
+
+			<InvoiceFormDialog
+				open={editOpen}
+				onOpenChange={setEditOpen}
+				invoiceId={invoice.id}
+				onSaved={() => {
+					void refetch();
+					showNotice('success', __('Invoice updated successfully.', 'doublescale'));
+					setEditOpen(false);
+				}}
 			/>
 		</div>
 	);

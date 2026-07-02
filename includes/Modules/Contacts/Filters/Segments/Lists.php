@@ -116,15 +116,24 @@ class Lists extends Filter {
 			$value = array( $value );
 		}
 
+		// The closure passed to whereHas()/whereDoesntHave() receives a plain
+		// query Builder, not the BelongsToMany relation, so `wherePivot()` is not
+		// available there — calling it emits a literal `pivot` column and the
+		// query fails with "Unknown column 'pivot'". Reference the pivot
+		// (`status`) column on the relationship table directly, mirroring how the
+		// related model's `id` is already qualified below.
+		global $wpdb;
+		$pivot_status = $wpdb->prefix . 'doublescale_contact_taxonomy_relationship.status';
+
 		// Add where clause
 		switch ( $operator ) {
 			case 'is':
 				foreach ( $value as $list_id ) {
 					$query->whereHas(
 						'lists',
-						function ( $query ) use ( $list_id ) {
+						function ( $query ) use ( $list_id, $pivot_status ) {
 							$query->where( $query->getModel()->getTable() . '.id', $list_id )
-								->wherePivot( 'status', 'subscribed' );
+								->where( $pivot_status, 'subscribed' );
 						}
 					);
 				}
@@ -132,43 +141,43 @@ class Lists extends Filter {
 			case 'is_not':
 				$query->whereDoesntHave(
 					'lists',
-					function ( $query ) use ( $value ) {
+					function ( $query ) use ( $value, $pivot_status ) {
 						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
-							->wherePivot( 'status', 'subscribed' );
+							->where( $pivot_status, 'subscribed' );
 					}
 				);
 				break;
 			case 'contains':
 				$query->whereHas(
 					'lists',
-					function ( $query ) use ( $value ) {
+					function ( $query ) use ( $value, $pivot_status ) {
 						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
-							->wherePivot( 'status', 'subscribed' );
+							->where( $pivot_status, 'subscribed' );
 					}
 				);
 				break;
 			case 'does_not_contain':
 				$query->whereDoesntHave(
 					'lists',
-					function ( $query ) use ( $value ) {
+					function ( $query ) use ( $value, $pivot_status ) {
 						$query->whereIn( $query->getModel()->getTable() . '.id', $value )
-							->wherePivot( 'status', 'subscribed' );
+							->where( $pivot_status, 'subscribed' );
 					}
 				);
 				break;
 			case 'is_empty':
 				$query->whereDoesntHave(
 					'lists',
-					function ( $query ) {
-						$query->wherePivot( 'status', 'subscribed' );
+					function ( $query ) use ( $pivot_status ) {
+						$query->where( $pivot_status, 'subscribed' );
 					}
 				);
 				break;
 			case 'is_not_empty':
 				$query->whereHas(
 					'lists',
-					function ( $query ) {
-						$query->wherePivot( 'status', 'subscribed' );
+					function ( $query ) use ( $pivot_status ) {
+						$query->where( $pivot_status, 'subscribed' );
 					}
 				);
 				break;

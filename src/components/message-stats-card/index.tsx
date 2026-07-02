@@ -14,7 +14,7 @@ interface MessageStatsCardProps {
 	/** Pill colors for percentage when layout is centered-badge */
 	percentageBadgeClass?: string;
 	/** Vertical analytics layout: icon on top, label, then value */
-	layout?: 'default' | 'centered' | 'centered-badge';
+	layout?: 'default' | 'centered' | 'centered-badge' | 'inline';
 }
 
 export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
@@ -29,6 +29,36 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 	percentageBadgeClass = 'bg-primary/10 text-primary',
 	layout = 'default',
 }) => {
+	if (layout === 'inline') {
+		return (
+			<div
+				className={cn(
+					'flex flex-1 items-center justify-between rounded-xl border border-[#D0D0D0] bg-white p-3.5 transition-all',
+					borderColorClass,
+					className
+				)}
+			>
+				<div className="flex min-w-0 items-center gap-3">
+					<div
+						className={cn(
+							iconBgClass,
+							'flex shrink-0 items-center justify-center rounded-full p-1.5',
+							iconColor
+						)}
+					>
+						{icon}
+					</div>
+					<span className="truncate text-base leading-5 text-[#6B6C76]">
+						{label}
+					</span>
+				</div>
+				<span className="shrink-0 pl-3 text-xl font-bold tabular-nums leading-7 text-[#29292E]">
+					{value}
+				</span>
+			</div>
+		);
+	}
+
 	if (layout === 'centered-badge') {
 		return (
 			<div

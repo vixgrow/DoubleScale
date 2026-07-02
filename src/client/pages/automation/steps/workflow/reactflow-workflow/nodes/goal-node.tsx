@@ -24,7 +24,7 @@ import {
 } from '@doublescale/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
-import StepReorderControls from '../components/step-reorder-controls';
+import SortableNodeContainer from '../components/sortable-node-container';
 import { duplicateStep } from '../utils/step-utils';
 import { GoalIcon, GoalsAutomationIcon } from '@doublescale/components';
 import {
@@ -184,7 +184,9 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 			onDelete={viewMode ? undefined : handleDelete}
 			disabled={viewMode}
 		>
-			<div
+			<SortableNodeContainer
+				step={step}
+				viewMode={viewMode}
 				className={`doublescale-reactflow-node doublescale-reactflow-node--goal doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
@@ -192,9 +194,6 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 					position={Position.Top}
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
-
-				{/* Step Reorder Controls - hide in view mode */}
-				{!viewMode && <StepReorderControls step={step} />}
 
 				<NodeLayout
 					variant="goal"
@@ -222,7 +221,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 					position={Position.Bottom}
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 				/>
-			</div>
+			</SortableNodeContainer>
 		</NodeContextMenu>
 	);
 };

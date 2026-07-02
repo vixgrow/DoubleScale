@@ -17,7 +17,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
-import StepReorderControls from '../components/step-reorder-controls';
+import SortableNodeContainer from '../components/sortable-node-container';
 import NodeActionsDropdown from '../components/node-actions-dropdown';
 import EndAutomationIcon from '@doublescale/shared/icons/end-automation';
 
@@ -104,7 +104,9 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-			<div
+			<SortableNodeContainer
+				step={step}
+				viewMode={viewMode}
 				className={`doublescale-reactflow-node doublescale-reactflow-node--end doublescale-reactflow-node--card-layout ${
 					isSelected ? 'doublescale-reactflow-node--selected' : ''
 				}`}
@@ -114,8 +116,6 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 					position={Position.Top}
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
-
-				{!viewMode && <StepReorderControls step={step} />}
 
 				<div className="doublescale-reactflow-node__card-inner">
 					<div
@@ -145,7 +145,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 						)}
 					</div>
 				</div>
-			</div>
+			</SortableNodeContainer>
 		</NodeContextMenu>
 	);
 };

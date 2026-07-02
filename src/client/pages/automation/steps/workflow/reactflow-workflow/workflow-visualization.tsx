@@ -2,8 +2,9 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect, useRef } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -21,6 +22,17 @@ import {
 	useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import {
+	DndContext,
+	DragOverlay,
+	closestCenter,
+	PointerSensor,
+	useSensor,
+	useSensors,
+	type DragEndEvent,
+	type DragStartEvent,
+} from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
 
 /**
  * Internal dependencies
@@ -43,6 +55,13 @@ import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
 import { getNodePosition, calculatePositions } from './utils/position-utils';
 import { removeDuplicateEdges } from './utils/edge-utils';
 import { deleteStep } from './utils/step-utils';
+import {
+	isDescendantOf,
+	moveStep,
+	moveStepToContext,
+} from './utils/step-reorder-utils';
+import { WorkflowReorderContext } from './components/workflow-reorder-context';
+import StepDragOverlay from './components/step-drag-overlay';
 
 // NodeProcess component
 import { initializeTrigger, addFinalAddStep } from './utils/node-process';
@@ -76,7 +95,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	onTriggerClick,
 }) => {
 	// ========== CONTEXT AND STATE ==========
-	const { updateAutomation } = useAutomationContext();
+	const { updateAutomation, setSteps } = useAutomationContext();
+	const { createNotice } = useDispatch('doublescale/core');
 	const reactFlowInstance = useReactFlow();
 
 	// Track the last focused step ID to maintain focus when sidebar closes
@@ -94,6 +114,161 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	// Track previous sidebar state to detect when it closes
 	const prevSidebarOpenRef = useRef<boolean>(false);
 	const initialViewportSetRef = useRef(false);
+	const [activeDragStep, setActiveDragStep] = useState<AutomationStep | null>(
+		null
+	);
+
+	const clearPositions = useCallback(() => {
+		if (!automation) {
+			return;
+		}
+
+		const updatedAutomation = {
+			...automation,
+			settings: {
+				...automation.settings,
+				reactflow_positions: {},
+			},
+		};
+
+		updateAutomation(updatedAutomation);
+
+		apiFetch({
+			path: `/doublescale/v1/automations/${automation.id}`,
+			method: 'POST',
+			data: updatedAutomation,
+		}).catch((error) => {
+			console.error('Failed to clear node positions:', error);
+		});
+	}, [automation, updateAutomation]);
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		})
+	);
+
+	const sortableStepIds = useMemo(() => {
+		if (viewMode) {
+			return [];
+		}
+
+		return steps.map((step) => step.id.toString());
+	}, [steps, viewMode]);
+
+	const savedPositionsKey = useMemo(
+		() =>
+			JSON.stringify(automation?.settings?.reactflow_positions ?? {}),
+		[automation?.settings?.reactflow_positions]
+	);
+
+	const handleDragStart = useCallback(
+		(event: DragStartEvent) => {
+			if (viewMode) {
+				return;
+			}
+
+			const step = steps.find(
+				(s) => s.id.toString() === event.active.id.toString()
+			);
+			setActiveDragStep(step ?? null);
+		},
+		[viewMode, steps]
+	);
+
+	const handleDragCancel = useCallback(() => {
+		setActiveDragStep(null);
+	}, []);
+
+	const handleDragEnd = useCallback(
+		async (event: DragEndEvent) => {
+			setActiveDragStep(null);
+
+			if (viewMode) {
+				return;
+			}
+
+			const { active, over } = event;
+			if (!over || active.id === over.id) {
+				return;
+			}
+
+			const activeStep = steps.find(
+				(s) => s.id.toString() === active.id.toString()
+			);
+
+			if (!activeStep) {
+				return;
+			}
+
+			const overId = over.id.toString();
+
+			if (overId.startsWith('add-step')) {
+				const dropData = over.data.current as
+					| {
+							parentId?: number | null;
+							condition?: string | null;
+					  }
+					| undefined;
+				const targetParentId = dropData?.parentId || 0;
+				const targetCondition = targetParentId
+					? dropData?.condition || ''
+					: '';
+
+				if (
+					targetParentId === activeStep.id ||
+					(targetParentId &&
+						isDescendantOf(steps, activeStep.id, targetParentId))
+				) {
+					return;
+				}
+
+				await moveStepToContext(
+					activeStep,
+					targetParentId,
+					targetCondition,
+					steps,
+					setSteps,
+					createNotice,
+					clearPositions
+				);
+				return;
+			}
+
+			const overStep = steps.find(
+				(s) => s.id.toString() === overId
+			);
+
+			if (!overStep) {
+				return;
+			}
+
+			if (isDescendantOf(steps, activeStep.id, overStep.id)) {
+				return;
+			}
+
+			await moveStep(
+				activeStep,
+				overStep.id,
+				steps,
+				setSteps,
+				createNotice,
+				clearPositions
+			);
+		},
+		[viewMode, steps, setSteps, createNotice, clearPositions]
+	);
+
+	const reorderContextValue = useMemo(
+		() => ({
+			clearPositions,
+			isDragging: activeDragStep !== null,
+			activeDragStepId: activeDragStep?.id?.toString() ?? null,
+		}),
+		[clearPositions, activeDragStep]
+	);
 
 	const focusViewportOnTrigger = useCallback(
 		(duration = 0) => {
@@ -317,6 +492,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		// saveNodePositions(initialNodes);
 	}, [
 		automation?.id,
+		savedPositionsKey,
 		steps,
 		onStepClick,
 		onDeleteStep,
@@ -620,12 +796,21 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	}
 
 	return (
-		<div
-			className={`doublescale-reactflow-workflow${viewMode ? ' doublescale-reactflow-workflow--view-mode' : ''}`}
-		>
-			<div className="doublescale-reactflow-workflow__layout">
-				<div className="doublescale-reactflow-workflow__canvas">
-					<ReactFlow
+		<WorkflowReorderContext.Provider value={reorderContextValue}>
+			<div
+				className={`doublescale-reactflow-workflow${viewMode ? ' doublescale-reactflow-workflow--view-mode' : ''}${activeDragStep ? ' doublescale-reactflow-workflow--reordering' : ''}`}
+			>
+				<div className="doublescale-reactflow-workflow__layout">
+					<div className="doublescale-reactflow-workflow__canvas">
+						<DndContext
+							sensors={sensors}
+							collisionDetection={closestCenter}
+							onDragStart={handleDragStart}
+							onDragCancel={handleDragCancel}
+							onDragEnd={handleDragEnd}
+						>
+							<SortableContext items={sortableStepIds}>
+								<ReactFlow
 						nodes={nodesState}
 						edges={edgesState}
 						onNodesChange={handleNodesChange}
@@ -694,10 +879,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								position="bottom-right"
 							/>
 						)}
-					</ReactFlow>
+								</ReactFlow>
+							</SortableContext>
+							<DragOverlay dropAnimation={{ duration: 180, easing: 'ease' }}>
+								{activeDragStep ? (
+									<StepDragOverlay step={activeDragStep} />
+								) : null}
+							</DragOverlay>
+						</DndContext>
+					</div>
 				</div>
 			</div>
-		</div>
+		</WorkflowReorderContext.Provider>
 	);
 };
 

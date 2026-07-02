@@ -598,35 +598,35 @@ class RestContactController extends RestController {
 				'first_name'      => array(
 					'description'  => __( 'First name of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'last_name'       => array(
 					'description'  => __( 'Last name of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'email'           => array(
 					'description'  => __( 'Email of the contact (optional when a phone number is provided).', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_email',
 					),
 				),
 				'phone'           => array(
 					'description'  => __( 'Phone number of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'whatsapp_phone'  => array(
 					'description'  => __( 'Whatsapp phone number of the contact in E.164 format (e.g., +12025551234).', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => function ( $value, $request, $param ) {
 							// Allow empty values (null, empty string, or false)
@@ -649,42 +649,42 @@ class RestContactController extends RestController {
 				'address_1'       => array(
 					'description'  => __( 'Address line 1 of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'address_2'       => array(
 					'description'  => __( 'Address line 2 of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'city'            => array(
 					'description'  => __( 'City of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'state'           => array(
 					'description'  => __( 'State of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'country'         => array(
 					'description'  => __( 'Country of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'zip'             => array(
 					'description'  => __( 'Zip code of the contact.', 'doublescale' ),
 					'type'         => 'string',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
@@ -693,7 +693,7 @@ class RestContactController extends RestController {
 					'type'         => 'string',
 					'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified' ),
 					'default'      => 'subscribed',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
@@ -702,7 +702,7 @@ class RestContactController extends RestController {
 					'type'         => 'string',
 					'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					'default'      => 'subscribed',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
@@ -711,7 +711,7 @@ class RestContactController extends RestController {
 					'type'         => 'string',
 					'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					'default'      => 'subscribed',
-					'args_options' => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),

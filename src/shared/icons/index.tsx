@@ -303,3 +303,5 @@ export { default as UserIcon } from './user';
 export { default as RecordIcon } from './record';
 export { default as DownloadIcon } from './download';
 export { default as DollerIcon } from './doller';
+export { default as ShowIcon } from './show';
+

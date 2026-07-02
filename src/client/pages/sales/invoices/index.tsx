@@ -29,7 +29,9 @@ import { INVOICE_STATUS_LABELS, INVOICE_STATUSES, type InvoiceStatus } from '@/c
 import type { Invoice } from '@/types/sales';
 import {
 	DashboardContentCard,
+	DeleteIcon,
 	DraftIcon,
+	EditHeaderIcon,
 	MessageStatsCard,
 	NoData,
 	NovicesIcon,
@@ -38,7 +40,9 @@ import {
 	PainInvoicesIcon,
 	PartiallyPaidIcon,
 	PastInvoicesIcon,
+	ShowIcon,
 	UnpaidIcon,
+	ViewIcon,
 } from '@doublescale/components';
 import type { IconProps } from '@doublescale/config';
 
@@ -362,9 +366,9 @@ const InvoicesList: React.FC = () => {
 					/>
 				) : (
 					<>
-						<div className="overflow-x-auto">
+						<div className="overflow-x-auto rounded-[10px] border border-border bg-white mt-6">
 							<table className="w-full text-sm">
-								<thead className="border-b border-[#ECECEC]">
+								<thead className="border-b border-border bg-[#F8F8F8]">
 									<tr className="text-left text-[#6B6C76]">
 										<th className="px-6 py-3 font-medium">
 											{__('Invoice #', 'doublescale')}
@@ -410,7 +414,7 @@ const InvoicesList: React.FC = () => {
 											return (
 												<tr
 													key={invoice.id}
-													className="border-b border-[#ECECEC] last:border-b-0 hover:bg-[#F7F8FA]"
+													className=" border-b border-border odd:bg-white even:bg-[#FAFAFA] last:!border-b-0 hover:bg-[#F3F4F6]"
 												>
 													<td className="px-6 py-4 font-medium text-[#29292E]">
 														{invoice.invoice_number}
@@ -439,7 +443,7 @@ const InvoicesList: React.FC = () => {
 																type="button"
 																variant="ghost"
 																size="icon"
-																className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																className="h-8 w-8 text-[#3A3A99] hover:bg-blue-50 hover:text-[#3A3A99]"
 																aria-label={__('View', 'doublescale')}
 																onClick={() =>
 																	navigate(
@@ -449,14 +453,14 @@ const InvoicesList: React.FC = () => {
 																	)
 																}
 															>
-																<Eye className="h-4 w-4" />
+																<ShowIcon width={24} height={24} color="#3A3A99" />
 															</Button>
 															{canEdit ? (
 																<Button
 																	type="button"
 																	variant="ghost"
 																	size="icon"
-																	className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																	className="h-8 w-8 text-[#0D9DFC] hover:bg-blue-50 hover:text-[#0D9DFC]"
 																	aria-label={__('Edit', 'doublescale')}
 																	onClick={() =>
 																		navigate(
@@ -466,7 +470,7 @@ const InvoicesList: React.FC = () => {
 																		)
 																	}
 																>
-																	<Pencil className="h-4 w-4" />
+																	<EditHeaderIcon width={24} height={24} color="#0D9DFC" />
 																</Button>
 															) : null}
 															<Button
@@ -477,7 +481,7 @@ const InvoicesList: React.FC = () => {
 																aria-label={__('Delete', 'doublescale')}
 																onClick={() => setDeleteId(invoice.id)}
 															>
-																<Trash2 className="h-4 w-4" />
+																<DeleteIcon width={24} height={24} />
 															</Button>
 														</div>
 													</td>

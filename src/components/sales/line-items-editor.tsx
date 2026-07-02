@@ -117,6 +117,7 @@ interface LineItemsEditorProps {
 	/** When true, discount type is controlled outside (e.g. proposal header). */
 	hideDiscountTypeSelect?: boolean;
 	readOnly?: boolean;
+	emptyStateIcon?: React.ReactNode;
 }
 
 const addItemButtonClass =
@@ -242,6 +243,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 	onAdjustmentChange,
 	hideDiscountTypeSelect = false,
 	readOnly = false,
+	emptyStateIcon,
 }) => {
 	const { data: salesTaxes, loading: taxesLoading } = useSalesTaxes();
 
@@ -355,7 +357,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 			<div className="space-y-4">
 				{itemsHeader}
 				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-12 text-center">
-					<NovicesIcon width={70} height={70} />
+					{emptyStateIcon ?? <NovicesIcon width={70} height={70} />}
 					<p className="mt-4 text-sm text-[#6B6C76]">
 						{__(
 							'No items found—this space is ready for adding items',

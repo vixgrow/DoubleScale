@@ -8,7 +8,9 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Loader2, GripVertical } from 'lucide-react';
+import type { DraggableAttributes } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 
 /**
  * Internal dependencies - UI Components
@@ -26,27 +28,38 @@ import {
  */
 import { useAutomationContext } from '../../../../state/context';
 import { reorderStep, canMoveStep } from '../utils/step-reorder-utils';
+import { useWorkflowReorder } from './workflow-reorder-context';
 import type { AutomationStep } from '@doublescale/client';
 
 interface StepReorderControlsProps {
 	step: AutomationStep;
 	className?: string;
+	isDragging?: boolean;
+	isVisible?: boolean;
+	onMouseEnter?: () => void;
+	onMouseLeave?: () => void;
+	dragHandleProps?: {
+		attributes: DraggableAttributes;
+		listeners: SyntheticListenerMap | undefined;
+	};
 }
 
 const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	step,
 	className = '',
+	isDragging = false,
+	isVisible = false,
+	onMouseEnter,
+	onMouseLeave,
+	dragHandleProps,
 }) => {
 	const { steps, setSteps } = useAutomationContext();
+	const { clearPositions } = useWorkflowReorder();
 	const { createNotice } = useDispatch('doublescale/core');
 	const [isMoving, setIsMoving] = useState<'up' | 'down' | null>(null);
 
-	// Enhanced logic to check if step can move considering condition branches and complex scenarios
 	const getStepMoveability = () => {
-		// If step is under a condition (has parent_id and condition),
-		// it can only move within that specific branch
 		if (step.parent_id && step.condition) {
-			// Find other steps in the same condition branch
 			const sameBranchSteps = steps
 				.filter(
 					(s) =>
@@ -59,13 +72,11 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				(s) => s.id === step.id
 			);
 
-			// Special restrictions for steps between conditions in branches
 			let canMoveUp = currentIndex > 0;
 			let canMoveDown = currentIndex < sameBranchSteps.length - 1;
 			let reason = 'within_branch';
 
 			if (sameBranchSteps.length <= 1) {
-				// Only one step in branch - only allow movement if it's a condition step
 				if (step.type === 'condition') {
 					canMoveUp = currentIndex > 0;
 					canMoveDown = currentIndex < sameBranchSteps.length - 1;
@@ -78,20 +89,19 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 			return { canMoveUp, canMoveDown, reason };
 		}
 
-		// If step is a root level step (no parent), check for condition restrictions
-		if (!step.parent_id) {
+		if (!step.parent_id || step.parent_id === 0) {
 			const rootSteps = steps
-				.filter((s) => !s.parent_id)
+				.filter((s) => !s.parent_id || s.parent_id === 0)
 				.sort((a, b) => a.order - b.order);
 			const currentIndex = rootSteps.findIndex((s) => s.id === step.id);
 
-			let canMoveUp = currentIndex > 0;
-			let canMoveDown = currentIndex < rootSteps.length - 1;
-			let reason = 'root_level';
-			return { canMoveUp, canMoveDown, reason };
+			return {
+				canMoveUp: currentIndex > 0,
+				canMoveDown: currentIndex < rootSteps.length - 1,
+				reason: 'root_level',
+			};
 		}
 
-		// For other cases, use default logic
 		return {
 			canMoveUp: canMoveStep(steps, step, 'up'),
 			canMoveDown: canMoveStep(steps, step, 'down'),
@@ -104,19 +114,26 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	const handleMove = async (direction: 'up' | 'down') => {
 		if (isMoving) return;
 
+		const currentStep = steps.find((s) => s.id === step.id) ?? step;
+
 		setIsMoving(direction);
 
 		try {
-			await reorderStep(step, direction, steps, setSteps, createNotice);
+			await reorderStep(
+				currentStep,
+				direction,
+				steps,
+				setSteps,
+				createNotice,
+				clearPositions
+			);
 		} finally {
 			setIsMoving(null);
 		}
 	};
 
-	// Helper function to get tooltip text based on context
 	const getTooltipText = (direction: 'up' | 'down', canMove: boolean) => {
 		if (canMove) {
-			// Add context-aware enabled tooltips
 			if (reason === 'between_conditions_root') {
 				return direction === 'up'
 					? __('Move up (between conditions)', 'doublescale')
@@ -127,48 +144,38 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				: __('Move step down', 'doublescale');
 		}
 
-		// Disabled tooltip explanations based on reason
 		switch (reason) {
 			case 'single_step_in_branch':
 				return __('Only step in this branch', 'doublescale');
-
 			case 'single_condition_in_branch':
 				return direction === 'up'
 					? __('Move condition up', 'doublescale')
 					: __('Move condition down', 'doublescale');
-
 			case 'between_conditions_in_branch':
 				return __(
 					'Cannot move when between conditions in branch',
 					'doublescale'
 				);
-
 			case 'after_condition_in_branch':
 				return direction === 'up'
 					? __('Cannot move above condition in branch', 'doublescale')
 					: __('Cannot move below this branch', 'doublescale');
-
 			case 'before_condition_in_branch':
 				return direction === 'up'
 					? __('Cannot move above this branch', 'doublescale')
 					: __('Cannot move below condition in branch', 'doublescale');
-
 			case 'before_condition_root':
 				return direction === 'up'
 					? __('Move step up', 'doublescale')
 					: __('Cannot move down past condition', 'doublescale');
-
 			case 'after_condition_root':
 				return direction === 'up'
 					? __('Cannot move up past condition', 'doublescale')
 					: __('Move step down', 'doublescale');
-
 			case 'between_conditions_root':
 				return __('Cannot move past conditions', 'doublescale');
-
 			case 'root_level':
 			default:
-				// Simple boundary restrictions for root level and other cases
 				return direction === 'up'
 					? __('Already at top', 'doublescale')
 					: __('Already at bottom', 'doublescale');
@@ -177,53 +184,74 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 
 	return (
 		<TooltipProvider>
-			<div className={`doublescale-step-reorder-controls ${className}`}>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							disabled={!canMoveUp}
-							onClick={(e) => {
-								e.stopPropagation();
-								handleMove('up');
-							}}
-							className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--up h-8 w-8"
-						>
-							{isMoving === 'up' ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								<ArrowUp className="h-4 w-4" />
-							)}
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent side="top">
-						<p>{getTooltipText('up', canMoveUp)}</p>
-					</TooltipContent>
-				</Tooltip>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							disabled={!canMoveDown}
-							onClick={(e) => {
-								e.stopPropagation();
-								handleMove('down');
-							}}
-							className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--down h-8 w-8"
-						>
-							{isMoving === 'down' ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								<ArrowDown className="h-4 w-4" />
-							)}
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent side="top">
-						<p>{getTooltipText('down', canMoveDown)}</p>
-					</TooltipContent>
-				</Tooltip>
+			<div
+				className={`doublescale-step-reorder-controls ${isVisible ? 'doublescale-step-reorder-controls--visible' : ''} ${isDragging ? 'doublescale-step-reorder-controls--active' : ''} ${className}`}
+				onClick={(e) => e.stopPropagation()}
+				onMouseEnter={onMouseEnter}
+				onMouseLeave={onMouseLeave}
+			>
+				{dragHandleProps && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--drag nodrag nopan"
+								{...dragHandleProps.attributes}
+								{...dragHandleProps.listeners}
+							>
+								<GripVertical className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent side="left">
+							<p>{__('Drag to reorder', 'doublescale')}</p>
+						</TooltipContent>
+					</Tooltip>
+				)}
+
+				<div className="doublescale-step-reorder-controls__arrows">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								disabled={!canMoveUp}
+								onClick={() => handleMove('up')}
+								className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--up"
+							>
+								{isMoving === 'up' ? (
+									<Loader2 className="h-3.5 w-3.5 animate-spin" />
+								) : (
+									<ArrowUp className="h-3.5 w-3.5" />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent side="left">
+							<p>{getTooltipText('up', canMoveUp)}</p>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								disabled={!canMoveDown}
+								onClick={() => handleMove('down')}
+								className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--down"
+							>
+								{isMoving === 'down' ? (
+									<Loader2 className="h-3.5 w-3.5 animate-spin" />
+								) : (
+									<ArrowDown className="h-3.5 w-3.5" />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent side="left">
+							<p>{getTooltipText('down', canMoveDown)}</p>
+						</TooltipContent>
+					</Tooltip>
+				</div>
 			</div>
 		</TooltipProvider>
 	);

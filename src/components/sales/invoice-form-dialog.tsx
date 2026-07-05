@@ -36,11 +36,7 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 		: __('Edit Invoice', 'doublescale');
 
 	return (
-		<Dialog
-			open={open}
-			modal={false}
-			onOpenChange={onOpenChange}
-		>
+		<Dialog open={open} modal={false} onOpenChange={onOpenChange}>
 			<DialogContent
 				className="doublescale-contact-page doublescale-invoice-form-dialog z-[150200] flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60"
 				style={{

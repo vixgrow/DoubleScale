@@ -10,11 +10,13 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { useDroppable } from '@dnd-kit/core';
 
 /**
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
+import { useWorkflowReorder } from '../components/workflow-reorder-context';
 import type { AutomationStep } from '@doublescale/client';
 import { AddStepDialog } from '../../add-step-dialog';
 
@@ -61,14 +63,25 @@ const updateStepOrderRecursive = (
 	return { newSteps, updatedSteps, currentStepOrder };
 };
 
-const AddStepNode: React.FC<NodeProps> = ({ data }) => {
+const AddStepNode: React.FC<NodeProps> = ({ id, data }) => {
 	const { parentId, condition, prevStep, onStepClick } =
 		data as unknown as AddStepNodeData;
 	const [loading, setLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
+	const { isDragging: isGlobalDragging } = useWorkflowReorder();
 	const { createNotice } = useDispatch('doublescale/core');
+
+	const { setNodeRef, isOver } = useDroppable({
+		id,
+		data: {
+			type: 'add-step',
+			parentId: parentId || 0,
+			condition: condition || '',
+		},
+		disabled: viewMode,
+	});
 
 	if (!automation) {
 		return null;
@@ -203,7 +216,8 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<div
-			className={`doublescale-reactflow-node doublescale-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'doublescale-reactflow-node--disabled' : ''}`}
+			ref={setNodeRef}
+			className={`doublescale-reactflow-node doublescale-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'doublescale-reactflow-node--disabled' : ''}${isOver ? ' doublescale-reactflow-node--drop-target' : ''}${isGlobalDragging && !isOver ? ' doublescale-reactflow-node--drag-active' : ''}`}
 		>
 			<Handle
 				type="target"

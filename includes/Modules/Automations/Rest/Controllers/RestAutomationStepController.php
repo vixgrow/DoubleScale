@@ -91,10 +91,10 @@ class RestAutomationStepController extends RestController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'direction'     => array(
-							'description' => __( 'Direction to move the step (up or down)', 'doublescale' ),
+							'description' => __( 'Direction to move the step (up, down, or move)', 'doublescale' ),
 							'type'        => 'string',
-							'enum'        => array( 'up', 'down' ),
-							'required'    => true,
+							'enum'        => array( 'up', 'down', 'move' ),
+							'required'    => false,
 						),
 						'updated_steps' => array(
 							'description' => __( 'Array of steps with updated orders', 'doublescale' ),
@@ -441,8 +441,8 @@ class RestAutomationStepController extends RestController {
 			}
 
 			// Validate direction
-			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
-				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'doublescale' ), array( 'status' => 400 ) );
+			if ( $direction && ! in_array( $direction, array( 'up', 'down', 'move' ), true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up", "down", or "move"', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			// Update the orders based on the frontend calculations
@@ -737,7 +737,18 @@ class RestAutomationStepController extends RestController {
 				continue;
 			}
 
-			$step->order = $step_data['order'];
+			if ( isset( $step_data['order'] ) ) {
+				$step->order = (int) $step_data['order'];
+			}
+
+			if ( isset( $step_data['parent_id'] ) ) {
+				$step->parent_id = (int) $step_data['parent_id'];
+			}
+
+			if ( array_key_exists( 'condition', $step_data ) ) {
+				$step->condition = (string) $step_data['condition'];
+			}
+
 			$step->save();
 		}
 	}

@@ -16,7 +16,7 @@ import React from 'react';
 import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import NodeContextMenu from './node-context-menu';
 import NodeActionsDropdown from './node-actions-dropdown';
-import StepReorderControls from './step-reorder-controls';
+import SortableNodeContainer from './sortable-node-container';
 import { useAutomationContext } from '../../../../state/context';
 import { deleteStep } from '../utils/step-utils';
 
@@ -74,7 +74,10 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className={`doublescale-reactflow-node ${className}`}>
+			<SortableNodeContainer
+				step={step}
+				className={`doublescale-reactflow-node ${className}`}
+			>
 				{showTargetHandle && (
 					<Handle
 						type="target"
@@ -82,9 +85,6 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 					/>
 				)}
-
-				{/* Step Reorder Controls */}
-				<StepReorderControls step={step} />
 
 				<div className="doublescale-reactflow-node__icon">{icon}</div>
 				<div
@@ -117,7 +117,7 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 
 				{/* Additional handles (e.g., for condition nodes) */}
 				{additionalHandles}
-			</div>
+			</SortableNodeContainer>
 		</NodeContextMenu>
 	);
 };

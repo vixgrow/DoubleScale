@@ -16,7 +16,7 @@ import { AlertTriangle } from 'lucide-react';
 import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
-import StepReorderControls from '../components/step-reorder-controls';
+import SortableNodeContainer from '../components/sortable-node-container';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep, duplicateStep } from '../utils/step-utils';
@@ -169,7 +169,9 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 			onDelete={viewMode ? undefined : handleDelete}
 			disabled={viewMode}
 		>
-			<div
+			<SortableNodeContainer
+				step={step}
+				viewMode={viewMode}
 				className={`doublescale-reactflow-node doublescale-reactflow-node--condition doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
@@ -177,9 +179,6 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 					position={Position.Top}
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
-
-				{/* Step Reorder Controls - hide in view mode */}
-				{!viewMode && <StepReorderControls step={step} />}
 
 				<NodeLayout
 					variant="condition"
@@ -215,7 +214,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 					id="no"
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--source doublescale-reactflow-handle--no"
 				/>
-			</div>
+			</SortableNodeContainer>
 		</NodeContextMenu>
 	);
 };

@@ -4,6 +4,9 @@
 
 import React, { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { NoticeMessage } from '@doublescale/client';
+
+import { NoticeBanner } from '@doublescale/components';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -67,6 +70,7 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 	const [paymentDate, setPaymentDate] = useState(today());
 	const [transactionId, setTransactionId] = useState('');
 	const [note, setNote] = useState('');
+	const [validationError, setValidationError] = useState<NoticeMessage | null>(null);
 
 	useEffect(() => {
 		if (open) {
@@ -75,14 +79,30 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 			setPaymentDate(today());
 			setTransactionId('');
 			setNote('');
+			setValidationError(null);
 		}
 	}, [open, balanceDue, modeOptions]);
 
 	const handleSubmit = () => {
-		const parsed = parseFloat(amount);
-		if (!parsed || parsed <= 0) {
+		const trimmed = amount.trim();
+		if (!trimmed) {
+			setValidationError({
+				type: 'error',
+				message: __('Please enter a payment amount.', 'doublescale'),
+			});
 			return;
 		}
+
+		const parsed = parseFloat(trimmed);
+		if (!Number.isFinite(parsed) || parsed <= 0) {
+			setValidationError({
+				type: 'error',
+				message: __('Please enter a valid payment amount greater than zero.', 'doublescale'),
+			});
+			return;
+		}
+
+		setValidationError(null);
 		void onSubmit({
 			amount: parsed,
 			payment_mode: paymentMode,
@@ -94,10 +114,20 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-md">
+			<DialogContent
+				className="max-w-md z-[150220]"
+				overlayClassName="z-[150210] bg-black/45 backdrop-blur-[1px]"
+			>
 				<DialogHeader>
 					<DialogTitle>{__('Record Payment', 'doublescale')}</DialogTitle>
 				</DialogHeader>
+
+				{validationError ? (
+					<NoticeBanner
+						notice={validationError}
+						closeNotice={() => setValidationError(null)}
+					/>
+				) : null}
 
 				<div className="space-y-4">
 					<div className="space-y-2">
@@ -107,7 +137,12 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 							min="0"
 							step="0.01"
 							value={amount}
-							onChange={(e) => setAmount(e.target.value)}
+							onChange={(e) => {
+								setAmount(e.target.value);
+								if (validationError) {
+									setValidationError(null);
+								}
+							}}
 						/>
 						<p className="text-xs text-muted-foreground">
 							{__('Balance due:', 'doublescale')}{' '}

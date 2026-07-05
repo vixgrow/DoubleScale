@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from '@wordpress/element';
+import type { NoticeMessage } from '@doublescale/client';
 import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
@@ -29,16 +30,21 @@ import { INVOICE_STATUS_LABELS, INVOICE_STATUSES, type InvoiceStatus } from '@/c
 import type { Invoice } from '@/types/sales';
 import {
 	DashboardContentCard,
+	DeleteIcon,
 	DraftIcon,
+	EditHeaderIcon,
 	MessageStatsCard,
 	NoData,
+	NoticeBanner,
 	NovicesIcon,
 	OutstandingInvoicesIcon,
 	PageHeader,
 	PainInvoicesIcon,
 	PartiallyPaidIcon,
 	PastInvoicesIcon,
+	ShowIcon,
 	UnpaidIcon,
+	ViewIcon,
 } from '@doublescale/components';
 import type { IconProps } from '@doublescale/config';
 
@@ -141,6 +147,9 @@ const InvoicesList: React.FC = () => {
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
+	const [editDialogInvoiceId, setEditDialogInvoiceId] = useState<number | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const closeNotice = () => setNotice(null);
 
 	const { data, loading, error, refetch } = useInvoices({
 		page,
@@ -199,6 +208,9 @@ const InvoicesList: React.FC = () => {
 
 	return (
 		<div className="space-y-6">
+			{notice ? (
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+			) : null}
 
 			<PageHeader title={__('Invoices', 'doublescale')}
 			actions={[
@@ -362,9 +374,9 @@ const InvoicesList: React.FC = () => {
 					/>
 				) : (
 					<>
-						<div className="overflow-x-auto">
+						<div className="overflow-x-auto rounded-[10px] border-2 border-border bg-white mt-6">
 							<table className="w-full text-sm">
-								<thead className="border-b border-[#ECECEC]">
+								<thead className="border-b-2 border-border bg-[#F8F8F8]">
 									<tr className="text-left text-[#6B6C76]">
 										<th className="px-6 py-3 font-medium">
 											{__('Invoice #', 'doublescale')}
@@ -384,7 +396,7 @@ const InvoicesList: React.FC = () => {
 										<th className="px-4 py-3 font-medium">
 											{__('Due Date', 'doublescale')}
 										</th>
-										<th className="px-6 py-3 font-medium text-right">
+										<th className="px-6 py-3 font-medium text-center">
 											{__('Actions', 'doublescale')}
 										</th>
 									</tr>
@@ -410,7 +422,7 @@ const InvoicesList: React.FC = () => {
 											return (
 												<tr
 													key={invoice.id}
-													className="border-b border-[#ECECEC] last:border-b-0 hover:bg-[#F7F8FA]"
+													className="border-b border-border bg-white last:!border-b-0 hover:bg-[#F7F8FA]"
 												>
 													<td className="px-6 py-4 font-medium text-[#29292E]">
 														{invoice.invoice_number}
@@ -439,7 +451,7 @@ const InvoicesList: React.FC = () => {
 																type="button"
 																variant="ghost"
 																size="icon"
-																className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																className="h-8 w-8 text-[#3A3A99] hover:bg-blue-50 hover:text-[#3A3A99]"
 																aria-label={__('View', 'doublescale')}
 																onClick={() =>
 																	navigate(
@@ -449,24 +461,18 @@ const InvoicesList: React.FC = () => {
 																	)
 																}
 															>
-																<Eye className="h-4 w-4" />
+																<ShowIcon width={24} height={24} color="#3A3A99" />
 															</Button>
 															{canEdit ? (
 																<Button
 																	type="button"
 																	variant="ghost"
 																	size="icon"
-																	className="h-8 w-8 text-[#2563EB] hover:bg-blue-50 hover:text-[#2563EB]"
+																	className="h-8 w-8 text-[#0D9DFC] hover:bg-blue-50 hover:text-[#0D9DFC]"
 																	aria-label={__('Edit', 'doublescale')}
-																	onClick={() =>
-																		navigate(
-																			getToLink(
-																				`sales/invoices/${invoice.id}/edit`
-																			)
-																		)
-																	}
+																	onClick={() => setEditDialogInvoiceId(invoice.id)}
 																>
-																	<Pencil className="h-4 w-4" />
+																	<EditHeaderIcon width={24} height={24} color="#0D9DFC" />
 																</Button>
 															) : null}
 															<Button
@@ -477,7 +483,7 @@ const InvoicesList: React.FC = () => {
 																aria-label={__('Delete', 'doublescale')}
 																onClick={() => setDeleteId(invoice.id)}
 															>
-																<Trash2 className="h-4 w-4" />
+																<DeleteIcon width={24} height={24} />
 															</Button>
 														</div>
 													</td>
@@ -501,7 +507,29 @@ const InvoicesList: React.FC = () => {
 			<InvoiceFormDialog
 				open={createDialogOpen}
 				onOpenChange={setCreateDialogOpen}
-				onSaved={() => refreshAll()}
+				onSaved={() => {
+					setNotice({
+						type: 'success',
+						message: __('Invoice created successfully.', 'doublescale'),
+					});
+					refreshAll();
+				}}
+			/>
+			<InvoiceFormDialog
+				open={editDialogInvoiceId !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditDialogInvoiceId(null);
+					}
+				}}
+				invoiceId={editDialogInvoiceId}
+				onSaved={() => {
+					setNotice({
+						type: 'success',
+						message: __('Invoice updated successfully.', 'doublescale'),
+					});
+					refreshAll();
+				}}
 			/>
 
 			<ConfirmDialog
@@ -513,7 +541,7 @@ const InvoicesList: React.FC = () => {
 				}}
 				title={__('Delete Invoice', 'doublescale')}
 				description={__(
-					'Are you sure you want to delete this invoice? This action cannot be undone.',
+					'Do you really want to delete this invoice?',
 					'doublescale'
 				)}
 				confirmLabel={__('Delete', 'doublescale')}

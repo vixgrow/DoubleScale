@@ -52,7 +52,7 @@ const TypeformInstructions: React.FC = () => {
 			).doublescalePro?.proPluginUrl) ||
 		ConfigAPI.getPluginDirUrl();
 
-	const logoUrl = `${proPluginUrl}assets/images/typeform/typeform.png`;
+	const logoUrl = `${proPluginUrl}assets/images/typeform/typeform.svg`;
 
 	return (
 		<div className="space-y-4">

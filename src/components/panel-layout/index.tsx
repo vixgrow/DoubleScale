@@ -106,7 +106,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			{/* Scrollable Content Section */}
 			{fullWidth ? (
 				<div className="flex min-h-0 flex-1 flex-col bg-[#F7F8FA] p-4 md:p-6">
-					<div className="min-h-0 flex-1 overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+					<div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
 						{children}
 					</div>
 				</div>

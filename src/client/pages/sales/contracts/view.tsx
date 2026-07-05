@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
 import {
 	DeleteIcon,
+	DownloadIcon,
 	EditHeaderIcon,
 	GradientContractBodyEmptyIcon,
 	PanelLayout,
@@ -97,6 +98,9 @@ const DownloadPdfIcon = () => (
 
 const contractViewTabsClassName =
 	'h-10 flex-1 rounded-xl px-4 text-base font-normal transition-colors data-[state=active]:border-0 data-[state=active]:bg-[#EEEEFF] data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=inactive]:border data-[state=inactive]:border-[#DEE1E6] data-[state=inactive]:bg-white data-[state=inactive]:text-[#29292E] data-[state=inactive]:shadow-none hover:data-[state=inactive]:bg-white';
+
+const contractBodyContentClassName =
+	'contract-body-content min-w-0 w-full max-w-full overflow-x-auto break-words prose prose-sm max-w-none text-foreground [&_img]:h-auto [&_img]:max-w-full [&_video]:max-w-full [&_iframe]:max-w-full [&_table]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap';
 
 const ContractView: React.FC = () => {
 	const navigate = useNavigate();
@@ -324,11 +328,13 @@ const ContractView: React.FC = () => {
 	);
 
 	const contentTab = hasBodyContent ? (
-		<div
-			className="prose prose-sm max-w-none text-foreground"
-			// eslint-disable-next-line react/no-danger
-			dangerouslySetInnerHTML={{ __html: contract.description || '' }}
-		/>
+		<div className="min-w-0 overflow-hidden">
+			<div
+				className={contractBodyContentClassName}
+				// eslint-disable-next-line react/no-danger
+				dangerouslySetInnerHTML={{ __html: contract.description || '' }}
+			/>
+		</div>
 	) : (
 		<div className="flex flex-col items-center justify-center py-20 text-center">
 			<GradientContractBodyEmptyIcon />
@@ -339,7 +345,7 @@ const ContractView: React.FC = () => {
 	);
 
 	return panelShell(
-		<div className="space-y-6">
+		<div className="min-w-0 space-y-6">
 			{notice ? (
 				<div className="rounded border bg-slate-50 px-3 py-2 text-sm text-slate-700">
 					{notice}
@@ -369,7 +375,7 @@ const ContractView: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="flex flex-wrap items-center justify-start gap-2 lg:justify-end">
+					<div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end">
 						{showSubmitApproval ? (
 							<Button
 								variant="outline"
@@ -404,7 +410,7 @@ const ContractView: React.FC = () => {
 							disabled={busy}
 							aria-label={__('Download PDF', 'doublescale')}
 						>
-							<DownloadPdfIcon />
+							<DownloadIcon />
 						</Button>
 						{canEdit ? (
 							<Button
@@ -432,11 +438,12 @@ const ContractView: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="rounded-xl border border-[#DEE1E6] bg-accent p-6">
+				<div className="min-w-0 overflow-hidden rounded-xl border border-[#DEE1E6] bg-accent p-6">
 					<PageTabs
+						className="min-w-0"
 						defaultValue="information"
 						tabsListWrapperClassName="mb-6 border-b border-border pb-6"
-						tabsListClassName="flex h-auto w-full max-w-md gap-3 bg-transparent p-0"
+						tabsListClassName="flex h-auto w-full max-w-sm flex-col sm:flex-row gap-3 bg-transparent p-0"
 						tabsTriggerClassName={contractViewTabsClassName}
 						tabsList={[
 							{

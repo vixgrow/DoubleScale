@@ -6,7 +6,7 @@ import React, { useCallback, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDropzone } from 'react-dropzone';
 
-import { DeleteIcon, FormField } from '@doublescale/components';
+import { DeleteIcon, FormField, DownloadIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ContractAttachmentLimits } from '@/types/sales';
@@ -334,13 +334,16 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 		</p>
 	) : attachments.length > 0 ? (
 		isFormLayout ? (
-			<div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{attachments.map((file) => (
 					<div
 						key={file.file_hash}
-						className={cn("flex max-w-xs sm:max-w-sm flex-1 items-center justify-between gap-3 rounded-lg border border-[#DEE1E6] p-4", file_classname)}
+						className={cn(
+							'flex min-w-0 items-center justify-between gap-3 rounded-lg border border-[#DEE1E6] p-4',
+							file_classname
+						)}
 					>
-						<span className="truncate text-sm font-medium text-foreground">
+						<span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
 							{file.file_name}
 						</span>
 						<div className="flex shrink-0 items-center gap-1">
@@ -357,31 +360,7 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 									rel="noopener noreferrer"
 									download
 								>
-									<svg
-										width="18"
-										height="18"
-										viewBox="0 0 18 18"
-										fill="none"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<path
-											opacity="0.2"
-											d="M9 18C4.05 18 0 13.95 0 9C0 4.05 4.05 0 9 0C13.95 0 18 4.05 18 9C18 13.95 13.95 18 9 18Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M8.9992 11.3128C8.8282 11.3128 8.65711 11.2498 8.52211 11.1148L6.59614 9.18881C6.33514 8.92781 6.33514 8.49581 6.59614 8.23481C6.85714 7.97381 7.2892 7.97381 7.5502 8.23481L8.9992 9.68381L10.4482 8.23481C10.7092 7.97381 11.1412 7.97381 11.4022 8.23481C11.6632 8.49581 11.6632 8.92781 11.4022 9.18881L9.4762 11.1148C9.3412 11.2498 9.1702 11.3128 8.9992 11.3128Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M8.99922 11.3133C8.63022 11.3133 8.32422 11.0073 8.32422 10.6383V4.78828C8.32422 4.41928 8.63022 4.11328 8.99922 4.11328C9.36822 4.11328 9.67422 4.41928 9.67422 4.78828V10.6383C9.67422 11.0163 9.36822 11.3133 8.99922 11.3133Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M12.1508 13.8871H5.85078C5.48178 13.8871 5.17578 13.5811 5.17578 13.2121C5.17578 12.8431 5.48178 12.5371 5.85078 12.5371H12.1508C12.5198 12.5371 12.8258 12.8431 12.8258 13.2121C12.8258 13.5811 12.5198 13.8871 12.1508 13.8871Z"
-											fill="#3A3A99"
-										/>
-									</svg>
+									<DownloadIcon />
 								</a>
 							</Button>
 							{canManage ? (
@@ -441,31 +420,7 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 									rel="noopener noreferrer"
 									download
 								>
-									<svg
-										width="18"
-										height="18"
-										viewBox="0 0 18 18"
-										fill="none"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<path
-											opacity="0.2"
-											d="M9 18C4.05 18 0 13.95 0 9C0 4.05 4.05 0 9 0C13.95 0 18 4.05 18 9C18 13.95 13.95 18 9 18Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M8.9992 11.3128C8.8282 11.3128 8.65711 11.2498 8.52211 11.1148L6.59614 9.18881C6.33514 8.92781 6.33514 8.49581 6.59614 8.23481C6.85714 7.97381 7.2892 7.97381 7.5502 8.23481L8.9992 9.68381L10.4482 8.23481C10.7092 7.97381 11.1412 7.97381 11.4022 8.23481C11.6632 8.49581 11.6632 8.92781 11.4022 9.18881L9.4762 11.1148C9.3412 11.2498 9.1702 11.3128 8.9992 11.3128Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M8.99922 11.3133C8.63022 11.3133 8.32422 11.0073 8.32422 10.6383V4.78828C8.32422 4.41928 8.63022 4.11328 8.99922 4.11328C9.36822 4.11328 9.67422 4.41928 9.67422 4.78828V10.6383C9.67422 11.0163 9.36822 11.3133 8.99922 11.3133Z"
-											fill="#3A3A99"
-										/>
-										<path
-											d="M12.1508 13.8871H5.85078C5.48178 13.8871 5.17578 13.5811 5.17578 13.2121C5.17578 12.8431 5.48178 12.5371 5.85078 12.5371H12.1508C12.5198 12.5371 12.8258 12.8431 12.8258 13.2121C12.8258 13.5811 12.5198 13.8871 12.1508 13.8871Z"
-											fill="#3A3A99"
-										/>
-									</svg>
+									<DownloadIcon />
 								</a>
 							</Button>
 							{canManage ? (

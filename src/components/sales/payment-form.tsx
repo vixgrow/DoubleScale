@@ -31,6 +31,9 @@ interface PaymentFormProps {
 	busy?: boolean;
 	error?: string | null;
 	readOnly?: boolean;
+	layout?: 'page' | 'dialog';
+	formId?: string;
+	hideActions?: boolean;
 	onSubmit: (payload: RecordPaymentPayload) => void | Promise<void>;
 }
 
@@ -39,8 +42,15 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 	busy = false,
 	error = null,
 	readOnly = false,
+	layout = 'page',
+	formId,
+	hideActions = false,
 	onSubmit,
 }) => {
+	const isDialog = layout === 'dialog';
+	const inputClass = isDialog
+		? '!rounded-lg !border-border'
+		: undefined;
 	const currency = payment.invoice?.currency || 'USD';
 	const maxAmount = useMemo(() => {
 		const total = payment.invoice?.total ?? 0;
@@ -94,7 +104,11 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
+		<form
+			id={formId}
+			onSubmit={handleSubmit}
+			className={isDialog ? 'space-y-4' : 'space-y-6'}
+		>
 			{readOnly ? (
 				<div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
 					{__(
@@ -103,7 +117,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 					)}
 				</div>
 			) : null}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div
+				className={
+					isDialog
+						? 'space-y-4'
+						: 'grid grid-cols-1 gap-6 md:grid-cols-2'
+				}
+			>
 				<div className="space-y-2">
 					<Label htmlFor="payment-amount">
 						{__('Amount Received', 'doublescale')}
@@ -119,14 +139,18 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 						disabled={readOnly}
 						readOnly={readOnly}
 						required
+						placeholder={__('Amount Received', 'doublescale')}
+						className={inputClass}
 					/>
-					<p className="text-xs text-muted-foreground">
-						{__('Maximum:', 'doublescale')}{' '}
-						{new Intl.NumberFormat(undefined, {
-							style: 'currency',
-							currency,
-						}).format(maxAmount)}
-					</p>
+					{!isDialog ? (
+						<p className="text-xs text-muted-foreground">
+							{__('Maximum:', 'doublescale')}{' '}
+							{new Intl.NumberFormat(undefined, {
+								style: 'currency',
+								currency,
+							}).format(maxAmount)}
+						</p>
+					) : null}
 				</div>
 
 				<div className="space-y-2">
@@ -134,13 +158,18 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 						{__('Payment Date', 'doublescale')}
 						<RequiredMark />
 					</Label>
-					<DatePicker value={paymentDate} onChange={setPaymentDate} disabled={readOnly} />
+					<DatePicker
+						value={paymentDate}
+						onChange={setPaymentDate}
+						disabled={readOnly}
+						buttonClassName={inputClass}
+					/>
 				</div>
 
 				<div className="space-y-2">
 					<Label>{__('Payment Mode', 'doublescale')}</Label>
 					<Select value={paymentMode} onValueChange={setPaymentMode} disabled={readOnly}>
-						<SelectTrigger disabled={readOnly}>
+						<SelectTrigger disabled={readOnly} className={inputClass}>
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
@@ -154,13 +183,16 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="payment-transaction-id">{__('Transaction ID', 'doublescale')}</Label>
+					<Label htmlFor="payment-transaction-id">
+						{__('Transaction ID', 'doublescale')}
+					</Label>
 					<Input
 						id="payment-transaction-id"
 						value={transactionId}
 						onChange={(e) => setTransactionId(e.target.value)}
 						disabled={readOnly}
 						readOnly={readOnly}
+						className={inputClass}
 					/>
 				</div>
 			</div>
@@ -173,7 +205,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 					onChange={(e) => setNote(e.target.value)}
 					disabled={readOnly}
 					readOnly={readOnly}
-					rows={4}
+					rows={isDialog ? 5 : 4}
+					placeholder={__('Type here...', 'doublescale')}
+					className={inputClass}
 				/>
 			</div>
 
@@ -186,7 +220,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 				</div>
 			) : null}
 
-			{!readOnly ? (
+			{!readOnly && !hideActions ? (
 				<div className="flex justify-end">
 					<Button type="submit" disabled={busy}>
 						{busy ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}

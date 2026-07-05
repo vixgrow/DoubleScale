@@ -483,7 +483,7 @@ const InvoiceView: React.FC = () => {
 						>
 
 							{__('Record Payment', 'doublescale')}
-							<RecordIcon width={32} height={32} />
+							<RecordIcon />
 						</Button>
 						{showSubmitApproval ? (
 							<Button

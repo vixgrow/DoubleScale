@@ -335,6 +335,9 @@ export interface PaymentDetail extends PaymentListItem {
 
 export interface PaymentFilters {
 	search?: string;
+	payment_mode?: string;
+	payment_date_from?: string;
+	payment_date_to?: string;
 	sort_by?: string;
 	sort_order?: 'asc' | 'desc';
 	per_page?: number;

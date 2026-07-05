@@ -15,6 +15,7 @@ import {
 	DeleteIcon,
 	DownloadIcon,
 	EditHeaderIcon,
+	GradientProposalsIcon,
 	LocationIcon,
 	PanelLayout,
 	PhoneIcon,
@@ -329,7 +330,7 @@ const ProposalView: React.FC = () => {
 			<ApprovalStatusBanner approval={proposal.approval} />
 
 			<div className="space-y-6">
-				<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between border-b border-border pb-6">
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between border-b border-border pb-6">
 					<div className="min-w-0 space-y-3">
 						<h1 className="text-3xl font-bold tracking-tight text-[#09090B]">
 							{proposal.proposal_number}
@@ -795,6 +796,7 @@ const ProposalView: React.FC = () => {
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
+				icon={<GradientProposalsIcon width={32} height={32} />}
 				title={__('Send Proposal', 'doublescale')}
 				description={__(
 					'Send this proposal to the customer by email? They will receive a link to view, accept, or decline.',

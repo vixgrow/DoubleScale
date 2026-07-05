@@ -11,6 +11,7 @@ import {
 	DownloadIcon,
 	EditHeaderIcon,
 	GradientContractBodyEmptyIcon,
+	GradientContractsIcon,
 	PanelLayout,
 	SendTestEmailIcon,
 	UserActivityIcon,
@@ -355,7 +356,7 @@ const ContractView: React.FC = () => {
 			<ApprovalStatusBanner approval={contract.approval} />
 
 			<div className="space-y-6">
-				<div className="flex flex-col gap-4 border-b border-border pb-6 xl:flex-row xl:items-start xl:justify-between">
+				<div className="flex flex-col gap-4 border-b border-border pb-6 lg:flex-row lg:items-start lg:justify-between">
 					<div className="min-w-0 space-y-3">
 						<h1 className="text-3xl font-bold tracking-tight text-[#09090B]">
 							{contract.contract_number}
@@ -375,7 +376,7 @@ const ContractView: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end">
+					<div className="flex flex-wrap items-center justify-start gap-2 lg:justify-end">
 						{showSubmitApproval ? (
 							<Button
 								variant="outline"
@@ -517,7 +518,7 @@ const ContractView: React.FC = () => {
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
-				documentType="contract"
+				icon={<GradientContractsIcon width={24} height={24} />}
 				title={__('Send Contract', 'doublescale')}
 				description={__(
 					'Send this contract to the customer by email? They will receive a link to view and sign.',

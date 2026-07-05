@@ -17,6 +17,8 @@ import {
 	FormField,
 	TagField,
 	InfiniteScrollSelect,
+	NovicesIcon,
+	PanelLayout,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -460,17 +462,42 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		}
 	};
 
+	const pageTitle = isNew
+		? __('Create New Invoice', 'doublescale')
+		: __('Edit Invoice', 'doublescale');
+
+	const breadcrumbItems = [
+		{ label: __('Sales (Invoices)', 'doublescale'), href: 'sales/invoices' },
+		{ label: pageTitle },
+	];
+
+	const panelShell = (children: React.ReactNode) => (
+		<PanelLayout
+			fullWidth
+			items={breadcrumbItems}
+			showPanelClose
+			onClosePanel={goBack}
+			handleNavigate={(href) => navigate(getToLink(href))}
+		>
+			{children}
+		</PanelLayout>
+	);
+
 	if (!isNew && loading) {
-		return (
-			<div className="p-6 text-muted-foreground">
+		if (isDialog) {
+			return (
+				<div className="p-6 text-muted-foreground">
+					{__('Loading…', 'doublescale')}
+				</div>
+			);
+		}
+
+		return panelShell(
+			<div className="py-12 text-center text-muted-foreground">
 				{__('Loading…', 'doublescale')}
 			</div>
 		);
 	}
-
-	const pageTitle = isNew
-		? __('Create New Invoice', 'doublescale')
-		: __('Edit Invoice', 'doublescale');
 
 	const formBody = (
 		<>
@@ -478,7 +505,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
 					{pageTitle}
 				</h2>
-			) : null}
+			) : (
+				<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
+			)}
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
@@ -857,23 +886,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	);
 
 	const formFooter = (
-		<div
-			className={
-				isDialog
-					? 'flex w-full items-center justify-between gap-3'
-					: 'flex justify-end gap-2'
-			}
-		>
+		<div className="flex flex-col-reverse gap-3 sm:flex-row items-center sm:justify-between">
 			<Button
-				variant={isDialog ? 'secondaryDeepBlue' : 'outline'}
+				variant="secondaryDeepBlue"
 				onClick={goBack}
 				className="rounded-lg"
 			>
 				{__('Cancel', 'doublescale')}
 			</Button>
-			<div className="flex flex-wrap gap-2 sm:gap-4">
+			<div className="flex flex-wrap justify-center sm:justify-end gap-2">
 				<Button
-					variant={isDialog ? 'secondaryDeepBlue' : 'outline'}
+					variant="secondaryDeepBlue"
 					onClick={() => void handleSave()}
 					disabled={saving || submittingApproval || fieldsLocked}
 					className="rounded-lg"
@@ -922,6 +945,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				<SendDocumentDialog
 					open={sendOpen}
 					onOpenChange={setSendOpen}
+					icon={<NovicesIcon width={32} height={32} />}
 					title={__('Save & Send Invoice', 'doublescale')}
 					description={__(
 						'Save this invoice and email it to the customer. Add an optional personal note below.',
@@ -936,20 +960,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	}
 
 	return (
-		<div className="max-w-6xl space-y-6 p-6">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold text-[#29292E]">
-					{pageTitle}
-				</h1>
-				<Button variant="outline" onClick={goBack}>
-					{__('Back', 'doublescale')}
-				</Button>
-			</div>
-			{formBody}
-			{formFooter}
+		<>
+			{panelShell(
+				<div className="space-y-6">
+					{formBody}
+					{formFooter}
+				</div>
+			)}
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
+				icon={<NovicesIcon width={32} height={32} />}
 				title={__('Save & Send Invoice', 'doublescale')}
 				description={__(
 					'Save this invoice and email it to the customer. Add an optional personal note below.',
@@ -959,7 +980,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				busy={saving}
 				onConfirm={handleSaveAndSend}
 			/>
-		</div>
+		</>
 	);
 };
 

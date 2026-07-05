@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, TagField, InfiniteScrollSelect, PanelLayout } from '@doublescale/components';
+import { FormField, TagField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -651,6 +651,7 @@ const ProposalEdit: React.FC = () => {
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
+				icon={<GradientProposalsIcon width={32} height={32} />}
 				title={__('Save & Send Proposal', 'doublescale')}
 				description={__(
 					'Save this proposal and email it to the customer. Add an optional personal note below.',

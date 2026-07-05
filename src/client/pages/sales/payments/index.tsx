@@ -2,50 +2,42 @@
  * Payments list page (a global table of all recorded payments).
  */
 
-import React, { useState } from '@wordpress/element';
+import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import type { DataTableConfig } from '@doublescale/client';
 import { __ } from '@wordpress/i18n';
-import { Eye, MoreVertical, RefreshCw, Trash2 } from 'lucide-react';
 
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate } from '@doublescale/navigation';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { formatDateForAPI } from '@doublescale/utils';
+import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { ConfirmDialog, isSalesRepOnly } from '@/components/sales';
 import { deletePayment, usePayments } from '@/hooks/sales';
-import { PAYMENT_MODE_LABELS } from '@/constants/sales';
+import {
+	PAYMENT_MODE_LABELS,
+	PAYMENT_MODES,
+} from '@/constants/sales';
 import type { PaymentListItem } from '@/types/sales';
+import { EmptyPaymentsIcon, PageHeader } from '@doublescale/components';
+import { getPaymentColumns } from './columns';
 
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
-
-const modeLabel = (mode: string | null): string => {
-	if (!mode) {
-		return '—';
-	}
-	return PAYMENT_MODE_LABELS[mode as keyof typeof PAYMENT_MODE_LABELS] ?? mode;
-};
-
-const contactName = (payment: PaymentListItem): string => {
-	const c = payment.contact;
-	if (!c) {
-		return '—';
-	}
-	const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
-	return name || c.email || '—';
-};
+const PAYMENT_MODE_FILTER_OPTIONS = [
+	...PAYMENT_MODES,
+	'credit_note',
+	'credit_card',
+] as const;
 
 const PaymentsList: React.FC = () => {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(25);
+	const [perPage, setPerPage] = useState(10);
 	const [search, setSearch] = useState('');
+	const [paymentMode, setPaymentMode] = useState('all');
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({ from: null, to: null });
+	const [hasRecords, setHasRecords] = useState(false);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
 	const paymentReadOnly = isSalesRepOnly();
@@ -54,12 +46,21 @@ const PaymentsList: React.FC = () => {
 		page,
 		per_page: perPage,
 		search: search || undefined,
+		payment_mode: paymentMode !== 'all' ? paymentMode : undefined,
+		payment_date_from: formatDateForAPI(dateRange.from),
+		payment_date_to: formatDateForAPI(dateRange.to),
 		sort_by: 'id',
 		sort_order: 'desc',
 	});
 
 	const payments = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
+
+	useEffect(() => {
+		if (!loading) {
+			setHasRecords((data?.total_count ?? 0) > 0);
+		}
+	}, [loading, data?.total_count]);
 
 	const table = useServerSideTable({
 		page,
@@ -68,6 +69,61 @@ const PaymentsList: React.FC = () => {
 		setPage,
 		setPerPage,
 	});
+
+	const columns = useMemo(
+		() =>
+			getPaymentColumns({
+				navigate,
+				onDelete: setDeleteId,
+				paymentReadOnly,
+			}),
+		[navigate, paymentReadOnly]
+	);
+
+	const tableConfig: DataTableConfig<PaymentListItem> = useMemo(
+		() => ({
+			manageColumns: { enabled: false },
+			search: {
+				placeholder: __('Search payments...', 'doublescale'),
+				onChange: (value) => {
+					setSearch(value);
+					setPage(1);
+				},
+				value: search,
+			},
+			dateRange: {
+				enabled: true,
+				value: dateRange,
+				onDateChange: (range) => {
+					setDateRange(range);
+					setPage(1);
+				},
+				placeholder: __('Date', 'doublescale'),
+			},
+			selectFilters: [
+				{
+					id: 'payment_mode',
+					placeholder: __('Payment Mode', 'doublescale'),
+					value: paymentMode,
+					onChange: (value) => {
+						setPaymentMode(value);
+						setPage(1);
+					},
+					options: [
+						{ value: 'all', label: __('All modes', 'doublescale') },
+						...PAYMENT_MODE_FILTER_OPTIONS.map((mode) => ({
+							value: mode,
+							label:
+								PAYMENT_MODE_LABELS[
+									mode as keyof typeof PAYMENT_MODE_LABELS
+								] ?? mode,
+						})),
+					],
+				},
+			],
+		}),
+		[dateRange, paymentMode, search]
+	);
 
 	const confirmDelete = async () => {
 		if (!deleteId) {
@@ -84,151 +140,49 @@ const PaymentsList: React.FC = () => {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">{__('Payments', 'doublescale')}</h1>
-					<p className="text-sm text-muted-foreground">
-						{__('View all invoice payments across customers.', 'doublescale')}
-					</p>
-				</div>
-				<Button variant="outline" size="icon" onClick={() => void refetch()}>
-					<RefreshCw className="h-4 w-4" />
-				</Button>
+		<div className="space-y-6">
+			<PageHeader
+				title={__('Payments', 'doublescale')}
+				rowClassName="flex-row items-center justify-between w-full [&_h1]:min-w-0"
+				className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
+			/>
+
+			<div className="overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+				{error ? <div className="mb-4 text-sm text-red-600">{error}</div> : null}
+
+				{loading && !hasRecords ? (
+					<div className="py-20 text-center text-sm text-muted-foreground">
+						{__('Loading…', 'doublescale')}
+					</div>
+				) : loading || hasRecords ? (
+					<>
+						<DataTable
+							columns={columns}
+							data={payments}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<DataTablePagination table={table} />
+					</>
+				) : (
+					<div className="flex flex-col items-center justify-center px-4 py-20">
+						<div className="flex max-w-sm flex-col items-center text-center">
+							<div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl">
+								<EmptyPaymentsIcon width={53} height={53} />
+							</div>
+							<p className="text-xl font-semibold leading-relaxed text-muted-foreground">
+								{__(
+									'No payments have been added by users yet',
+									'doublescale'
+								)}
+							</p>
+						</div>
+					</div>
+				)}
 			</div>
-
-			<div className="flex justify-end">
-				<Input
-					className="max-w-sm"
-					placeholder={__('Search payments…', 'doublescale')}
-					value={search}
-					onChange={(e) => {
-						setSearch(e.target.value);
-						setPage(1);
-					}}
-				/>
-			</div>
-
-			{error ? <div className="text-sm text-red-600">{error}</div> : null}
-
-			<div className="border rounded-lg overflow-hidden bg-white">
-				<table className="w-full text-sm">
-					<thead className="bg-slate-50 border-b">
-						<tr>
-							<th className="text-left px-4 py-3">{__('Payment #', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Invoice #', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Payment Mode', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Transaction ID', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Customer', 'doublescale')}</th>
-							<th className="text-right px-4 py-3">{__('Amount', 'doublescale')}</th>
-							<th className="text-right px-4 py-3">{__('Date', 'doublescale')}</th>
-							<th className="w-12 px-2 py-3" />
-						</tr>
-					</thead>
-					<tbody>
-						{loading ? (
-							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-									{__('Loading…', 'doublescale')}
-								</td>
-							</tr>
-						) : payments.length === 0 ? (
-							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-									{__('No payments found.', 'doublescale')}
-								</td>
-							</tr>
-						) : (
-							payments.map((payment) => (
-								<tr
-									key={payment.id}
-									className="border-b hover:bg-slate-50 cursor-pointer"
-									onClick={() =>
-										navigate(getToLink(`sales/payments/${payment.id}`))
-									}
-								>
-									<td className="px-4 py-3">{payment.id}</td>
-									<td className="px-4 py-3">
-										{payment.invoice?.invoice_number || `#${payment.invoice_id}`}
-									</td>
-									<td className="px-4 py-3">{modeLabel(payment.payment_mode)}</td>
-									<td className="px-4 py-3">{payment.transaction_id || '—'}</td>
-									<td
-										className="px-4 py-3"
-										onClick={(e) => e.stopPropagation()}
-									>
-										{payment.contact?.id ? (
-											<Button
-												variant="link"
-												className="h-auto p-0 font-normal text-primary"
-												onClick={() =>
-													navigate(
-														getToLink(`contacts/${payment.contact!.id}`)
-													)
-												}
-											>
-												{contactName(payment)}
-											</Button>
-										) : (
-											contactName(payment)
-										)}
-									</td>
-									<td className="px-4 py-3 text-right">
-										{formatMoney(
-											payment.amount,
-											payment.invoice?.currency || 'USD'
-										)}
-									</td>
-									<td className="px-4 py-3 text-right">
-										{payment.payment_date || '—'}
-									</td>
-									<td
-										className="px-2 py-3"
-										onClick={(e) => e.stopPropagation()}
-									>
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													aria-label={__('Actions', 'doublescale')}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end" className="min-w-[10rem]">
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(
-															getToLink(`sales/payments/${payment.id}`)
-														)
-													}
-												>
-													<Eye className="h-4 w-4" />
-													{__('View', 'doublescale')}
-												</DropdownMenuItem>
-												{!paymentReadOnly ? (
-													<DropdownMenuItem
-														className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-														onSelect={() => setDeleteId(payment.id)}
-													>
-														<Trash2 className="h-4 w-4" />
-														{__('Delete', 'doublescale')}
-													</DropdownMenuItem>
-												) : null}
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
-			</div>
-
-			<DataTablePagination table={table} />
 
 			<ConfirmDialog
 				open={deleteId !== null}

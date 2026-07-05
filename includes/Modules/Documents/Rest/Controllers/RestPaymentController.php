@@ -75,8 +75,11 @@ class RestPaymentController extends RestController {
 	 */
 	public function get_collection_params() {
 		return array(
-			'search'     => array( 'type' => 'string' ),
-			'sort_by'    => array(
+			'search'             => array( 'type' => 'string' ),
+			'payment_mode'       => array( 'type' => 'string' ),
+			'payment_date_from'  => array( 'type' => 'string' ),
+			'payment_date_to'    => array( 'type' => 'string' ),
+			'sort_by'            => array(
 				'type'    => 'string',
 				'enum'    => array( 'id', 'payment_date', 'amount', 'created_at' ),
 				'default' => 'id',
@@ -291,6 +294,35 @@ class RestPaymentController extends RestController {
 			}
 		);
 
+		$total_count = (int) $query->count();
+
+		$payment_mode = $request->get_param( 'payment_mode' );
+		if ( is_string( $payment_mode ) && '' !== trim( $payment_mode ) && 'all' !== $payment_mode ) {
+			$raw_mode = strtolower( str_replace( '-', '_', trim( $payment_mode ) ) );
+			$allowed  = array_merge(
+				PaymentMode::all(),
+				array( PaymentMode::CREDIT_NOTE, PaymentMode::CREDIT_CARD )
+			);
+			if ( in_array( $raw_mode, $allowed, true ) ) {
+				$query->where( 'payment_mode', $raw_mode );
+			} else {
+				$normalized_mode = PaymentMode::normalize( trim( $payment_mode ) );
+				if ( $normalized_mode ) {
+					$query->where( 'payment_mode', $normalized_mode );
+				}
+			}
+		}
+
+		$payment_date_from = $request->get_param( 'payment_date_from' );
+		if ( is_string( $payment_date_from ) && '' !== trim( $payment_date_from ) ) {
+			$query->where( 'payment_date', '>=', trim( $payment_date_from ) );
+		}
+
+		$payment_date_to = $request->get_param( 'payment_date_to' );
+		if ( is_string( $payment_date_to ) && '' !== trim( $payment_date_to ) ) {
+			$query->where( 'payment_date', '<=', trim( $payment_date_to ) );
+		}
+
 		$search = $request->get_param( 'search' );
 		if ( is_string( $search ) && '' !== trim( $search ) ) {
 			$term = trim( $search );
@@ -339,8 +371,9 @@ class RestPaymentController extends RestController {
 
 		return new WP_REST_Response(
 			array(
-				'data' => $data,
-				'meta' => array(
+				'data'        => $data,
+				'total_count' => $total_count,
+				'meta'        => array(
 					'total'        => $paginator->total(),
 					'per_page'     => $per_page,
 					'current_page' => $page,

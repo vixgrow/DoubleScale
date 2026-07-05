@@ -30,6 +30,7 @@ export { default as ContractAttachmentsPanel } from './contract-attachments-pane
 export { ProposalDocumentPreview, InvoiceDocumentPreview } from './document-preview';
 export { PaymentReceiptPreview } from './payment-receipt-preview';
 export { PaymentForm } from './payment-form';
+export { PaymentEditDialog } from './payment-edit-dialog';
 export { RecordPaymentDialog } from './record-payment-dialog';
 export { PaymentsList } from './payments-list';
 export { InvoiceOnlinePayment, InvoiceStripePayment } from './invoice-online-payment';

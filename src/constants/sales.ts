@@ -100,6 +100,7 @@ export const OFFLINE_PAYMENT_MODE_LABELS: Record<OfflinePaymentMode, string> = {
 /** Legacy/offline modes kept for display on existing records. */
 const LEGACY_PAYMENT_MODE_LABELS = {
 	credit_card: 'Credit Card',
+	credit_note: 'Credit Note',
 } as const;
 
 export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, string> = {

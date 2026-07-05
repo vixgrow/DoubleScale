@@ -483,7 +483,7 @@ const InvoiceView: React.FC = () => {
 						>
 
 							{__('Record Payment', 'doublescale')}
-							<RecordIcon width={24} height={24} />
+							<RecordIcon />
 						</Button>
 						{showSubmitApproval ? (
 							<Button
@@ -621,7 +621,7 @@ const InvoiceView: React.FC = () => {
 							{__('Details', 'doublescale')}
 						</h2>
 						<div className="space-y-6 text-sm text-muted-foreground">
-							<div className=' flex flex-col sm:flex-row gap-4 justify-between items-center'>
+							<div className=' flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center'>
 							<InfoItem icon={<CalendarIcon width={18} height={18} />}>
 								{__('Invoice Date', 'doublescale')}:{' '}
 								{invoice.invoice_date || '—'}

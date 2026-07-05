@@ -3,17 +3,22 @@
  */
 
 import React, { useState } from '@wordpress/element';
+import type { NoticeMessage } from '@doublescale/client';
 import { __ } from '@wordpress/i18n';
-import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	DeleteIcon,
+	NoticeBanner,
+	PanelLayout,
+	RecordIcon,
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	ConfirmDialog,
 	isSalesRepOnly,
-	PaymentForm,
+	PaymentEditDialog,
 	PaymentReceiptPreview,
 } from '@/components/sales';
 import { deletePayment, formatRestError, updatePayment, usePayment } from '@/hooks/sales';
@@ -26,10 +31,30 @@ const PaymentView: React.FC = () => {
 
 	const { data: payment, loading, error, refetch } = usePayment(paymentId);
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
-	const [notice, setNotice] = useState<string | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const paymentReadOnly = isSalesRepOnly();
+
+	const handleClose = () => navigate(getToLink('sales/payments'));
+
+	const breadcrumbItems = [
+		{ label: __('Sales (Payments)', 'doublescale'), href: 'sales/payments' },
+		{ label: __('Payment Receipt', 'doublescale') },
+	];
+
+	const panelShell = (children: React.ReactNode) => (
+		<PanelLayout
+			fullWidth
+			items={breadcrumbItems}
+			showPanelClose
+			onClosePanel={handleClose}
+			handleNavigate={(href) => navigate(getToLink(href))}
+		>
+			{children}
+		</PanelLayout>
+	);
 
 	const handleDelete = async () => {
 		if (!paymentId) {
@@ -55,7 +80,11 @@ const PaymentView: React.FC = () => {
 		try {
 			await updatePayment(paymentId, payload);
 			await refetch();
-			setNotice(__('Payment saved.', 'doublescale'));
+			setNotice({
+				type: 'success',
+				message: __('Payment saved.', 'doublescale'),
+			});
+			setPaymentDialogOpen(false);
 		} catch (err: unknown) {
 			setSaveError(formatRestError(err));
 		} finally {
@@ -64,73 +93,85 @@ const PaymentView: React.FC = () => {
 	};
 
 	if (loading) {
-		return (
-			<div className="p-6 text-muted-foreground">{__('Loading…', 'doublescale')}</div>
+		return panelShell(
+			<div className="py-12 text-center text-muted-foreground">
+				{__('Loading…', 'doublescale')}
+			</div>
 		);
 	}
 
 	if (error || !payment) {
-		return (
-			<div className="p-6 space-y-4">
-				<Button variant="ghost" onClick={() => navigate(getToLink('sales/payments'))}>
-					<ArrowLeft className="h-4 w-4 mr-1" />
-					{__('Payments', 'doublescale')}
-				</Button>
-				<div className="text-red-600">{error || __('Payment not found.', 'doublescale')}</div>
+		return panelShell(
+			<div className="py-12 text-center text-red-600">
+				{error || __('Payment not found.', 'doublescale')}
 			</div>
 		);
 	}
 
 	return (
-		<div className="p-6 space-y-6 max-w-5xl">
-			{notice ? (
-				<div className="text-sm rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700">
-					{notice}
-				</div>
-			) : null}
-
-			<div className="flex items-center justify-between gap-4">
-				<Button variant="ghost" onClick={() => navigate(getToLink('sales/payments'))}>
-					<ArrowLeft className="h-4 w-4 mr-1" />
-					{__('Payments', 'doublescale')}
-				</Button>
-				{!paymentReadOnly ? (
-					<Button
-						variant="outline"
-						className="text-red-600 hover:text-red-700"
-						onClick={() => setDeleteOpen(true)}
-						disabled={busy}
-					>
-						<Trash2 className="h-4 w-4 mr-1" />
-						{__('Delete', 'doublescale')}
-					</Button>
-				) : null}
-			</div>
-
-			<Tabs defaultValue="receipt">
-				<TabsList>
-					<TabsTrigger value="receipt">{__('Payment Receipt', 'doublescale')}</TabsTrigger>
-					<TabsTrigger value="payment">{__('Payment', 'doublescale')}</TabsTrigger>
-				</TabsList>
-
-				<TabsContent value="receipt" className="mt-6">
-					<div className="border rounded-lg bg-white p-8 shadow-sm">
-						<PaymentReceiptPreview payment={payment} />
-					</div>
-				</TabsContent>
-
-				<TabsContent value="payment" className="mt-6">
-					<div className="border rounded-lg bg-white p-6 shadow-sm">
-						<PaymentForm
-							payment={payment}
-							busy={busy}
-							error={saveError}
-							readOnly={paymentReadOnly}
-							onSubmit={handleSave}
+		<>
+			{panelShell(
+				<div className="space-y-6">
+					{notice ? (
+						<NoticeBanner
+							notice={notice}
+							closeNotice={() => setNotice(null)}
 						/>
+					) : null}
+
+					<div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between">
+						<h1 className="text-2xl font-bold tracking-tight text-foreground">
+							{__('Payment Receipt', 'doublescale')} (#{payment.id})
+						</h1>
+
+						<div className="flex flex-wrap items-center justify-start gap-6 sm:justify-end">
+							{!paymentReadOnly ? (
+								<Button
+									variant="outline"
+									onClick={() => {
+										setSaveError(null);
+										setPaymentDialogOpen(true);
+									}}
+									disabled={busy}
+									className="border-primary bg-white text-primary"
+								>
+									{__('Payment', 'doublescale')}
+									<RecordIcon />
+								</Button>
+							) : null}
+							{!paymentReadOnly ? (
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-10 w-10 shrink-0 border-destructive bg-white text-destructive hover:bg-[#FEE2E2]"
+									onClick={() => setDeleteOpen(true)}
+									disabled={busy}
+									aria-label={__('Delete', 'doublescale')}
+								>
+									<DeleteIcon width={24} height={24} />
+								</Button>
+							) : null}
+						</div>
 					</div>
-				</TabsContent>
-			</Tabs>
+
+					<PaymentReceiptPreview payment={payment} />
+				</div>
+			)}
+
+			<PaymentEditDialog
+				open={paymentDialogOpen}
+				onOpenChange={(open) => {
+					setPaymentDialogOpen(open);
+					if (!open) {
+						setSaveError(null);
+					}
+				}}
+				payment={payment}
+				busy={busy}
+				error={saveError}
+				readOnly={paymentReadOnly}
+				onSubmit={handleSave}
+			/>
 
 			<ConfirmDialog
 				open={deleteOpen}
@@ -145,7 +186,7 @@ const PaymentView: React.FC = () => {
 				busy={busy}
 				onConfirm={handleDelete}
 			/>
-		</div>
+		</>
 	);
 };
 

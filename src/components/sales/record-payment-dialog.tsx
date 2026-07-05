@@ -115,7 +115,7 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
-				className="max-w-md z-[150220]"
+				className="max-w-md z-[150220] max-h-[90vh] overflow-y-auto"
 				overlayClassName="z-[150210] bg-black/45 backdrop-blur-[1px]"
 			>
 				<DialogHeader>
@@ -143,6 +143,7 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 									setValidationError(null);
 								}
 							}}
+							className="!border-border !rounded-lg"
 						/>
 						<p className="text-xs text-muted-foreground">
 							{__('Balance due:', 'doublescale')}{' '}
@@ -194,7 +195,7 @@ export const RecordPaymentDialog: React.FC<RecordPaymentDialogProps> = ({
 					</div>
 				</div>
 
-				<DialogFooter>
+				<DialogFooter className='gap-4'>
 					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
 						{__('Cancel', 'doublescale')}
 					</Button>

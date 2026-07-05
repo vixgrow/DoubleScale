@@ -56,6 +56,7 @@ class ActivityTypes {
 	const SUPPORT_REPLY = 'support_reply'; // Customer-visible reply (web or email source)
 	const SUPPORT_NOTE  = 'support_note';  // Internal-only agent note
 	const SUPPORT_EVENT = 'support_event'; // System-generated activity (status change, assignment, etc.)
+	const TASK_EVENT      = 'task_event';  // System-generated task/subtask lifecycle audit row
 
 	/**
 	 * Booking lifecycle types — virtual rows projected from `doublescale_bookings`
@@ -105,6 +106,7 @@ class ActivityTypes {
 			self::SUPPORT_REPLY,
 			self::SUPPORT_NOTE,
 			self::SUPPORT_EVENT,
+			self::TASK_EVENT,
 		);
 	}
 
@@ -141,6 +143,7 @@ class ActivityTypes {
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
 			self::SUPPORT_EVENT,
+			self::TASK_EVENT,
 		);
 	}
 
@@ -240,6 +243,7 @@ class ActivityTypes {
 			/* translators: %s: user name */
 			self::SUPPORT_NOTE      => sprintf( __( '%s added an internal note', 'doublescale' ), $user_name ),
 			self::SUPPORT_EVENT     => __( 'Ticket activity', 'doublescale' ),
+			self::TASK_EVENT        => __( 'Task activity', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
@@ -283,6 +287,7 @@ class ActivityTypes {
 			self::SUPPORT_REPLY       => __( 'Ticket Reply', 'doublescale' ),
 			self::SUPPORT_NOTE        => __( 'Ticket Note', 'doublescale' ),
 			self::SUPPORT_EVENT       => __( 'Ticket Activity', 'doublescale' ),
+			self::TASK_EVENT          => __( 'Task Activity', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

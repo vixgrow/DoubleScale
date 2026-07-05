@@ -138,6 +138,12 @@ final class ActivityManager {
 			}
 		}
 
+		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK ) {
+			if ( ! $this->can_access_task( $entity_id ) ) {
+				return null;
+			}
+		}
+
 		$activity = ActivityModel::create(
 			array(
 				'contact_id'    => $contact_id,
@@ -423,13 +429,36 @@ final class ActivityManager {
 			}
 		}
 
-		// Exclude activities that have deal associations when no entity type is provided.
+		// Filter by task using activity_associations table.
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK ) {
+			if ( ! $this->can_access_task( $filters['entity_id'] ) ) {
+				return null;
+			}
+
+			if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+				$query->whereHas(
+					'associations',
+					function ( $q ) use ( $filters ) {
+						$q->where( 'entity_type', $filters['entity_type'] )
+							->where( 'entity_id', $filters['entity_id'] );
+					}
+				);
+			}
+		}
+
+		// Exclude activities that have deal or task associations when no entity type is provided.
 		if ( empty( $filters['entity_type'] ) ) {
 			if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
 				$query->whereDoesntHave(
 					'associations',
 					function ( $q ) {
-						$q->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL );
+						$q->whereIn(
+							'entity_type',
+							array(
+								\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL,
+								\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK,
+							)
+						);
 					}
 				);
 			}
@@ -499,6 +528,11 @@ final class ActivityManager {
 			return null;
 		}
 
+		// Check task permissions if activity is associated with a task.
+		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+			return null;
+		}
+
 		return $activity;
 	}
 
@@ -531,6 +565,11 @@ final class ActivityManager {
 
 		// Check deal permissions if activity is associated with a deal.
 		if ( $activity->deal_id && ! $this->can_access_deal( $activity->deal_id ) ) {
+			return null;
+		}
+
+		// Check task permissions if activity is associated with a task.
+		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
 			return null;
 		}
 
@@ -631,6 +670,11 @@ final class ActivityManager {
 
 		// Check deal permissions if activity is associated with a deal.
 		if ( $activity->deal_id && ! $this->can_access_deal( $activity->deal_id ) ) {
+			return false;
+		}
+
+		// Check task permissions if activity is associated with a task.
+		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
 			return false;
 		}
 
@@ -889,6 +933,45 @@ final class ActivityManager {
 	 */
 	private function can_access_deal( $deal_id ) {
 		return 'ok' === $this->check_deal_access( $deal_id );
+	}
+
+	/**
+	 * Check if current user can access a task (sales reps only see their own).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $task_id Task ID.
+	 *
+	 * @return string 'ok', 'not_found', or 'forbidden'.
+	 */
+	private function check_task_access( $task_id ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Tasks\Models\TaskModel' ) ) {
+			return 'not_found';
+		}
+
+		$task = \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::find( $task_id );
+		if ( ! $task ) {
+			return 'not_found';
+		}
+
+		if ( Permissions::is_sales_rep() && (int) $task->assigned_to !== get_current_user_id() ) {
+			return 'forbidden';
+		}
+
+		return 'ok';
+	}
+
+	/**
+	 * Check if current user can access a task (boolean shortcut).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $task_id Task ID.
+	 *
+	 * @return bool
+	 */
+	private function can_access_task( $task_id ) {
+		return 'ok' === $this->check_task_access( $task_id );
 	}
 
 	/**

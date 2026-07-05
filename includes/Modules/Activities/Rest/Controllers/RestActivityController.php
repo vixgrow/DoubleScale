@@ -273,6 +273,15 @@ class RestActivityController extends RestController {
 			);
 		}
 
+		// Check Pro availability for task entity type.
+		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK && ! $pro_active ) {
+			return new WP_Error(
+				'pro_required',
+				__( 'Task activities require Plugin Pro plugin', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		// Build filters.
 		$filters = array(
 			'contact_id'    => $request->get_param( 'contact_id' ),
@@ -577,12 +586,17 @@ class RestActivityController extends RestController {
 		}
 
 		// String mapping.
-		$map = array(
+		$mapped = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::string_to_entity_type( (string) $entity_type );
+		if ( null !== $mapped ) {
+			return $mapped;
+		}
+
+		$legacy_map = array(
 			'deal'     => \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL,
 			'campaign' => \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CAMPAIGN,
 		);
 
-		return $map[ strtolower( $entity_type ) ] ?? null;
+		return $legacy_map[ strtolower( (string) $entity_type ) ] ?? null;
 	}
 
 	/**

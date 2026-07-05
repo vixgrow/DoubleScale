@@ -76,6 +76,7 @@ class ActivityAssociationModel extends Model {
 	const ENTITY_TYPE_DEAL     = 1;
 	const ENTITY_TYPE_CAMPAIGN = 2;
 	const ENTITY_TYPE_TICKET   = 3;
+	const ENTITY_TYPE_TASK     = 4;
 
 	/**
 	 * Validation rules
@@ -86,7 +87,7 @@ class ActivityAssociationModel extends Model {
 	 */
 	public $rules = array(
 		'activity_id' => 'required|integer',
-		'entity_type' => 'required|integer|in:1,2,3',
+		'entity_type' => 'required|integer|in:1,2,3,4',
 		'entity_id'   => 'required|integer',
 	);
 
@@ -100,7 +101,7 @@ class ActivityAssociationModel extends Model {
 	public $messages = array(
 		'activity_id.required' => 'Activity ID is required.',
 		'entity_type.required' => 'Entity type is required.',
-		'entity_type.in'       => 'Entity type must be 1 (Deal), 2 (Campaign), or 3 (Ticket).',
+		'entity_type.in'       => 'Entity type must be 1 (Deal), 2 (Campaign), 3 (Ticket), or 4 (Task).',
 		'entity_id.required'   => 'Entity ID is required.',
 	);
 
@@ -225,6 +226,18 @@ class ActivityAssociationModel extends Model {
 	}
 
 	/**
+	 * Scope: Filter by task
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 * @param int                                   $task_id Task ID.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeForTask( $query, $task_id ) {
+		return $query->where( 'entity_type', self::ENTITY_TYPE_TASK )->where( 'entity_id', $task_id );
+	}
+
+	/**
 	 * Convert a REST-facing entity-type string to its internal integer constant.
 	 *
 	 * @param string $entity_type_string Entity type string ('deal', 'campaign', 'ticket').
@@ -236,6 +249,7 @@ class ActivityAssociationModel extends Model {
 			'deal'     => self::ENTITY_TYPE_DEAL,
 			'campaign' => self::ENTITY_TYPE_CAMPAIGN,
 			'ticket'   => self::ENTITY_TYPE_TICKET,
+			'task'     => self::ENTITY_TYPE_TASK,
 		);
 
 		return $map[ strtolower( $entity_type_string ) ] ?? null;
@@ -253,6 +267,7 @@ class ActivityAssociationModel extends Model {
 			self::ENTITY_TYPE_DEAL     => 'deal',
 			self::ENTITY_TYPE_CAMPAIGN => 'campaign',
 			self::ENTITY_TYPE_TICKET   => 'ticket',
+			self::ENTITY_TYPE_TASK     => 'task',
 		);
 
 		return $map[ $entity_type_int ] ?? null;
@@ -276,8 +291,8 @@ class ActivityAssociationModel extends Model {
 					$association->entity_type = self::string_to_entity_type( $association->entity_type );
 				}
 
-				if ( ! in_array( $association->entity_type, array( self::ENTITY_TYPE_DEAL, self::ENTITY_TYPE_CAMPAIGN, self::ENTITY_TYPE_TICKET ), true ) ) {
-					throw new \Exception( 'Invalid entity type. Must be 1 (Deal), 2 (Campaign), or 3 (Ticket).' );
+				if ( ! in_array( $association->entity_type, array( self::ENTITY_TYPE_DEAL, self::ENTITY_TYPE_CAMPAIGN, self::ENTITY_TYPE_TICKET, self::ENTITY_TYPE_TASK ), true ) ) {
+					throw new \Exception( 'Invalid entity type. Must be 1 (Deal), 2 (Campaign), 3 (Ticket), or 4 (Task).' );
 				}
 			}
 		);

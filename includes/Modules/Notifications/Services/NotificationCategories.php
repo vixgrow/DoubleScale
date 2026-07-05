@@ -158,6 +158,20 @@ class NotificationCategories {
 	const TASKS_ASSIGNED = 'task_assigned';
 
 	/**
+	 * Tasks subcategory: New comment on a task you are assigned to
+	 *
+	 * @var string
+	 */
+	const TASKS_COMMENT = 'task_comment';
+
+	/**
+	 * Tasks subcategory: You were @mentioned in a task comment
+	 *
+	 * @var string
+	 */
+	const TASKS_COMMENT_MENTION = 'task_comment_mention';
+
+	/**
 	 * Campaigns subcategory: Email campaigns
 	 *
 	 * @var string
@@ -740,6 +754,14 @@ class NotificationCategories {
 				self::TASKS_ASSIGNED  => array(
 					'label'       => __( 'Task Assigned', 'doublescale' ),
 					'description' => __( 'Notifications when a task is assigned to you.', 'doublescale' ),
+				),
+				self::TASKS_COMMENT => array(
+					'label'       => __( 'Task Comment', 'doublescale' ),
+					'description' => __( 'Notifications when someone comments on a task assigned to you.', 'doublescale' ),
+				),
+				self::TASKS_COMMENT_MENTION => array(
+					'label'       => __( 'Task Mention', 'doublescale' ),
+					'description' => __( 'Notifications when you are mentioned in a task comment.', 'doublescale' ),
 				),
 				self::TASKS_COMPLETED => array(
 					'label'       => __( 'Task Completed', 'doublescale' ),

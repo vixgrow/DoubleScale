@@ -236,6 +236,17 @@ class ActivityModel extends Model {
 	}
 
 	/**
+	 * Task associations (if any).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function taskAssociations() {
+		return $this->associationsByType( ActivityAssociationModel::ENTITY_TYPE_TASK );
+	}
+
+	/**
 	 * Convenience accessor: first associated deal's ID, or null.
 	 *
 	 * Activities may be associated with multiple entities; REST callers that
@@ -253,6 +264,22 @@ class ActivityModel extends Model {
 
 		$deal_association = $this->associations->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_DEAL )->first();
 		return $deal_association ? $deal_association->entity_id : null;
+	}
+
+	/**
+	 * Convenience accessor: first associated task's ID, or null.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|null
+	 */
+	public function getTaskIdAttribute() {
+		if ( ! $this->relationLoaded( 'associations' ) ) {
+			$this->load( 'associations' );
+		}
+
+		$task_association = $this->associations->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_TASK )->first();
+		return $task_association ? (int) $task_association->entity_id : null;
 	}
 
 	/**
@@ -303,6 +330,24 @@ class ActivityModel extends Model {
 			function ( $q ) use ( $ticket_id ) {
 				$q->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_TICKET )
 					->where( 'entity_id', $ticket_id );
+			}
+		)->orderBy( 'created_at', 'asc' );
+	}
+
+	/**
+	 * Scope: Filter by task using activity_associations table.
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 * @param int                                   $task_id Task ID.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeForTask( $query, $task_id ) {
+		return $query->whereHas(
+			'associations',
+			function ( $q ) use ( $task_id ) {
+				$q->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_TASK )
+					->where( 'entity_id', $task_id );
 			}
 		)->orderBy( 'created_at', 'asc' );
 	}

@@ -144,14 +144,20 @@ final class ActivityManager {
 			}
 		}
 
+		$note_data = array(
+			'title'   => sanitize_text_field( $title ),
+			'content' => wp_kses_post( $content ),
+		);
+
+		if ( ! empty( $data['meta'] ) && is_array( $data['meta'] ) ) {
+			$note_data = array_merge( $note_data, $data['meta'] );
+		}
+
 		$activity = ActivityModel::create(
 			array(
 				'contact_id'    => $contact_id,
 				'activity_type' => 'note',
-				'data'          => array(
-					'title'   => sanitize_text_field( $title ),
-					'content' => wp_kses_post( $content ),
-				),
+				'data'          => $note_data,
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
 		);
@@ -745,6 +751,11 @@ final class ActivityManager {
 			return null;
 		}
 
+		// Check task permissions if activity is associated with a task.
+		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+			return null;
+		}
+
 		if ( empty( $content ) ) {
 			return null;
 		}
@@ -774,10 +785,20 @@ final class ActivityManager {
 	 * @return ActivityCommentModel|null
 	 */
 	public function update_comment( $comment_id, $content, $user_id = null ) {
-		$comment = ActivityCommentModel::find( $comment_id );
+		$comment = ActivityCommentModel::with( 'activity.associations' )->find( $comment_id );
 
 		if ( ! $comment ) {
 			return null;
+		}
+
+		$activity = $comment->activity;
+		if ( $activity ) {
+			if ( $activity->deal_id && ! $this->can_access_deal( $activity->deal_id ) ) {
+				return null;
+			}
+			if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+				return null;
+			}
 		}
 
 		// Check if user can edit this comment.
@@ -804,10 +825,20 @@ final class ActivityManager {
 	 * @return bool
 	 */
 	public function delete_comment( $comment_id, $user_id = null ) {
-		$comment = ActivityCommentModel::find( $comment_id );
+		$comment = ActivityCommentModel::with( 'activity.associations' )->find( $comment_id );
 
 		if ( ! $comment ) {
 			return false;
+		}
+
+		$activity = $comment->activity;
+		if ( $activity ) {
+			if ( $activity->deal_id && ! $this->can_access_deal( $activity->deal_id ) ) {
+				return false;
+			}
+			if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+				return false;
+			}
 		}
 
 		// Check if user can delete this comment.

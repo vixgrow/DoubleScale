@@ -33,6 +33,8 @@ interface PanelLayoutProps {
 	onClosePanel?: () => void;
 	/** Show header close control; defaults to true when type is `campaign`. */
 	showPanelClose?: boolean;
+	/** When true, the content card fills the panel below the header (keeps shadow + rounded card). */
+	fullWidth?: boolean;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -54,6 +56,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	hideFooter = false,
 	onClosePanel,
 	showPanelClose,
+	fullWidth = false,
 }) => {
 	const navigate = useNavigate();
 	const progressValue =
@@ -101,14 +104,19 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			</div>
 
 			{/* Scrollable Content Section */}
-			<div className="min-h-0 flex-1 overflow-y-auto bg-[#F7F8FA] p-6">
-				<div
-					className="overflow-hidden rounded-[20px] bg-white p-6
-							shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
-				>
-					{children}
+			{fullWidth ? (
+				<div className="flex min-h-0 flex-1 flex-col bg-[#F7F8FA] p-4 md:p-6">
+					<div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+						{children}
+					</div>
 				</div>
-			</div>
+			) : (
+				<div className="w-full max-w-none overflow-y-auto bg-[#F7F8FA] p-6">
+					<div className="overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+						{children}
+					</div>
+				</div>
+			)}
 
 			{/* Footer Section - Fixed (optional; form wizard embeds actions in the white panel) */}
 			{totalSteps && !hideFooter && (

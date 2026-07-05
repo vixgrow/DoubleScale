@@ -138,7 +138,7 @@ const ProposalsList: React.FC = () => {
 				title={__('Proposals', 'doublescale')}
 				subtitle={__('Sales', 'doublescale')}
 				rowClassName="flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between w-full [&_h1]:min-w-0"
-				className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
+				className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-4"
 				actions={[
 					{
 						label: '',

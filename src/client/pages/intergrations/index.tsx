@@ -53,7 +53,7 @@ const integrationImages: Record<string, string> = {
 	'meta-whatsapp': metaWhatsappImg,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
-	typeform: `${proPluginUrl}assets/images/typeform/typeform.png`,
+	typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
 	jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
 };
 

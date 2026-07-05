@@ -372,6 +372,8 @@ export interface ContractFilters {
 	contract_type_id?: number;
 	is_trash?: boolean;
 	search?: string;
+	start_date_from?: string;
+	start_date_to?: string;
 	sort_by?: string;
 	sort_order?: 'asc' | 'desc';
 	per_page?: number;

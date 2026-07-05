@@ -5,11 +5,20 @@
 import React, { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { ExternalLink, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, TagField, InfiniteScrollSelect, Editor } from '@doublescale/components';
+import {
+	FormField,
+	TagField,
+	InfiniteScrollSelect,
+	Editor,
+	PanelLayout,
+	PlusIcon,
+	CustomDialogHeader,
+	GradientContractTypeIcon,
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +29,6 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import {
 	Select,
@@ -52,10 +60,14 @@ import {
 	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary } from '@/types/sales';
-import { CONTRACT_STATUSES, CURRENCIES } from '@/constants/sales';
+import {
+	CONTRACT_STATUSES,
+	CONTRACT_STATUS_LABELS,
+	CURRENCIES,
+} from '@/constants/sales';
 
 const selectClass =
-	'w-full border border-input rounded-md px-3 py-2 text-sm bg-background';
+	'w-full border !border-border !rounded-lg px-3 py-2 text-sm bg-background h-10';
 
 const contractEditorWrapperClassName =
 	'send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full';
@@ -328,213 +340,247 @@ const ContractEdit: React.FC = () => {
 		}
 	};
 
+	const handleClose = () => navigate(getToLink('sales/contracts'));
+
+	const pageTitle = isNew
+		? __('Create New Contract', 'doublescale')
+		: __('Edit Contract', 'doublescale');
+
+	const breadcrumbItems = [
+		{ label: __('Sales (Contracts)', 'doublescale'), href: 'sales/contracts' },
+		{ label: pageTitle },
+	];
+
+	const panelShell = (children: JSX.Element) => (
+		<PanelLayout
+			items={breadcrumbItems}
+			showPanelClose
+			fullWidth
+			onClosePanel={handleClose}
+			handleNavigate={(href) => navigate(getToLink(href))}
+		>
+			{children}
+		</PanelLayout>
+	);
+
 	if (!isNew && loading) {
-		return (
-			<div className="p-6 text-muted-foreground">{__('Loading…', 'doublescale')}</div>
+		return panelShell(
+			<div className="py-12 text-center text-muted-foreground">
+				{__('Loading…', 'doublescale')}
+			</div>
 		);
 	}
 
 	const assigneeReadOnly = assignableUsers.length <= 1;
 
-	const informationFields = (
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-			<div className="space-y-4">
-				<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
-					<Input value={subject} onChange={(e) => setSubject(e.target.value)} />
-				</FormField>
-
-				<FormField label={__('Customer', 'doublescale')} required className="!mb-0">
-					<InfiniteScrollSelect
-						value={contact?.id ? String(contact.id) : ''}
-						onValueChange={handleContactPick}
-						placeholder={__('Search contacts…', 'doublescale')}
-						apiEndpoint="/doublescale/v1/contacts"
-						searchParamName="keywords"
-						getOptionLabel={contactOptionLabel}
-						getOptionValue={(c: ContactSummary) => c.id}
-						dataPath="data"
-						totalPath="total"
-						perPage={20}
-						selectedItem={contact}
-					/>
-				</FormField>
-
-				<FormField label={__('Contract Type', 'doublescale')} className="!mb-0">
-					<div className="flex gap-2">
-						<Select
-							value={contractTypeId ? String(contractTypeId) : 'none'}
-							onValueChange={(next) =>
-								setContractTypeId(next === 'none' ? null : Number(next))
-							}
-						>
-							<SelectTrigger className="flex-1">
-								<SelectValue placeholder={__('— None —', 'doublescale')} />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="none">{__('— None —', 'doublescale')}</SelectItem>
-								{contractTypes.map((type) => (
-									<SelectItem key={type.id} value={String(type.id)}>
-										{type.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Button
-							type="button"
-							variant="outline"
-							size="icon"
-							onClick={() => setTypeDialogOpen(true)}
-							aria-label={__('Add contract type', 'doublescale')}
-						>
-							<Plus className="h-4 w-4" />
-						</Button>
-						<Button
-							type="button"
-							variant="ghost"
-							size="sm"
-							className="shrink-0 px-2"
-							onClick={() => navigate(getToLink('sales/contract-types'))}
-						>
-							<ExternalLink className="h-4 w-4" />
-						</Button>
-					</div>
-				</FormField>
-
-				<div className="grid grid-cols-2 gap-3">
-					<FormField label={__('Contract Value', 'doublescale')} required className="!mb-0">
+	const contractInformationContent = (
+		<>
+			<div className="mb-6 grid grid-cols-1 lg:grid-cols-2">
+				<div className="space-y-4 lg:border-r lg:border-[#DEE1E6] lg:pr-8">
+					<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
 						<Input
-							type="number"
-							min={0}
-							step="0.01"
-							value={contractValue}
-							onChange={(e) => setContractValue(Number(e.target.value))}
+							value={subject}
+							onChange={(e) => setSubject(e.target.value)}
+							placeholder={__('Subject', 'doublescale')}
+							className="!rounded-lg !border-border"
 						/>
 					</FormField>
-					<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
-						<select
-							className={selectClass}
-							value={currency}
-							onChange={(e) => setCurrency(e.target.value)}
-						>
-							{CURRENCIES.map((c) => (
-								<option key={c} value={c}>
-									{c}
-								</option>
-							))}
-						</select>
-					</FormField>
-				</div>
 
-				<div className="grid grid-cols-2 gap-3">
-					<FormField label={__('Start Date', 'doublescale')} className="!mb-0">
-						<DatePicker
-							value={startDate}
-							onChange={setStartDate}
-							outputFormat="iso"
-							placeholder={__('Select date', 'doublescale')}
-							buttonClassName="w-full"
-							className="w-full"
+					<FormField label={__('Customer', 'doublescale')} required className="!mb-0">
+						<InfiniteScrollSelect
+							value={contact?.id ? String(contact.id) : ''}
+							onValueChange={handleContactPick}
+							placeholder={__('Search contacts…', 'doublescale')}
+							apiEndpoint="/doublescale/v1/contacts"
+							searchParamName="keywords"
+							getOptionLabel={contactOptionLabel}
+							getOptionValue={(c: ContactSummary) => c.id}
+							dataPath="data"
+							totalPath="total"
+							perPage={20}
+							selectedItem={contact}
 						/>
 					</FormField>
-					<FormField label={__('End Date', 'doublescale')} className="!mb-0">
-						<DatePicker
-							value={endDate}
-							onChange={setEndDate}
-							outputFormat="iso"
-							placeholder={__('Select date', 'doublescale')}
-							buttonClassName="w-full"
-							className="w-full"
-						/>
-					</FormField>
-				</div>
 
-				<FormField label={__('Tags', 'doublescale')} className="!mb-0">
-					<TagField value={tagIds} onChange={setTagIds} />
-				</FormField>
-			</div>
-
-			<div className="space-y-4">
-				<div className="grid grid-cols-2 gap-3">
-					<FormField label={__('Status', 'doublescale')} className="!mb-0">
-						<select
-							className={selectClass}
-							value={status}
-							onChange={(e) => setStatus(e.target.value)}
-						>
-							{CONTRACT_STATUSES.map((s) => (
-								<option key={s} value={s}>
-									{s}
-								</option>
-							))}
-						</select>
-					</FormField>
-					<FormField label={__('Assigned', 'doublescale')} className="!mb-0">
-						{usersLoading ? (
-							<div className="text-sm text-muted-foreground">{__('Loading…', 'doublescale')}</div>
-						) : assigneeReadOnly ? (
-							<div className="border rounded px-3 py-2 bg-slate-50 text-sm h-10 flex items-center">
-								{assignableUsers.find((u) => u.id === assignedUserId)?.display_name ||
-									assignableUsers[0]?.display_name ||
-									'—'}
-							</div>
-						) : (
+					<FormField label={__('Contract Type', 'doublescale')} required className="!mb-0">
+						<div className="flex gap-2">
 							<Select
-								value={assignedUserId ? String(assignedUserId) : 'unassigned'}
+								value={contractTypeId ? String(contractTypeId) : 'none'}
 								onValueChange={(next) =>
-									setAssignedUserId(next === 'unassigned' ? null : Number(next))
+									setContractTypeId(next === 'none' ? null : Number(next))
 								}
 							>
-								<SelectTrigger className="w-full">
-									<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
+								<SelectTrigger className="flex-1 !rounded-lg !border-border">
+									<SelectValue
+										placeholder={__('Search contract type…', 'doublescale')}
+									/>
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="unassigned">
-										{__('— Unassigned —', 'doublescale')}
-									</SelectItem>
-									{assignableUsers.map((user) => (
-										<SelectItem key={user.id} value={String(user.id)}>
-											{user.display_name}
+									<SelectItem value="none">{__('— None —', 'doublescale')}</SelectItem>
+									{(contractTypes ?? []).map((type) => (
+										<SelectItem key={type.id} value={String(type.id)}>
+											{type.name}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
-						)}
+							<Button
+								type="button"
+								variant="outline"
+								className="shrink-0 h-10 !rounded-lg border-primary bg-white text-primary"
+								onClick={() => setTypeDialogOpen(true)}
+								aria-label={__('Add contract type', 'doublescale')}
+							>
+								<PlusIcon width={20} height={20} />
+							</Button>
+						</div>
 					</FormField>
+
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+						<FormField label={__('Contract Value', 'doublescale')} required className="!mb-0">
+							<Input
+								type="number"
+								min={0}
+								step="0.01"
+								value={contractValue}
+								onChange={(e) => setContractValue(Number(e.target.value))}
+								className="!rounded-lg !border-border"
+							/>
+						</FormField>
+						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
+							<select
+								className={selectClass}
+								value={currency}
+								onChange={(e) => setCurrency(e.target.value)}
+							>
+								{CURRENCIES.map((c) => (
+									<option key={c} value={c}>
+										{c}
+									</option>
+								))}
+							</select>
+						</FormField>
+					</div>
+
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+						<FormField label={__('Start Date', 'doublescale')} required className="!mb-0">
+							<DatePicker
+								value={startDate}
+								onChange={setStartDate}
+								outputFormat="iso"
+								placeholder={__('From - To', 'doublescale')}
+								buttonClassName="w-full !rounded-lg !border-border"
+								className="w-full"
+							/>
+						</FormField>
+						<FormField label={__('End Date', 'doublescale')} className="!mb-0">
+							<DatePicker
+								value={endDate}
+								onChange={setEndDate}
+								outputFormat="iso"
+								placeholder={__('From - To', 'doublescale')}
+								buttonClassName="w-full !rounded-lg !border-border"
+								className="w-full"
+							/>
+						</FormField>
+					</div>
 				</div>
 
-				<div className="flex items-center justify-between pt-2">
-					<Label htmlFor="contract-hide-customer">
-						{__('Hide from Customer', 'doublescale')}
-					</Label>
-					<Switch
-						id="contract-hide-customer"
-						checked={hideFromCustomer}
-						onCheckedChange={setHideFromCustomer}
-					/>
-				</div>
+				<div className="space-y-4 pt-6 lg:pl-8 lg:pt-0">
+					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
+						<TagField value={tagIds} onChange={setTagIds} />
+					</FormField>
 
-				<div className="flex items-center justify-between">
-					<Label htmlFor="contract-trash">{__('Move to Trash', 'doublescale')}</Label>
-					<Switch
-						id="contract-trash"
-						checked={isTrash}
-						onCheckedChange={setIsTrash}
-					/>
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+						<FormField label={__('Status', 'doublescale')} className="!mb-0">
+							<select
+								className={selectClass}
+								value={status}
+								onChange={(e) => setStatus(e.target.value)}
+							>
+								{CONTRACT_STATUSES.map((s) => (
+									<option key={s} value={s}>
+										{CONTRACT_STATUS_LABELS[s]}
+									</option>
+								))}
+							</select>
+						</FormField>
+						<FormField label={__('Assigned', 'doublescale')} className="!mb-0">
+							{usersLoading ? (
+								<div className="text-sm text-muted-foreground">
+									{__('Loading…', 'doublescale')}
+								</div>
+							) : assigneeReadOnly ? (
+								<div className="flex h-10 items-center rounded-lg border border-border bg-slate-50 px-3 py-2 text-sm">
+									{assignableUsers.find((u) => u.id === assignedUserId)?.display_name ||
+										assignableUsers[0]?.display_name ||
+										'—'}
+								</div>
+							) : (
+								<Select
+									value={assignedUserId ? String(assignedUserId) : 'unassigned'}
+									onValueChange={(next) =>
+										setAssignedUserId(next === 'unassigned' ? null : Number(next))
+									}
+								>
+									<SelectTrigger className="w-full !rounded-lg !border-border">
+										<SelectValue placeholder={__('— Unassigned —', 'doublescale')} />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="unassigned">
+											{__('— Unassigned —', 'doublescale')}
+										</SelectItem>
+										{assignableUsers.map((user) => (
+											<SelectItem key={user.id} value={String(user.id)}>
+												{user.display_name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							)}
+						</FormField>
+					</div>
+
+					<div className="space-y-4 rounded-lg border border-[#DEE1E6] bg-[#F7F8FA] p-4">
+						<div className="flex items-center justify-between border-b border-[#DEE1E6] pb-4">
+							<Label htmlFor="contract-hide-customer">
+								{__('Hide from Customer', 'doublescale')}
+							</Label>
+							<Switch
+								id="contract-hide-customer"
+								checked={hideFromCustomer}
+								onCheckedChange={setHideFromCustomer}
+							/>
+						</div>
+						<div className="flex items-center justify-between">
+							<Label htmlFor="contract-trash">{__('Move to Trash', 'doublescale')}</Label>
+							<Switch
+								id="contract-trash"
+								checked={isTrash}
+								onCheckedChange={setIsTrash}
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
+
+			<FormField label={__('Contract Body', 'doublescale')} required className="!mb-0 border-t border-[#DEE1E6] pt-4">
+				<div className={contractEditorWrapperClassName}>
+					<Editor
+						message={description}
+						onChange={setDescription}
+						placeholder={__('Write a contract body here…', 'doublescale')}
+					/>
+				</div>
+			</FormField>
+		</>
 	);
 
-	return (
-		<div className="p-6 space-y-6 max-w-6xl">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">
-					{isNew ? __('New Contract', 'doublescale') : __('Edit Contract', 'doublescale')}
-				</h1>
-				<Button variant="outline" onClick={() => navigate(getToLink('sales/contracts'))}>
-					{__('Back', 'doublescale')}
-				</Button>
-			</div>
+	return panelShell(
+		<div className="space-y-6">
+			<h1 className="text-2xl font-semibold text-foreground">
+				{pageTitle}
+			</h1>
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
@@ -543,71 +589,154 @@ const ContractEdit: React.FC = () => {
 				showReapprovalWarning={showReapprovalWarning}
 			/>
 
-			<fieldset disabled={fieldsLocked} className="space-y-6 border-0 p-0 m-0 min-w-0">
-			<PageTabs
-				defaultValue="information"
-				tabsVariant="underline"
-				tabsListWrapperClassName="border-b mb-4 border-border px-0 py-0 rounded-none bg-transparent"
-				tabsListClassName="bg-transparent gap-6"
-				enableHorizontalScroll
-				tabsList={[
-					{ value: 'information', label: __('Contract Information', 'doublescale') },
-					{ value: 'content', label: __('Content', 'doublescale') },
-					{ value: 'attachments', label: __('Attachments', 'doublescale') },
-				]}
-				tabsContent={[
-					{ value: 'information', children: informationFields },
-					{
-						value: 'content',
-						children: (
-							<FormField label={__('Contract Body', 'doublescale')} className="!mb-0">
-								<div className={contractEditorWrapperClassName}>
-									<Editor message={description} onChange={setDescription} />
-								</div>
-							</FormField>
-						),
-					},
-					{
-						value: 'attachments',
-						children: (
-							<ContractAttachmentsPanel
-								contractId={contractId}
-								onNotice={(message) => setError(message)}
-							/>
-						),
-					},
-				]}
-			/>
+			<fieldset
+				disabled={fieldsLocked}
+				className="m-0 min-w-0 space-y-0 border-0 p-0"
+			>
+				{isNew ? (
+					contractInformationContent
+				) : (
+					<PageTabs
+						defaultValue="information"
+						tabsListWrapperClassName="mb-6"
+						tabsListClassName="flex flex-col sm:flex-row h-auto w-full max-w-sm gap-3 bg-transparent p-0"
+						tabsTriggerClassName="h-10 flex-1 rounded-xl px-4 text-base font-normal transition-colors data-[state=active]:border-0 data-[state=active]:bg-[#EEEEFF] data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=inactive]:border data-[state=inactive]:border-[#DEE1E6] data-[state=inactive]:bg-white data-[state=inactive]:text-[#29292E] data-[state=inactive]:shadow-none hover:data-[state=inactive]:bg-white"
+						tabsList={[
+							{
+								value: 'information',
+								label: __(
+									'Contract Information',
+									'doublescale'
+								),
+							},
+							{
+								value: 'attachments',
+								label: __('Attachments', 'doublescale'),
+							},
+						]}
+						tabsContent={[
+							{
+								value: 'information',
+								children: contractInformationContent,
+							},
+							{
+								value: 'attachments',
+								children: (
+									<ContractAttachmentsPanel
+										contractId={contractId}
+										layout="form"
+										onNotice={(message) =>
+											setError(message)
+										}
+									/>
+								),
+							},
+						]}
+					/>
+				)}
 			</fieldset>
 
-			<div className="flex justify-end gap-2">
-				<Button variant="outline" onClick={() => navigate(getToLink('sales/contracts'))}>
+			<div className="flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-between">
+				<Button
+					variant="outline"
+					onClick={handleClose}
+					className="border-primary bg-white text-primary"
+				>
 					{__('Cancel', 'doublescale')}
 				</Button>
-				<Button variant="outline" onClick={() => void handleSave()} disabled={saving || fieldsLocked}>
-					{saving ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
-				</Button>
-				{showSubmitApproval ? (
-					<Button
-						variant="outline"
-						onClick={() => void handleSubmitForApproval()}
-						disabled={saving || submittingApproval}
-					>
-						{submittingApproval
-							? __('Submitting…', 'doublescale')
-							: __('Submit for Approval', 'doublescale')}
-					</Button>
-				) : null}
-				{showSend ? (
-					<Button onClick={() => setSendOpen(true)} disabled={saving || status === 'expired'}>
-						{__('Save & Send', 'doublescale')}
-					</Button>
-				) : null}
+				<div className="flex flex-wrap justify-center gap-2 sm:justify-end">
+					{isNew ? (
+						<>
+							<Button
+								variant="outline"
+								className="border-primary bg-white text-primary"
+								onClick={() => void handleSave()}
+								disabled={saving || fieldsLocked}
+							>
+								{saving
+									? __('Saving…', 'doublescale')
+									: __('Save', 'doublescale')}
+							</Button>
+							{showSubmitApproval ? (
+								<Button
+									variant="outline"
+									className="border-primary bg-white text-primary"
+									onClick={() =>
+										void handleSubmitForApproval()
+									}
+									disabled={saving || submittingApproval}
+								>
+									{submittingApproval
+										? __('Submitting…', 'doublescale')
+										: __(
+												'Submit for Approval',
+												'doublescale'
+											)}
+								</Button>
+							) : null}
+							{showSend ? (
+								<Button
+									onClick={() => setSendOpen(true)}
+									disabled={saving || status === 'expired'}
+								>
+									{__('Save & Send', 'doublescale')}
+								</Button>
+							) : null}
+						</>
+					) : (
+						<>
+							{showSubmitApproval ? (
+								<Button
+									variant="outline"
+									className="border-primary bg-white text-primary"
+									onClick={() =>
+										void handleSubmitForApproval()
+									}
+									disabled={
+										saving ||
+										submittingApproval ||
+										fieldsLocked
+									}
+								>
+									{submittingApproval
+										? __('Submitting…', 'doublescale')
+										: __(
+												'Submit for Approval',
+												'doublescale'
+											)}
+								</Button>
+							) : null}
+							{showSend ? (
+								<Button
+									variant="outline"
+									className="border-primary bg-white text-primary"
+									onClick={() => setSendOpen(true)}
+									disabled={
+										saving ||
+										status === 'expired' ||
+										fieldsLocked
+									}
+								>
+									{__('Save & Send', 'doublescale')}
+								</Button>
+							) : null}
+							<Button
+								onClick={() => void handleSave()}
+								disabled={saving || fieldsLocked}
+							>
+								{saving
+									? __('Saving…', 'doublescale')
+									: __('Edit', 'doublescale')}
+							</Button>
+						</>
+					)}
+				</div>
 			</div>
 
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
+				documentType="contract"
 				title={__('Save & Send Contract', 'doublescale')}
 				description={__(
 					'Save this contract and email it to the customer. Add an optional personal note below.',
@@ -619,21 +748,44 @@ const ContractEdit: React.FC = () => {
 			/>
 
 			<Dialog open={typeDialogOpen} onOpenChange={setTypeDialogOpen}>
-				<DialogContent>
+				<DialogContent className="max-w-lg z-[150200] bg-white">
 					<DialogHeader>
-						<DialogTitle>{__('New Contract Type', 'doublescale')}</DialogTitle>
+						<CustomDialogHeader
+							title={__('New Contract Type', 'doublescale')}
+							subtitle={__(
+								'Quickly add a new type with a clear interface that keeps everything organized',
+								'doublescale'
+							)}
+							icon={<GradientContractTypeIcon />}
+						/>
 					</DialogHeader>
-					<Input
-						value={newTypeName}
-						onChange={(e) => setNewTypeName(e.target.value)}
-						placeholder={__('Type name', 'doublescale')}
-					/>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setTypeDialogOpen(false)}>
+					<div className="space-y-2">
+						<Label htmlFor="new-contract-type-name">
+							{__('Name', 'doublescale')}
+						</Label>
+						<Input
+							id="new-contract-type-name"
+							value={newTypeName}
+							onChange={(e) => setNewTypeName(e.target.value)}
+							placeholder={__('Type name', 'doublescale')}
+							className="!rounded-lg !border-border"
+						/>
+					</div>
+					<DialogFooter className="flex gap-2 sm:justify-end">
+						<Button
+							variant="outline"
+							onClick={() => setTypeDialogOpen(false)}
+							className="border-primary bg-white text-primary"
+						>
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button onClick={() => void handleCreateType()} disabled={typeBusy}>
-							{typeBusy ? __('Saving…', 'doublescale') : __('Create', 'doublescale')}
+						<Button
+							onClick={() => void handleCreateType()}
+							disabled={typeBusy}
+						>
+							{typeBusy
+								? __('Saving…', 'doublescale')
+								: __('Create', 'doublescale')}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

@@ -120,7 +120,7 @@ const getFormIcon = (sourceKey: string) => {
 		wsform: wsForms,
 		bitform: bitForms,
 		sureforms: sureForms,
-		typeform: `${proPluginUrl}assets/images/typeform/typeform.png`,
+		typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
 		jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
 	};
 

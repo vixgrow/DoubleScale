@@ -5,9 +5,10 @@
 import React, { useCallback, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDropzone } from 'react-dropzone';
-import { Download, Trash2, Upload } from 'lucide-react';
 
+import { DeleteIcon, FormField } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { ContractAttachmentLimits } from '@/types/sales';
 import {
 	deleteContractAttachment,
@@ -19,6 +20,10 @@ interface Props {
 	contractId: number | null;
 	canManage?: boolean;
 	onNotice?: (message: string) => void;
+	layout?: 'default' | 'form';
+	/** When false, hides the logo upload zone in form layout (e.g. contract view). */
+	showLogoUpload?: boolean;
+	file_classname?: string;
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -26,7 +31,10 @@ const formatFileSize = (bytes: number): string => {
 		return '';
 	}
 	const units = ['B', 'KB', 'MB', 'GB'];
-	const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+	const exponent = Math.min(
+		Math.floor(Math.log(bytes) / Math.log(1024)),
+		units.length - 1
+	);
 	const value = bytes / Math.pow(1024, exponent);
 	return `${exponent === 0 ? value : Math.round(value * 10) / 10} ${units[exponent]}`;
 };
@@ -36,7 +44,10 @@ const buildLimitsHint = (limits: ContractAttachmentLimits | null): string => {
 		return '';
 	}
 
-	const { max_file_count: maxFileCount, max_file_size_bytes: maxFileSizeBytes } = limits;
+	const {
+		max_file_count: maxFileCount,
+		max_file_size_bytes: maxFileSizeBytes,
+	} = limits;
 	const hasCount = maxFileCount > 0;
 	const hasSize = maxFileSizeBytes > 0;
 
@@ -71,17 +82,137 @@ const buildLimitsHint = (limits: ContractAttachmentLimits | null): string => {
 	return '';
 };
 
+const UploadDropzone: React.FC<{
+	disabled: boolean;
+	uploading: boolean;
+	limitsHint: string;
+	isDragActive: boolean;
+	getRootProps: ReturnType<typeof useDropzone>['getRootProps'];
+	getInputProps: ReturnType<typeof useDropzone>['getInputProps'];
+	variant?: 'default' | 'form';
+}> = ({
+	disabled,
+	uploading,
+	limitsHint,
+	isDragActive,
+	getRootProps,
+	getInputProps,
+	variant = 'default',
+}) => {
+	const isForm = variant === 'form';
+	const borderStroke = isDragActive
+		? 'hsl(var(--primary))'
+		: isForm
+			? '#D0D0D0'
+			: 'hsl(var(--muted-foreground) / 0.35)';
+
+	return (
+		<div
+			{...getRootProps()}
+			className={cn(
+				'relative rounded-lg p-10 text-center transition-colors',
+				!disabled && !uploading && 'cursor-pointer',
+				isForm
+					? isDragActive
+						? 'bg-primary/5'
+						: 'bg-white'
+					: isDragActive
+						? 'bg-primary/5'
+						: 'bg-muted/20'
+			)}
+		>
+			<svg
+				className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<rect
+					x="0.5"
+					y="0.5"
+					width="calc(100% - 1px)"
+					height="calc(100% - 1px)"
+					rx="7"
+					ry="7"
+					fill="none"
+					stroke={borderStroke}
+					strokeWidth="1"
+					strokeDasharray="20 14"
+					vectorEffect="nonScalingStroke"
+				/>
+			</svg>
+			<div className="relative z-10">
+				<input {...getInputProps()} />
+				<div className="flex items-center justify-center">
+					<svg
+						width="48"
+						height="48"
+						viewBox="0 0 48 48"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							opacity="0.4"
+							d="M37.0098 20.7373C40.8498 20.7373 44.0098 23.8773 44.0098 27.7373C44.0098 29.8773 43.3698 33.2573 42.5698 35.2373L41.3298 38.3373C40.3498 40.7573 37.4298 42.7373 34.8298 42.7373H13.1897C10.5897 42.7373 7.66971 40.7573 6.68971 38.3373L5.44971 35.2373C4.64971 33.2573 4.00977 29.8773 4.00977 27.7373C4.00977 25.8173 4.80983 24.0573 6.06983 22.7973C7.32983 21.5173 9.08977 20.7373 11.0098 20.7373H37.0098Z"
+							fill="#3A3A99"
+						/>
+						<path
+							d="M23.7288 5.2777C23.9088 5.2577 24.1088 5.2577 24.2888 5.2777C24.5888 5.3377 24.8688 5.4577 25.0688 5.6777L31.4286 12.0377C32.0086 12.6177 32.0086 13.5777 31.4286 14.1577C30.8486 14.7377 29.8888 14.7377 29.3088 14.1577L25.5088 10.3577V29.0977C25.5088 29.9177 24.8288 30.5977 24.0088 30.5977C23.1888 30.5977 22.5088 29.9177 22.5088 29.0977V10.3577L18.7287 14.1577C18.4287 14.4577 18.0486 14.5977 17.6686 14.5977C17.2886 14.5977 16.8888 14.4577 16.6088 14.1577C16.0288 13.5777 16.0288 12.6177 16.6088 12.0377L22.9486 5.6777C23.0286 5.5977 23.1288 5.5177 23.2288 5.4777C23.2888 5.4377 23.3286 5.3977 23.3886 5.3977C23.4886 5.3377 23.6088 5.2977 23.7288 5.2777Z"
+							fill="#3A3A99"
+						/>
+					</svg>
+				</div>
+				{isForm ? (
+					<p className="text-sm text-foreground">
+						<span className="font-medium text-primary">
+							{__('Choose files', 'doublescale')}
+						</span>
+						<span className="text-muted-foreground">
+							{' '}
+							{__('to Drop files here to upload', 'doublescale')}
+						</span>
+					</p>
+				) : (
+					<>
+						<p className="text-sm font-medium">
+							{isDragActive
+								? __('Drop files here…', 'doublescale')
+								: __(
+										'Drop files here to upload',
+										'doublescale'
+									)}
+						</p>
+						<p className="mt-2 text-xs text-muted-foreground">
+							{__('or click to browse', 'doublescale')}
+						</p>
+					</>
+				)}
+				{limitsHint ? (
+					<p className="mt-3 text-xs text-muted-foreground">
+						{limitsHint}
+					</p>
+				) : null}
+			</div>
+		</div>
+	);
+};
+
 const ContractAttachmentsPanel: React.FC<Props> = ({
 	contractId,
 	canManage = true,
 	onNotice,
+	layout = 'default',
+	showLogoUpload = true,
+	file_classname = 'bg-[#F7F8FA]',
 }) => {
-	const { data: attachments, limits, loading, refetch } = useContractAttachments(
-		contractId,
-		!!contractId
-	);
+	const {
+		data: attachments,
+		limits,
+		loading,
+		refetch,
+	} = useContractAttachments(contractId, !!contractId);
 	const [uploading, setUploading] = useState(false);
 	const limitsHint = buildLimitsHint(limits);
+	const isFormLayout = layout === 'form';
 
 	const uploadFiles = useCallback(
 		async (files: File[]) => {
@@ -107,12 +238,18 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 				return;
 			}
 
-			const oversized = maxBytes > 0 ? files.find((file) => file.size > maxBytes) : undefined;
+			const oversized =
+				maxBytes > 0
+					? files.find((file) => file.size > maxBytes)
+					: undefined;
 			if (oversized) {
 				onNotice?.(
 					sprintf(
 						/* translators: 1: file name, 2: max size (e.g. "10 MB") */
-						__('"%1$s" exceeds the maximum upload size of %2$s.', 'doublescale'),
+						__(
+							'"%1$s" exceeds the maximum upload size of %2$s.',
+							'doublescale'
+						),
 						oversized.name,
 						formatFileSize(maxBytes)
 					)
@@ -128,7 +265,11 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 				await refetch();
 				onNotice?.(__('File uploaded.', 'doublescale'));
 			} catch (err: unknown) {
-				onNotice?.(err instanceof Error ? err.message : __('Upload failed.', 'doublescale'));
+				onNotice?.(
+					err instanceof Error
+						? err.message
+						: __('Upload failed.', 'doublescale')
+				);
 			} finally {
 				setUploading(false);
 			}
@@ -143,10 +284,17 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 		[uploadFiles]
 	);
 
-	const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+	const dropzoneDisabled = !canManage || !contractId || uploading;
+
+	const logoDropzone = useDropzone({
 		onDrop,
-		noClick: true,
-		disabled: !canManage || !contractId || uploading,
+		disabled: dropzoneDisabled,
+		multiple: true,
+	});
+
+	const attachmentsDropzone = useDropzone({
+		onDrop,
+		disabled: dropzoneDisabled,
 		multiple: true,
 	});
 
@@ -159,7 +307,11 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 			await deleteContractAttachment(contractId, fileHash);
 			await refetch();
 		} catch (err: unknown) {
-			onNotice?.(err instanceof Error ? err.message : __('Delete failed.', 'doublescale'));
+			onNotice?.(
+				err instanceof Error
+					? err.message
+					: __('Delete failed.', 'doublescale')
+			);
 		} finally {
 			setUploading(false);
 		}
@@ -168,96 +320,229 @@ const ContractAttachmentsPanel: React.FC<Props> = ({
 	if (!contractId) {
 		return (
 			<p className="text-sm text-muted-foreground">
-				{__('Save the contract first to upload attachments.', 'doublescale')}
+				{__(
+					'Save the contract first to upload attachments.',
+					'doublescale'
+				)}
 			</p>
+		);
+	}
+
+	const attachmentList = loading ? (
+		<p className="text-sm text-muted-foreground">
+			{__('Loading attachments…', 'doublescale')}
+		</p>
+	) : attachments.length > 0 ? (
+		isFormLayout ? (
+			<div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+				{attachments.map((file) => (
+					<div
+						key={file.file_hash}
+						className={cn("flex max-w-xs sm:max-w-sm flex-1 items-center justify-between gap-3 rounded-lg border border-[#DEE1E6] p-4", file_classname)}
+					>
+						<span className="truncate text-sm font-medium text-foreground">
+							{file.file_name}
+						</span>
+						<div className="flex shrink-0 items-center gap-1">
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8"
+								asChild
+							>
+								<a
+									href={file.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									download
+								>
+									<svg
+										width="18"
+										height="18"
+										viewBox="0 0 18 18"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path
+											opacity="0.2"
+											d="M9 18C4.05 18 0 13.95 0 9C0 4.05 4.05 0 9 0C13.95 0 18 4.05 18 9C18 13.95 13.95 18 9 18Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M8.9992 11.3128C8.8282 11.3128 8.65711 11.2498 8.52211 11.1148L6.59614 9.18881C6.33514 8.92781 6.33514 8.49581 6.59614 8.23481C6.85714 7.97381 7.2892 7.97381 7.5502 8.23481L8.9992 9.68381L10.4482 8.23481C10.7092 7.97381 11.1412 7.97381 11.4022 8.23481C11.6632 8.49581 11.6632 8.92781 11.4022 9.18881L9.4762 11.1148C9.3412 11.2498 9.1702 11.3128 8.9992 11.3128Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M8.99922 11.3133C8.63022 11.3133 8.32422 11.0073 8.32422 10.6383V4.78828C8.32422 4.41928 8.63022 4.11328 8.99922 4.11328C9.36822 4.11328 9.67422 4.41928 9.67422 4.78828V10.6383C9.67422 11.0163 9.36822 11.3133 8.99922 11.3133Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M12.1508 13.8871H5.85078C5.48178 13.8871 5.17578 13.5811 5.17578 13.2121C5.17578 12.8431 5.48178 12.5371 5.85078 12.5371H12.1508C12.5198 12.5371 12.8258 12.8431 12.8258 13.2121C12.8258 13.5811 12.5198 13.8871 12.1508 13.8871Z"
+											fill="#3A3A99"
+										/>
+									</svg>
+								</a>
+							</Button>
+							{canManage ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									className="text-destructive hover:text-destructive"
+									disabled={uploading}
+									onClick={() =>
+										void handleDelete(file.file_hash)
+									}
+									aria-label={__(
+										'Delete attachment',
+										'doublescale'
+									)}
+								>
+									<DeleteIcon />
+								</Button>
+							) : null}
+						</div>
+					</div>
+				))}
+			</div>
+		) : (
+			<ul className="divide-y rounded-lg border bg-white">
+				{attachments.map((file) => (
+					<li
+						key={file.file_hash}
+						className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+					>
+						<div className="min-w-0">
+							<div className="truncate font-medium">
+								{file.file_name}
+							</div>
+							<div className="text-xs text-muted-foreground">
+								{formatFileSize(file.file_size)}
+								{file.uploaded_by
+									? ` · ${sprintf(
+											/* translators: %s: uploader display name */
+											__('Uploaded by %s', 'doublescale'),
+											file.uploaded_by
+										)}`
+									: ''}
+							</div>
+						</div>
+						<div className="flex shrink-0 items-center gap-1">
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								asChild
+							>
+								<a
+									href={file.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									download
+								>
+									<svg
+										width="18"
+										height="18"
+										viewBox="0 0 18 18"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path
+											opacity="0.2"
+											d="M9 18C4.05 18 0 13.95 0 9C0 4.05 4.05 0 9 0C13.95 0 18 4.05 18 9C18 13.95 13.95 18 9 18Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M8.9992 11.3128C8.8282 11.3128 8.65711 11.2498 8.52211 11.1148L6.59614 9.18881C6.33514 8.92781 6.33514 8.49581 6.59614 8.23481C6.85714 7.97381 7.2892 7.97381 7.5502 8.23481L8.9992 9.68381L10.4482 8.23481C10.7092 7.97381 11.1412 7.97381 11.4022 8.23481C11.6632 8.49581 11.6632 8.92781 11.4022 9.18881L9.4762 11.1148C9.3412 11.2498 9.1702 11.3128 8.9992 11.3128Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M8.99922 11.3133C8.63022 11.3133 8.32422 11.0073 8.32422 10.6383V4.78828C8.32422 4.41928 8.63022 4.11328 8.99922 4.11328C9.36822 4.11328 9.67422 4.41928 9.67422 4.78828V10.6383C9.67422 11.0163 9.36822 11.3133 8.99922 11.3133Z"
+											fill="#3A3A99"
+										/>
+										<path
+											d="M12.1508 13.8871H5.85078C5.48178 13.8871 5.17578 13.5811 5.17578 13.2121C5.17578 12.8431 5.48178 12.5371 5.85078 12.5371H12.1508C12.5198 12.5371 12.8258 12.8431 12.8258 13.2121C12.8258 13.5811 12.5198 13.8871 12.1508 13.8871Z"
+											fill="#3A3A99"
+										/>
+									</svg>
+								</a>
+							</Button>
+							{canManage ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									className="text-muted-foreground hover:text-red-600"
+									disabled={uploading}
+									onClick={() =>
+										void handleDelete(file.file_hash)
+									}
+									aria-label={__(
+										'Delete attachment',
+										'doublescale'
+									)}
+								>
+									<DeleteIcon />
+								</Button>
+							) : null}
+						</div>
+					</li>
+				))}
+			</ul>
+		)
+	) : (
+		<p className="text-sm text-muted-foreground">
+			{__('No attachments yet.', 'doublescale')}
+		</p>
+	);
+
+	if (isFormLayout) {
+		return (
+			<div className="space-y-6">
+				{canManage && showLogoUpload ? (
+					<FormField
+						label={__('Logo', 'doublescale')}
+						className="!mb-0"
+					>
+						<UploadDropzone
+							variant="form"
+							disabled={dropzoneDisabled}
+							uploading={uploading}
+							limitsHint={limitsHint}
+							isDragActive={logoDropzone.isDragActive}
+							getRootProps={logoDropzone.getRootProps}
+							getInputProps={logoDropzone.getInputProps}
+						/>
+					</FormField>
+				) : null}
+
+				<FormField
+					label={__('Attachments', 'doublescale')}
+					className={cn(
+						'!mb-0',
+						canManage && showLogoUpload && 'border-t border-[#DEE1E6] pt-4'
+					)}
+				>
+					{attachmentList}
+				</FormField>
+			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
 			{canManage ? (
-				<div
-					{...getRootProps()}
-					className={`rounded-lg border-2 border-dashed p-10 text-center transition-colors ${
-						isDragActive
-							? 'border-primary bg-primary/5'
-							: 'border-muted-foreground/30 bg-muted/20'
-					}`}
-				>
-					<input {...getInputProps()} />
-					<Upload className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
-					<p className="text-sm font-medium">
-						{isDragActive
-							? __('Drop files here…', 'doublescale')
-							: __('Drop files here to upload', 'doublescale')}
-					</p>
-					<p className="text-xs text-muted-foreground mt-2">
-						{__('or', 'doublescale')}
-					</p>
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						className="mt-3"
-						disabled={uploading}
-						onClick={open}
-					>
-						{uploading ? __('Uploading…', 'doublescale') : __('Choose files', 'doublescale')}
-					</Button>
-					{limitsHint ? (
-						<p className="text-xs text-muted-foreground mt-3">{limitsHint}</p>
-					) : null}
-				</div>
+				<UploadDropzone
+					disabled={dropzoneDisabled}
+					uploading={uploading}
+					limitsHint={limitsHint}
+					isDragActive={attachmentsDropzone.isDragActive}
+					getRootProps={attachmentsDropzone.getRootProps}
+					getInputProps={attachmentsDropzone.getInputProps}
+				/>
 			) : null}
-
-			{loading ? (
-				<p className="text-sm text-muted-foreground">{__('Loading attachments…', 'doublescale')}</p>
-			) : attachments.length > 0 ? (
-				<ul className="divide-y rounded-lg border bg-white">
-					{attachments.map((file) => (
-						<li
-							key={file.file_hash}
-							className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-						>
-							<div className="min-w-0">
-								<div className="font-medium truncate">{file.file_name}</div>
-								<div className="text-xs text-muted-foreground">
-									{formatFileSize(file.file_size)}
-									{file.uploaded_by
-										? ` · ${sprintf(
-												/* translators: %s: uploader display name */
-												__('Uploaded by %s', 'doublescale'),
-												file.uploaded_by
-										  )}`
-										: ''}
-								</div>
-							</div>
-							<div className="flex items-center gap-1 shrink-0">
-								<Button type="button" variant="ghost" size="icon" asChild>
-									<a href={file.url} target="_blank" rel="noopener noreferrer" download>
-										<Download className="h-4 w-4" />
-									</a>
-								</Button>
-								{canManage ? (
-									<Button
-										type="button"
-										variant="ghost"
-										size="icon"
-										className="text-muted-foreground hover:text-red-600"
-										disabled={uploading}
-										onClick={() => void handleDelete(file.file_hash)}
-										aria-label={__('Delete attachment', 'doublescale')}
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								) : null}
-							</div>
-						</li>
-					))}
-				</ul>
-			) : (
-				<p className="text-sm text-muted-foreground">{__('No attachments yet.', 'doublescale')}</p>
-			)}
+			{attachmentList}
 		</div>
 	);
 };

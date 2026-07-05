@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { GradientProposalsIcon, CustomDialogHeader } from '@doublescale/components';
+import { GradientContractsIcon, GradientProposalsIcon, CustomDialogHeader } from '@doublescale/components';
 
 interface SendDocumentDialogProps {
 	open: boolean;
@@ -23,6 +23,7 @@ interface SendDocumentDialogProps {
 	description: string;
 	confirmLabel?: string;
 	busy?: boolean;
+	documentType?: 'proposal' | 'contract';
 	onConfirm: (message: string) => void | Promise<void>;
 }
 
@@ -33,6 +34,7 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 	description,
 	confirmLabel = __('Send', 'doublescale'),
 	busy = false,
+	documentType = 'proposal',
 	onConfirm,
 }) => {
 	const [message, setMessage] = useState('');
@@ -43,11 +45,14 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 		}
 	}, [open]);
 
+	const headerIcon =
+		documentType === 'contract' ? <GradientContractsIcon width={24} height={24}/> : <GradientProposalsIcon width={32} height={32} />;
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-lg z-[150200] bg-white">
 				<DialogHeader>
-					<CustomDialogHeader title={title} subtitle={description} icon={<GradientProposalsIcon />}/>
+					<CustomDialogHeader title={title} subtitle={description} icon={headerIcon} />
 				</DialogHeader>
 				<div className="space-y-2">
 					<Label htmlFor="send-custom-message">

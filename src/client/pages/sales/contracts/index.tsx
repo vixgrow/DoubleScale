@@ -2,62 +2,123 @@
  * Contracts list page with summary cards and charts.
  */
 
-import React, { useState } from '@wordpress/element';
+import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Eye, MoreVertical, Pencil, Plus, RefreshCw, Tags, Trash2 } from 'lucide-react';
+import { RefreshCw, Tags, CheckCheck } from 'lucide-react';
 import {
 	Bar,
 	BarChart,
 	CartesianGrid,
-	Cell,
-	Pie,
-	PieChart,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
 	YAxis,
 } from 'recharts';
 
+import type { DataTableConfig } from '@doublescale/client';
+import type { IconProps } from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { formatDateForAPI } from '@doublescale/utils';
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+	ColoredDeleteIcon,
+	ContractAboutToExpireIcon,
+	ContractDraftIcon,
+	ContractExpiredIcon,
+	ContractSignedIcon,
+	DashboardContentCard,
+	GradientContractsIcon,
+	MessageStatsCard,
+	NoData,
+	PageHeader,
+	PlusIcon,
+	SalesIcon,
+	SendTestEmailIcon,
+} from '@doublescale/components';
+import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog, ContractStatusPill } from '@/components/sales';
+import { ConfirmDialog } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	isApprovalWorkflowEnabled,
 } from '@/components/sales/sales-approval-utils';
-import { deleteContract, useContracts, useContractSummary, useSalesSettings } from '@/hooks/sales';
-import { CONTRACT_STATUS_LABELS } from '@/constants/sales';
+import {
+	CONTRACT_STATUSES,
+	CONTRACT_STATUS_LABELS,
+	type ContractStatus,
+} from '@/constants/sales';
+import {
+	deleteContract,
+	useContracts,
+	useContractSummary,
+	useContractTypes,
+	useSalesSettings,
+} from '@/hooks/sales';
 import type { Contract } from '@/types/sales';
-
-const CHART_COLORS = ['#4c6fff', '#38bdf8', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#94a3b8'];
+import { getContractColumns } from './columns';
 
 const formatMoney = (value: number, currency = 'USD') =>
 	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
-const contactName = (contract: Contract): string => {
-	const c = contract.contact;
-	if (!c) {
-		return '—';
+const ActiveContractIcon: React.FC<IconProps> = ({
+	width = 29,
+	height = 29,
+}) => <CheckCheck width={width} height={height} />;
+
+const statusSummaryConfig: Record<
+	ContractStatus,
+	{
+		Icon: ComponentType<IconProps>;
+		iconBgClass: string;
+		iconColor?: string;
+		percentageBadgeClass: string;
 	}
-	const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
-	return name || c.email || '—';
+> = {
+	draft: {
+		Icon: ContractDraftIcon,
+		iconBgClass: 'bg-[#6B6C76]',
+		iconColor: 'text-white',
+		percentageBadgeClass: 'bg-[#ECECEC] text-[#6B6C76]',
+	},
+	sent: {
+		Icon: SendTestEmailIcon,
+		iconBgClass: 'bg-[#16A34A]',
+		iconColor: 'text-white',
+		percentageBadgeClass: 'bg-[#E4FAEC] text-[#16A34A]',
+	},
+	signed: {
+		Icon: ContractSignedIcon,
+		iconBgClass: 'bg-[#FFD242]',
+		iconColor: 'text-[#29292E]',
+		percentageBadgeClass: 'bg-[#F7F4C3] text-[#896900]',
+	},
+	active: {
+		Icon: ActiveContractIcon,
+		iconBgClass: 'bg-[#16A34A]',
+		iconColor: 'text-white',
+		percentageBadgeClass: 'bg-[#E4FAEC] text-[#16A34A]',
+	},
+	expired: {
+		Icon: ContractExpiredIcon,
+		iconBgClass: 'bg-[#CB5301]',
+		iconColor: 'text-white',
+		percentageBadgeClass: 'bg-[#FAEADF] text-[#CB5301]',
+	},
 };
 
 const ContractsList: React.FC = () => {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(25);
+	const [perPage, setPerPage] = useState(10);
 	const [search, setSearch] = useState('');
-	const [showTrash, setShowTrash] = useState(false);
+	const [status, setStatus] = useState('all');
+	const [contractTypeId, setContractTypeId] = useState('all');
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({ from: null, to: null });
+	const [hasRecords, setHasRecords] = useState(false);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
 
@@ -65,16 +126,26 @@ const ContractsList: React.FC = () => {
 		page,
 		per_page: perPage,
 		search: search || undefined,
-		is_trash: showTrash,
+		status: status !== 'all' ? status : undefined,
+		contract_type_id:
+			contractTypeId !== 'all' ? Number(contractTypeId) : undefined,
+		start_date_from: formatDateForAPI(dateRange.from),
+		start_date_to: formatDateForAPI(dateRange.to),
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
 	const { data: salesSettings } = useSalesSettings();
-
 	const { data: summary, refetch: refetchSummary } = useContractSummary();
+	const { data: contractTypes } = useContractTypes();
 
 	const contracts = data?.data ?? [];
 	const total = data?.meta?.total ?? 0;
+
+	useEffect(() => {
+		if (!loading) {
+			setHasRecords((data?.total_count ?? summary?.total_count ?? 0) > 0);
+		}
+	}, [loading, data?.total_count, summary?.total_count]);
 
 	const table = useServerSideTable({
 		page,
@@ -84,10 +155,86 @@ const ContractsList: React.FC = () => {
 		setPerPage,
 	});
 
+	const goToCreate = () => navigate(getToLink('sales/contracts/new'));
+
 	const refreshAll = () => {
 		void refetch();
 		void refetchSummary();
 	};
+
+	const canEdit = (contract: Contract) =>
+		canEditSalesDocument(
+			isApprovalWorkflowEnabled(salesSettings, contract),
+			contract.approval,
+			contract
+		);
+
+	const columns = useMemo(
+		() =>
+			getContractColumns({
+				navigate,
+				onDelete: setDeleteId,
+				canEdit,
+			}),
+		[navigate, salesSettings]
+	);
+
+	const tableConfig: DataTableConfig<Contract> = useMemo(
+		() => ({
+			manageColumns: { enabled: false },
+			toolbarClassName:
+				'max-[1099px]:items-stretch max-[1099px]:[&>.data-table-search]:max-w-none max-[1099px]:[&>div:last-child]:!w-full min-[1100px]:flex-row min-[1100px]:items-center min-[1100px]:justify-between min-[1100px]:gap-1 min-[1100px]:[&>.data-table-search]:max-w-xs min-[1100px]:[&>.data-table-search]:flex-1 min-[1100px]:[&>div:last-child]:w-auto',
+			search: {
+				placeholder: __('Search Contracts...', 'doublescale'),
+				onChange: setSearch,
+				value: search,
+			},
+			dateRange: {
+				enabled: true,
+				value: dateRange,
+				onDateChange: (range) => {
+					setDateRange(range);
+					setPage(1);
+				},
+				placeholder: __('Start Date - End Date', 'doublescale'),
+			},
+			selectFilters: [
+				{
+					id: 'contract_type',
+					placeholder: __('Type', 'doublescale'),
+					value: contractTypeId,
+					onChange: (value) => {
+						setContractTypeId(value);
+						setPage(1);
+					},
+					options: [
+						{ value: 'all', label: __('All types', 'doublescale') },
+						...(contractTypes ?? []).map((type) => ({
+							value: String(type.id),
+							label: type.name,
+						})),
+					],
+				},
+				{
+					id: 'status',
+					placeholder: __('Status', 'doublescale'),
+					value: status,
+					onChange: (value) => {
+						setStatus(value);
+						setPage(1);
+					},
+					options: [
+						{ value: 'all', label: __('All statuses', 'doublescale') },
+						...CONTRACT_STATUSES.map((contractStatus) => ({
+							value: contractStatus,
+							label: CONTRACT_STATUS_LABELS[contractStatus],
+						})),
+					],
+				},
+			],
+		}),
+		[contractTypeId, contractTypes, dateRange, search, status]
+	);
 
 	const confirmDelete = async () => {
 		if (!deleteId) {
@@ -104,10 +251,9 @@ const ContractsList: React.FC = () => {
 	};
 
 	const typeCountData =
-		summary?.by_type?.map((row, index) => ({
+		summary?.by_type?.map((row) => ({
 			name: row.name,
 			count: row.count,
-			fill: CHART_COLORS[index % CHART_COLORS.length],
 		})) ?? [];
 
 	const typeValueData =
@@ -117,258 +263,290 @@ const ContractsList: React.FC = () => {
 		})) ?? [];
 
 	return (
-		<div className="p-6 space-y-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">{__('Contracts', 'doublescale')}</h1>
-					<p className="text-sm text-muted-foreground">
-						{__('Create and manage customer contracts.', 'doublescale')}
-					</p>
-				</div>
-				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						onClick={() => navigate(getToLink('sales/contract-types'))}
-					>
-						<Tags className="h-4 w-4 mr-1" />
-						{__('Contract Types', 'doublescale')}
-					</Button>
-					<Button variant="outline" size="icon" onClick={refreshAll}>
-						<RefreshCw className="h-4 w-4" />
-					</Button>
-					<Button onClick={() => navigate(getToLink('sales/contracts/new'))}>
-						<Plus className="h-4 w-4 mr-1" />
-						{__('New Contract', 'doublescale')}
-					</Button>
-				</div>
-			</div>
-
-			{summary ? (
-				<>
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-xs text-muted-foreground">{__('Active', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{summary.active_count}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-xs text-muted-foreground">{__('Expired', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{summary.expired_count}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-xs text-muted-foreground">
-								{__('About to Expire', 'doublescale')}
-							</div>
-							<div className="text-2xl font-semibold">{summary.about_to_expire_count}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-xs text-muted-foreground">
-								{__('Recently Added', 'doublescale')}
-							</div>
-							<div className="text-2xl font-semibold">{summary.recently_added_count}</div>
-						</div>
-						<div className="border rounded-lg p-4 bg-white">
-							<div className="text-xs text-muted-foreground">{__('Trash', 'doublescale')}</div>
-							<div className="text-2xl font-semibold">{summary.trash_count}</div>
-						</div>
-					</div>
-
-					{summary.by_type.length > 0 ? (
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-							<div className="border rounded-lg p-4 bg-white">
-								<h3 className="text-sm font-medium mb-4">
-									{__('Contracts by Type', 'doublescale')}
-								</h3>
-								<div className="h-64">
-									<ResponsiveContainer width="100%" height="100%">
-										<PieChart>
-											<Pie
-												data={typeCountData}
-												dataKey="count"
-												nameKey="name"
-												cx="50%"
-												cy="50%"
-												outerRadius={90}
-												label={({ name, count }) => `${name}: ${count}`}
-											>
-												{typeCountData.map((entry) => (
-													<Cell key={entry.name} fill={entry.fill} />
-												))}
-											</Pie>
-											<Tooltip />
-										</PieChart>
-									</ResponsiveContainer>
-								</div>
-							</div>
-							<div className="border rounded-lg p-4 bg-white">
-								<h3 className="text-sm font-medium mb-4">
-									{__('Contracts Value by Type', 'doublescale')}
-								</h3>
-								<div className="h-64">
-									<ResponsiveContainer width="100%" height="100%">
-										<BarChart data={typeValueData} layout="vertical" margin={{ left: 8 }}>
-											<CartesianGrid strokeDasharray="3 3" horizontal={false} />
-											<XAxis type="number" tickFormatter={(v) => formatMoney(Number(v))} />
-											<YAxis type="category" dataKey="name" width={100} />
-											<Tooltip formatter={(v: number) => formatMoney(v)} />
-											<Bar dataKey="value" fill="#4c6fff" radius={[0, 4, 4, 0]} />
-										</BarChart>
-									</ResponsiveContainer>
-								</div>
-							</div>
-						</div>
-					) : null}
-
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-						{Object.entries(CONTRACT_STATUS_LABELS).map(([status, label]) => {
-							const row = summary.by_status?.[status];
-							return (
-								<div key={status} className="border rounded-lg p-3 bg-white">
-									<div className="text-xs text-muted-foreground mb-1">{label}</div>
-									<div className="text-lg font-semibold">
-										{row?.count ?? 0} / {summary.total_count}
-									</div>
-									<div className="text-xs text-muted-foreground">
-										{(row?.percent ?? 0).toFixed(2)}%
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				</>
-			) : null}
-
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<Button
-					variant={showTrash ? 'default' : 'outline'}
-					size="sm"
-					onClick={() => {
-						setShowTrash((v) => !v);
-						setPage(1);
-					}}
-				>
-					{showTrash ? __('Showing Trash', 'doublescale') : __('Show Trash', 'doublescale')}
-				</Button>
-				<Input
-					className="max-w-sm"
-					placeholder={__('Search contracts…', 'doublescale')}
-					value={search}
-					onChange={(e) => {
-						setSearch(e.target.value);
-						setPage(1);
-					}}
-				/>
-			</div>
+		<div className="space-y-6">
+			<PageHeader
+				title={__('Contracts', 'doublescale')}
+				subtitle={__('Sales', 'doublescale')}
+				rowClassName="flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between w-full [&_h1]:min-w-0"
+				className="flex-row shrink-0 flex-wrap items-center justify-start sm:justify-end gap-3 sm:gap-4"
+				actions={[
+					{
+						label: '',
+						onClick: refreshAll,
+						variant: 'outline' as const,
+						size: 'icon' as const,
+						icon: <RefreshCw className="h-4 w-4" />,
+						'aria-label': __('Refresh', 'doublescale'),
+					},
+					{
+						label: __('Create New Contract', 'doublescale'),
+						onClick: goToCreate,
+						variant: 'default' as const,
+						icon: <PlusIcon />,
+					},
+				]}
+			/>
 
 			{error ? <div className="text-sm text-red-600">{error}</div> : null}
 
-			<div className="border rounded-lg overflow-hidden bg-white">
-				<table className="w-full text-sm">
-					<thead className="bg-slate-50 border-b">
-						<tr>
-							<th className="text-left px-4 py-3">{__('Contract #', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Subject', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Customer', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Type', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Value', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Start', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('End', 'doublescale')}</th>
-							<th className="text-left px-4 py-3">{__('Status', 'doublescale')}</th>
-							<th className="w-12 px-2 py-3" />
-						</tr>
-					</thead>
-					<tbody>
-						{loading ? (
-							<tr>
-								<td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-									{__('Loading…', 'doublescale')}
-								</td>
-							</tr>
-						) : contracts.length === 0 ? (
-							<tr>
-								<td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-									{__('No contracts found.', 'doublescale')}
-								</td>
-							</tr>
-						) : (
-							contracts.map((contract) => (
-								<tr
-									key={contract.id}
-									className="border-b hover:bg-slate-50 cursor-pointer"
-									onClick={() => navigate(getToLink(`sales/contracts/${contract.id}`))}
-								>
-									<td className="px-4 py-3 font-medium">{contract.contract_number}</td>
-									<td className="px-4 py-3">{contract.subject}</td>
-									<td className="px-4 py-3">{contactName(contract)}</td>
-									<td className="px-4 py-3">{contract.contract_type?.name || '—'}</td>
-									<td className="px-4 py-3">
-										{formatMoney(contract.contract_value, contract.currency)}
-									</td>
-									<td className="px-4 py-3">{contract.start_date || '—'}</td>
-									<td className="px-4 py-3">{contract.end_date || '—'}</td>
-									<td className="px-4 py-3">
-										<ContractStatusPill
-											status={contract.status}
-											expired={contract.is_expired}
-											aboutToExpire={contract.is_about_to_expire}
-										/>
-									</td>
-									<td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													aria-label={__('Actions', 'doublescale')}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end" className="min-w-[10rem]">
-												<DropdownMenuItem
-													className="cursor-pointer gap-2"
-													onSelect={() =>
-														navigate(getToLink(`sales/contracts/${contract.id}`))
-													}
-												>
-													<Eye className="h-4 w-4" />
-													{__('View', 'doublescale')}
-												</DropdownMenuItem>
-												{canEditSalesDocument(
-													isApprovalWorkflowEnabled(salesSettings, contract),
-													contract.approval,
-													contract
-												) ? (
-													<DropdownMenuItem
-														className="cursor-pointer gap-2"
-														onSelect={() =>
-															navigate(
-																getToLink(`sales/contracts/${contract.id}/edit`)
-															)
-														}
-													>
-														<Pencil className="h-4 w-4" />
-														{__('Edit', 'doublescale')}
-													</DropdownMenuItem>
-												) : null}
-												<DropdownMenuItem
-													className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
-													onSelect={() => setDeleteId(contract.id)}
-												>
-													<Trash2 className="h-4 w-4" />
-													{__('Delete', 'doublescale')}
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
-			</div>
+			{summary ? (
+				<>
+					<DashboardContentCard
+						title={__('Analytics Overview', 'doublescale')}
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+						contentClassName="flex min-h-0 flex-1 flex-col"
+					>
+						<div className="mb-6 grid grid-cols-1 gap-4 lg:gap-6 sm:grid-cols-5">
+							<MessageStatsCard
+								label={__('Active', 'doublescale')}
+								layout="centered"
+								value={formatMoney(
+									summary.by_status?.active?.amount ?? 0
+								)}
+								icon={
+									<ActiveContractIcon
+										width={29}
+										height={29}
+									/>
+								}
+								iconBgClass="bg-[#16A34A]"
+								className="bg-[#F7F8FA]"
+								iconColor="text-white"
+							/>
+							<MessageStatsCard
+								label={__('Expired', 'doublescale')}
+								layout="centered"
+								value={formatMoney(
+									summary.by_status?.expired?.amount ?? 0
+								)}
+								icon={
+									<ContractExpiredIcon
+										width={29}
+										height={29}
+									/>
+								}
+								iconBgClass="bg-[#CB5301]"
+								className="bg-[#F7F8FA]"
+								iconColor="text-white"
+							/>
+							<MessageStatsCard
+								label={__('About to Expire', 'doublescale')}
+								layout="centered"
+								value={summary.about_to_expire_count}
+								icon={
+									<ContractAboutToExpireIcon
+										width={29}
+										height={29}
+									/>
+								}
+								iconBgClass="bg-[#FFD242]"
+								className="bg-[#F7F8FA]"
+								iconColor="text-[#29292E]"
+							/>
+							<MessageStatsCard
+								label={__('Recently Added', 'doublescale')}
+								layout="centered"
+								value={summary.recently_added_count}
+								icon={<PlusIcon width={29} height={29} />}
+								iconBgClass="bg-[#0D9DFC]"
+								className="bg-[#F7F8FA]"
+								iconColor="text-white"
+							/>
+							<MessageStatsCard
+								label={__('Trash', 'doublescale')}
+								layout="centered"
+								value={summary.trash_count}
+								icon={
+									<ColoredDeleteIcon width={29} height={29} />
+								}
+								iconBgClass="bg-[#C30A0A]"
+								className="bg-[#F7F8FA]"
+								iconColor="text-white"
+							/>
+						</div>
 
-			<DataTablePagination table={table} totalRecords={total} />
+						<div className="grid grid-cols-1 gap-4 lg:gap-6 sm:grid-cols-5 mb-6">
+							{CONTRACT_STATUSES.map((contractStatus) => {
+								const row = summary.by_status?.[contractStatus];
+								const {
+									Icon,
+									iconBgClass,
+									iconColor,
+									percentageBadgeClass,
+								} = statusSummaryConfig[contractStatus];
+								return (
+									<MessageStatsCard
+										key={contractStatus}
+										label={
+											CONTRACT_STATUS_LABELS[
+												contractStatus
+											]
+										}
+										layout="centered-badge"
+										value={`${row?.count ?? 0} / ${summary.total_count}`}
+										percentage={row?.percent ?? 0}
+										icon={
+											contractStatus === 'sent' ? (
+												<SendTestEmailIcon
+													width={29}
+													height={29}
+												/>
+											) : (
+												<Icon width={29} height={29} />
+											)
+										}
+										iconBgClass={iconBgClass}
+										iconColor={iconColor ?? 'text-white'}
+										percentageBadgeClass={
+											percentageBadgeClass
+										}
+										className="bg-[#F7F8FA]"
+									/>
+								);
+							})}
+						</div>
+						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+							<DashboardContentCard
+								title={__('Contracts by Type', 'doublescale')}
+								cardClassName="border border-[#D0D0D0] bg-[#F7F8FA] rounded-xl shadow-none"
+							>
+								<div className="h-64">
+									<ResponsiveContainer
+										width="100%"
+										height="100%"
+									>
+										<BarChart
+											data={typeCountData}
+											margin={{
+												top: 8,
+												right: 8,
+												left: 0,
+												bottom: 0,
+											}}
+										>
+											<CartesianGrid
+												strokeDasharray="3 3"
+												vertical={false}
+											/>
+											<XAxis
+												dataKey="name"
+												tick={{ fontSize: 12 }}
+												tickLine={false}
+												axisLine={false}
+											/>
+											<YAxis
+												allowDecimals={false}
+												tick={{ fontSize: 12 }}
+												width={28}
+												tickLine={false}
+												axisLine={false}
+												tickMargin={4}
+											/>
+											<Tooltip />
+											<Bar
+												dataKey="count"
+												fill="#0D9DFC"
+												radius={[4, 4, 0, 0]}
+											/>
+										</BarChart>
+									</ResponsiveContainer>
+								</div>
+							</DashboardContentCard>
+
+							<DashboardContentCard
+								title={__(
+									'Contracts Value by Type',
+									'doublescale'
+								)}
+								cardClassName="border border-[#D0D0D0] bg-[#F7F8FA] rounded-xl shadow-none"
+							>
+								<div className="h-64">
+									<ResponsiveContainer
+										width="100%"
+										height="100%"
+									>
+										<BarChart
+											data={typeValueData}
+											layout="vertical"
+											margin={{
+												top: 8,
+												right: 8,
+												left: 0,
+												bottom: 0,
+											}}
+										>
+											<CartesianGrid
+												strokeDasharray="3 3"
+												horizontal={false}
+											/>
+											<XAxis
+												type="number"
+												tickFormatter={(v) =>
+													formatMoney(Number(v))
+												}
+												tick={{ fontSize: 12 }}
+												tickLine={false}
+												axisLine={false}
+											/>
+											<YAxis
+												type="category"
+												dataKey="name"
+												width={48}
+												tick={{ fontSize: 12 }}
+												tickLine={false}
+												axisLine={false}
+												tickMargin={4}
+											/>
+											<Tooltip
+												formatter={(v: number) =>
+													formatMoney(v)
+												}
+											/>
+											<Bar
+												dataKey="value"
+												fill="#CB5301"
+												radius={[0, 4, 4, 0]}
+											/>
+										</BarChart>
+									</ResponsiveContainer>
+								</div>
+							</DashboardContentCard>
+						</div>
+					</DashboardContentCard>
+				</>
+			) : null}
+
+			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+				{loading && !hasRecords ? (
+					<div className="py-20 text-center text-sm text-muted-foreground">
+						{__('Loading…', 'doublescale')}
+					</div>
+				) : loading || hasRecords ? (
+					<>
+						<DataTable
+							columns={columns}
+							data={contracts}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<DataTablePagination table={table} />
+					</>
+				) : (
+					<NoData
+						icon={<GradientContractsIcon />}
+						title={__('No contracts yet', 'doublescale')}
+						subtitle={__(
+							'Create a new contract to get started',
+							'doublescale'
+						)}
+						buttonLabel={__('Create New Contract', 'doublescale')}
+						onClick={goToCreate}
+					/>
+				)}
+			</div>
 
 			<ConfirmDialog
 				open={deleteId !== null}
@@ -379,10 +557,10 @@ const ContractsList: React.FC = () => {
 				}}
 				title={__('Delete Contract', 'doublescale')}
 				description={__(
-					'Are you sure you want to delete this contract? This action cannot be undone.',
+					'Do you really want to delete this contract?',
 					'doublescale'
 				)}
-				confirmLabel={__('Delete', 'doublescale')}
+				confirmLabel={__('Confirm', 'doublescale')}
 				destructive
 				busy={deleting}
 				onConfirm={confirmDelete}

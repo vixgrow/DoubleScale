@@ -31,11 +31,11 @@ const invoiceClasses: Record<InvoiceStatus, string> = {
 };
 
 const contractClasses: Record<ContractStatus, string> = {
-	draft: 'bg-slate-100 text-slate-700',
-	sent: 'bg-sky-100 text-sky-700',
-	signed: 'bg-indigo-100 text-indigo-700',
-	active: 'bg-green-100 text-green-700',
-	expired: 'bg-amber-100 text-amber-800',
+	draft: 'bg-[#ECECEC] text-[#6B6C76]',
+	sent: 'bg-[#E4FAEC] text-[#16A34A]',
+	signed: 'bg-[#F7F4C3] text-[#896900]',
+	active: 'bg-[#E4FAEC] text-[#16A34A]',
+	expired: 'bg-[#FAEADF] text-[#CB5301]',
 };
 
 export const ProposalStatusPill: React.FC<{
@@ -63,7 +63,7 @@ export const ContractStatusPill: React.FC<{
 }> = ({ status, expired = false, aboutToExpire = false }) => (
 	<span className="inline-flex items-center gap-1.5">
 		<span
-			className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${contractClasses[status] || contractClasses.draft}`}
+			className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium ${contractClasses[status] || contractClasses.draft}`}
 		>
 			{CONTRACT_STATUS_LABELS[status] || status}
 		</span>

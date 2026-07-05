@@ -13,7 +13,7 @@ const InvoiceEdit: React.FC = () => {
 	const isNew = !idParam || idParam === 'new';
 	const invoiceId = !isNew && idParam ? Number(idParam) : null;
 
-	return <InvoiceForm invoiceId={invoiceId} mode="page" />;
+	return <InvoiceForm invoiceId={invoiceId} mode="dialog" />;
 };
 
 export default InvoiceEdit;

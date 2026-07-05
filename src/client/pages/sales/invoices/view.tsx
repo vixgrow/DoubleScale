@@ -17,6 +17,7 @@ import {
 	DollerIcon,
 	DownloadIcon,
 	EditHeaderIcon,
+	NovicesIcon,
 	NoticeBanner,
 	PanelLayout,
 	PurchaseHistoryIcon,
@@ -236,6 +237,7 @@ const InvoiceView: React.FC = () => {
 
 	const panelShell = (children: JSX.Element) => (
 		<PanelLayout
+			fullWidth
 			items={breadcrumbItems}
 			showPanelClose
 			onClosePanel={handleClose}
@@ -453,7 +455,7 @@ const InvoiceView: React.FC = () => {
 			) : null}
 
 			<div className="space-y-6">
-				<div className="flex flex-col gap-4 border-b border-border pb-6 xl:flex-row xl:items-start xl:justify-between">
+				<div className="flex flex-col gap-4 border-b border-border pb-6 lg:flex-row lg:items-start lg:justify-between">
 					<div className="min-w-0 space-y-3">
 						<h1 className="text-2xl font-bold leading-9 tracking-tight text-foreground">
 							{invoice.invoice_number}
@@ -749,6 +751,7 @@ const InvoiceView: React.FC = () => {
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
+				icon={<NovicesIcon width={32} height={32} />}
 				title={__('Send Invoice', 'doublescale')}
 				description={__(
 					'Send this invoice to the customer by email? They will receive a link to view and pay online.',

@@ -10,7 +10,7 @@ import {
 } from './sales-discount-utils';
 import { Plus } from 'lucide-react';
 
-import { DeleteIcon } from '@doublescale/components';
+import { DeleteIcon, GradientProposalItemsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -357,8 +357,8 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 			<div className="space-y-4">
 				{itemsHeader}
 				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-12 text-center">
-					{emptyStateIcon ?? <NovicesIcon width={70} height={70} />}
-					<p className="mt-4 text-sm text-[#6B6C76]">
+					{emptyStateIcon ?? <GradientProposalItemsIcon />}
+					<p className="mt-4 text-sm font-semibold text-accent-foreground">
 						{__(
 							'No items found—this space is ready for adding items',
 							'doublescale'

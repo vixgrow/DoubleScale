@@ -18,6 +18,7 @@ import {
 	PlusIcon,
 	CustomDialogHeader,
 	GradientContractTypeIcon,
+	GradientContractsIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -736,7 +737,7 @@ const ContractEdit: React.FC = () => {
 			<SendDocumentDialog
 				open={sendOpen}
 				onOpenChange={setSendOpen}
-				documentType="contract"
+				icon={<GradientContractsIcon width={24} height={24} />}
 				title={__('Save & Send Contract', 'doublescale')}
 				description={__(
 					'Save this contract and email it to the customer. Add an optional personal note below.',

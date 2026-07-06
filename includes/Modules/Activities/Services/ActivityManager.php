@@ -985,7 +985,7 @@ final class ActivityManager {
 			return 'not_found';
 		}
 
-		if ( Permissions::is_sales_rep() && (int) $task->assigned_to !== get_current_user_id() ) {
+		if ( Permissions::is_sales_rep() && ! \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::salesRepCanView( $task ) ) {
 			return 'forbidden';
 		}
 

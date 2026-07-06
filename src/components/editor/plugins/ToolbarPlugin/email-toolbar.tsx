@@ -21,8 +21,15 @@ import AlignmentStyles from './alignment-styles';
 import AddingShortCode from './adding-shortcode';
 import LinkMergeTagsTrigger from './attachments/link-merge-tags-trigger';
 import { useToolbarState } from './use-toolbar-state';
+import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
 
-export default function EmailToolbar() {
+interface EmailToolbarProps {
+	salesEmailDocumentType?: SalesEmailDocumentType;
+}
+
+export default function EmailToolbar({
+	salesEmailDocumentType,
+}: EmailToolbarProps) {
 	const { activeEditor, paragraphFormat, handleFormatChange, updateToolbar } =
 		useToolbarState();
 
@@ -41,14 +48,20 @@ export default function EmailToolbar() {
 				<Attachments
 					activeEditor={activeEditor}
 					renderLinkUrlExtra={(appendToUrl) => (
-						<LinkMergeTagsTrigger appendToUrl={appendToUrl} />
+						<LinkMergeTagsTrigger
+							appendToUrl={appendToUrl}
+							salesEmailDocumentType={salesEmailDocumentType}
+						/>
 					)}
 				/>
 			</div>
 
 			<div className="flex gap-4 items-center">
 				{/* Standalone merge-tags button */}
-				<AddingShortCode activeEditor={activeEditor} />
+				<AddingShortCode
+					activeEditor={activeEditor}
+					salesEmailDocumentType={salesEmailDocumentType}
+				/>
 
 				{/* Lists */}
 				<ListStyles activeEditor={activeEditor} />

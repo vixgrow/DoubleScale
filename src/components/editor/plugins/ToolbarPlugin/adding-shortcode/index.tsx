@@ -13,13 +13,16 @@ import { Button } from '@/components/ui/button';
  */
 import { $createMentionNode } from '../../../nodes/mention-node';
 import { MergeTagsIcon, MergeTagsModal } from '@doublescale/components';
+import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
 
 interface AddingShortCodeProps {
 	activeEditor: any;
+	salesEmailDocumentType?: SalesEmailDocumentType;
 }
 
 export default function AddingShortCode({
 	activeEditor,
+	salesEmailDocumentType,
 }: AddingShortCodeProps) {
 	const [mentionModalVisible, setMentionModalVisible] = useState(false);
 
@@ -36,7 +39,10 @@ export default function AddingShortCode({
 				activeEditor.update(() => {
 					const selection = $getSelection();
 					if ($isRangeSelection(selection)) {
-						const mentionNode = $createMentionNode(mention, category);
+						const mentionNode = $createMentionNode(
+							mention,
+							category
+						);
 						selection.insertNodes([mentionNode]);
 					}
 				});
@@ -53,7 +59,7 @@ export default function AddingShortCode({
 				onClick={() => {
 					setMentionModalVisible(true);
 				}}
-				className="bg-transparent border-none shadow-none p-0 hover:bg-transparent hover:border-none text-muted-foreground"
+				className="bg-transparent border-none shadow-none p-0 hover:!bg-transparent hover:!border-none text-muted-foreground"
 			>
 				<MergeTagsIcon width={24} height={24} />
 			</Button>
@@ -63,6 +69,7 @@ export default function AddingShortCode({
 				visible={mentionModalVisible}
 				onClose={() => setMentionModalVisible(false)}
 				onInsertTag={handleAddMention}
+				salesEmailDocumentType={salesEmailDocumentType}
 			/>
 		</>
 	);

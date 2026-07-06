@@ -15,21 +15,31 @@
  */
 import EditorShell from './editor-shell';
 import EmailToolbar from './plugins/ToolbarPlugin/email-toolbar';
+import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
 
 interface EditorProps {
 	message: string;
 	onChange: (html: string) => void;
 	/** Placeholder shown when the editor is empty. */
 	placeholder?: string;
+	/** Limits merge tags to fields available for this sales document type. */
+	salesEmailDocumentType?: SalesEmailDocumentType;
 }
 
-function Editor({ message, onChange, placeholder }: EditorProps) {
+function Editor({
+	message,
+	onChange,
+	placeholder,
+	salesEmailDocumentType,
+}: EditorProps) {
 	return (
 		<EditorShell
 			message={message}
 			onChange={onChange}
 			placeholder={placeholder}
-			toolbar={<EmailToolbar />}
+			toolbar={
+				<EmailToolbar salesEmailDocumentType={salesEmailDocumentType} />
+			}
 		/>
 	);
 }

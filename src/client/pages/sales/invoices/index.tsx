@@ -234,7 +234,7 @@ const InvoicesList: React.FC = () => {
 						<MessageStatsCard
 							label={__('Past Invoices', 'doublescale')}
 							layout="centered"
-							value={formatMoney(summary.past_total)}
+							value={formatMoney(summary.overdue_total)}
 							icon={<PastInvoicesIcon width={29} height={29} />}
 							iconBgClass="bg-[#C30A0A]"
 							className="bg-[#F7F8FA]"

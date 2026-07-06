@@ -13,7 +13,8 @@ export type ListPreferenceKey =
 	| 'email_sequences'
 	| 'email_campaigns'
 	| 'sms_campaigns'
-	| 'forms';
+	| 'forms'
+	| 'sales_pipeline';
 
 export type SerializedDateRange = {
 	from: string | null;
@@ -35,6 +36,7 @@ export type ListPreferenceValues = {
 	keyword?: string;
 	date_range?: SerializedDateRange;
 	campaign_filters?: CampaignFiltersPreference;
+	view_mode?: 'kanban' | 'table' | 'list';
 };
 
 export type ListPreferencesMap = Partial<

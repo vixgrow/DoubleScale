@@ -44,6 +44,7 @@ final class ListPreferencesManager {
 		'email_campaigns',
 		'sms_campaigns',
 		'forms',
+		'sales_pipeline',
 	);
 
 	/**
@@ -208,6 +209,13 @@ final class ListPreferencesManager {
 
 		if ( array_key_exists( 'date_range', $preferences ) ) {
 			$sanitized['date_range'] = self::sanitize_date_range( $preferences['date_range'] );
+		}
+
+		if ( array_key_exists( 'view_mode', $preferences ) ) {
+			$view_mode = sanitize_key( (string) $preferences['view_mode'] );
+			if ( in_array( $view_mode, array( 'kanban', 'table', 'list' ), true ) ) {
+				$sanitized['view_mode'] = $view_mode;
+			}
 		}
 
 		return $sanitized;

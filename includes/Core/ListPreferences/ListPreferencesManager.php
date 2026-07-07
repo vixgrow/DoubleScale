@@ -45,6 +45,7 @@ final class ListPreferencesManager {
 		'sms_campaigns',
 		'forms',
 		'sales_pipeline',
+		'tasks',
 	);
 
 	/**

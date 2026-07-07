@@ -14,7 +14,8 @@ export type ListPreferenceKey =
 	| 'email_campaigns'
 	| 'sms_campaigns'
 	| 'forms'
-	| 'sales_pipeline';
+	| 'sales_pipeline'
+	| 'tasks';
 
 export type SerializedDateRange = {
 	from: string | null;

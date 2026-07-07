@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -123,6 +123,19 @@ Founders, agencies, marketers, course creators, e-commerce operators, and revenu
 
 Learn more at [doublescale.io](https://doublescale.io/).
 
+See how DoubleScale stacks up against popular CRM and marketing automation tools:
+
+* **DoubleScale vs FluentCRM:** [doublescale.io/compare/vs-fluentcrm](https://doublescale.io/compare/vs-fluentcrm/)
+* **DoubleScale vs HubSpot:** [doublescale.io/compare/vs-hubspot](https://doublescale.io/compare/vs-hubspot/)
+* **DoubleScale vs ActiveCampaign:** [doublescale.io/compare/vs-activecampaign](https://doublescale.io/compare/vs-activecampaign/)
+* **DoubleScale vs Pipedrive:** [doublescale.io/compare/vs-pipedrive](https://doublescale.io/compare/vs-pipedrive/)
+* **DoubleScale vs GoHighLevel:** [doublescale.io/compare/vs-gohighlevel](https://doublescale.io/compare/vs-gohighlevel/)
+* **DoubleScale vs FunnelKit:** [doublescale.io/compare/vs-funnelkit](https://doublescale.io/compare/vs-funnelkit/)
+* **DoubleScale vs Brevo:** [doublescale.io/compare/vs-brevo](https://doublescale.io/compare/vs-brevo/)
+* **DoubleScale vs MailerLite:** [doublescale.io/compare/vs-mailerlite](https://doublescale.io/compare/vs-mailerlite/)
+* **DoubleScale vs Omnisend:** [doublescale.io/compare/vs-omnisend](https://doublescale.io/compare/vs-omnisend/)
+
+
 == Source Code ==
 
 This plugin includes compiled JavaScript and CSS in the `build/` directory. Human-readable source lives in `src/`.
@@ -240,6 +253,29 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.8 = 07 Jul 2026
+- Add SMTP Bounce Handler tab and restore bounce webhook configuration UI on the Connections page
+- Improve SMTP navigation and bounce handling visibility
+- Fix mailbox SMTP settings link routing
+- Revamp sales settings and contract types management UI
+- Add sales pipeline and view mode list preferences for contacts, tags, and lists
+- Introduce task entity type and enhance contact activity management
+- Improve sales rep activity permissions and activity association handling
+- Enhance payment filtering and payment list UI components
+- Fix overdue invoice total display in the Invoices list
+- Enhance contract, invoice, and proposal document dialogs with updated icons and layout
+- Add invoice form dialog and improve invoice management workflow
+- Add automation step drag-and-drop reordering in the workflow builder
+- Enhance automation analytics and reporting dashboards
+- Add saved blocks for reusable email builder sections
+- Add Jotform and Typeform form submission automation triggers and integration setup guides
+- Add PayPal and Typeform entries to the integrations catalog
+- Add WhatsApp phone field on contact records
+- Improve contact list columns, tooltips, and localization
+- Improve Action Scheduler task cleanup on plugin activation and deactivation
+- Move comparison page links into the plugin description for better WordPress.org discoverability
+- Add translation-ready language files in `languages/` for Loco Translate, WPML, and other translation plugins
+
 = 1.2.7 = 30 Jun 2026
 - Add sales document approval workflow with discount validation for proposals, contracts, and invoices
 - Add sales rep permissions and read-only payment handling
@@ -548,21 +584,26 @@ Bug reports, ideas, and pull requests are welcome on the public GitHub repositor
 
 == Languages ==
 
-DoubleScale is translation-ready. English ships by default; additional locales welcome via community contributions.
+DoubleScale is translation-ready. English ships by default.
+
+Shipped language files live in the plugin `languages/` folder:
+
+* `doublescale.pot` — translation template for translators and Loco Translate
+
+Locale `.po` / `.mo` files are generated at release time or created by translation plugins on the site. English uses the source strings by default.
+
+Compatible with **Loco Translate**, **WPML**, **Polylang**, and other WordPress translation tools. Regenerate the template after string changes with:
+
+`npm run make-pot`
+
+Compile `.mo` files locally when needed with:
+
+`npm run make-mo`
+
+Community translations are also welcome on WordPress.org once the plugin listing is public.
 
 == Compare ==
 
-See how DoubleScale stacks up against popular CRM and marketing automation tools:
-
-* **DoubleScale vs FluentCRM:** [doublescale.io/compare/vs-fluentcrm](https://doublescale.io/compare/vs-fluentcrm/)
-* **DoubleScale vs HubSpot:** [doublescale.io/compare/vs-hubspot](https://doublescale.io/compare/vs-hubspot/)
-* **DoubleScale vs ActiveCampaign:** [doublescale.io/compare/vs-activecampaign](https://doublescale.io/compare/vs-activecampaign/)
-* **DoubleScale vs Pipedrive:** [doublescale.io/compare/vs-pipedrive](https://doublescale.io/compare/vs-pipedrive/)
-* **DoubleScale vs GoHighLevel:** [doublescale.io/compare/vs-gohighlevel](https://doublescale.io/compare/vs-gohighlevel/)
-* **DoubleScale vs FunnelKit:** [doublescale.io/compare/vs-funnelkit](https://doublescale.io/compare/vs-funnelkit/)
-* **DoubleScale vs Brevo:** [doublescale.io/compare/vs-brevo](https://doublescale.io/compare/vs-brevo/)
-* **DoubleScale vs MailerLite:** [doublescale.io/compare/vs-mailerlite](https://doublescale.io/compare/vs-mailerlite/)
-* **DoubleScale vs Omnisend:** [doublescale.io/compare/vs-omnisend](https://doublescale.io/compare/vs-omnisend/)
 
 == Integrations ==
 

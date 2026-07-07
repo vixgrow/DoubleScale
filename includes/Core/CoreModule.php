@@ -113,9 +113,19 @@ final class CoreModule extends AbstractModule {
 		// spikes. This is safe to set globally — it only affects delete batch size,
 		// not which records get deleted or when.
 		add_filter(
-			'action_scheduler/cleanup_batch_size',
+			'action_scheduler_cleanup_batch_size',
 			static function () {
 				return 100;
+			}
+		);
+
+		// Cap the queue runner's per-request time budget so DoubleScale tasks cannot
+		// monopolize the entire WP-Cron tick. Other plugins (e.g. UpdraftPlus) share
+		// the same Action Scheduler queue and need processing time.
+		add_filter(
+			'action_scheduler_queue_runner_time_limit',
+			static function ( $time_limit ) {
+				return min( (int) $time_limit, 15 );
 			}
 		);
 

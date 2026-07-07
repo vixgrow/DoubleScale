@@ -25,6 +25,10 @@ final class Lifecycle {
 		'doublescale_subscription',
 		'doublescale_sales',
 		'doublescale_support',
+		'doublescale_booking_payment',
+		'doublescale_booking_completion',
+		'doublescale-push',
+		'doublescale_smtp',
 	);
 
 	/**
@@ -42,7 +46,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.2.7',
+			'DOUBLESCALE_VERSION'       => '1.2.8',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -162,6 +166,7 @@ final class Lifecycle {
 
 		register_deactivation_hook( $plugin_file, array( __CLASS__, 'on_deactivate' ) );
 
+		add_action( 'init', array( __CLASS__, 'load_textdomain' ) );
 		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ), 5 );
 
 		// Suppress WP 6.7+'s "translation loaded too early" notice for the
@@ -184,6 +189,18 @@ final class Lifecycle {
 			},
 			10,
 			3
+		);
+	}
+
+	/**
+	 * Load plugin translations for PHP strings and translation plugins (Loco, WPML, etc.).
+	 */
+	public static function load_textdomain(): void {
+		// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Required for Loco Translate, WPML, and self-hosted language packs in languages/.
+		load_plugin_textdomain(
+			'doublescale',
+			false,
+			dirname( plugin_basename( DOUBLESCALE_PLUGIN_FILE ) ) . '/languages'
 		);
 	}
 

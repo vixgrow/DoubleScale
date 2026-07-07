@@ -188,6 +188,14 @@ class AdminLoader {
 			true
 		);
 
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations(
+				'doublescale-admin',
+				'doublescale',
+				DOUBLESCALE_PLUGIN_DIR . 'languages'
+			);
+		}
+
 		// Register main stylesheet (SCSS-based styles).
 		wp_register_style(
 			'doublescale-admin',

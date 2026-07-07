@@ -97,7 +97,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
+		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 10 );
 		if ( ! $action_id ) {
 			return false;
 		}
@@ -141,7 +141,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
+		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 10 );
 		if ( ! $action_id ) {
 			return false;
 		}
@@ -558,6 +558,10 @@ class Tasks {
 			'doublescale_subscription',
 			'doublescale_sales',
 			'doublescale_support',
+			'doublescale_booking_payment',
+			'doublescale_booking_completion',
+			'doublescale-push',
+			'doublescale_smtp',
 		);
 
 		$placeholders = implode( ', ', array_fill( 0, count( $group_slugs ), '%s' ) );
@@ -604,15 +608,12 @@ class Tasks {
 				+ ( $deleted_complete !== false ? (int) $deleted_complete : 0 );
 		}
 
-		// ── 4. Clean up orphaned claims ───────────────────────────────────────
-		$orphaned_claims = $wpdb->query(
-			"DELETE c
-			FROM {$wpdb->prefix}actionscheduler_claims c
-			LEFT JOIN {$wpdb->prefix}actionscheduler_actions a ON c.claim_id = a.claim_id
-			WHERE a.action_id IS NULL"
-		);
-
-		$stats['orphaned_claims'] = $orphaned_claims !== false ? (int) $orphaned_claims : 0;
+		// ── 4. Orphaned claims ────────────────────────────────────────────────
+		// Removed: the previous global DELETE on actionscheduler_claims could
+		// interfere with other plugins' claim lifecycle (e.g. UpdraftPlus,
+		// WooCommerce). Action Scheduler's built-in QueueCleaner already handles
+		// stale claims via its timeout mechanism — no manual intervention needed.
+		$stats['orphaned_claims'] = 0;
 
 		// ── 5. Clean up orphaned task meta ────────────────────────────────────
 		$orphaned_meta = $wpdb->query(

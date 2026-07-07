@@ -108,6 +108,17 @@ final class CoreModule extends AbstractModule {
 
 		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
 
+		// Use a smaller batch size so Action Scheduler's own cleanup deletes happen
+		// in short bursts that won't lock the table long enough to cause latency
+		// spikes. This is safe to set globally — it only affects delete batch size,
+		// not which records get deleted or when.
+		add_filter(
+			'action_scheduler/cleanup_batch_size',
+			static function () {
+				return 100;
+			}
+		);
+
 		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Core/Fields/Types/*.php' ) ?: array() as $f ) {
 			require_once $f;
 		}

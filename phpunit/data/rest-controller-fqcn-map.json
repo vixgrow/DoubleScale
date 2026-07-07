@@ -83,6 +83,7 @@
     "RestStageController": "DoubleScale\\Pro\\Modules\\Deals\\Rest\\Controllers\\RestStageController",
     "RestTagController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestTagController",
     "RestTaskController": "DoubleScale\\Pro\\Modules\\Tasks\\Rest\\Controllers\\RestTaskController",
+    "RestTaskStageController": "DoubleScale\\Pro\\Modules\\Tasks\\Rest\\Controllers\\RestTaskStageController",
     "RestTemplateController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestTemplateController",
     "RestTicketController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestTicketController",
     "RestUserEmailController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestUserEmailController",

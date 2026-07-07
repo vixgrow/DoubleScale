@@ -1,18 +1,25 @@
 /**
- * CRUD table for sales taxes on the settings page.
+ * CRUD UI for sales taxes on the settings page.
  */
 
 import React, { useState } from '@wordpress/element';
+import type { FC } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
+import {
+	CustomDialogHeader,
+	DeleteIcon,
+	EditHeaderIcon,
+	EmptyTaxesIcon,
+	SettingsTaxesIcon,
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,7 +39,56 @@ interface TaxFormState {
 
 const emptyForm = (): TaxFormState => ({ name: '', rate: '' });
 
-export const TaxesManager: React.FC = () => {
+const CreateTaxButton: FC<{ onClick: () => void; className?: string }> = ({
+	onClick,
+	className,
+}) => (
+	<Button onClick={onClick} className={className}>
+		<Plus className="mr-1 h-4 w-4" />
+		{__('Create New Tax', 'doublescale')}
+	</Button>
+);
+
+const TaxCard: FC<{
+	tax: SalesTax;
+	onEdit: (tax: SalesTax) => void;
+	onDelete: (tax: SalesTax) => void;
+}> = ({ tax, onEdit, onDelete }) => (
+	<div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-4">
+		<div className="flex min-w-0 items-center gap-2">
+			<span className="truncate text-sm font-semibold text-foreground">
+				{tax.name}
+			</span>
+			<span className="shrink-0 rounded-lg bg-[#D9E9F3] px-2 py-1 text-sm font-medium text-[#0D9DFC]">
+				{tax.rate}%
+			</span>
+		</div>
+		<div className="flex shrink-0 items-center gap-0.5">
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon"
+				className="h-8 w-8"
+				onClick={() => onEdit(tax)}
+				aria-label={__('Edit tax', 'doublescale')}
+			>
+				<EditHeaderIcon color="#0D9DFC" width={18} height={18} />
+			</Button>
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon"
+				className="h-8 w-8 text-destructive"
+				onClick={() => onDelete(tax)}
+				aria-label={__('Delete tax', 'doublescale')}
+			>
+				<DeleteIcon width={18} height={18} />
+			</Button>
+		</div>
+	</div>
+);
+
+export const TaxesManager: FC = () => {
 	const { data: taxes, loading, error, refetch } = useSalesTaxes();
 	const [formOpen, setFormOpen] = useState(false);
 	const [editing, setEditing] = useState<SalesTax | null>(null);
@@ -44,12 +100,14 @@ export const TaxesManager: React.FC = () => {
 	const openCreate = () => {
 		setEditing(null);
 		setForm(emptyForm());
+		setNotice(null);
 		setFormOpen(true);
 	};
 
 	const openEdit = (tax: SalesTax) => {
 		setEditing(tax);
 		setForm({ name: tax.name, rate: String(tax.rate) });
+		setNotice(null);
 		setFormOpen(true);
 	};
 
@@ -87,7 +145,6 @@ export const TaxesManager: React.FC = () => {
 			return;
 		}
 		setBusy(true);
-		setNotice(null);
 		try {
 			await deleteSalesTax(deleteTarget.id);
 			await refetch();
@@ -99,89 +156,116 @@ export const TaxesManager: React.FC = () => {
 		}
 	};
 
+	const hasTaxes = taxes.length > 0;
+
 	return (
-		<section className="space-y-4 border rounded-lg bg-white p-6">
-			<div className="flex items-center justify-between gap-4">
-				<div>
-					<h2 className="font-medium">{__('Taxes', 'doublescale')}</h2>
-					<p className="text-sm text-muted-foreground mt-1">
+		<section className="space-y-6 rounded-xl border border-border bg-[#F7F8FA] p-6">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+				<div className="min-w-0 space-y-1">
+					<div className="flex items-center gap-3">
+						<div className="flex p-1.5 shrink-0 items-center justify-center rounded-full bg-white border border-border text-[#0D9DFC]">
+							<SettingsTaxesIcon width={20} height={20} />
+						</div>
+						<h2 className="lg:text-xl text-base font-semibold text-foreground">
+							{__('Taxes', 'doublescale')}
+						</h2>
+					</div>
+					<p className="pl-[52px] lg:text-base text-sm text-muted-foreground">
 						{__(
 							'Manage tax rates available when editing proposal and invoice line items.',
 							'doublescale'
 						)}
 					</p>
 				</div>
-				<Button variant="outline" size="sm" onClick={openCreate}>
-					<Plus className="h-4 w-4 mr-1" />
-					{__('Add Tax', 'doublescale')}
-				</Button>
+				<CreateTaxButton onClick={openCreate} />
 			</div>
 
-			{notice ? (
-				<div className="text-sm rounded border px-3 py-2 bg-slate-50 text-slate-700">{notice}</div>
+			{notice && !formOpen && !deleteTarget ? (
+				<div className="rounded-lg border bg-slate-50 px-3 py-2 text-sm text-slate-700">
+					{notice}
+				</div>
 			) : null}
 
 			{loading ? (
 				<p className="text-sm text-muted-foreground">{__('Loading taxes…', 'doublescale')}</p>
 			) : error ? (
 				<p className="text-sm text-red-600">{error}</p>
-			) : taxes.length === 0 ? (
-				<p className="text-sm text-muted-foreground">{__('No taxes configured yet.', 'doublescale')}</p>
+			) : !hasTaxes ? (
+				<div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+					<div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl">
+						<EmptyTaxesIcon width={53} height={53} />
+					</div>
+					<p className="text-lg font-semibold text-foreground">
+						{__('No taxes yet', 'doublescale')}
+					</p>
+					<p className="mt-1 text-sm text-muted-foreground">
+						{__('Create a tax to get started', 'doublescale')}
+					</p>
+					<CreateTaxButton onClick={openCreate} className="mt-6" />
+				</div>
 			) : (
-				<div className="overflow-x-auto">
-					<table className="w-full text-sm">
-						<thead>
-							<tr className="border-b text-left text-muted-foreground">
-								<th className="py-2 pr-4 font-medium">{__('Name', 'doublescale')}</th>
-								<th className="py-2 pr-4 font-medium">{__('Rate (%)', 'doublescale')}</th>
-								<th className="py-2 font-medium text-right">{__('Actions', 'doublescale')}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{taxes.map((tax) => (
-								<tr key={tax.id} className="border-b last:border-0">
-									<td className="py-3 pr-4">{tax.name}</td>
-									<td className="py-3 pr-4">{tax.rate}</td>
-									<td className="py-3 text-right">
-										<div className="flex justify-end gap-2">
-											<Button variant="ghost" size="sm" onClick={() => openEdit(tax)}>
-												<Pencil className="h-4 w-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={() => setDeleteTarget(tax)}
-											>
-												<Trash2 className="h-4 w-4 text-red-600" />
-											</Button>
-										</div>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+				<div className="grid grid-cols-1 sm:gap-6 gap-4 sm:grid-cols-2 min-[1200px]:grid-cols-3 xl:grid-cols-4">
+					{taxes.map((tax) => (
+						<TaxCard
+							key={tax.id}
+							tax={tax}
+							onEdit={openEdit}
+							onDelete={setDeleteTarget}
+						/>
+					))}
 				</div>
 			)}
 
-			<Dialog open={formOpen} onOpenChange={setFormOpen}>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle>
-							{editing ? __('Edit Tax', 'doublescale') : __('Add Tax', 'doublescale')}
-						</DialogTitle>
+			<Dialog
+				open={formOpen}
+				onOpenChange={(open) => {
+					setFormOpen(open);
+					if (!open) {
+						setNotice(null);
+					}
+				}}
+			>
+				<DialogContent className="max-w-md gap-0 bg-white sm:rounded-xl">
+					<DialogHeader className="space-y-4 pb-4">
+						<CustomDialogHeader
+							title={
+								editing
+									? __('Edit Tax', 'doublescale')
+									: __('Create New Tax', 'doublescale')
+							}
+							subtitle={__(
+								'Quickly add a new tax with a clear interface that keeps everything organized',
+								'doublescale'
+							)}
+							icon={<EmptyTaxesIcon width={24} height={24} />}
+						/>
 					</DialogHeader>
+
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="tax-name">{__('Name', 'doublescale')}</Label>
+							<Label htmlFor="tax-name">
+								{__('Name', 'doublescale')}
+								<span className="text-red-500"> *</span>
+							</Label>
 							<Input
 								id="tax-name"
 								value={form.name}
 								onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+								placeholder={__('Name', 'doublescale')}
 								disabled={busy}
+								className="h-10 rounded-lg border-[#D0D0D0]"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') {
+										void handleSave();
+									}
+								}}
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="tax-rate">{__('Rate (%)', 'doublescale')}</Label>
+							<Label htmlFor="tax-rate">
+								{__('Rate (%)', 'doublescale')}
+								<span className="text-red-500"> *</span>
+							</Label>
 							<Input
 								id="tax-rate"
 								type="number"
@@ -190,16 +274,35 @@ export const TaxesManager: React.FC = () => {
 								step="0.01"
 								value={form.rate}
 								onChange={(e) => setForm((prev) => ({ ...prev, rate: e.target.value }))}
+								placeholder={__('Rate (%)', 'doublescale')}
 								disabled={busy}
+								className="h-10 !rounded-lg !border-border"
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') {
+										void handleSave();
+									}
+								}}
 							/>
 						</div>
+						{notice ? <p className="text-sm text-red-600">{notice}</p> : null}
 					</div>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setFormOpen(false)} disabled={busy}>
+
+					<DialogFooter className="mt-6 flex gap-3 sm:justify-end">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setFormOpen(false)}
+							disabled={busy}
+							className="border-primary bg-white text-primary"
+						>
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button onClick={() => void handleSave()} disabled={busy}>
-							{busy ? __('Saving…', 'doublescale') : __('Save', 'doublescale')}
+						<Button type="button" onClick={() => void handleSave()} disabled={busy}>
+							{busy
+								? __('Saving…', 'doublescale')
+								: editing
+									? __('Save', 'doublescale')
+									: __('Create', 'doublescale')}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

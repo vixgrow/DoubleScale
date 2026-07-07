@@ -16,10 +16,12 @@ import { useState } from 'react';
  * Internal dependencies
  */
 import { MergeTagsModal, MergeTagsIcon } from '@doublescale/components';
+import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
 
 interface LinkMergeTagsTriggerProps {
 	/** Appends the chosen merge tag onto the current link URL. */
-	appendToUrl: ( value: string ) => void;
+	appendToUrl: (value: string) => void;
+	salesEmailDocumentType?: SalesEmailDocumentType;
 }
 
 /**
@@ -27,10 +29,11 @@ interface LinkMergeTagsTriggerProps {
  * link URL input) plus the picker modal. Passed to `Attachments` via its
  * `renderLinkUrlExtra` slot.
  */
-export default function LinkMergeTagsTrigger( {
+export default function LinkMergeTagsTrigger({
 	appendToUrl,
-}: LinkMergeTagsTriggerProps ) {
-	const [ visible, setVisible ] = useState( false );
+	salesEmailDocumentType,
+}: LinkMergeTagsTriggerProps) {
+	const [visible, setVisible] = useState(false);
 
 	return (
 		<>
@@ -39,18 +42,19 @@ export default function LinkMergeTagsTrigger( {
 				title="Add Merge Tags"
 				aria-label="Add Merge Tags"
 				className="absolute right-0 top-0 h-full px-3 bg-[#EEEEEE] rounded-r-lg cursor-pointer hover:bg-[#E0E0E0] flex items-center"
-				onClick={ () => setVisible( true ) }
+				onClick={() => setVisible(true)}
 			>
-				<MergeTagsIcon width={ 20 } height={ 20 } />
+				<MergeTagsIcon width={20} height={20} />
 			</button>
 
 			<MergeTagsModal
-				visible={ visible }
-				onClose={ () => setVisible( false ) }
-				onInsertTag={ ( tagValue: string ) => {
-					appendToUrl( tagValue );
-					setVisible( false );
-				} }
+				visible={visible}
+				onClose={() => setVisible(false)}
+				onInsertTag={(tagValue: string) => {
+					appendToUrl(tagValue);
+					setVisible(false);
+				}}
+				salesEmailDocumentType={salesEmailDocumentType}
 			/>
 		</>
 	);

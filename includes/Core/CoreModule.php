@@ -108,6 +108,27 @@ final class CoreModule extends AbstractModule {
 
 		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
 
+		// Use a smaller batch size so Action Scheduler's own cleanup deletes happen
+		// in short bursts that won't lock the table long enough to cause latency
+		// spikes. This is safe to set globally — it only affects delete batch size,
+		// not which records get deleted or when.
+		add_filter(
+			'action_scheduler_cleanup_batch_size',
+			static function () {
+				return 100;
+			}
+		);
+
+		// Cap the queue runner's per-request time budget so DoubleScale tasks cannot
+		// monopolize the entire WP-Cron tick. Other plugins (e.g. UpdraftPlus) share
+		// the same Action Scheduler queue and need processing time.
+		add_filter(
+			'action_scheduler_queue_runner_time_limit',
+			static function ( $time_limit ) {
+				return min( (int) $time_limit, 15 );
+			}
+		);
+
 		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Core/Fields/Types/*.php' ) ?: array() as $f ) {
 			require_once $f;
 		}

@@ -36,3 +36,7 @@ test-results/
 coverage/
 .phpunit.result.cache
 *.yml
+
+# Compiled / locale catalogs — regenerate with npm run make-mo (see languages/doublescale.pot).
+languages/*.mo
+languages/*.po

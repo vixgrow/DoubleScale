@@ -249,7 +249,7 @@ const FooterLibrary = () => {
 							)}
 						</div>
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'doublescale')}
+							{'{{general:business_address}}'}
 						</div>
 						<div className="">
 							{__(
@@ -296,7 +296,7 @@ const FooterLibrary = () => {
 						</div>
 
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'doublescale')}
+							{'{{general:business_address}}'}
 						</div>
 						<div className="">
 							{__(
@@ -336,7 +336,7 @@ const FooterLibrary = () => {
 							)}
 						</div>
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'doublescale')}
+							{'{{general:business_address}}'}
 						</div>
 						<div className="">
 							{__(

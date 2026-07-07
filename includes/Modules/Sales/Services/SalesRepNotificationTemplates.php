@@ -22,28 +22,28 @@ final class SalesRepNotificationTemplates {
 	public static function defaults(): array {
 		return array(
 			NotificationCategories::SALES_PROPOSAL_SENT     => array(
-				'title'   => __( '{{sales:event_label}}: {{sales:proposal_number}}', 'doublescale' ),
-				'message' => __( '{{sales:proposal_number}} — {{sales:proposal_subject}}', 'doublescale' ),
+				'title'   => '{{sales:event_label}}: {{sales:proposal_number}}',
+				'message' => '{{sales:proposal_number}} — {{sales:proposal_subject}}',
 			),
 			NotificationCategories::SALES_PROPOSAL_ACCEPTED => array(
-				'title'   => __( '{{sales:event_label}}: {{sales:proposal_number}}', 'doublescale' ),
-				'message' => __( '{{sales:proposal_number}} — {{sales:proposal_subject}}', 'doublescale' ),
+				'title'   => '{{sales:event_label}}: {{sales:proposal_number}}',
+				'message' => '{{sales:proposal_number}} — {{sales:proposal_subject}}',
 			),
 			NotificationCategories::SALES_PROPOSAL_DECLINED => array(
-				'title'   => __( '{{sales:event_label}}: {{sales:proposal_number}}', 'doublescale' ),
-				'message' => __( '{{sales:proposal_number}} — {{sales:proposal_subject}}{{sales:decline_reason_suffix}}', 'doublescale' ),
+				'title'   => '{{sales:event_label}}: {{sales:proposal_number}}',
+				'message' => '{{sales:proposal_number}} — {{sales:proposal_subject}}{{sales:decline_reason_suffix}}',
 			),
 			NotificationCategories::SALES_INVOICE_PAID      => array(
 				'title'   => __( 'Invoice paid: {{sales:invoice_number}}', 'doublescale' ),
 				'message' => __( 'Invoice {{sales:invoice_number}} has been paid in full.', 'doublescale' ),
 			),
 			NotificationCategories::SALES_CONTRACT_SENT     => array(
-				'title'   => __( '{{sales:event_label}}: {{sales:contract_number}}', 'doublescale' ),
-				'message' => __( '{{sales:contract_number}} — {{sales:contract_subject}}', 'doublescale' ),
+				'title'   => '{{sales:event_label}}: {{sales:contract_number}}',
+				'message' => '{{sales:contract_number}} — {{sales:contract_subject}}',
 			),
 			NotificationCategories::SALES_CONTRACT_SIGNED   => array(
-				'title'   => __( '{{sales:event_label}}: {{sales:contract_number}}', 'doublescale' ),
-				'message' => __( '{{sales:contract_number}} — {{sales:contract_subject}}', 'doublescale' ),
+				'title'   => '{{sales:event_label}}: {{sales:contract_number}}',
+				'message' => '{{sales:contract_number}} — {{sales:contract_subject}}',
 			),
 		);
 	}

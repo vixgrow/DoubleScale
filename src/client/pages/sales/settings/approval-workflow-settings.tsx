@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useApprovalQueue } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
+import { SettingsApprovalsIcon } from '@doublescale/components';
 
 interface ApprovalWorkflowSettingsProps {
 	form: SalesSettings;
@@ -32,37 +33,55 @@ export const ApprovalWorkflowSettings: React.FC<ApprovalWorkflowSettingsProps> =
 
 	return (
 		<div className="space-y-6">
-			<section className="space-y-4 border rounded-lg bg-white p-6">
-				<div>
-					<h2 className="font-medium">{__('Approval workflow', 'doublescale')}</h2>
-					<p className="text-sm text-muted-foreground mt-1">
+			<section className="space-y-4 border rounded-lg bg-[#F7F8FA] p-6">
+				<div className="min-w-0 space-y-1">
+					<div className="flex items-center gap-3">
+						<div className="flex p-1.5 shrink-0 items-center justify-center rounded-full bg-white border border-border text-[#0D9DFC]">
+							<SettingsApprovalsIcon width={20} height={22} />
+						</div>
+						<h2 className="text-base lg:text-xl font-semibold text-foreground">
+							{__('Approval workflow', 'doublescale')}
+						</h2>
+					</div>
+					<p className="pl-[52px] lg:text-base text-sm text-muted-foreground">
 						{__(
 							'Control whether sales reps must get manager approval before sending proposals, invoices, contracts, and credit notes to customers.',
 							'doublescale'
 						)}
 					</p>
 				</div>
-
 				<div className="border rounded-lg p-4 space-y-3 bg-white">
-					<div className="flex items-start justify-between gap-4">
+					<div className="flex flex-col sm:flex-row items-start sm:justify-between justify-start gap-4">
 						<div className="space-y-1 min-w-0">
 							<div className="flex flex-wrap items-center gap-2">
 								<h3 className="font-medium">
-									{__('Internal document approval', 'doublescale')}
+									{__(
+										'Internal document approval',
+										'doublescale'
+									)}
 								</h3>
 								{enabled ? (
-									<Badge variant="default" className="text-xs bg-emerald-600">
+									<Badge
+										variant="default"
+										className="text-sm shadow-none text-white bg-green-600"
+									>
 										{__('Enabled', 'doublescale')}
 									</Badge>
 								) : (
-									<Badge variant="outline" className="text-xs">
+									<Badge
+										variant="outline"
+										className="text-sm shadow-none border-muted bg-muted text-muted-foreground"
+									>
 										{__('Disabled', 'doublescale')}
 									</Badge>
 								)}
-								{enabled && canReview && !queueLoading && pendingCount > 0 ? (
+								{enabled &&
+								canReview &&
+								!queueLoading &&
+								pendingCount > 0 ? (
 									<Badge
 										variant="outline"
-										className="text-xs border-amber-300 text-amber-800 bg-amber-50"
+										className="text-sm shadow-none text-[#896900] bg-[#F7F4C3]"
 									>
 										{sprintf(
 											/* translators: %d: number of documents awaiting approval */
@@ -79,19 +98,13 @@ export const ApprovalWorkflowSettings: React.FC<ApprovalWorkflowSettingsProps> =
 								)}
 							</p>
 						</div>
-						<div className="flex items-center gap-2 shrink-0">
-							<Label
-								htmlFor="approval-workflow-enabled"
-								className="text-sm text-muted-foreground"
-							>
-								{__('Enabled', 'doublescale')}
-							</Label>
-							<Switch
-								id="approval-workflow-enabled"
-								checked={enabled}
-								onCheckedChange={(v) => patch('approval_workflow_enabled', v)}
-							/>
-						</div>
+						<Switch
+							id="approval-workflow-enabled"
+							checked={enabled}
+							onCheckedChange={(v) =>
+								patch('approval_workflow_enabled', v)
+							}
+						/>
 					</div>
 
 					{enabled && canReview ? (
@@ -99,7 +112,10 @@ export const ApprovalWorkflowSettings: React.FC<ApprovalWorkflowSettingsProps> =
 							type="button"
 							variant="outline"
 							size="sm"
-							onClick={() => navigate(getToLink('sales/approvals'))}
+							onClick={() =>
+								navigate(getToLink('sales/approvals'))
+							}
+							className="border-primary text-primary bg-white"
 						>
 							<ListChecks className="h-4 w-4 mr-1" />
 							{__('Open Approvals Center', 'doublescale')}
@@ -109,10 +125,12 @@ export const ApprovalWorkflowSettings: React.FC<ApprovalWorkflowSettingsProps> =
 				</div>
 			</section>
 
-			<section className="space-y-4 border rounded-lg bg-white p-6">
+			<section className="space-y-4 border rounded-lg bg-[#F7F8FA] p-6">
 				<div>
-					<h2 className="font-medium">{__('How it works', 'doublescale')}</h2>
-					<p className="text-sm text-muted-foreground mt-1">
+					<h2 className="lg:text-xl text-base font-semibold text-foreground">
+						{__('How it works', 'doublescale')}
+					</h2>
+					<p className="lg:text-base text-sm text-muted-foreground mt-1">
 						{__(
 							'When the workflow is enabled, sending follows these rules for proposals, invoices, contracts, and credit notes.',
 							'doublescale'

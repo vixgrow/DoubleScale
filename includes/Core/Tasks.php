@@ -97,7 +97,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
+		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 10 );
 		if ( ! $action_id ) {
 			return false;
 		}
@@ -141,7 +141,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
+		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 10 );
 		if ( ! $action_id ) {
 			return false;
 		}
@@ -435,10 +435,15 @@ class Tasks {
 	}
 
 	/**
-	 * Clean up old Action Scheduler entries and orphaned task meta
+	 * Clean up old Action Scheduler entries and orphaned task meta.
 	 *
-	 * Removes completed/failed actions older than 7 days from all Plugin groups,
-	 * their associated logs, orphaned claims, and orphaned task meta entries.
+	 * - Purges any pending/failed actions whose hook has no registered WordPress
+	 *   callback (they can never succeed and only accumulate noise).
+	 * - Removes failed actions older than 1 day and completed actions older than
+	 *   3 days for all DoubleScale groups.
+	 * - Emergency mode: if the table exceeds 10 000 rows the cutoffs shrink to
+	 *   1 hour (failed) and 6 hours (complete) to drain any backlog quickly.
+	 * - Cleans orphaned claims and orphaned task-meta rows.
 	 *
 	 * @since 1.0.0
 	 *
@@ -448,26 +453,120 @@ class Tasks {
 		global $wpdb;
 
 		$stats = array(
-			'actions_deleted' => 0,
-			'orphaned_meta'   => 0,
-			'orphaned_claims' => 0,
+			'actions_deleted'   => 0,
+			'orphaned_hooks'    => 0,
+			'orphaned_meta'     => 0,
+			'orphaned_claims'   => 0,
+			'emergency_mode'    => false,
 		);
 
-		$days_old    = 7;
-		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days_old} days" ) );
+		// ── 1. Purge entirely-orphaned groups ────────────────────────────────────
+		// An orphaned group is one where every distinct hook in that group has no
+		// registered WordPress callback — meaning the entire group was abandoned
+		// (e.g. after a plugin rebrand or removal). We check at the group level so
+		// we never accidentally touch a group that still has at least one live hook.
+		$all_groups = $wpdb->get_results(
+			"SELECT group_id, slug FROM {$wpdb->prefix}actionscheduler_groups",
+			ARRAY_A
+		);
 
-		// Get all Plugin group IDs
+		$orphaned_group_ids = array();
+
+		foreach ( (array) $all_groups as $group ) {
+			// Check all distinct hooks in the group regardless of status.
+			// A group whose every hook has no registered callback is fully orphaned —
+			// pending/failed records will never run, and complete records have no
+			// owner to audit them, so the entire group can be removed.
+			$group_hooks = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT hook
+					FROM {$wpdb->prefix}actionscheduler_actions
+					WHERE group_id = %d",
+					(int) $group['group_id']
+				)
+			);
+
+			if ( empty( $group_hooks ) ) {
+				continue;
+			}
+
+			// Only mark as orphaned if EVERY hook in the group has no callback.
+			$all_orphaned = true;
+			foreach ( $group_hooks as $hook ) {
+				if ( has_action( $hook ) ) {
+					$all_orphaned = false;
+					break;
+				}
+			}
+
+			if ( $all_orphaned ) {
+				$orphaned_group_ids[] = (int) $group['group_id'];
+			}
+		}
+
+		if ( ! empty( $orphaned_group_ids ) ) {
+			$ogid_placeholders = implode( ', ', array_fill( 0, count( $orphaned_group_ids ), '%d' ) );
+
+			// Delete ALL actions from orphaned groups (pending, failed, and complete).
+			// Since no callback will ever run for these hooks, keeping completed records
+			// only wastes storage — there is no audit value for a group that no longer exists.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$orphaned_hooks_deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, l
+					FROM {$wpdb->prefix}actionscheduler_actions a
+					LEFT JOIN {$wpdb->prefix}actionscheduler_logs l ON a.action_id = l.action_id
+					WHERE a.group_id IN ($ogid_placeholders)",
+					...$orphaned_group_ids
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+			$stats['orphaned_hooks'] = $orphaned_hooks_deleted !== false ? (int) $orphaned_hooks_deleted : 0;
+
+			// Also remove the group rows themselves so they don't show in the admin UI.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}actionscheduler_groups
+					WHERE group_id IN ($ogid_placeholders)",
+					...$orphaned_group_ids
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		}
+
+		// ── 2. Determine cutoffs (emergency vs normal) ────────────────────────
+		$total_actions = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}actionscheduler_actions" );
+
+		if ( $total_actions > 10000 ) {
+			$stats['emergency_mode'] = true;
+			$failed_cutoff           = gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) );
+			$complete_cutoff         = gmdate( 'Y-m-d H:i:s', strtotime( '-6 hours' ) );
+		} else {
+			$failed_cutoff   = gmdate( 'Y-m-d H:i:s', strtotime( '-1 day' ) );
+			$complete_cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-3 days' ) );
+		}
+
+		// ── 3. Delete old completed/failed actions by DoubleScale groups ──────
 		$group_slugs = array(
 			'doublescale_campaigns',
 			'doublescale_automations',
 			'doublescale_daily',
 			'doublescale_abandoned_cart',
 			'doublescale_forms',
+			'doublescale_subscription',
+			'doublescale_sales',
+			'doublescale_support',
+			'doublescale_booking_payment',
+			'doublescale_booking_completion',
+			'doublescale-push',
+			'doublescale_smtp',
 		);
 
 		$placeholders = implode( ', ', array_fill( 0, count( $group_slugs ), '%s' ) );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a dynamically built '%s,%s…' string bound via spread $group_slugs; Action Scheduler table is a trusted core constant.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a dynamically built '%s,%s…' string; Action Scheduler tables are trusted core constants.
 		$group_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT group_id FROM {$wpdb->prefix}actionscheduler_groups WHERE slug IN ($placeholders)",
@@ -479,36 +578,44 @@ class Tasks {
 		if ( ! empty( $group_ids ) ) {
 			$group_placeholders = implode( ', ', array_fill( 0, count( $group_ids ), '%d' ) );
 
-			// Delete old completed/failed actions and their associated logs.
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $group_placeholders is a dynamically built '%d,%d…' string bound via spread; Action Scheduler tables are trusted core constants.
-			$deleted = $wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$deleted_failed = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE a, l
 					FROM {$wpdb->prefix}actionscheduler_actions a
 					LEFT JOIN {$wpdb->prefix}actionscheduler_logs l ON a.action_id = l.action_id
 					WHERE a.group_id IN ($group_placeholders)
-					AND a.status IN ('complete', 'failed')
+					AND a.status = 'failed'
 					AND a.scheduled_date_gmt < %s",
-					...array_merge( $group_ids, array( $cutoff_date ) )
+					...array_merge( $group_ids, array( $failed_cutoff ) )
+				)
+			);
+
+			$deleted_complete = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, l
+					FROM {$wpdb->prefix}actionscheduler_actions a
+					LEFT JOIN {$wpdb->prefix}actionscheduler_logs l ON a.action_id = l.action_id
+					WHERE a.group_id IN ($group_placeholders)
+					AND a.status = 'complete'
+					AND a.scheduled_date_gmt < %s",
+					...array_merge( $group_ids, array( $complete_cutoff ) )
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-			$stats['actions_deleted'] = $deleted !== false ? $deleted : 0;
+			$stats['actions_deleted'] = ( $deleted_failed !== false ? (int) $deleted_failed : 0 )
+				+ ( $deleted_complete !== false ? (int) $deleted_complete : 0 );
 		}
 
-		// Clean up orphaned claims
-		$orphaned_claims = $wpdb->query(
-			"DELETE c
-			FROM {$wpdb->prefix}actionscheduler_claims c
-			LEFT JOIN {$wpdb->prefix}actionscheduler_actions a ON c.claim_id = a.claim_id
-			WHERE a.action_id IS NULL"
-		);
+		// ── 4. Orphaned claims ────────────────────────────────────────────────
+		// Removed: the previous global DELETE on actionscheduler_claims could
+		// interfere with other plugins' claim lifecycle (e.g. UpdraftPlus,
+		// WooCommerce). Action Scheduler's built-in QueueCleaner already handles
+		// stale claims via its timeout mechanism — no manual intervention needed.
+		$stats['orphaned_claims'] = 0;
 
-		$stats['orphaned_claims'] = $orphaned_claims !== false ? $orphaned_claims : 0;
-
-		// Clean up orphaned task meta (meta entries without corresponding action)
-		// Only clean meta that has an action_id (async tasks), not recurring task meta
+		// ── 5. Clean up orphaned task meta ────────────────────────────────────
 		$orphaned_meta = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE tm
@@ -517,13 +624,13 @@ class Tasks {
 				WHERE tm.action_id IS NOT NULL
 				AND a.action_id IS NULL
 				AND tm.date_created < %s",
-				$cutoff_date
+				$failed_cutoff
 			)
 		);
 
-		$stats['orphaned_meta'] = $orphaned_meta !== false ? $orphaned_meta : 0;
+		$stats['orphaned_meta'] = $orphaned_meta !== false ? (int) $orphaned_meta : 0;
 
-		// Log cleanup results
+		// ── 6. Log results ────────────────────────────────────────────────────
 		if ( function_exists( 'doublescale_get_logger' ) ) {
 			doublescale_get_logger()->info(
 				__( 'Task cleanup completed', 'doublescale' ),

@@ -13,14 +13,22 @@ defined( 'ABSPATH' ) || exit;
 final class Lifecycle {
 
 	/**
-	 * Action Scheduler / WP-Cron hooks cleared on deactivation.
+	 * Action Scheduler group slugs owned by this plugin.
+	 * All pending/in-progress actions in these groups are cancelled on deactivation.
 	 */
-	private const SCHEDULED_HOOKS = array(
-		'doublescale_email_campaigns',
-		'doublescale_email_sequences',
-		'doublescale_daily3',
-		'doublescale_daily4',
-		'doublescale_cleanup_page_visits',
+	private const SCHEDULED_GROUPS = array(
+		'doublescale_campaigns',
+		'doublescale_automations',
+		'doublescale_daily',
+		'doublescale_abandoned_cart',
+		'doublescale_forms',
+		'doublescale_subscription',
+		'doublescale_sales',
+		'doublescale_support',
+		'doublescale_booking_payment',
+		'doublescale_booking_completion',
+		'doublescale-push',
+		'doublescale_smtp',
 	);
 
 	/**
@@ -38,7 +46,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.2.7',
+			'DOUBLESCALE_VERSION'       => '1.2.8',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -158,6 +166,7 @@ final class Lifecycle {
 
 		register_deactivation_hook( $plugin_file, array( __CLASS__, 'on_deactivate' ) );
 
+		add_action( 'init', array( __CLASS__, 'load_textdomain' ) );
 		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ), 5 );
 
 		// Suppress WP 6.7+'s "translation loaded too early" notice for the
@@ -184,12 +193,25 @@ final class Lifecycle {
 	}
 
 	/**
+	 * Load plugin translations for PHP strings and translation plugins (Loco, WPML, etc.).
+	 */
+	public static function load_textdomain(): void {
+		// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Required for Loco Translate, WPML, and self-hosted language packs in languages/.
+		load_plugin_textdomain(
+			'doublescale',
+			false,
+			dirname( plugin_basename( DOUBLESCALE_PLUGIN_FILE ) ) . '/languages'
+		);
+	}
+
+	/**
 	 * Single-site activation.
 	 */
 	public static function on_activate(): void {
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
 			\DoubleScale\Database\Install::install();
 		}
+		update_option( 'doublescale_needs_task_cleanup', true, false );
 	}
 
 	/**
@@ -201,6 +223,7 @@ final class Lifecycle {
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
 			\DoubleScale\Database\Install::multisite_activate( $network_wide );
 		}
+		update_option( 'doublescale_needs_task_cleanup', true, false );
 	}
 
 	/**
@@ -215,11 +238,19 @@ final class Lifecycle {
 	}
 
 	/**
-	 * Deactivation: clear scheduled hooks owned by this plugin.
+	 * Deactivation: cancel all Action Scheduler tasks owned by this plugin.
+	 *
+	 * as_unschedule_all_actions() cancels every pending and in-progress action
+	 * for the given group. Passing an empty hook and empty args targets the
+	 * whole group rather than individual hooks, so this stays correct even as
+	 * new hooks are added in future versions.
 	 */
 	public static function on_deactivate(): void {
-		foreach ( self::SCHEDULED_HOOKS as $hook ) {
-			wp_clear_scheduled_hook( $hook );
+		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
+			return;
+		}
+		foreach ( self::SCHEDULED_GROUPS as $group ) {
+			as_unschedule_all_actions( '', array(), $group );
 		}
 	}
 
@@ -232,6 +263,16 @@ final class Lifecycle {
 		}
 
 		\DoubleScale\Core\Bootstrap::init();
+
+		// On first boot after activation or upgrade, run task cleanup immediately
+		// so that any stale scheduled actions with no registered callback are
+		// removed before they can accumulate failures.
+		if ( get_option( 'doublescale_needs_task_cleanup' ) ) {
+			delete_option( 'doublescale_needs_task_cleanup' );
+			if ( class_exists( \DoubleScale\Core\Tasks::class ) ) {
+				\DoubleScale\Core\Tasks::cleanup_old_tasks();
+			}
+		}
 
 		/**
 		 * Fires after the DoubleScale (free) modular stack is fully initialized.

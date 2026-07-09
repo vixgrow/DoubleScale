@@ -75,7 +75,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 													className="rounded-full"
 												/>
 											) : null}
-											<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-base font-extrabold text-secondary">
+											<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-base font-extrabold text-primary">
 												{initials || '?'}
 											</AvatarFallback>
 										</Avatar>

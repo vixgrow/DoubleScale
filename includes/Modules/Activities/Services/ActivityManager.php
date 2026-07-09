@@ -470,6 +470,14 @@ final class ActivityManager {
 			}
 		}
 
+		// Task audit rows only belong on the task activity feed.
+		if (
+			empty( $filters['entity_type'] ) ||
+			(int) $filters['entity_type'] !== \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK
+		) {
+			$query->where( 'activity_type', '!=', ActivityTypes::TASK_EVENT );
+		}
+
 		// Filter by activity type.
 		if ( ! empty( $filters['activity_type'] ) ) {
 			$activity_types = $filters['activity_type'];
@@ -1263,12 +1271,14 @@ final class ActivityManager {
 			);
 		}
 
-		// Exclude activities with deal associations when no entity_type is provided.
+		// Exclude deal- and task-scoped activities when no entity_type is provided.
+		// Task audit rows (task_event) belong on the task activity feed, not contact/deal timelines.
 		if ( empty( $filters['entity_type'] ) ) {
-			$deal_type       = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
+			$deal_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
+			$task_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK;
 			$where_clauses[] = "NOT EXISTS (
 				SELECT 1 FROM {$associations_table} excl
-				WHERE excl.activity_id = a.id AND excl.entity_type = {$deal_type}
+				WHERE excl.activity_id = a.id AND excl.entity_type IN ({$deal_type}, {$task_type})
 			)";
 		}
 
@@ -1289,6 +1299,18 @@ final class ActivityManager {
 			$where_clauses[] = $wpdb->prepare(
 				'a.activity_date < %s',
 				gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00'
+			);
+		}
+
+		// Task audit rows only belong on the task activity feed.
+		$task_entity_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK;
+		if (
+			empty( $filters['entity_type'] ) ||
+			(int) $filters['entity_type'] !== $task_entity_type
+		) {
+			$where_clauses[] = $wpdb->prepare(
+				'a.activity_type != %s',
+				ActivityTypes::TASK_EVENT
 			);
 		}
 

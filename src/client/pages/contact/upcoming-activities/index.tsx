@@ -141,7 +141,9 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
 
             if (response && response.data) {
                 // Transform using service utility
-                const timelineItems = transformApiItemsToTimeline(response.data);
+                const timelineItems = transformApiItemsToTimeline(response.data).filter(
+                    (item) => item.type !== 'task' && item.icon_type !== 'task_event'
+                );
                 setTimelineItems(timelineItems);
             }
         } catch (error) {

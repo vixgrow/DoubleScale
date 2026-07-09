@@ -242,7 +242,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
         setLoading(true);
         try {
-            const { response, items: serviceItems } = await ActivitiesService.fetch({
+            const { items: serviceItems } = await ActivitiesService.fetch({
                 contact_id,
                 per_page: 100,
                 page: 1,
@@ -250,14 +250,15 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 date_to: filters.date_to || undefined,
             });
 
-            if (response && response.data) {
-                // Items already include activity data from service transformer
-                setTimelineItems(serviceItems);
-            } else {
-                setTimelineItems([]);
-            }
+            setTimelineItems(
+                serviceItems.filter(
+                    (item) =>
+                        item.type !== 'task' && item.icon_type !== 'task_event'
+                )
+            );
         } catch (error) {
             console.error('Failed to fetch timeline:', error);
+            setTimelineItems([]);
         } finally {
             setLoading(false);
         }

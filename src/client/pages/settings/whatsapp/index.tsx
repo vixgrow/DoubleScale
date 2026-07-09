@@ -17,7 +17,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { CheckCircle, XCircle, Loader2, Settings, ExternalLink, Phone, MessageCircle, Info } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Settings, ExternalLink, Phone } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@doub
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertIcon } from '@doublescale/components';
 import { getToLink, useNavigate } from '@doublescale/navigation';
+import WhatsappIcon from '@doublescale/shared/icons/whatsapp-icon';
 
 interface WhatsAppSettingsProps {
 	// These props are passed by the settings page but not used
@@ -137,11 +138,11 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 			</div>
 
 			{/* Info Banner */}
-			<Alert className="border-secondary bg-secondary/10 text-secondary flex items-center gap-2">
-				<div className="text-secondary">
+			<Alert className="border-primary bg-primary/10 text-primary flex items-center gap-2">
+				<div className="text-primary">
 					<AlertIcon width={16} height={16} />
 				</div>
-				<AlertDescription className="text-base text-secondary">
+				<AlertDescription className="text-base text-primary">
 					{__(
 						'WhatsApp messaging is available for individual contact messaging and automations. All messages use Meta-approved templates.',
 						'doublescale'
@@ -152,7 +153,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 			<Card className="shadow-sm border-blue-200 bg-blue-50/40">
 				<CardHeader className="pb-3">
 					<CardTitle className="text-base flex items-center gap-2">
-						<Info className="w-4 h-4 text-blue-600" />
+						<AlertIcon width={16} height={16} />
 						{__('How WhatsApp unsubscribe works', 'doublescale')}
 					</CardTitle>
 					<CardDescription>
@@ -189,7 +190,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle className="text-lg flex items-center gap-2">
-						<MessageCircle className="w-5 h-5" />
+						<WhatsappIcon width={20} height={20} />
 						{__('Meta WhatsApp Business API', 'doublescale')}
 					</CardTitle>
 					<CardDescription>

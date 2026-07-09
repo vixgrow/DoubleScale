@@ -355,11 +355,11 @@ const MyEmailSettings: React.FC = () => {
 			</div>
 
 			{/* Info Banner */}
-			<Alert className="border-secondary bg-secondary/10 text-secondary flex items-center gap-2">
-				<div className="text-secondary">
+			<Alert className="border-primary bg-primary/10 text-primary flex items-center gap-2">
+				<div className="text-primary">
 					<AlertIcon width={16} height={16} />
 				</div>
-				<AlertDescription className="text-base text-secondary">
+				<AlertDescription className="text-base text-primary">
 					{__(
 						'Connect your personal email account to send and receive emails as yourself in the CRM.',
 						'doublescale'

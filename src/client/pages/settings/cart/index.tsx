@@ -130,7 +130,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									}
 									type="textarea"
 								/>
-								<div className="text-secondary flex items-center gap-2">
+								<div className="text-primary flex items-center gap-2">
 									<AlertIcon />
 									{__(
 										'Use smartcode {{opt_out label="No Thanks"}} to let users opt out of cart tracking.',
@@ -172,7 +172,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 							{__('Add Lists on Cart Abandoned', 'doublescale')}
 						</div>
 						{!create_contacts_in_crm && (
-							<div className="text-secondary flex items-center gap-2">
+							<div className="text-primary flex items-center gap-2">
 								<AlertIcon />
 								{__(
 									'Enable CRM contacts above to apply these lists and tags when a cart is abandoned.',
@@ -207,7 +207,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 							{__('Lost Cart', 'doublescale')}
 						</div>
 						{!create_contacts_in_crm && (
-							<div className="text-secondary flex items-center gap-2">
+							<div className="text-primary flex items-center gap-2">
 								<AlertIcon />
 								{__(
 									'Enable CRM contacts above to apply these lists and tags when a cart is marked lost.',

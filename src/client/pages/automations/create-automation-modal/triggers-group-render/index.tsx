@@ -47,8 +47,107 @@ import { cn } from '@/lib/utils';
 
 type GroupIconComponent = React.FC<IconProps>;
 
+type FormProviderKey =
+	| 'contact'
+	| 'elementor'
+	| 'fluentforms'
+	| 'formidable'
+	| 'forminator'
+	| 'gravityforms'
+	| 'metform'
+	| 'ninjaforms'
+	| 'quillforms'
+	| 'wpforms'
+	| 'wsforms'
+	| 'bitform'
+	| 'sureforms'
+	| 'eform'
+	| 'jetform'
+	| 'typeform'
+	| 'jotform';
+
+const makeFormIconComponent = (src: string): GroupIconComponent => {
+	return ({ width = 24, height = 24 }) => (
+		<img
+			src={src}
+			alt="form provider"
+			width={width}
+			height={height}
+			className="object-contain"
+		/>
+	);
+};
+
+const getProPluginUrl = () => {
+	if (typeof window !== 'undefined') {
+		const pro = (window as unknown as { doublescalePro?: { proPluginUrl?: string } })
+			.doublescalePro;
+		if (pro?.proPluginUrl) return pro.proPluginUrl;
+	}
+
+	return config.getPluginDirUrl();
+};
+
+const basePluginUrl = config.getPluginDirUrl().replace(/\/?$/, '/');
+
+const formProviderIconSrcByKey: Record<FormProviderKey, string> = {
+	contact: `${basePluginUrl}assets/images/form-types/contact.png`,
+	elementor: `${basePluginUrl}assets/images/form-types/elementor.png`,
+	fluentforms: `${basePluginUrl}assets/images/form-types/fluentforms.png`,
+	formidable: `${basePluginUrl}assets/images/form-types/formidable.png`,
+	forminator: `${basePluginUrl}assets/images/form-types/forminator.png`,
+	gravityforms: `${basePluginUrl}assets/images/form-types/gravityforms.png`,
+	metform: `${basePluginUrl}assets/images/form-types/metform.png`,
+	ninjaforms: `${basePluginUrl}assets/images/form-types/ninjaforms.png`,
+	quillforms: `${basePluginUrl}assets/images/form-types/quillforms.png`,
+	wpforms: `${basePluginUrl}assets/images/form-types/wpforms.png`,
+	wsforms: `${basePluginUrl}assets/images/form-types/wsforms.png`,
+	bitform: `${basePluginUrl}assets/images/form-types/bitforms.png`,
+	sureforms: `${basePluginUrl}assets/images/form-types/sureforms.png`,
+	eform: `${basePluginUrl}assets/images/form-types/eform.png`,
+	jetform: `${basePluginUrl}assets/images/form-types/jetform.svg`,
+	typeform: `${getProPluginUrl()}assets/images/typeform/typeform.svg`,
+	jotform: `${getProPluginUrl()}assets/images/jotform/jotform.png`,
+};
+
+const getFormProviderKey = (label: string | undefined): FormProviderKey | null => {
+	const l = (label ?? '').toLowerCase();
+
+	if (l.includes('typeform')) return 'typeform';
+	if (l.includes('jotform')) return 'jotform';
+
+	// WordPress form plugins
+	if (l.includes('elementor')) return 'elementor';
+	if (l.includes('fluent')) return 'fluentforms';
+	if (l.includes('formidable')) return 'formidable';
+	if (l.includes('forminator')) return 'forminator';
+	if (l.includes('gravity')) return 'gravityforms';
+	if (l.includes('metform')) return 'metform';
+	if (l.includes('ninja')) return 'ninjaforms';
+	if (l.includes('quill')) return 'quillforms';
+	if (l.includes('wpforms')) return 'wpforms';
+	if (l.includes('wsforms') || l.includes('ws form')) return 'wsforms';
+	if (l.includes('bitform') || l.includes('bit form')) return 'bitform';
+	if (l.includes('sureforms')) return 'sureforms';
+	if (l.includes('jetform')) return 'jetform';
+	if (l.includes('eform')) return 'eform';
+
+	// Contact Form 7 and similar wording
+	if (l.includes('contact') && l.includes('form')) return 'contact';
+
+	return null;
+};
+
 function getGroupIcon(label: string | undefined): GroupIconComponent {
 	const l = (label ?? '').toLowerCase();
+
+	const formProviderKey = getFormProviderKey(label);
+	if (formProviderKey) {
+		return makeFormIconComponent(
+			formProviderIconSrcByKey[formProviderKey]
+		);
+	}
+
 	if (
 		l.includes('contact') ||
 		l.includes('subscriber') ||
@@ -423,7 +522,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 																	'hover:bg-neutral-50/60'
 													)}
 												>
-													<div className="flex min-w-0 flex-1 items-center gap-2">
+													<div className="flex min-w-0 flex-1 items-center gap-3">
 														{isFeatured && (
 															<Star
 																className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500"

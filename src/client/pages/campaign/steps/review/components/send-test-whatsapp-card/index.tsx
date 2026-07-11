@@ -198,7 +198,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 						className="w-full resize-none bg-white"
 						rows={2}
 					/>
-					<p className="text-base font-medium text-secondary mt-2">
+					<p className="text-base font-medium text-primary mt-2">
 						{__(
 							'Enter phone number in E.164 format (e.g., +1234567890)',
 							'doublescale'

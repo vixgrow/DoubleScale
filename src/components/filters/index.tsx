@@ -163,14 +163,14 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 
 					<div
 						onClick={handleAddFilter}
-						className={`cursor-pointer ${!selectedFilter ? 'opacity-50 cursor-not-allowed' : ''} text-secondary`}
+						className={`cursor-pointer ${!selectedFilter ? 'opacity-50 cursor-not-allowed' : ''} text-primary`}
 					>
 						<PlusIcon width={20} height={20} />
 					</div>
 				</div>
 
 				{/* Divider */}
-				<div className="text-secondary flex items-center gap-2 font-bold">
+				<div className="text-primary flex items-center gap-2 font-bold">
 					<InfoIcon />
 					{__(
 						'This add new filter to narrow down your contact based on different prosperities. is required by default',

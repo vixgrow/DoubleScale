@@ -53,6 +53,10 @@ import wsForms from '../../../../../../assets/images/form-types/wsforms.png';
 import bitForms from '../../../../../../assets/images/form-types/bitforms.png';
 //@ts-ignore
 import sureForms from '../../../../../../assets/images/form-types/sureforms.png';
+//@ts-ignore
+import eForm from '../../../../../../assets/images/form-types/eform.png';
+//@ts-ignore
+import jetForm from '../../../../../../assets/images/form-types/jetform.svg';
 
 interface FormTypeSelectorProps {
 	forms: any;
@@ -120,6 +124,8 @@ const getFormIcon = (sourceKey: string) => {
 		wsform: wsForms,
 		bitform: bitForms,
 		sureforms: sureForms,
+		eform: eForm,
+		jetformbuilder: jetForm,
 		typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
 		jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
 	};

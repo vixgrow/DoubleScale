@@ -337,7 +337,7 @@ const ContactList: React.FC<ContactListProps> = ({
 												className="rounded-full"
 											/>
 										) : null}
-										<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
+										<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-primary font-bold text-lg">
 											{initials}
 										</AvatarFallback>
 									</Avatar>

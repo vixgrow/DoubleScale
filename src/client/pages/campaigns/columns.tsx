@@ -295,7 +295,7 @@ export const emailCampaignColumns = ({
 				if (isAbTest) {
 					return {
 						icon: <ABSplitIcon />,
-						iconClass: 'text-secondary',
+						iconClass: 'text-primary',
 						label: __('A/B Split Campaign', 'doublescale'),
 					};
 				}

@@ -668,11 +668,11 @@ const EmailInboundSettingsPage: React.FC = () => {
 			</div>
 
 			{/* Info Banner */}
-			<Alert className="border-secondary bg-secondary/10 text-secondary flex items-center gap-2">
-				<div className="text-secondary">
+			<Alert className="border-primary bg-primary/10 text-primary flex items-center gap-2">
+				<div className="text-primary">
 					<AlertIcon width={16} height={16} />
 				</div>
-				<AlertDescription className="text-base text-secondary">
+				<AlertDescription className="text-base text-primary">
 				{__(
 					'Receive incoming emails from contacts via IMAP polling. Replies are automatically linked to conversations and can trigger automations.',
 					'doublescale'
@@ -914,7 +914,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 											key={tab.key}
 											className={`cursor-pointer rounded-lg border-2 p-3 transition-colors ${
 												tab.active
-													? 'border-secondary bg-secondary/5'
+													? 'border-primary bg-primary/10'
 													: 'border-gray-200 hover:border-gray-300'
 											}`}
 											onClick={tab.onClick}
@@ -925,7 +925,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 												) : tab.icon === 'outlook' ? (
 													<OutlookLogo />
 												) : (
-													<Server className={`w-4 h-4 ${tab.active ? 'text-secondary' : 'text-gray-400'}`} />
+													<Server className={`w-4 h-4 ${tab.active ? 'text-primary' : 'text-gray-400'}`} />
 												)}
 												<span className="font-medium text-sm">{tab.label}</span>
 											</div>
@@ -1137,7 +1137,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 							!settings.imap.host && (
 								<div className="rounded-md bg-blue-50 border border-blue-200 p-4">
 									<div className="flex items-start gap-3">
-										<Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+										<AlertIcon width={16} height={16} />
 										<p className="text-sm text-blue-700">
 											{sprintf(
 												__(
@@ -1162,7 +1162,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 								'custom' && (
 								<div className="rounded-md bg-gray-50 border border-gray-200 p-4">
 									<div className="flex items-start gap-3">
-										<Info className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
+										<AlertIcon width={16} height={16} />
 										<p className="text-sm text-gray-600">
 											{__(
 												'When using transactional email providers (SendGrid, Mailgun, Postmark, etc.), configure IMAP for the inbox where replies actually land — typically your domain email server (wherever your MX records point).',
@@ -1180,7 +1180,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 							!settings.imap.host && (
 								<div className="rounded-md bg-blue-50 border border-blue-200 p-4">
 									<div className="flex items-start gap-3">
-										<Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+										<AlertIcon width={16} height={16} />
 										<div className="flex-1 space-y-2">
 											<p className="text-sm text-blue-700">
 												{__(

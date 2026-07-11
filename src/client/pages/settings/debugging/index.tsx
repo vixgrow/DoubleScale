@@ -273,9 +273,9 @@ const DebuggingLogs: React.FC = () => {
 							</SelectContent>
 						</Select>
 					</div>
-					<Alert>
+					<Alert className="items-center">
 						<AlertTriangle className="h-4 w-4" />
-						<AlertDescription className="text-sm">
+						<AlertDescription className="text-sm pt-[5px]">
 							<strong>{__('Current Setting:', 'doublescale')}</strong>{' '}
 							{logLevel === 'error' && __(
 								'Only error-level logs and above (error, critical, alert, emergency) are being stored in the system.',

@@ -13,6 +13,7 @@ import './style.scss';
 import { PageHeader } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import UpgradeHeroBanner from './upgrade-hero-banner';
+import SmtpSetupAlert from './smtp-setup-alert';
 import UserDashboard from './user-dashboard';
 import { UserDashboardShimmer } from './user-dashboard/UserDashboardShimmer';
 import { useDashboardData } from './use-analytics';
@@ -102,6 +103,7 @@ const Dashboard: React.FC = () => {
 		<div className="doublescale-dashboard">
 			{hero}
 			<div className="doublescale-dashboard-main">
+				<SmtpSetupAlert />
 				<UserDashboard dashboardData={data} />
 				{/* Cross-module staff calendar — role-scoped server-side. */}
 				<AdminCalendar />

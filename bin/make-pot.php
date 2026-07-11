@@ -57,10 +57,10 @@ foreach ( $scan_dirs as $dir ) {
 }
 
 $patterns = array(
-	'/(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\(\s*([\'"])(?:\\\\.|(?!\\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
-	'/_n\(\s*([\'"])(?:\\\\.|(?!\\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\\3)[^\\\\])*\3\s*,\s*[^,]+,\s*[\'"]doublescale[\'"]\s*\)/',
-	'/_x\(\s*([\'"])(?:\\\\.|(?!\\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\\3)[^\\\\])*\3\s*,\s*[\'"]doublescale[\'"]\s*\)/',
-	'/\b__\(\s*([\'"])(?:\\\\.|(?!\\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
+	'/(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
+	'/_n\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\2)[^\\\\])*\2\s*,\s*[^,]+,\s*[\'"]doublescale[\'"]\s*\)/',
+	'/_x\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\2)[^\\\\])*\2\s*,\s*[\'"]doublescale[\'"]\s*\)/',
+	'/\b__\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
 );
 
 foreach ( $files as $file ) {
@@ -106,7 +106,7 @@ $pot .= "\"Content-Transfer-Encoding: 8bit\\n\"\n";
 $pot .= "\"X-Domain: doublescale\\n\"\n\n";
 
 foreach ( array_keys( $strings ) as $string ) {
-	$pot .= 'msgid "' . po_escape( $string ) . "\"\n";
+	$pot .= 'msgid "' . po_escape( (string) $string ) . "\"\n";
 	$pot .= "msgstr \"\"\n\n";
 }
 

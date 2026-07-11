@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.8
+Stable tag: 1.2.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -253,6 +253,23 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.10 = 12 Jul 2026
+- Add JavaScript translation support (JED JSON files) so React dashboard fully translates via Loco Translate / .po files
+- Add `make-json` build step for generating JS translation JSON from .po files
+- Add dashboard alert for admins and CRM managers when SMTP module is enabled but no connections are configured
+- Add translation template (.pot) generation tooling improvements for PHP 7.4 compatibility
+
+= 1.2.9 = 09 Jul 2026
+- Fix Action Scheduler queue monopolization that prevented other plugins (e.g. UpdraftPlus) from scheduling and running background tasks
+- Fix incorrect `action_scheduler/cleanup_batch_size` filter hook name (was a no-op, now correctly uses `action_scheduler_cleanup_batch_size`)
+- Cap Action Scheduler queue runner time limit to 15 seconds to share execution time with other plugins
+- Change scheduled action priority from 0 to default (10) so DoubleScale tasks no longer preempt all other plugins in the queue
+- Add missing Action Scheduler groups (booking, push, SMTP) to deactivation cleanup
+- Remove global orphaned-claims DELETE that could interfere with other plugins' claim lifecycle
+- Add time guard to automated campaign event drain worker to prevent unbounded execution
+- Remove blocking sleep calls from OAuth token refresh and SMTP sync to avoid delaying the queue
+- Sync Pro cleanup logic with improved emergency-mode thresholds and orphaned-group purging
+
 = 1.2.8 = 07 Jul 2026
 - Add SMTP Bounce Handler tab and restore bounce webhook configuration UI on the Connections page
 - Improve SMTP navigation and bounce handling visibility

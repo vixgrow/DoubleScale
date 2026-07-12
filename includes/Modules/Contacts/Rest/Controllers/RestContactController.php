@@ -26,6 +26,8 @@ use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Core\Constants\MessageDirection;
+use DoubleScale\Core\Models\AttachmentModel;
+use DoubleScale\Core\Services\AttachmentService;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Core\Logger\Models\LogModel;
@@ -58,6 +60,21 @@ class RestContactController extends RestController {
 	 * @var string
 	 */
 	protected $rest_base = 'contacts';
+
+	/**
+	 * Polymorphic attachable_type for contact file attachments.
+	 */
+	private const CONTACT_ATTACHABLE_TYPE = 'contact';
+
+	/**
+	 * Maximum upload size per contact attachment (10 MB).
+	 */
+	private const CONTACT_ATTACHMENT_MAX_BYTES = 10485760;
+
+	/**
+	 * Maximum active attachments per contact.
+	 */
+	private const CONTACT_ATTACHMENT_MAX_COUNT = 20;
 
 	/**
 	 * Register the routes for the controller.
@@ -575,6 +592,36 @@ class RestContactController extends RestController {
 				)
 			);
 		}
+
+		// Contact file attachments.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_attachments' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload_attachment' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/attachments/(?P<attachment_id>\d+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_attachment' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -3107,6 +3154,214 @@ class RestContactController extends RestController {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * List active file attachments for a contact.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_attachments( $request ) {
+		try {
+			$contact = $this->get_contact_for_attachment( $request );
+			if ( is_wp_error( $contact ) ) {
+				return $contact;
+			}
+
+			return new WP_REST_Response(
+				array(
+					'items' => $this->get_contact_attachments_shaped( (int) $contact->id ),
+				),
+				200
+			);
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Upload a file attachment to a contact.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function upload_attachment( $request ) {
+		try {
+			$contact = $this->get_contact_for_attachment( $request );
+			if ( is_wp_error( $contact ) ) {
+				return $contact;
+			}
+
+			$files = $request->get_file_params();
+			$file  = isset( $files['file'] ) && is_array( $files['file'] ) ? $files['file'] : null;
+			if ( ! $file ) {
+				return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			$existing_count = AttachmentModel::forType( self::CONTACT_ATTACHABLE_TYPE )
+				->where( 'attachable_id', (int) $contact->id )
+				->active()
+				->count();
+
+			$too_many = $this->guard_contact_attachment_count( (int) $existing_count );
+			if ( $too_many ) {
+				return $too_many;
+			}
+
+			$service    = $this->attachment_service();
+			$attachment = $service->store_upload(
+				$file,
+				self::CONTACT_ATTACHABLE_TYPE,
+				(int) $contact->id,
+				array( 'user_id' => get_current_user_id() ),
+				array(
+					'status'         => 'active',
+					'max_size_bytes' => self::CONTACT_ATTACHMENT_MAX_BYTES,
+					'meta'           => array( 'contact_id' => (int) $contact->id ),
+				)
+			);
+
+			if ( is_wp_error( $attachment ) ) {
+				return $attachment;
+			}
+
+			do_action( 'doublescale_contact_file_attached', $contact, $attachment );
+
+			return new WP_REST_Response(
+				$service->shape_for_api( $attachment ),
+				201
+			);
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Delete a contact file attachment.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_attachment( $request ) {
+		try {
+			$contact = $this->get_contact_for_attachment( $request );
+			if ( is_wp_error( $contact ) ) {
+				return $contact;
+			}
+
+			$attachment = $this->find_contact_attachment( $contact, (int) $request->get_param( 'attachment_id' ) );
+			if ( is_wp_error( $attachment ) ) {
+				return $attachment;
+			}
+
+			do_action( 'doublescale_contact_file_removed', $contact, $attachment );
+
+			$attachment->delete();
+
+			return new WP_REST_Response(
+				array(
+					'deleted' => true,
+					'id'      => (int) $request->get_param( 'attachment_id' ),
+				),
+				200
+			);
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Resolve a contact for attachment endpoints.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return ContactModel|WP_Error
+	 */
+	private function get_contact_for_attachment( $request ) {
+		$contact_id = (int) $request->get_param( 'id' );
+		$contact    = ContactModel::find( $contact_id );
+
+		if ( ! $contact ) {
+			return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+		}
+
+		return $contact;
+	}
+
+	/**
+	 * Fetch active contact attachments shaped for API responses.
+	 *
+	 * @param int $contact_id Contact ID.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function get_contact_attachments_shaped( int $contact_id ): array {
+		$service = $this->attachment_service();
+		$rows    = AttachmentModel::forType( self::CONTACT_ATTACHABLE_TYPE )
+			->where( 'attachable_id', $contact_id )
+			->active()
+			->orderBy( 'created_at', 'desc' )
+			->get();
+
+		$shaped = array();
+		foreach ( $rows as $attachment ) {
+			$shaped[] = $service->shape_for_api( $attachment );
+		}
+
+		return $shaped;
+	}
+
+	/**
+	 * Resolve a contact-scoped attachment row.
+	 *
+	 * @param ContactModel $contact       Parent contact.
+	 * @param int          $attachment_id Attachment row id.
+	 * @return AttachmentModel|WP_Error
+	 */
+	private function find_contact_attachment( $contact, int $attachment_id ) {
+		$attachment = AttachmentModel::forType( self::CONTACT_ATTACHABLE_TYPE )
+			->where( 'attachable_id', (int) $contact->id )
+			->where( 'id', $attachment_id )
+			->first();
+
+		if ( ! $attachment ) {
+			return new WP_Error( 'not_found', __( 'Attachment not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		return $attachment;
+	}
+
+	/**
+	 * Enforce the per-contact attachment count cap.
+	 *
+	 * @param int $existing_count Active attachments already on the contact.
+	 * @return WP_Error|null
+	 */
+	private function guard_contact_attachment_count( int $existing_count ): ?WP_Error {
+		if ( $existing_count >= self::CONTACT_ATTACHMENT_MAX_COUNT ) {
+			return new WP_Error(
+				'too_many_files',
+				sprintf(
+					/* translators: %d: maximum number of files allowed per contact */
+					_n(
+						'You can attach at most %d file to this contact.',
+						'You can attach at most %d files to this contact.',
+						self::CONTACT_ATTACHMENT_MAX_COUNT,
+						'doublescale'
+					),
+					self::CONTACT_ATTACHMENT_MAX_COUNT
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * @return AttachmentService
+	 */
+	private function attachment_service(): AttachmentService {
+		return new AttachmentService();
 	}
 
 	/**

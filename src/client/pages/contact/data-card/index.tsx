@@ -48,7 +48,7 @@ import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
-import { Receipt, Trophy } from 'lucide-react';
+import { Receipt, Trophy, Paperclip } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components';
 
 interface DataCardProps {
@@ -102,6 +102,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		TasksBase,
 		'tasks'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
+	const Attachments = applyFilters(
+		'doublescale_contact_tab_component',
+		null,
+		'attachments'
+	) as React.FC<{ contact_id: number }> | null;
 	const WhatsApp = applyFilters(
 		'doublescale_contact_tab_component',
 		null,
@@ -166,6 +171,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			icon: <CalendarIcon width={24} height={24} />,
 		},
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'attachments',
+			label: 'Attachments',
+			icon: <Paperclip width={24} height={24} />,
+		},
 		{
 			value: 'website_tracking',
 			label: 'Website Tracking',
@@ -339,6 +349,24 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			children: (
 				<CardContent className="pt-6">
 					<Notes contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'attachments',
+			children: (
+				<CardContent className="pt-6">
+					{Attachments ? (
+						<Attachments contact_id={contact.id} />
+					) : (
+						<ProFeatureNotice
+							featureName={__('Attachments', 'doublescale')}
+							description={__(
+								'Upload and manage files on contact records with DoubleScale Pro.',
+								'doublescale'
+							)}
+						/>
+					)}
 				</CardContent>
 			),
 		},

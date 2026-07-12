@@ -35,6 +35,14 @@ class ActivityModel extends Model {
 	protected $table = 'doublescale_activities';
 
 	/**
+	 * Contact IDs pending association write after insert (keyed by spl_object_id).
+	 * Must not live on model attributes — Eloquent would try to INSERT them.
+	 *
+	 * @var array<int, int>
+	 */
+	private static $pending_contact_ids = array();
+
+	/**
 	 * Primary key
 	 *
 	 * @var string
@@ -44,7 +52,10 @@ class ActivityModel extends Model {
 	protected $primary_key = 'id';
 
 	/**
-	 * Fillable columns
+	 * Fillable columns.
+	 *
+	 * contact_id is virtual input only — stripped in creating() and written to
+	 * activity_associations in created(); it is not a database column.
 	 *
 	 * @var array
 	 *
@@ -78,6 +89,7 @@ class ActivityModel extends Model {
 	 */
 	protected $appends = array(
 		'deal_id',
+		'contact_id',
 	);
 
 	/**
@@ -97,7 +109,6 @@ class ActivityModel extends Model {
 	 * @var array
 	 */
 	public $rules = array(
-		'contact_id'    => 'nullable|integer',
 		'activity_type' => '', // Set dynamically in constructor
 		'user_id'       => 'nullable|integer',
 	);
@@ -126,14 +137,23 @@ class ActivityModel extends Model {
 	}
 
 	/**
-	 * Contact relationship
+	 * Contact relationship via polymorphic activity_associations.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
 	 */
 	public function contact() {
-		return $this->belongsTo( ContactModel::class, 'contact_id' );
+		$assoc_table = $this->associations()->getRelated()->getTable();
+
+		return $this->hasOneThrough(
+			ContactModel::class,
+			ActivityAssociationModel::class,
+			'activity_id',
+			'id',
+			'id',
+			'entity_id'
+		)->where( $assoc_table . '.entity_type', ActivityAssociationModel::ENTITY_TYPE_CONTACT );
 	}
 
 	/**
@@ -247,6 +267,108 @@ class ActivityModel extends Model {
 	}
 
 	/**
+	 * Get contact associations for this activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function contactAssociations() {
+		return $this->associationsByType( ActivityAssociationModel::ENTITY_TYPE_CONTACT );
+	}
+
+	/**
+	 * Relations required by appended contact_id / deal_id / task_id accessors.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<int, string>
+	 */
+	public static function morph_append_relations(): array {
+		return array( 'contactAssociations', 'dealAssociations', 'taskAssociations' );
+	}
+
+	/**
+	 * Eager-load morph rows required by appended contact_id / deal_id / task_id.
+	 *
+	 * Call on queries that serialize virtual morph ids — not on counts/aggregates.
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeWithMorphAppends( $query ) {
+		return $query->with( self::morph_append_relations() );
+	}
+
+	/**
+	 * First entity_id for a typed association relation.
+	 *
+	 * Resolution order, cheapest first:
+	 *   1. The typed relation (e.g. contactAssociations) when eager-loaded via
+	 *      {@see scopeWithMorphAppends()} — the preferred, N+1-free path.
+	 *   2. The generic `associations` relation when it is already loaded — lets
+	 *      callers that loaded `associations` (but not the typed relations) read
+	 *      the id without a query.
+	 *   3. A single scalar query as a last resort, so appended accessors invoked
+	 *      implicitly during toArray()/toJson() degrade gracefully instead of
+	 *      throwing when nothing was eager-loaded.
+	 *
+	 * @param string $typed_relation Eager-loaded relation name (e.g. contactAssociations).
+	 * @param int    $entity_type    ENTITY_TYPE_* constant.
+	 *
+	 * @return int|null
+	 */
+	private function first_association_entity_id( string $typed_relation, int $entity_type ): ?int {
+		if ( $this->relationLoaded( $typed_relation ) ) {
+			$association = $this->{$typed_relation}->first();
+			return $association ? (int) $association->entity_id : null;
+		}
+
+		if ( $this->relationLoaded( 'associations' ) ) {
+			$association = $this->associations->first(
+				function ( $association ) use ( $entity_type ) {
+					return (int) $association->entity_type === $entity_type;
+				}
+			);
+			return $association ? (int) $association->entity_id : null;
+		}
+
+		// Nothing eager-loaded: fall back to a single scalar lookup rather than
+		// fatal. Callers that serialize many rows should use withMorphAppends().
+		if ( ! $this->exists ) {
+			return null;
+		}
+
+		$entity_id = ActivityAssociationModel::query()
+			->where( 'activity_id', $this->id )
+			->where( 'entity_type', $entity_type )
+			->value( 'entity_id' );
+
+		return null !== $entity_id ? (int) $entity_id : null;
+	}
+
+	/**
+	 * Convenience accessor: first associated contact's ID, or null.
+	 *
+	 * Source of truth is the polymorphic contact association.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|null
+	 */
+	public function getContactIdAttribute() {
+		if ( $this->relationLoaded( 'contact' ) && $this->contact ) {
+			return (int) $this->contact->id;
+		}
+
+		return $this->first_association_entity_id(
+			'contactAssociations',
+			ActivityAssociationModel::ENTITY_TYPE_CONTACT
+		);
+	}
+
+	/**
 	 * Convenience accessor: first associated deal's ID, or null.
 	 *
 	 * Activities may be associated with multiple entities; REST callers that
@@ -257,13 +379,10 @@ class ActivityModel extends Model {
 	 * @return int|null
 	 */
 	public function getDealIdAttribute() {
-		if ( ! $this->relationLoaded( 'associations' ) ) {
-			// Load associations if not already loaded
-			$this->load( 'associations' );
-		}
-
-		$deal_association = $this->associations->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_DEAL )->first();
-		return $deal_association ? $deal_association->entity_id : null;
+		return $this->first_association_entity_id(
+			'dealAssociations',
+			ActivityAssociationModel::ENTITY_TYPE_DEAL
+		);
 	}
 
 	/**
@@ -274,12 +393,10 @@ class ActivityModel extends Model {
 	 * @return int|null
 	 */
 	public function getTaskIdAttribute() {
-		if ( ! $this->relationLoaded( 'associations' ) ) {
-			$this->load( 'associations' );
-		}
-
-		$task_association = $this->associations->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_TASK )->first();
-		return $task_association ? (int) $task_association->entity_id : null;
+		return $this->first_association_entity_id(
+			'taskAssociations',
+			ActivityAssociationModel::ENTITY_TYPE_TASK
+		);
 	}
 
 	/**
@@ -291,7 +408,13 @@ class ActivityModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeForContact( $query, $contact_id ) {
-		return $query->where( 'contact_id', $contact_id );
+		return $query->whereHas(
+			'associations',
+			function ( $q ) use ( $contact_id ) {
+				$q->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+					->where( 'entity_id', $contact_id );
+			}
+		);
 	}
 
 	/**
@@ -1122,6 +1245,13 @@ class ActivityModel extends Model {
 				// Note: created_at is handled automatically by Eloquent ($timestamps = true)
 				// which uses Carbon::now() (UTC), consistent with the rest of the codebase.
 
+				// Accept contact_id in mass assignment, but never persist it — contact
+				// linking lives in activity_associations after the column cleanup.
+				if ( array_key_exists( 'contact_id', $activity->attributes ) ) {
+					self::$pending_contact_ids[ spl_object_id( $activity ) ] = (int) $activity->attributes['contact_id'];
+					unset( $activity->attributes['contact_id'] );
+				}
+
 				// Auto-populate activity_date from activity-specific date fields.
 				if ( ! $activity->activity_date ) {
 					$activity->activity_date = self::extract_activity_date( $activity );
@@ -1129,8 +1259,49 @@ class ActivityModel extends Model {
 			}
 		);
 
+		// When contact_id was provided at create time, write a contact association.
+		static::created(
+			function ( $activity ) {
+				$object_id  = spl_object_id( $activity );
+				$contact_id = self::$pending_contact_ids[ $object_id ] ?? 0;
+				unset( self::$pending_contact_ids[ $object_id ] );
+
+				if ( $contact_id <= 0 ) {
+					return;
+				}
+
+				$exists = ActivityAssociationModel::query()
+					->where( 'activity_id', $activity->id )
+					->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+					->where( 'entity_id', $contact_id )
+					->exists();
+
+				if ( $exists ) {
+					return;
+				}
+
+				ActivityAssociationModel::create(
+					array(
+						'activity_id' => $activity->id,
+						'entity_type' => ActivityAssociationModel::ENTITY_TYPE_CONTACT,
+						'entity_id'   => $contact_id,
+					)
+				);
+
+				// Keep in-memory relation in sync if it was already loaded empty.
+				if ( $activity->relationLoaded( 'associations' ) ) {
+					$activity->unsetRelation( 'associations' );
+				}
+			}
+		);
+
 		static::updating(
 			function ( $activity ) {
+				// contact_id is virtual — never write it to the activities table.
+				if ( array_key_exists( 'contact_id', $activity->attributes ) ) {
+					unset( $activity->attributes['contact_id'] );
+				}
+
 				// Re-sync activity_date when data (JSON) changes.
 				if ( $activity->isDirty( 'data' ) ) {
 					$activity->activity_date = self::extract_activity_date( $activity );

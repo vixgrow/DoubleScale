@@ -141,7 +141,14 @@ class RestPortalTimelineController extends RestController {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function collect_activity_items( int $contact_id, ?int $contact_user_id ): array {
-		$rows = ActivityModel::where( 'contact_id', $contact_id )
+		$rows = ActivityModel::query()
+			->whereHas(
+				'associations',
+				function ( $q ) use ( $contact_id ) {
+					$q->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+						->where( 'entity_id', $contact_id );
+				}
+			)
 			->whereIn( 'activity_type', PortalActivityWhitelist::allowed_types() )
 			->orderBy( 'id', 'desc' )
 			->limit( self::MAX_ACTIVITY_ROWS )

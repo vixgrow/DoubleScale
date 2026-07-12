@@ -138,8 +138,14 @@ class WasActiveInactive extends Filter {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
 		$has_page_visits = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_page_visits ) ) === $table_page_visits;
 
-		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data );
-		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );
+		$contact_link_sql = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::sql_activity_linked_to_contact_exists(
+			'a.id',
+			"{$table_contacts}.id"
+		);
+
+		$sql_timeframe          = $this->build_timeframe_sql( $timeframe_data );
+		$sql_timeframe_activity = $this->build_timeframe_sql( $timeframe_data, 'a.created_at' );
+		$time_bindings          = $this->get_timeframe_bindings( $timeframe_data );
 
 		// Determine operator based on slug (was_active = count > 0, was_not_active = count = 0)
 		if ( 'activity_was_not_active' === $this->slug ) {
@@ -151,7 +157,7 @@ class WasActiveInactive extends Filter {
 		}
 
 		$sum_parts = array(
-			"(SELECT COUNT(*) FROM {$table_activities} WHERE {$table_activities}.contact_id = {$table_contacts}.id {$sql_timeframe})",
+			"(SELECT COUNT(*) FROM {$table_activities} a WHERE {$contact_link_sql} {$sql_timeframe_activity})",
 		);
 		$bindings  = $time_bindings;
 

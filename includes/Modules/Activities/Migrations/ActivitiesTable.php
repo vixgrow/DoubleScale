@@ -40,16 +40,16 @@ class ActivitiesTable extends Migration {
 		 * Unified Activities Table Fields:
 		 *
 		 * id: BIGINT(20) NOT NULL AUTO_INCREMENT
-		 * contact_id: BIGINT(20) NULL - FK to contacts (for quick filtering)
 		 * activity_type: VARCHAR(50) NOT NULL - Type of activity (email_sent, sms_sent, note_added, etc.)
 		 * data: JSON NULL - All activity-specific data including subject/body
 		 * user_id: BIGINT(20) UNSIGNED NULL - User who performed action
 		 * activity_date: DATETIME NULL - When activity occurred (indexed for sorting/filtering)
 		 * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		 * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		 *
+		 * Contact (and other parent) linking lives in doublescale_activity_associations.
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
-			contact_id BIGINT(20) NULL COMMENT "FK to contacts for quick filtering",
 			activity_type VARCHAR(50) NOT NULL COMMENT "email_sent, sms_sent, note_added, call_logged, meeting_scheduled, created, deal_created, stage_changed, etc.",
 			data JSON NULL COMMENT "Activity-specific data including subject, body, and other metadata",
 			user_id BIGINT(20) UNSIGNED NULL COMMENT "User who performed action",
@@ -57,13 +57,10 @@ class ActivitiesTable extends Migration {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
-			KEY contact_id (contact_id),
 			KEY activity_type (activity_type),
 			KEY user_id (user_id),
 			KEY created_at (created_at),
-			KEY activity_date (activity_date),
-			KEY composite_contact_activity_date (contact_id, activity_date),
-			KEY composite_contact_type (contact_id, activity_type, created_at)';
+			KEY activity_date (activity_date)';
 
 		return $query;
 	}

@@ -134,6 +134,7 @@ class RestReplyController extends RestController {
 
 		$query = ActivityModel::forTicket( $ticket->id )
 			->whereIn( 'activity_type', $allowed_types )
+			->withMorphAppends()
 			->with( 'user' );
 
 		$per_page_raw = (int) $request->get_param( 'per_page' );
@@ -205,6 +206,7 @@ class RestReplyController extends RestController {
 		}
 
 		$attachments_map = ( new AttachmentService() )->map_for_activities( array( (int) $activity->id ) );
+		$activity->load( ActivityModel::morph_append_relations() );
 		return new WP_REST_Response( $this->shape_activity( $activity, $attachments_map ), 201 );
 	}
 
@@ -237,6 +239,7 @@ class RestReplyController extends RestController {
 		}
 
 		$attachments_map = ( new AttachmentService() )->map_for_activities( array( (int) $activity->id ) );
+		$activity->load( ActivityModel::morph_append_relations() );
 		return new WP_REST_Response( $this->shape_activity( $activity, $attachments_map ), 201 );
 	}
 

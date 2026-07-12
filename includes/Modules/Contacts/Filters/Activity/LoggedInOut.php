@@ -133,21 +133,25 @@ class LoggedInOut extends Filter {
 		$count_type     = $event_count_condition['type'] ?? 'exactly';
 		$expected_count = intval( $event_count_condition['count'] ?? 1 );
 
+		$table_activities   = $wpdb->prefix . 'doublescale_activities';
+		$table_contacts     = $wpdb->prefix . 'doublescale_contacts';
+		$contact_link_sql   = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::sql_activity_linked_to_contact_exists(
+			'a.id',
+			"{$table_contacts}.id"
+		);
+
+		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data, 'a.created_at' );
+		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );
+
 		$operator      = $this->get_comparison_operator( $count_type );
 		$activity_type = $this->activity_type;
-
-		$table_activities = $wpdb->prefix . 'doublescale_activities';
-		$table_contacts   = $wpdb->prefix . 'doublescale_contacts';
-
-		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data );
-		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );
 
 		$query->whereRaw(
 			"(
 			SELECT COUNT(*)
-			FROM {$table_activities}
-			WHERE {$table_activities}.contact_id = {$table_contacts}.id
-			AND {$table_activities}.activity_type = ?
+			FROM {$table_activities} a
+			WHERE {$contact_link_sql}
+			AND a.activity_type = ?
 			{$sql_timeframe}
 		) {$operator} ?",
 			array_merge(

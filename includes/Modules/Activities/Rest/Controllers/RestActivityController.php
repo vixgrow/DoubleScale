@@ -651,7 +651,12 @@ class RestActivityController extends RestController {
 			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user', 'associations' ) );
+		$activity->load(
+			array_merge(
+				array( 'user', 'associations' ),
+				ActivityModel::morph_append_relations()
+			)
+		);
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -695,7 +700,12 @@ class RestActivityController extends RestController {
 			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user', 'associations' ) );
+		$activity->load(
+			array_merge(
+				array( 'user', 'associations' ),
+				ActivityModel::morph_append_relations()
+			)
+		);
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -732,7 +742,12 @@ class RestActivityController extends RestController {
 			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user', 'associations' ) );
+		$activity->load(
+			array_merge(
+				array( 'user', 'associations' ),
+				ActivityModel::morph_append_relations()
+			)
+		);
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -781,7 +796,12 @@ class RestActivityController extends RestController {
 			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user', 'associations' ) );
+		$activity->load(
+			array_merge(
+				array( 'user', 'associations' ),
+				ActivityModel::morph_append_relations()
+			)
+		);
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -860,7 +880,12 @@ class RestActivityController extends RestController {
 			return new WP_Error( 'update_failed', __( 'Failed to update activity or access denied', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$updated_activity->load( array( 'user' ) );
+		$updated_activity->load(
+			array_merge(
+				array( 'user', 'associations' ),
+				ActivityModel::morph_append_relations()
+			)
+		);
 		$response_data = $this->prepare_item_for_response( $updated_activity, $request );
 
 		return new WP_REST_Response( $response_data, 200 );

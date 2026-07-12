@@ -21,6 +21,11 @@ use DoubleScale\Core\ModuleRegistry;
  */
 class Install {
 
+	/**
+	 * Option storing the last deferred activities.contact_id column drop error.
+	 */
+	private const CONTACT_ID_DROP_DEFERRED_OPTION = 'doublescale_activity_contact_id_drop_deferred';
+
 	private static function migration_registry(): ModuleRegistry {
 		$container = new Container();
 		$registry  = new ModuleRegistry( $container );
@@ -58,6 +63,7 @@ class Install {
 
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_deferred_migration_notices' ) );
 	}
 
 	public static function check_version(): void {
@@ -117,6 +123,12 @@ class Install {
 
 		self::maybe_unify_legacy_attachments();
 
+		self::maybe_backfill_activity_contact_associations();
+
+		self::maybe_ensure_activity_association_unique_index();
+
+		self::maybe_drop_activity_contact_id_column();
+
 		// Provision DoubleScale roles (Support roles always; CRM roles only
 		// when Pro is loaded — gating lives inside `add_roles_and_capabilities`).
 		if ( class_exists( \DoubleScale\Core\UserRoles\UserRoles::class ) ) {
@@ -168,5 +180,127 @@ class Install {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Retry the contact→association backfill until the migrated flag is set.
+	 *
+	 * @return void
+	 */
+	private static function maybe_backfill_activity_contact_associations(): void {
+		if ( get_option( 'doublescale_activity_contact_assoc_migrated' ) ) {
+			return;
+		}
+
+		if ( ! class_exists( \DoubleScale\Modules\Activities\Migrations\BackfillContactActivityAssociations::class ) ) {
+			return;
+		}
+
+		try {
+			( new \DoubleScale\Modules\Activities\Migrations\BackfillContactActivityAssociations() )->run();
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Contact activity association backfill deferred',
+					array(
+						'source' => 'install',
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Ensure activity_associations has unique_activity_entity (idempotent, no flag).
+	 *
+	 * Runs on every install so fresh installs and sites that skipped the backfill
+	 * path still enforce one association per (activity, entity_type, entity_id).
+	 *
+	 * @return void
+	 */
+	private static function maybe_ensure_activity_association_unique_index(): void {
+		if ( ! class_exists( \DoubleScale\Modules\Activities\Migrations\EnsureActivityAssociationUniqueIndex::class ) ) {
+			return;
+		}
+
+		try {
+			( new \DoubleScale\Modules\Activities\Migrations\EnsureActivityAssociationUniqueIndex() )->run();
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Activity association unique index deferred',
+					array(
+						'source' => 'install',
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Retry dropping activities.contact_id until the dropped flag is set.
+	 *
+	 * @return void
+	 */
+	private static function maybe_drop_activity_contact_id_column(): void {
+		if ( get_option( 'doublescale_activity_contact_id_dropped' ) ) {
+			return;
+		}
+
+		if ( ! class_exists( \DoubleScale\Modules\Activities\Migrations\DropActivityContactIdColumn::class ) ) {
+			return;
+		}
+
+		try {
+			( new \DoubleScale\Modules\Activities\Migrations\DropActivityContactIdColumn() )->run();
+			delete_option( self::CONTACT_ID_DROP_DEFERRED_OPTION );
+		} catch ( \Throwable $e ) {
+			update_option(
+				self::CONTACT_ID_DROP_DEFERRED_OPTION,
+				array(
+					'message' => $e->getMessage(),
+					'at'      => time(),
+				)
+			);
+
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Activity contact_id column drop deferred',
+					array(
+						'source' => 'install',
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Surface deferred activity schema migrations to site administrators.
+	 *
+	 * @return void
+	 */
+	public static function maybe_show_deferred_migration_notices(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( get_option( 'doublescale_activity_contact_id_dropped' ) ) {
+			return;
+		}
+
+		$deferred = get_option( self::CONTACT_ID_DROP_DEFERRED_OPTION );
+		if ( ! is_array( $deferred ) || empty( $deferred['message'] ) ) {
+			return;
+		}
+
+		$message = esc_html( (string) $deferred['message'] );
+		printf(
+			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
+			esc_html__( 'DoubleScale database migration pending:', 'doublescale' ),
+			$message
+		);
 	}
 }

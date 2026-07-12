@@ -409,11 +409,17 @@ final class ActivityManager {
 	 * @return \Illuminate\Pagination\LengthAwarePaginator|null
 	 */
 	public function get_activities( $filters = array(), $per_page = 20, $page = 1 ) {
-		$query = ActivityModel::with( array( 'user', 'comments.user', 'associations' ) );
+		$query = ActivityModel::withMorphAppends()->with( array( 'user', 'comments.user' ) );
 
-		// Filter by contact.
+		// Filter by contact via activity_associations (polymorphic).
 		if ( ! empty( $filters['contact_id'] ) ) {
-			$query->where( 'contact_id', $filters['contact_id'] );
+			$query->whereHas(
+				'associations',
+				function ( $q ) use ( $filters ) {
+					$q->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+						->where( 'entity_id', $filters['contact_id'] );
+				}
+			);
 		}
 
 		// Filter by deal using activity_associations table.
@@ -453,6 +459,7 @@ final class ActivityManager {
 		}
 
 		// Exclude activities that have deal or task associations when no entity type is provided.
+		// Contact associations are the contact timeline's source of truth and must not be excluded.
 		if ( empty( $filters['entity_type'] ) ) {
 			if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
 				$query->whereDoesntHave(
@@ -531,7 +538,7 @@ final class ActivityManager {
 			$relations[] = 'comments.user';
 		}
 
-		$activity = ActivityModel::with( $relations )->find( $activity_id );
+		$activity = ActivityModel::withMorphAppends()->with( $relations )->find( $activity_id );
 
 		if ( ! $activity ) {
 			return null;
@@ -562,7 +569,7 @@ final class ActivityManager {
 	 * @return ActivityModel|null
 	 */
 	public function update_activity( $activity_id, $data, $user_id = null ) {
-		$activity = ActivityModel::with( array( 'associations' ) )->find( $activity_id );
+		$activity = ActivityModel::withMorphAppends()->with( array( 'associations' ) )->find( $activity_id );
 
 		if ( ! $activity ) {
 			return null;
@@ -667,7 +674,7 @@ final class ActivityManager {
 	 * @return bool
 	 */
 	public function delete_activity( $activity_id, $user_id = null ) {
-		$activity = ActivityModel::find( $activity_id );
+		$activity = ActivityModel::withMorphAppends()->find( $activity_id );
 
 		if ( ! $activity ) {
 			return false;
@@ -748,7 +755,7 @@ final class ActivityManager {
 	 * @return ActivityCommentModel|null
 	 */
 	public function add_comment( $activity_id, $content, $user_id = null ) {
-		$activity = ActivityModel::find( $activity_id );
+		$activity = ActivityModel::withMorphAppends()->find( $activity_id );
 
 		if ( ! $activity ) {
 			return null;
@@ -793,7 +800,13 @@ final class ActivityManager {
 	 * @return ActivityCommentModel|null
 	 */
 	public function update_comment( $comment_id, $content, $user_id = null ) {
-		$comment = ActivityCommentModel::with( 'activity.associations' )->find( $comment_id );
+		$comment = ActivityCommentModel::with(
+			array(
+				'activity' => function ( $query ) {
+					$query->withMorphAppends();
+				},
+			)
+		)->find( $comment_id );
 
 		if ( ! $comment ) {
 			return null;
@@ -833,7 +846,13 @@ final class ActivityManager {
 	 * @return bool
 	 */
 	public function delete_comment( $comment_id, $user_id = null ) {
-		$comment = ActivityCommentModel::with( 'activity.associations' )->find( $comment_id );
+		$comment = ActivityCommentModel::with(
+			array(
+				'activity' => function ( $query ) {
+					$query->withMorphAppends();
+				},
+			)
+		)->find( $comment_id );
 
 		if ( ! $comment ) {
 			return false;
@@ -877,9 +896,15 @@ final class ActivityManager {
 	public function get_activity_statistics( $filters = array() ) {
 		$query = ActivityModel::query();
 
-		// Filter by contact.
+		// Filter by contact via activity_associations (polymorphic).
 		if ( ! empty( $filters['contact_id'] ) ) {
-			$query->where( 'contact_id', $filters['contact_id'] );
+			$query->whereHas(
+				'associations',
+				function ( $q ) use ( $filters ) {
+					$q->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+						->where( 'entity_id', $filters['contact_id'] );
+				}
+			);
 		}
 
 		// Filter by deal using activity_associations table.
@@ -1256,9 +1281,19 @@ final class ActivityManager {
 		$where_clauses = array( '1=1' );
 		$join_clauses  = array();
 
-		// Contact filter.
+		// Contact filter via activity_associations (polymorphic).
 		if ( ! empty( $filters['contact_id'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'a.contact_id = %d', $filters['contact_id'] );
+			$contact_type    = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT;
+			$where_clauses[] = $wpdb->prepare(
+				"EXISTS (
+					SELECT 1 FROM {$associations_table} contact_assoc
+					WHERE contact_assoc.activity_id = a.id
+					AND contact_assoc.entity_type = %d
+					AND contact_assoc.entity_id = %d
+				)",
+				$contact_type,
+				$filters['contact_id']
+			);
 		}
 
 		// Deal/Entity filter (via associations).
@@ -1314,9 +1349,10 @@ final class ActivityManager {
 			);
 		}
 
-		// LEFT JOIN to get deal_id from associations.
-		$deal_entity_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
-		$join_clauses[]   = "LEFT JOIN {$associations_table} deal_assoc ON a.id = deal_assoc.activity_id AND deal_assoc.entity_type = {$deal_entity_type}";
+		// Project deal_id / contact_id via scalar subqueries — a LEFT JOIN would fan out
+		// when an activity has multiple associations of the same entity_type.
+		$deal_entity_type    = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
+		$contact_entity_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT;
 
 		$where_sql = implode( ' AND ', $where_clauses );
 		$joins_sql = implode( ' ', $join_clauses );
@@ -1328,8 +1364,8 @@ final class ActivityManager {
 			'activity' as item_type,
 			a.activity_type,
 			NULL as task_type,
-			a.contact_id,
-			deal_assoc.entity_id as deal_id,
+			(SELECT MIN(c.entity_id) FROM {$associations_table} c WHERE c.activity_id = a.id AND c.entity_type = {$contact_entity_type}) as contact_id,
+			(SELECT MIN(d.entity_id) FROM {$associations_table} d WHERE d.activity_id = a.id AND d.entity_type = {$deal_entity_type}) as deal_id,
 			a.data,
 			a.user_id,
 			a.created_at,

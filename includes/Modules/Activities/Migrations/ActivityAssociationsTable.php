@@ -75,7 +75,7 @@ class ActivityAssociationsTable extends Migration {
             KEY entity_id (entity_id),
             KEY created_at (created_at),
             KEY updated_at (updated_at),
-            KEY composite_activity_entity (activity_id, entity_type, entity_id),
+            UNIQUE KEY unique_activity_entity (activity_id, entity_type, entity_id),
             KEY composite_activity_created (activity_id, created_at),
             KEY composite_activity_updated (activity_id, updated_at),
             KEY composite_entity_lookup (entity_type, entity_id, created_at)';

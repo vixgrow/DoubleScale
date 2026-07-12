@@ -17,6 +17,7 @@ use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Activities\Models\ActivityAssociationModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
@@ -317,7 +318,9 @@ class ContactModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function notes() {
-		return $this->activities()->where( 'activity_type', 'note' );
+		return $this->activities()
+			->where( 'activity_type', 'note' )
+			->with( ActivityModel::morph_append_relations() );
 	}
 
 	/**
@@ -325,10 +328,15 @@ class ContactModel extends Model {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function activities() {
-		return $this->hasMany( ActivityModel::class, 'contact_id', 'id' );
+		return $this->belongsToMany(
+			ActivityModel::class,
+			'doublescale_activity_associations',
+			'entity_id',
+			'activity_id'
+		)->wherePivot( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT );
 	}
 
 	/**
@@ -1370,10 +1378,21 @@ class ContactModel extends Model {
 		$dispatcher->listen(
 			"eloquent.deleting: {$model_name}",
 			function ( $contact ) {
-				// Delete note activities for this contact
-				ActivityModel::where( 'contact_id', $contact->id )
+				// Delete note activities for this contact (via polymorphic associations).
+				ActivityModel::query()
+					->whereHas(
+						'associations',
+						function ( $q ) use ( $contact ) {
+							$q->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+								->where( 'entity_id', $contact->id );
+						}
+					)
 					->where( 'activity_type', 'note' )
 					->delete();
+
+				// Remove contact linkage from remaining activities (emails, calls, etc.).
+				ActivityAssociationModel::delete_for_contact( (int) $contact->id );
+
 				$contact->automation_contacts()->delete();
 			}
 		);

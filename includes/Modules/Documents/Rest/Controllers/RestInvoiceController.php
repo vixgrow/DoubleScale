@@ -511,6 +511,7 @@ class RestInvoiceController extends RestController {
 				'user_id'       => get_current_user_id() ?: null,
 			)
 		);
+		// TODO(morph): wire proposal/invoice associations (ENTITY_TYPE_INVOICE).
 	}
 
 	/**

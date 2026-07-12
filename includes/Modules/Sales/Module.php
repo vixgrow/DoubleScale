@@ -181,6 +181,7 @@ final class Module extends AbstractModule {
 					'user_id'       => null,
 				)
 			);
+			// TODO(morph): wire proposal/invoice associations (ENTITY_TYPE_PROPOSAL / ENTITY_TYPE_INVOICE).
 		}
 
 		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );

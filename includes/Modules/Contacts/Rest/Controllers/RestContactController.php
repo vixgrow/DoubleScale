@@ -1742,7 +1742,7 @@ class RestContactController extends RestController {
 							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
 						'activity'                    => function ( $query ) {
-							$query->select( 'id', 'contact_id', 'activity_type', 'data', 'user_id', 'created_at' );
+							$query->select( 'id', 'activity_type', 'data', 'user_id', 'created_at' );
 						}, // Include activity content for individual messages (email_sent, sms_sent, whatsapp_sent)
 						'communication_tracking_meta' => function ( $query ) {
 							$query->select( 'id', 'communication_tracking_id', 'meta_key', 'meta_value' );
@@ -2385,7 +2385,8 @@ class RestContactController extends RestController {
 
 			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$activities = ActivityModel::notes()
+			$activities = ActivityModel::withMorphAppends()
+				->notes()
 				->forContact( $contact_id )
 				->orderBy( 'created_at', 'desc' )
 				->paginate( $per_page, array( '*' ), 'page', $page );

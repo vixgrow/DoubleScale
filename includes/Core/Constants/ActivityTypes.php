@@ -41,6 +41,8 @@ class ActivityTypes {
 	const STAGE_CHANGED  = 'stage_changed';
 	const VALUE_CHANGED  = 'value_changed';
 	const STATUS_CHANGED = 'status_changed';
+	const FILE_ATTACHED  = 'file_attached';
+	const FILE_REMOVED   = 'file_removed';
 
 	/**
 	 * Authentication activity types
@@ -94,6 +96,8 @@ class ActivityTypes {
 			self::STAGE_CHANGED,
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
+			self::FILE_ATTACHED,
+			self::FILE_REMOVED,
 			self::LOGGED_IN,
 			self::LOGGED_OUT,
 			self::BOOKING_SCHEDULED,
@@ -142,6 +146,8 @@ class ActivityTypes {
 			self::STAGE_CHANGED,
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
+			self::FILE_ATTACHED,
+			self::FILE_REMOVED,
 			self::SUPPORT_EVENT,
 			self::TASK_EVENT,
 		);
@@ -236,6 +242,10 @@ class ActivityTypes {
 			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
 			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'doublescale' ), $user_name ),
+			/* translators: %s: user name */
+			self::FILE_ATTACHED     => sprintf( __( '%s attached a file', 'doublescale' ), $user_name ),
+			/* translators: %s: user name */
+			self::FILE_REMOVED      => sprintf( __( '%s removed a file attachment', 'doublescale' ), $user_name ),
 			self::LOGGED_IN         => __( 'Contact logged in', 'doublescale' ),
 			self::LOGGED_OUT        => __( 'Contact logged out', 'doublescale' ),
 			/* translators: %s: user name */
@@ -275,6 +285,8 @@ class ActivityTypes {
 			self::STAGE_CHANGED       => __( 'Stage Changed', 'doublescale' ),
 			self::VALUE_CHANGED       => __( 'Value Changed', 'doublescale' ),
 			self::STATUS_CHANGED      => __( 'Status Changed', 'doublescale' ),
+			self::FILE_ATTACHED       => __( 'File Attached', 'doublescale' ),
+			self::FILE_REMOVED        => __( 'File Removed', 'doublescale' ),
 			self::LOGGED_IN           => __( 'Logged In', 'doublescale' ),
 			self::LOGGED_OUT          => __( 'Logged Out', 'doublescale' ),
 			self::BOOKING_SCHEDULED   => __( 'Booking Scheduled', 'doublescale' ),

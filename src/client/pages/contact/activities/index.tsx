@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  * External dependencies
  */
 import { format } from 'date-fns';
-import { User, ArrowRight, Eye, MousePointerClick, Globe, XCircle, RotateCw, Clock, Ban } from 'lucide-react';
+import { User, ArrowRight, Eye, MousePointerClick, Globe, XCircle, RotateCw, Clock, Ban, Paperclip } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -78,6 +78,8 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     email_received: <EmailActivityIcon />,
     call_logged: <CallActivityIcon width={16} height={16} />,
     meeting_scheduled: <MeetingActivityIcon color="#CB5301" />,
+    file_attached: <Paperclip className="h-4 w-4 text-primary" />,
+    file_removed: <Paperclip className="h-4 w-4 text-muted-foreground" />,
     sms_sent: <SMSIcon />,
     sms_received: <SMSIcon />,
     whatsapp_sent: <WhatsAppIcon />,
@@ -121,6 +123,9 @@ const activityBadgeClass: Record<string, string> = {
     call_logged: 'border-primary/40 bg-primary/10 text-primary',
     meeting_scheduled:
         'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    file_attached: 'border-primary/40 bg-primary/10 text-primary',
+    file_removed:
+        'border-rose-500/40 bg-rose-500/10 text-rose-900 dark:text-rose-100',
     sms_sent: 'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
     sms_received:
         'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
@@ -709,6 +714,29 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             </span>
                         </div>
                     )
+                );
+
+            case 'file_attached':
+            case 'file_removed':
+                return (
+                    activity.data?.file_name ? (
+                        <div className="text-sm text-muted-foreground">
+                            {activity.data.url ? (
+                                <a
+                                    href={activity.data.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-medium text-[#458DC7] hover:underline"
+                                >
+                                    {activity.data.file_name}
+                                </a>
+                            ) : (
+                                <span className="font-medium text-foreground">
+                                    {activity.data.file_name}
+                                </span>
+                            )}
+                        </div>
+                    ) : null
                 );
 
             default:

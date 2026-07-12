@@ -51,6 +51,11 @@ final class Module extends AbstractModule {
 			ImportExport\Importers\Manager::class,
 			static fn() => ImportExport\Importers\Manager::instance()
 		);
+
+		$container->singleton(
+			Services\ContactAttachmentActivityLogger::class,
+			static fn() => new Services\ContactAttachmentActivityLogger()
+		);
 	}
 
 	public function restControllers(): array {
@@ -67,6 +72,7 @@ final class Module extends AbstractModule {
 
 		$container->get( Filters\FiltersManager::class );
 		$container->get( ImportExport\Importers\Manager::class );
+		$container->get( Services\ContactAttachmentActivityLogger::class )->register();
 
 		add_action(
 			'doublescale_ready',

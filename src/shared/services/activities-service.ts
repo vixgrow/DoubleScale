@@ -48,6 +48,8 @@ export const ACTIVITY_TYPES = {
 	STAGE_CHANGED: 'stage_changed',
 	VALUE_CHANGED: 'value_changed',
 	STATUS_CHANGED: 'status_changed',
+	FILE_ATTACHED: 'file_attached',
+	FILE_REMOVED: 'file_removed',
 
 	// Authentication activities
 	LOGGED_IN: 'logged_in',

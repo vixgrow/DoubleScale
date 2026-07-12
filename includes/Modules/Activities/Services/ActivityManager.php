@@ -1697,6 +1697,16 @@ final class ActivityManager {
 			return $message;
 		}
 
+		if ( ActivityTypes::FILE_ATTACHED === $type || ActivityTypes::FILE_REMOVED === $type ) {
+			$file_name = isset( $data['file_name'] ) ? (string) $data['file_name'] : '';
+			$base      = ActivityTypes::get_activity_message( $type, $user_name );
+			if ( '' !== $file_name ) {
+				/* translators: 1: activity message, 2: file name */
+				return sprintf( __( '%1$s: %2$s', 'doublescale' ), $base, $file_name );
+			}
+			return $base;
+		}
+
 		return ActivityTypes::get_activity_message( $type, $user_name );
 	}
 

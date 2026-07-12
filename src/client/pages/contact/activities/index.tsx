@@ -19,11 +19,16 @@ import timezone from 'dayjs/plugin/timezone';
  * Internal dependencies
  */
 import ActivitiesFilters from './ActivitiesFilters';
+import type { ActivityTimelineTypeFilter } from './ActivitiesFilters';
 import {
     ActivitiesService,
     ACTIVITY_TYPES,
     type TimelineItem,
 } from '@doublescale/services/activities-service';
+import {
+    filterTimelineByType,
+    resolveTypeFilterParam,
+} from '@doublescale/shared/lib/activity-timeline-type-filter';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -234,32 +239,54 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [isLoadingEmailAction, setIsLoadingEmailAction] = useState(false);
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<{
+        activity_type: ActivityTimelineTypeFilter;
+        sort_by: string;
+        sort_order: string;
+        date_from: string;
+        date_to: string;
+    }>({
+        activity_type: 'all',
         sort_by: 'activity_date',
         sort_order: 'desc',
         date_from: '',
         date_to: '',
     });
 
+    const clearFilters = () => {
+        setFilters({
+            activity_type: 'all',
+            sort_by: 'activity_date',
+            sort_order: 'desc',
+            date_from: '',
+            date_to: '',
+        });
+    };
 
     const fetchActivities = async () => {
         if (!contact_id) return;
 
         setLoading(true);
         try {
-            const { items: serviceItems } = await ActivitiesService.fetch({
+            const params = {
                 contact_id,
                 per_page: 100,
                 page: 1,
+                sort_by: filters.sort_by as 'created_at' | 'updated_at' | 'activity_date',
+                sort_order: filters.sort_order as 'asc' | 'desc',
                 date_from: filters.date_from || undefined,
                 date_to: filters.date_to || undefined,
-            });
+            };
+
+            const activityTypeParam = resolveTypeFilterParam(filters.activity_type);
+
+            const { items: serviceItems } = await ActivitiesService.fetch(
+                params,
+                activityTypeParam
+            );
 
             setTimelineItems(
-                serviceItems.filter(
-                    (item) =>
-                        item.type !== 'task' && item.icon_type !== 'task_event'
-                )
+                filterTimelineByType(serviceItems, filters.activity_type)
             );
         } catch (error) {
             console.error('Failed to fetch timeline:', error);
@@ -274,14 +301,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         fetchActivities();
     }, [contact_id]);
 
-    // Auto-apply filters when date range changes
-    useEffect(() => {
-        // Only fetch if contact_id is available and we're not in initial mount
-        // The initial mount is handled by the contact_id useEffect
-        if (contact_id) {
-            fetchActivities();
-        }
-    }, [filters.date_from, filters.date_to]);
+    const applyFilters = () => {
+        fetchActivities();
+    };
 
     // Edit/Delete handlers
     const handleEditActivity = async (activity: Activity) => {
@@ -750,21 +772,24 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
     return (
         <div className="activity-container">
-            <div className="flex justify-between items-center max-sm:flex-col max-sm:gap-4">
-                <h2 className="text-2xl font-semibold">
-                    {__('Activities', 'doublescale')}
-                </h2>
-                <ActivitiesFilters
-                    filters={filters}
-                    onDateChange={(from, to) =>
-                        setFilters((prev) => ({
-                            ...prev,
-                            date_from: from,
-                            date_to: to,
-                        }))
-                    }
-                />
-            </div>
+            <h2 className="mb-4 text-2xl font-semibold">
+                {__('Activities', 'doublescale')}
+            </h2>
+            <ActivitiesFilters
+                filters={filters}
+                onChange={(key, value) =>
+                    setFilters((prev) => ({ ...prev, [key]: value }))
+                }
+                onDateChange={(from, to) =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        date_from: from,
+                        date_to: to,
+                    }))
+                }
+                onClear={clearFilters}
+                onApply={applyFilters}
+            />
             <div className="activities-list mt-4">
                 {loading ? (
                     <div className="space-y-6">

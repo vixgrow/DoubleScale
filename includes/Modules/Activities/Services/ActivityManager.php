@@ -470,6 +470,7 @@ final class ActivityManager {
 							array(
 								\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL,
 								\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK,
+								\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT,
 							)
 						);
 					}
@@ -483,6 +484,14 @@ final class ActivityManager {
 			(int) $filters['entity_type'] !== \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK
 		) {
 			$query->where( 'activity_type', '!=', ActivityTypes::TASK_EVENT );
+		}
+
+		// Project audit rows only belong on the project activity feed.
+		if (
+			empty( $filters['entity_type'] ) ||
+			(int) $filters['entity_type'] !== \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT
+		) {
+			$query->where( 'activity_type', '!=', ActivityTypes::PROJECT_EVENT );
 		}
 
 		// Filter by activity type.
@@ -1310,10 +1319,11 @@ final class ActivityManager {
 		// Task audit rows (task_event) belong on the task activity feed, not contact/deal timelines.
 		if ( empty( $filters['entity_type'] ) ) {
 			$deal_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
-			$task_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK;
+			$task_type     = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_TASK;
+			$project_type  = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT;
 			$where_clauses[] = "NOT EXISTS (
 				SELECT 1 FROM {$associations_table} excl
-				WHERE excl.activity_id = a.id AND excl.entity_type IN ({$deal_type}, {$task_type})
+				WHERE excl.activity_id = a.id AND excl.entity_type IN ({$deal_type}, {$task_type}, {$project_type})
 			)";
 		}
 
@@ -1346,6 +1356,18 @@ final class ActivityManager {
 			$where_clauses[] = $wpdb->prepare(
 				'a.activity_type != %s',
 				ActivityTypes::TASK_EVENT
+			);
+		}
+
+		// Project audit rows only belong on the project activity feed.
+		$project_entity_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT;
+		if (
+			empty( $filters['entity_type'] ) ||
+			(int) $filters['entity_type'] !== $project_entity_type
+		) {
+			$where_clauses[] = $wpdb->prepare(
+				'a.activity_type != %s',
+				ActivityTypes::PROJECT_EVENT
 			);
 		}
 

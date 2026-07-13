@@ -64,6 +64,7 @@ import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { RocketIcon } from '@/components/icons';
+import { FolderKanban } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -481,6 +482,53 @@ registerAdminPage('deal-detail', {
 		/>
 	),
 	label: __('Deal Details', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+registerAdminPage('projects', {
+	path: 'projects',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Projects', 'doublescale')}
+			description={__(
+				'Manage projects with kanban boards, tasks, and linked invoices with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Kanban project board', 'doublescale'),
+				__('Deal to project conversion', 'doublescale'),
+				__('Tasks on projects', 'doublescale'),
+				__('Invoice totals & financials', 'doublescale'),
+				__('Custom fields', 'doublescale'),
+			]}
+		/>
+	),
+	label: __('Projects', 'doublescale'),
+	icon: <FolderKanban size={24} />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_sales_rep',
+	],
+});
+
+registerAdminPage('project-detail', {
+	path: 'projects/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Project Details', 'doublescale')}
+			description={__(
+				'View and manage project details with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Project Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: [
 		'doublescale_crm_manager',

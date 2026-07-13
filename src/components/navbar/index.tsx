@@ -95,6 +95,7 @@ const CRM_NAV_ITEM_ORDER: Record<string, number> = {
 	booking: 2,
 	support: 3,
 	tasks: 4,
+	projects: 5,
 };
 
 const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
@@ -113,6 +114,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	booking: 'crm',
 	support: 'crm',
 	tasks: 'crm',
+	projects: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
 	forms: 'marketing',
@@ -148,6 +150,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	sales: 'sales',
 	tasks: 'tasks',
+	projects: 'projects',
 	forms: 'forms',
 	support: 'support',
 };
@@ -176,6 +179,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/payments/:id': 'documents',
 	'sales/settings': 'sales',
 	tasks: 'tasks',
+	projects: 'projects',
+	'projects/:id': 'projects',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
 	forms: 'forms',

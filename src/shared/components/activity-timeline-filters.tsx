@@ -27,6 +27,12 @@ interface ActivityTimelineFiltersProps {
 	onApply: () => void;
 	/** When true, only show the Type dropdown (task activity tab). */
 	typeOnly?: boolean;
+	/** Label for the system-events filter option (defaults to Tasks). */
+	systemEventsLabel?: string;
+	/** Value for the system-events filter option (defaults to task). */
+	systemEventsType?: ActivityTimelineTypeFilter;
+	/** When false, hide call/email/meeting filters (e.g. project activity). */
+	showCommunicationFilters?: boolean;
 	/** Raise portaled selects above the task detail dialog (z-index 1800001). */
 	nestedInTaskDialog?: boolean;
 }
@@ -38,6 +44,9 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 	onClear,
 	onApply,
 	typeOnly = false,
+	systemEventsLabel = __('Tasks', 'doublescale'),
+	systemEventsType = 'task',
+	showCommunicationFilters = true,
 	nestedInTaskDialog = false,
 }) => {
 	const taskDialogSelectProps = nestedInTaskDialog
@@ -66,21 +75,25 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 							<SelectItem value="all">
 								{__('All types', 'doublescale')}
 							</SelectItem>
-							<SelectItem value="task">
-								{__('Tasks', 'doublescale')}
+							<SelectItem value={systemEventsType}>
+								{systemEventsLabel}
 							</SelectItem>
 							<SelectItem value="note">
 								{__('Notes', 'doublescale')}
 							</SelectItem>
-							<SelectItem value="call_logged">
-								{__('Calls', 'doublescale')}
-							</SelectItem>
-							<SelectItem value="email_sent">
-								{__('Emails', 'doublescale')}
-							</SelectItem>
-							<SelectItem value="meeting_scheduled">
-								{__('Meetings', 'doublescale')}
-							</SelectItem>
+							{showCommunicationFilters ? (
+								<>
+									<SelectItem value="call_logged">
+										{__('Calls', 'doublescale')}
+									</SelectItem>
+									<SelectItem value="email_sent">
+										{__('Emails', 'doublescale')}
+									</SelectItem>
+									<SelectItem value="meeting_scheduled">
+										{__('Meetings', 'doublescale')}
+									</SelectItem>
+								</>
+							) : null}
 							<SelectItem value="files">
 								{__('Files', 'doublescale')}
 							</SelectItem>

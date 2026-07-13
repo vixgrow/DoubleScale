@@ -38,6 +38,8 @@ class ActivityTypes {
 	 */
 	const CREATED        = 'created';
 	const DEAL_CREATED   = 'deal_created';
+	const PROJECT_CREATED = 'project_created';
+	const PROJECT_STATUS_CHANGED = 'project_status_changed';
 	const STAGE_CHANGED  = 'stage_changed';
 	const VALUE_CHANGED  = 'value_changed';
 	const STATUS_CHANGED = 'status_changed';
@@ -59,6 +61,7 @@ class ActivityTypes {
 	const SUPPORT_NOTE  = 'support_note';  // Internal-only agent note
 	const SUPPORT_EVENT = 'support_event'; // System-generated activity (status change, assignment, etc.)
 	const TASK_EVENT      = 'task_event';  // System-generated task/subtask lifecycle audit row
+	const PROJECT_EVENT   = 'project_event'; // System-generated project lifecycle audit row
 
 	/**
 	 * Booking lifecycle types — virtual rows projected from `doublescale_bookings`
@@ -93,6 +96,8 @@ class ActivityTypes {
 			self::WHATSAPP_RECEIVED,
 			self::CREATED,
 			self::DEAL_CREATED,
+			self::PROJECT_CREATED,
+			self::PROJECT_STATUS_CHANGED,
 			self::STAGE_CHANGED,
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
@@ -111,6 +116,7 @@ class ActivityTypes {
 			self::SUPPORT_NOTE,
 			self::SUPPORT_EVENT,
 			self::TASK_EVENT,
+			self::PROJECT_EVENT,
 		);
 	}
 
@@ -143,6 +149,8 @@ class ActivityTypes {
 		return array(
 			self::CREATED,
 			self::DEAL_CREATED,
+			self::PROJECT_CREATED,
+			self::PROJECT_STATUS_CHANGED,
 			self::STAGE_CHANGED,
 			self::VALUE_CHANGED,
 			self::STATUS_CHANGED,
@@ -150,6 +158,7 @@ class ActivityTypes {
 			self::FILE_REMOVED,
 			self::SUPPORT_EVENT,
 			self::TASK_EVENT,
+			self::PROJECT_EVENT,
 		);
 	}
 
@@ -237,6 +246,10 @@ class ActivityTypes {
 			/* translators: %s: user name */
 			self::DEAL_CREATED      => sprintf( __( '%s created this record', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
+			self::PROJECT_CREATED   => sprintf( __( '%s created this project', 'doublescale' ), $user_name ),
+			/* translators: %s: user name */
+			self::PROJECT_STATUS_CHANGED => sprintf( __( '%s changed the project status', 'doublescale' ), $user_name ),
+			/* translators: %s: user name */
 			self::STAGE_CHANGED     => sprintf( __( '%s changed the stage', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
 			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'doublescale' ), $user_name ),
@@ -254,6 +267,7 @@ class ActivityTypes {
 			self::SUPPORT_NOTE      => sprintf( __( '%s added an internal note', 'doublescale' ), $user_name ),
 			self::SUPPORT_EVENT     => __( 'Ticket activity', 'doublescale' ),
 			self::TASK_EVENT        => __( 'Task activity', 'doublescale' ),
+			self::PROJECT_EVENT     => __( 'Project activity', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
@@ -282,6 +296,8 @@ class ActivityTypes {
 			self::WHATSAPP_RECEIVED   => __( 'Whatsapp Received', 'doublescale' ),
 			self::CREATED             => __( 'Created', 'doublescale' ),
 			self::DEAL_CREATED        => __( 'Deal Created', 'doublescale' ),
+			self::PROJECT_CREATED     => __( 'Project Created', 'doublescale' ),
+			self::PROJECT_STATUS_CHANGED => __( 'Project Status Changed', 'doublescale' ),
 			self::STAGE_CHANGED       => __( 'Stage Changed', 'doublescale' ),
 			self::VALUE_CHANGED       => __( 'Value Changed', 'doublescale' ),
 			self::STATUS_CHANGED      => __( 'Status Changed', 'doublescale' ),
@@ -300,6 +316,7 @@ class ActivityTypes {
 			self::SUPPORT_NOTE        => __( 'Ticket Note', 'doublescale' ),
 			self::SUPPORT_EVENT       => __( 'Ticket Activity', 'doublescale' ),
 			self::TASK_EVENT          => __( 'Task Activity', 'doublescale' ),
+			self::PROJECT_EVENT       => __( 'Project Activity', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

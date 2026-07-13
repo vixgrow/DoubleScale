@@ -3,6 +3,7 @@ import type { TimelineItem } from '@doublescale/services/activities-service';
 export type ActivityTimelineTypeFilter =
 	| 'all'
 	| 'task'
+	| 'project'
 	| 'note'
 	| 'call_logged'
 	| 'email_sent'

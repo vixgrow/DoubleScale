@@ -38,3 +38,7 @@ export { default as InvoiceForm } from './invoice-form';
 export { InvoiceFormDialog } from './invoice-form-dialog';
 export type { InvoiceFormProps } from './invoice-form';
 export type { InvoiceFormDialogProps } from './invoice-form-dialog';
+export { default as ProposalForm } from './proposal-form';
+export { ProposalFormDialog } from './proposal-form-dialog';
+export type { ProposalFormProps } from './proposal-form';
+export type { ProposalFormDialogProps } from './proposal-form-dialog';

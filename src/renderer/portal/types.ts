@@ -142,6 +142,30 @@ export interface PortalTimelineResponse {
 	total: number;
 }
 
+export interface PortalProjectStatus {
+	name: string;
+	is_completed: boolean;
+}
+
+export interface PortalProjectFinancials {
+	total: number;
+	paid: number;
+	due: number;
+}
+
+export interface PortalProject {
+	id: number;
+	title: string;
+	description: string;
+	status: PortalProjectStatus | null;
+	budget: number | null;
+	currency: string;
+	start_date: string | null;
+	due_date: string | null;
+	created_at: string;
+	financials?: PortalProjectFinancials;
+}
+
 // The calendar event model now lives in the shared foundation layer so the admin
 // staff calendar can reuse the same grid/chip/colors. The portal feed emits only
 // booking/invoice/proposal and never the staff-facing extras, but the shape is a

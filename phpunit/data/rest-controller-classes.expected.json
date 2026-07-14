@@ -59,6 +59,7 @@
     "RestPortalDocumentsController",
     "RestPortalPageController",
     "RestPortalPaymentsController",
+    "RestPortalProjectController",
     "RestPortalTimelineController",
     "RestProjectController",
     "RestProjectStatusController",

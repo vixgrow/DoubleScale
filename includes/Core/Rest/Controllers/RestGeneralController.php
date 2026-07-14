@@ -94,6 +94,19 @@ class RestGeneralController extends RestController {
 	}
 
 	/**
+	 * Resolves ProjectModel FQCN when the Pro Projects module is installed.
+	 *
+	 * @return class-string|null
+	 */
+	private function resolve_project_model_class(): ?string {
+		if ( class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' ) ) {
+			return '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel';
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get dashboard
 	 *
 	 * @since 1.0.0
@@ -161,6 +174,12 @@ class RestGeneralController extends RestController {
 			$deals_won_value  = (float) $deal_model::where( 'status', 'won' )->sum( 'value' );
 		}
 
+		$projects = 0;
+		$project_model = $this->resolve_project_model_class();
+		if ( $project_model && $this->dashboard_aggregate_allowed( 'projects' ) ) {
+			$projects = $project_model::count();
+		}
+
 		$response = array(
 			'total_contacts'               => $total_contacts,
 			'total_sent_emails'            => $total_sent_emails,
@@ -171,6 +190,7 @@ class RestGeneralController extends RestController {
 			'deals'                        => $deals,
 			'deals_closed_won'             => $deals_closed_won,
 			'deals_won_value'              => $deals_won_value,
+			'projects'                     => $projects,
 			'recent_contacts'              => $recent_contacts,
 			'recent_unsubscribed_contacts' => $recent_unsubscribed_contacts,
 			'top_campaigns'                => $top_campaigns,

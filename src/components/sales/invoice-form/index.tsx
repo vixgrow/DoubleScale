@@ -520,10 +520,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		</PanelLayout>
 	);
 
+	const dialogScrollShell = (children: React.ReactNode) => (
+		<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
+			<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-2 sm:p-4">
+				{children}
+			</div>
+		</div>
+	);
+
 	if (!isNew && loading) {
 		if (isDialog) {
-			return (
-				<div className="p-6 text-muted-foreground">
+			return dialogScrollShell(
+				<div className="p-2 text-muted-foreground">
 					{__('Loading…', 'doublescale')}
 				</div>
 			);
@@ -551,7 +559,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			/>
 		);
 		if (isDialog) {
-			return <div className="p-2">{gallery}</div>;
+			return dialogScrollShell(gallery);
 		}
 		return panelShell(gallery);
 	}

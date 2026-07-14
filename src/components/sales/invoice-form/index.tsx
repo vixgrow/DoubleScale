@@ -76,6 +76,8 @@ import {
 export interface InvoiceFormProps {
 	invoiceId?: number | null;
 	initialContactId?: number;
+	initialLineItems?: LineItem[];
+	initialCurrency?: string;
 	mode?: 'page' | 'dialog';
 	onClose?: () => void;
 	onSaved?: (invoiceId: number) => void;
@@ -106,6 +108,8 @@ const contactOptionLabel = (contact: ContactSummary): string => {
 const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	invoiceId: invoiceIdProp,
 	initialContactId,
+	initialLineItems,
+	initialCurrency,
 	mode = 'page',
 	onClose,
 	onSaved,
@@ -146,7 +150,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [invoiceDate, setInvoiceDate] = useState(today());
 	const [dueDate, setDueDate] = useState(monthFromToday());
-	const [currency, setCurrency] = useState('USD');
+	const [currency, setCurrency] = useState(initialCurrency ?? 'USD');
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
 	const [adjustment, setAdjustment] = useState(0);
@@ -159,7 +163,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [terms, setTerms] = useState('');
 	const [saleAgentUserId, setSaleAgentUserId] = useState<number | null>(null);
 	const [tagIds, setTagIds] = useState<number[]>([]);
-	const [lineItems, setLineItems] = useState<LineItem[]>([]);
+	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
+		isNew && initialLineItems?.length ? initialLineItems : []
+	);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const prefilledContactFromUrlRef = useRef(false);

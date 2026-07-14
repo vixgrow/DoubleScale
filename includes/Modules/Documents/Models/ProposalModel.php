@@ -40,6 +40,8 @@ class ProposalModel extends Model {
 		'hash',
 		'subject',
 		'status',
+		'template',
+		'template_color',
 		'contact_id',
 		'assigned_user_id',
 		'date',
@@ -75,6 +77,7 @@ class ProposalModel extends Model {
 	 * @var array<string, string>
 	 */
 	protected $casts = array(
+		'template'        => 'int',
 		'tag_ids'         => 'array',
 		'line_items'      => 'array',
 		'discount_value'  => 'float',

@@ -9,6 +9,8 @@ namespace DoubleScale\Modules\Documents\Rest;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
@@ -32,6 +34,8 @@ final class ProposalShaper {
 			'hash'             => (string) $proposal->hash,
 			'subject'          => (string) $proposal->subject,
 			'status'           => (string) $proposal->status,
+			'template'         => DocumentTemplate::normalize( $proposal->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'   => DocumentTemplateColor::normalize( $proposal->template_color ?? null ),
 			'contact_id'       => (int) $proposal->contact_id,
 			'assigned_user_id' => $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : null,
 			'date'             => $proposal->date,
@@ -101,6 +105,8 @@ final class ProposalShaper {
 			'proposal_number' => (string) $proposal->proposal_number,
 			'subject'         => (string) $proposal->subject,
 			'status'          => (string) $proposal->status,
+			'template'        => DocumentTemplate::normalize( $proposal->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'  => DocumentTemplateColor::normalize( $proposal->template_color ?? null ),
 			'date'            => $proposal->date,
 			'open_till'       => $proposal->open_till,
 			'currency'        => (string) $proposal->currency,

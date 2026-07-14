@@ -14,6 +14,8 @@ export interface PublicProposal {
 	proposal_number: string;
 	subject: string;
 	status: ProposalStatus;
+	template?: number;
+	template_color?: string | null;
 	date: string | null;
 	open_till: string | null;
 	currency: string;

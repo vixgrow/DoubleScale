@@ -20,7 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { LineItemsEditor, SendDocumentDialog, ApprovalStatusBanner, computeLineItemsTotals } from '@/components/sales';
+import { LineItemsEditor, SendDocumentDialog, ApprovalStatusBanner, computeLineItemsTotals, ProposalDocumentPreview } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	canSubmitForApproval,
@@ -47,8 +47,19 @@ import {
 	useProposal,
 	useSalesSettings,
 } from '@/hooks/sales';
-import type { ContactSummary, LineItem } from '@/types/sales';
+import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
 import { CURRENCIES, DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
+import {
+	DesignPickerRow,
+	TemplateGallery,
+} from '@/components/sales/document-templates/template-gallery';
+import { normalizeTemplateColor } from '@/components/sales/document-templates/color-presets';
+import { TemplateStyleEditor } from '@/components/sales/document-templates/template-style-editor';
+import {
+	DEFAULT_TEMPLATE_ID,
+	getTemplateMeta,
+	normalizeTemplateId,
+} from '@/components/sales/document-templates/registry';
 
 const selectClass =
 	'w-full border !border-border !rounded-lg px-3 py-2 text-sm bg-background';
@@ -97,6 +108,9 @@ const ProposalEdit: React.FC = () => {
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
 	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [lineItems, setLineItems] = useState<LineItem[]>([]);
+	const [template, setTemplate] = useState(DEFAULT_TEMPLATE_ID);
+	const [templateColor, setTemplateColor] = useState<string | null>(null);
+	const [templatePicked, setTemplatePicked] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const hydratedContactIdRef = useRef<number | null>(null);
@@ -201,7 +215,21 @@ const ProposalEdit: React.FC = () => {
 		);
 		hydratedContactIdRef.current = existing.contact_id ?? null;
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
+		setTemplate(normalizeTemplateId(existing.template));
+		setTemplateColor(normalizeTemplateColor(existing.template_color));
+		setTemplatePicked(true);
 	}, [existing]);
+
+	useEffect(() => {
+		if (!isNew || templatePicked || !salesSettings) {
+			return;
+		}
+		setTemplate(
+			normalizeTemplateId(
+				salesSettings.default_proposal_template ?? DEFAULT_TEMPLATE_ID
+			)
+		);
+	}, [isNew, templatePicked, salesSettings]);
 
 	const buildPayload = () => ({
 		subject: subject.trim(),
@@ -224,6 +252,8 @@ const ProposalEdit: React.FC = () => {
 		assigned_user_id: assignedUserId,
 		tag_ids: tagIds,
 		line_items: lineItems,
+		template,
+		template_color: templateColor,
 	});
 
 	const validateForm = (): boolean => {
@@ -396,6 +426,22 @@ const ProposalEdit: React.FC = () => {
 		);
 	}
 
+	if (isNew && !templatePicked) {
+		return panelShell(
+			<TemplateGallery
+				docType="proposal"
+				value={template}
+				colorValue={templateColor}
+				onSelect={({ templateId, templateColor: color }) => {
+					setTemplate(templateId);
+					setTemplateColor(color);
+					setTemplatePicked(true);
+				}}
+				onCancel={handleClose}
+			/>
+		);
+	}
+
 	return panelShell(
 		<div className="space-y-6">
 			<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
@@ -406,6 +452,82 @@ const ProposalEdit: React.FC = () => {
 				approval={approval}
 				showReapprovalWarning={showReapprovalWarning}
 			/>
+
+			<DesignPickerRow
+				docType="proposal"
+				templateId={template}
+				templateColor={templateColor}
+				disabled={fieldsLocked}
+				onChange={({ templateId, templateColor: color }) => {
+					setTemplate(templateId);
+					setTemplateColor(color);
+				}}
+			/>
+
+			<TemplateStyleEditor
+				value={templateColor}
+				onChange={setTemplateColor}
+				compact
+			/>
+
+			{(() => {
+				const totals = computeLineItemsTotals(
+					lineItems,
+					discountType,
+					discountValue,
+					adjustment
+				);
+				const draftProposal = {
+					id: proposalId || 0,
+					proposal_number:
+						existing?.proposal_number ||
+						__('Draft', 'doublescale'),
+					hash: existing?.hash || '',
+					subject,
+					status,
+					template,
+					template_color: templateColor,
+					contact_id: contact?.id || 0,
+					assigned_user_id: assignedUserId,
+					date,
+					open_till: openTill,
+					currency,
+					discount_type: discountType,
+					discount_value: discountValue,
+					tag_ids: tagIds,
+					line_items: lineItems,
+					subtotal: totals.subtotal,
+					adjustment,
+					total: totals.total,
+					to_name: toName,
+					address,
+					city,
+					state,
+					country,
+					zip,
+					email,
+					phone,
+					created_at: existing?.created_at ?? null,
+					updated_at: existing?.updated_at ?? null,
+					contact: contact ?? null,
+				} as Proposal;
+
+				return (
+					<div className="mb-6 rounded-2xl border border-border bg-[#FAFBFC] p-4">
+						<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+							<h2 className="text-sm font-semibold text-foreground">
+								{__('Live Design Preview', 'doublescale')}
+							</h2>
+							<span className="text-xs text-muted-foreground">
+								{getTemplateMeta(template).name}
+							</span>
+						</div>
+						<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
+							<ProposalDocumentPreview proposal={draftProposal} />
+						</div>
+					</div>
+				);
+			})()}
 
 			<fieldset disabled={fieldsLocked} className="m-0 min-w-0 space-y-0 border-0 p-0">
 			<div className="grid grid-cols-1 lg:grid-cols-2 mb-6">

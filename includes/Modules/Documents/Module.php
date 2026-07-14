@@ -81,11 +81,15 @@ final class Module extends AbstractSalesChildModule {
 			$this->sales_migration_path( 'SalesProposalViewedAt.php' ),
 			$this->sales_migration_path( 'SalesProposalSignatureColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalResponseColumns.php' ),
+			$this->sales_migration_path( 'SalesProposalTemplateColumn.php' ),
+			$this->sales_migration_path( 'SalesProposalTemplateColorColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoicesTable.php' ),
 			$this->sales_migration_path( 'SalesInvoiceCustomerColumns.php' ),
 			$this->sales_migration_path( 'SalesInvoiceProposalIdColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoiceStripeColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoiceExternalPaymentRefColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTemplateColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTemplateColorColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoicePaymentsTable.php' ),
 		);
 	}

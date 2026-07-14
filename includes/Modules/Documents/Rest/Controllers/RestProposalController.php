@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Documents\Constants\DiscountType;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
@@ -25,6 +27,7 @@ use DoubleScale\Modules\Documents\Services\ProposalNotifications;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
@@ -390,6 +393,12 @@ class RestProposalController extends RestController {
 			return $payload;
 		}
 
+		if ( ! isset( $payload['template'] ) ) {
+			$payload['template'] = DocumentTemplate::normalize(
+				SalesSettings::get( 'default_proposal_template', DocumentTemplate::DEFAULT )
+			);
+		}
+
 		$discount_check = DiscountType::validate_payload( $payload );
 		if ( is_wp_error( $discount_check ) ) {
 			return $discount_check;
@@ -717,6 +726,14 @@ class RestProposalController extends RestController {
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'template', $params ) ) {
+			$payload['template'] = DocumentTemplate::normalize( $params['template'] );
+		}
+
+		if ( array_key_exists( 'template_color', $params ) ) {
+			$payload['template_color'] = DocumentTemplateColor::normalize( $params['template_color'] );
 		}
 
 		if ( isset( $payload['status'] ) && ! ProposalStatus::is_valid( $payload['status'] ) ) {

@@ -1,0 +1,163 @@
+/**
+ * Live template preview panel with sample document data.
+ */
+
+import React, { useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
+import { DocumentDesign } from './designs';
+import type { DocumentDesignDocType } from './designs/types';
+import { normalizeTemplateId } from './registry';
+
+const getCompanyFrom = (): { label: string; lines: string[] } => {
+	const cfg =
+		typeof window !== 'undefined' ? window.doublescaleConfig : undefined;
+	const name = (cfg?.blogName as string | undefined) || '';
+	const business = (
+		cfg?.initialPayload as
+			| { business?: { business_name?: string; business_address?: string } }
+			| undefined
+	)?.business;
+	const displayName = business?.business_name || name;
+	const lines = [displayName].filter(Boolean) as string[];
+	if (business?.business_address) {
+		lines.push(
+			...String(business.business_address)
+				.split('\n')
+				.map((l) => l.trim())
+				.filter(Boolean)
+		);
+	}
+	return {
+		label: __('From', 'doublescale'),
+		lines: lines.length ? lines : [__('Your Company', 'doublescale')],
+	};
+};
+
+const sampleLineItems = () => [
+	{
+		description: __('SaaS Landing page design', 'doublescale'),
+		long_description: __('Home page design including hero section', 'doublescale'),
+		qty: 1,
+		rate: 500,
+		tax: [],
+	},
+	{
+		description: __('Brand identity', 'doublescale'),
+		long_description: __('Logo and color palette', 'doublescale'),
+		qty: 1,
+		rate: 300,
+		tax: [],
+	},
+];
+
+interface TemplatePreviewPanelProps {
+	docType: DocumentDesignDocType;
+	templateId: number;
+	accentColor?: string | null;
+	className?: string;
+}
+
+export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
+	docType,
+	templateId,
+	accentColor = null,
+	className = '',
+}) => {
+	const isInvoice = docType === 'invoice';
+	const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+	const dueDate = useMemo(() => {
+		const d = new Date();
+		d.setDate(d.getDate() + 30);
+		return d.toISOString().slice(0, 10);
+	}, []);
+
+	const subtotal = 800;
+	const total = 800;
+
+	return (
+		<div
+			className={`rounded-xl border border-border bg-[#f8fafc] p-4 ${className}`}
+		>
+			<h3 className="mb-3 text-base font-semibold text-foreground">
+				{__('Template Preview', 'doublescale')}
+			</h3>
+			<div className="overflow-auto rounded-lg border border-border bg-white p-3 shadow-sm">
+				<div className="mx-auto w-full min-w-[320px] max-w-[520px] pb-2">
+					<DocumentDesign
+						template={normalizeTemplateId(templateId)}
+						accentColor={accentColor}
+						docType={docType}
+						number={
+							isInvoice
+								? __('INV-00024', 'doublescale')
+								: __('PRO-00024', 'doublescale')
+						}
+						subject={__('Sample project', 'doublescale')}
+						from={getCompanyFrom()}
+						statusBadges={[]}
+						parties={[
+							{
+								label: isInvoice
+									? __('Bill To', 'doublescale')
+									: __('To', 'doublescale'),
+								lines: [
+									__('Client Name', 'doublescale'),
+									__('123 Main Street', 'doublescale'),
+									__('client@example.com', 'doublescale'),
+								],
+							},
+						]}
+						dates={
+							isInvoice
+								? [
+										{
+											label: __('Invoice Date', 'doublescale'),
+											value: today,
+										},
+										{
+											label: __('Due Date', 'doublescale'),
+											value: dueDate,
+										},
+										{
+											label: __('Currency', 'doublescale'),
+											value: 'USD',
+										},
+									]
+								: [
+										{
+											label: __('Date', 'doublescale'),
+											value: today,
+										},
+										{
+											label: __('Open Till', 'doublescale'),
+											value: dueDate,
+										},
+										{
+											label: __('Currency', 'doublescale'),
+											value: 'USD',
+										},
+									]
+						}
+						lineItems={sampleLineItems()}
+						currency="USD"
+						showTax={isInvoice}
+						subtotal={subtotal}
+						totalTax={0}
+						discountType="none"
+						discountValue={0}
+						adjustment={0}
+						total={total}
+						amountPaid={isInvoice ? 0 : undefined}
+						sections={[
+							{
+								title: __('Note', 'doublescale'),
+								body: __('Thank you for your business.', 'doublescale'),
+							},
+						]}
+					/>
+				</div>
+			</div>
+		</div>
+	);
+};

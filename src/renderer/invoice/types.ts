@@ -20,6 +20,8 @@ export interface PublicPayment {
 export interface PublicInvoice {
 	invoice_number: string;
 	status: InvoiceStatus;
+	template?: number;
+	template_color?: string | null;
 	invoice_date: string | null;
 	due_date: string | null;
 	currency: string;

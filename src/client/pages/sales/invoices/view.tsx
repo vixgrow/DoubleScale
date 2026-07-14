@@ -40,11 +40,13 @@ import {
 	InvoiceFormDialog,
 	InvoiceOnlinePayment,
 	InvoiceStatusPill,
+	InvoiceDocumentPreview,
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
 	ApprovalStatusBanner,
 } from '@/components/sales';
+import { getTemplateMeta } from '@/components/sales/document-templates/registry';
 import {
 	computeAmount,
 	formatSalesAmount,
@@ -580,6 +582,21 @@ const InvoiceView: React.FC = () => {
 						>
 							<DeleteIcon width={24} height={24} />
 						</Button>
+					</div>
+				</div>
+
+				<div className="rounded-2xl border border-border bg-white p-4 md:p-6">
+					<div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+						<h2 className="text-base font-semibold text-foreground">
+							{__('Document Preview', 'doublescale')}
+						</h2>
+						<span className="text-sm text-muted-foreground">
+							{__('Design:', 'doublescale')}{' '}
+							{getTemplateMeta(invoice.template).name}
+						</span>
+					</div>
+					<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
+						<InvoiceDocumentPreview invoice={invoice} />
 					</div>
 				</div>
 

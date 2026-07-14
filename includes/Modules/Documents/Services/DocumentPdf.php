@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Documents\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 
@@ -34,6 +35,7 @@ final class DocumentPdf {
 		ob_start();
 		$document = $shaped;
 		$doc_type = $type;
+		$design   = DocumentTemplate::normalize( $shaped['template'] ?? DocumentTemplate::DEFAULT );
 		include __DIR__ . '/templates/document-pdf.php';
 		return (string) ob_get_clean();
 	}

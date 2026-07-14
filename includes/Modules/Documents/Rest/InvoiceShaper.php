@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\PaymentModel;
 use DoubleScale\Core\Payment\GatewayManager;
@@ -33,6 +35,8 @@ class InvoiceShaper {
 			'invoice_number'        => (string) $invoice->invoice_number,
 			'hash'                  => (string) $invoice->hash,
 			'status'                => (string) $invoice->status,
+			'template'              => DocumentTemplate::normalize( $invoice->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'        => DocumentTemplateColor::normalize( $invoice->template_color ?? null ),
 			'contact_id'            => (int) $invoice->contact_id,
 			'proposal_id'           => $invoice->proposal_id ? (int) $invoice->proposal_id : null,
 			'sale_agent_user_id'    => $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : null,
@@ -98,6 +102,8 @@ class InvoiceShaper {
 		return array(
 			'invoice_number'        => (string) $invoice->invoice_number,
 			'status'                => (string) $invoice->status,
+			'template'              => DocumentTemplate::normalize( $invoice->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'        => DocumentTemplateColor::normalize( $invoice->template_color ?? null ),
 			'invoice_date'          => $invoice->invoice_date,
 			'due_date'              => $invoice->due_date,
 			'currency'              => (string) $invoice->currency,

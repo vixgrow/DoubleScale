@@ -121,6 +121,8 @@ export interface Proposal {
 	hash: string;
 	subject: string;
 	status: ProposalStatus;
+	template: number;
+	template_color?: string | null;
 	contact_id: number;
 	assigned_user_id: number | null;
 	date: string | null;
@@ -262,6 +264,8 @@ export interface Invoice {
 	invoice_number: string;
 	hash: string;
 	status: InvoiceStatus;
+	template: number;
+	template_color?: string | null;
 	contact_id: number;
 	proposal_id?: number | null;
 	sale_agent_user_id: number | null;
@@ -460,4 +464,6 @@ export interface SalesSettings {
 	default_online_payment_gateways: string[];
 	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
 	pdf_company_address?: string;
+	default_invoice_template?: number;
+	default_proposal_template?: number;
 }

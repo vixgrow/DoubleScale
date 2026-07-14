@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Sales\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
 use DoubleScale\Core\Payment\GatewayManager;
 
 /**
@@ -49,6 +50,8 @@ final class SalesSettings {
 			),
 			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
 			'pdf_company_address'             => '',
+			'default_invoice_template'        => DocumentTemplate::DEFAULT,
+			'default_proposal_template'       => DocumentTemplate::DEFAULT,
 		);
 	}
 
@@ -184,6 +187,12 @@ final class SalesSettings {
 
 		if ( array_key_exists( 'pdf_company_address', $merged ) ) {
 			$clean['pdf_company_address'] = sanitize_textarea_field( (string) $merged['pdf_company_address'] );
+		}
+
+		foreach ( array( 'default_invoice_template', 'default_proposal_template' ) as $template_key ) {
+			if ( array_key_exists( $template_key, $merged ) ) {
+				$clean[ $template_key ] = DocumentTemplate::normalize( $merged[ $template_key ] );
+			}
 		}
 
 		$bool_keys = array(

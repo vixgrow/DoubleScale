@@ -39,6 +39,8 @@ class InvoiceModel extends Model {
 		'invoice_number',
 		'hash',
 		'status',
+		'template',
+		'template_color',
 		'contact_id',
 		'proposal_id',
 		'subscription_id',
@@ -70,6 +72,7 @@ class InvoiceModel extends Model {
 	 * @var array<string, string>
 	 */
 	protected $casts = array(
+		'template'              => 'int',
 		'tag_ids'               => 'array',
 		'line_items'            => 'array',
 		'allowed_payment_modes' => 'array',

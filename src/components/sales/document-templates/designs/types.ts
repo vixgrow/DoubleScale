@@ -19,6 +19,8 @@ export interface DocumentDesignDateRow {
 export interface DocumentDesignParty {
 	label: string;
 	lines: string[];
+	/** Business logo URL from settings; shown in template header when set. */
+	logoUrl?: string;
 }
 
 export interface DocumentDesignSection {

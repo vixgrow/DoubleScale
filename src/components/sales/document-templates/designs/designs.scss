@@ -112,6 +112,25 @@
 		margin-bottom: 0.35rem;
 	}
 
+	.ds-sales-doc__brand-logo {
+		display: block;
+		max-height: 72px;
+		max-width: 180px;
+		object-fit: contain;
+		margin-bottom: 0.5rem;
+	}
+
+	.ds-sales-doc__brand-logo--inline {
+		margin-bottom: 0;
+		max-height: 40px;
+		max-width: 140px;
+	}
+
+	.ds-sales-doc__brand-logo--party {
+		margin-bottom: 0.35rem;
+		max-height: 56px;
+	}
+
 	.ds-sales-doc__brand-lines p {
 		color: var(--ds-doc-text-muted);
 		font-size: 11px;

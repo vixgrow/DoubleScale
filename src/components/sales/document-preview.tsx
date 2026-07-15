@@ -15,6 +15,7 @@ import {
 } from '@/constants/sales';
 import { computeLineItemsTotals } from './line-items-editor';
 import type { Invoice, LineItem, Proposal } from '@/types/sales';
+import { getCompanyFrom } from './document-templates/company-from';
 import { DocumentDesign } from './document-templates/designs';
 import {
 	DateRow,
@@ -26,31 +27,6 @@ import {
 import { normalizeTemplateId } from './document-templates/registry';
 
 import './document-preview.scss';
-
-const getCompanyFrom = (): { label: string; lines: string[] } => {
-	const cfg =
-		typeof window !== 'undefined' ? window.doublescaleConfig : undefined;
-	const name = (cfg?.blogName as string | undefined) || '';
-	const business = (
-		cfg?.initialPayload as
-			| { business?: { business_name?: string; business_address?: string } }
-			| undefined
-	)?.business;
-	const displayName = business?.business_name || name;
-	const lines = [displayName].filter(Boolean) as string[];
-	if (business?.business_address) {
-		lines.push(
-			...String(business.business_address)
-				.split('\n')
-				.map((l) => l.trim())
-				.filter(Boolean)
-		);
-	}
-	return {
-		label: __('From', 'doublescale'),
-		lines: lines.length ? lines : [__('Your Company', 'doublescale')],
-	};
-};
 
 const proposalStatusClass = (status: ProposalStatus): string =>
 	`ds-sales-doc__status ds-sales-doc__status--${status}`;

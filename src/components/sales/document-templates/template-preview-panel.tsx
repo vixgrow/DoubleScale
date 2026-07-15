@@ -6,33 +6,9 @@ import React, { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { DocumentDesign } from './designs';
+import { getCompanyFrom } from './company-from';
 import type { DocumentDesignDocType } from './designs/types';
 import { normalizeTemplateId } from './registry';
-
-const getCompanyFrom = (): { label: string; lines: string[] } => {
-	const cfg =
-		typeof window !== 'undefined' ? window.doublescaleConfig : undefined;
-	const name = (cfg?.blogName as string | undefined) || '';
-	const business = (
-		cfg?.initialPayload as
-			| { business?: { business_name?: string; business_address?: string } }
-			| undefined
-	)?.business;
-	const displayName = business?.business_name || name;
-	const lines = [displayName].filter(Boolean) as string[];
-	if (business?.business_address) {
-		lines.push(
-			...String(business.business_address)
-				.split('\n')
-				.map((l) => l.trim())
-				.filter(Boolean)
-		);
-	}
-	return {
-		label: __('From', 'doublescale'),
-		lines: lines.length ? lines : [__('Your Company', 'doublescale')],
-	};
-};
 
 const sampleLineItems = () => [
 	{

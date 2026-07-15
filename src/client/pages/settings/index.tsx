@@ -197,6 +197,14 @@ const SettingsPage: React.FC = () => {
 			originalSettingsRef.current = JSON.parse(JSON.stringify(settings));
 			setSaveCounter((prev) => prev + 1);
 
+			if (
+				settings?.business &&
+				typeof window !== 'undefined' &&
+				window.doublescaleConfig
+			) {
+				window.doublescaleConfig.business = settings.business;
+			}
+
 			// Check for warnings in the response
 			if (response?.warnings && response.warnings.length > 0) {
 				// Show warning message

@@ -202,13 +202,31 @@ if ( $is_invoice ) {
 	}
 }
 
-$company_lines = array_filter(
-	array(
-		(string) ( $company['name'] ?? '' ),
-		(string) ( $company['address'] ?? '' ),
-		(string) ( $company['url'] ?? '' ),
-	)
-);
+$company_lines = array();
+$logo_data_uri = (string) ( $company['logo_data_uri'] ?? '' );
+
+if ( '' === $logo_data_uri ) {
+	$name_line = trim( (string) ( $company['name'] ?? '' ) );
+	if ( '' !== $name_line ) {
+		$company_lines[] = $name_line;
+	}
+}
+
+$address_block = trim( (string) ( $company['address'] ?? '' ) );
+if ( '' !== $address_block ) {
+	$address_lines = preg_split( '/\r\n|\r|\n/', $address_block ) ?: array();
+	foreach ( $address_lines as $line ) {
+		$line = trim( (string) $line );
+		if ( '' !== $line ) {
+			$company_lines[] = $line;
+		}
+	}
+}
+
+$url_line = trim( (string) ( $company['url'] ?? '' ) );
+if ( '' !== $url_line ) {
+	$company_lines[] = $url_line;
+}
 
 $bill_label = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
 $show_wave  = 'wave' === $variant;
@@ -307,6 +325,8 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 		}
 		.title-bar table { width: 100%; }
 		.title-bar .brand { font-size: 12px; opacity: 0.85; }
+		.brand-logo { display: block; max-height: 40px; max-width: 140px; }
+		.party-logo { display: block; max-height: 56px; max-width: 160px; margin-bottom: 6px; }
 		.title-bar .doc-title { font-size: 18px; font-weight: 700; text-align: right; }
 
 		.slant-bar {
@@ -409,7 +429,13 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 			<div class="title-bar">
 				<table>
 					<tr>
-						<td class="brand"><?php echo esc_html( (string) ( $company['name'] ?? $number_label ) ); ?></td>
+						<td class="brand">
+							<?php if ( '' !== $logo_data_uri ) : ?>
+								<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( (string) ( $company['name'] ?? $number_label ) ); ?>" />
+							<?php else : ?>
+								<?php echo esc_html( (string) ( $company['name'] ?? $number_label ) ); ?>
+							<?php endif; ?>
+						</td>
 						<td class="doc-title"><?php echo esc_html( $number_label ); ?></td>
 					</tr>
 				</table>
@@ -449,6 +475,9 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 				<td>
 					<div class="party-box">
 						<div class="party-label"><?php esc_html_e( 'From', 'doublescale' ); ?></div>
+						<?php if ( '' !== $logo_data_uri ) : ?>
+							<img class="party-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( (string) ( $company['name'] ?? '' ) ); ?>" />
+						<?php endif; ?>
 						<?php foreach ( $company_lines as $line ) : ?>
 							<p class="party-line"><?php echo esc_html( $line ); ?></p>
 						<?php endforeach; ?>

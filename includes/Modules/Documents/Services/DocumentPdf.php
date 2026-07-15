@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Documents\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
@@ -26,11 +27,7 @@ final class DocumentPdf {
 	public static function render_html( array $shaped, string $type ): string {
 		$type = 'invoice' === $type ? 'invoice' : 'proposal';
 
-		$company = array(
-			'name'    => (string) \get_bloginfo( 'name' ),
-			'url'     => (string) \home_url( '/' ),
-			'address' => self::resolved_company_address(),
-		);
+		$company = self::resolved_company_block();
 
 		ob_start();
 		$document = $shaped;
@@ -38,6 +35,94 @@ final class DocumentPdf {
 		$design   = DocumentTemplate::normalize( $shaped['template'] ?? DocumentTemplate::DEFAULT );
 		include __DIR__ . '/templates/document-pdf.php';
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Business branding from core settings.
+	 *
+	 * @return array{business_name: string, business_address: string, business_logo: string}
+	 */
+	public static function resolved_business_settings(): array {
+		$business = Settings::get( 'business', array() );
+		if ( ! is_array( $business ) ) {
+			$business = array();
+		}
+
+		return array(
+			'business_name'    => trim( (string) ( $business['business_name'] ?? '' ) ),
+			'business_address' => trim( (string) ( $business['business_address'] ?? '' ) ),
+			'business_logo'    => esc_url_raw( (string) ( $business['business_logo'] ?? '' ) ),
+		);
+	}
+
+	/**
+	 * Company block for PDF and receipt headers.
+	 *
+	 * @return array{name: string, url: string, address: string, logo: string, logo_data_uri: string}
+	 */
+	public static function resolved_company_block(): array {
+		$business = self::resolved_business_settings();
+		$name     = $business['business_name'];
+		if ( '' === $name ) {
+			$name = (string) \get_bloginfo( 'name' );
+		}
+
+		$address = self::resolved_company_address();
+		if ( '' === $address ) {
+			$address = $business['business_address'];
+		}
+
+		$logo = $business['business_logo'];
+
+		return array(
+			'name'          => $name,
+			'url'           => (string) \home_url( '/' ),
+			'address'       => $address,
+			'logo'          => $logo,
+			'logo_data_uri' => self::resolved_company_logo_data_uri( $logo ),
+		);
+	}
+
+	/**
+	 * Embed a local media-library logo as a data URI for Dompdf.
+	 *
+	 * @param string $logo_url Logo URL from settings.
+	 * @return string
+	 */
+	public static function resolved_company_logo_data_uri( string $logo_url = '' ): string {
+		$logo_url = trim( $logo_url );
+		if ( '' === $logo_url ) {
+			$logo_url = self::resolved_business_settings()['business_logo'];
+		}
+		if ( '' === $logo_url ) {
+			return '';
+		}
+
+		$path = '';
+		$attachment_id = \attachment_url_to_postid( $logo_url );
+		if ( $attachment_id ) {
+			$path = (string) \get_attached_file( $attachment_id );
+		} else {
+			$upload_dir = \wp_upload_dir();
+			if ( ! empty( $upload_dir['baseurl'] ) && ! empty( $upload_dir['basedir'] ) ) {
+				if ( 0 === strpos( $logo_url, $upload_dir['baseurl'] ) ) {
+					$path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $logo_url );
+				}
+			}
+		}
+
+		if ( '' === $path || ! is_readable( $path ) ) {
+			return '';
+		}
+
+		$filetype = \wp_check_filetype( $path );
+		$mime     = ! empty( $filetype['type'] ) ? (string) $filetype['type'] : 'image/png';
+		$contents = \file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $contents ) {
+			return '';
+		}
+
+		return 'data:' . $mime . ';base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
 	/**

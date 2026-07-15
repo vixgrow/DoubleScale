@@ -123,6 +123,23 @@ final class ProposalFrontendHandler {
 		);
 
 		wp_localize_script( self::HANDLE, 'doublescale_proposal_config', $config );
+
+		$business = class_exists( \DoubleScale\Modules\Documents\Services\DocumentPdf::class )
+			? \DoubleScale\Modules\Documents\Services\DocumentPdf::resolved_business_settings()
+			: array(
+				'business_name'    => '',
+				'business_address' => '',
+				'business_logo'    => '',
+			);
+
+		wp_add_inline_script(
+			self::HANDLE,
+			'window.doublescaleConfig = window.doublescaleConfig || {};'
+			. 'window.doublescaleConfig.business = ' . wp_json_encode( $business ) . ';'
+			. 'window.doublescaleConfig.blogName = ' . wp_json_encode( get_bloginfo( 'name' ) ) . ';',
+			'before'
+		);
+
 		wp_style_add_data( self::HANDLE, 'rtl', 'replace' );
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( self::HANDLE );

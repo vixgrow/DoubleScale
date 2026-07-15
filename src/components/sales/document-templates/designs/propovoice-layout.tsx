@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
 
 import { computeAmount, computeLineItemsTotals } from '../../line-items-editor';
 import type { DocumentDesignProps } from './types';
+import type { DocumentDesignParty } from './types';
 import { docTypeLabel, formatMoney } from './blocks';
 
 export type LayoutVariant =
@@ -213,6 +214,53 @@ const PartyLines: React.FC<{ label: string; lines: string[] }> = ({
 	</div>
 );
 
+const BrandBlock: React.FC<{ from?: DocumentDesignParty | null }> = ({ from }) => {
+	if (!from) {
+		return null;
+	}
+
+	const name = from.lines[0] || __('Your Company', 'doublescale');
+	const detailLines = from.lines.slice(1);
+
+	return (
+		<>
+			{from.logoUrl ? (
+				<img
+					src={from.logoUrl}
+					alt={name}
+					className="ds-sales-doc__brand-logo"
+				/>
+			) : (
+				<div className="ds-sales-doc__brand">{name}</div>
+			)}
+			{detailLines.length > 0 ? (
+				<div className="ds-sales-doc__brand-lines">
+					{detailLines.map((line, i) => (
+						<p key={`${line}-${i}`}>{line}</p>
+					))}
+				</div>
+			) : null}
+		</>
+	);
+};
+
+const BrandMark: React.FC<{ from?: DocumentDesignParty | null; fallback: string }> = ({
+	from,
+	fallback,
+}) => {
+	if (from?.logoUrl) {
+		return (
+			<img
+				src={from.logoUrl}
+				alt={from.lines[0] || fallback}
+				className="ds-sales-doc__brand-logo ds-sales-doc__brand-logo--inline"
+			/>
+		);
+	}
+
+	return <>{from?.lines?.[0] || fallback}</>;
+};
+
 export const PropovoiceLayout: React.FC<
 	DocumentDesignProps & { variant: LayoutVariant; designId: number }
 > = ({ variant, designId, ...props }) => {
@@ -318,7 +366,7 @@ export const PropovoiceLayout: React.FC<
 				{showBar ? (
 					<div className="ds-sales-doc__title-bar">
 						<div className="ds-sales-doc__brand-mark">
-							{from?.lines?.[0] || title}
+							<BrandMark from={from} fallback={title} />
 						</div>
 						<h2 className="ds-sales-doc__doc-type-in-bar">{title}</h2>
 					</div>
@@ -331,16 +379,7 @@ export const PropovoiceLayout: React.FC<
 				{splitHero ? (
 					<div className="ds-sales-doc__hero ds-sales-doc__hero--split">
 						<div className="ds-sales-doc__hero-left">
-							<div className="ds-sales-doc__brand">
-								{from?.lines?.[0] || __('Your Company', 'doublescale')}
-							</div>
-							{from ? (
-								<div className="ds-sales-doc__brand-lines">
-									{from.lines.slice(1).map((line, i) => (
-										<p key={i}>{line}</p>
-									))}
-								</div>
-							) : null}
+							<BrandBlock from={from} />
 							{datesBlock}
 						</div>
 						<div className="ds-sales-doc__hero-right">
@@ -360,16 +399,7 @@ export const PropovoiceLayout: React.FC<
 						<p className="ds-sales-doc__doc-type">{title}</p>
 						<div className="ds-sales-doc__hero-split-meta">
 							<div className="ds-sales-doc__hero-left">
-								<div className="ds-sales-doc__brand">
-									{from?.lines?.[0] || __('Your Company', 'doublescale')}
-								</div>
-								{from ? (
-									<div className="ds-sales-doc__brand-lines">
-										{from.lines.slice(1).map((line, i) => (
-											<p key={i}>{line}</p>
-										))}
-									</div>
-								) : null}
+								<BrandBlock from={from} />
 								{datesBlock}
 							</div>
 							<div className="ds-sales-doc__hero-right">
@@ -403,8 +433,10 @@ export const PropovoiceLayout: React.FC<
 									<h2 className="ds-sales-doc__number">{props.number}</h2>
 								) : (
 									<div className="ds-sales-doc__brand">
-										{from?.lines?.[0] ||
-											__('Your Company', 'doublescale')}
+										<BrandMark
+											from={from}
+											fallback={__('Your Company', 'doublescale')}
+										/>
 									</div>
 								)}
 								{props.subject ? (
@@ -423,7 +455,28 @@ export const PropovoiceLayout: React.FC<
 							}`}
 						>
 							{!showSidebar && from ? (
-								<PartyLines label={from.label} lines={from.lines} />
+								from.logoUrl ? (
+									<div className="ds-sales-doc__party">
+										<h5 className="ds-sales-doc__party-label">
+											{from.label}
+										</h5>
+										<img
+											src={from.logoUrl}
+											alt={from.lines[0] || ''}
+											className="ds-sales-doc__brand-logo ds-sales-doc__brand-logo--party"
+										/>
+										{from.lines.slice(1).map((line, i) => (
+											<p
+												key={`${line}-${i}`}
+												className="ds-sales-doc__party-line"
+											>
+												{line}
+											</p>
+										))}
+									</div>
+								) : (
+									<PartyLines label={from.label} lines={from.lines} />
+								)
 							) : null}
 							{showSidebar && from ? (
 								<div className="ds-sales-doc__company-top">

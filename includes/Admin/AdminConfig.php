@@ -179,6 +179,7 @@ final class AdminConfig {
 				'salesApprovalWorkflowEnabled' => class_exists( \DoubleScale\Modules\Sales\Services\SalesSettings::class )
 					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
 					: false,
+				'business'            => self::get_business_branding_config(),
 			)
 		);
 
@@ -186,6 +187,28 @@ final class AdminConfig {
 			'doublescale-admin',
 			'window.doublescaleConfig = ' . wp_json_encode( $config ) . ';',
 			'before'
+		);
+	}
+
+	/**
+	 * Business branding for document templates and admin UI.
+	 *
+	 * @return array{business_name: string, business_address: string, business_logo: string}
+	 */
+	private static function get_business_branding_config(): array {
+		if ( class_exists( \DoubleScale\Modules\Documents\Services\DocumentPdf::class ) ) {
+			return \DoubleScale\Modules\Documents\Services\DocumentPdf::resolved_business_settings();
+		}
+
+		$business = Settings::get( 'business', array() );
+		if ( ! is_array( $business ) ) {
+			$business = array();
+		}
+
+		return array(
+			'business_name'    => (string) ( $business['business_name'] ?? '' ),
+			'business_address' => (string) ( $business['business_address'] ?? '' ),
+			'business_logo'    => (string) ( $business['business_logo'] ?? '' ),
 		);
 	}
 

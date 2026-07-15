@@ -287,6 +287,16 @@ class RestContactController extends RestController {
 							'type'        => 'string',
 							'required'    => false,
 						),
+						'deal_id' => array(
+							'description' => __( 'Link the resulting activity to this deal.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => false,
+						),
+						'project_id' => array(
+							'description' => __( 'Link the resulting activity to this project.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => false,
+						),
 					),
 				),
 			)

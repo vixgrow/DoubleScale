@@ -33,6 +33,8 @@ interface ActivityTimelineFiltersProps {
 	systemEventsType?: ActivityTimelineTypeFilter;
 	/** When false, hide call/email/meeting filters (e.g. project activity). */
 	showCommunicationFilters?: boolean;
+	/** Extra Type options appended before Files (e.g. project comments/documents). */
+	extraTypeOptions?: Array<{ value: string; label: string }>;
 	/** Raise portaled selects above the task detail dialog (z-index 1800001). */
 	nestedInTaskDialog?: boolean;
 }
@@ -47,6 +49,7 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 	systemEventsLabel = __('Tasks', 'doublescale'),
 	systemEventsType = 'task',
 	showCommunicationFilters = true,
+	extraTypeOptions = [],
 	nestedInTaskDialog = false,
 }) => {
 	const taskDialogSelectProps = nestedInTaskDialog
@@ -94,6 +97,11 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 									</SelectItem>
 								</>
 							) : null}
+							{extraTypeOptions.map((option) => (
+								<SelectItem key={option.value} value={option.value}>
+									{option.label}
+								</SelectItem>
+							))}
 							<SelectItem value="files">
 								{__('Files', 'doublescale')}
 							</SelectItem>

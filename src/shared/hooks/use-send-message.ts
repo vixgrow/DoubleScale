@@ -25,6 +25,7 @@ interface BaseMessageData {
 	to: string;
 	body: string;
 	deal_id?: number; // Optional: Pass when sending from deal context for activity linking
+	project_id?: number; // Optional: Pass when sending from project context for activity linking
 }
 
 /**
@@ -225,6 +226,11 @@ export const useSendMessage = ({
 			// Add deal_id if provided (for context-aware activity linking)
 			if (data.deal_id) {
 				payload.deal_id = data.deal_id;
+			}
+
+			// Add project_id if provided (for context-aware activity linking)
+			if (data.project_id) {
+				payload.project_id = data.project_id;
 			}
 
 			// Send message via API

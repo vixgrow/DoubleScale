@@ -44,6 +44,7 @@ class EmailIndividualSender {
 		$body        = (string) ( $request->get_param( 'body' ) ?? $request->get_param( 'message' ) ?? '' );
 		$subject     = $request->get_param( 'subject' );
 		$deal_id     = $request->get_param( 'deal_id' );
+		$project_id  = $request->get_param( 'project_id' );
 		$in_reply_to = $request->get_param( 'in_reply_to' );
 
 		if ( empty( $subject ) || ! trim( (string) $subject ) ) {
@@ -100,6 +101,18 @@ class EmailIndividualSender {
 						'activity_id' => $activity->id,
 						'entity_type' => ActivityAssociationModel::ENTITY_TYPE_DEAL,
 						'entity_id'   => (int) $deal_id,
+						'created_at'  => current_time( 'mysql' ),
+						'updated_at'  => current_time( 'mysql' ),
+					)
+				);
+			}
+
+			if ( $project_id ) {
+				ActivityAssociationModel::create(
+					array(
+						'activity_id' => $activity->id,
+						'entity_type' => ActivityAssociationModel::ENTITY_TYPE_PROJECT,
+						'entity_id'   => (int) $project_id,
 						'created_at'  => current_time( 'mysql' ),
 						'updated_at'  => current_time( 'mysql' ),
 					)

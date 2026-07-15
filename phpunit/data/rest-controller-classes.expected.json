@@ -67,6 +67,7 @@
     "RestPublicContractController",
     "RestPublicCreditNoteController",
     "RestPublicInvoiceController",
+    "RestPublicProjectController",
     "RestPublicProposalController",
     "RestReplyController",
     "RestReportController",

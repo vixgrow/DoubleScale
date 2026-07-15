@@ -218,6 +218,18 @@ if ( ! function_exists( 'esc_attr' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	/**
+	 * @param string       $url
+	 * @param array<mixed> $protocols
+	 * @return string
+	 */
+	function esc_url_raw( $url, $protocols = null ) {
+		unset( $protocols );
+		return trim( (string) $url );
+	}
+}
+
 if ( ! function_exists( 'wp_strip_all_tags' ) ) {
 	/**
 	 * @param string $string

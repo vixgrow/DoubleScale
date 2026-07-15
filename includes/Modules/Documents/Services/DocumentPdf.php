@@ -51,7 +51,7 @@ final class DocumentPdf {
 		return array(
 			'business_name'    => trim( (string) ( $business['business_name'] ?? '' ) ),
 			'business_address' => trim( (string) ( $business['business_address'] ?? '' ) ),
-			'business_logo'    => esc_url_raw( (string) ( $business['business_logo'] ?? '' ) ),
+			'business_logo'    => \esc_url_raw( (string) ( $business['business_logo'] ?? '' ) ),
 		);
 	}
 

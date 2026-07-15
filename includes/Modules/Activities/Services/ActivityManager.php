@@ -1729,6 +1729,32 @@ final class ActivityManager {
 			return $base;
 		}
 
+		if ( ActivityTypes::STATUS_CHANGED === $type ) {
+			$actor = $user_name ?? __( 'Someone', 'doublescale' );
+			if ( ! empty( $data['proposal_id'] ) ) {
+				$number = ! empty( $data['proposal_number'] )
+					? (string) $data['proposal_number']
+					: '#' . (int) $data['proposal_id'];
+				return sprintf(
+					/* translators: 1: user name, 2: proposal number */
+					__( '%1$s linked proposal %2$s to this deal', 'doublescale' ),
+					$actor,
+					$number
+				);
+			}
+			if ( ! empty( $data['invoice_id'] ) ) {
+				$number = ! empty( $data['invoice_number'] )
+					? (string) $data['invoice_number']
+					: '#' . (int) $data['invoice_id'];
+				return sprintf(
+					/* translators: 1: user name, 2: invoice number */
+					__( '%1$s linked invoice %2$s to this deal', 'doublescale' ),
+					$actor,
+					$number
+				);
+			}
+		}
+
 		return ActivityTypes::get_activity_message( $type, $user_name );
 	}
 

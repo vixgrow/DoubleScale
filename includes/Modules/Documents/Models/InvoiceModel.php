@@ -191,6 +191,22 @@ class InvoiceModel extends Model {
 				$invoice->total     = $totals['total'];
 			}
 		);
+
+		static::deleting(
+			function ( $invoice ) {
+				// Deal/project links are soft activity associations; remove this
+				// invoice's rows so nothing keeps resolving a deleted document.
+				if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+					\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_INVOICE )
+						->where( 'entity_id', $invoice->id )
+						->delete();
+				}
+
+				PaymentModel::query()
+					->where( 'invoice_id', (int) $invoice->id )
+					->delete();
+			}
+		);
 	}
 
 	/**

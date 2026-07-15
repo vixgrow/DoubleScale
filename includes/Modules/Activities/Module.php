@@ -54,5 +54,9 @@ final class Module extends AbstractModule {
 		parent::boot( $container );
 
 		$container->get( Services\ActivityManager::class );
+
+		// Weekly safety net for soft associations: removes rows that point at
+		// entities deleted outside the model-event cleanup paths.
+		Services\AssociationOrphanSweeper::boot();
 	}
 }

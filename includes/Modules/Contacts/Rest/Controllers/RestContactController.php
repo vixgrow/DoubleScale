@@ -2271,7 +2271,24 @@ class RestContactController extends RestController {
 	public function delete_items( $request ) {
 		try {
 			$contact_ids = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
-			$contacts    = ContactModel::find( $contact_ids );
+
+			// Invoices are financial records; contacts that still have them
+			// cannot be deleted (matches Perfex/HubSpot behavior).
+			$blocked_ids = $this->contact_ids_with_invoices( (array) $contact_ids );
+			$contact_ids = array_values( array_diff( array_map( 'intval', (array) $contact_ids ), $blocked_ids ) );
+
+			if ( empty( $contact_ids ) ) {
+				return new WP_Error(
+					'contact_has_invoices',
+					__( 'These contacts have invoices and cannot be deleted. Delete or reassign their invoices first.', 'doublescale' ),
+					array(
+						'status'      => 409,
+						'blocked_ids' => $blocked_ids,
+					)
+				);
+			}
+
+			$contacts = ContactModel::find( $contact_ids );
 
 			if ( ! $contacts ) {
 				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
@@ -2303,12 +2320,48 @@ class RestContactController extends RestController {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
+			// Invoices are financial records; a contact that still has them
+			// cannot be deleted (matches Perfex/HubSpot behavior).
+			if ( ! empty( $this->contact_ids_with_invoices( array( (int) $contact->id ) ) ) ) {
+				return new WP_Error(
+					'contact_has_invoices',
+					__( 'This contact has invoices and cannot be deleted. Delete or reassign the invoices first.', 'doublescale' ),
+					array( 'status' => 409 )
+				);
+			}
+
 			$contact->delete();
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
+	}
+
+	/**
+	 * Which of the given contact ids still have invoices.
+	 *
+	 * Invoices reference contacts without a DB constraint, so deletion is
+	 * guarded here instead.
+	 *
+	 * @param array<int|string> $contact_ids Contact ids to check.
+	 * @return array<int>
+	 */
+	private function contact_ids_with_invoices( array $contact_ids ): array {
+		$contact_ids = array_values( array_filter( array_map( 'intval', $contact_ids ) ) );
+
+		if ( empty( $contact_ids ) || ! class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+			return array();
+		}
+
+		$ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+			->whereIn( 'contact_id', $contact_ids )
+			->pluck( 'contact_id' )
+			->unique()
+			->values()
+			->toArray();
+
+		return array_map( 'intval', $ids );
 	}
 
 	/**

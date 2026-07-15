@@ -165,6 +165,24 @@ class ProposalModel extends Model {
 				$proposal->total    = $totals['total'];
 			}
 		);
+
+		static::deleting(
+			function ( $proposal ) {
+				// Deal/project links are soft activity associations; remove this
+				// proposal's rows so nothing keeps resolving a deleted document.
+				if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+					\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROPOSAL )
+						->where( 'entity_id', $proposal->id )
+						->delete();
+				}
+
+				// The converted invoice is a financial record and must survive,
+				// but its proposal pointer would 404 — detach it.
+				InvoiceModel::query()
+					->where( 'proposal_id', (int) $proposal->id )
+					->update( array( 'proposal_id' => null ) );
+			}
+		);
 	}
 
 	/**

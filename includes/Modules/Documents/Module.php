@@ -106,6 +106,23 @@ final class Module extends AbstractSalesChildModule {
 		add_action( 'init', array( $this, 'register_schedules' ) );
 		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );
 
+		// Deleting a contact cascades to their proposals (one model at a time so
+		// the proposal deleting event cleans associations and detaches invoices).
+		// Invoices are financial records: the REST layer blocks deleting a
+		// contact that still has any, so they are intentionally not cascaded.
+		add_action(
+			'doublescale_contact_deleting',
+			static function ( $contact ) {
+				if ( ! $contact || ! isset( $contact->id ) ) {
+					return;
+				}
+				$proposals = Models\ProposalModel::where( 'contact_id', (int) $contact->id )->get();
+				foreach ( $proposals as $proposal ) {
+					$proposal->delete();
+				}
+			}
+		);
+
 		MenuRegistry::add(
 			array(
 				'page_title'      => __( 'Proposals', 'doublescale' ),

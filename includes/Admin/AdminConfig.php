@@ -75,6 +75,7 @@ final class AdminConfig {
 			'doublescale_booking_agent'           => Permissions::user_has_role( UserRoles::BOOKING_AGENT ),
 			'doublescale_project_manager'         => Permissions::user_has_role( UserRoles::PROJECT_MANAGER ),
 			'doublescale_project_member'          => Permissions::user_has_role( UserRoles::PROJECT_MEMBER ),
+			'doublescale_is_project_only'         => Permissions::is_project_only(),
 			'doublescale_view_support'            => Permissions::has_support_access(),
 			'doublescale_manage_all_tickets'      => Permissions::can_manage_all_tickets(),
 			// Mailbox/settings gate (manager-tier): admins, CRM Managers, and

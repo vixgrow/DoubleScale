@@ -249,6 +249,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			false
 		) as boolean;
 
+		const projectOnly = Boolean(
+			config.getUserCapabilities().doublescale_is_project_only
+		);
+
 		const builtItems = Object.entries(pages)
 			.filter(([, item]) => {
 				return (
@@ -256,6 +260,13 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					item.path &&
 					hasRequiredCapability(item.requiredCapability)
 				);
+			})
+			.filter(([, item]) => {
+				if (projectOnly) {
+					const normalizedPath = item.path.replace(/^\//, '').split('/:')[0];
+					return normalizedPath === 'projects';
+				}
+				return true;
 			})
 			.filter(([pageId, item]) => {
 				// While Sales documents (proposals/invoices) are gated, the

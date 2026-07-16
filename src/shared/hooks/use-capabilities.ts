@@ -85,6 +85,11 @@ export const useCapabilities = () => {
         return Boolean(caps.doublescale_project_manage_all_projects);
     }, []);
 
+    const isProjectOnly = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities();
+        return caps.doublescale_is_project_only || false;
+    }, []);
+
     return {
         hasRequiredCapability,
         isSalesRep,
@@ -94,6 +99,7 @@ export const useCapabilities = () => {
         canManageAllTickets,
         hasProjectAccess,
         canManageAllProjects,
+        isProjectOnly,
     };
 };
 

@@ -42,7 +42,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 			page.requiredCapability &&
 			!hasRequiredCapability(page.requiredCapability)
 		) {
-			navigate(getToLink('/'));
+			const fallbackPath = config.getUserCapabilities().doublescale_is_project_only
+				? 'projects'
+				: '/';
+			navigate(getToLink(fallbackPath));
 		}
 	}, [page.requiredCapability, navigate, hasRequiredCapability]);
 

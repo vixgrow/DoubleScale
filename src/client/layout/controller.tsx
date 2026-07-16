@@ -511,9 +511,12 @@ registerAdminPage('projects', {
 	label: __('Projects', 'doublescale'),
 	icon: <FolderKanban size={24} />,
 	requiredCapability: [
-		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
+		'doublescale_project_manager',
+		'doublescale_project_member',
+		'doublescale_project_read_own_projects',
+		'doublescale_project_read_all_projects',
+		'doublescale_project_manage_own_projects',
+		'doublescale_project_manage_all_projects',
 	],
 });
 
@@ -531,9 +534,12 @@ registerAdminPage('project-detail', {
 	label: __('Project Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: [
-		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
+		'doublescale_project_manager',
+		'doublescale_project_member',
+		'doublescale_project_read_own_projects',
+		'doublescale_project_read_all_projects',
+		'doublescale_project_manage_own_projects',
+		'doublescale_project_manage_all_projects',
 	],
 });
 

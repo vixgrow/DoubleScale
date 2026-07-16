@@ -50,6 +50,7 @@ import {
 	useProposal,
 	useSalesSettings,
 } from '@/hooks/sales';
+import config from '@doublescale/config';
 import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
 import { CURRENCIES, DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
 import {
@@ -441,7 +442,11 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		}
 	};
 
-	const assigneeReadOnly = assignableUsers.length <= 1;
+	const canAssignSalesRep =
+		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
+	const assigneeReadOnly =
+		assignableUsers.length === 0 ||
+		(!canAssignSalesRep && assignableUsers.length <= 1);
 
 	const handleClose = goBack;
 

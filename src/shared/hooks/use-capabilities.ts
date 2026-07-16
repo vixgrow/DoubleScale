@@ -70,6 +70,21 @@ export const useCapabilities = () => {
         return userCapabilities.doublescale_manage_all_tickets || false;
     }, []);
 
+    const hasProjectAccess = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities() as Record<string, boolean | undefined>;
+        return Boolean(
+            caps.doublescale_project_read_own_projects ||
+                caps.doublescale_project_read_all_projects ||
+                caps.doublescale_project_manage_own_projects ||
+                caps.doublescale_project_manage_all_projects
+        );
+    }, []);
+
+    const canManageAllProjects = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities() as Record<string, boolean | undefined>;
+        return Boolean(caps.doublescale_project_manage_all_projects);
+    }, []);
+
     return {
         hasRequiredCapability,
         isSalesRep,
@@ -77,6 +92,8 @@ export const useCapabilities = () => {
         canManageAllDeals,
         isCrmManager,
         canManageAllTickets,
+        hasProjectAccess,
+        canManageAllProjects,
     };
 };
 

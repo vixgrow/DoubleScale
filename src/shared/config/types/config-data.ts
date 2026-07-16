@@ -167,9 +167,14 @@ export type UserCapabilities = {
 	doublescale_support_agent?: boolean;
 	doublescale_booking_manager?: boolean;
 	doublescale_booking_agent?: boolean;
+	doublescale_project_manager?: boolean;
+	doublescale_project_member?: boolean;
 	doublescale_view_support?: boolean;
 	doublescale_manage_all_tickets?: boolean;
 	doublescale_manage_support_settings?: boolean;
+	doublescale_can_assign_project_owner?: boolean;
+	doublescale_can_assign_task_assignee?: boolean;
+	doublescale_can_assign_sales_rep?: boolean;
 };
 
 export type DefaultStage = {

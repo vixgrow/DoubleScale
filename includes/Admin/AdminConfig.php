@@ -73,6 +73,8 @@ final class AdminConfig {
 			'doublescale_support_agent'           => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
 			'doublescale_booking_manager'         => Permissions::user_has_role( UserRoles::BOOKING_MANAGER ),
 			'doublescale_booking_agent'           => Permissions::user_has_role( UserRoles::BOOKING_AGENT ),
+			'doublescale_project_manager'         => Permissions::user_has_role( UserRoles::PROJECT_MANAGER ),
+			'doublescale_project_member'          => Permissions::user_has_role( UserRoles::PROJECT_MEMBER ),
 			'doublescale_view_support'            => Permissions::has_support_access(),
 			'doublescale_manage_all_tickets'      => Permissions::can_manage_all_tickets(),
 			// Mailbox/settings gate (manager-tier): admins, CRM Managers, and
@@ -92,7 +94,16 @@ final class AdminConfig {
 			}
 		}
 
+		if ( class_exists( \DoubleScale\Pro\Modules\Projects\Capabilities::class ) ) {
+			foreach ( \DoubleScale\Pro\Modules\Projects\Capabilities::get_all_capabilities() as $project_cap ) {
+				$user_capabilities[ $project_cap ] = current_user_can( $project_cap );
+			}
+		}
+
 		$user_capabilities['doublescale_manage'] = current_user_can( 'doublescale_manage' );
+		$user_capabilities['doublescale_can_assign_project_owner'] = Permissions::can_assign_project_owner();
+		$user_capabilities['doublescale_can_assign_task_assignee'] = Permissions::can_assign_task_assignee();
+		$user_capabilities['doublescale_can_assign_sales_rep']    = \DoubleScale\Modules\Sales\Capabilities::can_assign_sales_rep();
 
 		$current_wp_user = wp_get_current_user();
 		$current_user    = array(

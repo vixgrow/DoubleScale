@@ -62,6 +62,7 @@ import {
 	useInvoice,
 	useSalesSettings,
 } from '@/hooks/sales';
+import config from '@doublescale/config';
 import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
 import {
 	CURRENCIES,
@@ -499,6 +500,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		}
 	};
 
+	const canAssignSalesRep =
+		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
+	const saleAgentReadOnly =
+		assignableUsers.length === 0 ||
+		(!canAssignSalesRep && assignableUsers.length <= 1);
+
 	const pageTitle = isNew
 		? __('Create New Invoice', 'doublescale')
 		: __('Edit Invoice', 'doublescale');
@@ -691,7 +698,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 								<div className="text-sm text-muted-foreground">
 									{__('Loading…', 'doublescale')}
 								</div>
-							) : assignableUsers.length <= 1 ? (
+							) : saleAgentReadOnly ? (
 								<div className="flex h-10 items-center rounded-lg border border-border bg-[#ECECEC] px-3 text-sm text-[#29292E]">
 									{assignableUsers.find(
 										(u) => u.id === saleAgentUserId

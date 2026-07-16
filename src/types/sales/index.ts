@@ -234,6 +234,7 @@ export interface RecordPaymentPayload {
 export interface ConvertProposalResponse {
 	invoice: Invoice;
 	proposal: Proposal;
+	already_converted?: boolean;
 }
 
 export interface OnlinePaymentGatewayStatus {
@@ -459,6 +460,8 @@ export interface SalesSettings {
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
 	approval_workflow_enabled?: boolean;
+	/** When on, a deal linked to an invoice is marked Won once that invoice is fully paid. */
+	auto_close_deals_on_paid?: boolean;
 	enabled_online_gateways: string[];
 	default_offline_payment_modes: string[];
 	default_online_payment_gateways: string[];

@@ -61,6 +61,7 @@ import {
 	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary } from '@/types/sales';
+import config from '@doublescale/config';
 import {
 	CONTRACT_STATUSES,
 	CONTRACT_STATUS_LABELS,
@@ -372,7 +373,11 @@ const ContractEdit: React.FC = () => {
 		);
 	}
 
-	const assigneeReadOnly = assignableUsers.length <= 1;
+	const canAssignSalesRep =
+		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
+	const assigneeReadOnly =
+		assignableUsers.length === 0 ||
+		(!canAssignSalesRep && assignableUsers.length <= 1);
 
 	const contractInformationContent = (
 		<>

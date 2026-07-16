@@ -2888,6 +2888,15 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_message( $request ) {
+		$access = Permissions::validate_send_contact_message_access(
+			$request->get_param( 'id' ),
+			$request->get_param( 'project_id' ),
+			$request->get_param( 'deal_id' )
+		);
+		if ( is_wp_error( $access ) ) {
+			return $access;
+		}
+
 		$channel = $request->get_param( 'channel' );
 
 		// Validate channel parameter.
@@ -2950,7 +2959,7 @@ class RestContactController extends RestController {
 	 * @return bool
 	 */
 	public function send_message_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_send_contact_message();
 	}
 
 	/**
@@ -3437,7 +3446,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_read_contacts();
 	}
 
 	/**
@@ -3502,7 +3511,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_read_contacts();
 	}
 
 	/**

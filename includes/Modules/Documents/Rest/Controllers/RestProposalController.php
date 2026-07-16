@@ -17,6 +17,7 @@ use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
@@ -187,7 +188,11 @@ class RestProposalController extends RestController {
 	public function create_item_permissions_check( $request ) {
 		unset( $request );
 		return Capabilities::can_view_sales()
-			&& ( Capabilities::can_manage_all_sales() || Capabilities::current_user_can( 'doublescale_manage_own_sales' ) );
+			&& (
+				Capabilities::can_manage_all_sales()
+				|| Capabilities::current_user_can( 'doublescale_manage_own_sales' )
+				|| Capabilities::can_assign_sales_rep()
+			);
 	}
 
 	public function update_item_permissions_check( $request ) {
@@ -210,7 +215,7 @@ class RestProposalController extends RestController {
 
 		$query = ProposalModel::query()->with( array( 'contact', 'assigned_user' ) );
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'assigned_user_id', get_current_user_id() );
 		}
 
@@ -404,7 +409,7 @@ class RestProposalController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_assign_sales_rep() ) {
 			$payload['assigned_user_id'] = get_current_user_id();
 		}
 
@@ -450,7 +455,7 @@ class RestProposalController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['assigned_user_id'] ) ) {
+		if ( ! Capabilities::can_assign_sales_rep() && isset( $payload['assigned_user_id'] ) ) {
 			unset( $payload['assigned_user_id'] );
 		}
 
@@ -520,6 +525,25 @@ class RestProposalController extends RestController {
 
 		$invoice = ( new ConvertProposalToInvoice() )->convert( $proposal );
 		if ( is_wp_error( $invoice ) ) {
+			if ( 'already_converted' === $invoice->get_error_code() ) {
+				$existing_id = (int) ( $invoice->get_error_data()['invoice_id'] ?? 0 );
+				$existing    = $existing_id > 0
+					? InvoiceModel::with( array( 'contact', 'sale_agent' ) )->find( $existing_id )
+					: null;
+				if ( $existing ) {
+					$proposal->refresh();
+
+					return new WP_REST_Response(
+						array(
+							'invoice'           => InvoiceShaper::shape( $existing, true ),
+							'proposal'        => ProposalShaper::shape_admin( $proposal, true ),
+							'already_converted' => true,
+						),
+						200
+					);
+				}
+			}
+
 			return $invoice;
 		}
 		$proposal->refresh();

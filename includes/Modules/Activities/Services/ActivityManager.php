@@ -144,6 +144,12 @@ final class ActivityManager {
 			}
 		}
 
+		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT ) {
+			if ( ! $this->can_manage_project( $entity_id ) ) {
+				return null;
+			}
+		}
+
 		$note_data = array(
 			'title'   => sanitize_text_field( $title ),
 			'content' => wp_kses_post( $content ),
@@ -458,6 +464,23 @@ final class ActivityManager {
 			}
 		}
 
+		// Filter by project using activity_associations table.
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && (int) $filters['entity_type'] === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT ) {
+			if ( ! $this->can_access_project( $filters['entity_id'] ) ) {
+				return null;
+			}
+
+			if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+				$query->whereHas(
+					'associations',
+					function ( $q ) use ( $filters ) {
+						$q->where( 'entity_type', $filters['entity_type'] )
+							->where( 'entity_id', $filters['entity_id'] );
+					}
+				);
+			}
+		}
+
 		// Exclude activities that have deal or task associations when no entity type is provided.
 		// Contact associations are the contact timeline's source of truth and must not be excluded.
 		if ( empty( $filters['entity_type'] ) ) {
@@ -563,6 +586,11 @@ final class ActivityManager {
 			return null;
 		}
 
+		$project_id = $this->get_project_id_from_activity( $activity );
+		if ( $project_id && ! $this->can_access_project( $project_id ) ) {
+			return null;
+		}
+
 		return $activity;
 	}
 
@@ -600,6 +628,11 @@ final class ActivityManager {
 
 		// Check task permissions if activity is associated with a task.
 		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+			return null;
+		}
+
+		$project_id = $this->get_project_id_from_activity( $activity );
+		if ( $project_id && ! $this->can_manage_project( $project_id ) ) {
 			return null;
 		}
 
@@ -705,6 +738,11 @@ final class ActivityManager {
 
 		// Check task permissions if activity is associated with a task.
 		if ( $activity->task_id && ! $this->can_access_task( $activity->task_id ) ) {
+			return false;
+		}
+
+		$project_id = $this->get_project_id_from_activity( $activity );
+		if ( $project_id && ! $this->can_manage_project( $project_id ) ) {
 			return false;
 		}
 
@@ -1048,6 +1086,95 @@ final class ActivityManager {
 	}
 
 	/**
+	 * Check if current user can access a project.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int  $project_id     Project ID.
+	 * @param bool $require_manage When true, require manage access.
+	 *
+	 * @return string 'ok', 'not_found', 'no_pro', or 'forbidden'.
+	 */
+	private function check_project_access( $project_id, $require_manage = false ): string {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' ) ) {
+			return 'no_pro';
+		}
+
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' ) ) {
+			return 'no_pro';
+		}
+
+		$project = \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::find( $project_id );
+		if ( ! $project ) {
+			return 'not_found';
+		}
+
+		$can = $require_manage
+			? \DoubleScale\Pro\Modules\Projects\Capabilities::can_manage_project( $project_id )
+			: \DoubleScale\Pro\Modules\Projects\Capabilities::can_read_project( $project_id );
+
+		return $can ? 'ok' : 'forbidden';
+	}
+
+	/**
+	 * Check if current user can read a project (boolean shortcut).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $project_id Project ID.
+	 *
+	 * @return bool
+	 */
+	private function can_access_project( $project_id ) {
+		return 'ok' === $this->check_project_access( $project_id, false );
+	}
+
+	/**
+	 * Check if current user can manage a project (boolean shortcut).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $project_id Project ID.
+	 *
+	 * @return bool
+	 */
+	private function can_manage_project( $project_id ) {
+		return 'ok' === $this->check_project_access( $project_id, true );
+	}
+
+	/**
+	 * Resolve the project ID associated with an activity, if any.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param ActivityModel $activity Activity model.
+	 *
+	 * @return int|null
+	 */
+	private function get_project_id_from_activity( ActivityModel $activity ): ?int {
+		if ( $activity->relationLoaded( 'associations' ) ) {
+			foreach ( $activity->associations as $association ) {
+				if ( (int) $association->entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT ) {
+					return (int) $association->entity_id;
+				}
+			}
+
+			return null;
+		}
+
+		if ( ! class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+			return null;
+		}
+
+		$entity_id = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::query()
+			->where( 'activity_id', $activity->id )
+			->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT )
+			->value( 'entity_id' );
+
+		return null !== $entity_id ? (int) $entity_id : null;
+	}
+
+	/**
 	 * Get contact_id from deal
 	 *
 	 * @since 1.0.0
@@ -1150,6 +1277,25 @@ final class ActivityManager {
 						'total_pages'  => 0,
 						'pro_active'   => $pro_active,
 						'error'        => $deal_access,
+					),
+				);
+			}
+		}
+
+		// Permission check for project access.
+		if ( ! empty( $filters['entity_type'] ) &&
+			(int) $filters['entity_type'] === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROJECT ) {
+			$project_access = $this->check_project_access( $filters['entity_id'], false );
+			if ( 'ok' !== $project_access ) {
+				return array(
+					'data' => array(),
+					'meta' => array(
+						'total'        => 0,
+						'per_page'     => $per_page,
+						'current_page' => $page,
+						'total_pages'  => 0,
+						'pro_active'   => $pro_active,
+						'error'        => $project_access,
 					),
 				);
 			}

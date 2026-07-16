@@ -158,7 +158,11 @@ class RestInvoiceController extends RestController {
 	public function create_item_permissions_check( $request ) {
 		unset( $request );
 		return Capabilities::can_view_sales()
-			&& ( Capabilities::can_manage_all_sales() || Capabilities::current_user_can( 'doublescale_manage_own_sales' ) );
+			&& (
+				Capabilities::can_manage_all_sales()
+				|| Capabilities::current_user_can( 'doublescale_manage_own_sales' )
+				|| Capabilities::can_assign_sales_rep()
+			);
 	}
 
 	public function update_item_permissions_check( $request ) {
@@ -216,7 +220,7 @@ class RestInvoiceController extends RestController {
 		}
 
 		$query = InvoiceModel::query();
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'sale_agent_user_id', get_current_user_id() );
 		}
 
@@ -299,7 +303,7 @@ class RestInvoiceController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_assign_sales_rep() ) {
 			$payload['sale_agent_user_id'] = get_current_user_id();
 		}
 
@@ -345,7 +349,7 @@ class RestInvoiceController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['sale_agent_user_id'] ) ) {
+		if ( ! Capabilities::can_assign_sales_rep() && isset( $payload['sale_agent_user_id'] ) ) {
 			unset( $payload['sale_agent_user_id'] );
 		}
 
@@ -543,7 +547,7 @@ class RestInvoiceController extends RestController {
 			$query->where( 'contact_id', (int) $contact_id );
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'sale_agent_user_id', get_current_user_id() );
 		}
 

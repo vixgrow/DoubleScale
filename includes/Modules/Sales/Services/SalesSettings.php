@@ -39,6 +39,7 @@ final class SalesSettings {
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
 			'approval_workflow_enabled'     => false,
+			'auto_close_deals_on_paid'      => false,
 			'default_offline_payment_modes' => array(
 				PaymentMode::BANK_TRANSFER,
 				PaymentMode::CASH,
@@ -198,6 +199,7 @@ final class SalesSettings {
 		$bool_keys = array(
 			'require_signature_on_accept',
 			'approval_workflow_enabled',
+			'auto_close_deals_on_paid',
 		);
 		foreach ( $bool_keys as $key ) {
 			if ( array_key_exists( $key, $merged ) ) {

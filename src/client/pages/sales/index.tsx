@@ -37,6 +37,8 @@ const SALES_MENU_CAPS = [
 	'doublescale_crm_manager',
 	'doublescale_sales_manager',
 	'doublescale_sales_rep',
+	'doublescale_project_manager',
+	'doublescale_project_member',
 ];
 
 /**

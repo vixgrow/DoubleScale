@@ -49,8 +49,8 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 		: {};
 
 	return (
-		<div className="mb-6 flex w-full min-w-0 flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6 lg:gap-[24px]">
-			<div className="flex w-full min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:gap-4 md:gap-6 lg:gap-[24px]">
+		<div className="mb-6 flex w-full min-w-0 flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+			<div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start lg:grid-cols-2 lg:items-start min-[1200px]:grid-cols-3 min-[1200px]:items-end">
 				<div className="flex min-w-0 w-full flex-1 flex-col sm:min-w-[12rem]">
 					<label className="mb-2 block text-sm font-medium leading-6 text-foreground">
 						{__('Type', 'doublescale')}
@@ -111,7 +111,7 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 										);
 									}}
 									placeholder={__('From - To', 'doublescale')}
-									className="h-10 w-full justify-start gap-2 rounded-lg border border-border bg-background text-left text-sm font-normal text-foreground shadow-none"
+									className="h-10 w-full justify-start lg:w-[13.5rem] lg:max-w-[13.5rem] gap-2 rounded-lg border border-border bg-background text-left text-sm font-normal text-foreground shadow-none"
 								/>
 							</div>
 						</div>
@@ -145,7 +145,7 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 				) : null}
 			</div>
 
-			<div className="flex w-full shrink-0 flex-col gap-6 sm:flex-row sm:items-end sm:justify-end md:ml-auto md:w-auto">
+			<div className="flex w-full shrink-0 flex-col gap-4 sm:flex-row xl:items-end xl:justify-end md:w-auto">
 				<Button
 					variant="outline"
 					size="sm"

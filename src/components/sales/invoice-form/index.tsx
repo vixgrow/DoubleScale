@@ -79,10 +79,11 @@ import {
 	TemplateGallery,
 } from '../document-templates/template-gallery';
 import { normalizeTemplateColor } from '../document-templates/color-presets';
+import { DocumentEditorSidebar } from '../document-templates/document-editor-sidebar';
+import { DocumentEditorSteps } from '../document-templates/document-editor-steps';
 import { TemplateStyleEditor } from '../document-templates/template-style-editor';
 import {
 	DEFAULT_TEMPLATE_ID,
-	getTemplateMeta,
 	normalizeTemplateId,
 } from '../document-templates/registry';
 
@@ -571,12 +572,70 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		return panelShell(gallery);
 	}
 
+	const buildDraftInvoice = (): Invoice => {
+		const totals = computeLineItemsTotals(
+			lineItems,
+			discountType,
+			discountValue,
+			adjustment
+		);
+		return {
+			id: invoiceId || 0,
+			invoice_number:
+				existing?.invoice_number || __('Draft', 'doublescale'),
+			hash: existing?.hash || '',
+			status,
+			template,
+			template_color: templateColor,
+			contact_id: contact?.id || 0,
+			sale_agent_user_id: saleAgentUserId,
+			invoice_date: invoiceDate,
+			due_date: dueDate,
+			currency,
+			allowed_payment_modes: allowedPaymentModes,
+			discount_type: discountType,
+			discount_value: discountValue,
+			tag_ids: tagIds,
+			line_items: lineItems,
+			subtotal: totals.subtotal,
+			total_tax: totals.totalTax,
+			adjustment,
+			total: totals.total,
+			amount_paid: existing?.amount_paid ?? 0,
+			billing_address: billingAddress,
+			shipping_address: shippingAddress,
+			client_note: clientNote,
+			terms,
+			created_at: existing?.created_at ?? null,
+			updated_at: existing?.updated_at ?? null,
+			contact: contact ?? null,
+		} as Invoice;
+	};
+
+	const draftInvoice = buildDraftInvoice();
+
+	const inlinePreview = (
+		<div className="rounded-2xl border border-border bg-[#FAFBFC] p-4">
+			<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+				<h2 className="text-sm font-semibold text-foreground">
+					{__('Live Design Preview', 'doublescale')}
+				</h2>
+			</div>
+			<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
+				<InvoiceDocumentPreview invoice={draftInvoice} />
+			</div>
+		</div>
+	);
+
 	const formBody = (
 		<>
 			{isDialog ? (
-				<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
-					{pageTitle}
-				</h2>
+				<>
+					<DocumentEditorSteps activeStep="content" className="mb-4" />
+					<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
+						{pageTitle}
+					</h2>
+				</>
 			) : (
 				<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
 			)}
@@ -599,68 +658,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				}}
 			/>
 
-			<TemplateStyleEditor
-				value={templateColor}
-				onChange={setTemplateColor}
-				compact
-			/>
-
-			{(() => {
-				const totals = computeLineItemsTotals(
-					lineItems,
-					discountType,
-					discountValue,
-					adjustment
-				);
-				const draftInvoice = {
-					id: invoiceId || 0,
-					invoice_number:
-						existing?.invoice_number ||
-						__('Draft', 'doublescale'),
-					hash: existing?.hash || '',
-					status,
-					template,
-					template_color: templateColor,
-					contact_id: contact?.id || 0,
-					sale_agent_user_id: saleAgentUserId,
-					invoice_date: invoiceDate,
-					due_date: dueDate,
-					currency,
-					allowed_payment_modes: allowedPaymentModes,
-					discount_type: discountType,
-					discount_value: discountValue,
-					tag_ids: tagIds,
-					line_items: lineItems,
-					subtotal: totals.subtotal,
-					total_tax: totals.totalTax,
-					adjustment,
-					total: totals.total,
-					amount_paid: existing?.amount_paid ?? 0,
-					billing_address: billingAddress,
-					shipping_address: shippingAddress,
-					client_note: clientNote,
-					terms,
-					created_at: existing?.created_at ?? null,
-					updated_at: existing?.updated_at ?? null,
-					contact: contact ?? null,
-				} as Invoice;
-
-				return (
-					<div className="rounded-2xl border border-border bg-[#FAFBFC] p-4">
-						<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-							<h2 className="text-sm font-semibold text-foreground">
-								{__('Live Design Preview', 'doublescale')}
-							</h2>
-							<span className="text-xs text-muted-foreground">
-								{getTemplateMeta(template).name}
-							</span>
-						</div>
-						<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
-							<InvoiceDocumentPreview invoice={draftInvoice} />
-						</div>
-					</div>
-				);
-			})()}
+			{isDialog ? null : (
+				<>
+					<TemplateStyleEditor
+						value={templateColor}
+						onChange={setTemplateColor}
+						compact
+					/>
+					{inlinePreview}
+				</>
+			)}
 
 			<fieldset
 				disabled={fieldsLocked}
@@ -1028,6 +1035,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					</div>
 				</div>
 			</fieldset>
+
+			{isDialog ? (
+				<div className="mt-6 space-y-4 border-t border-border pt-6 lg:hidden">
+					<DocumentEditorSidebar
+						docType="invoice"
+						templateId={template}
+						templateColor={templateColor}
+						onColorChange={setTemplateColor}
+						preview={
+							<InvoiceDocumentPreview invoice={draftInvoice} />
+						}
+					/>
+				</div>
+			) : null}
 		</>
 	);
 
@@ -1080,12 +1101,25 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	if (isDialog) {
 		return (
 			<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
-				<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
-					<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6">
-						{formBody}
+				<div className="flex min-h-0 flex-1 overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+					<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+						<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6 lg:pr-4">
+							{formBody}
+						</div>
+						<div className="shrink-0 border-t border-border bg-white px-6 py-4">
+							{formFooter}
+						</div>
 					</div>
-					<div className="shrink-0  bg-white px-6 py-4">
-						{formFooter}
+					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(400px,34vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
+						<DocumentEditorSidebar
+							docType="invoice"
+							templateId={template}
+							templateColor={templateColor}
+							onColorChange={setTemplateColor}
+							preview={
+								<InvoiceDocumentPreview invoice={draftInvoice} />
+							}
+						/>
 					</div>
 				</div>
 				<SendDocumentDialog

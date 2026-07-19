@@ -574,7 +574,6 @@ $corner_tri_svg = static function ( string $fill ): string {
 					<?php if ( $show_sign ) : ?>
 						<div class="signature">
 							<div class="signature-line"></div>
-							<span class="signature-label"><?php esc_html_e( 'Signature', 'doublescale' ); ?></span>
 						</div>
 					<?php endif; ?>
 				</td>

@@ -332,7 +332,6 @@ const BankInfo: React.FC<{ placeholder?: boolean }> = ({ placeholder }) => {
 const SignatureBlock: React.FC = () => (
 	<div className="pv-inv-sign">
 		<div className="pv-inv-sign__line" />
-		<span className="pv-inv-sign__label">{__('Signature', 'doublescale')}</span>
 	</div>
 );
 

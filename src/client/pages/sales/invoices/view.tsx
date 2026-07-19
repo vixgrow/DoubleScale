@@ -46,7 +46,7 @@ import {
 	SendDocumentDialog,
 	ApprovalStatusBanner,
 } from '@/components/sales';
-import { getTemplateMeta } from '@/components/sales/document-templates/registry';
+import { DocumentEditorSidebar } from '@/components/sales/document-templates/document-editor-sidebar';
 import {
 	computeAmount,
 	formatSalesAmount,
@@ -585,21 +585,8 @@ const InvoiceView: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="rounded-2xl border border-border bg-white p-4 md:p-6">
-					<div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-						<h2 className="text-base font-semibold text-foreground">
-							{__('Document Preview', 'doublescale')}
-						</h2>
-						<span className="text-sm text-muted-foreground">
-							{__('Design:', 'doublescale')}{' '}
-							{getTemplateMeta(invoice.template).name}
-						</span>
-					</div>
-					<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
-						<InvoiceDocumentPreview invoice={invoice} />
-					</div>
-				</div>
-
+				<div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_min(400px,34vw)] xl:items-start">
+					<div className="min-w-0 space-y-6">
 				<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 					<div className={cardClass}>
 						<h2 className="mb-6 text-base font-semibold text-accent-foreground">
@@ -763,6 +750,19 @@ const InvoiceView: React.FC = () => {
 						)}
 					</div>
 				) : null}
+					</div>
+
+					<div className="xl:sticky xl:top-4">
+						<DocumentEditorSidebar
+							docType="invoice"
+							templateId={invoice.template}
+							templateColor={invoice.template_color ?? null}
+							onColorChange={() => {}}
+							showStyleEditor={false}
+							preview={<InvoiceDocumentPreview invoice={invoice} />}
+						/>
+					</div>
+				</div>
 			</div>
 
 			<SendDocumentDialog

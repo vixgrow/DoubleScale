@@ -6,6 +6,7 @@ import React, { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { DocumentDesign } from './designs';
+import { DocumentPreviewFrame } from './document-preview-frame';
 import { getCompanyFrom } from './company-from';
 import type { DocumentDesignDocType } from './designs/types';
 import { normalizeTemplateId } from './registry';
@@ -58,9 +59,10 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 			<h3 className="mb-3 text-base font-semibold text-foreground">
 				{__('Template Preview', 'doublescale')}
 			</h3>
-			<div className="overflow-auto rounded-lg border border-border bg-white p-3 shadow-sm">
-				<div className="mx-auto w-full min-w-[320px] max-w-[520px] pb-2">
-					<DocumentDesign
+			<div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+				<div className="max-h-[min(58vh,560px)] overflow-x-hidden overflow-y-auto p-0">
+					<DocumentPreviewFrame>
+						<DocumentDesign
 						template={normalizeTemplateId(templateId)}
 						accentColor={accentColor}
 						docType={docType}
@@ -131,6 +133,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 							},
 						]}
 					/>
+					</DocumentPreviewFrame>
 				</div>
 			</div>
 		</div>

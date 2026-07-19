@@ -58,10 +58,11 @@ import {
 	TemplateGallery,
 } from '../document-templates/template-gallery';
 import { normalizeTemplateColor } from '../document-templates/color-presets';
+import { DocumentEditorSidebar } from '../document-templates/document-editor-sidebar';
+import { DocumentEditorSteps } from '../document-templates/document-editor-steps';
 import { TemplateStyleEditor } from '../document-templates/template-style-editor';
 import {
 	DEFAULT_TEMPLATE_ID,
-	getTemplateMeta,
 	normalizeTemplateId,
 } from '../document-templates/registry';
 
@@ -514,9 +515,73 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		return panelShell(gallery);
 	}
 
+	const buildDraftProposal = (): Proposal => {
+		const totals = computeLineItemsTotals(
+			lineItems,
+			discountType,
+			discountValue,
+			adjustment
+		);
+		return {
+			id: proposalId || 0,
+			proposal_number:
+				existing?.proposal_number || __('Draft', 'doublescale'),
+			hash: existing?.hash || '',
+			subject,
+			status,
+			template,
+			template_color: templateColor,
+			contact_id: contact?.id || 0,
+			assigned_user_id: assignedUserId,
+			date,
+			open_till: openTill,
+			currency,
+			discount_type: discountType,
+			discount_value: discountValue,
+			tag_ids: tagIds,
+			line_items: lineItems,
+			subtotal: totals.subtotal,
+			adjustment,
+			total: totals.total,
+			to_name: toName,
+			address,
+			city,
+			state,
+			country,
+			zip,
+			email,
+			phone,
+			created_at: existing?.created_at ?? null,
+			updated_at: existing?.updated_at ?? null,
+			contact: contact ?? null,
+		} as Proposal;
+	};
+
+	const draftProposal = buildDraftProposal();
+
+	const inlinePreview = (
+		<div className="mb-6 rounded-2xl border border-border bg-[#FAFBFC] p-4">
+			<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+				<h2 className="text-sm font-semibold text-foreground">
+					{__('Live Design Preview', 'doublescale')}
+				</h2>
+			</div>
+			<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
+				<ProposalDocumentPreview proposal={draftProposal} />
+			</div>
+		</div>
+	);
+
 	const formBody = (
 		<div className="space-y-6">
-			{isDialog ? null : (
+			{isDialog ? (
+				<>
+					<DocumentEditorSteps activeStep="content" />
+					<h2 className="text-xl font-semibold tracking-tight text-[#29292E]">
+						{pageTitle}
+					</h2>
+				</>
+			) : (
 				<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
 			)}
 
@@ -538,70 +603,16 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				}}
 			/>
 
-			<TemplateStyleEditor
-				value={templateColor}
-				onChange={setTemplateColor}
-				compact
-			/>
-
-			{(() => {
-				const totals = computeLineItemsTotals(
-					lineItems,
-					discountType,
-					discountValue,
-					adjustment
-				);
-				const draftProposal = {
-					id: proposalId || 0,
-					proposal_number:
-						existing?.proposal_number ||
-						__('Draft', 'doublescale'),
-					hash: existing?.hash || '',
-					subject,
-					status,
-					template,
-					template_color: templateColor,
-					contact_id: contact?.id || 0,
-					assigned_user_id: assignedUserId,
-					date,
-					open_till: openTill,
-					currency,
-					discount_type: discountType,
-					discount_value: discountValue,
-					tag_ids: tagIds,
-					line_items: lineItems,
-					subtotal: totals.subtotal,
-					adjustment,
-					total: totals.total,
-					to_name: toName,
-					address,
-					city,
-					state,
-					country,
-					zip,
-					email,
-					phone,
-					created_at: existing?.created_at ?? null,
-					updated_at: existing?.updated_at ?? null,
-					contact: contact ?? null,
-				} as Proposal;
-
-				return (
-					<div className="mb-6 rounded-2xl border border-border bg-[#FAFBFC] p-4">
-						<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-							<h2 className="text-sm font-semibold text-foreground">
-								{__('Live Design Preview', 'doublescale')}
-							</h2>
-							<span className="text-xs text-muted-foreground">
-								{getTemplateMeta(template).name}
-							</span>
-						</div>
-						<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
-							<ProposalDocumentPreview proposal={draftProposal} />
-						</div>
-					</div>
-				);
-			})()}
+			{isDialog ? null : (
+				<>
+					<TemplateStyleEditor
+						value={templateColor}
+						onChange={setTemplateColor}
+						compact
+					/>
+					{inlinePreview}
+				</>
+			)}
 
 			<fieldset disabled={fieldsLocked} className="m-0 min-w-0 space-y-0 border-0 p-0">
 			<div className="grid grid-cols-1 lg:grid-cols-2 mb-6">
@@ -813,6 +824,20 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			</div>
 			</fieldset>
 
+			{isDialog ? (
+				<div className="space-y-4 border-t border-border pt-6 lg:hidden">
+					<DocumentEditorSidebar
+						docType="proposal"
+						templateId={template}
+						templateColor={templateColor}
+						onColorChange={setTemplateColor}
+						preview={
+							<ProposalDocumentPreview proposal={draftProposal} />
+						}
+					/>
+				</div>
+			) : null}
+
 		</div>
 	);
 
@@ -859,11 +884,26 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	if (isDialog) {
 		return (
 			<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
-				<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
-					<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6">
-						{formBody}
+				<div className="flex min-h-0 flex-1 overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+					<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+						<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6 lg:pr-4">
+							{formBody}
+						</div>
+						<div className="shrink-0 border-t border-border bg-white px-6 py-4">
+							{formFooter}
+						</div>
 					</div>
-					<div className="shrink-0 bg-white px-6 py-4">{formFooter}</div>
+					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(400px,34vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
+						<DocumentEditorSidebar
+							docType="proposal"
+							templateId={template}
+							templateColor={templateColor}
+							onColorChange={setTemplateColor}
+							preview={
+								<ProposalDocumentPreview proposal={draftProposal} />
+							}
+						/>
+					</div>
 				</div>
 				<SendDocumentDialog
 					open={sendOpen}

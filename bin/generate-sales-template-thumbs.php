@@ -236,11 +236,10 @@ function render_thumb( $cfg, $doc_label, $path ) {
 		imagestring( $im, 4, $tx + 10, $ty + 8, 'Total   $600', $ink );
 	}
 
-	// Signature for signature-based designs.
+	// Signature line for signature-based designs.
 	if ( in_array( $variant, array( 'clean', 'wave', 'centered', 'gold' ), true ) ) {
 		$sy = $H - 60;
 		fill_rect( $im, $W - $pad - 110, $sy, 100, 1, $muted );
-		imagestring( $im, 2, $W - $pad - 90, $sy + 6, 'Signature', $muted );
 	}
 
 	imagepng( $im, $path );

@@ -1,8 +1,8 @@
 import React from '@wordpress/element';
-import { PropovoiceLayout } from './propovoice-layout';
+import { DoubleScaleLayout } from './doublescale-layout';
 import type { DocumentDesignProps } from './types';
 
 const Design7: React.FC<DocumentDesignProps> = (props) => (
-	<PropovoiceLayout {...props} designId={7} variant="bar" />
+	<DoubleScaleLayout {...props} designId={7} />
 );
 export default Design7;

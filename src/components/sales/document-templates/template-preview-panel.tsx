@@ -124,7 +124,6 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 						discountValue={0}
 						adjustment={0}
 						total={total}
-						amountPaid={isInvoice ? 0 : undefined}
 						sections={[
 							{
 								title: __('Note', 'doublescale'),

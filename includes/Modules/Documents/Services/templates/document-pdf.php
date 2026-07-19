@@ -1,7 +1,7 @@
 <?php
 /**
  * Shared PDF HTML template for proposals and invoices.
- * Layout variants mirror the Propovoice-inspired web designs (1–8).
+ * Layout variants mirror the on-screen web designs (1–8).
  *
  * @package DoubleScale\Modules\Documents
  *
@@ -33,99 +33,93 @@ $balance       = $is_invoice ? max( 0, round( $total - $amount_paid, 2 ) ) : $to
 $design = isset( $design ) ? (int) $design : 1;
 
 /**
- * Per-design visual config aligned with web `designs.scss`.
+ * Per-design visual config aligned with the reference images.
  *
- * variant: classic|corners|corners-quad|wave|minimal|boxed|bar|sidebar
+ * variant: classic|divider|banner|sidebar|clean|wave|centered|gold
  * total_style: fill|line|soft
  */
 $design_config = array(
+	// Templates 1-4 mirror Propovoice's colored (primary) table header + zebra rows.
 	1 => array(
 		'variant'         => 'classic',
 		'accent'          => '#4c6fff',
-		'items_header'    => '#edf2f7',
-		'items_header_fg' => '#2d3748',
-		'total_bg'        => '#2d3748',
+		'items_header'    => '#4c6fff',
+		'items_header_fg' => '#ffffff',
+		'total_bg'        => '#4c6fff',
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => false,
-		'boxed_parties'   => false,
 	),
 	2 => array(
-		'variant'         => 'corners-quad',
-		'accent'          => '#0095ff',
-		'items_header'    => '#0095ff',
+		'variant'         => 'divider',
+		'accent'          => '#4c6fff',
+		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
-		'total_bg'        => '#0095ff',
+		'total_bg'        => '#4c6fff',
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => false,
-		'boxed_parties'   => false,
 	),
 	3 => array(
-		'variant'         => 'corners',
+		'variant'         => 'banner',
 		'accent'          => '#4c6fff',
-		'items_header'    => '#a0aec0',
+		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
 		'total_bg'        => '#4c6fff',
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => true,
-		'boxed_parties'   => false,
 	),
 	4 => array(
-		'variant'         => 'wave',
-		'accent'          => '#c6a96b',
-		'items_header'    => '#c6a96b',
+		'variant'         => 'sidebar',
+		'accent'          => '#4c6fff',
+		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
-		'total_bg'        => '#c6a96b',
+		'total_bg'        => '#4c6fff',
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => true,
-		'boxed_parties'   => false,
 	),
+	// Templates 5-8 mirror Propovoice's neutral (grey) header + dark total.
 	5 => array(
-		'variant'         => 'minimal',
-		'accent'          => '#c5d4e3',
-		'items_header'    => '#c5d4e3',
-		'items_header_fg' => '#ffffff',
+		'variant'         => 'clean',
+		'accent'          => '#4c6fff',
+		'items_header'    => '#edf2f7',
+		'items_header_fg' => '#718096',
 		'total_bg'        => 'transparent',
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'line',
 		'center_title'    => false,
-		'boxed_parties'   => false,
 	),
 	6 => array(
-		'variant'         => 'boxed',
-		'accent'          => '#1a202c',
+		'variant'         => 'wave',
+		'accent'          => '#4c6fff',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
 		'total_bg'        => '#edf2f7',
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'soft',
 		'center_title'    => false,
-		'boxed_parties'   => true,
 	),
 	7 => array(
-		'variant'         => 'bar',
+		'variant'         => 'centered',
 		'accent'          => '#1a202c',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
 		'total_bg'        => 'transparent',
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'line',
-		'center_title'    => false,
-		'boxed_parties'   => true,
+		'center_title'    => true,
 	),
 	8 => array(
-		'variant'         => 'sidebar',
-		'accent'          => '#edf2f7',
+		'variant'         => 'gold',
+		'accent'          => '#1a202c',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
 		'total_bg'        => '#edf2f7',
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'soft',
-		'center_title'    => false,
-		'boxed_parties'   => false,
+		'center_title'    => true,
 	),
 );
 
@@ -136,7 +130,7 @@ $sanitize_color = static function ( string $color ): string {
 	if ( 'transparent' === $color ) {
 		return 'transparent';
 	}
-	return preg_match( '/^#[0-9a-fA-F]{3,8}$/', $color ) ? $color : '#4c6fff';
+	return preg_match( '/^#[0-9a-fA-F]{3,8}$/', $color ) ? $color : '#2d3748';
 };
 
 $variant         = (string) $config['variant'];
@@ -147,16 +141,18 @@ $total_bg        = $sanitize_color( (string) $config['total_bg'] );
 $total_fg        = $sanitize_color( (string) $config['total_fg'] );
 $total_style     = (string) $config['total_style'];
 $center_title    = (bool) $config['center_title'];
-$boxed_parties   = (bool) $config['boxed_parties'];
 
 $custom_accent = \DoubleScale\Modules\Documents\Constants\DocumentTemplateColor::normalize(
 	$document['template_color'] ?? null
 );
 if ( null !== $custom_accent ) {
-	$accent          = $sanitize_color( $custom_accent );
-	$items_header_bg = $accent;
-	$items_header_fg = '#ffffff';
+	$accent = $sanitize_color( $custom_accent );
 	if ( 'fill' === $total_style ) {
+		$items_header_bg = $accent;
+		$items_header_fg = '#ffffff';
+		$total_bg        = $accent;
+		$total_fg        = '#ffffff';
+	} elseif ( in_array( $design, array( 6, 7, 8 ), true ) ) {
 		$total_bg = $accent;
 		$total_fg = '#ffffff';
 	}
@@ -205,11 +201,9 @@ if ( $is_invoice ) {
 $company_lines = array();
 $logo_data_uri = (string) ( $company['logo_data_uri'] ?? '' );
 
-if ( '' === $logo_data_uri ) {
-	$name_line = trim( (string) ( $company['name'] ?? '' ) );
-	if ( '' !== $name_line ) {
-		$company_lines[] = $name_line;
-	}
+$company_name = trim( (string) ( $company['name'] ?? '' ) );
+if ( '' === $logo_data_uri && '' !== $company_name ) {
+	$company_lines[] = $company_name;
 }
 
 $address_block = trim( (string) ( $company['address'] ?? '' ) );
@@ -228,38 +222,37 @@ if ( '' !== $url_line ) {
 	$company_lines[] = $url_line;
 }
 
-$bill_label = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
-$show_wave  = 'wave' === $variant;
-$show_quad  = 'corners-quad' === $variant;
-$show_pair  = 'corners' === $variant;
-$show_bar   = 'bar' === $variant;
-$show_side  = 'sidebar' === $variant;
-$show_slant = 'boxed' === $variant;
+$bill_label   = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
+$show_wave    = 'wave' === $variant;
+$show_banner  = 'banner' === $variant;
+$show_side    = 'sidebar' === $variant;
+$show_corner  = 'centered' === $variant;
+$show_gold    = 'gold' === $variant;
+$show_divider = 'divider' === $variant;
+$show_sign    = in_array( $variant, array( 'clean', 'wave', 'centered', 'gold' ), true );
 
 $total_row_css = 'fill' === $total_style
-	? sprintf( 'background:%s;color:%s;padding:10px 12px;', $total_bg, $total_fg )
+	? sprintf( 'background:%s;color:%s;padding:12px 16px;', $total_bg, $total_fg )
 	: ( 'line' === $total_style
-		? sprintf( 'border-top:2px solid #1a202c;color:%s;padding-top:10px;font-size:16px;', $total_fg )
-		: sprintf( 'background:%s;color:%s;padding:10px 12px;', $total_bg, $total_fg ) );
+		? sprintf( 'border-top:2px solid %s;color:%s;padding-top:12px;font-size:20px;', $accent, $total_fg )
+		: ( in_array( $design, array( 6, 8 ), true )
+			? sprintf( 'background:%s;color:%s;padding:12px 16px;', $total_bg, $total_fg )
+			: sprintf( 'color:%s;padding-top:10px;font-size:18px;', $total_fg ) ) );
 
-$corner_svg = static function ( string $fill, string $flip = '' ): string {
-	$path = 'M0,0 H180 C140,18 110,55 95,95 C70,150 30,140 0,140 Z';
-	$transform = '';
-	if ( 'x' === $flip ) {
-		$transform = ' transform="translate(180,0) scale(-1,1)"';
-	} elseif ( 'y' === $flip ) {
-		$transform = ' transform="translate(0,140) scale(1,-1)"';
-	} elseif ( 'xy' === $flip ) {
-		$transform = ' transform="translate(180,140) scale(-1,-1)"';
+$wave_svg = static function ( string $fill, bool $flip = false ): string {
+	if ( $flip ) {
+		return '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="70" viewBox="0 0 800 90" preserveAspectRatio="none"><path fill="' . esc_attr( $fill ) . '" d="M0,90 L800,90 L800,20 C640,70 520,-10 360,28 C220,60 110,20 0,50 Z"/></svg>';
 	}
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="110" viewBox="0 0 180 140"><path fill="' . esc_attr( $fill ) . '"' . $transform . ' d="' . $path . '"/></svg>';
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="70" viewBox="0 0 800 90" preserveAspectRatio="none"><path fill="' . esc_attr( $fill ) . '" d="M0,0 L800,0 L800,60 C640,20 520,96 360,58 C220,26 110,70 0,36 Z"/></svg>';
 };
 
-$wave_svg = static function ( string $fill, bool $flip_y = false ): string {
-	if ( $flip_y ) {
-		return '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="28" viewBox="0 0 800 36" preserveAspectRatio="none"><path fill="' . esc_attr( $fill ) . '" d="M0,36 H800 V18 C733,2 667,28 600,16 C533,4 467,30 400,16 C333,2 267,28 200,16 C133,4 67,30 0,18 Z"/></svg>';
-	}
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="28" viewBox="0 0 800 36" preserveAspectRatio="none"><path fill="' . esc_attr( $fill ) . '" d="M0,0 H800 V18 C733,34 667,8 600,20 C533,32 467,6 400,20 C333,34 267,8 200,20 C133,32 67,6 0,18 Z"/></svg>';
+$gold_corner_svg = static function ( string $fill, bool $flip = false ): string {
+	$transform = $flip ? ' transform="rotate(180 100 100)"' : '';
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 200 200"><path fill="' . esc_attr( $fill ) . '"' . $transform . ' d="M0,0 H200 V60 C200,140 140,200 60,200 H0 Z"/></svg>';
+};
+
+$corner_tri_svg = static function ( string $fill ): string {
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 200 200"><path fill="' . esc_attr( $fill ) . '" d="M200,0 V200 H0 C120,180 180,120 200,0 Z"/></svg>';
 };
 ?>
 <!DOCTYPE html>
@@ -268,241 +261,250 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 	<meta charset="utf-8">
 	<title><?php echo esc_html( $number_label . ' ' . $number_value ); ?></title>
 	<style>
-		@page { margin: 28px 32px; }
+		@page { margin: 0; }
 		* { box-sizing: border-box; }
 		body {
 			font-family: DejaVu Sans, sans-serif;
-			color: #1a202c;
+			color: #2d3748;
 			font-size: 12px;
-			line-height: 1.45;
+			line-height: 1.5;
 			margin: 0;
 			padding: 0;
 		}
-		.page {
-			position: relative;
-			overflow: hidden;
-			min-height: 980px;
-		}
+		.page { position: relative; }
 		.body-inner {
 			position: relative;
-			z-index: 2;
-			padding: <?php echo $show_side ? '18px 18px 18px 56px' : '18px 8px 12px'; ?>;
-		}
-		.ornament { position: absolute; z-index: 1; line-height: 0; }
-		.ornament-tl { top: 0; left: 0; width: 140px; }
-		.ornament-tr { top: 0; right: 0; width: 140px; }
-		.ornament-bl { bottom: 0; left: 0; width: 140px; }
-		.ornament-br { bottom: 0; right: 0; width: 140px; }
-		.ornament-wave-top { top: 0; left: 0; right: 0; width: 100%; }
-		.ornament-wave-bottom { bottom: 0; left: 0; right: 0; width: 100%; }
-
-		.side-tab {
-			position: absolute;
-			left: 0;
-			top: 220px;
-			width: 36px;
-			background: #edf2f7;
-			border-radius: 0 8px 8px 0;
-			padding: 28px 6px;
-			z-index: 3;
-			text-align: center;
-		}
-		.side-tab span {
-			display: block;
-			font-size: 11px;
-			font-weight: 700;
-			color: #1a202c;
-			letter-spacing: 0.04em;
-			word-break: break-all;
-			line-height: 1.2;
-		}
-
-		.title-bar {
-			background: <?php echo esc_html( $accent ); ?>;
-			color: #fff;
-			padding: 12px 16px;
-			margin: -18px -8px 18px;
-		}
-		.title-bar table { width: 100%; }
-		.title-bar .brand { font-size: 12px; opacity: 0.85; }
-		.brand-logo { display: block; max-height: 40px; max-width: 140px; }
-		.party-logo { display: block; max-height: 56px; max-width: 160px; margin-bottom: 6px; }
-		.title-bar .doc-title { font-size: 18px; font-weight: 700; text-align: right; }
-
-		.slant-bar {
-			width: 180px;
-			height: 8px;
-			background: <?php echo esc_html( $accent ); ?>;
-			margin-bottom: 14px;
+			padding: <?php echo $show_side ? '38px 40px 32px 64px' : '38px 40px 32px'; ?>;
 		}
 
 		.doc-type {
-			font-size: 20px;
-			font-weight: 700;
-			margin: 0 0 4px;
 			color: #1a202c;
+			font-size: 30px;
+			font-weight: bold;
+			margin: 0 0 8px;
 		}
-		.doc-number { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
-		.subject { color: #4a5568; font-size: 12px; margin: 0; }
-		.header { width: 100%; margin-bottom: 16px; }
-		.header td { vertical-align: top; }
-		.header.centered { text-align: center; }
-		.header.centered .dates { text-align: center; }
-		.dates { text-align: right; font-size: 11px; color: #4a5568; }
-		.dates .label { color: #718096; }
+		.doc-type.centered { text-align: center; margin-bottom: 22px; }
+		.doc-number { color: #6b7688; font-size: 12px; font-weight: bold; margin: 0 0 6px; }
+		.subject { color: #6b7688; font-size: 12px; margin: 0; }
 
-		.meta { width: 100%; margin-bottom: 18px; border-collapse: separate; border-spacing: 10px 0; }
-		.meta td { vertical-align: top; width: 50%; }
-		.party-box {
-			<?php if ( $boxed_parties ) : ?>
-			border: 1px solid #edf2f7;
-			border-radius: 6px;
-			padding: 12px 14px;
-			<?php endif; ?>
-		}
-		.party-label { font-size: 12px; font-weight: 700; margin: 0 0 6px; }
-		.party-line { color: #4a5568; font-size: 11px; margin: 0 0 2px; }
+		.brand { color: #1a202c; font-size: 20px; font-weight: bold; margin: 0 0 6px; }
+		.brand-logo { display: block; max-height: 50px; max-width: 190px; margin-bottom: 6px; }
+		.brand-line { color: #8a94a6; font-size: 11px; margin: 0 0 1px; }
 
-		table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-		table.items th, table.items td { padding: 8px 6px; text-align: left; vertical-align: top; }
+		.hero { width: 100%; margin-bottom: 26px; }
+		.hero td { vertical-align: top; }
+		.hero .right { text-align: right; }
+
+		.dates { margin-top: 10px; }
+		.dates div { color: #4a5568; font-size: 11px; }
+		.dates .label { color: #8a94a6; font-weight: bold; }
+		.right .dates div { text-align: right; }
+
+		.meta { width: 100%; margin-bottom: 26px; border-spacing: 0; }
+		.meta td { vertical-align: top; width: 50%; padding-right: 16px; }
+		.party-label { color: #1a202c; font-size: 14px; font-weight: bold; margin: 0 0 8px; }
+		.party-line { color: #4a5568; font-size: 11px; margin: 0 0 1px; }
+		.party-box { background: #f5f7fa; border-radius: 8px; padding: 14px 16px; }
+		.party-highlight { background: #e8eefb; border-radius: 8px; padding: 14px 16px; }
+
+		table.items { width: 100%; border-collapse: collapse; margin-bottom: 26px; }
 		table.items th {
 			background: <?php echo esc_html( $items_header_bg ); ?>;
 			color: <?php echo esc_html( $items_header_fg ); ?>;
-			font-size: 11px;
-			font-weight: 700;
-			text-transform: none;
+			font-size: 10px;
+			font-weight: bold;
+			padding: 11px 12px;
+			text-align: left;
+			text-transform: uppercase;
 		}
-		table.items tbody tr:nth-child(even) td { background: #f7fafc; }
-		table.items .desc { color: #718096; font-size: 10px; }
+		table.items td { padding: 12px; vertical-align: top; border-bottom: 1px solid #edf0f5; color: #4a5568; font-size: 11px; }
+		table.items .name { color: #1a202c; font-weight: bold; }
+		table.items .desc { color: #8a94a6; font-size: 10px; }
+		table.items .sl { color: #8a94a6; width: 36px; }
 		.right { text-align: right; }
 
-		.footer { width: 100%; margin-top: 8px; }
+		.footer { width: 100%; }
 		.footer td { vertical-align: top; }
-		.notes { width: 55%; padding-right: 16px; }
-		.section-title { font-size: 11px; font-weight: 700; margin: 0 0 3px; }
-		.section-body { color: #4a5568; font-size: 11px; margin: 0 0 10px; }
+		.notes { width: 55%; padding-right: 24px; }
+		.section-title { color: #1a202c; font-size: 11px; font-weight: bold; margin: 0 0 3px; }
+		.section-body { color: #4a5568; font-size: 11px; margin: 0 0 12px; }
+
+		.signature { margin-top: 26px; width: 180px; }
+		.signature-line { border-bottom: 1px solid #b7c0cf; height: 30px; }
+		.signature-label { color: #8a94a6; font-size: 11px; font-weight: bold; }
 
 		table.totals { width: 100%; border-collapse: collapse; }
-		<?php if ( 'soft' === $total_style || 'boxed' === $variant ) : ?>
-		.totals-wrap {
-			background: #edf2f7;
-			border-radius: 8px;
-			padding: 10px 12px;
-		}
+		<?php if ( 'soft' === $total_style ) : ?>
+		.totals-wrap { background: #eef1f6; border-radius: 8px; padding: 12px 16px; }
 		<?php endif; ?>
-		table.totals th, table.totals td { padding: 5px 0; }
-		table.totals th { text-align: left; color: #718096; font-weight: normal; }
-		table.totals td { text-align: right; font-weight: 600; }
+		table.totals th { color: #8a94a6; font-weight: normal; text-align: left; padding: 6px 0; font-size: 12px; }
+		table.totals td { color: #2d3748; font-weight: bold; text-align: right; padding: 6px 0; font-size: 12px; }
 		table.totals .total-row th,
 		table.totals .total-row td {
 			<?php echo $total_row_css; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized colors above. ?>
-			font-weight: 700;
+			font-weight: bold;
 		}
 
-		.muted { color: #718096; font-size: 11px; }
-		.divider { border-bottom: 1px solid #d6e2ef; margin: 0 0 14px; padding-bottom: 10px; }
+		.banner {
+			background: #1a202c;
+			color: #fff;
+			padding: 22px 40px;
+			width: 100%;
+		}
+		.banner td { vertical-align: middle; }
+		.banner .brand, .banner .brand-line { color: #fff; }
+		.banner .brand-line { color: #cbd5e0; }
+		.banner-title { color: #fff; font-size: 28px; font-weight: bold; text-align: right; }
+
+		.divider-bar { background: <?php echo esc_html( $accent ); ?>; height: 6px; width: 100%; margin: 0 0 22px; }
+
+		.side-tab {
+			position: absolute; left: 0; top: 0; bottom: 0; width: 44px;
+			background: <?php echo esc_html( $accent ); ?>;
+		}
+		.side-tab span {
+			color: #fff; font-size: 18px; font-weight: bold;
+		}
+
+		.ornament { position: absolute; line-height: 0; }
+		.ornament-wave-top { top: 0; left: 0; right: 0; }
+		.ornament-wave-bottom { bottom: 0; left: 0; right: 0; }
+		.ornament-tl { top: 0; left: 0; }
+		.ornament-br { bottom: 0; right: 0; }
+
+		.muted { color: #8a94a6; font-size: 11px; }
 	</style>
 </head>
 <body>
-<div class="page design-<?php echo (int) $design; ?> variant-<?php echo esc_attr( $variant ); ?>">
+<div class="page">
 
 	<?php if ( $show_wave ) : ?>
 		<div class="ornament ornament-wave-top"><?php echo $wave_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 		<div class="ornament ornament-wave-bottom"><?php echo $wave_svg( $accent, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 	<?php endif; ?>
 
-	<?php if ( $show_quad || $show_pair ) : ?>
-		<div class="ornament ornament-tl"><?php echo $corner_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-		<?php if ( $show_quad ) : ?>
-			<div class="ornament ornament-tr"><?php echo $corner_svg( $accent, 'x' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-			<div class="ornament ornament-bl"><?php echo $corner_svg( $accent, 'y' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-		<?php endif; ?>
-		<div class="ornament ornament-br"><?php echo $corner_svg( $accent, 'xy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+	<?php if ( $show_gold ) : ?>
+		<div class="ornament ornament-tl"><?php echo $gold_corner_svg( $accent, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+		<div class="ornament ornament-br"><?php echo $gold_corner_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+	<?php endif; ?>
+
+	<?php if ( $show_corner ) : ?>
+		<div class="ornament ornament-br"><?php echo $corner_tri_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 	<?php endif; ?>
 
 	<?php if ( $show_side ) : ?>
-		<div class="side-tab"><span><?php echo esc_html( $number_label ); ?></span></div>
+		<table class="side-tab" style="height:100%;"><tr><td style="text-align:center;vertical-align:middle;"><span><?php echo esc_html( $number_label ); ?></span></td></tr></table>
+	<?php endif; ?>
+
+	<?php if ( $show_banner ) : ?>
+		<table class="banner">
+			<tr>
+				<td>
+					<?php if ( '' !== $logo_data_uri ) : ?>
+						<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( $company_name ); ?>" />
+					<?php else : ?>
+						<div class="brand"><?php echo esc_html( '' !== $company_name ? $company_name : $number_label ); ?></div>
+					<?php endif; ?>
+					<?php foreach ( array_slice( $company_lines, '' === $logo_data_uri ? 1 : 0 ) as $line ) : ?>
+						<p class="brand-line"><?php echo esc_html( $line ); ?></p>
+					<?php endforeach; ?>
+				</td>
+				<td class="banner-title"><?php echo esc_html( $number_label ); ?></td>
+			</tr>
+		</table>
 	<?php endif; ?>
 
 	<div class="body-inner">
-		<?php if ( $show_bar ) : ?>
-			<div class="title-bar">
-				<table>
-					<tr>
-						<td class="brand">
-							<?php if ( '' !== $logo_data_uri ) : ?>
-								<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( (string) ( $company['name'] ?? $number_label ) ); ?>" />
-							<?php else : ?>
-								<?php echo esc_html( (string) ( $company['name'] ?? $number_label ) ); ?>
-							<?php endif; ?>
-						</td>
-						<td class="doc-title"><?php echo esc_html( $number_label ); ?></td>
-					</tr>
-				</table>
-			</div>
+
+		<?php if ( $show_corner || $show_gold ) : ?>
+			<div class="doc-type centered"><?php echo esc_html( $number_label ); ?></div>
 		<?php endif; ?>
 
-		<?php if ( $show_slant ) : ?>
-			<div class="slant-bar"></div>
-		<?php endif; ?>
-
-		<table class="header<?php echo $center_title ? ' centered' : ''; ?><?php echo in_array( $variant, array( 'minimal', 'sidebar' ), true ) ? ' divider' : ''; ?>">
-			<tr>
-				<td>
-					<?php if ( ! $show_bar && ! $show_side ) : ?>
-						<div class="doc-type"><?php echo esc_html( $number_label ); ?></div>
-					<?php endif; ?>
-					<div class="doc-number"><?php echo esc_html( $number_value ); ?></div>
-					<?php if ( ! $is_invoice && ! empty( $document['subject'] ) ) : ?>
-						<p class="subject"><?php echo esc_html( (string) $document['subject'] ); ?></p>
-					<?php endif; ?>
-				</td>
-				<td class="dates">
-					<?php if ( $is_invoice ) : ?>
-						<div><span class="label"><?php esc_html_e( 'Invoice Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['invoice_date'] ?? '—' ) ); ?></div>
-						<div><span class="label"><?php esc_html_e( 'Due Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['due_date'] ?? '—' ) ); ?></div>
-					<?php else : ?>
-						<div><span class="label"><?php esc_html_e( 'Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['date'] ?? '—' ) ); ?></div>
-						<div><span class="label"><?php esc_html_e( 'Open Till', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['open_till'] ?? '—' ) ); ?></div>
-					<?php endif; ?>
-					<div><span class="label"><?php esc_html_e( 'Currency', 'doublescale' ); ?>:</span> <?php echo esc_html( $currency ); ?></div>
-				</td>
-			</tr>
-		</table>
-
-		<table class="meta">
-			<tr>
-				<td>
-					<div class="party-box">
-						<div class="party-label"><?php esc_html_e( 'From', 'doublescale' ); ?></div>
+		<?php if ( ! $show_banner ) : ?>
+			<table class="hero">
+				<tr>
+					<td>
 						<?php if ( '' !== $logo_data_uri ) : ?>
-							<img class="party-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( (string) ( $company['name'] ?? '' ) ); ?>" />
+							<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( $company_name ); ?>" />
+						<?php else : ?>
+							<div class="brand"><?php echo esc_html( '' !== $company_name ? $company_name : $number_label ); ?></div>
 						<?php endif; ?>
-						<?php foreach ( $company_lines as $line ) : ?>
-							<p class="party-line"><?php echo esc_html( $line ); ?></p>
+						<?php foreach ( array_slice( $company_lines, '' === $logo_data_uri ? 1 : 0 ) as $line ) : ?>
+							<p class="brand-line"><?php echo esc_html( $line ); ?></p>
 						<?php endforeach; ?>
-					</div>
-				</td>
-				<td>
-					<div class="party-box">
-						<div class="party-label"><?php echo esc_html( $bill_label ); ?></div>
-						<?php if ( $customer_lines ) : ?>
+					</td>
+					<td class="right">
+						<?php if ( ! $show_corner && ! $show_gold ) : ?>
+							<div class="doc-type"><?php echo esc_html( $number_label ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! $show_side && ! $show_wave && ! $show_corner && ! $show_gold ) : ?>
+							<div class="doc-number"><?php echo esc_html( $number_value ); ?></div>
+						<?php endif; ?>
+						<?php if ( in_array( $variant, array( 'clean', 'wave', 'centered', 'gold', 'sidebar', 'divider' ), true ) && $customer_lines ) : ?>
+							<div class="party-label" style="margin-top:6px;"><?php echo esc_html( $bill_label ); ?></div>
 							<?php foreach ( $customer_lines as $line ) : ?>
 								<p class="party-line"><?php echo esc_html( trim( (string) $line ) ); ?></p>
 							<?php endforeach; ?>
-						<?php else : ?>
-							<p class="party-line">—</p>
 						<?php endif; ?>
-					</div>
-				</td>
-			</tr>
-		</table>
+						<div class="dates">
+							<?php if ( $is_invoice ) : ?>
+								<div><span class="label"><?php esc_html_e( 'Invoice Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['invoice_date'] ?? '—' ) ); ?></div>
+								<div><span class="label"><?php esc_html_e( 'Due Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['due_date'] ?? '—' ) ); ?></div>
+							<?php else : ?>
+								<div><span class="label"><?php esc_html_e( 'Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['date'] ?? '—' ) ); ?></div>
+								<div><span class="label"><?php esc_html_e( 'Open Till', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['open_till'] ?? '—' ) ); ?></div>
+							<?php endif; ?>
+							<div><span class="label"><?php esc_html_e( 'Currency', 'doublescale' ); ?>:</span> <?php echo esc_html( $currency ); ?></div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		<?php endif; ?>
+
+		<?php if ( $show_divider ) : ?>
+			<div class="divider-bar"></div>
+		<?php endif; ?>
+
+		<?php // Two-column From / Bill To block (classic, divider, banner). ?>
+		<?php if ( in_array( $variant, array( 'classic', 'divider', 'banner' ), true ) ) : ?>
+			<table class="meta">
+				<tr>
+					<td>
+						<div class="<?php echo $show_divider ? 'party-box' : ''; ?>">
+							<div class="party-label"><?php esc_html_e( 'From', 'doublescale' ); ?></div>
+							<?php if ( $show_banner && '' !== $logo_data_uri ) : ?>
+								<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="" style="max-height:40px;" />
+							<?php endif; ?>
+							<?php foreach ( $company_lines as $line ) : ?>
+								<p class="party-line"><?php echo esc_html( $line ); ?></p>
+							<?php endforeach; ?>
+						</div>
+					</td>
+					<td>
+						<div class="<?php echo $show_divider ? 'party-box' : ( $show_banner ? 'party-highlight' : '' ); ?>">
+							<div class="party-label"><?php echo esc_html( $bill_label ); ?></div>
+							<?php if ( $customer_lines ) : ?>
+								<?php foreach ( $customer_lines as $line ) : ?>
+									<p class="party-line"><?php echo esc_html( trim( (string) $line ) ); ?></p>
+								<?php endforeach; ?>
+							<?php else : ?>
+								<p class="party-line">—</p>
+							<?php endif; ?>
+						</div>
+					</td>
+				</tr>
+			</table>
+		<?php endif; ?>
 
 		<table class="items">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Item', 'doublescale' ); ?></th>
-					<th class="right"><?php esc_html_e( 'Qty', 'doublescale' ); ?></th>
+					<?php $show_sl = in_array( $variant, array( 'classic', 'divider', 'banner', 'sidebar' ), true ); ?>
+					<?php if ( $show_sl ) : ?>
+						<th class="sl"><?php esc_html_e( 'SL.', 'doublescale' ); ?></th>
+					<?php endif; ?>
+					<th><?php esc_html_e( 'Item Description', 'doublescale' ); ?></th>
+					<th class="right"><?php esc_html_e( 'Unit', 'doublescale' ); ?></th>
 					<th class="right"><?php esc_html_e( 'Rate', 'doublescale' ); ?></th>
 					<?php if ( $is_invoice ) : ?>
 						<th class="right"><?php esc_html_e( 'Tax', 'doublescale' ); ?></th>
@@ -513,15 +515,17 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 			<tbody>
 				<?php
 				$has_rows = false;
+				$row_no   = 0;
 				foreach ( $line_items as $item ) :
 					if ( ! empty( $item['optional'] ) ) {
 						continue;
 					}
 					$has_rows = true;
-					$qty      = (float) ( $item['qty'] ?? 0 );
-					$rate     = (float) ( $item['rate'] ?? 0 );
-					$amount   = (float) ( $item['amount'] ?? ( $qty * $rate ) );
-					$taxes    = array();
+					++$row_no;
+					$qty    = (float) ( $item['qty'] ?? 0 );
+					$rate   = (float) ( $item['rate'] ?? 0 );
+					$amount = (float) ( $item['amount'] ?? ( $qty * $rate ) );
+					$taxes  = array();
 					if ( ! empty( $item['tax'] ) && is_array( $item['tax'] ) ) {
 						foreach ( $item['tax'] as $tax ) {
 							if ( isset( $tax['name'], $tax['rate'] ) ) {
@@ -531,8 +535,11 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 					}
 					?>
 					<tr>
+						<?php if ( $show_sl ) : ?>
+							<td class="sl"><?php echo esc_html( str_pad( (string) $row_no, 2, '0', STR_PAD_LEFT ) . '.' ); ?></td>
+						<?php endif; ?>
 						<td>
-							<strong><?php echo esc_html( (string) ( $item['description'] ?? '—' ) ); ?></strong>
+							<span class="name"><?php echo esc_html( (string) ( $item['description'] ?? '—' ) ); ?></span>
 							<?php if ( ! empty( $item['long_description'] ) ) : ?>
 								<br><span class="desc"><?php echo esc_html( (string) $item['long_description'] ); ?></span>
 							<?php endif; ?>
@@ -547,7 +554,7 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 				<?php endforeach; ?>
 				<?php if ( ! $has_rows ) : ?>
 					<tr>
-						<td colspan="<?php echo $is_invoice ? 5 : 4; ?>" class="muted"><?php esc_html_e( 'No line items.', 'doublescale' ); ?></td>
+						<td colspan="<?php echo (int) ( ( $show_sl ? 1 : 0 ) + ( $is_invoice ? 5 : 4 ) ); ?>" class="muted"><?php esc_html_e( 'No line items.', 'doublescale' ); ?></td>
 					</tr>
 				<?php endif; ?>
 			</tbody>
@@ -557,16 +564,22 @@ $wave_svg = static function ( string $fill, bool $flip_y = false ): string {
 			<tr>
 				<td class="notes">
 					<?php if ( $is_invoice && ! empty( $document['client_note'] ) ) : ?>
-						<div class="section-title"><?php esc_html_e( 'Client Note', 'doublescale' ); ?></div>
+						<div class="section-title"><?php esc_html_e( 'Note', 'doublescale' ); ?></div>
 						<p class="section-body"><?php echo esc_html( (string) $document['client_note'] ); ?></p>
 					<?php endif; ?>
 					<?php if ( $is_invoice && ! empty( $document['terms'] ) ) : ?>
-						<div class="section-title"><?php esc_html_e( 'Terms', 'doublescale' ); ?></div>
+						<div class="section-title"><?php esc_html_e( 'T&C', 'doublescale' ); ?></div>
 						<p class="section-body"><?php echo esc_html( (string) $document['terms'] ); ?></p>
+					<?php endif; ?>
+					<?php if ( $show_sign ) : ?>
+						<div class="signature">
+							<div class="signature-line"></div>
+							<span class="signature-label"><?php esc_html_e( 'Signature', 'doublescale' ); ?></span>
+						</div>
 					<?php endif; ?>
 				</td>
 				<td style="width:42%;">
-					<div class="totals-wrap">
+					<div class="<?php echo 'soft' === $total_style ? 'totals-wrap' : ''; ?>">
 						<table class="totals">
 							<tr>
 								<th><?php esc_html_e( 'Subtotal', 'doublescale' ); ?></th>

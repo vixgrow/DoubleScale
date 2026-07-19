@@ -47,8 +47,8 @@ const TemplateCardGrid: React.FC<{
 	selectedId: number;
 	onPick: (id: number) => void;
 	columns?: string;
-}> = ({ docType, selectedId, onPick, columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' }) => (
-	<div className={`grid gap-4 ${columns}`}>
+}> = ({ docType, selectedId, onPick, columns = 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4' }) => (
+	<div className={`grid auto-rows-min content-start items-start gap-4 sm:gap-5 ${columns}`}>
 		{DOCUMENT_TEMPLATES.map((tpl) => {
 			const isSelected = selectedId === tpl.id;
 			return (
@@ -56,25 +56,24 @@ const TemplateCardGrid: React.FC<{
 					key={tpl.id}
 					type="button"
 					onClick={() => onPick(tpl.id)}
-					className={`group relative overflow-hidden rounded-xl border bg-white text-left transition ${
+					className={`group relative flex w-full flex-col self-start overflow-hidden rounded-xl border bg-white p-0 text-left transition ${
 						isSelected
 							? 'border-primary ring-2 ring-primary/30'
 							: 'border-border hover:border-primary/50'
 					}`}
 				>
-					<div className="aspect-[600/840] overflow-hidden bg-[#f8fafc]">
-						<img
-							src={thumbFor(tpl, docType)}
-							alt={tpl.name}
-							className="h-full w-full object-cover object-top"
-						/>
-					</div>
-					<div className="flex items-center justify-between gap-2 px-3 py-2.5">
+					<div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 px-2.5 py-1.5">
 						<span className="text-sm font-medium text-foreground">
 							{tpl.name}
 						</span>
 						<span className="text-xs text-muted-foreground">#{tpl.id}</span>
 					</div>
+					<img
+						src={thumbFor(tpl, docType)}
+						alt={tpl.name}
+						className="block w-full h-auto"
+						loading="lazy"
+					/>
 					<div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/45 via-transparent to-transparent p-3 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
 						<span className="rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-foreground shadow">
 							{__('Select', 'doublescale')}
@@ -128,12 +127,14 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
-				<TemplateCardGrid
-					docType={docType}
-					selectedId={selectedId}
-					onPick={setSelectedId}
-				/>
+			<div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
+				<div className="min-h-0 w-full self-start">
+					<TemplateCardGrid
+						docType={docType}
+						selectedId={selectedId}
+						onPick={setSelectedId}
+					/>
+				</div>
 				<div className="flex flex-col gap-4">
 					<TemplatePreviewPanel
 						docType={docType}
@@ -221,13 +222,15 @@ export const TemplateGalleryDialog: React.FC<TemplateGalleryDialogProps> = ({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,1fr)]">
-					<TemplateCardGrid
-						docType={docType}
-						selectedId={selectedId}
-						onPick={setSelectedId}
-						columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3"
-					/>
+				<div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,1fr)]">
+					<div className="min-h-0 w-full self-start">
+						<TemplateCardGrid
+							docType={docType}
+							selectedId={selectedId}
+							onPick={setSelectedId}
+							columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3"
+						/>
+					</div>
 					<div className="flex flex-col gap-4">
 						<TemplatePreviewPanel
 							docType={docType}

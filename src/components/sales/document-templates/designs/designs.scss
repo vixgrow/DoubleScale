@@ -662,12 +662,12 @@
 	}
 
 	.pv-inv-five .pv-inv-shape1 {
-		background-color: #ebebeb;
+		background-color: var(--pv-inv-primary);
 		height: 1px;
 	}
 
 	.pv-inv-five .pv-inv-shape2 {
-		background-color: #ebebeb;
+		background-color: var(--pv-inv-primary);
 		height: 7px;
 	}
 
@@ -686,11 +686,11 @@
 	}
 
 	.pv-inv-five .pv-inv-items table thead {
-		background-color: #edf2f7;
+		background-color: var(--pv-inv-primary-soft);
 	}
 
 	.pv-inv-five .pv-inv-items table thead th {
-		color: #718096;
+		color: var(--pv-inv-primary);
 	}
 
 	.pv-inv-five .pv-inv-total table th {
@@ -701,28 +701,33 @@
 	}
 
 	.pv-inv-five .pv-inv-table-bg {
-		background: none;
+		background-color: var(--pv-inv-primary);
 	}
 
 	.pv-inv-five .pv-inv-table-bg th {
-		color: #1a202c !important;
+		color: var(--pv-inv-white) !important;
 	}
 
 	.pv-inv-five .pv-inv-table-bg td,
 	.pv-inv-five .pv-inv-table-bg th {
+		color: var(--pv-inv-white) !important;
 		font-size: var(--pv-inv-medium) !important;
 		font-weight: 900 !important;
 		line-height: 24px;
 	}
 
 	.pv-inv-five .pv-inv-table-bg td {
-		color: #1a202c;
+		color: var(--pv-inv-white) !important;
 	}
 
 	.pv-inv-five .pv-inv-total .total th {
-		color: #1a202c;
+		color: var(--pv-inv-white);
 		font-size: 15px;
 		font-weight: 800;
+	}
+
+	.pv-inv-five .pv-inv-total .total td {
+		color: var(--pv-inv-white);
 	}
 
 	.pv-inv-five .pv-inv-e-bold td {
@@ -740,7 +745,7 @@
 	}
 
 	.pv-inv-five .pv-inv-bank {
-		background-color: #edf2f7;
+		background-color: var(--pv-inv-primary-soft);
 		max-width: 235px;
 		padding: 13px 20px 30px;
 		width: 100%;
@@ -763,14 +768,14 @@
 	}
 
 	.pv-inv-six .pv-inv-from {
-		border: 1px solid #edf2f7;
+		border: 1px solid color-mix(in srgb, var(--pv-inv-primary) 22%, #edf2f7);
 		max-width: 251px;
 		padding: 15px 29px;
 		width: 100%;
 	}
 
 	.pv-inv-six .pv-inv-to {
-		border: 1px solid #edf2f7;
+		border: 1px solid color-mix(in srgb, var(--pv-inv-primary) 22%, #edf2f7);
 		padding: 15px 29px;
 		width: 251px;
 	}
@@ -790,11 +795,12 @@
 	}
 
 	.pv-inv-six .pv-inv-shape2 {
+		color: var(--pv-inv-primary);
 		margin-bottom: 7px;
 	}
 
 	.pv-inv-six .pv-inv-shape2 svg path {
-		fill: var(--pv-inv-primary);
+		fill: currentColor;
 	}
 
 	.pv-inv-six .pv-inv-from address,

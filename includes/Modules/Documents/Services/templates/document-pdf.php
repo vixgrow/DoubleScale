@@ -152,7 +152,7 @@ if ( null !== $custom_accent ) {
 		$items_header_fg = '#ffffff';
 		$total_bg        = $accent;
 		$total_fg        = '#ffffff';
-	} elseif ( in_array( $design, array( 6, 7, 8 ), true ) ) {
+	} elseif ( in_array( $design, array( 5, 6, 7, 8 ), true ) ) {
 		$total_bg = $accent;
 		$total_fg = '#ffffff';
 	}

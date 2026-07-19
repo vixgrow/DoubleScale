@@ -44,8 +44,12 @@
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
 	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
-	overflow: hidden;
+	overflow: visible;
 	padding: 1.5rem;
+
+	.pv-inv {
+		min-height: 920px;
+	}
 }
 
 .doublescale-invoice-renderer__toolbar {

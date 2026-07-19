@@ -28,13 +28,9 @@ final class DocumentPdf {
 		$type = 'invoice' === $type ? 'invoice' : 'proposal';
 
 		$company = self::resolved_company_block();
+		$design  = DocumentTemplate::normalize( $shaped['template'] ?? DocumentTemplate::DEFAULT );
 
-		ob_start();
-		$document = $shaped;
-		$doc_type = $type;
-		$design   = DocumentTemplate::normalize( $shaped['template'] ?? DocumentTemplate::DEFAULT );
-		include __DIR__ . '/templates/document-pdf.php';
-		return (string) ob_get_clean();
+		return PvInvPdfHtml::render( $shaped, $type, $company, $design );
 	}
 
 	/**

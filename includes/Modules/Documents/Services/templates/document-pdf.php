@@ -33,13 +33,12 @@ $balance       = $is_invoice ? max( 0, round( $total - $amount_paid, 2 ) ) : $to
 $design = isset( $design ) ? (int) $design : 1;
 
 /**
- * Per-design visual config aligned with the reference images.
+ * Per-design visual config aligned with React pv-inv templates (registry 1–8).
  *
- * variant: classic|divider|banner|sidebar|clean|wave|centered|gold
+ * variant: classic|wave|corner|goldwave|clean|boxed|titlebar|sidebar
  * total_style: fill|line|soft
  */
 $design_config = array(
-	// Templates 1-4 mirror Propovoice's colored (primary) table header + zebra rows.
 	1 => array(
 		'variant'         => 'classic',
 		'accent'          => '#4c6fff',
@@ -49,9 +48,10 @@ $design_config = array(
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => false,
+		'zebra_rows'      => true,
 	),
 	2 => array(
-		'variant'         => 'divider',
+		'variant'         => 'wave',
 		'accent'          => '#4c6fff',
 		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
@@ -59,9 +59,10 @@ $design_config = array(
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => false,
+		'zebra_rows'      => true,
 	),
 	3 => array(
-		'variant'         => 'banner',
+		'variant'         => 'corner',
 		'accent'          => '#4c6fff',
 		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
@@ -69,9 +70,10 @@ $design_config = array(
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => true,
+		'zebra_rows'      => true,
 	),
 	4 => array(
-		'variant'         => 'sidebar',
+		'variant'         => 'goldwave',
 		'accent'          => '#4c6fff',
 		'items_header'    => '#4c6fff',
 		'items_header_fg' => '#ffffff',
@@ -79,8 +81,8 @@ $design_config = array(
 		'total_fg'        => '#ffffff',
 		'total_style'     => 'fill',
 		'center_title'    => true,
+		'zebra_rows'      => true,
 	),
-	// Templates 5-8 mirror Propovoice's neutral (grey) header + dark total.
 	5 => array(
 		'variant'         => 'clean',
 		'accent'          => '#4c6fff',
@@ -90,9 +92,10 @@ $design_config = array(
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'line',
 		'center_title'    => false,
+		'zebra_rows'      => false,
 	),
 	6 => array(
-		'variant'         => 'wave',
+		'variant'         => 'boxed',
 		'accent'          => '#4c6fff',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
@@ -100,9 +103,10 @@ $design_config = array(
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'soft',
 		'center_title'    => false,
+		'zebra_rows'      => false,
 	),
 	7 => array(
-		'variant'         => 'centered',
+		'variant'         => 'titlebar',
 		'accent'          => '#1a202c',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
@@ -110,16 +114,18 @@ $design_config = array(
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'line',
 		'center_title'    => true,
+		'zebra_rows'      => false,
 	),
 	8 => array(
-		'variant'         => 'gold',
-		'accent'          => '#1a202c',
+		'variant'         => 'sidebar',
+		'accent'          => '#4c6fff',
 		'items_header'    => '#edf2f7',
 		'items_header_fg' => '#718096',
 		'total_bg'        => '#edf2f7',
 		'total_fg'        => '#1a202c',
 		'total_style'     => 'soft',
-		'center_title'    => true,
+		'center_title'    => false,
+		'zebra_rows'      => false,
 	),
 );
 
@@ -141,6 +147,7 @@ $total_bg        = $sanitize_color( (string) $config['total_bg'] );
 $total_fg        = $sanitize_color( (string) $config['total_fg'] );
 $total_style     = (string) $config['total_style'];
 $center_title    = (bool) $config['center_title'];
+$zebra_rows      = (bool) ( $config['zebra_rows'] ?? false );
 
 $custom_accent = \DoubleScale\Modules\Documents\Constants\DocumentTemplateColor::normalize(
 	$document['template_color'] ?? null
@@ -222,14 +229,15 @@ if ( '' !== $url_line ) {
 	$company_lines[] = $url_line;
 }
 
-$bill_label   = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
-$show_wave    = 'wave' === $variant;
-$show_banner  = 'banner' === $variant;
-$show_side    = 'sidebar' === $variant;
-$show_corner  = 'centered' === $variant;
-$show_gold    = 'gold' === $variant;
-$show_divider = 'divider' === $variant;
-$show_sign    = in_array( $variant, array( 'clean', 'wave', 'centered', 'gold' ), true );
+$bill_label      = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
+$show_wave       = in_array( $variant, array( 'wave', 'goldwave' ), true );
+$show_corner     = 'corner' === $variant;
+$show_side       = 'sidebar' === $variant;
+$show_boxed      = 'boxed' === $variant;
+$show_titlebar   = 'titlebar' === $variant;
+$show_sign       = 'goldwave' === $variant;
+$use_split_meta  = in_array( $variant, array( 'classic', 'wave', 'corner', 'goldwave' ), true );
+$show_sl         = in_array( $variant, array( 'classic', 'wave', 'corner', 'goldwave', 'sidebar' ), true );
 
 $total_row_css = 'fill' === $total_style
 	? sprintf( 'background:%s;color:%s;padding:12px 16px;', $total_bg, $total_fg )
@@ -274,7 +282,7 @@ $corner_tri_svg = static function ( string $fill ): string {
 		.page { position: relative; }
 		.body-inner {
 			position: relative;
-			padding: <?php echo $show_side ? '38px 40px 32px 64px' : '38px 40px 32px'; ?>;
+			padding: <?php echo $show_side ? '38px 40px 32px 64px' : ( $show_wave ? '48px 40px 56px' : '38px 40px 32px' ); ?>;
 		}
 
 		.doc-type {
@@ -318,6 +326,10 @@ $corner_tri_svg = static function ( string $fill ): string {
 			text-transform: uppercase;
 		}
 		table.items td { padding: 12px; vertical-align: top; border-bottom: 1px solid #edf0f5; color: #4a5568; font-size: 11px; }
+		<?php if ( $zebra_rows ) : ?>
+		table.items tbody tr:nth-child(even) td { background: #f7fafc; }
+		table.items tbody tr:nth-child(odd) td { background: #edf2f7; }
+		<?php endif; ?>
 		table.items .name { color: #1a202c; font-weight: bold; }
 		table.items .desc { color: #8a94a6; font-size: 10px; }
 		table.items .sl { color: #8a94a6; width: 36px; }
@@ -345,18 +357,15 @@ $corner_tri_svg = static function ( string $fill ): string {
 			font-weight: bold;
 		}
 
-		.banner {
-			background: #1a202c;
-			color: #fff;
-			padding: 22px 40px;
-			width: 100%;
-		}
-		.banner td { vertical-align: middle; }
-		.banner .brand, .banner .brand-line { color: #fff; }
-		.banner .brand-line { color: #cbd5e0; }
-		.banner-title { color: #fff; font-size: 28px; font-weight: bold; text-align: right; }
-
 		.divider-bar { background: <?php echo esc_html( $accent ); ?>; height: 6px; width: 100%; margin: 0 0 22px; }
+
+		.titlebar-wrap { margin: 0 0 22px; text-align: center; }
+		.titlebar-line { background: <?php echo esc_html( $accent ); ?>; height: 4px; width: 100%; margin: 8px 0; }
+
+		.body-inner.boxed {
+			border-top: 4px solid <?php echo esc_html( $accent ); ?>;
+			border-bottom: 4px solid <?php echo esc_html( $accent ); ?>;
+		}
 
 		.side-tab {
 			position: absolute; left: 0; top: 0; bottom: 0; width: 44px;
@@ -383,12 +392,8 @@ $corner_tri_svg = static function ( string $fill ): string {
 		<div class="ornament ornament-wave-bottom"><?php echo $wave_svg( $accent, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 	<?php endif; ?>
 
-	<?php if ( $show_gold ) : ?>
-		<div class="ornament ornament-tl"><?php echo $gold_corner_svg( $accent, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-		<div class="ornament ornament-br"><?php echo $gold_corner_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-	<?php endif; ?>
-
 	<?php if ( $show_corner ) : ?>
+		<div class="ornament ornament-tl"><?php echo $corner_tri_svg( '#e2e8f0' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 		<div class="ornament ornament-br"><?php echo $corner_tri_svg( $accent ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 	<?php endif; ?>
 
@@ -396,31 +401,20 @@ $corner_tri_svg = static function ( string $fill ): string {
 		<table class="side-tab" style="height:100%;"><tr><td style="text-align:center;vertical-align:middle;"><span><?php echo esc_html( $number_label ); ?></span></td></tr></table>
 	<?php endif; ?>
 
-	<?php if ( $show_banner ) : ?>
-		<table class="banner">
-			<tr>
-				<td>
-					<?php if ( '' !== $logo_data_uri ) : ?>
-						<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="<?php echo esc_attr( $company_name ); ?>" />
-					<?php else : ?>
-						<div class="brand"><?php echo esc_html( '' !== $company_name ? $company_name : $number_label ); ?></div>
-					<?php endif; ?>
-					<?php foreach ( array_slice( $company_lines, '' === $logo_data_uri ? 1 : 0 ) as $line ) : ?>
-						<p class="brand-line"><?php echo esc_html( $line ); ?></p>
-					<?php endforeach; ?>
-				</td>
-				<td class="banner-title"><?php echo esc_html( $number_label ); ?></td>
-			</tr>
-		</table>
-	<?php endif; ?>
+	<div class="body-inner<?php echo $show_boxed ? ' boxed' : ''; ?>">
 
-	<div class="body-inner">
-
-		<?php if ( $show_corner || $show_gold ) : ?>
+		<?php if ( $center_title && ! $show_titlebar ) : ?>
 			<div class="doc-type centered"><?php echo esc_html( $number_label ); ?></div>
 		<?php endif; ?>
 
-		<?php if ( ! $show_banner ) : ?>
+		<?php if ( $show_titlebar ) : ?>
+			<div class="titlebar-wrap">
+				<div class="titlebar-line"></div>
+				<div class="doc-type centered" style="margin-bottom:0;"><?php echo esc_html( $number_label ); ?></div>
+				<div class="titlebar-line"></div>
+			</div>
+		<?php endif; ?>
+
 			<table class="hero">
 				<tr>
 					<td>
@@ -434,19 +428,22 @@ $corner_tri_svg = static function ( string $fill ): string {
 						<?php endforeach; ?>
 					</td>
 					<td class="right">
-						<?php if ( ! $show_corner && ! $show_gold ) : ?>
+						<?php if ( ! $center_title ) : ?>
 							<div class="doc-type"><?php echo esc_html( $number_label ); ?></div>
 						<?php endif; ?>
-						<?php if ( ! $show_side && ! $show_wave && ! $show_corner && ! $show_gold ) : ?>
+						<?php if ( $use_split_meta ) : ?>
 							<div class="doc-number"><?php echo esc_html( $number_value ); ?></div>
 						<?php endif; ?>
-						<?php if ( in_array( $variant, array( 'clean', 'wave', 'centered', 'gold', 'sidebar', 'divider' ), true ) && $customer_lines ) : ?>
+						<?php if ( ! $use_split_meta && $customer_lines ) : ?>
 							<div class="party-label" style="margin-top:6px;"><?php echo esc_html( $bill_label ); ?></div>
 							<?php foreach ( $customer_lines as $line ) : ?>
 								<p class="party-line"><?php echo esc_html( trim( (string) $line ) ); ?></p>
 							<?php endforeach; ?>
 						<?php endif; ?>
 						<div class="dates">
+							<?php if ( $use_split_meta ) : ?>
+								<div><span class="label"><?php echo esc_html( $is_invoice ? __( 'Invoice No', 'doublescale' ) : __( 'Proposal No', 'doublescale' ) ); ?>:</span> <?php echo esc_html( $number_value ); ?></div>
+							<?php endif; ?>
 							<?php if ( $is_invoice ) : ?>
 								<div><span class="label"><?php esc_html_e( 'Invoice Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['invoice_date'] ?? '—' ) ); ?></div>
 								<div><span class="label"><?php esc_html_e( 'Due Date', 'doublescale' ); ?>:</span> <?php echo esc_html( (string) ( $document['due_date'] ?? '—' ) ); ?></div>
@@ -459,29 +456,21 @@ $corner_tri_svg = static function ( string $fill ): string {
 					</td>
 				</tr>
 			</table>
-		<?php endif; ?>
 
-		<?php if ( $show_divider ) : ?>
-			<div class="divider-bar"></div>
-		<?php endif; ?>
-
-		<?php // Two-column From / Bill To block (classic, divider, banner). ?>
-		<?php if ( in_array( $variant, array( 'classic', 'divider', 'banner' ), true ) ) : ?>
+		<?php // Two-column From / Bill To block (classic family). ?>
+		<?php if ( $use_split_meta ) : ?>
 			<table class="meta">
 				<tr>
 					<td>
-						<div class="<?php echo $show_divider ? 'party-box' : ''; ?>">
+						<div>
 							<div class="party-label"><?php esc_html_e( 'From', 'doublescale' ); ?></div>
-							<?php if ( $show_banner && '' !== $logo_data_uri ) : ?>
-								<img class="brand-logo" src="<?php echo esc_attr( $logo_data_uri ); ?>" alt="" style="max-height:40px;" />
-							<?php endif; ?>
 							<?php foreach ( $company_lines as $line ) : ?>
 								<p class="party-line"><?php echo esc_html( $line ); ?></p>
 							<?php endforeach; ?>
 						</div>
 					</td>
 					<td>
-						<div class="<?php echo $show_divider ? 'party-box' : ( $show_banner ? 'party-highlight' : '' ); ?>">
+						<div>
 							<div class="party-label"><?php echo esc_html( $bill_label ); ?></div>
 							<?php if ( $customer_lines ) : ?>
 								<?php foreach ( $customer_lines as $line ) : ?>
@@ -499,7 +488,6 @@ $corner_tri_svg = static function ( string $fill ): string {
 		<table class="items">
 			<thead>
 				<tr>
-					<?php $show_sl = in_array( $variant, array( 'classic', 'divider', 'banner', 'sidebar' ), true ); ?>
 					<?php if ( $show_sl ) : ?>
 						<th class="sl"><?php esc_html_e( 'SL.', 'doublescale' ); ?></th>
 					<?php endif; ?>

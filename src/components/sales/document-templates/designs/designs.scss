@@ -24,9 +24,10 @@
 	background-color: var(--pv-inv-white);
 	height: 100%;
 	margin: 0 auto;
-	max-height: 100%;
+	max-height: none;
 	max-width: 100%;
-	overflow: hidden;
+	min-height: 880px;
+	overflow: visible;
 	position: relative;
 	width: 100%;
 
@@ -232,12 +233,18 @@
 
 	.pv-inv-account {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-end;
+		margin-top: 8px;
+	}
+
+	.pv-inv-total {
+		margin-left: auto;
 	}
 
 	.pv-inv-total table {
 		border-spacing: 0;
-		min-width: 200px;
+		min-width: 240px;
+		width: 100%;
 	}
 
 	.pv-inv-total table th {
@@ -266,12 +273,15 @@
 
 	.pv-inv-total .pv-inv-table-bg th {
 		color: var(--pv-inv-white);
-		padding: 6px 10px 6px 28px;
+		padding: 12px 12px 12px 28px;
 	}
 
 	.pv-inv-total .pv-inv-table-bg td {
 		color: var(--pv-inv-white);
+		font-size: 15px;
+		font-weight: 800;
 		line-height: 140%;
+		padding: 12px 16px 12px 0;
 	}
 
 	tr.pv-inv-table-bg {
@@ -461,8 +471,14 @@
 	}
 
 	/* ---- 3 ---- */
+	.pv-inv-three {
+		min-height: 880px;
+		position: relative;
+	}
+
 	.pv-inv-three .pv-inv-body {
 		margin: 0 35px;
+		padding-bottom: 140px;
 		position: relative;
 	}
 
@@ -507,7 +523,8 @@
 
 	/* ---- 4 ---- */
 	.pv-inv-four {
-		padding-bottom: 150px;
+		min-height: 920px;
+		padding-bottom: 190px;
 		position: relative;
 	}
 

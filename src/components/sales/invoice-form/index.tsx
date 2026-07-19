@@ -258,6 +258,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		[applyContactFields]
 	);
 
+	const handleTemplateSelection = useCallback(
+		({
+			templateId,
+			templateColor: color,
+		}: {
+			templateId: number;
+			templateColor: string | null;
+		}) => {
+			setTemplate(templateId);
+			setTemplateColor(color);
+		},
+		[]
+	);
+
 	useEffect(() => {
 		if (!isNew || prefilledContactFromUrlRef.current) {
 			return;
@@ -612,6 +626,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		} as Invoice;
 	};
 
+	const editorSidebarProps = {
+		templateId: template,
+		templateColor,
+		onColorChange: setTemplateColor,
+		onTemplateChange: handleTemplateSelection,
+		templateChangeDisabled: fieldsLocked,
+	};
+
 	const draftInvoice = buildDraftInvoice();
 
 	const inlinePreview = (
@@ -647,6 +669,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				showReapprovalWarning={showReapprovalWarning}
 			/>
 
+			{!isDialog ? (
 			<DesignPickerRow
 				docType="invoice"
 				templateId={template}
@@ -657,8 +680,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					setTemplateColor(color);
 				}}
 			/>
+			) : null}
 
-			{isDialog ? null : (
+			{!isDialog ? (
 				<>
 					<TemplateStyleEditor
 						value={templateColor}
@@ -667,7 +691,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					/>
 					{inlinePreview}
 				</>
-			)}
+			) : null}
 
 			<fieldset
 				disabled={fieldsLocked}
@@ -1040,9 +1064,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				<div className="mt-6 space-y-4 border-t border-border pt-6 lg:hidden">
 					<DocumentEditorSidebar
 						docType="invoice"
-						templateId={template}
-						templateColor={templateColor}
-						onColorChange={setTemplateColor}
+						{...editorSidebarProps}
 						preview={
 							<InvoiceDocumentPreview invoice={draftInvoice} />
 						}
@@ -1110,12 +1132,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 							{formFooter}
 						</div>
 					</div>
-					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(400px,34vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
+					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(420px,36vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
 						<DocumentEditorSidebar
 							docType="invoice"
-							templateId={template}
-							templateColor={templateColor}
-							onColorChange={setTemplateColor}
+							{...editorSidebarProps}
 							preview={
 								<InvoiceDocumentPreview invoice={draftInvoice} />
 							}

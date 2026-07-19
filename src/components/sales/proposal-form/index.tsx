@@ -202,6 +202,20 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		[applyContactFields]
 	);
 
+	const handleTemplateSelection = useCallback(
+		({
+			templateId,
+			templateColor: color,
+		}: {
+			templateId: number;
+			templateColor: string | null;
+		}) => {
+			setTemplate(templateId);
+			setTemplateColor(color);
+		},
+		[]
+	);
+
 	useEffect(() => {
 		if (!isNew || prefilledContactFromUrlRef.current) {
 			return;
@@ -557,6 +571,14 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		} as Proposal;
 	};
 
+	const editorSidebarProps = {
+		templateId: template,
+		templateColor,
+		onColorChange: setTemplateColor,
+		onTemplateChange: handleTemplateSelection,
+		templateChangeDisabled: fieldsLocked,
+	};
+
 	const draftProposal = buildDraftProposal();
 
 	const inlinePreview = (
@@ -576,8 +598,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		<div className="space-y-6">
 			{isDialog ? (
 				<>
-					<DocumentEditorSteps activeStep="content" />
-					<h2 className="text-xl font-semibold tracking-tight text-[#29292E]">
+					<DocumentEditorSteps activeStep="content" className="mb-4" />
+					<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
 						{pageTitle}
 					</h2>
 				</>
@@ -592,6 +614,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				showReapprovalWarning={showReapprovalWarning}
 			/>
 
+			{!isDialog ? (
 			<DesignPickerRow
 				docType="proposal"
 				templateId={template}
@@ -602,8 +625,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 					setTemplateColor(color);
 				}}
 			/>
+			) : null}
 
-			{isDialog ? null : (
+			{!isDialog ? (
 				<>
 					<TemplateStyleEditor
 						value={templateColor}
@@ -612,7 +636,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 					/>
 					{inlinePreview}
 				</>
-			)}
+			) : null}
 
 			<fieldset disabled={fieldsLocked} className="m-0 min-w-0 space-y-0 border-0 p-0">
 			<div className="grid grid-cols-1 lg:grid-cols-2 mb-6">
@@ -825,12 +849,10 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			</fieldset>
 
 			{isDialog ? (
-				<div className="space-y-4 border-t border-border pt-6 lg:hidden">
+				<div className="mt-6 space-y-4 border-t border-border pt-6 lg:hidden">
 					<DocumentEditorSidebar
 						docType="proposal"
-						templateId={template}
-						templateColor={templateColor}
-						onColorChange={setTemplateColor}
+						{...editorSidebarProps}
 						preview={
 							<ProposalDocumentPreview proposal={draftProposal} />
 						}
@@ -844,16 +866,16 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const formFooter = (
 		<div className="flex flex-col-reverse gap-3 sm:flex-row items-center sm:justify-between">
 			<Button
-				variant="outline"
+				variant={isDialog ? 'secondaryDeepBlue' : 'outline'}
 				onClick={handleClose}
-				className="border-primary text-primary bg-white"
+				className={isDialog ? 'rounded-lg' : 'border-primary text-primary bg-white'}
 			>
 				{__('Cancel', 'doublescale')}
 			</Button>
 			<div className="flex flex-wrap justify-center sm:justify-end gap-2">
 				<Button
-					variant="outline"
-					className="border-primary text-primary bg-white"
+					variant={isDialog ? 'secondaryDeepBlue' : 'outline'}
+					className={isDialog ? 'rounded-lg' : 'border-primary text-primary bg-white'}
 					onClick={() => void handleSave()}
 					disabled={saving || submittingApproval || fieldsLocked}
 				>
@@ -861,6 +883,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				</Button>
 				{showSubmitApproval ? (
 					<Button
+						variant={isDialog ? 'gradient' : 'default'}
+						className={isDialog ? 'rounded-lg' : undefined}
 						onClick={() => void handleSubmitForApproval()}
 						disabled={saving || submittingApproval}
 					>
@@ -871,6 +895,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				) : null}
 				{showSend ? (
 					<Button
+						variant={isDialog ? 'gradient' : 'default'}
+						className={isDialog ? 'rounded-lg' : undefined}
 						onClick={() => setSendOpen(true)}
 						disabled={saving || submittingApproval}
 					>
@@ -893,12 +919,10 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 							{formFooter}
 						</div>
 					</div>
-					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(400px,34vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
+					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(420px,36vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
 						<DocumentEditorSidebar
 							docType="proposal"
-							templateId={template}
-							templateColor={templateColor}
-							onColorChange={setTemplateColor}
+							{...editorSidebarProps}
 							preview={
 								<ProposalDocumentPreview proposal={draftProposal} />
 							}

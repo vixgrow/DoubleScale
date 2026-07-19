@@ -40,6 +40,7 @@ import {
 	ApprovalStatusBanner,
 	ProposalStatusPill,
 	ProposalDocumentPreview,
+	ProposalFormDialog,
 } from '@/components/sales';
 import { DocumentEditorSidebar } from '@/components/sales/document-templates/document-editor-sidebar';
 import { computeAmount } from '@/components/sales/line-items-editor';
@@ -91,6 +92,7 @@ const ProposalView: React.FC = () => {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [convertOpen, setConvertOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
+	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [signature, setSignature] = useState<ProposalSignature | null>(null);
@@ -455,13 +457,7 @@ const ProposalView: React.FC = () => {
 								variant="outline"
 								size="icon"
 								className="h-10 w-10 shrink-0 border-[#0D9DFC] bg-white text-[#0D9DFC] hover:bg-[#DBEAFE]"
-								onClick={() =>
-									navigate(
-										getToLink(
-											`sales/proposals/${proposal.id}/edit`
-										)
-									)
-								}
+								onClick={() => setEditOpen(true)}
 								aria-label={__('Edit', 'doublescale')}
 							>
 								<EditHeaderIcon
@@ -833,6 +829,18 @@ const ProposalView: React.FC = () => {
 				busy={busy}
 				onConfirm={handleConvert}
 			/>
+
+			{proposal ? (
+				<ProposalFormDialog
+					open={editOpen}
+					onOpenChange={setEditOpen}
+					proposalId={proposal.id}
+					onSaved={() => {
+						void refetch();
+						setEditOpen(false);
+					}}
+				/>
+			) : null}
 		</div>
 	);
 };

@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Documents\Services\TotalsCalculator;
@@ -49,7 +48,6 @@ class ProposalModel extends Model {
 		'currency',
 		'discount_type',
 		'discount_value',
-		'tag_ids',
 		'line_items',
 		'subtotal',
 		'adjustment',
@@ -78,7 +76,6 @@ class ProposalModel extends Model {
 	 */
 	protected $casts = array(
 		'template'        => 'int',
-		'tag_ids'         => 'array',
 		'line_items'      => 'array',
 		'discount_value'  => 'float',
 		'subtotal'        => 'float',
@@ -111,17 +108,6 @@ class ProposalModel extends Model {
 	 */
 	public function invoice() {
 		return $this->hasOne( InvoiceModel::class, 'proposal_id', 'id' );
-	}
-
-	/**
-	 * @return \Illuminate\Database\Eloquent\Collection
-	 */
-	public function tags() {
-		$ids = is_array( $this->tag_ids ) ? array_filter( array_map( 'intval', $this->tag_ids ) ) : array();
-		if ( empty( $ids ) ) {
-			return TagModel::query()->whereRaw( '0=1' )->get();
-		}
-		return TagModel::query()->whereIn( 'id', $ids )->get();
 	}
 
 	/**

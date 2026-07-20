@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, TagField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon } from '@doublescale/components';
+import { FormField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -153,7 +153,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
-	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
 	);
@@ -273,11 +272,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		setEmail(existing.email || '');
 		setPhone(existing.phone || '');
 		setAssignedUserId(existing.assigned_user_id ?? null);
-		setTagIds(
-			Array.isArray(existing.tag_ids)
-				? existing.tag_ids.map((id) => Number(id)).filter(Boolean)
-				: []
-		);
 		hydratedContactIdRef.current = existing.contact_id ?? null;
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
 		setTemplate(normalizeTemplateId(existing.template));
@@ -315,7 +309,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		email,
 		phone,
 		assigned_user_id: assignedUserId,
-		tag_ids: tagIds,
 		line_items: lineItems,
 		template,
 		template_color: templateColor,
@@ -554,7 +547,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			currency,
 			discount_type: discountType,
 			discount_value: discountValue,
-			tag_ids: tagIds,
 			line_items: lineItems,
 			subtotal: totals.subtotal,
 			adjustment,
@@ -724,10 +716,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 							/>
 						</FormField>
 					) : null}
-
-					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
-						<TagField value={tagIds} onChange={setTagIds} />
-					</FormField>
 				</div>
 
 				<div className="space-y-4 lg:pl-8 pt-6 lg:pt-0">

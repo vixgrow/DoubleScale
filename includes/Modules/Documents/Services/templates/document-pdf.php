@@ -171,13 +171,17 @@ $format_money = static function ( float $value ) use ( $currency ): string {
 	return number_format_i18n( $value, 2 ) . ' ' . $currency;
 };
 
+// Mirror TotalsCalculator::compute so the displayed discount matches the saved
+// total. before_tax/after_tax are PERCENT discounts with different bases.
 $discount_amount = 0.0;
-if ( 'percent' === $discount_type && $discount_val > 0 ) {
-	$discount_amount = round( $subtotal * ( $discount_val / 100 ), 2 );
-} elseif ( 'fixed' === $discount_type && $discount_val > 0 ) {
-	$discount_amount = min( $subtotal, $discount_val );
-} elseif ( in_array( $discount_type, array( 'before_tax', 'after_tax' ), true ) && $discount_val > 0 ) {
-	$discount_amount = $discount_val;
+if ( $discount_val > 0 ) {
+	if ( 'percent' === $discount_type || 'before_tax' === $discount_type ) {
+		$discount_amount = round( $subtotal * ( $discount_val / 100 ), 2 );
+	} elseif ( 'after_tax' === $discount_type ) {
+		$discount_amount = round( ( $subtotal + $total_tax ) * ( $discount_val / 100 ), 2 );
+	} elseif ( 'fixed' === $discount_type ) {
+		$discount_amount = min( $subtotal, $discount_val );
+	}
 }
 
 $customer_lines = array();

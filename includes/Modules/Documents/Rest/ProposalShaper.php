@@ -44,7 +44,6 @@ final class ProposalShaper {
 			'currency'         => Settings::document_currency( $proposal->currency, $proposal->sent_at ),
 			'discount_type'    => (string) $proposal->discount_type,
 			'discount_value'   => (float) $proposal->discount_value,
-			'tag_ids'          => is_array( $proposal->tag_ids ) ? array_values( array_map( 'intval', $proposal->tag_ids ) ) : array(),
 			'line_items'       => is_array( $proposal->line_items ) ? $proposal->line_items : array(),
 			'subtotal'         => (float) $proposal->subtotal,
 			'adjustment'       => (float) $proposal->adjustment,

@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Documents\Services\TotalsCalculator;
@@ -51,7 +50,6 @@ class InvoiceModel extends Model {
 		'allowed_payment_modes',
 		'discount_type',
 		'discount_value',
-		'tag_ids',
 		'line_items',
 		'subtotal',
 		'total_tax',
@@ -73,7 +71,6 @@ class InvoiceModel extends Model {
 	 */
 	protected $casts = array(
 		'template'              => 'int',
-		'tag_ids'               => 'array',
 		'line_items'            => 'array',
 		'allowed_payment_modes' => 'array',
 		'discount_value'        => 'float',
@@ -136,17 +133,6 @@ class InvoiceModel extends Model {
 	 */
 	public function payments() {
 		return $this->hasMany( PaymentModel::class, 'invoice_id', 'id' );
-	}
-
-	/**
-	 * @return \Illuminate\Database\Eloquent\Collection
-	 */
-	public function tags() {
-		$ids = is_array( $this->tag_ids ) ? array_filter( array_map( 'intval', $this->tag_ids ) ) : array();
-		if ( empty( $ids ) ) {
-			return TagModel::query()->whereRaw( '0=1' )->get();
-		}
-		return TagModel::query()->whereIn( 'id', $ids )->get();
 	}
 
 	/**

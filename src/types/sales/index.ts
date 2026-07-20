@@ -130,7 +130,6 @@ export interface Proposal {
 	currency: string;
 	discount_type: string;
 	discount_value: number;
-	tag_ids: number[];
 	line_items: LineItem[];
 	subtotal: number;
 	adjustment: number;
@@ -179,7 +178,6 @@ export interface Contract {
 	start_date: string | null;
 	end_date: string | null;
 	description: string;
-	tag_ids: number[];
 	hide_from_customer: boolean;
 	is_trash: boolean;
 	sent_at?: string | null;
@@ -276,7 +274,6 @@ export interface Invoice {
 	allowed_payment_modes: string[];
 	discount_type: string;
 	discount_value: number;
-	tag_ids: number[];
 	line_items: LineItem[];
 	subtotal: number;
 	total_tax: number;
@@ -413,6 +410,10 @@ export interface InvoiceSummary {
 	paid_total: number;
 	outstanding_total: number;
 	overdue_total: number;
+	/** Per-currency breakdowns (resolved currency). Present so mixed-currency totals stay consistent. */
+	paid_by_currency?: Record<string, number>;
+	outstanding_by_currency?: Record<string, number>;
+	overdue_by_currency?: Record<string, number>;
 	total_count: number;
 	by_status: Record<
 		string,

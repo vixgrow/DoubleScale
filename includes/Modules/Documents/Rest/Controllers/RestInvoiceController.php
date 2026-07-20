@@ -25,7 +25,6 @@ use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
-use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -238,19 +237,59 @@ class RestInvoiceController extends RestController {
 			);
 		}
 
-		$paid_total        = (float) ( clone $query )->where( 'status', InvoiceStatus::PAID )->sum( 'total' );
-		$outstanding_total = (float) ( clone $query )->whereIn( 'status', array( InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID ) )->sum( 'total' );
-		$overdue_total     = (float) ( clone $query )->where( 'status', InvoiceStatus::OVERDUE )->sum( 'total' );
+		// Break each total down by the RESOLVED currency (global for drafts, frozen
+		// for sent) so reports stay consistent when older documents used a different
+		// currency. The flat *_total is kept for backward compatibility.
+		$paid        = $this->sum_by_currency( clone $query, array( InvoiceStatus::PAID ) );
+		$outstanding = $this->sum_by_currency( clone $query, array( InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID ) );
+		$overdue     = $this->sum_by_currency( clone $query, array( InvoiceStatus::OVERDUE ) );
 
 		return new WP_REST_Response(
 			array(
-				'paid_total'        => round( $paid_total, 2 ),
-				'outstanding_total' => round( $outstanding_total, 2 ),
-				'overdue_total'     => round( $overdue_total, 2 ),
-				'by_status'         => $by_status,
-				'total_count'       => $total_count,
+				'paid_total'              => $paid['total'],
+				'outstanding_total'       => $outstanding['total'],
+				'overdue_total'           => $overdue['total'],
+				'paid_by_currency'        => $paid['by_currency'],
+				'outstanding_by_currency' => $outstanding['by_currency'],
+				'overdue_by_currency'     => $overdue['by_currency'],
+				'by_status'               => $by_status,
+				'total_count'             => $total_count,
 			),
 			200
+		);
+	}
+
+	/**
+	 * Sum invoice totals for the given statuses, grouped by the resolved currency.
+	 *
+	 * @param mixed    $query    Invoice query (already scoped to the caller).
+	 * @param string[] $statuses Statuses to include.
+	 * @return array{total: float, by_currency: array<string, float>}
+	 */
+	private function sum_by_currency( $query, array $statuses ): array {
+		$total       = 0.0;
+		$by_currency = array();
+
+		foreach ( $query->whereIn( 'status', $statuses )->get() as $invoice ) {
+			$amount = (float) $invoice->total;
+			if ( 0.0 === $amount ) {
+				continue;
+			}
+			$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
+			$total   += $amount;
+			if ( ! isset( $by_currency[ $currency ] ) ) {
+				$by_currency[ $currency ] = 0.0;
+			}
+			$by_currency[ $currency ] += $amount;
+		}
+
+		foreach ( $by_currency as $code => $value ) {
+			$by_currency[ $code ] = round( (float) $value, 2 );
+		}
+
+		return array(
+			'total'       => round( $total, 2 ),
+			'by_currency' => $by_currency,
 		);
 	}
 
@@ -630,11 +669,6 @@ class RestInvoiceController extends RestController {
 			}
 		}
 
-		if ( array_key_exists( 'tag_ids', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tag_ids'] );
-		} elseif ( array_key_exists( 'tags', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tags'] );
-		}
 		if ( array_key_exists( 'allowed_payment_modes', $params ) ) {
 			$payload['allowed_payment_modes'] = PaymentMode::normalize_list( $params['allowed_payment_modes'] );
 		}

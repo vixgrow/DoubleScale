@@ -56,7 +56,6 @@ class ConvertProposalToInvoice {
 				'discount_type'       => (string) $proposal->discount_type,
 				'discount_value'      => (float) $proposal->discount_value,
 				'adjustment'          => (float) $proposal->adjustment,
-				'tag_ids'             => is_array( $proposal->tag_ids ) ? $proposal->tag_ids : array(),
 				'line_items'          => is_array( $proposal->line_items ) ? $proposal->line_items : array(),
 				'billing_address'     => self::compose_billing_address( $proposal ),
 				'invoice_date'        => $today,

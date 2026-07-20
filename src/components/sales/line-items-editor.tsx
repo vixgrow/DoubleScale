@@ -8,6 +8,7 @@ import {
 	isPercentDiscountType,
 	parseDiscountInput,
 } from './sales-discount-utils';
+import { getCurrencySymbol } from './sales-currency-utils';
 import { Plus } from 'lucide-react';
 
 import { DeleteIcon, GradientProposalItemsIcon } from '@doublescale/components';
@@ -71,8 +72,11 @@ export const computeLineItemsTotals = (
 	discountValue: number,
 	adjustment: number
 ) => {
+	// Must mirror the backend TotalsCalculator::compute exactly, otherwise the
+	// preview shows a different total than what gets saved (the model recomputes
+	// on save). before_tax/after_tax change BOTH the tax base and the discount base.
 	let subtotal = 0;
-	let totalTax = 0;
+	const lines: { amount: number; taxRates: number[] }[] = [];
 
 	items.forEach((item) => {
 		if (item.optional) {
@@ -80,17 +84,43 @@ export const computeLineItemsTotals = (
 		}
 		const amount = computeAmount(item);
 		subtotal += amount;
-		(item.tax || []).forEach((tax) => {
-			totalTax += amount * ((Number(tax.rate) || 0) / 100);
+		lines.push({
+			amount,
+			taxRates: (item.tax || []).map((tax) => Number(tax.rate) || 0),
 		});
 	});
 
+	let totalTax = 0;
 	let discount = 0;
-	if (discountValue > 0 && discountType !== 'none') {
-		if (discountType === 'fixed') {
-			discount = Math.min(subtotal, discountValue);
-		} else {
-			discount = subtotal * (discountValue / 100);
+
+	if (discountType === 'before_tax' && discountValue > 0) {
+		const ratio = discountValue / 100;
+		discount = subtotal * ratio;
+		lines.forEach((line) => {
+			const taxable = line.amount * (1 - ratio);
+			line.taxRates.forEach((rate) => {
+				totalTax += taxable * (rate / 100);
+			});
+		});
+	} else if (discountType === 'after_tax' && discountValue > 0) {
+		lines.forEach((line) => {
+			line.taxRates.forEach((rate) => {
+				totalTax += line.amount * (rate / 100);
+			});
+		});
+		discount = (subtotal + totalTax) * (discountValue / 100);
+	} else {
+		lines.forEach((line) => {
+			line.taxRates.forEach((rate) => {
+				totalTax += line.amount * (rate / 100);
+			});
+		});
+		if (discountValue > 0 && discountType !== 'none') {
+			if (discountType === 'fixed') {
+				discount = Math.min(subtotal, discountValue);
+			} else if (discountType === 'percent') {
+				discount = subtotal * (discountValue / 100);
+			}
 		}
 	}
 
@@ -152,6 +182,15 @@ const TotalsSummary: React.FC<TotalsSummaryProps> = ({
 }) => (
 	<div className="flex w-full justify-end pt-4">
 		<div className="w-full min-w-[240px] max-w-[280px] rounded-2xl border border-[#E5E7EB] bg-[#F7F8FA] p-4">
+			<div className="mb-3 flex items-center justify-between">
+				<span className="text-xs font-medium text-[#6B7280]">
+					{__('Currency', 'doublescale')}
+				</span>
+				<span className="flex items-center gap-1 rounded-lg border border-border bg-white px-2.5 py-1 text-sm font-medium">
+					<span>{getCurrencySymbol(currency)}</span>
+					<span className="text-muted-foreground">{currency}</span>
+				</span>
+			</div>
 			{!hideDiscountTypeSelect && onDiscountTypeChange && onDiscountValueChange ? (
 				<div className="mb-3 grid grid-cols-2 gap-2">
 					<select

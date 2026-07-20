@@ -49,7 +49,6 @@ class InvoiceShaper {
 			'allowed_payment_modes' => PaymentMode::normalize_list( $invoice->allowed_payment_modes ),
 			'discount_type'         => (string) $invoice->discount_type,
 			'discount_value'        => (float) $invoice->discount_value,
-			'tag_ids'               => is_array( $invoice->tag_ids ) ? array_values( array_map( 'intval', $invoice->tag_ids ) ) : array(),
 			'line_items'            => is_array( $invoice->line_items ) ? $invoice->line_items : array(),
 			'subtotal'              => (float) $invoice->subtotal,
 			'total_tax'             => (float) $invoice->total_tax,

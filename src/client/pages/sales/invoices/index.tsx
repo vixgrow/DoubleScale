@@ -34,11 +34,32 @@ import {
 	PastInvoicesIcon,
 	UnpaidIcon,
 } from '@doublescale/components';
-import type { IconProps } from '@doublescale/config';
+import config, { type IconProps } from '@doublescale/config';
 import { getInvoiceColumns } from './columns';
 
-const formatMoney = (value: number, currency = 'USD') =>
+const formatMoney = (value: number, currency = config.getCurrency() || 'USD') =>
 	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
+
+// Currency is a single global setting, but older documents may keep a different
+// (frozen) currency. Show one figure when everything is one currency; otherwise
+// break the total down per currency so mixed-currency reports stay consistent.
+const formatSummaryTotal = (
+	fallbackTotal: number,
+	byCurrency?: Record<string, number>
+): string => {
+	const entries = Object.entries(byCurrency || {}).filter(
+		([, amount]) => amount !== 0
+	);
+	if (entries.length === 0) {
+		return formatMoney(fallbackTotal);
+	}
+	if (entries.length === 1) {
+		return formatMoney(entries[0][1], entries[0][0]);
+	}
+	return entries
+		.map(([currency, amount]) => formatMoney(amount, currency))
+		.join(' · ');
+};
 
 const summaryCards: InvoiceStatus[] = [
 	'unpaid',
@@ -225,7 +246,10 @@ const InvoicesList: React.FC = () => {
 						<MessageStatsCard
 							label={__('Paid Invoices', 'doublescale')}
 							layout="centered"
-							value={formatMoney(summary.paid_total)}
+							value={formatSummaryTotal(
+								summary.paid_total,
+								summary.paid_by_currency
+							)}
 							icon={<PainInvoicesIcon width={29} height={29} />}
 							iconBgClass="bg-[#16A34A]"
 							className="bg-[#F7F8FA]"
@@ -234,7 +258,10 @@ const InvoicesList: React.FC = () => {
 						<MessageStatsCard
 							label={__('Past Invoices', 'doublescale')}
 							layout="centered"
-							value={formatMoney(summary.overdue_total)}
+							value={formatSummaryTotal(
+								summary.overdue_total,
+								summary.overdue_by_currency
+							)}
 							icon={<PastInvoicesIcon width={29} height={29} />}
 							iconBgClass="bg-[#C30A0A]"
 							className="bg-[#F7F8FA]"
@@ -243,7 +270,10 @@ const InvoicesList: React.FC = () => {
 						<MessageStatsCard
 							label={__('Outstanding Invoices', 'doublescale')}
 							layout="centered"
-							value={formatMoney(summary.outstanding_total)}
+							value={formatSummaryTotal(
+								summary.outstanding_total,
+								summary.outstanding_by_currency
+							)}
 							icon={<OutstandingInvoicesIcon width={29} height={29} />}
 							iconBgClass="bg-[#262666]"
 							className="bg-[#F7F8FA]"

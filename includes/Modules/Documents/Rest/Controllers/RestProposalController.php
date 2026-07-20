@@ -29,7 +29,6 @@ use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
-use DoubleScale\Modules\Sales\Services\SalesTags;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -742,11 +741,6 @@ class RestProposalController extends RestController {
 		}
 		if ( array_key_exists( 'adjustment', $params ) ) {
 			$payload['adjustment'] = (float) $params['adjustment'];
-		}
-		if ( array_key_exists( 'tag_ids', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tag_ids'] );
-		} elseif ( array_key_exists( 'tags', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tags'] );
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];

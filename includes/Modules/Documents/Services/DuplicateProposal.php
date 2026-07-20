@@ -43,7 +43,6 @@ final class DuplicateProposal {
 				'currency'         => (string) $source->currency,
 				'discount_type'    => (string) $source->discount_type,
 				'discount_value'   => (float) $source->discount_value,
-				'tag_ids'          => is_array( $source->tag_ids ) ? $source->tag_ids : array(),
 				'line_items'       => is_array( $source->line_items ) ? $source->line_items : array(),
 				'adjustment'       => (float) $source->adjustment,
 				'to_name'          => $source->to_name,

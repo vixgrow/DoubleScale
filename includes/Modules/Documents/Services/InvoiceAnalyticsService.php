@@ -32,16 +32,14 @@ final class InvoiceAnalyticsService {
 			->whereDate( 'payment_date', '>=', $start_date )
 			->whereDate( 'payment_date', '<=', $end_date );
 
-		if ( $agent_id > 0 || ! empty( $currencies ) ) {
+		// Currency filtering happens AFTER resolution (below), not on the raw
+		// `currency` column, so the report matches what is actually displayed
+		// (drafts follow the global currency; sent docs keep their frozen one).
+		if ( $agent_id > 0 ) {
 			$payments_query->whereHas(
 				'invoice',
-				function ( $query ) use ( $agent_id, $currencies ) {
-					if ( $agent_id > 0 ) {
-						$query->where( 'sale_agent_user_id', $agent_id );
-					}
-					if ( ! empty( $currencies ) ) {
-						$query->whereIn( 'currency', $currencies );
-					}
+				function ( $query ) use ( $agent_id ) {
+					$query->where( 'sale_agent_user_id', $agent_id );
 				}
 			);
 		}
@@ -80,9 +78,6 @@ final class InvoiceAnalyticsService {
 		if ( $agent_id > 0 ) {
 			$outstanding_query->where( 'sale_agent_user_id', $agent_id );
 		}
-		if ( ! empty( $currencies ) ) {
-			$outstanding_query->whereIn( 'currency', $currencies );
-		}
 
 		$outstanding_total = 0.0;
 		$outstanding_count = 0;
@@ -93,6 +88,9 @@ final class InvoiceAnalyticsService {
 				continue;
 			}
 			$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
+			if ( ! empty( $currencies ) && ! in_array( $currency, $currencies, true ) ) {
+				continue;
+			}
 			$outstanding_total += $balance;
 			$outstanding_count++;
 			if ( ! isset( $outstanding_by_currency[ $currency ] ) ) {
@@ -109,11 +107,19 @@ final class InvoiceAnalyticsService {
 		if ( $agent_id > 0 ) {
 			$paid_query->where( 'sale_agent_user_id', $agent_id );
 		}
-		if ( ! empty( $currencies ) ) {
-			$paid_query->whereIn( 'currency', $currencies );
-		}
 
-		$paid_invoices = $paid_query->count();
+		if ( empty( $currencies ) ) {
+			$paid_invoices = $paid_query->count();
+		} else {
+			// Count post-resolution so the currency filter matches the displayed currency.
+			$paid_invoices = 0;
+			foreach ( $paid_query->get() as $invoice ) {
+				$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
+				if ( in_array( $currency, $currencies, true ) ) {
+					$paid_invoices++;
+				}
+			}
+		}
 
 		return array(
 			'start_date'                => $start_date,
@@ -150,16 +156,12 @@ final class InvoiceAnalyticsService {
 				->whereDate( 'payment_date', '>=', $start )
 				->whereDate( 'payment_date', '<=', $end );
 
-			if ( $agent_id > 0 || ! empty( $currencies ) ) {
+			// Currency filtering happens after resolution in the loop below.
+			if ( $agent_id > 0 ) {
 				$payments_query->whereHas(
 					'invoice',
-					function ( $query ) use ( $agent_id, $currencies ) {
-						if ( $agent_id > 0 ) {
-							$query->where( 'sale_agent_user_id', $agent_id );
-						}
-						if ( ! empty( $currencies ) ) {
-							$query->whereIn( 'currency', $currencies );
-						}
+					function ( $query ) use ( $agent_id ) {
+						$query->where( 'sale_agent_user_id', $agent_id );
 					}
 				);
 			}
@@ -208,22 +210,27 @@ final class InvoiceAnalyticsService {
 	 * @return string[]
 	 */
 	public function get_available_currencies(): array {
+		// Return the RESOLVED currencies (global for drafts, frozen for sent), so
+		// the filter options match what the report groups by. Only `currency` and
+		// `sent_at` are needed to resolve each row.
 		$rows = InvoiceModel::query()
-			->select( 'currency' )
-			->distinct()
-			->orderBy( 'currency' )
-			->pluck( 'currency' )
-			->all();
+			->select( array( 'currency', 'sent_at' ) )
+			->get();
 
 		$currencies = array();
-		foreach ( $rows as $currency ) {
-			$currency = strtoupper( trim( (string) $currency ) );
+		foreach ( $rows as $invoice ) {
+			$currency = strtoupper(
+				trim( (string) \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at ) )
+			);
 			if ( '' !== $currency ) {
 				$currencies[] = $currency;
 			}
 		}
 
-		return array_values( array_unique( $currencies ) );
+		$currencies = array_values( array_unique( $currencies ) );
+		sort( $currencies );
+
+		return $currencies;
 	}
 
 	/**

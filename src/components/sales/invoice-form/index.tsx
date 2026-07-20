@@ -15,7 +15,6 @@ import { useParams } from '@doublescale/navigation';
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import {
 	FormField,
-	TagField,
 	InfiniteScrollSelect,
 	NovicesIcon,
 	PanelLayout,
@@ -177,7 +176,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [clientNote, setClientNote] = useState('');
 	const [terms, setTerms] = useState('');
 	const [saleAgentUserId, setSaleAgentUserId] = useState<number | null>(null);
-	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
 	);
@@ -214,11 +212,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		setClientNote(existing.client_note || '');
 		setTerms(existing.terms || '');
 		setSaleAgentUserId(existing.sale_agent_user_id ?? null);
-		setTagIds(
-			Array.isArray(existing.tag_ids)
-				? existing.tag_ids.map((id) => Number(id)).filter(Boolean)
-				: []
-		);
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
 		setTemplate(normalizeTemplateId(existing.template));
 		setTemplateColor(normalizeTemplateColor(existing.template_color));
@@ -393,7 +386,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		client_note: clientNote,
 		terms,
 		sale_agent_user_id: saleAgentUserId,
-		tag_ids: tagIds,
 		line_items: lineItems,
 		template,
 		template_color: templateColor,
@@ -610,7 +602,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			allowed_payment_modes: allowedPaymentModes,
 			discount_type: discountType,
 			discount_value: discountValue,
-			tag_ids: tagIds,
 			line_items: lineItems,
 			subtotal: totals.subtotal,
 			total_tax: totals.totalTax,
@@ -781,12 +772,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 									</SelectContent>
 								</Select>
 							)}
-						</FormField>
-						<FormField
-							label={__('Tags', 'doublescale')}
-							className="!mb-0"
-						>
-							<TagField value={tagIds} onChange={setTagIds} />
 						</FormField>
 						<FormField
 							label={__('Bill To', 'doublescale')}

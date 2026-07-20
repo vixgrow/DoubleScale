@@ -25,6 +25,9 @@ interface DatePickerProps {
 	minDate?: Date; // Minimum selectable date (dates before this are disabled)
 	maxDate?: Date; // Maximum selectable date (dates after this are disabled)
 	style?: React.CSSProperties;
+	/** Merged onto the calendar popover (e.g. higher z-index inside nested dialogs). */
+	popoverContentClassName?: string;
+	popoverContentStyle?: React.CSSProperties;
 }
 
 function formatDate(date: Date | undefined) {
@@ -88,6 +91,8 @@ export function DatePicker({
 	minDate,
 	maxDate,
 	style,
+	popoverContentClassName,
+	popoverContentStyle,
 }: DatePickerProps) {
 	const [open, setOpen] = React.useState(false);
 
@@ -140,13 +145,13 @@ export function DatePicker({
 	};
 
 	return (
-		<div className={cn('relative flex gap-2', className)}>
+		<div className={cn('relative flex w-full gap-2', className)}>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
 						className={cn(
-							'group relative h-10 w-[220px] justify-start gap-2.5 rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150',
+							'group relative h-10 w-full justify-start gap-2.5 rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150',
 							!inputValue &&
 								'border-input bg-white text-muted-foreground shadow-sm hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.02]',
 							inputValue &&
@@ -202,7 +207,11 @@ export function DatePicker({
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent
-					className="w-auto overflow-hidden rounded-xl border border-border bg-white p-0 shadow-xl"
+					className={cn(
+						'w-auto overflow-hidden rounded-xl border border-border bg-white p-0 shadow-xl',
+						popoverContentClassName
+					)}
+					style={popoverContentStyle}
 					align="end"
 					alignOffset={-8}
 					sideOffset={8}

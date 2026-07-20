@@ -9,6 +9,8 @@ namespace DoubleScale\Modules\Documents\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
@@ -45,6 +47,8 @@ class ConvertProposalToInvoice {
 		$invoice->fill(
 			array(
 				'status'              => InvoiceStatus::DRAFT,
+				'template'            => DocumentTemplate::normalize( $proposal->template ?? DocumentTemplate::DEFAULT ),
+				'template_color'      => DocumentTemplateColor::normalize( $proposal->template_color ?? null ),
 				'contact_id'          => (int) $proposal->contact_id,
 				'proposal_id'         => (int) $proposal->id,
 				'sale_agent_user_id'  => $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : null,
@@ -52,7 +56,6 @@ class ConvertProposalToInvoice {
 				'discount_type'       => (string) $proposal->discount_type,
 				'discount_value'      => (float) $proposal->discount_value,
 				'adjustment'          => (float) $proposal->adjustment,
-				'tag_ids'             => is_array( $proposal->tag_ids ) ? $proposal->tag_ids : array(),
 				'line_items'          => is_array( $proposal->line_items ) ? $proposal->line_items : array(),
 				'billing_address'     => self::compose_billing_address( $proposal ),
 				'invoice_date'        => $today,

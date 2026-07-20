@@ -182,6 +182,28 @@ class Settings {
 	}
 
 	/**
+	 * Resolve the currency to display for a sales document.
+	 *
+	 * Currency is a single global setting (like deals), but once a document has
+	 * been sent to the customer its currency is frozen to whatever was stored at
+	 * that time — changing the global currency afterwards must not retroactively
+	 * relabel money the customer has already seen or paid. Documents that have
+	 * not been sent yet (drafts) always follow the current global currency.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $stored_currency Currency stored on the record.
+	 * @param mixed       $sent_at         Truthy once the document was sent (e.g. `sent_at` timestamp).
+	 * @return string Currency code (e.g., 'USD', 'EUR').
+	 */
+	public static function document_currency( $stored_currency, $sent_at ) {
+		if ( ! empty( $sent_at ) && ! empty( $stored_currency ) ) {
+			return (string) $stored_currency;
+		}
+		return self::get_currency();
+	}
+
+	/**
 	 * Encrypt a value using AES-256-CBC with SECURE_AUTH_KEY.
 	 *
 	 * @param string $value Plaintext value.

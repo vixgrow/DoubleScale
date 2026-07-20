@@ -69,6 +69,7 @@ const sharedAlias = {
 	'@/types/sales': path.resolve(__dirname, 'src/types/sales'),
 	'@/hooks/sales': path.resolve(__dirname, 'src/hooks/sales'),
 	'@/components/sales': path.resolve(__dirname, 'src/components/sales'),
+	'@/components/settings': path.resolve(__dirname, 'src/components/settings'),
 	'@/constants/sales': path.resolve(__dirname, 'src/constants/sales.ts'),
 
 	'@doublescale/email-sequences-page': path.resolve(

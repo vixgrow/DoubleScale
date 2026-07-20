@@ -47,11 +47,11 @@ class RestSalesUsersController extends RestController {
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
-		return Capabilities::can_view_sales();
+		return Capabilities::can_view_sales() || Capabilities::can_assign_sales_rep();
 	}
 
 	/**
-	 * Managers receive every sales-team user; reps receive only themselves.
+	 * Users who may assign sales reps receive every sales-team user; reps receive only themselves.
 	 *
 	 * @param WP_REST_Request $request Unused. // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 	 * @return WP_REST_Response
@@ -62,7 +62,7 @@ class RestSalesUsersController extends RestController {
 			return $disabled;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_assign_sales_rep() ) {
 			$self = wp_get_current_user();
 			return new WP_REST_Response( array( $this->shape_user( $self ) ), 200 );
 		}

@@ -23,6 +23,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
+use DoubleScale\Modules\Activities\Models\ActivityAssociationModel;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Core\Constants\ActivityTypes;
@@ -632,7 +633,7 @@ class RestActivityController extends RestController {
 		$data = array(
 			'contact_id'  => $request->get_param( 'contact_id' ),
 			'entity_id'   => $request->get_param( 'entity_id' ),
-			'entity_type' => $request->get_param( 'entity_type' ),
+			'entity_type' => $this->normalize_entity_type( $request->get_param( 'entity_type' ) ),
 			'title'       => sanitize_text_field( $request->get_param( 'title' ) ?? '' ),
 			'content'     => wp_kses_post( $request->get_param( 'content' ) ?? '' ),
 		);
@@ -1275,7 +1276,7 @@ class RestActivityController extends RestController {
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return $this->user_can_access_activities( $request, false );
 	}
 
 	/**
@@ -1286,7 +1287,7 @@ class RestActivityController extends RestController {
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return $this->user_can_access_activities( $request, false );
 	}
 
 	/**
@@ -1297,7 +1298,7 @@ class RestActivityController extends RestController {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return $this->user_can_access_activities( $request, true );
 	}
 
 	/**
@@ -1308,7 +1309,7 @@ class RestActivityController extends RestController {
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return $this->user_can_access_activities( $request, true );
 	}
 
 	/**
@@ -1319,7 +1320,82 @@ class RestActivityController extends RestController {
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return $this->user_can_access_activities( $request, true );
+	}
+
+	/**
+	 * Allow sales users globally, or project users when scoped to a project they can access.
+	 *
+	 * @param WP_REST_Request $request        Full data about the request.
+	 * @param bool            $require_manage When true, require project manage access.
+	 *
+	 * @return bool
+	 */
+	private function user_can_access_activities( WP_REST_Request $request, bool $require_manage ): bool {
+		if ( Permissions::has_sales_rep_access() ) {
+			return true;
+		}
+
+		return $this->user_can_access_project_scoped_activities( $request, $require_manage );
+	}
+
+	/**
+	 * Project-only users may access activities tied to a project they can read or manage.
+	 *
+	 * @param WP_REST_Request $request        Full data about the request.
+	 * @param bool            $require_manage When true, require project manage access.
+	 *
+	 * @return bool
+	 */
+	private function user_can_access_project_scoped_activities( WP_REST_Request $request, bool $require_manage ): bool {
+		if ( ! class_exists( '\DoubleScale\Pro\Core\UserRoles\PermissionsCompat' ) ) {
+			return false;
+		}
+
+		if ( ! \DoubleScale\Pro\Core\UserRoles\PermissionsCompat::has_project_access() ) {
+			return false;
+		}
+
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' ) ) {
+			return false;
+		}
+
+		$project_id = $this->resolve_project_id_from_request( $request );
+		if ( ! $project_id ) {
+			return false;
+		}
+
+		return $require_manage
+			? \DoubleScale\Pro\Modules\Projects\Capabilities::can_manage_project( $project_id )
+			: \DoubleScale\Pro\Modules\Projects\Capabilities::can_read_project( $project_id );
+	}
+
+	/**
+	 * Resolve a project ID from request params or an activity association.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return int|null
+	 */
+	private function resolve_project_id_from_request( WP_REST_Request $request ): ?int {
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+		$entity_id   = (int) $request->get_param( 'entity_id' );
+
+		if ( ActivityAssociationModel::ENTITY_TYPE_PROJECT === $entity_type && $entity_id > 0 ) {
+			return $entity_id;
+		}
+
+		$activity_id = (int) $request->get_param( 'id' );
+		if ( $activity_id <= 0 ) {
+			return null;
+		}
+
+		$project_id = ActivityAssociationModel::query()
+			->where( 'activity_id', $activity_id )
+			->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_PROJECT )
+			->value( 'entity_id' );
+
+		return null !== $project_id ? (int) $project_id : null;
 	}
 
 	/**

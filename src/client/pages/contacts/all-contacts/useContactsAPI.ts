@@ -182,13 +182,13 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		}
 	};
 
-	const deleteSelected = async () => {
+	const deleteSelected = async (force = false) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
 				path: '/doublescale/v1/contacts',
 				method: 'DELETE',
-				data: { ids: selectedRowKeys },
+				data: { ids: selectedRowKeys, force },
 			});
 
 			setSelectedRowKeys([]);
@@ -325,7 +325,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 	const doBulkAction = async (action: string, data?: any) => {
 		switch (action) {
 			case 'delete':
-				deleteSelected();
+				deleteSelected(Boolean(data?.force));
 				break;
 			case 'add_to_list':
 				if (data?.lists) {

@@ -14,12 +14,15 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import InvoiceForm from './invoice-form';
+import type { LineItem } from '@/types/sales';
 
 export interface InvoiceFormDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	invoiceId?: number | null;
 	initialContactId?: number;
+	initialLineItems?: LineItem[];
+	initialCurrency?: string;
 	onSaved?: (invoiceId: number) => void;
 }
 
@@ -28,6 +31,8 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 	onOpenChange,
 	invoiceId = null,
 	initialContactId,
+	initialLineItems,
+	initialCurrency,
 	onSaved,
 }) => {
 	const isNew = invoiceId === null;
@@ -72,9 +77,11 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 				</DialogHeader>
 
 				<InvoiceForm
-					key={`${invoiceId ?? 'new'}-${initialContactId ?? ''}-${open}`}
+					key={`${invoiceId ?? 'new'}-${initialContactId ?? ''}-${initialCurrency ?? ''}-${initialLineItems?.[0]?.description ?? ''}-${initialLineItems?.[0]?.rate ?? ''}-${open}`}
 					invoiceId={invoiceId}
 					initialContactId={initialContactId}
+					initialLineItems={initialLineItems}
+					initialCurrency={initialCurrency}
 					mode="dialog"
 					onClose={() => onOpenChange(false)}
 					onSaved={(id) => {

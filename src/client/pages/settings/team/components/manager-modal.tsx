@@ -60,7 +60,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	const [error, setError] = useState<string>('');
 
 	const availableRoles = ManagerRoleOptions;
-	const moduleFlags = useModulesEnabled( [ 'support', 'deals', 'booking' ] );
+	const moduleFlags = useModulesEnabled( [ 'support', 'deals', 'booking', 'projects' ] );
 	const isProActiveFlag = isProActive();
 
 	const getModuleLabel = useCallback( ( slug: string ) => {
@@ -253,9 +253,8 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="max-w-md p-0">
-				{/* Header */}
-				<DialogHeader className="p-6 pb-4">
+			<DialogContent className="flex max-h-[min(90vh,720px)] max-w-md flex-col overflow-hidden p-0">
+				<DialogHeader className="shrink-0 border-b border-border/60 p-6 pb-4">
 					<CustomDialogHeader
 						title={getTitle()}
 						subtitle={getSubtitle()}
@@ -263,148 +262,150 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					/>
 				</DialogHeader>
 
-				{/* Content */}
-				<form onSubmit={handleSubmit} className="px-6 pb-6">
-					{/* Error Message */}
-					{error && (
-						<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-							<p className="text-sm text-red-600">{error}</p>
-						</div>
-					)}
-
-					{/* User Selection Section */}
-					<div className="mb-6">
-						<label className="block text-foreground font-normal text-base mb-2">
-							{__('Select User', 'doublescale')}
-							{!isEditMode && (
-								<span className="text-red-500 ml-1">*</span>
-							)}
-						</label>
-						{isEditMode ? (
-							<>
-								<div className="h-12 w-full py-[5px] px-4 rounded-lg border border-border/60 bg-gray-50 text-foreground text-sm flex items-center">
-									{email}
-								</div>
-								<p className="text-xs text-gray-500 mt-1">
-									{getUserHelperText()}
-								</p>
-							</>
-						) : (
-							<>
-								<InfiniteScrollSelect
-									value={selectedUserId || ''}
-									onValueChange={handleUserChange}
-									placeholder={__(
-										'Select a WordPress user',
-										'doublescale'
-									)}
-									apiEndpoint="/doublescale/v1/user-management/users/frontend"
-									searchParamName="search"
-									getOptionLabel={(user: WordPressUser) =>
-										`${user.display_name} (${user.email})`
-									}
-									getOptionValue={(user: WordPressUser) =>
-										user.id
-									}
-									dataPath="users"
-									totalPath="pagination.total"
-									perPage={20}
-									selectedItem={selectedUser}
-								/>
-								<p className="text-xs text-gray-500 mt-1">
-									{getUserHelperText()}
-								</p>
-							</>
+				<form
+					onSubmit={handleSubmit}
+					className="flex min-h-0 flex-1 flex-col"
+				>
+					<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
+						{error && (
+							<div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3">
+								<p className="text-sm text-red-600">{error}</p>
+							</div>
 						)}
-					</div>
 
-					{/* Roles Section */}
-					<div className="">
-						<div className="text-foreground font-normal text-base">
-							{__('Roles', 'doublescale')}
-						</div>
-						<p className="text-xs text-gray-500 mb-2">
-							{__(
-								'Select one or more roles. Capabilities merge across every assigned role; the highest-priority role is shown as the effective role (CRM Manager → Sales Manager → Sales Rep → Support Manager → Support Agent → Booking Manager → Booking Agent).',
-								'doublescale'
+						<div className="mb-6">
+							<label className="mb-2 block text-base font-normal text-foreground">
+								{__('Select User', 'doublescale')}
+								{!isEditMode && (
+									<span className="ml-1 text-red-500">*</span>
+								)}
+							</label>
+							{isEditMode ? (
+								<>
+									<div className="flex h-12 w-full items-center rounded-lg border border-border/60 bg-gray-50 px-4 py-[5px] text-sm text-foreground">
+										{email}
+									</div>
+									<p className="mt-1 text-xs text-gray-500">
+										{getUserHelperText()}
+									</p>
+								</>
+							) : (
+								<>
+									<InfiniteScrollSelect
+										value={selectedUserId || ''}
+										onValueChange={handleUserChange}
+										placeholder={__(
+											'Select a WordPress user',
+											'doublescale'
+										)}
+										apiEndpoint="/doublescale/v1/user-management/users/frontend"
+										searchParamName="search"
+										getOptionLabel={(user: WordPressUser) =>
+											`${user.display_name} (${user.email})`
+										}
+										getOptionValue={(user: WordPressUser) =>
+											user.id
+										}
+										dataPath="users"
+										totalPath="pagination.total"
+										perPage={20}
+										selectedItem={selectedUser}
+									/>
+									<p className="mt-1 text-xs text-gray-500">
+										{getUserHelperText()}
+									</p>
+								</>
 							)}
-						</p>
+						</div>
 
-						<div className="space-y-3">
-							{availableRoles.map( ( role ) => {
-								const moduleSlug =
-									ManagerRoleModuleRequirements[ role.id ];
-								const requiresPro =
-									ManagerRoleProRequirements.includes(
+						<div>
+							<div className="text-base font-normal text-foreground">
+								{__('Roles', 'doublescale')}
+							</div>
+							<p className="mb-2 text-xs text-gray-500">
+								{__(
+									'Select one or more roles. Capabilities merge across every assigned role.',
+									'doublescale'
+								)}
+							</p>
+
+							<div className="space-y-3">
+								{availableRoles.map((role) => {
+									const moduleSlug =
+										ManagerRoleModuleRequirements[role.id];
+									const requiresPro =
+										ManagerRoleProRequirements.includes(
+											role.id
+										);
+									const roleAssignable = isRoleAssignable(
 										role.id
 									);
-								const roleAssignable = isRoleAssignable(
-									role.id
-								);
-								const isAssigned = selectedRoles.includes(
-									role.id
-								);
-								const checkboxDisabled =
-									! roleAssignable && ! isAssigned;
+									const isAssigned = selectedRoles.includes(
+										role.id
+									);
+									const checkboxDisabled =
+										!roleAssignable && !isAssigned;
 
-								return (
-									<div key={role.id} className="space-y-1">
-										<div className="flex items-center space-x-3">
-											<Checkbox
-												id={role.id}
-												checked={isAssigned}
-												disabled={checkboxDisabled}
-												onCheckedChange={( checked ) =>
-													handleRoleToggle(
-														role.id,
-														checked === true
-													)
-												}
-												className="h-5 w-5"
-											/>
-											<Label
-												htmlFor={role.id}
-												className={
-													checkboxDisabled
-														? 'text-sm font-normal text-gray-400 cursor-not-allowed'
-														: 'text-sm font-normal text-gray-700 cursor-pointer'
-												}
-											>
-												{__( role.label, 'doublescale' )}
-											</Label>
-										</div>
-										{ requiresPro && ! isProActiveFlag && (
-											<p className="text-xs text-amber-700 pl-8">
-												{__(
-													'Activate DoubleScale Pro to assign this role.',
-													'doublescale'
-												)}
-											</p>
-										) }
-										{ roleAssignable === false &&
-											moduleSlug &&
-											( requiresPro ? isProActiveFlag : true ) && (
-												<p className="text-xs text-amber-700 pl-8">
-													{sprintf(
-														/* translators: %s: module label from Settings → Modules */
-														__(
-															'Enable the %s module in Settings → Modules to assign this role.',
-															'doublescale'
-														),
-														getModuleLabel(
-															moduleSlug
+									return (
+										<div key={role.id} className="space-y-1">
+											<div className="flex items-center space-x-3">
+												<Checkbox
+													id={role.id}
+													checked={isAssigned}
+													disabled={checkboxDisabled}
+													onCheckedChange={(checked) =>
+														handleRoleToggle(
+															role.id,
+															checked === true
 														)
+													}
+													className="h-5 w-5"
+												/>
+												<Label
+													htmlFor={role.id}
+													className={
+														checkboxDisabled
+															? 'cursor-not-allowed text-sm font-normal text-gray-400'
+															: 'cursor-pointer text-sm font-normal text-gray-700'
+													}
+												>
+													{__(role.label, 'doublescale')}
+												</Label>
+											</div>
+											{requiresPro && !isProActiveFlag && (
+												<p className="pl-8 text-xs text-amber-700">
+													{__(
+														'Activate DoubleScale Pro to assign this role.',
+														'doublescale'
 													)}
 												</p>
-											) }
-									</div>
-								);
-							} ) }
+											)}
+											{roleAssignable === false &&
+												moduleSlug &&
+												(requiresPro
+													? isProActiveFlag
+													: true) && (
+													<p className="pl-8 text-xs text-amber-700">
+														{sprintf(
+															/* translators: %s: module label from Settings → Modules */
+															__(
+																'Enable the %s module in Settings → Modules to assign this role.',
+																'doublescale'
+															),
+															getModuleLabel(
+																moduleSlug
+															)
+														)}
+													</p>
+												)}
+										</div>
+									);
+								})}
+							</div>
 						</div>
 					</div>
 
-					{/* Action Buttons */}
-					<div className="pt-4">
+					<div className="shrink-0 border-t border-border/60 bg-background px-6 py-4">
 						<Button
 							variant="gradient"
 							size="lg"

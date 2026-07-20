@@ -31,6 +31,7 @@ import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@doublescale/client';
+import ConfigAPI from '@doublescale/config';
 
 interface UpcomingActivitiesProps {
     contact_id?: number;
@@ -208,6 +209,9 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
     };
 
     const handleDeleteTask = async (taskId: number) => {
+        if (!ConfigAPI.isModuleEnabled('tasks')) {
+            return;
+        }
         if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'doublescale'))) {
             return;
         }
@@ -227,14 +231,16 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
     };
 
     const handleMarkTaskComplete = async (taskId: number) => {
+        if (!ConfigAPI.isModuleEnabled('tasks')) {
+            return;
+        }
         try {
-            await apiFetch({
-                path: `/doublescale/v1/tasks/${taskId}`,
-                method: 'PATCH',
-                data: {
-                    status: 'completed',
-                },
-            });
+            const TaskService = getProTaskService();
+            if (!TaskService) {
+                showNotice('error', __('Task updates require Pro plugin.', 'doublescale'));
+                return;
+            }
+            await TaskService.markCompleted(taskId);
             fetchUpcomingActivities();
             showNotice('success', __('Task marked as complete', 'doublescale'));
         } catch (error) {

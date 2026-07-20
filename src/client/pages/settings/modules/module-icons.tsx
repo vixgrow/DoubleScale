@@ -45,6 +45,8 @@ export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
 				return <AutomationsIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'tasks':
 				return <TaskIcon width={dim} height={dim} color={ICON_COLOR} />;
+			case 'projects':
+				return <PipelineIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'campaigns':
 				return <CampaignIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'booking':

@@ -17,6 +17,7 @@ use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Container;
 use DoubleScale\Core\Payment\GatewayManager;
+use DoubleScale\Modules\Activities\Models\ActivityAssociationModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
@@ -162,29 +163,90 @@ final class Module extends AbstractModule {
 		}
 
 		if ( class_exists( ActivityModel::class ) ) {
-			ActivityModel::create(
+			$deal_ids = $this->get_proposal_deal_ids( $proposal );
+
+			$data = array(
+				'title'          => __( 'Invoice created from proposal', 'doublescale' ),
+				'type'           => 'system',
+				'note'           => sprintf(
+					/* translators: 1: proposal number, 2: invoice number */
+					__( 'Proposal %1$s was accepted and converted to invoice %2$s.', 'doublescale' ),
+					(string) $proposal->proposal_number,
+					(string) $invoice->invoice_number
+				),
+				'proposal_id'    => (int) $proposal->id,
+				'invoice_id'     => (int) $invoice->id,
+				'invoice_number' => (string) $invoice->invoice_number,
+				'event_key'      => 'invoice_linked',
+			);
+			if ( $deal_ids ) {
+				$data['deal_id'] = (int) $deal_ids[0];
+			}
+
+			$activity = ActivityModel::create(
 				array(
 					'contact_id'    => (int) $proposal->contact_id,
 					'activity_type' => ActivityTypes::STATUS_CHANGED,
-					'data'          => array(
-						'title'       => __( 'Invoice created from proposal', 'doublescale' ),
-						'type'        => 'system',
-						'note'        => sprintf(
-							/* translators: 1: proposal number, 2: invoice number */
-							__( 'Proposal %1$s was accepted and converted to invoice %2$s.', 'doublescale' ),
-							(string) $proposal->proposal_number,
-							(string) $invoice->invoice_number
-						),
-						'proposal_id' => (int) $proposal->id,
-						'invoice_id'  => (int) $invoice->id,
-					),
+					'data'          => $data,
 					'user_id'       => null,
 				)
 			);
-			// TODO(morph): wire proposal/invoice associations (ENTITY_TYPE_PROPOSAL / ENTITY_TYPE_INVOICE).
+
+			if ( $activity && class_exists( ActivityAssociationModel::class ) ) {
+				$entities = array(
+					array( ActivityAssociationModel::ENTITY_TYPE_PROPOSAL, (int) $proposal->id ),
+					array( ActivityAssociationModel::ENTITY_TYPE_INVOICE, (int) $invoice->id ),
+				);
+				foreach ( $deal_ids as $deal_id ) {
+					$entities[] = array( ActivityAssociationModel::ENTITY_TYPE_DEAL, $deal_id );
+				}
+				foreach ( $entities as $entity ) {
+					ActivityAssociationModel::create(
+						array(
+							'activity_id' => $activity->id,
+							'entity_type' => $entity[0],
+							'entity_id'   => $entity[1],
+						)
+					);
+				}
+			}
 		}
 
 		do_action( 'doublescale_sales_proposal_converted_to_invoice', $proposal, $invoice );
+	}
+
+	/**
+	 * Deal ids linked to a proposal via activity associations.
+	 *
+	 * Documents link to deals purely through activity associations (no deal_id
+	 * column), so walk proposal associations to their activities and read the
+	 * deal associations back out.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @return array<int>
+	 */
+	private function get_proposal_deal_ids( ProposalModel $proposal ): array {
+		if ( ! class_exists( ActivityAssociationModel::class ) ) {
+			return array();
+		}
+
+		$activity_ids = ActivityAssociationModel::where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_PROPOSAL )
+			->where( 'entity_id', (int) $proposal->id )
+			->pluck( 'activity_id' )
+			->toArray();
+
+		if ( empty( $activity_ids ) ) {
+			return array();
+		}
+
+		$deal_ids = ActivityAssociationModel::whereIn( 'activity_id', $activity_ids )
+			->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_DEAL )
+			->pluck( 'entity_id' )
+			->unique()
+			->values()
+			->toArray();
+
+		return array_map( 'intval', $deal_ids );
 	}
 
 	/**

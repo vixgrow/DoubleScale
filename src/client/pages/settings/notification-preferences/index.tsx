@@ -34,7 +34,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Loader2, Bell, Mail, Save, Monitor, Smartphone, CheckCircle2, AlertCircle, XCircle, Wifi, Receipt, Pencil } from 'lucide-react';
+import { Loader2, Bell, Mail, Save, Monitor, Smartphone, CheckCircle2, AlertCircle, XCircle, Wifi, Receipt, Pencil, FolderKanban } from 'lucide-react';
 import {
 	isBrowserNotificationSupported,
 	getBrowserNotificationPermission,
@@ -66,6 +66,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 	booking: <UpcomingCalendarIcon width={18} height={18} />,
 	support: <SupportIcon width={18} height={18} />,
 	sales: <Receipt size={18} />,
+	projects: <FolderKanban width={18} height={18} />,
 };
 
 interface PushConfig {

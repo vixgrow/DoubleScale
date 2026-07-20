@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Documents\Services\TotalsCalculator;
@@ -39,6 +38,8 @@ class InvoiceModel extends Model {
 		'invoice_number',
 		'hash',
 		'status',
+		'template',
+		'template_color',
 		'contact_id',
 		'proposal_id',
 		'subscription_id',
@@ -49,7 +50,6 @@ class InvoiceModel extends Model {
 		'allowed_payment_modes',
 		'discount_type',
 		'discount_value',
-		'tag_ids',
 		'line_items',
 		'subtotal',
 		'total_tax',
@@ -70,7 +70,7 @@ class InvoiceModel extends Model {
 	 * @var array<string, string>
 	 */
 	protected $casts = array(
-		'tag_ids'               => 'array',
+		'template'              => 'int',
 		'line_items'            => 'array',
 		'allowed_payment_modes' => 'array',
 		'discount_value'        => 'float',
@@ -136,17 +136,6 @@ class InvoiceModel extends Model {
 	}
 
 	/**
-	 * @return \Illuminate\Database\Eloquent\Collection
-	 */
-	public function tags() {
-		$ids = is_array( $this->tag_ids ) ? array_filter( array_map( 'intval', $this->tag_ids ) ) : array();
-		if ( empty( $ids ) ) {
-			return TagModel::query()->whereRaw( '0=1' )->get();
-		}
-		return TagModel::query()->whereIn( 'id', $ids )->get();
-	}
-
-	/**
 	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
 	 * @param string                                $status Status value.
 	 * @return \Illuminate\Database\Eloquent\Builder
@@ -186,6 +175,22 @@ class InvoiceModel extends Model {
 				$invoice->subtotal  = $totals['subtotal'];
 				$invoice->total_tax = $totals['total_tax'];
 				$invoice->total     = $totals['total'];
+			}
+		);
+
+		static::deleting(
+			function ( $invoice ) {
+				// Deal/project links are soft activity associations; remove this
+				// invoice's rows so nothing keeps resolving a deleted document.
+				if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+					\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_INVOICE )
+						->where( 'entity_id', $invoice->id )
+						->delete();
+				}
+
+				PaymentModel::query()
+					->where( 'invoice_id', (int) $invoice->id )
+					->delete();
 			}
 		);
 	}

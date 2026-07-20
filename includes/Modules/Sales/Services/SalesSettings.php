@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Sales\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
 use DoubleScale\Core\Payment\GatewayManager;
 
 /**
@@ -38,6 +39,7 @@ final class SalesSettings {
 			'proposal_expiry_reminder_days' => 3,
 			'require_signature_on_accept'   => true,
 			'approval_workflow_enabled'     => false,
+			'auto_close_deals_on_paid'      => false,
 			'default_offline_payment_modes' => array(
 				PaymentMode::BANK_TRANSFER,
 				PaymentMode::CASH,
@@ -49,6 +51,8 @@ final class SalesSettings {
 			),
 			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
 			'pdf_company_address'             => '',
+			'default_invoice_template'        => DocumentTemplate::DEFAULT,
+			'default_proposal_template'       => DocumentTemplate::DEFAULT,
 		);
 	}
 
@@ -186,9 +190,16 @@ final class SalesSettings {
 			$clean['pdf_company_address'] = sanitize_textarea_field( (string) $merged['pdf_company_address'] );
 		}
 
+		foreach ( array( 'default_invoice_template', 'default_proposal_template' ) as $template_key ) {
+			if ( array_key_exists( $template_key, $merged ) ) {
+				$clean[ $template_key ] = DocumentTemplate::normalize( $merged[ $template_key ] );
+			}
+		}
+
 		$bool_keys = array(
 			'require_signature_on_accept',
 			'approval_workflow_enabled',
+			'auto_close_deals_on_paid',
 		);
 		foreach ( $bool_keys as $key ) {
 			if ( array_key_exists( $key, $merged ) ) {

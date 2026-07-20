@@ -12,9 +12,12 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Documents\Constants\DiscountType;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
@@ -25,7 +28,7 @@ use DoubleScale\Modules\Documents\Services\ProposalNotifications;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
-use DoubleScale\Modules\Sales\Services\SalesTags;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -184,7 +187,11 @@ class RestProposalController extends RestController {
 	public function create_item_permissions_check( $request ) {
 		unset( $request );
 		return Capabilities::can_view_sales()
-			&& ( Capabilities::can_manage_all_sales() || Capabilities::current_user_can( 'doublescale_manage_own_sales' ) );
+			&& (
+				Capabilities::can_manage_all_sales()
+				|| Capabilities::current_user_can( 'doublescale_manage_own_sales' )
+				|| Capabilities::can_assign_sales_rep()
+			);
 	}
 
 	public function update_item_permissions_check( $request ) {
@@ -207,7 +214,7 @@ class RestProposalController extends RestController {
 
 		$query = ProposalModel::query()->with( array( 'contact', 'assigned_user' ) );
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'assigned_user_id', get_current_user_id() );
 		}
 
@@ -390,12 +397,18 @@ class RestProposalController extends RestController {
 			return $payload;
 		}
 
+		if ( ! isset( $payload['template'] ) ) {
+			$payload['template'] = DocumentTemplate::normalize(
+				SalesSettings::get( 'default_proposal_template', DocumentTemplate::DEFAULT )
+			);
+		}
+
 		$discount_check = DiscountType::validate_payload( $payload );
 		if ( is_wp_error( $discount_check ) ) {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_assign_sales_rep() ) {
 			$payload['assigned_user_id'] = get_current_user_id();
 		}
 
@@ -441,7 +454,7 @@ class RestProposalController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['assigned_user_id'] ) ) {
+		if ( ! Capabilities::can_assign_sales_rep() && isset( $payload['assigned_user_id'] ) ) {
 			unset( $payload['assigned_user_id'] );
 		}
 
@@ -511,6 +524,25 @@ class RestProposalController extends RestController {
 
 		$invoice = ( new ConvertProposalToInvoice() )->convert( $proposal );
 		if ( is_wp_error( $invoice ) ) {
+			if ( 'already_converted' === $invoice->get_error_code() ) {
+				$existing_id = (int) ( $invoice->get_error_data()['invoice_id'] ?? 0 );
+				$existing    = $existing_id > 0
+					? InvoiceModel::with( array( 'contact', 'sale_agent' ) )->find( $existing_id )
+					: null;
+				if ( $existing ) {
+					$proposal->refresh();
+
+					return new WP_REST_Response(
+						array(
+							'invoice'           => InvoiceShaper::shape( $existing, true ),
+							'proposal'        => ProposalShaper::shape_admin( $proposal, true ),
+							'already_converted' => true,
+						),
+						200
+					);
+				}
+			}
+
 			return $invoice;
 		}
 		$proposal->refresh();
@@ -710,13 +742,16 @@ class RestProposalController extends RestController {
 		if ( array_key_exists( 'adjustment', $params ) ) {
 			$payload['adjustment'] = (float) $params['adjustment'];
 		}
-		if ( array_key_exists( 'tag_ids', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tag_ids'] );
-		} elseif ( array_key_exists( 'tags', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tags'] );
-		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'template', $params ) ) {
+			$payload['template'] = DocumentTemplate::normalize( $params['template'] );
+		}
+
+		if ( array_key_exists( 'template_color', $params ) ) {
+			$payload['template_color'] = DocumentTemplateColor::normalize( $params['template_color'] );
 		}
 
 		if ( isset( $payload['status'] ) && ! ProposalStatus::is_valid( $payload['status'] ) ) {

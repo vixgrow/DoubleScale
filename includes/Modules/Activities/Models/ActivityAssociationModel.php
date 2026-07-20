@@ -80,6 +80,7 @@ class ActivityAssociationModel extends Model {
 	const ENTITY_TYPE_CONTACT  = 5;
 	const ENTITY_TYPE_PROPOSAL = 6;
 	const ENTITY_TYPE_INVOICE  = 7;
+	const ENTITY_TYPE_PROJECT  = 8;
 
 	/**
 	 * Validation rules
@@ -90,7 +91,7 @@ class ActivityAssociationModel extends Model {
 	 */
 	public $rules = array(
 		'activity_id' => 'required|integer',
-		'entity_type' => 'required|integer|in:1,2,3,4,5,6,7',
+		'entity_type' => 'required|integer|in:1,2,3,4,5,6,7,8',
 		'entity_id'   => 'required|integer',
 	);
 
@@ -104,7 +105,7 @@ class ActivityAssociationModel extends Model {
 	public $messages = array(
 		'activity_id.required' => 'Activity ID is required.',
 		'entity_type.required' => 'Entity type is required.',
-		'entity_type.in'       => 'Entity type must be 1 (Deal), 2 (Campaign), 3 (Ticket), 4 (Task), 5 (Contact), 6 (Proposal), or 7 (Invoice).',
+		'entity_type.in'       => 'Entity type must be 1 (Deal), 2 (Campaign), 3 (Ticket), 4 (Task), 5 (Contact), 6 (Proposal), 7 (Invoice), or 8 (Project).',
 		'entity_id.required'   => 'Entity ID is required.',
 	);
 
@@ -207,6 +208,19 @@ class ActivityAssociationModel extends Model {
 		if ( class_exists( '\DoubleScale\Modules\Documents\Models\InvoiceModel' ) ) {
 			return $this->belongsTo( '\DoubleScale\Modules\Documents\Models\InvoiceModel', 'entity_id', 'id' )
 				->where( 'entity_type', self::ENTITY_TYPE_INVOICE );
+		}
+		return null;
+	}
+
+	/**
+	 * Get project association (if entity_type is ENTITY_TYPE_PROJECT).
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo|null
+	 */
+	public function project() {
+		if ( class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' ) ) {
+			return $this->belongsTo( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel', 'entity_id', 'id' )
+				->where( 'entity_type', self::ENTITY_TYPE_PROJECT );
 		}
 		return null;
 	}
@@ -321,6 +335,18 @@ class ActivityAssociationModel extends Model {
 	}
 
 	/**
+	 * Scope: Filter by project.
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 * @param int                                   $project_id Project ID.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeForProject( $query, $project_id ) {
+		return $query->where( 'entity_type', self::ENTITY_TYPE_PROJECT )->where( 'entity_id', $project_id );
+	}
+
+	/**
 	 * Delete all association rows linking activities to a contact.
 	 *
 	 * Activities themselves are kept (timeline history); only the morph link is removed.
@@ -377,6 +403,7 @@ class ActivityAssociationModel extends Model {
 			'contact'  => self::ENTITY_TYPE_CONTACT,
 			'proposal' => self::ENTITY_TYPE_PROPOSAL,
 			'invoice'  => self::ENTITY_TYPE_INVOICE,
+			'project'  => self::ENTITY_TYPE_PROJECT,
 		);
 
 		return $map[ strtolower( $entity_type_string ) ] ?? null;
@@ -398,6 +425,7 @@ class ActivityAssociationModel extends Model {
 			self::ENTITY_TYPE_CONTACT  => 'contact',
 			self::ENTITY_TYPE_PROPOSAL => 'proposal',
 			self::ENTITY_TYPE_INVOICE  => 'invoice',
+			self::ENTITY_TYPE_PROJECT  => 'project',
 		);
 
 		return $map[ $entity_type_int ] ?? null;
@@ -429,10 +457,11 @@ class ActivityAssociationModel extends Model {
 					self::ENTITY_TYPE_CONTACT,
 					self::ENTITY_TYPE_PROPOSAL,
 					self::ENTITY_TYPE_INVOICE,
+					self::ENTITY_TYPE_PROJECT,
 				);
 
 				if ( ! in_array( $association->entity_type, $valid_types, true ) ) {
-					throw new \Exception( 'Invalid entity type. Must be 1 (Deal), 2 (Campaign), 3 (Ticket), 4 (Task), 5 (Contact), 6 (Proposal), or 7 (Invoice).' );
+					throw new \Exception( 'Invalid entity type. Must be 1 (Deal), 2 (Campaign), 3 (Ticket), 4 (Task), 5 (Contact), 6 (Proposal), 7 (Invoice), or 8 (Project).' );
 				}
 			}
 		);

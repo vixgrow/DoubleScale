@@ -42,7 +42,7 @@ final class Module extends AbstractModule {
 	}
 
 	/**
-	 * Host shell — always on.
+	 * Host shell — always on (not toggleable).
 	 *
 	 * @return bool
 	 */

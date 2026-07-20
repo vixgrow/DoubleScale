@@ -15,7 +15,6 @@ import { useParams } from '@doublescale/navigation';
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import {
 	FormField,
-	TagField,
 	InfiniteScrollSelect,
 	NovicesIcon,
 	PanelLayout,
@@ -35,6 +34,7 @@ import {
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
+import { InvoiceDocumentPreview } from '../document-preview';
 import {
 	canEditSalesDocument,
 	canSubmitForApproval,
@@ -61,9 +61,9 @@ import {
 	useInvoice,
 	useSalesSettings,
 } from '@/hooks/sales';
-import type { ContactSummary, LineItem } from '@/types/sales';
+import config from '@doublescale/config';
+import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
 import {
-	CURRENCIES,
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
 	INVOICE_STATUS_LABELS,
@@ -72,10 +72,24 @@ import {
 	ONLINE_PAYMENT_GATEWAYS,
 	ONLINE_PAYMENT_GATEWAY_LABELS,
 } from '@/constants/sales';
+import {
+	DesignPickerRow,
+	TemplateGallery,
+} from '../document-templates/template-gallery';
+import { normalizeTemplateColor } from '../document-templates/color-presets';
+import { DocumentEditorSidebar } from '../document-templates/document-editor-sidebar';
+import { DocumentEditorSteps } from '../document-templates/document-editor-steps';
+import { TemplateStyleEditor } from '../document-templates/template-style-editor';
+import {
+	DEFAULT_TEMPLATE_ID,
+	normalizeTemplateId,
+} from '../document-templates/registry';
 
 export interface InvoiceFormProps {
 	invoiceId?: number | null;
 	initialContactId?: number;
+	initialLineItems?: LineItem[];
+	initialCurrency?: string;
 	mode?: 'page' | 'dialog';
 	onClose?: () => void;
 	onSaved?: (invoiceId: number) => void;
@@ -106,6 +120,8 @@ const contactOptionLabel = (contact: ContactSummary): string => {
 const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	invoiceId: invoiceIdProp,
 	initialContactId,
+	initialLineItems,
+	initialCurrency,
 	mode = 'page',
 	onClose,
 	onSaved,
@@ -146,7 +162,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [invoiceDate, setInvoiceDate] = useState(today());
 	const [dueDate, setDueDate] = useState(monthFromToday());
-	const [currency, setCurrency] = useState('USD');
+	const [currency, setCurrency] = useState(
+		initialCurrency ?? config.getCurrency() ?? 'USD'
+	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
 	const [adjustment, setAdjustment] = useState(0);
@@ -158,8 +176,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [clientNote, setClientNote] = useState('');
 	const [terms, setTerms] = useState('');
 	const [saleAgentUserId, setSaleAgentUserId] = useState<number | null>(null);
-	const [tagIds, setTagIds] = useState<number[]>([]);
-	const [lineItems, setLineItems] = useState<LineItem[]>([]);
+	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
+		isNew && initialLineItems?.length ? initialLineItems : []
+	);
+	const [template, setTemplate] = useState(DEFAULT_TEMPLATE_ID);
+	const [templateColor, setTemplateColor] = useState<string | null>(null);
+	const [templatePicked, setTemplatePicked] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const prefilledContactFromUrlRef = useRef(false);
@@ -190,12 +212,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		setClientNote(existing.client_note || '');
 		setTerms(existing.terms || '');
 		setSaleAgentUserId(existing.sale_agent_user_id ?? null);
-		setTagIds(
-			Array.isArray(existing.tag_ids)
-				? existing.tag_ids.map((id) => Number(id)).filter(Boolean)
-				: []
-		);
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
+		setTemplate(normalizeTemplateId(existing.template));
+		setTemplateColor(normalizeTemplateColor(existing.template_color));
+		setTemplatePicked(true);
 		hydratedInvoiceIdRef.current = existing.id;
 	}, [existing]);
 
@@ -230,6 +250,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			})();
 		},
 		[applyContactFields]
+	);
+
+	const handleTemplateSelection = useCallback(
+		({
+			templateId,
+			templateColor: color,
+		}: {
+			templateId: number;
+			templateColor: string | null;
+		}) => {
+			setTemplate(templateId);
+			setTemplateColor(color);
+		},
+		[]
 	);
 
 	useEffect(() => {
@@ -283,6 +317,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			setAllowedPaymentModes(defaults);
 		}
 	}, [isNew, existing, salesSettings, allowedPaymentModes.length]);
+
+	useEffect(() => {
+		if (!isNew || templatePicked || !salesSettings) {
+			return;
+		}
+		setTemplate(
+			normalizeTemplateId(
+				salesSettings.default_invoice_template ?? DEFAULT_TEMPLATE_ID
+			)
+		);
+	}, [isNew, templatePicked, salesSettings]);
 
 	const togglePaymentMode = (mode: string) => {
 		setAllowedPaymentModes((prev) =>
@@ -341,8 +386,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		client_note: clientNote,
 		terms,
 		sale_agent_user_id: saleAgentUserId,
-		tag_ids: tagIds,
 		line_items: lineItems,
+		template,
+		template_color: templateColor,
 	});
 
 	const validateForm = (): boolean => {
@@ -462,6 +508,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		}
 	};
 
+	const canAssignSalesRep =
+		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
+	const saleAgentReadOnly =
+		assignableUsers.length === 0 ||
+		(!canAssignSalesRep && assignableUsers.length <= 1);
+
 	const pageTitle = isNew
 		? __('Create New Invoice', 'doublescale')
 		: __('Edit Invoice', 'doublescale');
@@ -483,10 +535,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		</PanelLayout>
 	);
 
+	const dialogScrollShell = (children: React.ReactNode) => (
+		<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
+			<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-2 sm:p-4">
+				{children}
+			</div>
+		</div>
+	);
+
 	if (!isNew && loading) {
 		if (isDialog) {
-			return (
-				<div className="p-6 text-muted-foreground">
+			return dialogScrollShell(
+				<div className="p-2 text-muted-foreground">
 					{__('Loading…', 'doublescale')}
 				</div>
 			);
@@ -499,12 +559,97 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		);
 	}
 
+	if (isNew && !templatePicked) {
+		const gallery = (
+			<TemplateGallery
+				docType="invoice"
+				value={template}
+				colorValue={templateColor}
+				onSelect={({ templateId, templateColor: color }) => {
+					setTemplate(templateId);
+					setTemplateColor(color);
+					setTemplatePicked(true);
+				}}
+				onCancel={goBack}
+			/>
+		);
+		if (isDialog) {
+			return dialogScrollShell(gallery);
+		}
+		return panelShell(gallery);
+	}
+
+	const buildDraftInvoice = (): Invoice => {
+		const totals = computeLineItemsTotals(
+			lineItems,
+			discountType,
+			discountValue,
+			adjustment
+		);
+		return {
+			id: invoiceId || 0,
+			invoice_number:
+				existing?.invoice_number || __('Draft', 'doublescale'),
+			hash: existing?.hash || '',
+			status,
+			template,
+			template_color: templateColor,
+			contact_id: contact?.id || 0,
+			sale_agent_user_id: saleAgentUserId,
+			invoice_date: invoiceDate,
+			due_date: dueDate,
+			currency,
+			allowed_payment_modes: allowedPaymentModes,
+			discount_type: discountType,
+			discount_value: discountValue,
+			line_items: lineItems,
+			subtotal: totals.subtotal,
+			total_tax: totals.totalTax,
+			adjustment,
+			total: totals.total,
+			amount_paid: existing?.amount_paid ?? 0,
+			billing_address: billingAddress,
+			shipping_address: shippingAddress,
+			client_note: clientNote,
+			terms,
+			created_at: existing?.created_at ?? null,
+			updated_at: existing?.updated_at ?? null,
+			contact: contact ?? null,
+		} as Invoice;
+	};
+
+	const editorSidebarProps = {
+		templateId: template,
+		templateColor,
+		onColorChange: setTemplateColor,
+		onTemplateChange: handleTemplateSelection,
+		templateChangeDisabled: fieldsLocked,
+	};
+
+	const draftInvoice = buildDraftInvoice();
+
+	const inlinePreview = (
+		<div className="rounded-2xl border border-border bg-[#FAFBFC] p-4">
+			<div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+				<h2 className="text-sm font-semibold text-foreground">
+					{__('Live Design Preview', 'doublescale')}
+				</h2>
+			</div>
+			<div className="overflow-x-auto rounded-lg border border-border bg-white p-2 md:p-4">
+				<InvoiceDocumentPreview invoice={draftInvoice} />
+			</div>
+		</div>
+	);
+
 	const formBody = (
 		<>
 			{isDialog ? (
-				<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
-					{pageTitle}
-				</h2>
+				<>
+					<DocumentEditorSteps activeStep="content" className="mb-4" />
+					<h2 className="mb-6 text-xl font-semibold tracking-tight text-[#29292E]">
+						{pageTitle}
+					</h2>
+				</>
 			) : (
 				<h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
 			)}
@@ -515,6 +660,30 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				approval={approval}
 				showReapprovalWarning={showReapprovalWarning}
 			/>
+
+			{!isDialog ? (
+			<DesignPickerRow
+				docType="invoice"
+				templateId={template}
+				templateColor={templateColor}
+				disabled={fieldsLocked}
+				onChange={({ templateId, templateColor: color }) => {
+					setTemplate(templateId);
+					setTemplateColor(color);
+				}}
+			/>
+			) : null}
+
+			{!isDialog ? (
+				<>
+					<TemplateStyleEditor
+						value={templateColor}
+						onChange={setTemplateColor}
+						compact
+					/>
+					{inlinePreview}
+				</>
+			) : null}
 
 			<fieldset
 				disabled={fieldsLocked}
@@ -552,7 +721,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 								<div className="text-sm text-muted-foreground">
 									{__('Loading…', 'doublescale')}
 								</div>
-							) : assignableUsers.length <= 1 ? (
+							) : saleAgentReadOnly ? (
 								<div className="flex h-10 items-center rounded-lg border border-border bg-[#ECECEC] px-3 text-sm text-[#29292E]">
 									{assignableUsers.find(
 										(u) => u.id === saleAgentUserId
@@ -603,12 +772,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 									</SelectContent>
 								</Select>
 							)}
-						</FormField>
-						<FormField
-							label={__('Tags', 'doublescale')}
-							className="!mb-0"
-						>
-							<TagField value={tagIds} onChange={setTagIds} />
 						</FormField>
 						<FormField
 							label={__('Bill To', 'doublescale')}
@@ -702,29 +865,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 							</Select>
 						</FormField>
 						<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-							<FormField
-								label={__('Currency', 'doublescale')}
-								required
-								className="!mb-0"
-							>
-								<Select
-									value={currency}
-									onValueChange={setCurrency}
-								>
-									<SelectTrigger
-										className={selectTriggerClass}
-									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{CURRENCIES.map((c) => (
-											<SelectItem key={c} value={c}>
-												{c}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormField>
 							<FormField
 								label={__('Discount Type', 'doublescale')}
 								className="!mb-0"
@@ -882,6 +1022,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					</div>
 				</div>
 			</fieldset>
+
+			{isDialog ? (
+				<div className="mt-6 space-y-4 border-t border-border pt-6 lg:hidden">
+					<DocumentEditorSidebar
+						docType="invoice"
+						{...editorSidebarProps}
+						preview={
+							<InvoiceDocumentPreview invoice={draftInvoice} />
+						}
+					/>
+				</div>
+			) : null}
 		</>
 	);
 
@@ -934,12 +1086,23 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	if (isDialog) {
 		return (
 			<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
-				<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
-					<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6">
-						{formBody}
+				<div className="flex min-h-0 flex-1 overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+					<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+						<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6 lg:pr-4">
+							{formBody}
+						</div>
+						<div className="shrink-0 border-t border-border bg-white px-6 py-4">
+							{formFooter}
+						</div>
 					</div>
-					<div className="shrink-0  bg-white px-6 py-4">
-						{formFooter}
+					<div className="doublescale-contact-page-column-scroll hidden min-h-0 w-[min(420px,36vw)] shrink-0 overflow-y-auto border-l border-border bg-[#F4F6F9] p-4 lg:block">
+						<DocumentEditorSidebar
+							docType="invoice"
+							{...editorSidebarProps}
+							preview={
+								<InvoiceDocumentPreview invoice={draftInvoice} />
+							}
+						/>
 					</div>
 				</div>
 				<SendDocumentDialog

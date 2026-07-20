@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Documents\Services\TotalsCalculator;
@@ -40,6 +39,8 @@ class ProposalModel extends Model {
 		'hash',
 		'subject',
 		'status',
+		'template',
+		'template_color',
 		'contact_id',
 		'assigned_user_id',
 		'date',
@@ -47,7 +48,6 @@ class ProposalModel extends Model {
 		'currency',
 		'discount_type',
 		'discount_value',
-		'tag_ids',
 		'line_items',
 		'subtotal',
 		'adjustment',
@@ -75,7 +75,7 @@ class ProposalModel extends Model {
 	 * @var array<string, string>
 	 */
 	protected $casts = array(
-		'tag_ids'         => 'array',
+		'template'        => 'int',
 		'line_items'      => 'array',
 		'discount_value'  => 'float',
 		'subtotal'        => 'float',
@@ -108,17 +108,6 @@ class ProposalModel extends Model {
 	 */
 	public function invoice() {
 		return $this->hasOne( InvoiceModel::class, 'proposal_id', 'id' );
-	}
-
-	/**
-	 * @return \Illuminate\Database\Eloquent\Collection
-	 */
-	public function tags() {
-		$ids = is_array( $this->tag_ids ) ? array_filter( array_map( 'intval', $this->tag_ids ) ) : array();
-		if ( empty( $ids ) ) {
-			return TagModel::query()->whereRaw( '0=1' )->get();
-		}
-		return TagModel::query()->whereIn( 'id', $ids )->get();
 	}
 
 	/**
@@ -160,6 +149,24 @@ class ProposalModel extends Model {
 				);
 				$proposal->subtotal = $totals['subtotal'];
 				$proposal->total    = $totals['total'];
+			}
+		);
+
+		static::deleting(
+			function ( $proposal ) {
+				// Deal/project links are soft activity associations; remove this
+				// proposal's rows so nothing keeps resolving a deleted document.
+				if ( class_exists( '\DoubleScale\Modules\Activities\Models\ActivityAssociationModel' ) ) {
+					\DoubleScale\Modules\Activities\Models\ActivityAssociationModel::where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_PROPOSAL )
+						->where( 'entity_id', $proposal->id )
+						->delete();
+				}
+
+				// The converted invoice is a financial record and must survive,
+				// but its proposal pointer would 404 — detach it.
+				InvoiceModel::query()
+					->where( 'proposal_id', (int) $proposal->id )
+					->update( array( 'proposal_id' => null ) );
 			}
 		);
 	}

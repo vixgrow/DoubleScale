@@ -11,11 +11,14 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\PaymentModel;
 use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Documents\Services\InvoicePayable;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Core\Settings\Settings;
 
 /**
  * InvoiceShaper class.
@@ -33,16 +36,19 @@ class InvoiceShaper {
 			'invoice_number'        => (string) $invoice->invoice_number,
 			'hash'                  => (string) $invoice->hash,
 			'status'                => (string) $invoice->status,
+			'template'              => DocumentTemplate::normalize( $invoice->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'        => DocumentTemplateColor::normalize( $invoice->template_color ?? null ),
 			'contact_id'            => (int) $invoice->contact_id,
 			'proposal_id'           => $invoice->proposal_id ? (int) $invoice->proposal_id : null,
 			'sale_agent_user_id'    => $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : null,
 			'invoice_date'          => $invoice->invoice_date,
 			'due_date'              => $invoice->due_date,
-			'currency'              => (string) $invoice->currency,
+			// Currency follows the global setting (like deals); once the invoice has
+			// been sent its currency is frozen to what the customer saw.
+			'currency'              => Settings::document_currency( $invoice->currency, $invoice->sent_at ),
 			'allowed_payment_modes' => PaymentMode::normalize_list( $invoice->allowed_payment_modes ),
 			'discount_type'         => (string) $invoice->discount_type,
 			'discount_value'        => (float) $invoice->discount_value,
-			'tag_ids'               => is_array( $invoice->tag_ids ) ? array_values( array_map( 'intval', $invoice->tag_ids ) ) : array(),
 			'line_items'            => is_array( $invoice->line_items ) ? $invoice->line_items : array(),
 			'subtotal'              => (float) $invoice->subtotal,
 			'total_tax'             => (float) $invoice->total_tax,
@@ -98,9 +104,13 @@ class InvoiceShaper {
 		return array(
 			'invoice_number'        => (string) $invoice->invoice_number,
 			'status'                => (string) $invoice->status,
+			'template'              => DocumentTemplate::normalize( $invoice->template ?? DocumentTemplate::DEFAULT ),
+			'template_color'        => DocumentTemplateColor::normalize( $invoice->template_color ?? null ),
 			'invoice_date'          => $invoice->invoice_date,
 			'due_date'              => $invoice->due_date,
-			'currency'              => (string) $invoice->currency,
+			// Currency follows the global setting (like deals); once the invoice has
+			// been sent its currency is frozen to what the customer saw.
+			'currency'              => Settings::document_currency( $invoice->currency, $invoice->sent_at ),
 			'allowed_payment_modes' => PaymentMode::normalize_list( $invoice->allowed_payment_modes ),
 			'discount_type'         => (string) $invoice->discount_type,
 			'discount_value'        => (float) $invoice->discount_value,

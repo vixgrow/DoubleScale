@@ -9,6 +9,8 @@ namespace DoubleScale\Modules\Documents\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
@@ -32,6 +34,8 @@ final class DuplicateProposal {
 					(string) $source->subject
 				),
 				'status'           => ProposalStatus::DRAFT,
+				'template'         => DocumentTemplate::normalize( $source->template ?? DocumentTemplate::DEFAULT ),
+				'template_color'   => DocumentTemplateColor::normalize( $source->template_color ?? null ),
 				'contact_id'       => (int) $source->contact_id,
 				'assigned_user_id' => $source->assigned_user_id ? (int) $source->assigned_user_id : null,
 				'date'             => current_time( 'Y-m-d' ),
@@ -39,7 +43,6 @@ final class DuplicateProposal {
 				'currency'         => (string) $source->currency,
 				'discount_type'    => (string) $source->discount_type,
 				'discount_value'   => (float) $source->discount_value,
-				'tag_ids'          => is_array( $source->tag_ids ) ? $source->tag_ids : array(),
 				'line_items'       => is_array( $source->line_items ) ? $source->line_items : array(),
 				'adjustment'       => (float) $source->adjustment,
 				'to_name'          => $source->to_name,

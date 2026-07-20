@@ -117,7 +117,7 @@ final class ProposalNotifications {
 		$formatted_total = sprintf(
 			'%1$s %2$s',
 			number_format_i18n( (float) $proposal->total, 2 ),
-			(string) $proposal->currency
+			\DoubleScale\Core\Settings\Settings::document_currency( $proposal->currency, $proposal->sent_at )
 		);
 
 		$summary_rows = array(

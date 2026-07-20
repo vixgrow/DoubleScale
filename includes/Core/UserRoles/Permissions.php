@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use WP_Error;
 
 /**
  * Permissions class
@@ -105,6 +106,302 @@ final class Permissions {
 	 */
 	public static function is_booking_agent( $user_id = null ) {
 		return self::user_has_role( UserRoles::BOOKING_AGENT, $user_id );
+	}
+
+	/**
+	 * Check if user is a Project Manager
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_project_manager( $user_id = null ) {
+		return self::user_has_role( UserRoles::PROJECT_MANAGER, $user_id );
+	}
+
+	/**
+	 * Check if user is a Project Member
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_project_member( $user_id = null ) {
+		return self::user_has_role( UserRoles::PROJECT_MEMBER, $user_id );
+	}
+
+	/**
+	 * Check if the user can see and manage every project (not just their own).
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function can_manage_all_projects( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		return user_can( $user_id, 'doublescale_project_manage_all_projects' );
+	}
+
+	/**
+	 * Check if the user may assign a project to any eligible owner.
+	 *
+	 * Project Members (own-scope only) must assign themselves. Project
+	 * Managers, CRM/Sales managers, and administrators may pick any user.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_assign_project_owner( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		if ( self::has_crm_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		if ( self::has_sales_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::can_manage_all_projects( $user_id );
+	}
+
+	/**
+	 * Check if the user may assign tasks (or subtasks) to someone other than themselves.
+	 *
+	 * Project Members and Sales Reps are limited to self-assignment. Project
+	 * Managers, CRM/Sales managers, and administrators may pick any eligible user.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_assign_task_assignee( $user_id = null ) {
+		return self::can_assign_project_owner( $user_id );
+	}
+
+	/**
+	 * Check if the user may assign a sales rep on proposals, invoices, etc.
+	 *
+	 * Sales Reps are limited to self-assignment. Project Managers, Project
+	 * Members, CRM/Sales managers, and administrators may pick any sales-team user.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_assign_sales_rep( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		if ( self::has_crm_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		if ( self::has_sales_manager_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::has_project_access( $user_id );
+	}
+
+	/**
+	 * Check if the user can access the projects module at all.
+	 *
+	 * Unlike {@see has_booking_access()}, CRM Manager does NOT grant project
+	 * access — project roles (or WP admin) are required.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function has_project_access( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		return user_can( $user_id, 'doublescale_project_read_own_projects' )
+			|| user_can( $user_id, 'doublescale_project_read_all_projects' )
+			|| user_can( $user_id, 'doublescale_project_manage_own_projects' )
+			|| user_can( $user_id, 'doublescale_project_manage_all_projects' );
+	}
+
+	/**
+	 * Check if the user may access task APIs (list, create, update on projects).
+	 *
+	 * Sales/CRM users retain access. Project users need tasks on their projects.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_access_tasks_api( $user_id = null ) {
+		if ( self::has_sales_rep_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::has_project_access( $user_id );
+	}
+
+	/**
+	 * Check if the user may read custom field definitions for a given scope.
+	 *
+	 * Sales/CRM users retain global read access. Project-only users may read
+	 * project-scoped definitions so project forms can render field metadata.
+	 *
+	 * @param string|null $scope   Entity scope (contact, deal, task, project, …).
+	 * @param int|null    $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_read_custom_field_definitions( $scope = null, $user_id = null ) {
+		if ( self::has_sales_rep_access( $user_id ) ) {
+			return true;
+		}
+
+		$scope = is_string( $scope ) ? strtolower( trim( $scope ) ) : '';
+
+		if ( 'project' === $scope && self::has_project_access( $user_id ) ) {
+			return true;
+		}
+
+		if ( 'task' === $scope && self::can_access_tasks_api( $user_id ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the user may read shared taxonomy terms (tags, lists).
+	 *
+	 * Any DoubleScale app user needs this for pickers on contacts, deals, and
+	 * projects. Creating or deleting terms remains CRM-manager-only.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_read_taxonomy_terms( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		return user_can( $user_id, 'doublescale_access' );
+	}
+
+	/**
+	 * Check if the user may read contacts (list/detail).
+	 *
+	 * Sales/CRM users retain access. Project users need read access to pick a
+	 * related contact when creating or editing projects.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_read_contacts( $user_id = null ) {
+		if ( self::has_sales_rep_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::has_project_access( $user_id );
+	}
+
+	/**
+	 * Check if the user may read deals (list/detail).
+	 *
+	 * Sales/CRM users retain access. Project users need read access to pick a
+	 * related deal when creating or editing projects.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_read_deals( $user_id = null ) {
+		if ( self::has_sales_rep_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::has_project_access( $user_id );
+	}
+
+	/**
+	 * Check if the user may send a message (email/SMS/WhatsApp) to a contact.
+	 *
+	 * Sales/CRM users retain access. Project users may send when scoped to a
+	 * project they can manage (validated in {@see validate_send_contact_message_access()}).
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_send_contact_message( $user_id = null ) {
+		if ( self::has_sales_rep_access( $user_id ) ) {
+			return true;
+		}
+
+		return self::has_project_access( $user_id );
+	}
+
+	/**
+	 * Enforce project-scoped send rules for project-only users.
+	 *
+	 * Sales/CRM users pass unconditionally. Project users must send in the
+	 * context of a project they manage, to that project's linked contact.
+	 *
+	 * @param int      $contact_id Contact ID from the route.
+	 * @param int|null $project_id Optional project ID from the request body.
+	 * @param int|null $deal_id    Optional deal ID (ignored for project-only users).
+	 * @return true|WP_Error
+	 */
+	public static function validate_send_contact_message_access( $contact_id, $project_id = null, $deal_id = null ) {
+		if ( self::has_sales_rep_access() ) {
+			return true;
+		}
+
+		if ( ! self::has_project_access() ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to do that.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		unset( $deal_id );
+
+		$contact_id = absint( $contact_id );
+		$project_id = absint( $project_id );
+
+		if ( $project_id <= 0 || $contact_id <= 0 ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to do that.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' )
+			|| ! class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to do that.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! \DoubleScale\Pro\Modules\Projects\Capabilities::can_manage_project( $project_id ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'You cannot send messages for this project.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$project = \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::find( $project_id );
+		if ( ! $project || (int) $project->contact_id !== $contact_id ) {
+			return new WP_Error(
+				'invalid_contact',
+				__( 'This contact is not linked to the project.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -270,6 +567,11 @@ final class Permissions {
 			return false;
 		}
 
+		$project_roles = array( UserRoles::PROJECT_MANAGER, UserRoles::PROJECT_MEMBER );
+		if ( array_intersect( $project_roles, $roles ) ) {
+			return false;
+		}
+
 		$support_roles = array( UserRoles::SUPPORT_MANAGER, UserRoles::SUPPORT_AGENT );
 		return (bool) array_intersect( $support_roles, $roles );
 	}
@@ -308,8 +610,56 @@ final class Permissions {
 			return false;
 		}
 
+		$project_roles = array( UserRoles::PROJECT_MANAGER, UserRoles::PROJECT_MEMBER );
+		if ( array_intersect( $project_roles, $roles ) ) {
+			return false;
+		}
+
 		$booking_roles = array( UserRoles::BOOKING_MANAGER, UserRoles::BOOKING_AGENT );
 		return (bool) array_intersect( $booking_roles, $roles );
+	}
+
+	/**
+	 * Check if the user's ONLY DoubleScale roles are project roles (no CRM /
+	 * Support / Booking / Administrator). Used to scope the admin menu down to
+	 * only the Projects submenu for dedicated project staff.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_project_only( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		$user    = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return false;
+		}
+
+		$roles             = (array) $user->roles;
+		$broader_crm_roles = array(
+			UserRoles::CRM_MANAGER,
+			UserRoles::SALES_MANAGER,
+			UserRoles::SALES_REP,
+		);
+		if ( array_intersect( $broader_crm_roles, $roles ) ) {
+			return false;
+		}
+
+		$support_roles = array( UserRoles::SUPPORT_MANAGER, UserRoles::SUPPORT_AGENT );
+		if ( array_intersect( $support_roles, $roles ) ) {
+			return false;
+		}
+
+		$booking_roles = array( UserRoles::BOOKING_MANAGER, UserRoles::BOOKING_AGENT );
+		if ( array_intersect( $booking_roles, $roles ) ) {
+			return false;
+		}
+
+		$project_roles = array( UserRoles::PROJECT_MANAGER, UserRoles::PROJECT_MEMBER );
+		return (bool) array_intersect( $project_roles, $roles );
 	}
 
 
@@ -523,7 +873,8 @@ final class Permissions {
 		$roles = (array) $user->roles;
 
 		// Priority order: Administrator > CRM Manager > Sales Manager > Sales Rep
-		// > Support Manager > Support Agent > Booking Manager > Booking Agent.
+		// > Support Manager > Support Agent > Booking Manager > Booking Agent
+		// > Project Manager > Project Member.
 		$priority = array(
 			UserRoles::ADMINISTRATOR,
 			UserRoles::CRM_MANAGER,
@@ -533,6 +884,8 @@ final class Permissions {
 			UserRoles::SUPPORT_AGENT,
 			UserRoles::BOOKING_MANAGER,
 			UserRoles::BOOKING_AGENT,
+			UserRoles::PROJECT_MANAGER,
+			UserRoles::PROJECT_MEMBER,
 		);
 
 		foreach ( $priority as $role ) {

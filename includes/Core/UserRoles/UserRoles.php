@@ -33,6 +33,8 @@ final class UserRoles {
 	public const SUPPORT_AGENT   = self::PREFIX . 'support_agent';
 	public const BOOKING_MANAGER = self::PREFIX . 'booking_manager';
 	public const BOOKING_AGENT   = self::PREFIX . 'booking_agent';
+	public const PROJECT_MANAGER = self::PREFIX . 'project_manager';
+	public const PROJECT_MEMBER  = self::PREFIX . 'project_member';
 	public const ADMINISTRATOR   = 'administrator';
 	public const NONE            = self::PREFIX . 'none';
 
@@ -192,6 +194,22 @@ final class UserRoles {
 	}
 
 	/**
+	 * @return void
+	 */
+	public static function provision_project_roles(): void {
+		self::provision_role( self::PROJECT_MANAGER );
+		self::provision_role( self::PROJECT_MEMBER );
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function deprovision_project_roles(): void {
+		self::deprovision_role( self::PROJECT_MANAGER );
+		self::deprovision_role( self::PROJECT_MEMBER );
+	}
+
+	/**
 	 * Provision Sales Rep + Sales Manager only. CRM Manager is org admin and
 	 * is not tied to the deals module toggle.
 	 *
@@ -223,6 +241,10 @@ final class UserRoles {
 
 		if ( 'booking' === $module_slug ) {
 			return array( self::BOOKING_MANAGER, self::BOOKING_AGENT );
+		}
+
+		if ( 'projects' === $module_slug ) {
+			return array( self::PROJECT_MANAGER, self::PROJECT_MEMBER );
 		}
 
 		// The pipeline (`deals`) is a child of Sales and no longer owns roles:
@@ -283,6 +305,8 @@ final class UserRoles {
 			self::CRM_MANAGER,
 			self::SALES_MANAGER,
 			self::SALES_REP,
+			self::PROJECT_MANAGER,
+			self::PROJECT_MEMBER,
 		);
 	}
 
@@ -306,6 +330,10 @@ final class UserRoles {
 			|| doublescale_is_module_active( 'sales' ) ) {
 			self::provision_crm_roles();
 		}
+
+		if ( function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'projects' ) ) {
+			self::provision_project_roles();
+		}
 	}
 
 	/**
@@ -317,6 +345,7 @@ final class UserRoles {
 	public static function deprovision_pro_roles(): void {
 		self::deprovision_role( self::CRM_MANAGER );
 		self::deprovision_crm_roles();
+		self::deprovision_project_roles();
 	}
 
 	/**
@@ -398,6 +427,12 @@ final class UserRoles {
 		}
 		if ( $role === self::BOOKING_AGENT ) {
 			return self::get_booking_agent_capabilities();
+		}
+		if ( $role === self::PROJECT_MANAGER ) {
+			return self::get_project_manager_capabilities();
+		}
+		if ( $role === self::PROJECT_MEMBER ) {
+			return self::get_project_member_capabilities();
 		}
 
 		return null;
@@ -512,6 +547,10 @@ final class UserRoles {
 			// only grant admin-shell access (menu + REST bootstrap).
 			self::BOOKING_MANAGER => array(),
 			self::BOOKING_AGENT   => array(),
+			// Project caps (doublescale_project_*) are assigned by
+			// {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
+			self::PROJECT_MANAGER => array(),
+			self::PROJECT_MEMBER  => array(),
 		);
 	}
 
@@ -536,7 +575,9 @@ final class UserRoles {
 					$caps[ self::SUPPORT_MANAGER ],
 					$caps[ self::SUPPORT_AGENT ],
 					$caps[ self::BOOKING_MANAGER ],
-					$caps[ self::BOOKING_AGENT ]
+					$caps[ self::BOOKING_AGENT ],
+					$caps[ self::PROJECT_MANAGER ],
+					$caps[ self::PROJECT_MEMBER ]
 				)
 			)
 		);
@@ -559,6 +600,8 @@ final class UserRoles {
 			self::SUPPORT_AGENT   => __( 'Support Agent', 'doublescale' ),
 			self::BOOKING_MANAGER => __( 'Booking Manager', 'doublescale' ),
 			self::BOOKING_AGENT   => __( 'Booking Agent', 'doublescale' ),
+			self::PROJECT_MANAGER => __( 'Project Manager', 'doublescale' ),
+			self::PROJECT_MEMBER  => __( 'Project Member', 'doublescale' ),
 		);
 	}
 
@@ -576,10 +619,11 @@ final class UserRoles {
 		$pro_active    = self::is_pro_addon_active();
 		$is_support    = in_array( $role, array( self::SUPPORT_AGENT, self::SUPPORT_MANAGER ), true );
 		$is_booking    = in_array( $role, array( self::BOOKING_AGENT, self::BOOKING_MANAGER ), true );
+		$is_project    = in_array( $role, array( self::PROJECT_MEMBER, self::PROJECT_MANAGER ), true );
 		$is_deals_role = in_array( $role, array( self::SALES_REP, self::SALES_MANAGER ), true );
 		$sales_on      = function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'sales' );
 
-		if ( ! $pro_active && ! $is_support && ! $is_booking && ! ( $is_deals_role && $sales_on ) ) {
+		if ( ! $pro_active && ! $is_support && ! $is_booking && ! $is_project && ! ( $is_deals_role && $sales_on ) ) {
 			return false;
 		}
 
@@ -588,6 +632,10 @@ final class UserRoles {
 		}
 
 		if ( $is_booking && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'booking' ) ) {
+			return false;
+		}
+
+		if ( $is_project && function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'projects' ) ) {
 			return false;
 		}
 
@@ -768,6 +816,15 @@ final class UserRoles {
 
 		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'booking' ) ) {
 			foreach ( self::get_booking_capability_slugs() as $cap ) {
+				if ( isset( $shell_caps[ $cap ] ) ) {
+					continue;
+				}
+				unset( $allcaps[ $cap ] );
+			}
+		}
+
+		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'projects' ) ) {
+			foreach ( self::get_project_capability_slugs() as $cap ) {
 				if ( isset( $shell_caps[ $cap ] ) ) {
 					continue;
 				}
@@ -1056,6 +1113,42 @@ final class UserRoles {
 	}
 
 	/**
+	 * Project Manager: admin-shell access only; project module caps are synced
+	 * separately by {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
+	 *
+	 * @return array
+	 */
+	public static function get_project_manager_capabilities() {
+		$caps = self::get_capabilities();
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['common'],
+					$caps[ self::PROJECT_MANAGER ]
+				)
+			)
+		);
+	}
+
+	/**
+	 * Project Member: admin-shell access only; own-scope project caps are synced
+	 * separately by {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
+	 *
+	 * @return array
+	 */
+	public static function get_project_member_capabilities() {
+		$caps = self::get_capabilities();
+		return array_values(
+			array_unique(
+				array_merge(
+					$caps['common'],
+					$caps[ self::PROJECT_MEMBER ]
+				)
+			)
+		);
+	}
+
+	/**
 	 * @return array<int, string>
 	 */
 	private static function get_booking_capability_slugs(): array {
@@ -1066,6 +1159,17 @@ final class UserRoles {
 		// Only `doublescale_booking_*` slugs — never `doublescale_access`, which
 		// must stay available to Sales/Support/CRM roles when Booking is toggled off.
 		return \DoubleScale\Modules\Booking\Capabilities::get_booking_capability_slugs();
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private static function get_project_capability_slugs(): array {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' ) ) {
+			return array();
+		}
+
+		return \DoubleScale\Pro\Modules\Projects\Capabilities::get_project_capability_slugs();
 	}
 
 	/**
@@ -1091,7 +1195,7 @@ final class UserRoles {
 	 * Bump this string when the role-to-capability map changes so existing
 	 * installs re-run {@see add_roles_and_capabilities()} on next boot.
 	 */
-	private const ROLES_PROVISION_VERSION = '2026-06-10-booking-roles';
+	private const ROLES_PROVISION_VERSION = '2026-07-16-project-roles';
 
 	/**
 	 * Allow logged-in users with any DoubleScale role to bypass WooCommerce's

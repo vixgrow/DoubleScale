@@ -121,6 +121,8 @@ export interface Proposal {
 	hash: string;
 	subject: string;
 	status: ProposalStatus;
+	template: number;
+	template_color?: string | null;
 	contact_id: number;
 	assigned_user_id: number | null;
 	date: string | null;
@@ -128,7 +130,6 @@ export interface Proposal {
 	currency: string;
 	discount_type: string;
 	discount_value: number;
-	tag_ids: number[];
 	line_items: LineItem[];
 	subtotal: number;
 	adjustment: number;
@@ -177,7 +178,6 @@ export interface Contract {
 	start_date: string | null;
 	end_date: string | null;
 	description: string;
-	tag_ids: number[];
 	hide_from_customer: boolean;
 	is_trash: boolean;
 	sent_at?: string | null;
@@ -232,6 +232,7 @@ export interface RecordPaymentPayload {
 export interface ConvertProposalResponse {
 	invoice: Invoice;
 	proposal: Proposal;
+	already_converted?: boolean;
 }
 
 export interface OnlinePaymentGatewayStatus {
@@ -262,6 +263,8 @@ export interface Invoice {
 	invoice_number: string;
 	hash: string;
 	status: InvoiceStatus;
+	template: number;
+	template_color?: string | null;
 	contact_id: number;
 	proposal_id?: number | null;
 	sale_agent_user_id: number | null;
@@ -271,7 +274,6 @@ export interface Invoice {
 	allowed_payment_modes: string[];
 	discount_type: string;
 	discount_value: number;
-	tag_ids: number[];
 	line_items: LineItem[];
 	subtotal: number;
 	total_tax: number;
@@ -408,6 +410,10 @@ export interface InvoiceSummary {
 	paid_total: number;
 	outstanding_total: number;
 	overdue_total: number;
+	/** Per-currency breakdowns (resolved currency). Present so mixed-currency totals stay consistent. */
+	paid_by_currency?: Record<string, number>;
+	outstanding_by_currency?: Record<string, number>;
+	overdue_by_currency?: Record<string, number>;
 	total_count: number;
 	by_status: Record<
 		string,
@@ -455,9 +461,13 @@ export interface SalesSettings {
 	proposal_expiry_reminder_days: number;
 	require_signature_on_accept: boolean;
 	approval_workflow_enabled?: boolean;
+	/** When on, a deal linked to an invoice is marked Won once that invoice is fully paid. */
+	auto_close_deals_on_paid?: boolean;
 	enabled_online_gateways: string[];
 	default_offline_payment_modes: string[];
 	default_online_payment_gateways: string[];
 	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
 	pdf_company_address?: string;
+	default_invoice_template?: number;
+	default_proposal_template?: number;
 }

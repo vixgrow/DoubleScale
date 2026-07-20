@@ -29,6 +29,8 @@ class SalesInvoicesTable extends Migration {
 			invoice_number VARCHAR(50) NOT NULL,
 			hash VARCHAR(32) NOT NULL,
 			status VARCHAR(50) NOT NULL DEFAULT 'draft',
+			template TINYINT UNSIGNED NOT NULL DEFAULT 1,
+			template_color VARCHAR(7) NULL DEFAULT NULL,
 			contact_id BIGINT(20) UNSIGNED NOT NULL,
 			proposal_id BIGINT(20) UNSIGNED NULL,
 			subscription_id BIGINT(20) UNSIGNED NULL,

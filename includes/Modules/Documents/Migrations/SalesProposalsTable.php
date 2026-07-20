@@ -30,6 +30,8 @@ class SalesProposalsTable extends Migration {
 			hash VARCHAR(32) NOT NULL,
 			subject VARCHAR(255) NOT NULL,
 			status VARCHAR(50) NOT NULL DEFAULT 'draft',
+			template TINYINT UNSIGNED NOT NULL DEFAULT 1,
+			template_color VARCHAR(7) NULL DEFAULT NULL,
 			contact_id BIGINT(20) UNSIGNED NOT NULL,
 			assigned_user_id BIGINT(20) UNSIGNED NULL,
 			date DATE NULL,

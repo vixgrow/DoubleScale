@@ -559,7 +559,7 @@ abstract class RestTaxonomyController extends RestController {
 	 * @return bool Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_read_taxonomy_terms();
 	}
 
 	/**
@@ -585,7 +585,7 @@ abstract class RestTaxonomyController extends RestController {
 	 * @return bool Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_read_taxonomy_terms();
 	}
 
 	/**

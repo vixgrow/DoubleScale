@@ -44,6 +44,7 @@ import EmailDetails from '../emails/email-details-dialog';
 import type { CampaignEmail, Note } from '@doublescale/client';
 import { isManualEmailLog } from '@doublescale/utils/email-activity';
 import { fetchContactEmailByActivityId } from '@doublescale/utils/fetch-contact-email-by-activity';
+import ConfigAPI from '@doublescale/config';
 
 // Pro plugin components - loaded via WordPress filters at runtime
 // Pro plugin registers these via addFilter('doublescale_pro_component', ...)
@@ -335,6 +336,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const handleEditTask = async (taskId: number) => {
+        if (!ConfigAPI.isModuleEnabled('tasks')) {
+            return;
+        }
         try {
             const TaskService = getProTaskService();
             if (!TaskService) {
@@ -400,6 +404,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const handleDeleteTask = async (taskId: number) => {
+        if (!ConfigAPI.isModuleEnabled('tasks')) {
+            return;
+        }
         if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'doublescale'))) {
             return;
         }
@@ -419,14 +426,16 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const handleMarkTaskComplete = async (taskId: number) => {
+        if (!ConfigAPI.isModuleEnabled('tasks')) {
+            return;
+        }
         try {
-            await apiFetch({
-                path: `/doublescale/v1/tasks/${taskId}`,
-                method: 'PATCH',
-                data: {
-                    status: 'completed',
-                },
-            });
+            const TaskService = getProTaskService();
+            if (!TaskService) {
+                showNotice('error', __('Task updates require Pro plugin.', 'doublescale'));
+                return;
+            }
+            await TaskService.markCompleted(taskId);
             fetchActivities();
             showNotice('success', __('Task marked as complete', 'doublescale'));
         } catch (error) {

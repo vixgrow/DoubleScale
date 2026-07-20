@@ -73,6 +73,9 @@ final class AdminConfig {
 			'doublescale_support_agent'           => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
 			'doublescale_booking_manager'         => Permissions::user_has_role( UserRoles::BOOKING_MANAGER ),
 			'doublescale_booking_agent'           => Permissions::user_has_role( UserRoles::BOOKING_AGENT ),
+			'doublescale_project_manager'         => Permissions::user_has_role( UserRoles::PROJECT_MANAGER ),
+			'doublescale_project_member'          => Permissions::user_has_role( UserRoles::PROJECT_MEMBER ),
+			'doublescale_is_project_only'         => Permissions::is_project_only(),
 			'doublescale_view_support'            => Permissions::has_support_access(),
 			'doublescale_manage_all_tickets'      => Permissions::can_manage_all_tickets(),
 			// Mailbox/settings gate (manager-tier): admins, CRM Managers, and
@@ -92,7 +95,16 @@ final class AdminConfig {
 			}
 		}
 
+		if ( class_exists( \DoubleScale\Pro\Modules\Projects\Capabilities::class ) ) {
+			foreach ( \DoubleScale\Pro\Modules\Projects\Capabilities::get_all_capabilities() as $project_cap ) {
+				$user_capabilities[ $project_cap ] = current_user_can( $project_cap );
+			}
+		}
+
 		$user_capabilities['doublescale_manage'] = current_user_can( 'doublescale_manage' );
+		$user_capabilities['doublescale_can_assign_project_owner'] = Permissions::can_assign_project_owner();
+		$user_capabilities['doublescale_can_assign_task_assignee'] = Permissions::can_assign_task_assignee();
+		$user_capabilities['doublescale_can_assign_sales_rep']    = \DoubleScale\Modules\Sales\Capabilities::can_assign_sales_rep();
 
 		$current_wp_user = wp_get_current_user();
 		$current_user    = array(
@@ -179,6 +191,7 @@ final class AdminConfig {
 				'salesApprovalWorkflowEnabled' => class_exists( \DoubleScale\Modules\Sales\Services\SalesSettings::class )
 					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
 					: false,
+				'business'            => self::get_business_branding_config(),
 			)
 		);
 
@@ -186,6 +199,28 @@ final class AdminConfig {
 			'doublescale-admin',
 			'window.doublescaleConfig = ' . wp_json_encode( $config ) . ';',
 			'before'
+		);
+	}
+
+	/**
+	 * Business branding for document templates and admin UI.
+	 *
+	 * @return array{business_name: string, business_address: string, business_logo: string}
+	 */
+	private static function get_business_branding_config(): array {
+		if ( class_exists( \DoubleScale\Modules\Documents\Services\DocumentPdf::class ) ) {
+			return \DoubleScale\Modules\Documents\Services\DocumentPdf::resolved_business_settings();
+		}
+
+		$business = Settings::get( 'business', array() );
+		if ( ! is_array( $business ) ) {
+			$business = array();
+		}
+
+		return array(
+			'business_name'    => (string) ( $business['business_name'] ?? '' ),
+			'business_address' => (string) ( $business['business_address'] ?? '' ),
+			'business_logo'    => (string) ( $business['business_logo'] ?? '' ),
 		);
 	}
 

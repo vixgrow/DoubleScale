@@ -133,9 +133,33 @@ class RestContactController extends RestController {
 					'callback'            => array( $this, 'delete_items' ),
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
-						'ids' => array(
+						'ids'   => array(
 							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
+						),
+						'force' => array(
+							'description' => __( 'Also delete financial records (invoices, contracts, credit notes) tied to these contacts.', 'doublescale' ),
+							'type'        => 'boolean',
+							'default'     => false,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/deletion-impact',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_deletion_impact' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description' => __( 'Contact IDs to inspect before deletion.', 'doublescale' ),
+							'type'        => 'array',
+							'required'    => true,
 						),
 					),
 				),
@@ -201,6 +225,13 @@ class RestContactController extends RestController {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'description' => __( 'Also delete financial records tied to this contact.', 'doublescale' ),
+							'type'        => 'boolean',
+							'default'     => false,
+						),
+					),
 				),
 			)
 		);
@@ -285,6 +316,16 @@ class RestContactController extends RestController {
 						'subject' => array(
 							'description' => __( 'Email subject (required for email, ignored for Sms/Whatsapp).', 'doublescale' ),
 							'type'        => 'string',
+							'required'    => false,
+						),
+						'deal_id' => array(
+							'description' => __( 'Link the resulting activity to this deal.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => false,
+						),
+						'project_id' => array(
+							'description' => __( 'Link the resulting activity to this project.', 'doublescale' ),
+							'type'        => 'integer',
 							'required'    => false,
 						),
 					),
@@ -2260,8 +2301,23 @@ class RestContactController extends RestController {
 	 */
 	public function delete_items( $request ) {
 		try {
-			$contact_ids = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
-			$contacts    = ContactModel::find( $contact_ids );
+			$contact_ids = array_values(
+				array_filter(
+					array_map( 'intval', (array) ( $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array() ) )
+				)
+			);
+			$force       = rest_sanitize_boolean( $request->get_param( 'force' ) );
+
+			if ( empty( $contact_ids ) ) {
+				return new WP_Error( 'invalid_request', __( 'No contacts selected.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			$guard = $this->guard_contact_deletion( $contact_ids, $force );
+			if ( is_wp_error( $guard ) ) {
+				return $guard;
+			}
+
+			$contacts = ContactModel::find( $contact_ids );
 
 			if ( ! $contacts ) {
 				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
@@ -2286,11 +2342,17 @@ class RestContactController extends RestController {
 	 */
 	public function delete_item( $request ) {
 		try {
-			$contact_id = $request->get_param( 'id' );
+			$contact_id = (int) $request->get_param( 'id' );
+			$force      = rest_sanitize_boolean( $request->get_param( 'force' ) );
 			$contact    = ContactModel::find( $contact_id );
 
 			if ( ! $contact ) {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$guard = $this->guard_contact_deletion( array( $contact_id ), $force );
+			if ( is_wp_error( $guard ) ) {
+				return $guard;
 			}
 
 			$contact->delete();
@@ -2298,6 +2360,249 @@ class RestContactController extends RestController {
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Summarize related records that will be removed or unlinked when contacts are deleted.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_deletion_impact( $request ) {
+		$contact_ids = array_values(
+			array_filter(
+				array_map( 'intval', (array) $request->get_param( 'ids' ) )
+			)
+		);
+
+		if ( empty( $contact_ids ) ) {
+			return new WP_Error( 'invalid_request', __( 'No contacts selected.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$impact = $this->build_contact_deletion_impact( $contact_ids );
+
+		return new WP_REST_Response(
+			array(
+				'contact_count'  => count( $contact_ids ),
+				'related'        => $impact,
+				'requires_force' => $this->contact_deletion_requires_force( $impact ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Which of the given contact ids still have invoices.
+	 *
+	 * Invoices reference contacts without a DB constraint, so deletion is
+	 * guarded here instead.
+	 *
+	 * @param array<int|string> $contact_ids Contact ids to check.
+	 * @return array<int>
+	 */
+	private function contact_ids_with_invoices( array $contact_ids ): array {
+		$contact_ids = array_values( array_filter( array_map( 'intval', $contact_ids ) ) );
+
+		if ( empty( $contact_ids ) || ! class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+			return array();
+		}
+
+		$ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+			->whereIn( 'contact_id', $contact_ids )
+			->pluck( 'contact_id' )
+			->unique()
+			->values()
+			->toArray();
+
+		return array_map( 'intval', $ids );
+	}
+
+	/**
+	 * Block deletion when financial records exist unless the caller confirmed force.
+	 *
+	 * @param array<int> $contact_ids Contact ids.
+	 * @param bool       $force       Whether to cascade-delete financial records first.
+	 * @return true|WP_Error
+	 */
+	private function guard_contact_deletion( array $contact_ids, bool $force ) {
+		$impact = $this->build_contact_deletion_impact( $contact_ids );
+
+		if ( ! $force && $this->contact_deletion_requires_force( $impact ) ) {
+			return new WP_Error(
+				'contact_has_invoices',
+				__( 'These contacts have invoices and cannot be deleted. Delete or reassign their invoices first.', 'doublescale' ),
+				array(
+					'status'         => 409,
+					'blocked_ids'      => $this->contact_ids_with_invoices( $contact_ids ),
+					'impact'           => $impact,
+					'requires_force'   => true,
+				)
+			);
+		}
+
+		if ( $force ) {
+			$this->cascade_financial_records_for_contacts( $contact_ids );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether deletion needs explicit confirmation because financial records exist.
+	 *
+	 * @param array<string, int> $impact Related record counts from {@see build_contact_deletion_impact()}.
+	 * @return bool
+	 */
+	private function contact_deletion_requires_force( array $impact ): bool {
+		foreach ( array( 'invoices', 'contracts', 'credit_notes' ) as $key ) {
+			if ( ! empty( $impact[ $key ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Count related CRM records that will be removed or unlinked with these contacts.
+	 *
+	 * @param array<int> $contact_ids Contact ids.
+	 * @return array<string, int>
+	 */
+	private function build_contact_deletion_impact( array $contact_ids ): array {
+		$contact_ids = array_values( array_filter( array_map( 'intval', $contact_ids ) ) );
+
+		$impact = array(
+			'invoices'     => 0,
+			'payments'     => 0,
+			'proposals'    => 0,
+			'deals'        => 0,
+			'projects'     => 0,
+			'tasks'        => 0,
+			'contracts'    => 0,
+			'credit_notes' => 0,
+			'tickets'      => 0,
+			'bookings'     => 0,
+			'activities'   => 0,
+		);
+
+		if ( empty( $contact_ids ) ) {
+			return $impact;
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+			$invoice_ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->pluck( 'id' )
+				->toArray();
+			$impact['invoices'] = count( $invoice_ids );
+
+			if ( ! empty( $invoice_ids ) && class_exists( \DoubleScale\Modules\Documents\Models\PaymentModel::class ) ) {
+				$impact['payments'] = (int) \DoubleScale\Modules\Documents\Models\PaymentModel::query()
+					->whereIn( 'invoice_id', $invoice_ids )
+					->count();
+			}
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Documents\Models\ProposalModel::class ) ) {
+			$impact['proposals'] = (int) \DoubleScale\Modules\Documents\Models\ProposalModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\Deals\Models\DealModel::class ) ) {
+			$impact['deals'] = (int) \DoubleScale\Pro\Modules\Deals\Models\DealModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::class ) ) {
+			$impact['projects'] = (int) \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::class ) ) {
+			$impact['tasks'] = (int) \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::query()
+				->where( 'entity_type', \DoubleScale\Core\Constants\TaskEntityType::CONTACT )
+				->whereIn( 'entity_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class ) ) {
+			$impact['contracts'] = (int) \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class ) ) {
+			$impact['credit_notes'] = (int) \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Support\Models\TicketModel::class ) ) {
+			$impact['tickets'] = (int) \DoubleScale\Modules\Support\Models\TicketModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Booking\Models\BookingModel::class ) ) {
+			$impact['bookings'] = (int) \DoubleScale\Modules\Booking\Models\BookingModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->count();
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::class ) ) {
+			$impact['activities'] = (int) \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::query()
+				->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+				->whereIn( 'entity_id', $contact_ids )
+				->distinct()
+				->count( 'activity_id' );
+		}
+
+		return $impact;
+	}
+
+	/**
+	 * Delete financial records that block contact removal when force-delete is confirmed.
+	 *
+	 * @param array<int> $contact_ids Contact ids.
+	 * @return void
+	 */
+	private function cascade_financial_records_for_contacts( array $contact_ids ): void {
+		$contact_ids = array_values( array_filter( array_map( 'intval', $contact_ids ) ) );
+
+		if ( empty( $contact_ids ) ) {
+			return;
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class ) ) {
+			$credit_notes = \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->get();
+			foreach ( $credit_notes as $credit_note ) {
+				$credit_note->delete();
+			}
+		}
+
+		if ( class_exists( \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class ) ) {
+			$contracts = \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->get();
+			foreach ( $contracts as $contract ) {
+				$contract->delete();
+			}
+		}
+
+		if ( class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+			$invoices = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->get();
+			foreach ( $invoices as $invoice ) {
+				$invoice->delete();
+			}
 		}
 	}
 
@@ -2825,6 +3130,15 @@ class RestContactController extends RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_message( $request ) {
+		$access = Permissions::validate_send_contact_message_access(
+			$request->get_param( 'id' ),
+			$request->get_param( 'project_id' ),
+			$request->get_param( 'deal_id' )
+		);
+		if ( is_wp_error( $access ) ) {
+			return $access;
+		}
+
 		$channel = $request->get_param( 'channel' );
 
 		// Validate channel parameter.
@@ -2887,7 +3201,7 @@ class RestContactController extends RestController {
 	 * @return bool
 	 */
 	public function send_message_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_send_contact_message();
 	}
 
 	/**
@@ -3374,7 +3688,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_read_contacts();
 	}
 
 	/**
@@ -3439,7 +3753,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::can_read_contacts();
 	}
 
 	/**

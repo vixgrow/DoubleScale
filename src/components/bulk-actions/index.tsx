@@ -27,6 +27,7 @@ import {
 	AddRemoveTagsModal,
 	DeleteModal,
 } from '@doublescale/components';
+import ContactDeleteModal from '../../client/pages/contacts/all-contacts/contact-delete-modal';
 
 interface BulkActionSelectProps {
 	bulkAction: string;
@@ -88,7 +89,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 	};
 
 	const handleDeleteConfirm = () => {
-		doBulkAction('delete');
+		doBulkAction('delete', { force: activeTab === 'all' });
 		setIsDeleteModalOpen(false);
 	};
 
@@ -257,13 +258,22 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 			</div>
 
 			{/* Delete Confirmation Modal */}
-			<DeleteModal
-				isOpen={isDeleteModalOpen}
-				onClose={handleDeleteModalClose}
-				onConfirm={handleDeleteConfirm}
-				selectedCount={selectedRowKeys.length}
-				activeTab={activeTab}
-			/>
+			{activeTab === 'all' ? (
+				<ContactDeleteModal
+					isOpen={isDeleteModalOpen}
+					onClose={handleDeleteModalClose}
+					onConfirm={handleDeleteConfirm}
+					selectedIds={selectedRowKeys.map(String)}
+				/>
+			) : (
+				<DeleteModal
+					isOpen={isDeleteModalOpen}
+					onClose={handleDeleteModalClose}
+					onConfirm={handleDeleteConfirm}
+					selectedCount={selectedRowKeys.length}
+					activeTab={activeTab}
+				/>
+			)}
 
 			{/* Unified List Modal for both Add and Remove operations */}
 			<AddRemoveListsModal

@@ -377,6 +377,37 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
+				// Projects — personal, actionable; push supported.
+				NotificationCategories::PROJECTS_CREATED        => array(
+					'bell'    => true,
+					'email'   => false,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::PROJECTS_ASSIGNED       => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::PROJECTS_STATUS_CHANGED => array(
+					'bell'    => true,
+					'email'   => false,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::PROJECTS_COMMENT        => array(
+					'bell'    => true,
+					'email'   => false,
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::PROJECTS_DUE_DATE       => array(
+					'bell'    => true,
+					'email'   => true,
+					'browser' => true,
+					'push'    => true,
+				),
 				// System.
 				// NotificationCategories::SYSTEM_GENERAL               => array(
 				// 'bell'    => true,

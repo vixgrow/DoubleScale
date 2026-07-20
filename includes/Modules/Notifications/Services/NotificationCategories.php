@@ -109,6 +109,13 @@ class NotificationCategories {
 	const SALES = 'sales';
 
 	/**
+	 * Project-related notifications (lifecycle, assignment, comments).
+	 *
+	 * @var string
+	 */
+	const PROJECTS = 'projects';
+
+	/**
 	 * Pipeline subcategory: Deal won or lost
 	 *
 	 * @var string
@@ -498,6 +505,41 @@ class NotificationCategories {
 	const SALES_APPROVAL_PENDING_RESET = 'sales_approval_pending_reset';
 
 	/**
+	 * Projects subcategory: New project created.
+	 *
+	 * @var string
+	 */
+	const PROJECTS_CREATED = 'project_created';
+
+	/**
+	 * Projects subcategory: Project assigned to you (owner changed).
+	 *
+	 * @var string
+	 */
+	const PROJECTS_ASSIGNED = 'project_assigned';
+
+	/**
+	 * Projects subcategory: Project status changed.
+	 *
+	 * @var string
+	 */
+	const PROJECTS_STATUS_CHANGED = 'project_status_changed';
+
+	/**
+	 * Projects subcategory: New comment or reply on a project.
+	 *
+	 * @var string
+	 */
+	const PROJECTS_COMMENT = 'project_comment';
+
+	/**
+	 * Projects subcategory: Project due date changed.
+	 *
+	 * @var string
+	 */
+	const PROJECTS_DUE_DATE = 'project_due_date';
+
+	/**
 	 * Get all available notification categories
 	 *
 	 * Returns basic category info (label, description). For UI display with
@@ -552,6 +594,10 @@ class NotificationCategories {
 			self::SALES          => array(
 				'label'       => __( 'Sales', 'doublescale' ),
 				'description' => __( 'Proposal, contract, and invoice notifications for assigned sales reps.', 'doublescale' ),
+			),
+			self::PROJECTS       => array(
+				'label'       => __( 'Projects', 'doublescale' ),
+				'description' => __( 'Project lifecycle notifications (created, assigned, status, comments, due dates).', 'doublescale' ),
 			),
 				// self::SYSTEM         => array(
 				// 'label'       => __( 'System', 'doublescale'),
@@ -888,6 +934,28 @@ class NotificationCategories {
 					'description' => __( 'Notifications when a pending request is cleared because a manager edited the document.', 'doublescale' ),
 				),
 			),
+			self::PROJECTS       => array(
+				self::PROJECTS_CREATED        => array(
+					'label'       => __( 'New Project', 'doublescale' ),
+					'description' => __( 'Notifications when a new project is created.', 'doublescale' ),
+				),
+				self::PROJECTS_ASSIGNED       => array(
+					'label'       => __( 'Project Assigned to Me', 'doublescale' ),
+					'description' => __( 'Notifications when a project is assigned to you.', 'doublescale' ),
+				),
+				self::PROJECTS_STATUS_CHANGED => array(
+					'label'       => __( 'Status Changed', 'doublescale' ),
+					'description' => __( 'Notifications when a project status changes.', 'doublescale' ),
+				),
+				self::PROJECTS_COMMENT        => array(
+					'label'       => __( 'New Comment', 'doublescale' ),
+					'description' => __( 'Notifications when someone comments on a project.', 'doublescale' ),
+				),
+				self::PROJECTS_DUE_DATE       => array(
+					'label'       => __( 'Due Date Changed', 'doublescale' ),
+					'description' => __( 'Notifications when a project due date is updated.', 'doublescale' ),
+				),
+			),
 			self::SYSTEM         => array(
 				self::SYSTEM_GENERAL          => array(
 					'label'       => __( 'System Alerts', 'doublescale' ),
@@ -986,6 +1054,7 @@ class NotificationCategories {
 			self::BOOKING,
 			self::SUPPORT,
 			self::SALES,
+			self::PROJECTS,
 		);
 	}
 
@@ -1042,6 +1111,7 @@ class NotificationCategories {
 			self::BOOKING        => 'booking',
 			self::SUPPORT        => 'support',
 			self::SALES          => 'sales',
+			self::PROJECTS       => 'projects',
 			self::TASKS          => 'tasks',
 			self::PIPELINE       => 'deals',
 			self::EMAIL_TRACKING => 'tracking',
@@ -1110,6 +1180,7 @@ class NotificationCategories {
 			self::AUTOMATIONS  => 'doublescale_manage',
 			self::FORMS        => 'doublescale_manage',
 			self::INTEGRATIONS => 'doublescale_manage',
+			self::PROJECTS     => 'doublescale_project_read_all_projects',
 			self::SYSTEM       => 'manage_options',
 			// CONTACTS, PIPELINE, TASKS, EMAIL_TRACKING - accessible by all CRM users.
 		);

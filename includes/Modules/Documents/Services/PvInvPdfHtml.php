@@ -58,6 +58,7 @@ final class PvInvPdfHtml {
 			: (string) ( $document['proposal_number'] ?? '' );
 		$bill_label   = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
 
+		// Already resolved by the shaper (global for drafts, frozen once sent).
 		$currency      = (string) ( $document['currency'] ?? 'USD' );
 		$line_items    = is_array( $document['line_items'] ?? null ) ? $document['line_items'] : array();
 		$subtotal      = (float) ( $document['subtotal'] ?? 0 );
@@ -189,11 +190,14 @@ final class PvInvPdfHtml {
 			$discount_amount = $discount_val;
 		}
 
+		$subject = $is_invoice ? '' : trim( (string) ( $document['subject'] ?? '' ) );
+
 		return compact(
 			'is_invoice',
 			'doc_title',
 			'number_label',
 			'number',
+			'subject',
 			'bill_label',
 			'currency',
 			'line_items',
@@ -506,6 +510,9 @@ final class PvInvPdfHtml {
 		?>
 <div class="pv-inv-from-date">
 	<p><?php echo esc_html( $ctx['number_label'] ); ?>: <span><?php echo esc_html( $ctx['number'] ); ?></span></p>
+	<?php if ( ! $ctx['is_invoice'] && '' !== ( $ctx['subject'] ?? '' ) ) : ?>
+		<p><?php esc_html_e( 'Subject', 'doublescale' ); ?>: <span><?php echo esc_html( (string) $ctx['subject'] ); ?></span></p>
+	<?php endif; ?>
 	<?php foreach ( $ctx['dates'] as $row ) : ?>
 		<p><?php echo esc_html( (string) $row['label'] ); ?>: <span><?php echo esc_html( (string) ( $row['value'] ?? '' ) ); ?></span></p>
 	<?php endforeach; ?>

@@ -18,6 +18,7 @@ use DoubleScale\Modules\Documents\Models\PaymentModel;
 use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Documents\Services\InvoicePayable;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Core\Settings\Settings;
 
 /**
  * InvoiceShaper class.
@@ -42,7 +43,9 @@ class InvoiceShaper {
 			'sale_agent_user_id'    => $invoice->sale_agent_user_id ? (int) $invoice->sale_agent_user_id : null,
 			'invoice_date'          => $invoice->invoice_date,
 			'due_date'              => $invoice->due_date,
-			'currency'              => (string) $invoice->currency,
+			// Currency follows the global setting (like deals); once the invoice has
+			// been sent its currency is frozen to what the customer saw.
+			'currency'              => Settings::document_currency( $invoice->currency, $invoice->sent_at ),
 			'allowed_payment_modes' => PaymentMode::normalize_list( $invoice->allowed_payment_modes ),
 			'discount_type'         => (string) $invoice->discount_type,
 			'discount_value'        => (float) $invoice->discount_value,
@@ -106,7 +109,9 @@ class InvoiceShaper {
 			'template_color'        => DocumentTemplateColor::normalize( $invoice->template_color ?? null ),
 			'invoice_date'          => $invoice->invoice_date,
 			'due_date'              => $invoice->due_date,
-			'currency'              => (string) $invoice->currency,
+			// Currency follows the global setting (like deals); once the invoice has
+			// been sent its currency is frozen to what the customer saw.
+			'currency'              => Settings::document_currency( $invoice->currency, $invoice->sent_at ),
 			'allowed_payment_modes' => PaymentMode::normalize_list( $invoice->allowed_payment_modes ),
 			'discount_type'         => (string) $invoice->discount_type,
 			'discount_value'        => (float) $invoice->discount_value,

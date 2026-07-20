@@ -408,7 +408,7 @@ class RestPaymentController extends RestController {
 			$row['invoice'] = array(
 				'id'             => (int) $invoice->id,
 				'invoice_number' => (string) $invoice->invoice_number,
-				'currency'       => (string) $invoice->currency,
+				'currency'       => \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at ),
 			);
 
 			if ( $with_receipt ) {

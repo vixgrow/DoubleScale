@@ -58,7 +58,11 @@ final class InvoiceAnalyticsService {
 				continue;
 			}
 			$invoice  = $payment->invoice;
-			$currency = $invoice ? (string) $invoice->currency : 'USD';
+			// Global currency for drafts, frozen stored currency once sent.
+			$currency = \DoubleScale\Core\Settings\Settings::document_currency(
+				$invoice ? $invoice->currency : null,
+				$invoice ? $invoice->sent_at : null
+			);
 			if ( ! empty( $currencies ) && ! in_array( $currency, $currencies, true ) ) {
 				continue;
 			}
@@ -88,7 +92,7 @@ final class InvoiceAnalyticsService {
 			if ( $balance <= 0 ) {
 				continue;
 			}
-			$currency = (string) $invoice->currency;
+			$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
 			$outstanding_total += $balance;
 			$outstanding_count++;
 			if ( ! isset( $outstanding_by_currency[ $currency ] ) ) {
@@ -171,7 +175,10 @@ final class InvoiceAnalyticsService {
 					continue;
 				}
 				$invoice  = $payment->invoice;
-				$currency = $invoice ? (string) $invoice->currency : 'USD';
+				$currency = \DoubleScale\Core\Settings\Settings::document_currency(
+					$invoice ? $invoice->currency : null,
+					$invoice ? $invoice->sent_at : null
+				);
 				if ( ! empty( $currencies ) && ! in_array( $currency, $currencies, true ) ) {
 					continue;
 				}

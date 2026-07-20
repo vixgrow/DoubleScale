@@ -19,6 +19,8 @@ $number_value = $is_invoice
 	? (string) ( $document['invoice_number'] ?? '' )
 	: (string) ( $document['proposal_number'] ?? '' );
 
+// Already resolved by the shaper: global currency for drafts, frozen stored
+// currency once the document has been sent.
 $currency      = (string) ( $document['currency'] ?? 'USD' );
 $line_items    = is_array( $document['line_items'] ?? null ) ? $document['line_items'] : array();
 $subtotal      = (float) ( $document['subtotal'] ?? 0 );

@@ -52,7 +52,7 @@ import {
 } from '@/hooks/sales';
 import config from '@doublescale/config';
 import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
-import { CURRENCIES, DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
+import { DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
 import {
 	DesignPickerRow,
 	TemplateGallery,
@@ -138,7 +138,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [date, setDate] = useState(today());
 	const [openTill, setOpenTill] = useState(weekFromToday());
-	const [currency, setCurrency] = useState(initialCurrency ?? 'USD');
+	const [currency, setCurrency] = useState(
+		initialCurrency ?? config.getCurrency() ?? 'USD'
+	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
 	const [adjustment, setAdjustment] = useState(0);
@@ -685,19 +687,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 					</div>
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
-							<select
-								className={selectClass}
-								value={currency}
-								onChange={(e) => setCurrency(e.target.value)}
-							>
-								{CURRENCIES.map((c) => (
-									<option key={c} value={c}>
-										{c}
-									</option>
-								))}
-							</select>
-						</FormField>
 						<FormField label={__('Discount Type', 'doublescale')} className="!mb-0">
 							<select
 								className={selectClass}

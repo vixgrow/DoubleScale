@@ -65,7 +65,6 @@ import config from '@doublescale/config';
 import {
 	CONTRACT_STATUSES,
 	CONTRACT_STATUS_LABELS,
-	CURRENCIES,
 } from '@/constants/sales';
 
 const selectClass =
@@ -104,7 +103,7 @@ const ContractEdit: React.FC = () => {
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [contractTypeId, setContractTypeId] = useState<number | null>(null);
 	const [contractValue, setContractValue] = useState(0);
-	const [currency, setCurrency] = useState('USD');
+	const [currency, setCurrency] = useState(config.getCurrency() ?? 'USD');
 	const [startDate, setStartDate] = useState(today());
 	const [endDate, setEndDate] = useState(yearFromToday());
 	const [description, setDescription] = useState('');
@@ -452,19 +451,6 @@ const ContractEdit: React.FC = () => {
 								onChange={(e) => setContractValue(Number(e.target.value))}
 								className="!rounded-lg !border-border"
 							/>
-						</FormField>
-						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
-							<select
-								className={selectClass}
-								value={currency}
-								onChange={(e) => setCurrency(e.target.value)}
-							>
-								{CURRENCIES.map((c) => (
-									<option key={c} value={c}>
-										{c}
-									</option>
-								))}
-							</select>
 						</FormField>
 					</div>
 

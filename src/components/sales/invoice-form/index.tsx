@@ -65,7 +65,6 @@ import {
 import config from '@doublescale/config';
 import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
 import {
-	CURRENCIES,
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
 	INVOICE_STATUS_LABELS,
@@ -164,7 +163,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [invoiceDate, setInvoiceDate] = useState(today());
 	const [dueDate, setDueDate] = useState(monthFromToday());
-	const [currency, setCurrency] = useState(initialCurrency ?? 'USD');
+	const [currency, setCurrency] = useState(
+		initialCurrency ?? config.getCurrency() ?? 'USD'
+	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
 	const [adjustment, setAdjustment] = useState(0);
@@ -879,29 +880,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 							</Select>
 						</FormField>
 						<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-							<FormField
-								label={__('Currency', 'doublescale')}
-								required
-								className="!mb-0"
-							>
-								<Select
-									value={currency}
-									onValueChange={setCurrency}
-								>
-									<SelectTrigger
-										className={selectTriggerClass}
-									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{CURRENCIES.map((c) => (
-											<SelectItem key={c} value={c}>
-												{c}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormField>
 							<FormField
 								label={__('Discount Type', 'doublescale')}
 								className="!mb-0"

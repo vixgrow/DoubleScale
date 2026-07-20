@@ -16,6 +16,7 @@ use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
+use DoubleScale\Core\Settings\Settings;
 
 /**
  * ProposalShaper class.
@@ -40,7 +41,7 @@ final class ProposalShaper {
 			'assigned_user_id' => $proposal->assigned_user_id ? (int) $proposal->assigned_user_id : null,
 			'date'             => $proposal->date,
 			'open_till'        => $proposal->open_till,
-			'currency'         => (string) $proposal->currency,
+			'currency'         => Settings::document_currency( $proposal->currency, $proposal->sent_at ),
 			'discount_type'    => (string) $proposal->discount_type,
 			'discount_value'   => (float) $proposal->discount_value,
 			'tag_ids'          => is_array( $proposal->tag_ids ) ? array_values( array_map( 'intval', $proposal->tag_ids ) ) : array(),
@@ -109,7 +110,7 @@ final class ProposalShaper {
 			'template_color'  => DocumentTemplateColor::normalize( $proposal->template_color ?? null ),
 			'date'            => $proposal->date,
 			'open_till'       => $proposal->open_till,
-			'currency'        => (string) $proposal->currency,
+			'currency'        => Settings::document_currency( $proposal->currency, $proposal->sent_at ),
 			'discount_type'   => (string) $proposal->discount_type,
 			'discount_value'  => (float) $proposal->discount_value,
 			'line_items'      => is_array( $proposal->line_items ) ? $proposal->line_items : array(),

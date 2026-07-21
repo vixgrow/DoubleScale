@@ -204,6 +204,25 @@ class Settings {
 	}
 
 	/**
+	 * Resolve the currency to display for a deal.
+	 *
+	 * Unlinked deals keep a NULL currency column and always follow the global
+	 * settings currency. Once a deal is linked to a proposal or invoice the
+	 * stored value is frozen so later settings changes cannot relabel it.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $stored_currency Currency stored on the deal (NULL = follow global).
+	 * @return string Currency code (e.g., 'USD', 'EUR').
+	 */
+	public static function deal_currency( $stored_currency ) {
+		if ( ! empty( $stored_currency ) ) {
+			return (string) $stored_currency;
+		}
+		return self::get_currency();
+	}
+
+	/**
 	 * Encrypt a value using AES-256-CBC with SECURE_AUTH_KEY.
 	 *
 	 * @param string $value Plaintext value.

@@ -92,6 +92,7 @@
     "RestStageController": "DoubleScale\\Pro\\Modules\\Deals\\Rest\\Controllers\\RestStageController",
     "RestTagController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestTagController",
     "RestTaskController": "DoubleScale\\Pro\\Modules\\Tasks\\Rest\\Controllers\\RestTaskController",
+    "RestTaskReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestTaskReportsController",
     "RestTaskStatusController": "DoubleScale\\Pro\\Modules\\Tasks\\Rest\\Controllers\\RestTaskStatusController",
     "RestTemplateController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestTemplateController",
     "RestTicketController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestTicketController",

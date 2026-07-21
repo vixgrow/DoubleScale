@@ -92,6 +92,7 @@
     "RestStageController",
     "RestTagController",
     "RestTaskController",
+    "RestTaskReportsController",
     "RestTaskStatusController",
     "RestTemplateController",
     "RestTicketController",

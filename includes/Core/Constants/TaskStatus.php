@@ -56,6 +56,18 @@ class TaskStatus {
 	}
 
 	/**
+	 * DB-storable status keys only (never display pseudo-statuses).
+	 *
+	 * Used by entity-report descriptors so the status filter/breakdown offers
+	 * only values that can actually be stored on a task row.
+	 *
+	 * @return string[]
+	 */
+	public static function all() {
+		return array_keys( self::get_db_statuses() );
+	}
+
+	/**
 	 * Get all display statuses (for UI filtering/display)
 	 *
 	 * @return array Associative array of all status constants to labels

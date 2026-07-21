@@ -424,14 +424,21 @@ final class MergeTagsManager {
 	/**
 	 * Get Groups
 	 *
+	 * Re-applies {@see 'doublescale_mail_merge_tag_groups'} so modules that boot
+	 * after MergeTagsManager (e.g. Sales) can still attach `triggers` / labels.
+	 * Without that late pass, self-registered tags create groups with no
+	 * `triggers` key and the UI treats them as global (visible for every trigger).
+	 *
 	 * @return array
 	 */
 	public function get_groups() {
+		$groups = apply_filters( 'doublescale_mail_merge_tag_groups', $this->groups );
+
 		if ( function_exists( 'doublescale_filter_merge_tag_groups_for_modules' ) ) {
-			return doublescale_filter_merge_tag_groups_for_modules( $this->groups );
+			return doublescale_filter_merge_tag_groups_for_modules( $groups );
 		}
 
-		return $this->groups;
+		return $groups;
 	}
 
 	/**

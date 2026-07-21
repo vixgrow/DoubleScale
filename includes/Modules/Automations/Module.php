@@ -184,8 +184,16 @@ final class Module extends AbstractModule {
 	public function register_merge_tag_groups( $groups ) {
 		$groups['messaging'] = array(
 			'name'      => __( 'Messaging', 'doublescale' ),
-			'mergeTags' => array(),
+			'mergeTags' => isset( $groups['messaging']['mergeTags'] ) ? $groups['messaging']['mergeTags'] : array(),
 			'triggers'  => array( 'whatsapp_received', 'sms_received', 'email_received' ),
+		);
+
+		// Restrict WordPress User tags to WP user-lifecycle triggers only.
+		// Without `triggers`, the selector shows the group for every automation.
+		$groups['wordpress_user'] = array(
+			'name'      => __( 'WordPress User', 'doublescale' ),
+			'mergeTags' => isset( $groups['wordpress_user']['mergeTags'] ) ? $groups['wordpress_user']['mergeTags'] : array(),
+			'triggers'  => array( 'user_login', 'user_register', 'user_role_update' ),
 		);
 
 		$acf_disabled = ! doublescale_is_plugin_active( 'advanced-custom-fields/acf.php' )
@@ -193,7 +201,8 @@ final class Module extends AbstractModule {
 
 		$groups['acf_user'] = array(
 			'name'        => __( 'ACF User Fields', 'doublescale' ),
-			'mergeTags'   => array(),
+			'mergeTags'   => isset( $groups['acf_user']['mergeTags'] ) ? $groups['acf_user']['mergeTags'] : array(),
+			'triggers'    => array( 'user_login', 'user_register', 'user_role_update' ),
 			'is_disabled' => $acf_disabled,
 		);
 

@@ -579,3 +579,23 @@ if ( ! function_exists( 'doublescale_get_smtp_email_log' ) ) {
 		);
 	}
 }
+
+if ( ! function_exists( 'doublescale_is_lazy_boot' ) ) {
+	/**
+	 * Whether the current request skipped the full kernel at plugins_loaded.
+	 */
+	function doublescale_is_lazy_boot(): bool {
+		return defined( 'DOUBLESCALE_LAZY_BOOT' ) && DOUBLESCALE_LAZY_BOOT;
+	}
+}
+
+if ( ! function_exists( 'doublescale_ensure_kernel_booted' ) ) {
+	/**
+	 * Boot the full DoubleScale kernel if this request used lazy boot.
+	 */
+	function doublescale_ensure_kernel_booted(): void {
+		if ( class_exists( \DoubleScale\Core\KernelLoader::class ) ) {
+			\DoubleScale\Core\KernelLoader::ensure_booted();
+		}
+	}
+}

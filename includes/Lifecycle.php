@@ -36,7 +36,7 @@ final class Lifecycle {
 	 */
 	public static function boot( string $plugin_file ): void {
 		self::define_constants( $plugin_file );
-		self::load_dependencies();
+		self::load_core_dependencies();
 		self::register_hooks( $plugin_file );
 	}
 
@@ -62,13 +62,36 @@ final class Lifecycle {
 	}
 
 	/**
-	 * Require Composer + custom autoloaders.
+	 * Lightweight deps required on every request (activation hooks, lazy-boot gate).
 	 */
-	private static function load_dependencies(): void {
+	private static function load_core_dependencies(): void {
 		$dir = DOUBLESCALE_PLUGIN_DIR;
 
 		require_once $dir . 'includes/safe-redirect.php';
 		require_once $dir . 'dependencies/libraries/load.php';
+		require_once $dir . 'includes/Core/RequestContext.php';
+		require_once $dir . 'includes/Core/KernelLoader.php';
+
+		if ( file_exists( $dir . 'includes/Autoload.php' ) ) {
+			require_once $dir . 'includes/Autoload.php';
+		}
+
+		require_once $dir . 'includes/Core/functions.php';
+
+		require_once $dir . 'includes/Compat/LegacyProBookingPayment.php';
+		\DoubleScale\Compat\LegacyProBookingPayment::ensure_loaded();
+	}
+
+	/**
+	 * Heavy Composer vendor stack — only for full kernel boot.
+	 */
+	public static function load_vendor_dependencies(): void {
+		if ( defined( 'DOUBLESCALE_VENDOR_LOADED' ) ) {
+			return;
+		}
+		define( 'DOUBLESCALE_VENDOR_LOADED', true );
+
+		$dir = DOUBLESCALE_PLUGIN_DIR;
 
 		$doublescale_scoped_deps     = $dir . 'dependencies/build/vendor/scoper-autoload.php';
 		$vendor_autoload             = $dir . 'dependencies/vendor/autoload.php';
@@ -140,17 +163,6 @@ final class Lifecycle {
 			}
 		}
 
-		if ( file_exists( $dir . 'includes/Autoload.php' ) ) {
-			require_once $dir . 'includes/Autoload.php';
-		}
-
-		// Gate helpers (e.g. doublescale_sales_documents_ready) must exist before
-		// activation migrations — Install::install() runs on register_activation_hook,
-		// which fires before PluginKernel loads includes/Core/functions.php.
-		require_once $dir . 'includes/Core/functions.php';
-
-		require_once $dir . 'includes/Compat/LegacyProBookingPayment.php';
-		\DoubleScale\Compat\LegacyProBookingPayment::ensure_loaded();
 	}
 
 	/**
@@ -208,6 +220,10 @@ final class Lifecycle {
 	 * Single-site activation.
 	 */
 	public static function on_activate(): void {
+		self::load_vendor_dependencies();
+		if ( function_exists( 'doublescale_pro_load_vendor_stack' ) ) {
+			doublescale_pro_load_vendor_stack();
+		}
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
 			\DoubleScale\Database\Install::install();
 		}
@@ -220,6 +236,10 @@ final class Lifecycle {
 	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 */
 	public static function on_multisite_activate( $network_wide = false ): void {
+		self::load_vendor_dependencies();
+		if ( function_exists( 'doublescale_pro_load_vendor_stack' ) ) {
+			doublescale_pro_load_vendor_stack();
+		}
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
 			\DoubleScale\Database\Install::multisite_activate( $network_wide );
 		}
@@ -232,6 +252,10 @@ final class Lifecycle {
 	 * @param int $blog_id
 	 */
 	public static function on_new_blog( $blog_id ): void {
+		self::load_vendor_dependencies();
+		if ( function_exists( 'doublescale_pro_load_vendor_stack' ) ) {
+			doublescale_pro_load_vendor_stack();
+		}
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
 			\DoubleScale\Database\Install::activate_new_site( $blog_id );
 		}
@@ -258,25 +282,13 @@ final class Lifecycle {
 	 * Boot the modular kernel after WordPress finishes loading plugins.
 	 */
 	public static function on_plugins_loaded(): void {
-		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
-			\DoubleScale\Database\Install::ensure_db_ready();
+		if ( \DoubleScale\Core\RequestContext::should_boot_full_kernel() ) {
+			\DoubleScale\Core\KernelLoader::boot_full();
+			return;
 		}
 
-		\DoubleScale\Core\Bootstrap::init();
-
-		// On first boot after activation or upgrade, run task cleanup immediately
-		// so that any stale scheduled actions with no registered callback are
-		// removed before they can accumulate failures.
-		if ( get_option( 'doublescale_needs_task_cleanup' ) ) {
-			delete_option( 'doublescale_needs_task_cleanup' );
-			if ( class_exists( \DoubleScale\Core\Tasks::class ) ) {
-				\DoubleScale\Core\Tasks::cleanup_old_tasks();
-			}
+		if ( ! defined( 'DOUBLESCALE_LAZY_BOOT' ) ) {
+			define( 'DOUBLESCALE_LAZY_BOOT', true );
 		}
-
-		/**
-		 * Fires after the DoubleScale (free) modular stack is fully initialized.
-		 */
-		do_action( 'doublescale_ready' );
 	}
 }

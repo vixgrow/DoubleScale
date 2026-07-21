@@ -1,6 +1,6 @@
 <?php
 /**
- * Add proposal_id foreign key column to invoices.
+ * Add template column to invoices.
  *
  * @package DoubleScale\Modules\Documents
  */
@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesInvoiceProposalIdColumn migration.
+ * SalesInvoiceTableTemplateColumn migration.
  */
-class SalesInvoiceProposalIdColumn {
+class SalesInvoiceTableTemplateColumn {
 
 	/**
 	 * @return void
@@ -29,17 +29,14 @@ class SalesInvoiceProposalIdColumn {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'proposal_id'" );
+		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'template'" );
 		if ( $has_column ) {
 			return;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query(
-			"ALTER TABLE `{$table}`
-			ADD `proposal_id` BIGINT(20) UNSIGNED NULL AFTER `contact_id`,
-			ADD KEY `idx_proposal_id` (`proposal_id`),
-			ADD UNIQUE KEY `proposal_id` (`proposal_id`)"
+			"ALTER TABLE `{$table}` ADD `template` TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER `status`"
 		);
 	}
 }

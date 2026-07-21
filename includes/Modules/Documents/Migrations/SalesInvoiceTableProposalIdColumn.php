@@ -1,6 +1,6 @@
 <?php
 /**
- * Add viewed_at timestamp to proposals.
+ * Add proposal_id foreign key column to invoices.
  *
  * @package DoubleScale\Modules\Documents
  */
@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesProposalViewedAt migration.
+ * SalesInvoiceTableProposalIdColumn migration.
  */
-class SalesProposalViewedAt {
+class SalesInvoiceTableProposalIdColumn {
 
 	/**
 	 * @return void
@@ -20,7 +20,7 @@ class SalesProposalViewedAt {
 	public function run() {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_sales_proposals';
+		$table = $wpdb->prefix . 'doublescale_sales_invoices';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
@@ -29,12 +29,17 @@ class SalesProposalViewedAt {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'viewed_at'" );
+		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'proposal_id'" );
 		if ( $has_column ) {
 			return;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "ALTER TABLE `{$table}` ADD `viewed_at` DATETIME NULL AFTER `sent_at`" );
+		$wpdb->query(
+			"ALTER TABLE `{$table}`
+			ADD `proposal_id` BIGINT(20) UNSIGNED NULL AFTER `contact_id`,
+			ADD KEY `idx_proposal_id` (`proposal_id`),
+			ADD UNIQUE KEY `proposal_id` (`proposal_id`)"
+		);
 	}
 }

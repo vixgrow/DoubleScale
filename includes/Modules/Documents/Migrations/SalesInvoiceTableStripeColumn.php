@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesInvoiceStripeColumn migration.
+ * SalesInvoiceTableStripeColumn migration.
  */
-class SalesInvoiceStripeColumn {
+class SalesInvoiceTableStripeColumn {
 
 	/**
 	 * @return void

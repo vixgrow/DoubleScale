@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesProposalTemplateColumn migration.
+ * SalesProposalTableTemplateColumn migration.
  */
-class SalesProposalTemplateColumn {
+class SalesProposalTableTemplateColumn {
 
 	/**
 	 * @return void

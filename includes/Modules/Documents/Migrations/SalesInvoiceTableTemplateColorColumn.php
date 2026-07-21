@@ -1,6 +1,6 @@
 <?php
 /**
- * Add template_color column to proposals.
+ * Add template_color column to invoices.
  *
  * @package DoubleScale\Modules\Documents
  */
@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesProposalTemplateColorColumn migration.
+ * SalesInvoiceTableTemplateColorColumn migration.
  */
-class SalesProposalTemplateColorColumn {
+class SalesInvoiceTableTemplateColorColumn {
 
 	/**
 	 * @return void
@@ -20,7 +20,7 @@ class SalesProposalTemplateColorColumn {
 	public function run() {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_sales_proposals';
+		$table = $wpdb->prefix . 'doublescale_sales_invoices';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );

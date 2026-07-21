@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesInvoiceExternalPaymentRefColumn migration.
+ * SalesInvoiceTableExternalPaymentRefColumn migration.
  */
-class SalesInvoiceExternalPaymentRefColumn {
+class SalesInvoiceTableExternalPaymentRefColumn {
 
 	/**
 	 * @return void

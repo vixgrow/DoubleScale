@@ -78,19 +78,19 @@ final class Module extends AbstractSalesChildModule {
 	protected function child_migration_files(): array {
 		return array(
 			$this->sales_migration_path( 'SalesProposalsTable.php' ),
-			$this->sales_migration_path( 'SalesProposalViewedAt.php' ),
-			$this->sales_migration_path( 'SalesProposalSignatureColumns.php' ),
-			$this->sales_migration_path( 'SalesProposalResponseColumns.php' ),
-			$this->sales_migration_path( 'SalesProposalTemplateColumn.php' ),
-			$this->sales_migration_path( 'SalesProposalTemplateColorColumn.php' ),
+			$this->sales_migration_path( 'SalesProposalTableViewedAt.php' ),
+			$this->sales_migration_path( 'SalesProposalTableSignatureColumns.php' ),
+			$this->sales_migration_path( 'SalesProposalTableResponseColumns.php' ),
+			$this->sales_migration_path( 'SalesProposalTableTemplateColumn.php' ),
+			$this->sales_migration_path( 'SalesProposalTableTemplateColorColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoicesTable.php' ),
-			$this->sales_migration_path( 'SalesInvoiceCustomerColumns.php' ),
-			$this->sales_migration_path( 'SalesInvoiceProposalIdColumn.php' ),
-			$this->sales_migration_path( 'SalesInvoiceStripeColumn.php' ),
-			$this->sales_migration_path( 'SalesInvoiceExternalPaymentRefColumn.php' ),
-			$this->sales_migration_path( 'SalesInvoiceTemplateColumn.php' ),
-			$this->sales_migration_path( 'SalesInvoiceTemplateColorColumn.php' ),
-			$this->sales_migration_path( 'SalesInvoicePaymentsTable.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableCustomerColumns.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableProposalIdColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableStripeColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableExternalPaymentRefColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableTemplateColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableTemplateColorColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTablePaymentsTable.php' ),
 		);
 	}
 

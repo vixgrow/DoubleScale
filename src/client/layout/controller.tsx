@@ -859,6 +859,89 @@ registerAdminPage('invoices-analytics', {
 	alwaysRegister: true,
 });
 
+registerAdminPage('contracts-analytics', {
+	path: 'contracts-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="contracts-analytics" />
+	),
+	label: __('Contract Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('proposals-analytics', {
+	path: 'proposals-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="proposals-analytics" />
+	),
+	label: __('Proposal Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('credit-notes-analytics', {
+	path: 'credit-notes-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="credit-notes-analytics" />
+	),
+	label: __('Credit Note Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('projects-analytics', {
+	path: 'projects-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="projects-analytics" />
+	),
+	label: __('Project Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_project_manager',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+// Tabbed hub that collapses the five entity reports above into one page. The
+// per-report routes stay registered so old links resolve, but the sidebar
+// points here.
+registerAdminPage('sales-reports', {
+	path: 'sales-reports',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="sales-reports" />
+	),
+	label: __('Sales & Delivery Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+		'doublescale_project_manager',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
 registerAdminPage('sales-rep-analytics', {
 	path: 'sales-rep-analytics',
 	component: (props) => (

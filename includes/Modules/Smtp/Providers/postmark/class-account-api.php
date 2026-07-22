@@ -11,7 +11,6 @@ namespace DoubleScale\Modules\Smtp\Providers\PostMark;
 
 defined( 'ABSPATH' ) || exit;
 
-use Postmark\PostmarkClient;
 use WP_Error;
 
 /**
@@ -53,10 +52,10 @@ class Account_API {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return PostmarkClient
+	 * @return Http_Client
 	 */
 	public function get_client() {
-		return new PostmarkClient( $this->api_key );
+		return new Http_Client( $this->api_key );
 	}
 
 	/**

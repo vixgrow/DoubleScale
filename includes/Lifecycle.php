@@ -258,8 +258,17 @@ final class Lifecycle {
 	 * Boot the modular kernel after WordPress finishes loading plugins.
 	 */
 	public static function on_plugins_loaded(): void {
-		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
+		// `ensure_db_ready()` runs `SHOW TABLES` probes plus a per-module
+		// migration-repair sweep. That work only matters right after an install
+		// or upgrade, so gate it on a version stamp: on steady-state requests
+		// this collapses to one autoloaded `get_option` compare. The stamp is
+		// written only once the schema check completes cleanly.
+		if (
+			class_exists( \DoubleScale\Database\Install::class )
+			&& get_option( 'doublescale_schema_ready_version' ) !== DOUBLESCALE_VERSION
+		) {
 			\DoubleScale\Database\Install::ensure_db_ready();
+			update_option( 'doublescale_schema_ready_version', DOUBLESCALE_VERSION );
 		}
 
 		\DoubleScale\Core\Bootstrap::init();

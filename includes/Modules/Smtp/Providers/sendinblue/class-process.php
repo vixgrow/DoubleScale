@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Exception;
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
-use Brevo\Client\Model\SendSmtpEmail;
 use WP_Error;
 
 /**
@@ -242,7 +241,7 @@ class Process extends Abstract_Process {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return SendSmtpEmail
+	 * @return array Brevo `SendSmtpEmail` payload as a plain array.
 	 */
 	public function get_body() {
 
@@ -253,9 +252,7 @@ class Process extends Abstract_Process {
 		 *
 		 * @param array $body Email body.
 		 */
-		$body = apply_filters( 'doublescale_smtp_sendinblue_mailer_get_body', $this->body );
-
-		return new SendSmtpEmail( $body );
+		return apply_filters( 'doublescale_smtp_sendinblue_mailer_get_body', $this->body );
 	}
 
 	/**
@@ -274,19 +271,22 @@ class Process extends Abstract_Process {
 				throw new Exception( $account_api->get_error_message() );
 			}
 			$api_instance = $account_api->get_api_instance();
-			$result       = $api_instance->sendTransacEmail( $this->get_body() );
-			if ( $result->getMessageId() ) {
+			$result       = $api_instance->send_transactional_email( $this->get_body() );
+			if ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			}
+			if ( ! empty( $result['messageId'] ) ) {
 				$this->log_result(
 					array(
 						'status'   => self::SUCCEEDED,
 						'response' => array(
-							'message_id' => $result->getMessageId(),
+							'message_id' => $result['messageId'],
 						),
 					)
 				);
 				return true;
 			} else {
-				throw new Exception( $result->getMessage() );
+				throw new Exception( esc_html__( 'No message ID returned', 'doublescale' ) );
 			}
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(

@@ -24,11 +24,7 @@ return [
 	'expose-global-constants' => true,
 	'expose-global-classes'   => true,
 	'expose-global-functions' => true,
-	'expose-namespaces'       => array(
-		'SendGrid',
-		'Postmark',
-		'Brevo',
-	),
+	'expose-namespaces'       => array(),
 	'exclude-namespaces'      => array(
 		'Composer',
 		'GuzzleHttp',
@@ -71,22 +67,10 @@ return [
 	),
 	'patchers'                => array(
 		/**
-		 * Prefix dynamic class strings used by Brevo / SendGrid clients.
+		 * Prefix dynamic class strings used at runtime by bundled libraries.
 		 */
 		static function ( string $file_path, string $prefix, string $contents ): string {
 			$p = str_replace( '\\', '\\\\', $prefix );
-
-			$contents = str_replace(
-				'\'\\\\Brevo\\\\Client\\\\Model\\\\',
-				'\'' . $p . '\\\\Brevo\\\\Client\\\\Model\\\\',
-				$contents
-			);
-
-			$contents = str_replace(
-				'\'\\\\SendGrid\\\\Mail\\\\',
-				'\'' . $p . '\\\\SendGrid\\\\Mail\\\\',
-				$contents
-			);
 
 			// Dompdf builds decorator/reflower/positioner class names at runtime.
 			$contents = str_replace(

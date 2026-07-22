@@ -2380,7 +2380,16 @@ class RestContactController extends RestController {
 			return new WP_Error( 'invalid_request', __( 'No contacts selected.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$impact = $this->build_contact_deletion_impact( $contact_ids );
+		try {
+			$impact = $this->build_contact_deletion_impact( $contact_ids );
+		} catch ( \Throwable $e ) {
+			// Never surface raw SQL (missing-module tables) to the admin UI.
+			return new WP_Error(
+				'deletion_impact_unavailable',
+				__( 'Could not calculate related records for these contacts. Please try again.', 'doublescale' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return new WP_REST_Response(
 			array(
@@ -2408,12 +2417,16 @@ class RestContactController extends RestController {
 			return array();
 		}
 
-		$ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
-			->whereIn( 'contact_id', $contact_ids )
-			->pluck( 'contact_id' )
-			->unique()
-			->values()
-			->toArray();
+		try {
+			$ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+				->whereIn( 'contact_id', $contact_ids )
+				->pluck( 'contact_id' )
+				->unique()
+				->values()
+				->toArray();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
 
 		return array_map( 'intval', $ids );
 	}

@@ -451,10 +451,16 @@ function doublescale_is_module_storage_ready( string $slug, string $model_class 
 		return false;
 	}
 
-	global $wpdb;
-	$table = ( new $model_class() )->getTable();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+	try {
+		global $wpdb;
+		$table = ( new $model_class() )->getTable();
+		// Escape `_` / `%` — SHOW TABLES uses LIKE, and table names contain underscores.
+		$like = $wpdb->esc_like( $table );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) ) === $table;
+	} catch ( \Throwable $e ) {
+		return false;
+	}
 }
 
 if ( ! function_exists( 'doublescale_flush_module_enabled_cache' ) ) {

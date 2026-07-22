@@ -116,9 +116,19 @@ final class Module extends AbstractSalesChildModule {
 				if ( ! $contact || ! isset( $contact->id ) ) {
 					return;
 				}
-				$proposals = Models\ProposalModel::where( 'contact_id', (int) $contact->id )->get();
-				foreach ( $proposals as $proposal ) {
-					$proposal->delete();
+				if (
+					function_exists( 'doublescale_is_module_storage_ready' )
+					&& ! doublescale_is_module_storage_ready( 'documents', Models\ProposalModel::class )
+				) {
+					return;
+				}
+				try {
+					$proposals = Models\ProposalModel::where( 'contact_id', (int) $contact->id )->get();
+					foreach ( $proposals as $proposal ) {
+						$proposal->delete();
+					}
+				} catch ( \Throwable $e ) {
+					// Table missing or storage mid-migration — skip cascade.
 				}
 			}
 		);

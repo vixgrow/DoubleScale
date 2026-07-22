@@ -369,8 +369,19 @@ final class Module extends AbstractModule {
 			return 0;
 		}
 
-		return (int) TicketModel::where( 'contact_id', $contact->id )
-			->whereIn( 'status', array( TicketStatus::OPEN, TicketStatus::PENDING ) )
-			->count();
+		if (
+			function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready( 'support', TicketModel::class )
+		) {
+			return 0;
+		}
+
+		try {
+			return (int) TicketModel::where( 'contact_id', $contact->id )
+				->whereIn( 'status', array( TicketStatus::OPEN, TicketStatus::PENDING ) )
+				->count();
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
 	}
 }

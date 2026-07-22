@@ -212,9 +212,20 @@ final class BookingPortalProvider {
 			return 0;
 		}
 
-		return (int) BookingModel::where( 'contact_id', (int) $contact->id )
-			->whereNotIn( 'status', array( 'cancelled' ) )
-			->where( 'end_time', '>=', gmdate( 'Y-m-d H:i:s' ) )
-			->count();
+		if (
+			function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready( 'booking', BookingModel::class )
+		) {
+			return 0;
+		}
+
+		try {
+			return (int) BookingModel::where( 'contact_id', (int) $contact->id )
+				->whereNotIn( 'status', array( 'cancelled' ) )
+				->where( 'end_time', '>=', gmdate( 'Y-m-d H:i:s' ) )
+				->count();
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
 	}
 }

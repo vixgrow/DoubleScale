@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.13
+Stable tag: 1.2.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,20 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.14 = 22 Jul 2026
+- Fix SQL errors when disabled modules (Projects, Booking, Deals, Support, Documents, Tasks) have no database tables yet — skip those queries instead of failing
+- Harden module storage readiness checks (escape table-name LIKE wildcards; never surface raw missing-table SQL in the contact deletion impact UI)
+- Guard dashboard aggregates, portal counts, and contact-delete cascades so missing module tables return empty results safely
+- Performance: replace heavy SendGrid, Brevo, and Postmark Composer SDKs with thin HTTP clients to shrink the plugin package and autoload classmap
+- Performance: enable webpack code-splitting so admin SPA routes load as async chunks
+- Performance: skip heavy admin config localization on non-DoubleScale wp-admin screens
+- Performance: version-stamp schema readiness, capability sync, and Action Scheduler schedule checks to avoid repeated per-request probes
+- Performance: lazy-load the validator factory and remove the artificial 1.5s delay before the admin SPA mounts
+- Streamline contact deletion impact calculation with centralized module readiness helpers
+- Add deep-link filters for the Contacts page
+- Improve abandoned cart tracking settings and CRM contact sync
+- Fix sales invoice payments migration file naming so it runs in the correct order
+
 = 1.2.13 = 22 Jul 2026
 - Rename plugin title to DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel)
 - Document modular architecture: enable or disable optional modules from Settings → Modules

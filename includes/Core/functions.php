@@ -361,10 +361,18 @@ if ( ! function_exists( 'doublescale_resolve_deal_model_class' ) ) {
 	 * @return string|null Fully-qualified class name.
 	 */
 	function doublescale_resolve_deal_model_class(): ?string {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\DealModel' ) ) {
-			return '\DoubleScale\Pro\Modules\Deals\Models\DealModel';
+		$class = '\DoubleScale\Pro\Modules\Deals\Models\DealModel';
+		if ( ! class_exists( $class ) ) {
+			return null;
 		}
-		return null;
+
+		// Pro still autoloads DealModel when Pipelines is off / tables missing.
+		if ( function_exists( 'doublescale_is_module_storage_ready' )
+			&& ! doublescale_is_module_storage_ready( 'deals', $class ) ) {
+			return null;
+		}
+
+		return $class;
 	}
 }
 

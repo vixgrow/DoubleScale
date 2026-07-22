@@ -1100,11 +1100,21 @@ final class ActivityManager {
 			return 'no_pro';
 		}
 
-		if ( ! class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' ) ) {
+		if (
+			! class_exists( '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' )
+			|| (
+				function_exists( 'doublescale_is_module_storage_ready' )
+				&& ! doublescale_is_module_storage_ready( 'projects', '\DoubleScale\Pro\Modules\Projects\Models\ProjectModel' )
+			)
+		) {
 			return 'no_pro';
 		}
 
-		$project = \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::find( $project_id );
+		try {
+			$project = \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::find( $project_id );
+		} catch ( \Throwable $e ) {
+			return 'no_pro';
+		}
 		if ( ! $project ) {
 			return 'not_found';
 		}

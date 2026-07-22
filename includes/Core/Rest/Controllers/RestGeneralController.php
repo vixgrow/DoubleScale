@@ -168,16 +168,40 @@ class RestGeneralController extends RestController {
 		$deals_won_value  = 0;
 
 		$deal_model = $this->resolve_deal_model_class();
-		if ( $deal_model && $this->dashboard_aggregate_allowed( 'deals' ) ) {
-			$deals            = $deal_model::count();
-			$deals_closed_won = $deal_model::where( 'status', 'won' )->count();
-			$deals_won_value  = (float) $deal_model::where( 'status', 'won' )->sum( 'value' );
+		if (
+			$deal_model
+			&& $this->dashboard_aggregate_allowed( 'deals' )
+			&& (
+				! function_exists( 'doublescale_is_module_storage_ready' )
+				|| doublescale_is_module_storage_ready( 'deals', $deal_model )
+			)
+		) {
+			try {
+				$deals            = $deal_model::count();
+				$deals_closed_won = $deal_model::where( 'status', 'won' )->count();
+				$deals_won_value  = (float) $deal_model::where( 'status', 'won' )->sum( 'value' );
+			} catch ( \Throwable $e ) {
+				$deals            = 0;
+				$deals_closed_won = 0;
+				$deals_won_value  = 0;
+			}
 		}
 
-		$projects = 0;
+		$projects      = 0;
 		$project_model = $this->resolve_project_model_class();
-		if ( $project_model && $this->dashboard_aggregate_allowed( 'projects' ) ) {
-			$projects = $project_model::count();
+		if (
+			$project_model
+			&& $this->dashboard_aggregate_allowed( 'projects' )
+			&& (
+				! function_exists( 'doublescale_is_module_storage_ready' )
+				|| doublescale_is_module_storage_ready( 'projects', $project_model )
+			)
+		) {
+			try {
+				$projects = $project_model::count();
+			} catch ( \Throwable $e ) {
+				$projects = 0;
+			}
 		}
 
 		$response = array(

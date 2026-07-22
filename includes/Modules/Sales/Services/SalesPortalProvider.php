@@ -276,14 +276,24 @@ final class SalesPortalProvider {
 
 		$count = 0;
 
-		if ( doublescale_sales_child_module_active( 'documents' ) ) {
-			$count += (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
-				->where( 'status', '!=', InvoiceStatus::DRAFT )
-				->count();
+		if (
+			doublescale_sales_child_module_active( 'documents' )
+			&& (
+				! function_exists( 'doublescale_is_module_storage_ready' )
+				|| doublescale_is_module_storage_ready( 'documents', InvoiceModel::class )
+			)
+		) {
+			try {
+				$count += (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
+					->where( 'status', '!=', InvoiceStatus::DRAFT )
+					->count();
 
-			$count += (int) ProposalModel::where( 'contact_id', (int) $contact->id )
-				->where( 'status', '!=', ProposalStatus::DRAFT )
-				->count();
+				$count += (int) ProposalModel::where( 'contact_id', (int) $contact->id )
+					->where( 'status', '!=', ProposalStatus::DRAFT )
+					->count();
+			} catch ( \Throwable $e ) {
+				// Tables missing — leave count at 0 for documents.
+			}
 		}
 
 		/**
@@ -306,17 +316,27 @@ final class SalesPortalProvider {
 			return 0;
 		}
 
-		$invoices = doublescale_sales_child_module_active( 'documents' )
-			? (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
-				->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
-				->count()
-			: 0;
+		$documents_ready = doublescale_sales_child_module_active( 'documents' )
+			&& (
+				! function_exists( 'doublescale_is_module_storage_ready' )
+				|| doublescale_is_module_storage_ready( 'documents', InvoiceModel::class )
+			);
 
-		$proposals = doublescale_sales_child_module_active( 'documents' )
-			? (int) ProposalModel::where( 'contact_id', (int) $contact->id )
-				->whereIn( 'status', self::OPEN_PROPOSAL_STATUSES )
-				->count()
-			: 0;
+		try {
+			$invoices = $documents_ready
+				? (int) InvoiceModel::where( 'contact_id', (int) $contact->id )
+					->whereIn( 'status', self::OUTSTANDING_INVOICE_STATUSES )
+					->count()
+				: 0;
+
+			$proposals = $documents_ready
+				? (int) ProposalModel::where( 'contact_id', (int) $contact->id )
+					->whereIn( 'status', self::OPEN_PROPOSAL_STATUSES )
+					->count()
+				: 0;
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
 
 		return $invoices + $proposals;
 	}

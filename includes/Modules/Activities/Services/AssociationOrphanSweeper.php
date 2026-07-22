@@ -218,8 +218,10 @@ class AssociationOrphanSweeper {
 	private static function table_exists( string $table ): bool {
 		global $wpdb;
 
-		return (bool) $wpdb->get_var(
-			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
-		);
+		$like = $wpdb->esc_like( $table );
+
+		return $wpdb->get_var(
+			$wpdb->prepare( 'SHOW TABLES LIKE %s', $like )
+		) === $table;
 	}
 }

@@ -528,6 +528,13 @@ class RestSettingsController extends RestController {
 		// Sanitize settings
 		$settings = $this->sanitize_settings( $settings );
 
+		// Cart tracking off must also disable blind CRM contact sync (UI hides that toggle).
+		if ( isset( $settings['cart'] ) && is_array( $settings['cart'] ) ) {
+			if ( empty( $settings['cart']['enable_cart_tracking'] ) ) {
+				$settings['cart']['create_contacts_in_crm'] = false;
+			}
+		}
+
 		Settings::update_many( $settings );
 
 		$response = array( 'success' => true );

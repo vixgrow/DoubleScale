@@ -40,6 +40,7 @@ import {
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -51,6 +52,7 @@ interface ListsProps {
 
 const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
+	const navigate = useNavigate();
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(
@@ -257,6 +259,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setVisible(true);
 	};
 
+	const handleViewContacts = (listToView: ContactList) => {
+		navigate(getToLink('contacts', { list_id: listToView.id }));
+	};
+
 	const handleSubmit = () => {
 		selectedList ? updateList() : createList();
 	};
@@ -281,7 +287,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	}));
 
 	// Table configuration
-	const columns = getListColumns({ onEditList: handleEditList });
+	const columns = getListColumns({
+		onEditList: handleEditList,
+		onViewContacts: handleViewContacts,
+	});
 
 	const tableConfig: DataTableConfig<ContactList> = {
 		manageColumns: { enabled: false },

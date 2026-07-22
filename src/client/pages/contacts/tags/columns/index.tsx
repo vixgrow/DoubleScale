@@ -41,10 +41,12 @@ const selectionColumn: ColumnDef<ContactTag> = {
 
 interface UseTagsColumnsProps {
 	onEditTag: (tag: ContactTag) => void;
+	onViewContacts: (tag: ContactTag) => void;
 }
 
 export const useTagsColumns = ({
 	onEditTag,
+	onViewContacts,
 }: UseTagsColumnsProps): ColumnDef<ContactTag>[] => {
 	return [
 		selectionColumn,
@@ -76,7 +78,15 @@ export const useTagsColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => <span>{row.original.name}</span>,
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					onClick={() => onViewContacts(row.original)}
+					className="h-auto p-0 text-left font-medium text-primary hover:bg-transparent hover:underline cursor-pointer bg-transparent shadow-none border-none"
+				>
+					{row.original.name}
+				</Button>
+			),
 		},
 		{
 			accessorKey: 'description',
@@ -106,7 +116,15 @@ export const useTagsColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => (row.original as any).contacts_count ?? 0,
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					onClick={() => onViewContacts(row.original)}
+					className="h-auto p-0 text-left font-medium text-primary hover:bg-transparent hover:underline cursor-pointer bg-transparent shadow-none border-none"
+				>
+					{(row.original as any).contacts_count ?? 0}
+				</Button>
+			),
 		},
 		{
 			accessorKey: 'created_at',

@@ -42,6 +42,7 @@ import {
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -53,6 +54,7 @@ interface TagsProps {
 
 const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
+	const navigate = useNavigate();
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(
@@ -277,11 +279,18 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setVisible(true);
 	};
 
+	const handleViewContacts = (tagToView: ContactTag) => {
+		navigate(getToLink('contacts', { tag_id: tagToView.id }));
+	};
+
 	const handleSubmit = () => {
 		selectedTag ? updateTag() : createTag();
 	};
 
-	const columns = useTagsColumns({ onEditTag: handleEditTag });
+	const columns = useTagsColumns({
+		onEditTag: handleEditTag,
+		onViewContacts: handleViewContacts,
+	});
 
 	const tableConfig: DataTableConfig<ContactTag> = {
 		manageColumns: {

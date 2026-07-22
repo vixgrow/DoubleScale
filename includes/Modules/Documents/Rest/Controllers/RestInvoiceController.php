@@ -14,6 +14,8 @@ use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Documents\Constants\DiscountType;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplateColor;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
@@ -22,7 +24,7 @@ use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
-use DoubleScale\Modules\Sales\Services\SalesTags;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -155,7 +157,11 @@ class RestInvoiceController extends RestController {
 	public function create_item_permissions_check( $request ) {
 		unset( $request );
 		return Capabilities::can_view_sales()
-			&& ( Capabilities::can_manage_all_sales() || Capabilities::current_user_can( 'doublescale_manage_own_sales' ) );
+			&& (
+				Capabilities::can_manage_all_sales()
+				|| Capabilities::current_user_can( 'doublescale_manage_own_sales' )
+				|| Capabilities::can_assign_sales_rep()
+			);
 	}
 
 	public function update_item_permissions_check( $request ) {
@@ -213,7 +219,7 @@ class RestInvoiceController extends RestController {
 		}
 
 		$query = InvoiceModel::query();
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'sale_agent_user_id', get_current_user_id() );
 		}
 
@@ -231,19 +237,59 @@ class RestInvoiceController extends RestController {
 			);
 		}
 
-		$paid_total        = (float) ( clone $query )->where( 'status', InvoiceStatus::PAID )->sum( 'total' );
-		$outstanding_total = (float) ( clone $query )->whereIn( 'status', array( InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID ) )->sum( 'total' );
-		$overdue_total     = (float) ( clone $query )->where( 'status', InvoiceStatus::OVERDUE )->sum( 'total' );
+		// Break each total down by the RESOLVED currency (global for drafts, frozen
+		// for sent) so reports stay consistent when older documents used a different
+		// currency. The flat *_total is kept for backward compatibility.
+		$paid        = $this->sum_by_currency( clone $query, array( InvoiceStatus::PAID ) );
+		$outstanding = $this->sum_by_currency( clone $query, array( InvoiceStatus::UNPAID, InvoiceStatus::PARTIALLY_PAID ) );
+		$overdue     = $this->sum_by_currency( clone $query, array( InvoiceStatus::OVERDUE ) );
 
 		return new WP_REST_Response(
 			array(
-				'paid_total'        => round( $paid_total, 2 ),
-				'outstanding_total' => round( $outstanding_total, 2 ),
-				'overdue_total'     => round( $overdue_total, 2 ),
-				'by_status'         => $by_status,
-				'total_count'       => $total_count,
+				'paid_total'              => $paid['total'],
+				'outstanding_total'       => $outstanding['total'],
+				'overdue_total'           => $overdue['total'],
+				'paid_by_currency'        => $paid['by_currency'],
+				'outstanding_by_currency' => $outstanding['by_currency'],
+				'overdue_by_currency'     => $overdue['by_currency'],
+				'by_status'               => $by_status,
+				'total_count'             => $total_count,
 			),
 			200
+		);
+	}
+
+	/**
+	 * Sum invoice totals for the given statuses, grouped by the resolved currency.
+	 *
+	 * @param mixed    $query    Invoice query (already scoped to the caller).
+	 * @param string[] $statuses Statuses to include.
+	 * @return array{total: float, by_currency: array<string, float>}
+	 */
+	private function sum_by_currency( $query, array $statuses ): array {
+		$total       = 0.0;
+		$by_currency = array();
+
+		foreach ( $query->whereIn( 'status', $statuses )->get() as $invoice ) {
+			$amount = (float) $invoice->total;
+			if ( 0.0 === $amount ) {
+				continue;
+			}
+			$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
+			$total   += $amount;
+			if ( ! isset( $by_currency[ $currency ] ) ) {
+				$by_currency[ $currency ] = 0.0;
+			}
+			$by_currency[ $currency ] += $amount;
+		}
+
+		foreach ( $by_currency as $code => $value ) {
+			$by_currency[ $code ] = round( (float) $value, 2 );
+		}
+
+		return array(
+			'total'       => round( $total, 2 ),
+			'by_currency' => $by_currency,
 		);
 	}
 
@@ -285,12 +331,18 @@ class RestInvoiceController extends RestController {
 			return $payload;
 		}
 
+		if ( ! isset( $payload['template'] ) ) {
+			$payload['template'] = DocumentTemplate::normalize(
+				SalesSettings::get( 'default_invoice_template', DocumentTemplate::DEFAULT )
+			);
+		}
+
 		$discount_check = DiscountType::validate_payload( $payload );
 		if ( is_wp_error( $discount_check ) ) {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_assign_sales_rep() ) {
 			$payload['sale_agent_user_id'] = get_current_user_id();
 		}
 
@@ -336,7 +388,7 @@ class RestInvoiceController extends RestController {
 			return $discount_check;
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() && isset( $payload['sale_agent_user_id'] ) ) {
+		if ( ! Capabilities::can_assign_sales_rep() && isset( $payload['sale_agent_user_id'] ) ) {
 			unset( $payload['sale_agent_user_id'] );
 		}
 
@@ -534,7 +586,7 @@ class RestInvoiceController extends RestController {
 			$query->where( 'contact_id', (int) $contact_id );
 		}
 
-		if ( ! Capabilities::can_manage_all_sales() ) {
+		if ( ! Capabilities::can_manage_all_sales() && ! Capabilities::can_assign_sales_rep() ) {
 			$query->where( 'sale_agent_user_id', get_current_user_id() );
 		}
 
@@ -617,16 +669,19 @@ class RestInvoiceController extends RestController {
 			}
 		}
 
-		if ( array_key_exists( 'tag_ids', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tag_ids'] );
-		} elseif ( array_key_exists( 'tags', $params ) ) {
-			$payload['tag_ids'] = SalesTags::normalize_tag_ids( $params['tags'] );
-		}
 		if ( array_key_exists( 'allowed_payment_modes', $params ) ) {
 			$payload['allowed_payment_modes'] = PaymentMode::normalize_list( $params['allowed_payment_modes'] );
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'template', $params ) ) {
+			$payload['template'] = DocumentTemplate::normalize( $params['template'] );
+		}
+
+		if ( array_key_exists( 'template_color', $params ) ) {
+			$payload['template_color'] = DocumentTemplateColor::normalize( $params['template_color'] );
 		}
 
 		if ( isset( $payload['status'] ) && ! InvoiceStatus::is_valid( $payload['status'] ) ) {

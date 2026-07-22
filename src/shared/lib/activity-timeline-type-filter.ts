@@ -3,11 +3,38 @@ import type { TimelineItem } from '@doublescale/services/activities-service';
 export type ActivityTimelineTypeFilter =
 	| 'all'
 	| 'task'
+	| 'project'
 	| 'note'
 	| 'call_logged'
 	| 'email_sent'
 	| 'meeting_scheduled'
+	| 'proposals'
+	| 'invoices'
 	| 'files';
+
+export const resolveDocumentLinkEventKey = (
+	activityType: string,
+	data?: Record<string, unknown>
+): 'proposal_linked' | 'invoice_linked' | null => {
+	if (activityType !== 'status_changed' || !data) {
+		return null;
+	}
+	if (data.proposal_id) {
+		return 'proposal_linked';
+	}
+	if (data.invoice_id) {
+		return 'invoice_linked';
+	}
+	return null;
+};
+
+const isProposalLinkedTimelineItem = (item: TimelineItem): boolean =>
+	item.type === 'activity' &&
+	resolveDocumentLinkEventKey(item.icon_type, item.data) === 'proposal_linked';
+
+const isInvoiceLinkedTimelineItem = (item: TimelineItem): boolean =>
+	item.type === 'activity' &&
+	resolveDocumentLinkEventKey(item.icon_type, item.data) === 'invoice_linked';
 
 export interface TaskActivityFilterEntry {
 	activity_type: string;
@@ -53,6 +80,14 @@ export const filterTimelineByType = (
 				item.icon_type === 'file_attached' ||
 				item.icon_type === 'file_removed'
 		);
+	}
+
+	if (typeFilter === 'proposals') {
+		return items.filter(isProposalLinkedTimelineItem);
+	}
+
+	if (typeFilter === 'invoices') {
+		return items.filter(isInvoiceLinkedTimelineItem);
 	}
 
 	if (

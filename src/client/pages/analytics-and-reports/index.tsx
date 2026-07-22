@@ -110,6 +110,61 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 						)}
 					/>
 				);
+			case 'contracts-analytics':
+				return applyFilters(
+					'doublescale_analytics_contracts_content',
+					<ProFeatureNotice
+						featureName={__('Contract Reports', 'doublescale')}
+						description={__(
+							'Track signing rates, contract value, and contracts approaching expiry.',
+							'doublescale'
+						)}
+					/>
+				);
+			case 'proposals-analytics':
+				return applyFilters(
+					'doublescale_analytics_proposals_content',
+					<ProFeatureNotice
+						featureName={__('Proposal Reports', 'doublescale')}
+						description={__(
+							'Track acceptance rates, value sent, and conversion of proposals into invoices.',
+							'doublescale'
+						)}
+					/>
+				);
+			case 'credit-notes-analytics':
+				return applyFilters(
+					'doublescale_analytics_credit_notes_content',
+					<ProFeatureNotice
+						featureName={__('Credit Note Reports', 'doublescale')}
+						description={__(
+							'Track credit issued, applied, and remaining, and credit as a share of invoiced value.',
+							'doublescale'
+						)}
+					/>
+				);
+			case 'projects-analytics':
+				return applyFilters(
+					'doublescale_analytics_projects_content',
+					<ProFeatureNotice
+						featureName={__('Project Reports', 'doublescale')}
+						description={__(
+							'Track delivery throughput, on-time completion, budgets, and progress.',
+							'doublescale'
+						)}
+					/>
+				);
+			case 'sales-reports':
+				return applyFilters(
+					'doublescale_analytics_sales_reports_content',
+					<ProFeatureNotice
+						featureName={__('Sales & Delivery Reports', 'doublescale')}
+						description={__(
+							'Invoices, proposals, contracts, credit notes, and projects in one tabbed report hub.',
+							'doublescale'
+						)}
+					/>
+				);
 			default:
 				// Default view for analytics-and-reports main page
 				// Sales Rep (without manager access) sees only their reports

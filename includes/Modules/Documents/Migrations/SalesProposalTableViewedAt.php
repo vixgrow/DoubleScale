@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesProposalViewedAt migration.
+ * SalesProposalTableViewedAt migration.
  */
-class SalesProposalViewedAt {
+class SalesProposalTableViewedAt {
 
 	/**
 	 * @return void

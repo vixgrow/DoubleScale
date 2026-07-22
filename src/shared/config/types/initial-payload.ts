@@ -14,6 +14,7 @@ export type InitialPayload = {
 type BusinessSettings = {
 	business_name: string;
 	business_address: string;
+	business_logo?: string;
 };
 
 type EmailSettings = {

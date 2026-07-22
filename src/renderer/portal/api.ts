@@ -19,6 +19,7 @@ import type {
 	PortalCalendarResponse,
 	PortalDocument,
 	PortalPaymentsResponse,
+	PortalProject,
 	PortalSubscription,
 	PortalTimelineResponse,
 } from './types';
@@ -80,6 +81,12 @@ export const fetchRescheduleUrl = (id: number): Promise<{ url: string }> =>
 	apiFetch<{ url: string }>({
 		path: `${PORTAL}/bookings/${id}/reschedule-url`,
 	});
+
+export const fetchProjects = (): Promise<{ data: PortalProject[] }> =>
+	apiFetch<{ data: PortalProject[] }>({ path: `${PORTAL}/projects` });
+
+export const fetchProject = (id: number): Promise<PortalProject> =>
+	apiFetch<PortalProject>({ path: `${PORTAL}/projects/${id}` });
 
 export type DocumentFilter = 'all' | 'invoice' | 'proposal' | 'contract' | 'credit_note';
 

@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import type { Settings } from '@doublescale/client';
 import { Field } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
+import { BusinessLogoUpload } from '@/components/settings/business-logo-upload';
 
 interface BusinessSettingsProps {
     settings: Settings;
@@ -19,15 +20,19 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
     settings,
     onChange,
 }) => {
-    const { business_name, business_address } = settings.business;
+    const { business_name, business_address, business_logo } = settings.business;
     const handleFieldChange = (key: string, value: string) => {
+        const nextBusiness = {
+            ...settings.business,
+            [key]: value,
+        };
         onChange({
             ...settings,
-            business: {
-                ...settings.business,
-                [key]: value,
-            },
+            business: nextBusiness,
         });
+        if (typeof window !== 'undefined' && window.doublescaleConfig) {
+            window.doublescaleConfig.business = nextBusiness;
+        }
     };
     return (
         <div className="business-settings doublescale-fields">
@@ -46,9 +51,17 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
                 }
                 type="textarea"
             />
+            <div className="space-y-2">
+                <div className="text-sm font-medium text-foreground">
+                    {__('Business Logo', 'doublescale')}
+                </div>
+                <BusinessLogoUpload
+                    value={business_logo || ''}
+                    onChange={(url) => handleFieldChange('business_logo', url)}
+                />
+            </div>
         </div>
     );
 };
 
 export default BusinessSettings;
-

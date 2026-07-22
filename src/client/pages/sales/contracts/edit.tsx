@@ -5,13 +5,11 @@
 import React, { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Plus } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import {
 	FormField,
-	TagField,
 	InfiniteScrollSelect,
 	Editor,
 	PanelLayout,
@@ -61,10 +59,11 @@ import {
 	useSalesSettings,
 } from '@/hooks/sales';
 import type { ContactSummary } from '@/types/sales';
+import config from '@doublescale/config';
+import { getCurrencySymbol } from '@/components/sales/sales-currency-utils';
 import {
 	CONTRACT_STATUSES,
 	CONTRACT_STATUS_LABELS,
-	CURRENCIES,
 } from '@/constants/sales';
 
 const selectClass =
@@ -103,14 +102,13 @@ const ContractEdit: React.FC = () => {
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [contractTypeId, setContractTypeId] = useState<number | null>(null);
 	const [contractValue, setContractValue] = useState(0);
-	const [currency, setCurrency] = useState('USD');
+	const [currency, setCurrency] = useState(config.getCurrency() ?? 'USD');
 	const [startDate, setStartDate] = useState(today());
 	const [endDate, setEndDate] = useState(yearFromToday());
 	const [description, setDescription] = useState('');
 	const [hideFromCustomer, setHideFromCustomer] = useState(false);
 	const [isTrash, setIsTrash] = useState(false);
 	const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
-	const [tagIds, setTagIds] = useState<number[]>([]);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [sendOpen, setSendOpen] = useState(false);
@@ -174,11 +172,6 @@ const ContractEdit: React.FC = () => {
 		setHideFromCustomer(existing.hide_from_customer);
 		setIsTrash(existing.is_trash);
 		setAssignedUserId(existing.assigned_user_id ?? null);
-		setTagIds(
-			Array.isArray(existing.tag_ids)
-				? existing.tag_ids.map((id) => Number(id)).filter(Boolean)
-				: []
-		);
 	}, [existing]);
 
 	const buildPayload = () => ({
@@ -194,7 +187,6 @@ const ContractEdit: React.FC = () => {
 		hide_from_customer: hideFromCustomer,
 		is_trash: isTrash,
 		assigned_user_id: assignedUserId,
-		tag_ids: tagIds,
 	});
 
 	const validateForm = (): boolean => {
@@ -372,7 +364,11 @@ const ContractEdit: React.FC = () => {
 		);
 	}
 
-	const assigneeReadOnly = assignableUsers.length <= 1;
+	const canAssignSalesRep =
+		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
+	const assigneeReadOnly =
+		assignableUsers.length === 0 ||
+		(!canAssignSalesRep && assignableUsers.length <= 1);
 
 	const contractInformationContent = (
 		<>
@@ -439,27 +435,20 @@ const ContractEdit: React.FC = () => {
 
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<FormField label={__('Contract Value', 'doublescale')} required className="!mb-0">
-							<Input
-								type="number"
-								min={0}
-								step="0.01"
-								value={contractValue}
-								onChange={(e) => setContractValue(Number(e.target.value))}
-								className="!rounded-lg !border-border"
-							/>
-						</FormField>
-						<FormField label={__('Currency', 'doublescale')} required className="!mb-0">
-							<select
-								className={selectClass}
-								value={currency}
-								onChange={(e) => setCurrency(e.target.value)}
-							>
-								{CURRENCIES.map((c) => (
-									<option key={c} value={c}>
-										{c}
-									</option>
-								))}
-							</select>
+							<div className="flex items-center gap-3">
+								<Input
+									type="number"
+									min={0}
+									step="0.01"
+									value={contractValue}
+									onChange={(e) => setContractValue(Number(e.target.value))}
+									className="!rounded-lg !border-border"
+								/>
+								<div className="flex h-10 min-w-[72px] items-center justify-center gap-1 rounded-lg border border-border bg-muted px-3 text-sm font-medium">
+									<span>{getCurrencySymbol(currency)}</span>
+									<span className="text-muted-foreground">{currency}</span>
+								</div>
+							</div>
 						</FormField>
 					</div>
 
@@ -488,10 +477,6 @@ const ContractEdit: React.FC = () => {
 				</div>
 
 				<div className="space-y-4 pt-6 lg:pl-8 lg:pt-0">
-					<FormField label={__('Tags', 'doublescale')} className="!mb-0">
-						<TagField value={tagIds} onChange={setTagIds} />
-					</FormField>
-
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<FormField label={__('Status', 'doublescale')} className="!mb-0">
 							<select

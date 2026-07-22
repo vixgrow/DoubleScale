@@ -64,6 +64,7 @@ import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { RocketIcon } from '@/components/icons';
+import { FolderKanban } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -489,6 +490,59 @@ registerAdminPage('deal-detail', {
 	],
 });
 
+registerAdminPage('projects', {
+	path: 'projects',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Projects', 'doublescale')}
+			description={__(
+				'Manage projects with kanban boards, tasks, and linked invoices with DoubleScale Pro.',
+				'doublescale'
+			)}
+			features={[
+				__('Kanban project board', 'doublescale'),
+				__('Deal to project conversion', 'doublescale'),
+				__('Tasks on projects', 'doublescale'),
+				__('Invoice totals & financials', 'doublescale'),
+				__('Custom fields', 'doublescale'),
+			]}
+		/>
+	),
+	label: __('Projects', 'doublescale'),
+	icon: <FolderKanban size={24} />,
+	requiredCapability: [
+		'doublescale_project_manager',
+		'doublescale_project_member',
+		'doublescale_project_read_own_projects',
+		'doublescale_project_read_all_projects',
+		'doublescale_project_manage_own_projects',
+		'doublescale_project_manage_all_projects',
+	],
+});
+
+registerAdminPage('project-detail', {
+	path: 'projects/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Project Details', 'doublescale')}
+			description={__(
+				'View and manage project details with DoubleScale Pro.',
+				'doublescale'
+			)}
+		/>
+	),
+	label: __('Project Details', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_project_manager',
+		'doublescale_project_member',
+		'doublescale_project_read_own_projects',
+		'doublescale_project_read_all_projects',
+		'doublescale_project_manage_own_projects',
+		'doublescale_project_manage_all_projects',
+	],
+});
+
 // Subscriptions - stub the DoubleScale-Subscriptions add-on plugin overrides via
 // the `doublescale_navigation_page_settings` filter. `requiresModule` gates the
 // route on the module being active (add-on plugin active AND Sales on): when the
@@ -801,6 +855,89 @@ registerAdminPage('invoices-analytics', {
 	label: __('Invoice Revenue', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_view_sales'],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('contracts-analytics', {
+	path: 'contracts-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="contracts-analytics" />
+	),
+	label: __('Contract Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('proposals-analytics', {
+	path: 'proposals-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="proposals-analytics" />
+	),
+	label: __('Proposal Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('credit-notes-analytics', {
+	path: 'credit-notes-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="credit-notes-analytics" />
+	),
+	label: __('Credit Note Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+registerAdminPage('projects-analytics', {
+	path: 'projects-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="projects-analytics" />
+	),
+	label: __('Project Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_project_manager',
+	],
+	requiresModule: 'analytics',
+	alwaysRegister: true,
+});
+
+// Tabbed hub that collapses the five entity reports above into one page. The
+// per-report routes stay registered so old links resolve, but the sidebar
+// points here.
+registerAdminPage('sales-reports', {
+	path: 'sales-reports',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="sales-reports" />
+	),
+	label: __('Sales & Delivery Reports', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+		'doublescale_view_sales',
+		'doublescale_project_manager',
+	],
 	requiresModule: 'analytics',
 	alwaysRegister: true,
 });

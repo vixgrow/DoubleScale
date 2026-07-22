@@ -1378,6 +1378,11 @@ class ContactModel extends Model {
 		$dispatcher->listen(
 			"eloquent.deleting: {$model_name}",
 			function ( $contact ) {
+				// Contact children (deals, projects, proposals, tasks) reference the
+				// contact without FK constraints; let their modules cascade while the
+				// contact row still exists.
+				do_action( 'doublescale_contact_deleting', $contact );
+
 				// Delete note activities for this contact (via polymorphic associations).
 				ActivityModel::query()
 					->whereHas(

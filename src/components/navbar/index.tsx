@@ -95,6 +95,7 @@ const CRM_NAV_ITEM_ORDER: Record<string, number> = {
 	booking: 2,
 	support: 3,
 	tasks: 4,
+	projects: 5,
 };
 
 const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
@@ -113,6 +114,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	booking: 'crm',
 	support: 'crm',
 	tasks: 'crm',
+	projects: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
 	forms: 'marketing',
@@ -148,6 +150,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	sales: 'sales',
 	tasks: 'tasks',
+	projects: 'projects',
 	forms: 'forms',
 	support: 'support',
 };
@@ -176,6 +179,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'sales/payments/:id': 'documents',
 	'sales/settings': 'sales',
 	tasks: 'tasks',
+	projects: 'projects',
+	'projects/:id': 'projects',
 	campaigns: 'campaigns',
 	'sms-campaigns': 'campaigns',
 	forms: 'forms',
@@ -200,6 +205,11 @@ const SUB_PATH_TO_MODULE: Record<string, string> = {
 	'emails-analytics': 'analytics',
 	'contacts-analytics': 'analytics',
 	'cart-analytics': 'analytics',
+	'contracts-analytics': 'analytics',
+	'proposals-analytics': 'analytics',
+	'credit-notes-analytics': 'analytics',
+	'projects-analytics': 'analytics',
+	'sales-reports': 'analytics',
 };
 
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
@@ -244,6 +254,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			false
 		) as boolean;
 
+		const projectOnly = Boolean(
+			config.getUserCapabilities().doublescale_is_project_only
+		);
+
 		const builtItems = Object.entries(pages)
 			.filter(([, item]) => {
 				return (
@@ -251,6 +265,13 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					item.path &&
 					hasRequiredCapability(item.requiredCapability)
 				);
+			})
+			.filter(([, item]) => {
+				if (projectOnly) {
+					const normalizedPath = item.path.replace(/^\//, '').split('/:')[0];
+					return normalizedPath === 'projects';
+				}
+				return true;
 			})
 			.filter(([pageId, item]) => {
 				// While Sales documents (proposals/invoices) are gated, the
@@ -304,8 +325,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
-								path: 'invoices-analytics',
-								label: __('Invoice Revenue', 'doublescale'),
+								path: 'sales-reports',
+								label: __('Sales & Delivery Reports', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',
@@ -324,8 +345,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
-								path: 'invoices-analytics',
-								label: __('Invoice Revenue', 'doublescale'),
+								path: 'sales-reports',
+								label: __('Sales & Delivery Reports', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',

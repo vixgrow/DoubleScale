@@ -13,7 +13,7 @@ import { formatDateForAPI } from '@doublescale/utils';
 import { GradientProposalsIcon, NoData, PageHeader, PlusIcon } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog } from '@/components/sales';
+import { ConfirmDialog, ProposalFormDialog } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	isApprovalWorkflowEnabled,
@@ -36,6 +36,8 @@ const ProposalsList: React.FC = () => {
 	const [hasRecords, setHasRecords] = useState(false);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
 	const [deleting, setDeleting] = useState(false);
+	const [createDialogOpen, setCreateDialogOpen] = useState(false);
+	const [editDialogProposalId, setEditDialogProposalId] = useState<number | null>(null);
 
 	const { data, loading, error, refetch } = useProposals({
 		page,
@@ -66,7 +68,7 @@ const ProposalsList: React.FC = () => {
 		setPerPage,
 	});
 
-	const goToCreate = () => navigate(getToLink('sales/proposals/new'));
+	const goToCreate = () => setCreateDialogOpen(true);
 
 	const canEdit = (proposal: Proposal) =>
 		canEditSalesDocument(
@@ -79,6 +81,7 @@ const ProposalsList: React.FC = () => {
 		() =>
 			getProposalColumns({
 				navigate,
+				onEdit: setEditDialogProposalId,
 				onDelete: setDeleteId,
 				canEdit,
 			}),
@@ -192,6 +195,26 @@ const ProposalsList: React.FC = () => {
 					/>
 				)}
 			</div>
+
+			<ProposalFormDialog
+				open={createDialogOpen}
+				onOpenChange={setCreateDialogOpen}
+				onSaved={() => {
+					void refetch();
+				}}
+			/>
+			<ProposalFormDialog
+				open={editDialogProposalId !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditDialogProposalId(null);
+					}
+				}}
+				proposalId={editDialogProposalId}
+				onSaved={() => {
+					void refetch();
+				}}
+			/>
 
 			<ConfirmDialog
 				open={deleteId !== null}

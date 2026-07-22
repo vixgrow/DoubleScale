@@ -1,6 +1,6 @@
 <?php
 /**
- * Add stripe_payment_intent_id column to invoices.
+ * Add template_color column to proposals.
  *
  * @package DoubleScale\Modules\Documents
  */
@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Documents\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * SalesInvoiceStripeColumn migration.
+ * SalesProposalTableTemplateColorColumn migration.
  */
-class SalesInvoiceStripeColumn {
+class SalesProposalTableTemplateColorColumn {
 
 	/**
 	 * @return void
@@ -20,7 +20,7 @@ class SalesInvoiceStripeColumn {
 	public function run() {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_sales_invoices';
+		$table = $wpdb->prefix . 'doublescale_sales_proposals';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
@@ -29,14 +29,14 @@ class SalesInvoiceStripeColumn {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'stripe_payment_intent_id'" );
+		$has_column = $wpdb->get_var( "SHOW COLUMNS FROM `{$table}` LIKE 'template_color'" );
 		if ( $has_column ) {
 			return;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query(
-			"ALTER TABLE `{$table}` ADD `stripe_payment_intent_id` VARCHAR(191) NULL AFTER `amount_paid`"
+			"ALTER TABLE `{$table}` ADD `template_color` VARCHAR(7) NULL DEFAULT NULL AFTER `template`"
 		);
 	}
 }

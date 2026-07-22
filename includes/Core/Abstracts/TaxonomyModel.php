@@ -160,13 +160,82 @@ class TaxonomyModel extends Model {
 		$dispatcher = static::getEventDispatcher();
 		$model_name = static::class;
 		$event_name = "eloquent.creating: {$model_name}";
-		$listeners  = $dispatcher->getListeners( $event_name );
+		$listeners  = $dispatcher ? $dispatcher->getListeners( $event_name ) : array();
 
 		// If no listeners, re-register events on current dispatcher
-		if ( count( $listeners ) === 0 ) {
+		if ( count( $listeners ) === 0 && $dispatcher ) {
 			$this->registerEventsOnDispatcher( $dispatcher, $model_name );
 		}
+
+		// Do not rely solely on eloquent events — WPEloquent may swallow INSERT failures
+		// when `type` / `slug` are missing (NOT NULL + UNIQUE on doublescale_terms).
+		$this->ensureInsertAttributes();
+
 		return parent::save( $options );
+	}
+
+	/**
+	 * Ensure required insert columns are set before persisting a new taxonomy row.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	protected function ensureInsertAttributes(): void {
+		if ( $this->exists ) {
+			return;
+		}
+
+		if ( empty( $this->getAttribute( 'type' ) ) ) {
+			$this->setAttribute( 'type', static::type_value() );
+		}
+
+		$name = (string) $this->getAttribute( 'name' );
+		if ( '' !== $name && empty( $this->getAttribute( 'slug' ) ) ) {
+			$this->setAttribute( 'slug', static::generateUniqueSlug( $name ) );
+		}
+	}
+
+	/**
+	 * Generate a unique slug for this taxonomy type.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string   $name       Display name.
+	 * @param int|null $exclude_id Row ID to exclude from uniqueness check (updates).
+	 *
+	 * @return string
+	 */
+	protected static function generateUniqueSlug( string $name, ?int $exclude_id = null ): string {
+		$original_slug = Str::slug( $name );
+		$slug          = $original_slug;
+		$count         = 1;
+
+		while ( static::slugExists( $slug, $exclude_id ) ) {
+			$slug = $original_slug . '-' . $count++;
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Whether a slug is already taken for this taxonomy type.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string   $slug       Candidate slug.
+	 * @param int|null $exclude_id Row ID to exclude.
+	 *
+	 * @return bool
+	 */
+	protected static function slugExists( string $slug, ?int $exclude_id = null ): bool {
+		$query = static::where( 'slug', $slug );
+
+		if ( null !== $exclude_id ) {
+			$query->where( 'id', '!=', $exclude_id );
+		}
+
+		return $query->exists();
 	}
 
 	/**
@@ -185,14 +254,11 @@ class TaxonomyModel extends Model {
 				if ( is_subclass_of( $class, TaxonomyModel::class, true ) ) {
 					$taxonomy->setAttribute( 'type', $class::type_value() );
 				}
-				$originalSlug = $slug = Str::slug( $taxonomy->name );
-				$count        = 1;
 
-				while ( static::where( 'slug', $slug )->exists() ) {
-					$slug = $originalSlug . '-' . $count++;
+				$name = (string) $taxonomy->getAttribute( 'name' );
+				if ( '' !== $name && empty( $taxonomy->getAttribute( 'slug' ) ) ) {
+					$taxonomy->setAttribute( 'slug', $class::generateUniqueSlug( $name ) );
 				}
-
-				$taxonomy->slug = $slug;
 			}
 		);
 

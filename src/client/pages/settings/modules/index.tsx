@@ -93,7 +93,7 @@ const MODULE_DIALOG_GROUPS: {
 	{
 		key: 'workspace',
 		label: __( 'Workspace', 'doublescale' ),
-		slugs: [ 'tasks', 'booking', 'support' ],
+		slugs: [ 'tasks', 'projects', 'booking', 'support' ],
 	},
 ];
 
@@ -404,11 +404,11 @@ export default function ModulesSettings({
 					<p className="text-sm text-muted-foreground mt-1">
 						{isSalesDocumentsReady()
 							? __(
-									'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
+									'Enable or disable optional features: SMTP, Sales (proposals, invoices, and the pipeline), Forms, Automations, Tasks, Projects, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
 									'doublescale'
 							  )
 							: __(
-									'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
+									'Enable or disable optional features: SMTP, Sales (with the pipeline), Forms, Automations, Tasks, Projects, Campaigns, Booking, and Helpdesk. Other CRM capabilities are always available and are not listed here.',
 									'doublescale'
 							  )}
 					</p>

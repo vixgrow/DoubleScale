@@ -39,7 +39,10 @@ import {
 	ConvertToInvoiceDialog,
 	ApprovalStatusBanner,
 	ProposalStatusPill,
+	ProposalDocumentPreview,
+	ProposalFormDialog,
 } from '@/components/sales';
+import { DocumentEditorSidebar } from '@/components/sales/document-templates/document-editor-sidebar';
 import { computeAmount } from '@/components/sales/line-items-editor';
 import {
 	canEditSalesDocument,
@@ -89,6 +92,7 @@ const ProposalView: React.FC = () => {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [convertOpen, setConvertOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
+	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [signature, setSignature] = useState<ProposalSignature | null>(null);
@@ -453,13 +457,7 @@ const ProposalView: React.FC = () => {
 								variant="outline"
 								size="icon"
 								className="h-10 w-10 shrink-0 border-[#0D9DFC] bg-white text-[#0D9DFC] hover:bg-[#DBEAFE]"
-								onClick={() =>
-									navigate(
-										getToLink(
-											`sales/proposals/${proposal.id}/edit`
-										)
-									)
-								}
+								onClick={() => setEditOpen(true)}
 								aria-label={__('Edit', 'doublescale')}
 							>
 								<EditHeaderIcon
@@ -482,6 +480,8 @@ const ProposalView: React.FC = () => {
 					</div>
 				</div>
 
+				<div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_min(400px,34vw)] xl:items-start">
+					<div className="min-w-0 space-y-6">
 				<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 					<div className={cardClass}>
 						<h2 className="mb-4 text-base font-semibold text-accent-foreground">
@@ -734,6 +734,21 @@ const ProposalView: React.FC = () => {
 						</div>
 					</div>
 				</div>
+					</div>
+
+					<div className="xl:sticky xl:top-4">
+						<DocumentEditorSidebar
+							docType="proposal"
+							templateId={proposal.template}
+							templateColor={proposal.template_color ?? null}
+							onColorChange={() => {}}
+							showStyleEditor={false}
+							preview={
+								<ProposalDocumentPreview proposal={proposal} />
+							}
+						/>
+					</div>
+				</div>
 			</div>
 
 			{proposal.has_signature || proposal.signed_name ? (
@@ -814,6 +829,18 @@ const ProposalView: React.FC = () => {
 				busy={busy}
 				onConfirm={handleConvert}
 			/>
+
+			{proposal ? (
+				<ProposalFormDialog
+					open={editOpen}
+					onOpenChange={setEditOpen}
+					proposalId={proposal.id}
+					onSaved={() => {
+						void refetch();
+						setEditOpen(false);
+					}}
+				/>
+			) : null}
 		</div>
 	);
 };

@@ -360,7 +360,8 @@ export const InfiniteScrollMultiSelect: React.FC<
 				<div
 					ref={dropdownRef}
 					onScroll={handleScroll}
-					className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-[300px] overflow-y-auto"
+					onWheel={(event) => event.stopPropagation()}
+					className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-[300px] overflow-y-auto overscroll-contain"
 				>
 					{loading && items.length === 0 && (
 						<div className="px-3 py-2 text-sm text-gray-500">

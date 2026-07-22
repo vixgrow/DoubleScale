@@ -79,6 +79,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'credit_notes',
 		'contracts',
 		'tasks',
+		'projects',
 	);
 
 	return array_values( array_unique( apply_filters( 'doublescale_phantom_module_toggle_slugs', $slugs ) ) );
@@ -218,6 +219,12 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Tasks', 'doublescale' ),
 				'description' => __( 'Create tasks, due dates, and reminders linked to contacts and deals.', 'doublescale' ),
+			);
+		case 'projects':
+			return array(
+				'label'        => __( 'Projects', 'doublescale' ),
+				'description'  => __( 'Manage projects with kanban statuses, tasks, and linked invoices.', 'doublescale' ),
+				'dependencies' => array( 'core', 'contacts' ),
 			);
 		default:
 			return null;

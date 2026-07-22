@@ -197,6 +197,30 @@ const SettingsPage: React.FC = () => {
 			originalSettingsRef.current = JSON.parse(JSON.stringify(settings));
 			setSaveCounter((prev) => prev + 1);
 
+			if (
+				settings?.business &&
+				typeof window !== 'undefined' &&
+				window.doublescaleConfig
+			) {
+				window.doublescaleConfig.business = settings.business;
+			}
+
+			// Keep the in-memory currency in sync so every module (proposals,
+			// invoices, contracts, credit notes, deals) picks up the new global
+			// currency without a full page reload. The raw payload is updated too
+			// so any config re-created from it (free/pro keep separate ConfigAPI
+			// instances) stays correct.
+			const nextCurrency = settings?.currency?.currency;
+			if (nextCurrency) {
+				config.setCurrency(nextCurrency);
+				if (
+					typeof window !== 'undefined' &&
+					window.doublescaleConfig
+				) {
+					window.doublescaleConfig.currency = nextCurrency;
+				}
+			}
+
 			// Check for warnings in the response
 			if (response?.warnings && response.warnings.length > 0) {
 				// Show warning message

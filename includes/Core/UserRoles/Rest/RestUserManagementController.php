@@ -479,6 +479,7 @@ class RestUserManagementController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function check_sales_rep_permissions( $request ) {
-		return Permissions::has_sales_rep_access();
+		return Permissions::has_sales_rep_access()
+			|| Permissions::can_assign_project_owner();
 	}
 }

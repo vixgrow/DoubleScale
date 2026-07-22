@@ -1,0 +1,118 @@
+/**
+ * Edit Style color picker for document templates.
+ */
+
+import React, { useId, useRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Ban, Pipette, X } from 'lucide-react';
+
+import {
+	TEMPLATE_COLOR_PRESETS,
+	getCustomColorValue,
+	isPresetColor,
+	normalizeTemplateColor,
+} from './color-presets';
+
+interface TemplateStyleEditorProps {
+	value: string | null;
+	onChange: (color: string | null) => void;
+	onClose?: () => void;
+	compact?: boolean;
+}
+
+export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
+	value,
+	onChange,
+	onClose,
+	compact = false,
+}) => {
+	const colorInputId = useId();
+	const colorInputRef = useRef<HTMLInputElement>(null);
+	const normalized = normalizeTemplateColor(value);
+	const customValue = getCustomColorValue(normalized);
+	const isCustom = Boolean(normalized && !isPresetColor(normalized));
+
+	return (
+		<div
+			className={`rounded-xl border border-border bg-white shadow-sm ${
+				compact ? 'p-4' : 'p-5'
+			}`}
+		>
+			<div className="mb-4 flex items-center justify-between gap-2">
+				<h3 className="text-base font-semibold text-foreground">
+					{__('Edit Style', 'doublescale')}
+				</h3>
+				{onClose ? (
+					<button
+						type="button"
+						className="rounded-md p-1 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+						onClick={onClose}
+						aria-label={__('Close', 'doublescale')}
+					>
+						<X className="h-4 w-4" />
+					</button>
+				) : null}
+			</div>
+
+			<div className="space-y-3">
+				<p className="text-sm font-medium text-foreground">
+					{__('Edit Color', 'doublescale')}
+				</p>
+				<div className="flex flex-wrap items-center gap-2">
+					{TEMPLATE_COLOR_PRESETS.map((preset) => {
+						const isActive =
+							preset.value === normalized ||
+							(preset.value === null && normalized === null);
+						return (
+							<button
+								key={preset.id}
+								type="button"
+								title={preset.label}
+								onClick={() => onChange(preset.value)}
+								className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
+									isActive
+										? 'border-primary ring-2 ring-primary/30'
+										: 'border-border hover:border-primary/40'
+								}`}
+								style={
+									preset.value
+										? { backgroundColor: preset.value }
+										: { backgroundColor: '#f8fafc' }
+								}
+							>
+								{preset.value === null ? (
+									<Ban className="h-4 w-4 text-muted-foreground" />
+								) : null}
+							</button>
+						);
+					})}
+
+					<button
+						type="button"
+						title={__('Custom color', 'doublescale')}
+						onClick={() => colorInputRef.current?.click()}
+						className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border transition ${
+							isCustom
+								? 'border-primary ring-2 ring-primary/30'
+								: 'border-border hover:border-primary/40'
+						}`}
+						style={{ backgroundColor: customValue }}
+					>
+						<Pipette className="h-4 w-4 text-white drop-shadow" />
+					</button>
+
+					<input
+						ref={colorInputRef}
+						id={colorInputId}
+						type="color"
+						className="sr-only"
+						value={customValue}
+						onChange={(e) =>
+							onChange(normalizeTemplateColor(e.target.value))
+						}
+					/>
+				</div>
+			</div>
+		</div>
+	);
+};

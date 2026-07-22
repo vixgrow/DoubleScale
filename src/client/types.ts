@@ -700,6 +700,7 @@ export type DashboardData = {
 	deals: number;
 	deals_closed_won: number;
 	deals_won_value: number;
+	projects: number;
 	total_orders: number;
 	total_revenue: string;
 	recent_contacts: Contact[];

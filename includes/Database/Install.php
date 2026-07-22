@@ -127,6 +127,8 @@ class Install {
 
 		self::maybe_ensure_activity_association_unique_index();
 
+		self::maybe_repair_terms_schema();
+
 		self::maybe_drop_activity_contact_id_column();
 
 		// Provision DoubleScale roles (Support roles always; CRM roles only
@@ -230,6 +232,31 @@ class Install {
 			if ( function_exists( 'doublescale_get_logger' ) ) {
 				doublescale_get_logger()->error(
 					'Activity association unique index deferred',
+					array(
+						'source' => 'install',
+						'error'  => $e->getMessage(),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Repair doublescale_terms when the physical table predates unified schema.
+	 *
+	 * @return void
+	 */
+	private static function maybe_repair_terms_schema(): void {
+		if ( ! class_exists( \DoubleScale\Modules\Contacts\Migrations\TermsSchemaRepair::class ) ) {
+			return;
+		}
+
+		try {
+			( new \DoubleScale\Modules\Contacts\Migrations\TermsSchemaRepair() )->run();
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
+				doublescale_get_logger()->error(
+					'Terms schema repair deferred',
 					array(
 						'source' => 'install',
 						'error'  => $e->getMessage(),

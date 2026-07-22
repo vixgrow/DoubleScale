@@ -137,7 +137,7 @@ final class InvoiceNotifications {
 		$formatted_total = sprintf(
 			'%1$s %2$s',
 			number_format_i18n( $balance, 2 ),
-			(string) $invoice->currency
+			\DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at )
 		);
 
 		$summary_rows = array(

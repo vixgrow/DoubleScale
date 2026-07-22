@@ -146,6 +146,7 @@ const SettingsSectionCard: FC<SettingsSectionCardProps> = ({
 
 const SalesSettingsPage: FC = () => {
 	const documentsEnabled = ConfigAPI.isModuleEnabled('documents');
+	const dealsEnabled = ConfigAPI.isModuleEnabled('deals');
 	const isProActive = useIsProActive();
 	const { data, loading, error, refetch } = useSalesSettings();
 	const [form, setForm] = useState<SalesSettings | null>(null);
@@ -365,6 +366,34 @@ const SalesSettingsPage: FC = () => {
 							}
 						/>
 					</div>
+					{isProActive && dealsEnabled ? (
+						<div className="flex items-center justify-between gap-4">
+							<div className="flex flex-col gap-1">
+								<Label
+									htmlFor="auto-close-deals"
+									className="font-medium text-base"
+								>
+									{__(
+										'Auto-close associated deals when fully paid',
+										'doublescale'
+									)}
+								</Label>
+								<p className="text-sm text-muted-foreground">
+									{__(
+										'When an invoice is fully paid, mark any deal linked to it as Won.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+							<Switch
+								id="auto-close-deals"
+								checked={Boolean(form.auto_close_deals_on_paid)}
+								onCheckedChange={(v) =>
+									patch('auto_close_deals_on_paid', v)
+								}
+							/>
+						</div>
+					) : null}
 					<FormField
 						label={__(
 							'Expiry reminder (days before open till)',

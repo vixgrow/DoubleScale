@@ -20,6 +20,7 @@ import {
 	DealsIcon,
 	ListsIcon,
 	PremiumIcon,
+	TaskDoneIcon,
 } from '@doublescale/components';
 import type { DashboardData } from '@doublescale/client';
 import config from '@doublescale/config';
@@ -41,6 +42,7 @@ const formatDealsWonValue = (n: number) =>
 export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	const dealsModuleEnabled = config.isModuleToggleEnabled('deals');
+	const projectsModuleEnabled = config.isModuleToggleEnabled('projects');
 
 	return (
 		<DashboardContentCard
@@ -166,6 +168,29 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconColor="text-white"
 					/>
 				))}
+
+				{projectsModuleEnabled &&
+					(isProActive ? (
+						<MessageStatsCard
+							layout="centered"
+							className="bg-[#F7F8FA]"
+							label={__('Total Projects', 'doublescale')}
+							value={formatStatCount(data.projects || 0)}
+							icon={<TaskDoneIcon width={29} height={29} />}
+							iconBgClass="bg-[#8775EC]"
+							iconColor="text-white"
+						/>
+					) : (
+						<ProStatCard
+							layout="centered"
+							className="bg-[#F7F8FA]"
+							label={__('Total Projects', 'doublescale')}
+							value={formatStatCount(data.projects || 0)}
+							icon={<PremiumIcon width={29} height={29} />}
+							iconBgClass="bg-[#8775EC]"
+							iconColor="text-white"
+						/>
+					))}
 			</div>
 		</DashboardContentCard>
 	);

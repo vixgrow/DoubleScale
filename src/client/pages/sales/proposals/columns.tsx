@@ -28,12 +28,14 @@ const contactName = (proposal: Proposal): string => {
 
 export interface ProposalColumnProps {
 	navigate: (path: string) => void;
+	onEdit: (id: number) => void;
 	onDelete: (id: number) => void;
 	canEdit: (proposal: Proposal) => boolean;
 }
 
 export const getProposalColumns = ({
 	navigate,
+	onEdit,
 	onDelete,
 	canEdit,
 }: ProposalColumnProps): ColumnDef<Proposal>[] => [
@@ -117,13 +119,7 @@ export const getProposalColumns = ({
 							variant="ghost"
 							size="icon"
 							aria-label={__('Edit', 'doublescale')}
-							onClick={() =>
-								navigate(
-									getToLink(
-										`sales/proposals/${proposal.id}/edit`
-									)
-								)
-							}
+							onClick={() => onEdit(proposal.id)}
 						>
 							<EditHeaderIcon color="#0D9DFC" />
 						</Button>

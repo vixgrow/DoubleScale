@@ -30,6 +30,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'forms',
 	'automations',
 	'tasks',
+	'projects',
 	'campaigns',
 	'booking',
 	'support',
@@ -64,6 +65,7 @@ export const REST_PHANTOM_MODULE_SLUGS = [
 	'leadscoring',
 	'notifications',
 	'tasks',
+	'projects',
 ] as const;
 
 const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
@@ -73,7 +75,10 @@ const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
 ]);
 
 /** Pro marketing rows: feature ships in Pro; free install still shows toggle + install copy until Pro is active. */
-const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['tasks']);
+const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set([
+	'tasks',
+	'projects',
+]);
 
 export type OptionalMarketingModuleSlug =
 	(typeof OPTIONAL_MARKETING_MODULE_SLUGS)[number];
@@ -129,6 +134,14 @@ function placeholderFor(
 				label: __('Tasks', 'doublescale'),
 				description: __(
 					'Create tasks, due dates, and reminders linked to contacts and deals.',
+					'doublescale'
+				),
+			};
+		case 'projects':
+			return {
+				label: __('Projects', 'doublescale'),
+				description: __(
+					'Manage projects with kanban statuses, tasks, and linked invoices.',
 					'doublescale'
 				),
 			};

@@ -40,11 +40,13 @@ import {
 	InvoiceFormDialog,
 	InvoiceOnlinePayment,
 	InvoiceStatusPill,
+	InvoiceDocumentPreview,
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
 	ApprovalStatusBanner,
 } from '@/components/sales';
+import { DocumentEditorSidebar } from '@/components/sales/document-templates/document-editor-sidebar';
 import {
 	computeAmount,
 	formatSalesAmount,
@@ -583,6 +585,8 @@ const InvoiceView: React.FC = () => {
 					</div>
 				</div>
 
+				<div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_min(400px,34vw)] xl:items-start">
+					<div className="min-w-0 space-y-6">
 				<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 					<div className={cardClass}>
 						<h2 className="mb-6 text-base font-semibold text-accent-foreground">
@@ -746,6 +750,19 @@ const InvoiceView: React.FC = () => {
 						)}
 					</div>
 				) : null}
+					</div>
+
+					<div className="xl:sticky xl:top-4">
+						<DocumentEditorSidebar
+							docType="invoice"
+							templateId={invoice.template}
+							templateColor={invoice.template_color ?? null}
+							onColorChange={() => {}}
+							showStyleEditor={false}
+							preview={<InvoiceDocumentPreview invoice={invoice} />}
+						/>
+					</div>
+				</div>
 			</div>
 
 			<SendDocumentDialog

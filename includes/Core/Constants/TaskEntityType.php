@@ -30,6 +30,11 @@ class TaskEntityType {
 	const DEAL = 2;
 
 	/**
+	 * Project - Task associated with a project (Pro feature)
+	 */
+	const PROJECT = 3;
+
+	/**
 	 * Get all entity types
 	 *
 	 * @return array Associative array of type constants to labels
@@ -38,6 +43,7 @@ class TaskEntityType {
 		return array(
 			self::CONTACT => __( 'Contact', 'doublescale' ),
 			self::DEAL    => __( 'Deal', 'doublescale' ),
+			self::PROJECT => __( 'Project', 'doublescale' ),
 		);
 	}
 
@@ -86,6 +92,10 @@ class TaskEntityType {
 			unset( $types[ self::DEAL ] );
 		}
 
+		if ( ! class_exists( 'DoubleScale\\Pro\\Modules\\Projects\\Models\\ProjectModel', false ) ) {
+			unset( $types[ self::PROJECT ] );
+		}
+
 		return $types;
 	}
 
@@ -112,6 +122,6 @@ class TaskEntityType {
 	 * @return bool True if type requires Pro plugin
 	 */
 	public static function requires_pro( $type ) {
-		return self::DEAL === $type;
+		return self::DEAL === $type || self::PROJECT === $type;
 	}
 }

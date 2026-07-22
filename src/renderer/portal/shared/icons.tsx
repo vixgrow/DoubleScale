@@ -77,6 +77,12 @@ export const MapPinIcon = (p: IconProps) =>
 		p
 	);
 
+export const FolderIcon = (p: IconProps) =>
+	base(
+		<path d="M4 5a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />,
+		p
+	);
+
 export const ChevronLeftIcon = (p: IconProps) => base(<path d="M15 6l-6 6 6 6" />, p);
 
 export const PaymentIcon = (p: IconProps) =>
@@ -106,6 +112,7 @@ const REGISTRY: Record<string, (p: IconProps) => JSX.Element> = {
 	ticket: TicketIcon,
 	calendar: CalendarIcon,
 	document: DocumentIcon,
+	folder: FolderIcon,
 	clock: ClockIcon,
 	subscriptions: RepeatIcon,
 };

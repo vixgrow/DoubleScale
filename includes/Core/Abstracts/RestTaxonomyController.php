@@ -344,6 +344,8 @@ abstract class RestTaxonomyController extends RestController {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
+		global $wpdb;
+
 		try {
 			$item_data   = $this->prepare_item_for_database( $request );
 			$model_class = $this->model_class;
@@ -354,16 +356,102 @@ abstract class RestTaxonomyController extends RestController {
 				$item_data['type'] = $model_class::type_value();
 			}
 
+			if ( property_exists( $wpdb, 'last_error' ) ) {
+				$wpdb->last_error = '';
+			}
+
 			$item = $model_class::create( $item_data );
+
+			$item_id    = (int) ( $item->id ?? 0 );
+			$db_error   = property_exists( $wpdb, 'last_error' ) ? (string) $wpdb->last_error : '';
+			$insert_ok  = $item_id > 0 && '' === $db_error;
+
+			if ( ! $insert_ok ) {
+				$this->log_taxonomy_create_failure(
+					$model_class,
+					$item_data,
+					$item_id,
+					$db_error
+				);
+
+				return new WP_Error(
+					'rest_' . $this->rest_base . '_cannot_create',
+					/* translators: %s: Singular taxonomy name. */
+					sprintf( __( 'Failed to create %s. Please try again or contact support.', 'doublescale' ), strtolower( $this->singular_name ) ),
+					array( 'status' => 500 )
+				);
+			}
 
 			return new WP_REST_Response( $item, 201 );
 		} catch ( \Exception $e ) {
+			$this->log_taxonomy_create_failure(
+				$this->model_class,
+				isset( $item_data ) ? $item_data : array(),
+				0,
+				$e->getMessage()
+			);
+
 			return new WP_Error(
 				'rest_' . $this->rest_base . '_cannot_create',
 				$e->getMessage(),
 				array( 'status' => 500 )
 			);
 		}
+	}
+
+	/**
+	 * Log diagnostic context when taxonomy create returns id=0 or the DB reports an error.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string               $model_class Model class name.
+	 * @param array<string, mixed> $item_data   Payload sent to create().
+	 * @param int                  $item_id     Inserted ID (0 when failed).
+	 * @param string               $db_error    wpdb or exception message.
+	 *
+	 * @return void
+	 */
+	protected function log_taxonomy_create_failure( $model_class, array $item_data, $item_id, $db_error ) {
+		if ( ! function_exists( 'doublescale_get_logger' ) ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$table   = $wpdb->prefix . 'doublescale_terms';
+		$columns = array();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$column_rows = $wpdb->get_results( "SHOW COLUMNS FROM `{$table}`", ARRAY_A );
+		if ( is_array( $column_rows ) ) {
+			foreach ( $column_rows as $column ) {
+				if ( isset( $column['Field'] ) ) {
+					$columns[] = array(
+						'field' => $column['Field'],
+						'type'  => $column['Type'] ?? '',
+						'extra' => $column['Extra'] ?? '',
+					);
+				}
+			}
+		}
+
+		$type = is_subclass_of( $model_class, TaxonomyModel::class, true )
+			? $model_class::type_value()
+			: '';
+
+		doublescale_get_logger()->error(
+			'Taxonomy create failed (id=0 or DB error).',
+			array(
+				'source'    => 'rest-taxonomy-controller',
+				'rest_base' => $this->rest_base,
+				'type'      => $type,
+				'model'     => $model_class,
+				'payload'   => $item_data,
+				'item_id'   => $item_id,
+				'db_error'  => $db_error,
+				'columns'   => $columns,
+			)
+		);
 	}
 
 	/**
@@ -559,7 +647,7 @@ abstract class RestTaxonomyController extends RestController {
 	 * @return bool Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_read_taxonomy_terms();
 	}
 
 	/**
@@ -585,7 +673,7 @@ abstract class RestTaxonomyController extends RestController {
 	 * @return bool Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_read_taxonomy_terms();
 	}
 
 	/**

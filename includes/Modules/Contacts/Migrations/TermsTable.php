@@ -39,6 +39,7 @@ class TermsTable extends Migration {
 			slug VARCHAR(191) NOT NULL,
 			description TEXT,
 			status VARCHAR(255) NOT NULL DEFAULT "active",
+			is_public TINYINT(1) NOT NULL DEFAULT 1,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

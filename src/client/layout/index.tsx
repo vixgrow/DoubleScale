@@ -9,6 +9,7 @@ import {
 	Routes,
 	Navigate,
 	adminPagePassesModuleGate,
+	getToLink,
 } from '@doublescale/navigation';
 
 /**
@@ -34,6 +35,7 @@ import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@doublescale/components';
 import { SidebarProvider } from '@doublescale/components/ui/sidebar';
+import config from '@doublescale/config';
 
 // `<SnackbarList>` strips the `status` prop at the `<Snackbar>` boundary, so
 // success and error notices render identically. Color them via `className`
@@ -143,6 +145,9 @@ const _PageLayout = () => {
 	const visiblePages = Object.values(getAdminPages()).filter(
 		adminPagePassesModuleGate
 	);
+	const defaultLandingPath = config.getUserCapabilities().doublescale_is_project_only
+		? getToLink('projects')
+		: '/';
 
 	return (
 		<>
@@ -158,7 +163,7 @@ const _PageLayout = () => {
 							/>
 						);
 					})}
-					<Route path="*" element={<Navigate to="/" replace />} />
+					<Route path="*" element={<Navigate to={defaultLandingPath} replace />} />
 				</Routes>
 			</HistoryRouter>
 		</>

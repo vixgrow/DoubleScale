@@ -11,9 +11,6 @@ namespace DoubleScale\Modules\Smtp\Providers\SendInBlue;
 
 defined( 'ABSPATH' ) || exit;
 
-use Brevo\Client\Configuration;
-use GuzzleHttp\Client as GuzzleClient;
-use Brevo\Client\Api\TransactionalEmailsApi;
 use WP_Error;
 
 /**
@@ -51,17 +48,14 @@ class Account_API {
 	}
 
 	/**
-	 * Get Brevo api_instance
+	 * Get Brevo HTTP client.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return TransactionalEmailsApi
+	 * @return Http_Client
 	 */
 	public function get_api_instance() {
-		$config       = Configuration::getDefaultConfiguration()->setApiKey( 'api-key', $this->api_key );
-		$api_instance = new TransactionalEmailsApi( new GuzzleClient(), $config );
-
-		return $api_instance;
+		return new Http_Client( $this->api_key );
 	}
 
 	/**
@@ -179,23 +173,20 @@ class Account_API {
 				$email_body['headers'] = $batch_args['headers'];
 			}
 
-			try {
-				$send_smtp_email = new \Brevo\Client\Model\SendSmtpEmail( $email_body );
-				$result          = $api_instance->sendTransacEmail( $send_smtp_email );
+			$result = $api_instance->send_transactional_email( $email_body );
 
-				if ( $result->getMessageId() ) {
-					++$sent_count;
-					$message_ids[] = $result->getMessageId();
-				} else {
-					$failed[] = array(
-						'email' => $email,
-						'error' => __( 'No message ID returned', 'doublescale' ),
-					);
-				}
-			} catch ( \Exception $e ) {
+			if ( is_wp_error( $result ) ) {
 				$failed[] = array(
 					'email' => $email,
-					'error' => $e->getMessage(),
+					'error' => $result->get_error_message(),
+				);
+			} elseif ( ! empty( $result['messageId'] ) ) {
+				++$sent_count;
+				$message_ids[] = $result['messageId'];
+			} else {
+				$failed[] = array(
+					'email' => $email,
+					'error' => __( 'No message ID returned', 'doublescale' ),
 				);
 			}
 		}

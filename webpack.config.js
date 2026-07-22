@@ -217,7 +217,10 @@ const adminClientConfig = {
 	},
 	optimization: {
 		...defaultConfig.optimization,
-		splitChunks: false,
+		// Enable code splitting so the route-level React.lazy()/import() in
+		// src/client/index.tsx emit real per-page async chunks instead of
+		// everything landing in the monolithic index.js.
+		splitChunks: safeSplitChunks(defaultConfig.optimization?.splitChunks),
 	},
 	resolve: {
 		...defaultConfig.resolve,
@@ -245,6 +248,12 @@ const adminClientConfig = {
 		...defaultConfig.output,
 		path: path.resolve(__dirname, 'build/client'),
 		filename: 'index.js',
+		// Content-hash the async chunks so they bust cache on update (the entry
+		// busts via its asset.php ?ver hash; async chunks otherwise cache
+		// forever). `publicPath: 'auto'` resolves chunk URLs relative to the
+		// running script, which lands correctly under wp-content/plugins/.
+		chunkFilename: '[name].[contenthash].js',
+		publicPath: 'auto',
 	},
 };
 

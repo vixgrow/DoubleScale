@@ -59,7 +59,5 @@ addFilter(
 const appRoot = document.getElementById( 'doublescale-admin-root' );
 
 if (appRoot) {
-	setTimeout(() => {
-		createRoot(appRoot).render(<PageLayout />);
-	}, 1500);
+	createRoot(appRoot).render(<PageLayout />);
 }

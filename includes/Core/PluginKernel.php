@@ -127,8 +127,17 @@ final class PluginKernel {
 		$capsule->setAsGlobal();
 		$capsule->bootEloquent();
 
-		$translator = new Translator( new ArrayLoader(), 'en' );
-		$this->container->instance( ValidatorFactory::class, new ValidatorFactory( $translator ) );
+		// Defer the validation stack (Translator + Factory) to first use. It is
+		// only needed on requests that validate input (mostly REST writes), so
+		// building it eagerly here taxed every frontend/cron request. A lazy
+		// singleton resolves — and memoizes — it the first time `->validator`
+		// (ValidatorFactory) is read from the container.
+		$this->container->singleton(
+			ValidatorFactory::class,
+			static function () {
+				return new ValidatorFactory( new Translator( new ArrayLoader(), 'en' ) );
+			}
+		);
 	}
 
 	public function get_container(): Container {

@@ -30,6 +30,7 @@ interface PageTabsProps {
 	/** @default 'pill' */
 	tabsVariant?: TabsVariant;
 	tabsTriggerClassName?: string;
+	tabsContentClassName?: string;
 	scrollThreshold?: number;
 	scrollArrowBg?: string;
 	/** When true, always use a horizontal scroll container and show arrows on overflow. */
@@ -56,6 +57,7 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	tabsListClassName = 'bg-transparent text-muted-foreground gap-1',
 	tabsVariant = 'pill',
 	tabsTriggerClassName,
+	tabsContentClassName,
 	scrollThreshold = 10,
 	scrollArrowBg = 'bg-card',
 	enableHorizontalScroll = false,
@@ -196,7 +198,10 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				<TabsContent
 					key={content.value}
 					value={content.value}
-					className={tabsVariant === 'underline' ? 'mt-0' : undefined}
+					className={cn(
+						tabsVariant === 'underline' ? 'mt-0' : undefined,
+						tabsContentClassName,
+					)}
 				>
 					{content.children}
 				</TabsContent>

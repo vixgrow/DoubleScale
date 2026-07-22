@@ -129,13 +129,25 @@ final class CoreModule extends AbstractModule {
 			}
 		);
 
-		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Core/Fields/Types/*.php' ) ?: array() as $f ) {
-			require_once $f;
-		}
+		// Load the field-type files via the cached manifest instead of globbing
+		// the directory on every request. Falls back to a glob when no manifest
+		// is available (same behaviour as before, but cached once built).
+		$this->loadManifestOrGlobs(
+			array( 'includes/Core/Fields/Types/*.php' ),
+			'core-field-types'
+		);
 	}
 
 	private function ensure_base_access_capability(): void {
 		if ( ! function_exists( 'get_role' ) ) {
+			return;
+		}
+
+		// The role → capability scan (and any add_cap() DB write) only needs to
+		// run once per plugin version. Skip the get_role()/has_cap() loop on
+		// every request via a version stamp; re-arm on upgrade so a release that
+		// adds new roles re-provisions the base cap.
+		if ( get_option( 'doublescale_base_caps_version' ) === DOUBLESCALE_VERSION ) {
 			return;
 		}
 
@@ -150,6 +162,8 @@ final class CoreModule extends AbstractModule {
 				$role->add_cap( 'doublescale_access' );
 			}
 		}
+
+		update_option( 'doublescale_base_caps_version', DOUBLESCALE_VERSION );
 	}
 
 	/**
@@ -198,10 +212,14 @@ final class CoreModule extends AbstractModule {
 	}
 
 	public function register_cron_schedules(): void {
-		if ( get_transient( 'doublescale_register_tasks_lock_daily' ) ) {
+		// Once the recurring actions are scheduled they stay scheduled, so skip
+		// the Action Scheduler lookups on every request. The stamp carries the
+		// plugin version so a release that adds new recurring hooks re-arms the
+		// scheduling pass. Previously this fired a `set_transient` write on
+		// every request that didn't hold the lock.
+		if ( get_option( 'doublescale_cron_scheduled_version' ) === DOUBLESCALE_VERSION ) {
 			return;
 		}
-		set_transient( 'doublescale_register_tasks_lock_daily', 1, MINUTE_IN_SECONDS );
 
 		$daily = new \DoubleScale\Core\Tasks( 'doublescale_daily' );
 
@@ -214,5 +232,7 @@ final class CoreModule extends AbstractModule {
 		if ( $daily->get_next_timestamp( 'doublescale_cleanup_page_visits' ) === false ) {
 			$daily->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_cleanup_page_visits' );
 		}
+
+		update_option( 'doublescale_cron_scheduled_version', DOUBLESCALE_VERSION );
 	}
 }

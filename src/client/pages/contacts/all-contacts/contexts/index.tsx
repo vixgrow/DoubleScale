@@ -1,11 +1,18 @@
 /**
  * external dependencies
  */
-import React, { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+	ReactNode,
+} from 'react';
 /**
  * DoubleScale dependencies
  */
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, useLocation, getToLink } from '@doublescale/navigation';
 import {
 	getListPreferences,
 	parseSavedDateRange,
@@ -20,6 +27,7 @@ import type {
 	Filter as FilterType,
 	NoticeMessage,
 } from '@doublescale/client';
+import { parseContactsDeepLinkFilters } from '../../deep-link-filters';
 
 export interface ContactsState {
 	// Data state
@@ -99,6 +107,7 @@ export interface ContactsActions {
 
 function buildContactsInitialState(): ContactsState {
 	const saved = getListPreferences('contacts');
+	const deepLinkFilters = parseContactsDeepLinkFilters();
 
 	return {
 		loading: true,
@@ -110,7 +119,8 @@ function buildContactsInitialState(): ContactsState {
 		totalRecords: 0,
 		hasRecords: false,
 		showFilters: saved.show_filters ?? false,
-		filters: [],
+		// Deep link from Lists/Tags: open Contacts already filtered.
+		filters: (deepLinkFilters as unknown as FilterType[]) ?? [],
 		isFiltering: false,
 		dateRange: parseSavedDateRange(saved.date_range),
 		selectedRowKeys: [],
@@ -135,10 +145,32 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
 	const [state, setState] = useState<ContactsState>(buildContactsInitialState);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const updateState = (updates: Partial<ContactsState>) => {
 		setState((prev) => ({ ...prev, ...updates }));
 	};
+
+	// Keep Contacts filters in sync when arriving via list_id / tag_id deep links.
+	useEffect(() => {
+		const deepLinkFilters = parseContactsDeepLinkFilters(location.search);
+		if (!deepLinkFilters) {
+			return;
+		}
+		setState((prev) => {
+			if (
+				JSON.stringify(prev.filters) ===
+				JSON.stringify(deepLinkFilters)
+			) {
+				return prev;
+			}
+			return {
+				...prev,
+				filters: deepLinkFilters as unknown as FilterType[],
+				page: 1,
+			};
+		});
+	}, [location.search]);
 
 	const actions: ContactsActions = {
 		setLoading: (loading) => updateState({ loading }),

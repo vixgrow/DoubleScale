@@ -15,7 +15,6 @@ defined( 'ABSPATH' ) || exit;
 use Exception;
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
 use WP_Error;
-use SendGrid\Mail\Mail;
 
 /**
  * Process class.

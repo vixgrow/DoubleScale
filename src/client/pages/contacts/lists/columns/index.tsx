@@ -17,10 +17,12 @@ import { Button } from '@doublescale/components/ui/button';
 
 interface ListColumnsProps {
 	onEditList: (list: ContactList) => void;
+	onViewContacts: (list: ContactList) => void;
 }
 
 export const getListColumns = ({
 	onEditList,
+	onViewContacts,
 }: ListColumnsProps): ColumnDef<ContactList>[] => {
 	const selectionColumn: ColumnDef<ContactList> = {
 		id: 'select',
@@ -74,7 +76,15 @@ export const getListColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => <span>{row.original.name}</span>,
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					onClick={() => onViewContacts(row.original)}
+					className="h-auto p-0 text-left font-medium text-primary hover:bg-transparent hover:underline cursor-pointer bg-transparent shadow-none border-none"
+				>
+					{row.original.name}
+				</Button>
+			),
 		},
 		{
 			accessorKey: 'description',
@@ -104,7 +114,15 @@ export const getListColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.contacts_count ?? 0,
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					onClick={() => onViewContacts(row.original)}
+					className="h-auto p-0 text-left font-medium text-primary hover:bg-transparent hover:underline cursor-pointer bg-transparent shadow-none border-none"
+				>
+					{row.original.contacts_count ?? 0}
+				</Button>
+			),
 		},
 		{
 			accessorKey: 'created_at',

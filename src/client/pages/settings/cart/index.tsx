@@ -51,9 +51,19 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 				<div className="flex items-center gap-2">
 					<Switch
 						checked={enable_cart_tracking}
-						onCheckedChange={(checked: boolean) =>
-							handleFieldChange('enable_cart_tracking', checked)
-						}
+						onCheckedChange={(checked: boolean) => {
+							onChange({
+								...settings,
+								cart: {
+									...settings.cart,
+									enable_cart_tracking: checked,
+									// Keep CRM sync opt-in in sync with the master switch.
+									...(checked
+										? {}
+										: { create_contacts_in_crm: false }),
+								},
+							});
+						}}
 					/>
 					<Label>{__('Enable Cart Tracking', 'doublescale')}</Label>
 				</div>

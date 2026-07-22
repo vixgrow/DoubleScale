@@ -41,6 +41,11 @@ class TermsSchemaRepair {
 			'slug',
 			"ADD COLUMN `slug` VARCHAR(191) NOT NULL DEFAULT '' AFTER `name`"
 		);
+		$this->ensure_column(
+			$table,
+			'is_public',
+			'ADD COLUMN `is_public` TINYINT(1) NOT NULL DEFAULT 1'
+		);
 		$this->backfill_empty_slugs( $table );
 		$this->ensure_type_slug_unique_index( $table );
 	}

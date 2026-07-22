@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       DoubleScale | All-In-One Business Growth Platform
+ * Plugin Name:       DoubleScale | All-In-One Self-Hosted CRM Platform (HubSpot alternative)
  * Plugin URI:        https://www.doublescale.io/
- * Description:       DoubleScale | All-In-One Business Growth Platform
- * Version:           1.2.10
+ * Description:       DoubleScale | All-In-One Self-Hosted CRM Platform (HubSpot alternative)
+ * Version:           1.2.12
  * Author:            vixgrowy
  * Author URI:        https://www.vixgrow.com
  * License:           GPL v2 or later

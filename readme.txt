@@ -1,14 +1,14 @@
-=== DoubleScale | All-In-One Business Growth Platform ===
+=== DoubleScale | All-In-One Self-Hosted CRM Platform (HubSpot alternative) ===
 Contributors: vixgrowy
 Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.10
+Stable tag: 1.2.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native CRM, sales pipeline, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin.
+All-in-one CRM with sales pipeline, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin.
 
 
 == Description ==
@@ -253,6 +253,21 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.12 = 21 Jul 2026
+- Fix missing `is_public` column on `doublescale_terms` after upgrade or fresh install
+- Ensure Terms table schema includes `is_public` and repair it on every install when absent
+- Rename Terms public-column migration so it runs after TermsTable is created
+
+= 1.2.11 = 21 Jul 2026
+- Rename plugin title to DoubleScale | All-In-One Self-Hosted CRM Platform (HubSpot alternative)
+- Add project management features with roles, permissions, dashboard integration, and notification preferences
+- Add contact file attachments with activity logging
+- Enhance proposal and invoice editing, activity associations, currency resolution, and PDF document rendering
+- Add business branding configuration with logo upload
+- Enhance contact deletion with impact assessment and confirmation
+- Improve activity timeline filters and taxonomy/schema management
+- Temporarily disable Client Portal module for adjustments
+
 = 1.2.10 = 12 Jul 2026
 - Add JavaScript translation support (JED JSON files) so React dashboard fully translates via Loco Translate / .po files
 - Add `make-json` build step for generating JS translation JSON from .po files

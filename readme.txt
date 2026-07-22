@@ -1,14 +1,14 @@
-=== DoubleScale | All-In-One Self-Hosted CRM Platform (HubSpot alternative) ===
+=== DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
 Contributors: vixgrowy
 Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.12
+Stable tag: 1.2.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-All-in-one CRM with sales pipeline, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin.
+All-in-one CRM with sales pipeline, projects, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin. Enable or disable any module.
 
 
 == Description ==
@@ -18,9 +18,13 @@ All-in-one CRM with sales pipeline, email/SMS/WhatsApp campaigns, booking, helpd
 You shouldn't need eight separate logins, eight billing relationships, and eight half-broken integrations to run a small business. DoubleScale unifies them around a single contact record, so a form submit can fire an automation, book a meeting, open a support thread, score the lead, alert the assigned rep, and send the receipt — all from the same data model.
 **Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
+= Modular architecture — enable or disable any module =
+
+DoubleScale is built as a **modular plugin**. Optional features (Sales, Campaigns, Booking, Tasks, Projects, SMTP, Helpdesk, Forms, Automations, and more) can be turned **on or off** under **Settings → Modules**. Disable what you do not need to keep the admin UI lean; enable modules later without reinstalling. Core CRM capabilities stay available. Disabling a module suspends its menus, REST routes, scheduled tasks, and role capabilities — assignments are preserved when you turn the module back on.
+
 = What's inside one plugin =
 
-DoubleScale is a single install that gives you **nine first-class modules**, every one designed to feel like a dedicated product:
+DoubleScale is a single install with **first-class modules**, each designed to feel like a dedicated product — and each toggleable when you do not need it:
 
 **1. CRM — contacts, lists, segmentation, activity timeline**
 A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, bulk operations, and CSV / WordPress user / WooCommerce imports. Every contact has a **full activity timeline** that stitches together emails, SMS and WhatsApp messages, deal stage changes, bookings, support threads, page visits, form submissions, link clicks, and automation runs — one chronological view per contact, no tab-switching.
@@ -52,23 +56,31 @@ A full scheduling system inside WordPress — no Calendly needed. Create **singl
 **5. Tasks — team task management**
 Create, assign, schedule, and track tasks. Link them to contacts and deals. Due dates, reminders, status workflows. Stop running a separate ClickUp or Asana when 80% of your tasks are about customers anyway.
 
-**6. SMTP — multi-provider email routing**
+**6. Projects — project boards linked to CRM and sales (Pro)**
+Manage delivery work next to your contacts and invoices. Kanban boards with customizable statuses, progress tracking, project discussions/comments, custom fields, tags, due dates, and ownership. Link projects to contacts and sales documents so the activity timeline stays unified. Scoped **Project Manager** and **Project Member** roles keep delivery teams focused without granting full CRM admin access.
+
+**7. SMTP — multi-provider email routing**
 A complete `wp_mail()` replacement built into the CRM — no separate SMTP plugin required. Connect one or more of **20+ providers**: SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, SMTP2GO, Gmail (OAuth), Outlook (OAuth), Zoho (OAuth), MailerSend, Mailjet, Mandrill, Brevo (Sendinblue), Elastic Email, SendLayer, SocketLabs, Loops, and generic SMTP relay. Set up multiple connections with routing rules so transactional mail goes through one provider while marketing campaigns use another. OAuth authentication for Gmail, Outlook, and Zoho — no app passwords needed. Includes full email delivery logs, bounce handling with soft/hard classification, provider health checks, email test sending, and automatic failover when a provider is down.
 
-**7. Support — ticket-based helpdesk with mailbox channels and customer portal**
+**8. Support — ticket-based helpdesk with mailbox channels and customer portal**
 A complete helpdesk built into your CRM. Customers open tickets via a self-service portal or by emailing a connected mailbox; agents reply, assign, tag, and resolve — all without leaving WordPress. Features include: multiple mailbox channels (web and IMAP), configurable email notifications with threading and subject tagging, file attachments with signed secure downloads, ticket priority and status workflows, CC management, bulk actions (assign, close, merge, tag), per-ticket activity logging, custom fields, saved replies, and a built-in reports dashboard. IMAP polling brings inbound emails straight into the agent inbox. Every ticket links to the contact record and can trigger automations — auto-tag, route to an agent, create a deal, or start a follow-up sequence.
 
-**8. Analytics — dashboards & reports**
+**9. Analytics — dashboards & reports**
 A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**9. User roles — scoped access for sales, support, and booking teams**
-DoubleScale ships **seven dedicated WordPress roles** (plus site administrators). Assign them under **Settings → Team**. Users can hold **multiple roles** — capabilities merge across roles.
+**10. User roles — scoped access for sales, support, booking, and project teams**
+DoubleScale ships dedicated roles (plus site administrators). Assign them under **Settings → Team**. Users can hold **multiple roles** — capabilities merge across roles.
 
 **Sales (Pro)**
 
 * **CRM Manager** — Full CRM admin: all contacts, deals, pipelines, settings, team, reports, import/export, and all proposals/invoices. Full Support inbox access without a separate support role.
 * **Sales Manager** — All deals and contacts; import/export; all proposals and invoices. Support access requires an additional support role.
 * **Sales Rep** — Own deals and contacts only; own proposals and invoices; create deals and log activities.
+
+**Projects (Pro)**
+
+* **Project Manager** — Create and manage all projects, statuses, and assignments across the team.
+* **Project Member** — Work on projects assigned to them; update progress and join discussions.
 
 **Support**
 
@@ -86,11 +98,11 @@ DoubleScale ships **seven dedicated WordPress roles** (plus site administrators)
 
 **Notes**
 
-* CRM Manager, Sales Manager, and Sales Rep require **DoubleScale Pro**.
-* Support and Booking roles are available when those modules are enabled.
+* CRM Manager, Sales Manager, Sales Rep, Project Manager, and Project Member require **DoubleScale Pro**.
+* Support, Booking, and Projects roles are available when those modules are enabled.
 * Disabling a module suspends its role capabilities; assignments are preserved when you turn the module back on.
 
-= Plus: a visual automation engine that connects all nine =
+= Plus: a visual automation engine that connects every module =
 
 Underneath every module is one workflow builder. **100+ triggers** across contacts, deals, forms, booking, support, messaging, e-commerce, LMS, and membership plugins — flow into **multi-step automations** with conditional branches, time delays, goal conditions, and webhook calls. Actions include: send email, send SMS, send WhatsApp, start or pause an email sequence, tag, score, move a deal to a new stage, create a deal, assign a task, post to Slack, hit a webhook.
 
@@ -109,7 +121,8 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 = Key capabilities =
 
 * **AI-powered writing and assistance** — Connect your own API key from OpenAI, Google Gemini, Groq, OpenRouter, or any OpenAI-compatible provider. AI-assisted email composition, smart template generation, subject line suggestions, and content rewriting are built right into the campaign builder and email editor. Bring your own key, pick your provider, and keep full control over cost and data.
-* One contact record shared across every module — campaigns, bookings, tasks, helpdesk threads, and deals all attach to the same contact.
+* Modular architecture — enable or disable optional modules (Sales, Campaigns, Booking, Tasks, Projects, SMTP, Helpdesk, Forms, Automations, and more) from **Settings → Modules**.
+* One contact record shared across every module — campaigns, bookings, tasks, projects, helpdesk threads, and deals all attach to the same contact.
 * Unlimited contacts and custom fields with no per-contact or per-seat fees.
 * Self-hosted: all records live in your own WordPress database; no third-party cloud, no vendor lock-in.
 * GDPR-friendly: per-contact exports, hard-delete workflows, consent tracking per channel, retention rules, and unsubscribe handling.
@@ -196,9 +209,13 @@ You'll have a working CRM + email engine + booking page in under 10 minutes.
 
 == Frequently Asked Questions ==
 
-= Is DoubleScale really an all-in-one replacement for CRM + deals/pipelines + email/SMS/WhatsApp campaigns + booking + tasks + SMTP + helpdesk + analytics + team management? =
+= Is DoubleScale really an all-in-one replacement for CRM + deals/pipelines + projects + email/SMS/WhatsApp campaigns + booking + tasks + SMTP + helpdesk + analytics + team management? =
 
 Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single activity timeline, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Pipedrive/HubSpot, Mailchimp, Twilio dashboard, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
+
+= Can I enable or disable modules I do not need? =
+
+Yes. DoubleScale uses a **modular architecture**. Under **Settings → Modules** you can enable or disable optional modules such as Sales, Campaigns, Booking, Tasks, Projects, SMTP, Helpdesk, Forms, and Automations. Turn features off to simplify the UI for your team; turn them back on later without reinstalling. Core CRM stays available. When a module is disabled, its menus, APIs, background tasks, and role capabilities are suspended (role assignments are kept for when you re-enable it).
 
 = How is this different from "marketing automation" plugins like FluentCRM or Groundhogg? =
 
@@ -253,6 +270,18 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.13 = 22 Jul 2026
+- Rename plugin title to DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel)
+- Document modular architecture: enable or disable optional modules from Settings → Modules
+- Document Projects module (Pro) with kanban boards, discussions, and Project Manager / Project Member roles
+- Clarify that module menus, APIs, background tasks, and role capabilities suspend when a module is disabled
+- Add FAQ for enabling and disabling modules
+- Rename sales invoice/proposal migrations so they run after base tables are created
+- Improve merge tag group registration and filtering in automations
+- Resolve deal currency from the stored deal value
+- Add storable task status helpers for REST mappings
+- Add analytics pages in the dashboard navigation
+
 = 1.2.12 = 21 Jul 2026
 - Fix missing `is_public` column on `doublescale_terms` after upgrade or fresh install
 - Ensure Terms table schema includes `is_public` and repair it on every install when absent

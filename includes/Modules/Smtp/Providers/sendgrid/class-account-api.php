@@ -11,13 +11,6 @@ namespace DoubleScale\Modules\Smtp\Providers\SendGrid;
 
 defined( 'ABSPATH' ) || exit;
 
-use SendGrid;
-use SendGrid\Mail\Mail;
-use SendGrid\Mail\From;
-use SendGrid\Mail\To;
-use SendGrid\Mail\Subject;
-use SendGrid\Mail\Substitution;
-use SendGrid\Mail\Personalization;
 use WP_Error;
 
 /**
@@ -59,10 +52,10 @@ class Account_API {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return SendGrid
+	 * @return Http_Client
 	 */
 	public function get_client() {
-		return new SendGrid( $this->api_key );
+		return new Http_Client( $this->api_key );
 	}
 
 	/**

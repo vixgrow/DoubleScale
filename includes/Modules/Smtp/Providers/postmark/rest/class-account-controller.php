@@ -16,7 +16,7 @@ use WP_REST_Request;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Account_Controller as Abstract_Account_Controller;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Creatable;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Gettable;
-use Postmark\PostmarkClient;
+use DoubleScale\Modules\Smtp\Providers\PostMark\Http_Client;
 
 /**
  * Account_Controller class.
@@ -77,15 +77,16 @@ class Account_Controller extends Abstract_Account_Controller {
 			return new WP_Error( 'doublescale_smtp_postmark_api_key_missing', __( 'API key is missing.', 'doublescale' ) );
 		}
 
-		try {
-			$client = new PostmarkClient( $api_key );
-			$server = $client->getServer();
-			return array(
-				'id'   => $account_name,
-				'name' => $account_id,
-			);
-		} catch ( \Exception $e ) {
+		$client = new Http_Client( $api_key );
+		$server = $client->get_server();
+
+		if ( is_wp_error( $server ) ) {
 			return new WP_Error( 'doublescale_smtp_postmark_api_key_invalid', __( 'API key is invalid.', 'doublescale' ) );
 		}
+
+		return array(
+			'id'   => $account_name,
+			'name' => $account_id,
+		);
 	}
 }

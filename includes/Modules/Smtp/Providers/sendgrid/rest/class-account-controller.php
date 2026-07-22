@@ -16,7 +16,7 @@ use WP_REST_Request;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Account_Controller as Abstract_Account_Controller;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Creatable;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Gettable;
-use SendGrid;
+use DoubleScale\Modules\Smtp\Providers\SendGrid\Http_Client;
 
 /**
  * Account_Controller class.
@@ -77,16 +77,16 @@ class Account_Controller extends Abstract_Account_Controller {
 			return new WP_Error( 'doublescale_smtp_sendgrid_api_key_missing', __( 'API key is missing.', 'doublescale' ) );
 		}
 
-		try {
-			$client   = new SendGrid( $api_key );
-			$response = $client->client->user()->email()->get();
+		$client = new Http_Client( $api_key );
+		$result = $client->validate_key();
 
-			return array(
-				'id'   => $account_id,
-				'name' => $account_name,
-			);
-		} catch ( \Exception $e ) {
+		if ( is_wp_error( $result ) ) {
 			return new WP_Error( 'doublescale_smtp_sendgrid_api_key_invalid', __( 'API key is invalid.', 'doublescale' ) );
 		}
+
+		return array(
+			'id'   => $account_id,
+			'name' => $account_name,
+		);
 	}
 }

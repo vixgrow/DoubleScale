@@ -2404,7 +2404,7 @@ class RestContactController extends RestController {
 	private function contact_ids_with_invoices( array $contact_ids ): array {
 		$contact_ids = array_values( array_filter( array_map( 'intval', $contact_ids ) ) );
 
-		if ( empty( $contact_ids ) || ! class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+		if ( empty( $contact_ids ) || ! $this->module_storage_ready( 'documents', \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
 			return array();
 		}
 
@@ -2467,6 +2467,9 @@ class RestContactController extends RestController {
 	/**
 	 * Count related CRM records that will be removed or unlinked with these contacts.
 	 *
+	 * Skips modules that are disabled or whose tables are missing so deletion
+	 * impact (and the user-facing warning modal) still loads for everything else.
+	 *
 	 * @param array<int> $contact_ids Contact ids.
 	 * @return array<string, int>
 	 */
@@ -2491,78 +2494,166 @@ class RestContactController extends RestController {
 			return $impact;
 		}
 
-		if ( class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
-			$invoice_ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->pluck( 'id' )
-				->toArray();
-			$impact['invoices'] = count( $invoice_ids );
-
-			if ( ! empty( $invoice_ids ) && class_exists( \DoubleScale\Modules\Documents\Models\PaymentModel::class ) ) {
-				$impact['payments'] = (int) \DoubleScale\Modules\Documents\Models\PaymentModel::query()
-					->whereIn( 'invoice_id', $invoice_ids )
+		$impact['invoices'] = $this->count_related_for_contacts(
+			'documents',
+			\DoubleScale\Modules\Documents\Models\InvoiceModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+					->whereIn( 'contact_id', $contact_ids )
 					->count();
+			}
+		);
+
+		if ( $impact['invoices'] > 0 && class_exists( \DoubleScale\Modules\Documents\Models\PaymentModel::class ) ) {
+			try {
+				$invoice_ids = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->pluck( 'id' )
+					->toArray();
+				if ( ! empty( $invoice_ids ) ) {
+					$impact['payments'] = (int) \DoubleScale\Modules\Documents\Models\PaymentModel::query()
+						->whereIn( 'invoice_id', $invoice_ids )
+						->count();
+				}
+			} catch ( \Throwable $e ) {
+				$impact['payments'] = 0;
 			}
 		}
 
-		if ( class_exists( \DoubleScale\Modules\Documents\Models\ProposalModel::class ) ) {
-			$impact['proposals'] = (int) \DoubleScale\Modules\Documents\Models\ProposalModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['proposals'] = $this->count_related_for_contacts(
+			'documents',
+			\DoubleScale\Modules\Documents\Models\ProposalModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Modules\Documents\Models\ProposalModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Pro\Modules\Deals\Models\DealModel::class ) ) {
-			$impact['deals'] = (int) \DoubleScale\Pro\Modules\Deals\Models\DealModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['deals'] = $this->count_related_for_contacts(
+			'deals',
+			\DoubleScale\Pro\Modules\Deals\Models\DealModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Pro\Modules\Deals\Models\DealModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::class ) ) {
-			$impact['projects'] = (int) \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['projects'] = $this->count_related_for_contacts(
+			'projects',
+			\DoubleScale\Pro\Modules\Projects\Models\ProjectModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Pro\Modules\Projects\Models\ProjectModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::class ) ) {
-			$impact['tasks'] = (int) \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::query()
-				->where( 'entity_type', \DoubleScale\Core\Constants\TaskEntityType::CONTACT )
-				->whereIn( 'entity_id', $contact_ids )
-				->count();
-		}
+		$impact['tasks'] = $this->count_related_for_contacts(
+			'tasks',
+			\DoubleScale\Pro\Modules\Tasks\Models\TaskModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Pro\Modules\Tasks\Models\TaskModel::query()
+					->where( 'entity_type', \DoubleScale\Core\Constants\TaskEntityType::CONTACT )
+					->whereIn( 'entity_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class ) ) {
-			$impact['contracts'] = (int) \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['contracts'] = $this->count_related_for_contacts(
+			'contracts',
+			\DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class ) ) {
-			$impact['credit_notes'] = (int) \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['credit_notes'] = $this->count_related_for_contacts(
+			'credit_notes',
+			\DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Modules\Support\Models\TicketModel::class ) ) {
-			$impact['tickets'] = (int) \DoubleScale\Modules\Support\Models\TicketModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['tickets'] = $this->count_related_for_contacts(
+			'support',
+			\DoubleScale\Modules\Support\Models\TicketModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Modules\Support\Models\TicketModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Modules\Booking\Models\BookingModel::class ) ) {
-			$impact['bookings'] = (int) \DoubleScale\Modules\Booking\Models\BookingModel::query()
-				->whereIn( 'contact_id', $contact_ids )
-				->count();
-		}
+		$impact['bookings'] = $this->count_related_for_contacts(
+			'booking',
+			\DoubleScale\Modules\Booking\Models\BookingModel::class,
+			static function () use ( $contact_ids ) {
+				return (int) \DoubleScale\Modules\Booking\Models\BookingModel::query()
+					->whereIn( 'contact_id', $contact_ids )
+					->count();
+			}
+		);
 
-		if ( class_exists( \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::class ) ) {
-			$impact['activities'] = (int) \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::query()
-				->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
-				->whereIn( 'entity_id', $contact_ids )
-				->distinct()
-				->count( 'activity_id' );
+		try {
+			if ( class_exists( \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::class ) ) {
+				$impact['activities'] = (int) \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::query()
+					->where( 'entity_type', \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_CONTACT )
+					->whereIn( 'entity_id', $contact_ids )
+					->distinct()
+					->count( 'activity_id' );
+			}
+		} catch ( \Throwable $e ) {
+			$impact['activities'] = 0;
 		}
 
 		return $impact;
+	}
+
+	/**
+	 * Count related rows for a module, or 0 when the module/table is unavailable.
+	 *
+	 * @param string   $slug        Module slug.
+	 * @param string   $model_class Eloquent model class.
+	 * @param callable $counter     Returns int count.
+	 */
+	private function count_related_for_contacts( string $slug, string $model_class, callable $counter ): int {
+		if ( ! $this->module_storage_ready( $slug, $model_class ) ) {
+			return 0;
+		}
+
+		try {
+			return (int) $counter();
+		} catch ( \Throwable $e ) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Whether a module is enabled and its storage table exists.
+	 *
+	 * class_exists alone is not enough: disabled modules still autoload models,
+	 * but their tables may never have been created.
+	 *
+	 * @param string $slug        Module slug.
+	 * @param string $model_class Eloquent model class.
+	 */
+	private function module_storage_ready( string $slug, string $model_class ): bool {
+		if ( function_exists( 'doublescale_is_module_storage_ready' ) ) {
+			return doublescale_is_module_storage_ready( $slug, $model_class );
+		}
+
+		if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( $slug ) ) {
+			return false;
+		}
+
+		return class_exists( $model_class );
 	}
 
 	/**
@@ -2578,7 +2669,7 @@ class RestContactController extends RestController {
 			return;
 		}
 
-		if ( class_exists( \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class ) ) {
+		if ( $this->module_storage_ready( 'credit_notes', \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::class ) ) {
 			$credit_notes = \DoubleScale\Pro\Modules\CreditNotes\Models\CreditNoteModel::query()
 				->whereIn( 'contact_id', $contact_ids )
 				->get();
@@ -2587,7 +2678,7 @@ class RestContactController extends RestController {
 			}
 		}
 
-		if ( class_exists( \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class ) ) {
+		if ( $this->module_storage_ready( 'contracts', \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::class ) ) {
 			$contracts = \DoubleScale\Pro\Modules\Contracts\Models\ContractModel::query()
 				->whereIn( 'contact_id', $contact_ids )
 				->get();
@@ -2596,7 +2687,7 @@ class RestContactController extends RestController {
 			}
 		}
 
-		if ( class_exists( \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
+		if ( $this->module_storage_ready( 'documents', \DoubleScale\Modules\Documents\Models\InvoiceModel::class ) ) {
 			$invoices = \DoubleScale\Modules\Documents\Models\InvoiceModel::query()
 				->whereIn( 'contact_id', $contact_ids )
 				->get();

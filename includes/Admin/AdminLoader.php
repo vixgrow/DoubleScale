@@ -161,6 +161,13 @@ class AdminLoader {
 	 * @since 1.0.0
 	 */
 	public function add_inline_scripts() {
+		// The admin config blob (~15 managers, License/Store reads, many
+		// current_user_can() calls) is only consumed by the DoubleScale SPA,
+		// which loads only on DoubleScale screens. Skip the whole computation on
+		// every other wp-admin page (Posts, Media, Settings, ...).
+		if ( ! self::is_admin_page() ) {
+			return;
+		}
 		AdminConfig::set_admin_config();
 	}
 
@@ -214,22 +221,26 @@ class AdminLoader {
 		);
 		wp_style_add_data( 'doublescale-admin-entry', 'rtl', 'replace' );
 
-		// Attach Pro config to the main script.
-		$doublescale_pro_script_data = array(
-			'version'   => DOUBLESCALE_VERSION,
-			'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
-			'restUrl'   => rest_url( 'doublescale/v1/' ),
-			'nonce'     => wp_create_nonce( 'wp_rest' ),
-			'isPro'     => self::admin_context_is_pro_plugin(),
-		);
-		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ) {
-			$doublescale_pro_script_data['proPluginUrl'] = DOUBLESCALE_PRO_PLUGIN_URL;
+		// Attach Pro config to the main script. Only the SPA (DoubleScale
+		// screens) reads `doublescalePro`, so skip the nonce creation and
+		// localize on every other wp-admin page.
+		if ( self::is_admin_page() ) {
+			$doublescale_pro_script_data = array(
+				'version'   => DOUBLESCALE_VERSION,
+				'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
+				'restUrl'   => rest_url( 'doublescale/v1/' ),
+				'nonce'     => wp_create_nonce( 'wp_rest' ),
+				'isPro'     => self::admin_context_is_pro_plugin(),
+			);
+			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ) {
+				$doublescale_pro_script_data['proPluginUrl'] = DOUBLESCALE_PRO_PLUGIN_URL;
+			}
+			wp_localize_script(
+				'doublescale-admin',
+				'doublescalePro',
+				$doublescale_pro_script_data
+			);
 		}
-		wp_localize_script(
-			'doublescale-admin',
-			'doublescalePro',
-			$doublescale_pro_script_data
-		);
 
 		// Enqueue WordPress media library for admin pages that need it.
 		if ( self::is_admin_page() ) {

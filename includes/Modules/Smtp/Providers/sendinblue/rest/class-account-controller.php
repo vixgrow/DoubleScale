@@ -11,9 +11,7 @@ namespace DoubleScale\Modules\Smtp\Providers\SendInBlue\REST;
 
 defined( 'ABSPATH' ) || exit;
 
-use Brevo\Client\Configuration;
-use Brevo\Client\Api\AccountApi;
-use GuzzleHttp\Client as GuzzleClient;
+use DoubleScale\Modules\Smtp\Providers\SendInBlue\Http_Client;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Account_Controller as Abstract_Account_Controller;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Creatable;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits\Account_Controller_Gettable;
@@ -79,18 +77,16 @@ class Account_Controller extends Abstract_Account_Controller {
 			return new WP_Error( 'doublescale_smtp_sendinblue_api_key_missing', __( 'API key is missing.', 'doublescale' ) );
 		}
 
-		$config       = Configuration::getDefaultConfiguration()->setApiKey( 'api-key', $api_key );
-		$api_instance = new AccountApi( new GuzzleClient(), $config );
+		$client = new Http_Client( $api_key );
+		$result = $client->get_account();
 
-		try {
-			$result = $api_instance->getAccount();
-
-			return array(
-				'id'   => $account_id,
-				'name' => $account_name,
-			);
-		} catch ( \Exception $e ) {
+		if ( is_wp_error( $result ) ) {
 			return new WP_Error( 'doublescale_smtp_sendinblue_api_key_invalid', __( 'API key is invalid.', 'doublescale' ) );
 		}
+
+		return array(
+			'id'   => $account_id,
+			'name' => $account_name,
+		);
 	}
 }

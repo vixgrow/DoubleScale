@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Exception;
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
-use Postmark\Models\PostmarkAttachment;
 use WP_Error;
 
 /**

@@ -6,6 +6,7 @@ import {
 	HelpdeskIcon,
 	IntegrationsIcon,
 	PipelineIcon,
+	ProjectsIcon,
 	SalesIcon,
 	SmtpIcon,
 	TaskIcon,
@@ -46,7 +47,7 @@ export function ModuleIcon({ slug, size = 'md' }: ModuleIconProps) {
 			case 'tasks':
 				return <TaskIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'projects':
-				return <PipelineIcon width={dim} height={dim} color={ICON_COLOR} />;
+				return <ProjectsIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'campaigns':
 				return <CampaignIcon width={dim} height={dim} color={ICON_COLOR} />;
 			case 'booking':

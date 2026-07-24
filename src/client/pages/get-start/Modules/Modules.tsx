@@ -19,6 +19,7 @@ import {
 	HelpdeskIcon,
 	IntegrationsIcon,
 	PipelineIcon,
+	ProjectsIcon,
 	SalesIcon,
 	SmtpIcon,
 	TaskIcon,
@@ -48,6 +49,8 @@ function getModuleIcon(slug: string) {
 			return <AutomationsIcon width={32} height={32} color="#0D9DFC" />;
 		case 'tasks':
 			return <TaskIcon width={32} height={32} color="#0D9DFC" />;
+		case 'projects':
+			return <ProjectsIcon width={32} height={32} color="#0D9DFC" />;
 		case 'campaigns':
 			return <CampaignIcon width={32} height={32} color="#0D9DFC" />;
 		case 'booking':

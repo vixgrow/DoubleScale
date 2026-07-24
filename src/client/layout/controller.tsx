@@ -58,13 +58,13 @@ import {
 	PiplelinesIcon,
 	SalesIcon,
 	SmtpIcon,
+	ProjectsIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { RocketIcon } from '@/components/icons';
-import { FolderKanban } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -509,7 +509,7 @@ registerAdminPage('projects', {
 		/>
 	),
 	label: __('Projects', 'doublescale'),
-	icon: <FolderKanban size={24} />,
+	icon: <ProjectsIcon width={24} height={24} />,
 	requiredCapability: [
 		'doublescale_project_manager',
 		'doublescale_project_member',

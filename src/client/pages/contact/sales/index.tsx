@@ -11,6 +11,7 @@ import config from '@doublescale/config';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { Button } from '@/components/ui/button';
 import { InvoiceFormDialog, InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
+import { GradientProposalsIcon, NovicesIcon } from '@doublescale/components';
 import {
 	useContactSalesPayments,
 	useInvoices,
@@ -22,6 +23,8 @@ import { InvoicesProGate, PaymentsProGate } from '../../sales/pro-gates';
 interface ContactSalesProps {
 	contact_id: number;
 	navigate?: (path: string) => void;
+	/** Which document sections to render. Defaults to all. */
+	sections?: Array<'proposals' | 'invoices' | 'payments'>;
 }
 
 const formatMoney = (value: number, currency = 'USD') =>
@@ -34,7 +37,15 @@ const modeLabel = (mode: string | null): string => {
 	return PAYMENT_MODE_LABELS[mode as keyof typeof PAYMENT_MODE_LABELS] ?? mode;
 };
 
-const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => {
+const ContactSales: React.FC<ContactSalesProps> = ({
+	contact_id,
+	navigate,
+	sections = ['proposals', 'invoices', 'payments'],
+}) => {
+	const showProposals = sections.includes('proposals');
+	const showInvoices = sections.includes('invoices');
+	const showPayments = sections.includes('payments');
+
 	const go = (path: string, queryParams?: Record<string, string | number | undefined>) => {
 		if (navigate) {
 			navigate(getToLink(path, queryParams));
@@ -69,10 +80,13 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 
 	return (
 		<div className="space-y-8">
-			{showDocuments ? (
+			{showDocuments && showProposals ? (
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
-					<h3 className="text-base font-semibold">{__('Proposals', 'doublescale')}</h3>
+					<h3 className="flex items-center gap-2 text-base font-semibold">
+						<GradientProposalsIcon width={24} height={24} />
+						{__('Proposals', 'doublescale')}
+					</h3>
 					<Button
 						size="sm"
 						variant="outline"
@@ -132,11 +146,14 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 			</section>
 			) : null}
 
-			{showDocuments ? (
+			{showDocuments && showInvoices ? (
 			isProActive ? (
 			<section className="space-y-3">
 				<div className="flex items-center justify-between gap-3">
-					<h3 className="text-base font-semibold">{__('Invoices', 'doublescale')}</h3>
+					<h3 className="flex items-center gap-2 text-base font-semibold">
+						<NovicesIcon width={24} height={24} />
+						{__('Invoices', 'doublescale')}
+					</h3>
 					<Button
 						size="sm"
 						variant="outline"
@@ -198,7 +215,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({ contact_id, navigate }) => 
 			)
 			) : null}
 
-			{showDocuments ? (
+			{showDocuments && showPayments ? (
 			isProActive ? (
 			<section className="space-y-3">
 				<h3 className="text-base font-semibold">{__('Payments', 'doublescale')}</h3>

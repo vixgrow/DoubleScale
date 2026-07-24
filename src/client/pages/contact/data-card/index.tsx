@@ -29,8 +29,10 @@ import {
 	ContactTotalEmailsIcon,
 	DealsIcon,
 	NotesIcon,
+	NovicesIcon,
 	PurchaseHistoryIcon,
 	CoursesIcon,
+	GradientProposalsIcon,
 	TaskDoneIcon,
 	PhoneIcon,
 	DealActivityIcon,
@@ -48,7 +50,7 @@ import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
-import { Receipt, Trophy, Paperclip } from 'lucide-react';
+import { Trophy, Paperclip } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components';
 
 interface DataCardProps {
@@ -155,7 +157,18 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			? [{ value: 'deals', label: 'Deals', icon: <DealsIcon /> }]
 			: []),
 		...(isSalesModuleEnabled
-			? [{ value: 'sales', label: 'Sales', icon: <Receipt width={24} height={24} /> }]
+			? [
+					{
+						value: 'proposals',
+						label: __('Proposals', 'doublescale'),
+						icon: <GradientProposalsIcon width={24} height={24} />,
+					},
+					{
+						value: 'invoices',
+						label: __('Invoices', 'doublescale'),
+						icon: <NovicesIcon width={24} height={24} />,
+					},
+				]
 			: []),
 		{
 			value: 'lead-score',
@@ -298,12 +311,25 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		...(isSalesModuleEnabled
 			? [
 					{
-						value: 'sales',
+						value: 'proposals',
 						children: (
 							<CardContent className="pt-6">
 								<ContactSales
 									contact_id={contact.id}
 									navigate={navigate}
+									sections={['proposals']}
+								/>
+							</CardContent>
+						),
+					},
+					{
+						value: 'invoices',
+						children: (
+							<CardContent className="pt-6">
+								<ContactSales
+									contact_id={contact.id}
+									navigate={navigate}
+									sections={['invoices', 'payments']}
 								/>
 							</CardContent>
 						),
@@ -409,9 +435,13 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	}
 
 	// Use URL tab param if it matches a valid tab, otherwise fall back to "activities".
+	// Legacy `sales` deep-links open Proposals (documents were previously one Sales tab).
+	const normalizedInitialTab =
+		initialTab === 'sales' ? 'proposals' : initialTab;
 	const resolvedTab =
-		initialTab && tabsList.some((t) => t.value === initialTab)
-			? initialTab
+		normalizedInitialTab &&
+		tabsList.some((t) => t.value === normalizedInitialTab)
+			? normalizedInitialTab
 			: 'activities';
 
 	return (

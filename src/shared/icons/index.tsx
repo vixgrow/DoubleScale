@@ -286,6 +286,7 @@ export { default as SendEmailIcon } from './send-email';
 export { default as CampaignIcon } from './campaigns';
 export { default as BookingIcon } from './booking';
 export { default as PipelineIcon } from './pipeline';
+export { default as ProjectsIcon } from './projects';
 export { default as SalesIcon } from './sales';
 export { default as SmtpIcon } from './smtp';
 export { default as TaskIcon } from './task';

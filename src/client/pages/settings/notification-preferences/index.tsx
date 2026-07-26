@@ -1386,7 +1386,7 @@ export function NotificationPreferences({
 		hasChanges,
 	} = useNotificationPreferences();
 
-	const { isSalesRep, isSalesManager, isCrmManager, hasRequiredCapability } = useCapabilities();
+	const { hasLimitedSettingsAccess, hasRequiredCapability } = useCapabilities();
 
 	// Which channels are available on this install. The preferences payload only
 	// contains keys for allowed channels (free = email only; Pro unlocks the
@@ -1402,15 +1402,15 @@ export function NotificationPreferences({
 		};
 	}, [preferences.channels]);
 
-	const canManageRetentionSettings = !isSalesRep();
+	// PHP computes this so CRM Manager + Sales Rep multi-role users keep full
+	// notification controls (not treated as sales-only).
+	const hasLimitedAccess = hasLimitedSettingsAccess();
+	const canManageRetentionSettings = !hasLimitedAccess;
 	const canEditSalesTemplates =
 		hasRequiredCapability([
 			'doublescale_manage_all_sales',
 			'doublescale_crm_manager',
 		]) && config.isModuleToggleEnabled('sales');
-	// Prefer the highest role: CRM Managers keep full notification controls even
-	// if they also hold Sales Rep / Sales Manager capabilities.
-	const hasLimitedAccess = !isCrmManager() && (isSalesRep() || isSalesManager());
 	const canManagePushSetup = !hasLimitedAccess;
 	const whiteLabel = typeof ConfigAPI.getWhiteLabel === 'function' ? ConfigAPI.getWhiteLabel() : undefined;
 

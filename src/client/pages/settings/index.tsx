@@ -117,22 +117,18 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
+	const { hasLimitedSettingsAccess: checkLimitedSettingsAccess } =
+		useCapabilities();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
 		() => new Set(applyFilters('doublescale_settings_tabs_without_save', TABS_WITHOUT_SAVE_BUTTON_LIST) as string[]),
 		[]
 	);
 
-	// Memoize the role checks to avoid recalculating on every render.
-	// Sales Rep / Sales Manager have limited settings access — but never when the
-	// user also holds CRM Manager (or admin-equivalent) caps. Caps merge across
-	// roles, so `isSalesRep()` alone would incorrectly lock a CRM Manager who
-	// also has the Sales Rep role down to Mailbox + Notifications.
-	const hasLimitedSettingsAccess = useMemo(
-		() => !isCrmManager() && (isSalesRep() || isSalesManager()),
-		[]
-	);
+	// Prefer PHP `doublescale_limited_settings` so CRM Manager + Sales Rep
+	// multi-role users keep full Settings access (Mailbox/Notifications only
+	// for pure Sales Rep / Sales Manager).
+	const hasLimitedSettingsAccess = checkLimitedSettingsAccess();
 	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 

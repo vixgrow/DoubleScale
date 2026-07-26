@@ -163,6 +163,8 @@ export type UserCapabilities = {
 	doublescale_crm_manager: boolean;
 	doublescale_sales_manager: boolean;
 	doublescale_sales_rep: boolean;
+	/** Server-computed: Sales-only users limited to Mailbox + Notifications. */
+	doublescale_limited_settings?: boolean;
 	doublescale_support_manager?: boolean;
 	doublescale_support_agent?: boolean;
 	doublescale_booking_manager?: boolean;

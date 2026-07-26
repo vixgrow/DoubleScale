@@ -38,8 +38,36 @@ final class Permissions {
 	 * @return bool True if user is CRM manager
 	 */
 	public static function is_crm_manager( $user_id = null ) {
-		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( UserRoles::CRM_MANAGER, UserRoles::ADMINISTRATOR ) ) ? true : false;
+		$user_id = self::set_current_user_id( $user_id );
+
+		// WP admins always count as CRM Managers for DoubleScale UI/API gates.
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		// Use role membership (not only the single highest role) so a user who
+		// is CRM Manager / Administrator AND Sales Rep still resolves as CRM
+		// Manager for settings and other manager-tier UI.
+		return self::user_has_role( UserRoles::CRM_MANAGER, $user_id )
+			|| self::user_has_role( UserRoles::ADMINISTRATOR, $user_id );
+	}
+
+	/**
+	 * Whether Settings should be limited to Mailbox + Notifications.
+	 *
+	 * True only for Sales Rep / Sales Manager users who are NOT also CRM
+	 * Manager / Administrator. Multi-role users keep full settings access.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function has_limited_settings_access( $user_id = null ) {
+		if ( self::is_crm_manager( $user_id ) ) {
+			return false;
+		}
+
+		return self::user_has_role( UserRoles::SALES_REP, $user_id )
+			|| self::user_has_role( UserRoles::SALES_MANAGER, $user_id );
 	}
 
 	/**

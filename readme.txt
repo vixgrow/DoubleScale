@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.15
+Stable tag: 1.2.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.16 = 26 Jul 2026
+- Harden Settings access for CRM Manager + Sales Rep multi-role users: compute the limited-settings gate on the server and treat manage_options / CRM Manager role membership as full access
+- Fix notification retention controls incorrectly treating CRM Managers who also hold Sales Rep as sales-only
+
 = 1.2.15 = 26 Jul 2026
 - Fix Settings page restricting CRM Managers / admins to Mailbox and Notifications when they also have the Sales Rep capability — prefer the higher role
 - Keep full notification settings available for CRM Managers who also hold Sales roles

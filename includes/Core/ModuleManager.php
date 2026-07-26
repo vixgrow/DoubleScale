@@ -46,7 +46,24 @@ final class ModuleManager {
 
 		$sync = static function ( array $old, array $new ): void {
 			self::flushCache(); // Lifecycle hooks must evaluate module state against the NEW option value.
-			self::sync_lifecycle_from_option_delta( $old, $new );
+			try {
+				self::sync_lifecycle_from_option_delta( $old, $new );
+			} catch ( \Throwable $e ) {
+				// The option is already persisted by update_option before this hook runs.
+				// Never let activation/deactivation fatals turn a successful save into a
+				// failed REST response (UI shows an error and the user "saves twice").
+				if ( function_exists( 'doublescale_get_logger' ) ) {
+					doublescale_get_logger()->error(
+						'Module lifecycle sync failed after doublescale_enabled_modules update',
+						array(
+							'source' => 'module-manager',
+							'error'  => $e->getMessage(),
+							'file'   => $e->getFile(),
+							'line'   => $e->getLine(),
+						)
+					);
+				}
+			}
 			self::flushCache(); // Drop anything cached mid-sync.
 		};
 
@@ -87,9 +104,35 @@ final class ModuleManager {
 			$was_on        = isset( $old_value[ $slug ] ) ? (bool) $old_value[ $slug ] : $missing_state;
 			$now_on        = isset( $new_value[ $slug ] ) ? (bool) $new_value[ $slug ] : $missing_state;
 			if ( $was_on && ! $now_on ) {
-				self::deactivateModule( $slug );
+				try {
+					self::deactivateModule( $slug );
+				} catch ( \Throwable $e ) {
+					if ( function_exists( 'doublescale_get_logger' ) ) {
+						doublescale_get_logger()->error(
+							'Module deactivation failed',
+							array(
+								'source' => 'module-manager',
+								'module' => $slug,
+								'error'  => $e->getMessage(),
+							)
+						);
+					}
+				}
 			} elseif ( ! $was_on && $now_on ) {
-				self::activateModule( $slug );
+				try {
+					self::activateModule( $slug );
+				} catch ( \Throwable $e ) {
+					if ( function_exists( 'doublescale_get_logger' ) ) {
+						doublescale_get_logger()->error(
+							'Module activation failed',
+							array(
+								'source' => 'module-manager',
+								'module' => $slug,
+								'error'  => $e->getMessage(),
+							)
+						);
+					}
+				}
 			}
 		}
 	}

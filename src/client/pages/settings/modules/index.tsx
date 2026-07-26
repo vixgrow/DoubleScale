@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
+import { useState, useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -115,6 +115,21 @@ export default function ModulesSettings({
 	>( {} );
 	const [ confirmDisableOpen, setConfirmDisableOpen ] = useState( false );
 
+	// Refs keep the dialog footer Save button in sync: footer state is lifted via
+	// useEffect, so without these a fast double-click can fire two POSTs (isSaving
+	// still false in the parent) or call a stale performSave with empty pending.
+	const isSavingRef = useRef( false );
+	const pendingChangesRef = useRef( pendingChanges );
+	const modulesRef = useRef( modules );
+	const affectedDisableModulesRef = useRef<ModuleRoleImpactSlug[]>( [] );
+	const onFooterStateChangeRef = useRef( onFooterStateChange );
+	const createNoticeRef = useRef( createNotice );
+
+	pendingChangesRef.current = pendingChanges;
+	modulesRef.current = modules;
+	onFooterStateChangeRef.current = onFooterStateChange;
+	createNoticeRef.current = createNotice;
+
 	const isProAddonActive = isProActive();
 	const displayRows = useMemo(
 		() => buildMarketingModuleDisplayRows( modules, isProAddonActive ),
@@ -139,6 +154,9 @@ export default function ModulesSettings({
 
 	const handleToggle = useCallback(
 		( slug: string, enabled: boolean ) => {
+			if ( isSavingRef.current ) {
+				return;
+			}
 			setPendingChanges( ( prev ) => {
 				const next = { ...prev, [ slug ]: enabled };
 				return reduceMarketingModulePending( next, modules );
@@ -182,11 +200,32 @@ export default function ModulesSettings({
 		);
 	}, [ modulesPendingDisable, roleImpact ] );
 
+	affectedDisableModulesRef.current = affectedDisableModules;
+
+	const syncFooterState = useCallback(
+		( next: Partial<ModulesFooterState> & { onSave: () => void } ) => {
+			onFooterStateChangeRef.current?.( {
+				hasChanges:
+					next.hasChanges ??
+					Object.keys( pendingChangesRef.current ).length > 0,
+				isSaving: next.isSaving ?? isSavingRef.current,
+				onSave: next.onSave,
+			} );
+		},
+		[]
+	);
+
 	const performSave = useCallback( async () => {
-		const payload = pickToggleableModulePayload( pendingChanges, modules );
+		if ( isSavingRef.current ) {
+			return;
+		}
+
+		const pending = pendingChangesRef.current;
+		const currentModules = modulesRef.current;
+		const payload = pickToggleableModulePayload( pending, currentModules );
 		if ( Object.keys( payload ).length === 0 ) {
 			setPendingChanges( {} );
-			createNotice( {
+			createNoticeRef.current( {
 				type: 'info',
 				message: __(
 					'Only modules available in your install can be saved. Install DoubleScale Pro to enable the remaining add-ons.',
@@ -196,7 +235,15 @@ export default function ModulesSettings({
 			return;
 		}
 
+		isSavingRef.current = true;
 		setIsSaving( true );
+		// Push isSaving immediately — do not wait for the useEffect sync, or the
+		// dialog footer stays clickable and a second POST can race the first.
+		syncFooterState( {
+			isSaving: true,
+			onSave: () => undefined,
+		} );
+
 		try {
 			const response = await apiFetch<ModulesResponse>( {
 				path: '/doublescale/v1/modules',
@@ -218,20 +265,29 @@ export default function ModulesSettings({
 				window.location.assign( getToLink( '/' ) );
 				return;
 			}
+
+			createNoticeRef.current( {
+				type: 'error',
+				message: __( 'Failed to save module settings.', 'doublescale' ),
+			} );
 		} catch ( error: any ) {
 			const msg =
 				error?.message ||
 				error?.data?.message ||
 				__( 'Failed to save module settings.', 'doublescale' );
-			createNotice( { type: 'error', message: msg } );
+			createNoticeRef.current( { type: 'error', message: msg } );
 		} finally {
+			isSavingRef.current = false;
 			setIsSaving( false );
 			setConfirmDisableOpen( false );
 		}
-	}, [ pendingChanges, modules, createNotice ] );
+	}, [ syncFooterState ] );
 
 	const handleSave = useCallback( () => {
-		if ( ! hasChanges ) {
+		if ( isSavingRef.current ) {
+			return;
+		}
+		if ( Object.keys( pendingChangesRef.current ).length === 0 ) {
 			return;
 		}
 
@@ -241,21 +297,24 @@ export default function ModulesSettings({
 		// dialog's own Radix modal collides the two focus traps / scroll locks
 		// and freezes the page. Save directly here; only the full-page variant
 		// (no surrounding modal) escalates to the confirm AlertDialog.
-		if ( variant !== 'dialog' && affectedDisableModules.length > 0 ) {
+		if (
+			variant !== 'dialog' &&
+			affectedDisableModulesRef.current.length > 0
+		) {
 			setConfirmDisableOpen( true );
 			return;
 		}
 
 		void performSave();
-	}, [ hasChanges, affectedDisableModules, performSave, variant ] );
+	}, [ performSave, variant ] );
 
 	useEffect( () => {
-		onFooterStateChange?.( {
+		syncFooterState( {
 			hasChanges,
 			isSaving,
 			onSave: handleSave,
 		} );
-	}, [ hasChanges, isSaving, handleSave, onFooterStateChange ] );
+	}, [ hasChanges, isSaving, handleSave, syncFooterState ] );
 
 	const getModuleLabel = useCallback(
 		( slug: string ) => {

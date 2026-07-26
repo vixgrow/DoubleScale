@@ -144,7 +144,9 @@ class RestModulesController extends RestController {
 			);
 		}
 
-		$all    = ModuleManager::all();
+		$all = ModuleManager::all();
+
+		// Snapshot before write so lifecycle sync can compare.
 		$stored = get_option( 'doublescale_enabled_modules', array() );
 
 		// Merge incoming with stored values.
@@ -165,7 +167,14 @@ class RestModulesController extends RestController {
 			$proposed[ $slug ] = (bool) $enabled;
 		}
 
+		// Lifecycle activate/deactivate runs inside update_option hooks and is
+		// isolated with try/catch in ModuleManager so failures there do not turn
+		// this request into a REST error after the option is already written.
 		update_option( 'doublescale_enabled_modules', $proposed );
+
+		// Ensure request-level enabled cache reflects the just-written option even
+		// if a lifecycle hook left the cache warm from mid-activation reads.
+		ModuleManager::flushCache();
 
 		return new WP_REST_Response(
 			array(

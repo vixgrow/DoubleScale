@@ -577,7 +577,11 @@ final class UserRoles {
 					$caps[ self::BOOKING_MANAGER ],
 					$caps[ self::BOOKING_AGENT ],
 					$caps[ self::PROJECT_MANAGER ],
-					$caps[ self::PROJECT_MEMBER ]
+					$caps[ self::PROJECT_MEMBER ],
+					// Module-owned slugs so {@see provision_role()} can strip them
+					// from roles that should not hold them (e.g. Sales).
+					self::get_booking_capability_slugs(),
+					self::get_project_capability_slugs()
 				)
 			)
 		);
@@ -1113,39 +1117,50 @@ final class UserRoles {
 	}
 
 	/**
-	 * Project Manager: admin-shell access only; project module caps are synced
-	 * separately by {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
+	 * Project Manager: shell caps + full project module caps when Pro Projects
+	 * is loaded. Module caps are also kept in sync by
+	 * {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
 	 *
 	 * @return array
 	 */
 	public static function get_project_manager_capabilities() {
 		$caps = self::get_capabilities();
-		return array_values(
-			array_unique(
-				array_merge(
-					$caps['common'],
-					$caps[ self::PROJECT_MANAGER ]
-				)
-			)
+		$list = array_merge(
+			$caps['common'],
+			$caps[ self::PROJECT_MANAGER ]
 		);
+
+		if ( class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' ) ) {
+			$list = array_merge(
+				$list,
+				\DoubleScale\Pro\Modules\Projects\Capabilities::get_caps_for_role( self::PROJECT_MANAGER )
+			);
+		}
+
+		return array_values( array_unique( $list ) );
 	}
 
 	/**
-	 * Project Member: admin-shell access only; own-scope project caps are synced
-	 * separately by {@see \DoubleScale\Pro\Modules\Projects\Capabilities}.
+	 * Project Member: shell caps + own-scope project module caps when Pro
+	 * Projects is loaded.
 	 *
 	 * @return array
 	 */
 	public static function get_project_member_capabilities() {
 		$caps = self::get_capabilities();
-		return array_values(
-			array_unique(
-				array_merge(
-					$caps['common'],
-					$caps[ self::PROJECT_MEMBER ]
-				)
-			)
+		$list = array_merge(
+			$caps['common'],
+			$caps[ self::PROJECT_MEMBER ]
 		);
+
+		if ( class_exists( '\DoubleScale\Pro\Modules\Projects\Capabilities' ) ) {
+			$list = array_merge(
+				$list,
+				\DoubleScale\Pro\Modules\Projects\Capabilities::get_caps_for_role( self::PROJECT_MEMBER )
+			);
+		}
+
+		return array_values( array_unique( $list ) );
 	}
 
 	/**
@@ -1195,7 +1210,7 @@ final class UserRoles {
 	 * Bump this string when the role-to-capability map changes so existing
 	 * installs re-run {@see add_roles_and_capabilities()} on next boot.
 	 */
-	private const ROLES_PROVISION_VERSION = '2026-07-16-project-roles';
+	private const ROLES_PROVISION_VERSION = '2026-07-26-project-caps';
 
 	/**
 	 * Allow logged-in users with any DoubleScale role to bypass WooCommerce's

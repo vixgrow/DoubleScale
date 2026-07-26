@@ -510,13 +510,10 @@ registerAdminPage('projects', {
 	),
 	label: __('Projects', 'doublescale'),
 	icon: <ProjectsIcon width={24} height={24} />,
-	// Include CRM caps so the free stub (ProFeatureNotice) stays visible when
-	// Pro is inactive — project_* caps are only populated once the Pro Projects
-	// module loads. Keep project caps so project-only users still pass the gate.
+	// Projects: CRM Manager (full access) + Project Manager / Member.
+	// Sales Manager / Sales Rep must NOT see this.
 	requiredCapability: [
 		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
 		'doublescale_project_manager',
 		'doublescale_project_member',
 		'doublescale_project_read_own_projects',
@@ -541,8 +538,6 @@ registerAdminPage('project-detail', {
 	hidden: true,
 	requiredCapability: [
 		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
 		'doublescale_project_manager',
 		'doublescale_project_member',
 		'doublescale_project_read_own_projects',

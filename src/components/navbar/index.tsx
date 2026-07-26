@@ -287,13 +287,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				const whiteLabel = config.getWhiteLabel?.();
 				if (whiteLabel?.enabled) {
-					// Addon may set whiteLabelShowSettings so agency admins can
-					// still open Settings (e.g. via a secret URL) after hiding it.
-					if (
-						pageId === 'settings' &&
-						whiteLabel.hideSettingsTab &&
-						!config.isWhiteLabelShowSettings?.()
-					) {
+					if (pageId === 'settings' && whiteLabel.hideSettingsMenu) {
 						return false;
 					}
 					if (pageId === 'extensions' && whiteLabel.hideExtensions) {

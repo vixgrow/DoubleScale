@@ -91,9 +91,7 @@ class Store {
 				'name'        => 'White Labeling',
 				'slug'        => 'white-label',
 				'description' => __( 'Remove Plugin branding and replace with your own plugin name, logo, menu icon, and brand colors.', 'doublescale' ),
-				'plugin_file' => file_exists( $plugins_dir . 'doublescale-whitelabeling/doublescale-white-labeling.php' )
-					? 'doublescale-whitelabeling/doublescale-white-labeling.php'
-					: 'doublescale-whitelabeling/doublescale-white-labeling.php',
+				'plugin_file' => self::resolve_white_label_plugin_file( $plugins_dir ),
 				'image'       => 'white-label/white-label.svg',
 				'plan'        => 'enterprise',
 			),
@@ -270,6 +268,28 @@ class Store {
 		}
 
 		wp_send_json_success( esc_html__( 'Addon activated successfully', 'doublescale' ), 200 );
+	}
+
+	/**
+	 * Resolve the White Labeling add-on plugin file path across naming conventions.
+	 *
+	 * @param string $plugins_dir Absolute path to the plugins directory.
+	 * @return string Plugin file relative path.
+	 */
+	private static function resolve_white_label_plugin_file( $plugins_dir ) {
+		$candidates = array(
+			'DoubleScale-WhiteLabeling/doublescale-white-labeling.php',
+			'doublescale-whitelabeling/doublescale-white-labeling.php',
+			'DS-WhiteLabeling/ds-white-labeling.php',
+		);
+
+		foreach ( $candidates as $file ) {
+			if ( file_exists( $plugins_dir . $file ) ) {
+				return $file;
+			}
+		}
+
+		return $candidates[0];
 	}
 
 	/**

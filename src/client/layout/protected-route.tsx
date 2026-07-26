@@ -32,11 +32,7 @@ const isWhiteLabelHiddenPath = (path?: string): boolean => {
 
 	const normalized = path.replace(/^\//, '').split('/:')[0];
 
-	if (
-		whiteLabel.hideSettingsTab &&
-		normalized === 'settings' &&
-		!config.isWhiteLabelShowSettings?.()
-	) {
+	if (whiteLabel.hideSettingsMenu && normalized === 'settings') {
 		return true;
 	}
 	if (whiteLabel.hideExtensions && normalized === 'extensions') {

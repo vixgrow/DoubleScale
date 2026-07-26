@@ -117,6 +117,33 @@ class Admin {
 		);
 		$menu_icon    = apply_filters( 'doublescale_admin_menu_icon', $default_icon );
 
+		// URL-based icons render as unconstrained <img> tags in WP admin; pin
+		// them to the standard 20×20 menu slot (SVG data-URIs already use background-size).
+		if ( is_string( $menu_icon ) && ( 0 === strpos( $menu_icon, 'http' ) || 0 === strpos( $menu_icon, '/' ) ) ) {
+			$icon_menu_slug = $menu_slug;
+			add_action(
+				'admin_head',
+				static function () use ( $icon_menu_slug ) {
+					$id = 'toplevel_page_' . $icon_menu_slug;
+					printf(
+						'<style id="doublescale-admin-menu-icon">
+							#adminmenu #%1$s .wp-menu-image img,
+							#adminmenu .%1$s .wp-menu-image img {
+								width: 20px !important;
+								height: 20px !important;
+								max-width: 20px !important;
+								max-height: 20px !important;
+								padding: 7px 0 0 !important;
+								object-fit: contain;
+								box-sizing: content-box;
+							}
+						</style>' . "\n",
+						esc_attr( $id )
+					);
+				}
+			);
+		}
+
 		add_menu_page(
 			$menu_title,
 			$menu_title,

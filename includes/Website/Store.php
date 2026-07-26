@@ -65,16 +65,20 @@ class Store {
 		$plugins_dir = trailingslashit( dirname( dirname( DOUBLESCALE_PLUGIN_FILE ) ) );
 
 		$addons = array(
-			// 'zapier'       => array(
-			// 	'name'        => 'Zapier',
-			// 	'slug'        => 'zapier',
-			// 	'description' => __( 'Connect Plugin with Zapier to automate your CRM with 5000+ apps.', 'doublescale' ),
-			// 	'plugin_file' => file_exists( $plugins_dir . 'DoubleScale-Zapier/doublescale-zapier.php' )
-			// 		? 'DoubleScale-Zapier/doublescale-zapier.php'
-			// 		: 'DS-Zapier/ds-zapier.php',
-			// 	'image'       => 'zapier/zapier.svg',
-			// 	'plan'        => 'plus',
-			// ),
+			// Always list Zapier so Integrations can show an AddonCard even when the
+			// doublescale-zapier plugin is not activated (free or Pro without the addon).
+			'zapier'        => array(
+				'name'        => 'Zapier',
+				'slug'        => 'zapier',
+				'description' => __( 'Connect Plugin with Zapier to automate your CRM with 5000+ apps.', 'doublescale' ),
+				'plugin_file' => file_exists( $plugins_dir . 'doublescale-zapier/doublescale-zapier.php' )
+					? 'doublescale-zapier/doublescale-zapier.php'
+					: ( file_exists( $plugins_dir . 'DoubleScale-Zapier/doublescale-zapier.php' )
+						? 'DoubleScale-Zapier/doublescale-zapier.php'
+						: 'DS-Zapier/ds-zapier.php' ),
+				'image'       => 'zapier/zapier.svg',
+				'plan'        => 'plus',
+			),
 			// 'make'   => array(
 			// 'name'        => 'Make',
 			// 'slug'        => 'make',

@@ -67,7 +67,21 @@ class RestLicenseController extends RestController {
 	 * @return true|WP_Error
 	 */
 	public function get_status_permissions_check( WP_REST_Request $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'rest_not_logged_in',
+				__( 'You are not currently logged in.', 'doublescale' ),
+				array( 'status' => 401 )
+			);
+		}
+
 		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		// Mobile app users authenticate with application passwords; allow any
+		// authenticated CRM user to read site license/plan status for gating.
+		if ( user_can( get_current_user_id(), 'read' ) ) {
 			return true;
 		}
 

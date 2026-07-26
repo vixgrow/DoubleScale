@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.14
+Stable tag: 1.2.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,12 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.15 = 26 Jul 2026
+- Fix Settings page restricting CRM Managers / admins to Mailbox and Notifications when they also have the Sales Rep capability — prefer the higher role
+- Keep full notification settings available for CRM Managers who also hold Sales roles
+- Update contact details Proposals and Invoices tabs to use the same brand icons as the Proposals and Invoices pages
+- Split the contact Sales tab into separate Proposals and Invoices tabs for clearer navigation
+
 = 1.2.14 = 22 Jul 2026
 - Fix SQL errors when disabled modules (Projects, Booking, Deals, Support, Documents, Tasks) have no database tables yet — skip those queries instead of failing
 - Harden module storage readiness checks (escape table-name LIKE wildcards; never surface raw missing-table SQL in the contact deletion impact UI)

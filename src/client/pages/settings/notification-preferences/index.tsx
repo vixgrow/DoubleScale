@@ -1408,7 +1408,9 @@ export function NotificationPreferences({
 			'doublescale_manage_all_sales',
 			'doublescale_crm_manager',
 		]) && config.isModuleToggleEnabled('sales');
-	const hasLimitedAccess = isSalesRep() || (isSalesManager() && !isCrmManager());
+	// Prefer the highest role: CRM Managers keep full notification controls even
+	// if they also hold Sales Rep / Sales Manager capabilities.
+	const hasLimitedAccess = !isCrmManager() && (isSalesRep() || isSalesManager());
 	const canManagePushSetup = !hasLimitedAccess;
 	const whiteLabel = typeof ConfigAPI.getWhiteLabel === 'function' ? ConfigAPI.getWhiteLabel() : undefined;
 

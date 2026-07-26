@@ -124,9 +124,15 @@ const SettingsPage: React.FC = () => {
 		[]
 	);
 
-	// Memoize the role checks to avoid recalculating on every render
-	// Sales Rep and Sales Manager have limited settings access
-	const hasLimitedSettingsAccess = useMemo(() => isSalesRep() || (isSalesManager() && !isCrmManager()), []);
+	// Memoize the role checks to avoid recalculating on every render.
+	// Sales Rep / Sales Manager have limited settings access — but never when the
+	// user also holds CRM Manager (or admin-equivalent) caps. Caps merge across
+	// roles, so `isSalesRep()` alone would incorrectly lock a CRM Manager who
+	// also has the Sales Rep role down to Mailbox + Notifications.
+	const hasLimitedSettingsAccess = useMemo(
+		() => !isCrmManager() && (isSalesRep() || isSalesManager()),
+		[]
+	);
 	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 

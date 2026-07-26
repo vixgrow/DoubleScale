@@ -234,6 +234,10 @@ export const HeaderBar = ({ page }: { page: any }) => {
 			<div className="doublescale-layout__header-right">
 				{!isProActive && <HeaderProBells />}
 				{isProActive &&
+					!(
+						config.getWhiteLabel()?.enabled &&
+						config.getWhiteLabel()?.hideLicense
+					) &&
 					Boolean(
 						applyFilters(
 							'doublescale_show_activate_license',

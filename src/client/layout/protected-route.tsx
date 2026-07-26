@@ -13,6 +13,7 @@ import config from '@doublescale/config';
 
 interface ProtectedRouteProps {
 	page: {
+		path?: string;
 		requiredCapability?: string[];
 		/** When set, user is redirected away unless this module is enabled in admin config. */
 		requiresModule?: string;
@@ -22,6 +23,28 @@ interface ProtectedRouteProps {
 	};
 	children?: React.ReactNode;
 }
+
+const isWhiteLabelHiddenPath = (path?: string): boolean => {
+	const whiteLabel = config.getWhiteLabel?.();
+	if (!whiteLabel?.enabled || !path) {
+		return false;
+	}
+
+	const normalized = path.replace(/^\//, '').split('/:')[0];
+
+	if (
+		whiteLabel.hideSettingsTab &&
+		normalized === 'settings' &&
+		!config.isWhiteLabelShowSettings?.()
+	) {
+		return true;
+	}
+	if (whiteLabel.hideExtensions && normalized === 'extensions') {
+		return true;
+	}
+
+	return false;
+};
 
 /**
  * Protected route component that checks if user has required permissions
@@ -50,6 +73,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	}, [page.requiredCapability, navigate, hasRequiredCapability]);
 
 	useEffect(() => {
+		if (isWhiteLabelHiddenPath(page.path)) {
+			navigate(getToLink('/'), { replace: true });
+		}
+	}, [page.path, navigate]);
+
+	useEffect(() => {
 		if (
 			page.requiresModule &&
 			!page.alwaysRegister &&
@@ -58,6 +87,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 			navigate(getToLink('/'), { replace: true });
 		}
 	}, [page.requiresModule, page.alwaysRegister, navigate, moduleGateEpoch]);
+
+	if (isWhiteLabelHiddenPath(page.path)) {
+		return null;
+	}
 
 	if (
 		page.requiresModule &&

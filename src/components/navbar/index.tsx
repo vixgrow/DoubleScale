@@ -284,6 +284,23 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				) {
 					return false;
 				}
+
+				const whiteLabel = config.getWhiteLabel?.();
+				if (whiteLabel?.enabled) {
+					// Addon may set whiteLabelShowSettings so agency admins can
+					// still open Settings (e.g. via a secret URL) after hiding it.
+					if (
+						pageId === 'settings' &&
+						whiteLabel.hideSettingsTab &&
+						!config.isWhiteLabelShowSettings?.()
+					) {
+						return false;
+					}
+					if (pageId === 'extensions' && whiteLabel.hideExtensions) {
+						return false;
+					}
+				}
+
 				const optionalGate = FREE_OPTIONAL_SIDEBAR_PAGE_MODULE[pageId];
 				const defaultSidebar =
 					isProActive ||

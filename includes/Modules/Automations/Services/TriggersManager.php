@@ -279,23 +279,28 @@ final class TriggersManager {
 					),
 				),
 			),
-			'memberpress' => array(
-				'label'  => __( 'MemberPress', 'doublescale' ),
-				'groups' => array(
+			'membership'  => array(
+				'label' => __( 'Membership', 'doublescale' ),
+				'tabs'  => array(
 					'memberpress' => array(
-						'label'       => __( 'MemberPress', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+						'label'  => __( 'MemberPress', 'doublescale' ),
+						'groups' => array(
+							'memberpress' => array(
+								'label'       => __( 'MemberPress', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+							),
+						),
 					),
-				),
-			),
-			'pmpro'       => array(
-				'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
-				'groups' => array(
-					'pmpro' => array(
-						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+					'pmpro'       => array(
+						'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
+						'groups' => array(
+							'pmpro' => array(
+								'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+							),
+						),
 					),
 				),
 			),
@@ -523,17 +528,23 @@ final class TriggersManager {
 			return;
 		}
 
-		$ecommerce_sources = array( 'woocommerce', 'edd', 'surecart' );
-		if ( in_array( $trigger->source, $ecommerce_sources, true ) ) {
-			if ( ! isset( $this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ] ) ) {
-				$this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ] = array(
-					'label'    => $trigger->group,
-					'triggers' => array(),
-				);
-			}
-			$this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+		$tabbed_sources = array(
+			'ecommerce'  => array( 'woocommerce', 'edd', 'surecart' ),
+			'membership' => array( 'memberpress', 'pmpro' ),
+		);
 
-			return;
+		foreach ( $tabbed_sources as $category_key => $source_keys ) {
+			if ( in_array( $trigger->source, $source_keys, true ) ) {
+				if ( ! isset( $this->sources[ $category_key ]['tabs'][ $trigger->source ]['groups'][ $trigger->group ] ) ) {
+					$this->sources[ $category_key ]['tabs'][ $trigger->source ]['groups'][ $trigger->group ] = array(
+						'label'    => $trigger->group,
+						'triggers' => array(),
+					);
+				}
+				$this->sources[ $category_key ]['tabs'][ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+
+				return;
+			}
 		}
 
 		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;

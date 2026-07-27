@@ -100,7 +100,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
 	const [selectedCategory, setSelectedCategory] = useState('crm');
-	const [selectedEcommerceTab, setSelectedEcommerceTab] =
+	const [selectedCategoryTab, setSelectedCategoryTab] =
 		useState('woocommerce');
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
@@ -449,7 +449,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				'doublescale'
 			),
 		},
-		memberpress: {
+		membership: {
 			image: (
 				<svg
 					width="24"
@@ -461,27 +461,27 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					<path
 						opacity="0.4"
 						d="M17 2H7C4.24 2 2 4.24 2 7V17C2 19.76 4.24 22 7 22H17C19.76 22 22 19.76 22 17V7C22 4.24 19.76 2 17 2Z"
-						fill="url(#paint0_linear_mp_trigger)"
+						fill="url(#paint0_linear_membership_trigger)"
 					/>
 					<path
 						d="M15.5 9.75H8.5C8.09 9.75 7.75 9.41 7.75 9C7.75 8.59 8.09 8.25 8.5 8.25H15.5C15.91 8.25 16.25 8.59 16.25 9C16.25 9.41 15.91 9.75 15.5 9.75Z"
-						fill="url(#paint1_linear_mp_trigger)"
+						fill="url(#paint1_linear_membership_trigger)"
 					/>
 					<path
 						d="M12 12.75C10.9 12.75 10 11.85 10 10.75V7.25C10 6.15 10.9 5.25 12 5.25C13.1 5.25 14 6.15 14 7.25V10.75C14 11.85 13.1 12.75 12 12.75Z"
-						fill="url(#paint2_linear_mp_trigger)"
+						fill="url(#paint2_linear_membership_trigger)"
 					/>
 					<path
 						d="M17 15.75H7C6.59 15.75 6.25 15.41 6.25 15C6.25 14.59 6.59 14.25 7 14.25H17C17.41 14.25 17.75 14.59 17.75 15C17.75 15.41 17.41 15.75 17 15.75Z"
-						fill="url(#paint3_linear_mp_trigger)"
+						fill="url(#paint3_linear_membership_trigger)"
 					/>
 					<path
 						d="M14 18.75H10C9.59 18.75 9.25 18.41 9.25 18C9.25 17.59 9.59 17.25 10 17.25H14C14.41 17.25 14.75 17.59 14.75 18C14.75 18.41 14.41 18.75 14 18.75Z"
-						fill="url(#paint4_linear_mp_trigger)"
+						fill="url(#paint4_linear_membership_trigger)"
 					/>
 					<defs>
 						<linearGradient
-							id="paint0_linear_mp_trigger"
+							id="paint0_linear_membership_trigger"
 							x1="2"
 							y1="12"
 							x2="22"
@@ -495,7 +495,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							<stop offset="1" stopColor="#3B82F6" />
 						</linearGradient>
 						<linearGradient
-							id="paint1_linear_mp_trigger"
+							id="paint1_linear_membership_trigger"
 							x1="7.75"
 							y1="9"
 							x2="16.25"
@@ -509,7 +509,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							<stop offset="1" stopColor="#3B82F6" />
 						</linearGradient>
 						<linearGradient
-							id="paint2_linear_mp_trigger"
+							id="paint2_linear_membership_trigger"
 							x1="10"
 							y1="9"
 							x2="14"
@@ -523,7 +523,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							<stop offset="1" stopColor="#3B82F6" />
 						</linearGradient>
 						<linearGradient
-							id="paint3_linear_mp_trigger"
+							id="paint3_linear_membership_trigger"
 							x1="6.25"
 							y1="15"
 							x2="17.75"
@@ -537,7 +537,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							<stop offset="1" stopColor="#3B82F6" />
 						</linearGradient>
 						<linearGradient
-							id="paint4_linear_mp_trigger"
+							id="paint4_linear_membership_trigger"
 							x1="9.25"
 							y1="18"
 							x2="14.75"
@@ -553,83 +553,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __(
-				'MemberPress membership automation',
-				'doublescale'
-			),
-		},
-		pmpro: {
-			image: (
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						opacity="0.4"
-						d="M12 2C9.38 2 3 4.5 3 4.5V14.5C3 18 7 21 12 22C17 21 21 18 21 14.5V4.5C21 4.5 14.62 2 12 2Z"
-						fill="url(#paint0_linear_pmpro_trigger)"
-					/>
-					<path
-						d="M12 7C10.9 7 10 7.9 10 9V10H9.5C9.22 10 9 10.22 9 10.5V14.5C9 14.78 9.22 15 9.5 15H14.5C14.78 15 15 14.78 15 14.5V10.5C15 10.22 14.78 10 14.5 10H14V9C14 7.9 13.1 7 12 7ZM13 10H11V9C11 8.45 11.45 8 12 8C12.55 8 13 8.45 13 9V10Z"
-						fill="url(#paint1_linear_pmpro_trigger)"
-					/>
-					<path
-						d="M12 17.5C11.17 17.5 10.5 16.83 10.5 16C10.5 15.17 11.17 14.5 12 14.5C12.83 14.5 13.5 15.17 13.5 16C13.5 16.83 12.83 17.5 12 17.5Z"
-						fill="url(#paint2_linear_pmpro_trigger)"
-					/>
-					<defs>
-						<linearGradient
-							id="paint0_linear_pmpro_trigger"
-							x1="3"
-							y1="12"
-							x2="21"
-							y2="12"
-							gradientUnits="userSpaceOnUse"
-						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-						<linearGradient
-							id="paint1_linear_pmpro_trigger"
-							x1="9"
-							y1="11"
-							x2="15"
-							y2="11"
-							gradientUnits="userSpaceOnUse"
-						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-						<linearGradient
-							id="paint2_linear_pmpro_trigger"
-							x1="10.5"
-							y1="16"
-							x2="13.5"
-							y2="16"
-							gradientUnits="userSpaceOnUse"
-						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-					</defs>
-				</svg>
-			),
-			description: __(
-				'Paid Memberships Pro membership automation',
-				'doublescale'
-			),
+			description: __('Membership and subscription automation', 'doublescale'),
 		},
 		video: {
 			image: (
@@ -684,7 +608,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		return automationTriggers[selectedCategory];
 	}, [automationTriggers, selectedCategory]);
 
-	const ecommerceTabs = useMemo(() => {
+	const categoryTabs = useMemo(() => {
 		const tabs = currentCategoryData?.tabs;
 		if (!tabs || typeof tabs !== 'object') {
 			return [];
@@ -698,15 +622,15 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
 	// PHP sends `groups` as an object (associative array). TS types expect an array; normalize for the UI.
 	const triggerGroupsForCategory = useMemo((): TriggersGroup[] => {
-		if (ecommerceTabs.length > 0) {
+		if (categoryTabs.length > 0) {
 			const activeTab =
-				ecommerceTabs.find((tab) => tab.key === selectedEcommerceTab) ??
-				ecommerceTabs[0];
+				categoryTabs.find((tab) => tab.key === selectedCategoryTab) ??
+				categoryTabs[0];
 			return activeTab?.groups ?? [];
 		}
 
 		return normalizeTriggerGroups(currentCategoryData?.groups);
-	}, [currentCategoryData, ecommerceTabs, selectedEcommerceTab]);
+	}, [currentCategoryData, categoryTabs, selectedCategoryTab]);
 
 	// When editing, switch to the category that contains the saved trigger.
 	useEffect(() => {
@@ -720,7 +644,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				for (const [tabKey, tab] of Object.entries(category.tabs)) {
 					if (groupContainsTrigger(tab.groups, automation.trigger)) {
 						setSelectedCategory(categoryKey);
-						setSelectedEcommerceTab(tabKey);
+						setSelectedCategoryTab(tabKey);
 						return;
 					}
 				}
@@ -839,11 +763,30 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 														type="button"
 														role="tab"
 														aria-selected={isActive}
-														onClick={() =>
+														onClick={() => {
 															setSelectedCategory(
 																categoryKey
-															)
-														}
+															);
+															const tabs =
+																automationTriggers[
+																	categoryKey
+																]?.tabs;
+															if (
+																tabs &&
+																typeof tabs ===
+																	'object'
+															) {
+																const firstTab =
+																	Object.keys(
+																		tabs
+																	)[0];
+																if (firstTab) {
+																	setSelectedCategoryTab(
+																		firstTab
+																	);
+																}
+															}
+														}}
 														className={cn(
 															'flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors',
 															'focus:outline-none focus:ring-2 focus:ring-brandPrimary/20',
@@ -885,16 +828,16 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 										)}
 										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[480px] overflow-y-auto"
 									>
-										{ecommerceTabs.length > 0 ? (
+										{categoryTabs.length > 0 ? (
 											<Tabs
-												value={selectedEcommerceTab}
+												value={selectedCategoryTab}
 												onValueChange={
-													setSelectedEcommerceTab
+													setSelectedCategoryTab
 												}
 												className="flex flex-col gap-4"
 											>
 												<TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-neutral-100 p-1">
-													{ecommerceTabs.map(
+													{categoryTabs.map(
 														(tab) => (
 															<TabsTrigger
 																key={tab.key}
@@ -906,7 +849,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 														)
 													)}
 												</TabsList>
-												{ecommerceTabs.map((tab) => (
+												{categoryTabs.map((tab) => (
 													<TabsContent
 														key={tab.key}
 														value={tab.key}

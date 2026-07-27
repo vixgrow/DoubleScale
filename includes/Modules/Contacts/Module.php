@@ -122,6 +122,44 @@ final class Module extends AbstractModule {
 		);
 
 		/**
+		 * Register contact-scoped custom field filters after Pro Custom Fields is available.
+		 *
+		 * The filter class loads with the contacts filters glob, but registration must run once
+		 * module storage is ready and scoped fields can be queried reliably.
+		 */
+		add_action(
+			'doublescale_ready',
+			static function (): void {
+				if ( ! class_exists( Filters\ContactFields\Fields::class, true ) ) {
+					return;
+				}
+				if ( ! class_exists( \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::class, true ) ) {
+					return;
+				}
+				if ( function_exists( 'doublescale_is_module_storage_ready' )
+					&& ! doublescale_is_module_storage_ready( 'custom-fields', \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::class ) ) {
+					return;
+				}
+
+				$mgr = Filters\FiltersManager::instance();
+
+				try {
+					$custom_fields = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::where( 'scope', 'contact' )->get();
+					foreach ( $custom_fields as $custom_field ) {
+						$slug = 'contact_field_' . $custom_field->id;
+						if ( array_key_exists( $slug, $mgr->get_filters() ) ) {
+							continue;
+						}
+						$mgr->register( new Filters\ContactFields\Fields( $custom_field ) );
+					}
+				} catch ( \Throwable $e ) {
+					// Tables may not exist yet before migrations.
+				}
+			},
+			20
+		);
+
+		/**
 		 * Register Activity filters that query Pro-owned tables only when their owning
 		 * modules are active. `page_visits` lives under `websitetracking` (Pro, non-toggleable);
 		 * `form_submissions` lives under `forms` (Pro, toggleable). Hiding the filters at

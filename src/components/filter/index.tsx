@@ -58,6 +58,9 @@ const Filter: React.FC<FilterProps> = ({
 
 	const datePickerClassName =
 		'rounded-md border border-input px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm bg-background';
+	const showValueInput = !['is_empty', 'is_not_empty'].includes(
+		filter.operator
+	);
 	const fetchOptions = useCallback(async () => {
 		if (!filterSettings.is_dynamic) return;
 
@@ -122,13 +125,20 @@ const Filter: React.FC<FilterProps> = ({
 							</SelectContent>
 						</Select>
 					)}
-					{filterSettings.type === 'text' && (
+					{showValueInput && filterSettings.type === 'text' && (
 						<Input
 							value={filter.value}
 							onChange={(e) => onChange('value', e.target.value)}
 						/>
 					)}
-					{filterSettings.type === 'select' &&
+					{showValueInput && filterSettings.type === 'number' && (
+						<Input
+							type="number"
+							value={filter.value}
+							onChange={(e) => onChange('value', e.target.value)}
+						/>
+					)}
+					{showValueInput && filterSettings.type === 'select' &&
 						!filterSettings.is_dynamic && (
 							<Select
 								value={filter.value}
@@ -154,7 +164,34 @@ const Filter: React.FC<FilterProps> = ({
 								</SelectContent>
 							</Select>
 						)}
-					{filterSettings.type === 'select' &&
+					{showValueInput && filterSettings.type === 'multiselect' &&
+						!filterSettings.is_dynamic && (
+							<Select
+								value={filter.value}
+								onValueChange={(value) =>
+									onChange('value', value)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{map(
+										filterSettings.options,
+										(label, value) => (
+											<SelectItem
+												key={value}
+												value={value}
+											>
+												{label}
+											</SelectItem>
+										)
+									)}
+								</SelectContent>
+							</Select>
+						)}
+					{showValueInput &&
+						filterSettings.type === 'select' &&
 						filterSettings.is_dynamic && (
 							<MultiSelect
 								options={options.map((option) => ({
@@ -187,7 +224,7 @@ const Filter: React.FC<FilterProps> = ({
 								searchPlaceholder={__('Search...', 'doublescale')}
 							/>
 						)}
-					{filterSettings.type === 'date' && (
+					{showValueInput && filterSettings.type === 'date' && (
 						<>
 							{filter.operator === 'within' ? (
 								<DateRangePicker

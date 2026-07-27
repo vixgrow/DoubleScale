@@ -73,6 +73,13 @@ class Fields extends Rule {
 	public $type = 'text';
 
 	/**
+	 * Available in contacts list advanced filters (not automation-only).
+	 *
+	 * @var bool
+	 */
+	public $is_automation = false;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct( $custom_field ) {

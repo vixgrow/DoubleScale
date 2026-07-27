@@ -2250,13 +2250,23 @@ class RestContactController extends RestController {
 
 			// Apply keyword search AFTER filters (search within filtered results)
 			if ( '' !== $keywords ) {
-				$contacts = $contacts->where(
-					function ( $query ) use ( $keywords ) {
+				$has_custom_fields = class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' );
+				$contacts          = $contacts->where(
+					function ( $query ) use ( $keywords, $has_custom_fields ) {
 						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'email', 'like', '%' . $keywords . '%' )
 							->orWhere( 'phone', 'like', '%' . $keywords . '%' )
 							->orWhere( 'whatsapp_phone', 'like', '%' . $keywords . '%' );
+
+						if ( $has_custom_fields ) {
+							$query->orWhereHas(
+								'custom_fields',
+								function ( $custom_field_query ) use ( $keywords ) {
+									$custom_field_query->where( 'value', 'like', '%' . $keywords . '%' );
+								}
+							);
+						}
 					}
 				);
 			}

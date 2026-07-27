@@ -27,6 +27,7 @@ import {
 	LinkTriggersIcon,
 	OrdersIcon,
 	PremiumIcon,
+	SalesIcon,
 	VideoBlockIcon,
 } from '@doublescale/components/icons/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -161,6 +162,15 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	}
 	if (l.includes('helpdesk') || l.includes('support') || l.includes('ticket')) {
 		return HelpdeskIcon;
+	}
+	if (
+		l.includes('sales') ||
+		l.includes('proposal') ||
+		l.includes('invoice') ||
+		l.includes('contract') ||
+		l.includes('credit')
+	) {
+		return SalesIcon;
 	}
 	if (l.includes('form')) {
 		return FormsIcon;

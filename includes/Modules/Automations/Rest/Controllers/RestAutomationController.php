@@ -2147,7 +2147,7 @@ class RestAutomationController extends RestController {
 				'is_enabled' => doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) ),
 			),
 			'support'                   => array(
-				'label'      => __( 'Support', 'doublescale' ),
+				'label'      => __( 'Helpdesk', 'doublescale' ),
 				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'support' ),
 			),
 		);

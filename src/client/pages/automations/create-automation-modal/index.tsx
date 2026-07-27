@@ -21,6 +21,8 @@ import {
 	NoticeBanner,
 	GradientAutomationsIcon,
 	AutomationsIcon,
+	HelpdeskIcon,
+	SalesIcon,
 } from '@doublescale/components';
 import { IntegrationsIcon } from '@doublescale/components/icons/index';
 import {
@@ -194,6 +196,24 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Trigger automations based on booking events',
+				'doublescale'
+			),
+		},
+		support: {
+			image: (
+				<HelpdeskIcon width={22} height={22} color="#1E3A8A" />
+			),
+			description: __(
+				'Trigger automations based on helpdesk ticket events',
+				'doublescale'
+			),
+		},
+		sales: {
+			image: (
+				<SalesIcon width={22} height={22} color="#1E3A8A" />
+			),
+			description: __(
+				'Trigger automations based on sales document and deal events',
 				'doublescale'
 			),
 		},

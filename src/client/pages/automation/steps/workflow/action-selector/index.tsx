@@ -19,6 +19,7 @@ import {
 	DialogDescription,
 } from "@/components/ui/dialog";
 import ConfigAPI from '@doublescale/config';
+import { HelpdeskIcon } from '@doublescale/components';
 
 interface ActionSelectorProps {
 	value: string;
@@ -64,43 +65,9 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	const categoryData = {
 		'support': {
 			image: (
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						opacity="0.4"
-						d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z"
-						fill="url(#paint0_linear_support_action)"
-					/>
-					<path
-						d="M7.5 9.75H16.5C16.91 9.75 17.25 9.41 17.25 9C17.25 8.59 16.91 8.25 16.5 8.25H7.5C7.09 8.25 6.75 8.59 6.75 9C6.75 9.41 7.09 9.75 7.5 9.75Z"
-						fill="url(#paint1_linear_support_action)"
-					/>
-					<path
-						d="M7.5 13.75H12.5C12.91 13.75 13.25 13.41 13.25 13C13.25 12.59 12.91 12.25 12.5 12.25H7.5C7.09 12.25 6.75 12.59 6.75 13C6.75 13.41 7.09 13.75 7.5 13.75Z"
-						fill="url(#paint2_linear_support_action)"
-					/>
-					<defs>
-						<linearGradient id="paint0_linear_support_action" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-						<linearGradient id="paint1_linear_support_action" x1="6.75" y1="9" x2="17.25" y2="9" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-						<linearGradient id="paint2_linear_support_action" x1="6.75" y1="13" x2="13.25" y2="13" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
-						</linearGradient>
-					</defs>
-				</svg>
+				<HelpdeskIcon width={22} height={22} color="#1E3A8A" />
 			),
-			description: __('Manage support tickets and agents', 'doublescale')
+			description: __('Manage helpdesk tickets and agents', 'doublescale')
 		},
 		'crm': {
 			image: (

@@ -49,6 +49,8 @@ export type Contact = {
 	company_name?: string;
 	company_registration_number?: string;
 	tax_vat_number?: string;
+	avatar_id?: number | null;
+	avatar_url?: string;
 	phone: string;
 	whatsapp_phone: string;
 	address_1: string;

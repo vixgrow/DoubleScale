@@ -69,6 +69,7 @@ class ContactModel extends Model {
 		'company_name',
 		'company_registration_number',
 		'tax_vat_number',
+		'avatar_id',
 		'phone',
 		'whatsapp_phone',
 		'address_1',
@@ -522,6 +523,14 @@ class ContactModel extends Model {
 	 * @return string
 	 */
 	public function getAvatarUrlAttribute() {
+		$avatar_id = ! empty( $this->avatar_id ) ? (int) $this->avatar_id : 0;
+		if ( $avatar_id > 0 ) {
+			$custom_url = wp_get_attachment_image_url( $avatar_id, 'medium' );
+			if ( $custom_url ) {
+				return $custom_url;
+			}
+		}
+
 		$email = $this->email;
 		$size  = 96; // Default avatar size
 
@@ -1275,6 +1284,11 @@ class ContactModel extends Model {
 			} else {
 				$data['whatsapp_phone'] = $whatsapp;
 			}
+		}
+
+		if ( array_key_exists( 'avatar_id', $data ) ) {
+			$avatar_id = absint( $data['avatar_id'] );
+			$data['avatar_id'] = $avatar_id > 0 ? $avatar_id : null;
 		}
 
 		return $data;

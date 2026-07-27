@@ -17,6 +17,7 @@ import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import { Contact as ContactType, NoticeMessage } from '@doublescale/client';
 import { mapContactIdentifierError } from '@doublescale/shared/utils/contact-identifier-errors';
+import { isWordPressMediaElement } from '@doublescale/shared/utils/wordpress-media-modal';
 import type { ContactUpdateResult } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
@@ -212,6 +213,23 @@ const Contact: React.FC<ContactProps> = ({
 		}
 	};
 
+	useEffect(() => {
+		const handleFocusTrap = (event: FocusEvent) => {
+			const target = event.target as HTMLElement;
+			if (isWordPressMediaElement(target)) {
+				event.stopPropagation();
+			}
+		};
+
+		document.addEventListener('focusin', handleFocusTrap, true);
+		document.addEventListener('focusout', handleFocusTrap, true);
+
+		return () => {
+			document.removeEventListener('focusin', handleFocusTrap, true);
+			document.removeEventListener('focusout', handleFocusTrap, true);
+		};
+	}, []);
+
 	return (
 		<Dialog
 			open={isDialog ? isOpen : showFullPageDialog}
@@ -229,6 +247,21 @@ const Contact: React.FC<ContactProps> = ({
 					paddingLeft: '0px',
 					paddingRight: '0px',
 					paddingBottom: '0px',
+				}}
+				onEscapeKeyDown={(event) => {
+					if (document.querySelector('.media-modal')) {
+						event.preventDefault();
+					}
+				}}
+				onPointerDownOutside={(event) => {
+					if (isWordPressMediaElement(event.target as HTMLElement)) {
+						event.preventDefault();
+					}
+				}}
+				onInteractOutside={(event) => {
+					if (isWordPressMediaElement(event.target as HTMLElement)) {
+						event.preventDefault();
+					}
 				}}
 			>
 				<DialogHeader className="shrink-0 border-b border-border/50 bg-white/90 pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">

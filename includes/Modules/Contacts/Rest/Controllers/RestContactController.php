@@ -718,6 +718,34 @@ class RestContactController extends RestController {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'avatar_id'       => array(
+					'description'  => __( 'WordPress media attachment ID for the contact profile image.', 'doublescale' ),
+					'type'         => 'integer',
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+						'validate_callback' => function ( $value ) {
+							if ( is_null( $value ) || '' === $value || 0 === (int) $value ) {
+								return true;
+							}
+
+							$attachment_id = absint( $value );
+							if ( ! get_post( $attachment_id ) || ! wp_attachment_is_image( $attachment_id ) ) {
+								return new WP_Error(
+									'rest_invalid_param',
+									__( 'Invalid avatar image attachment.', 'doublescale' ),
+									array( 'status' => 400 )
+								);
+							}
+
+							return true;
+						},
+					),
+				),
+				'avatar_url'      => array(
+					'description' => __( 'Profile image URL.', 'doublescale' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
 				'email'           => array(
 					'description'  => __( 'Email of the contact (optional when a phone number is provided).', 'doublescale' ),
 					'type'         => 'string',
@@ -2930,6 +2958,7 @@ class RestContactController extends RestController {
 			'company_name'                => $request->get_param( 'company_name' ),
 			'company_registration_number' => $request->get_param( 'company_registration_number' ),
 			'tax_vat_number'              => $request->get_param( 'tax_vat_number' ),
+			'avatar_id'                   => $request->get_param( 'avatar_id' ),
 			'email'                       => $request->get_param( 'email' ),
 			'phone'           => $request->get_param( 'phone' ),
 			'whatsapp_phone'  => $request->get_param( 'whatsapp_phone' ),

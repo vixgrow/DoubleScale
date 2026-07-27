@@ -158,14 +158,7 @@ final class CustomMetabox {
 		$last_name            = $contact->last_name ?? '-';
 		$name                 = "{$first_name} {$last_name}";
 
-		// Generate avatar URL using Gravatar or UI Avatars
-		$avatar_url = add_query_arg(
-			array(
-				's' => 128,
-				'd' => $name ? 'https://ui-avatars.com/api/' . urlencode( $name ) . '/128' : '',
-			),
-			'https://www.gravatar.com/avatar/' . md5( strtolower( $contact->email ) )
-		);
+		$avatar_url = $contact->avatar_url;
 
 		$profile_url = admin_url( 'admin.php?page=doublescale&path=contacts&id=' . $contact->id );
 

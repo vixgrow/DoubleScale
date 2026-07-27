@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Select,
@@ -29,8 +29,9 @@ import {
 } from '@doublescale/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import { UserRound, Mail } from 'lucide-react';
+import { UserRound, Mail, Camera, Loader2 } from 'lucide-react';
 import PhoneIcon from '@doublescale/shared/icons/phone';
+import { elevateWordPressMediaModal } from '@doublescale/shared/utils/wordpress-media-modal';
 
 // Constants
 const DROPDOWN_Z_INDEX = 'z-[150000]'; // High z-index to appear above modals
@@ -164,10 +165,18 @@ const StatusSelect: React.FC<StatusSelectProps> = ({
 };
 
 const ContactInformation: React.FC = () => {
-	const { contact, setContact, updateContact, emailAnalytics, showNotice } =
-		useContactContext();
+	const {
+		contact,
+		setContact,
+		updateContact,
+		emailAnalytics,
+		showNotice,
+		isUpdating,
+	} = useContactContext();
 	const [isSendingOptIn, setIsSendingOptIn] = useState(false);
 	const [optInSent, setOptInSent] = useState(false);
+	const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+	const avatarFileInputRef = useRef<HTMLInputElement>(null);
 
 	const sendOptInEmail = async () => {
 		if (!contact || isSendingOptIn || optInSent) {
@@ -254,8 +263,139 @@ const ContactInformation: React.FC = () => {
 		contact.email;
 
 	const initials = getContactInitials(contact.first_name, contact.last_name);
-	// TODO: Add avatar_url to Contact type definition
-	const avatarUrl = (contact as any).avatar_url;
+	const avatarUrl = contact.avatar_url;
+	const hasCustomAvatar = Boolean(contact.avatar_id);
+
+	const handleAvatarSelect = async (selectedMedia: { id: number }) => {
+		await updateContact({ avatar_id: selectedMedia.id });
+	};
+
+	const handleAvatarRemove = async () => {
+		await updateContact({ avatar_id: 0 });
+	};
+
+	const uploadImageFile = async (file: File): Promise<number> => {
+		const formData = new FormData();
+		formData.append('file', file);
+
+		const response = (await apiFetch({
+			path: '/wp/v2/media',
+			method: 'POST',
+			body: formData,
+		})) as { id?: number };
+
+		if (!response?.id) {
+			throw new Error(__('Failed to upload image', 'doublescale'));
+		}
+
+		return response.id;
+	};
+
+	const openAvatarPicker = useCallback(() => {
+		if (isUpdating || isAvatarUploading) {
+			return;
+		}
+
+		const wpMedia = (
+			window as Window & {
+				wp?: {
+					media?: (args: Record<string, unknown>) => {
+						on: (
+							event: string,
+							callback: () => void
+						) => void;
+						open: () => void;
+						state: () => {
+							get: (key: string) => {
+								first: () => {
+									toJSON: () => { id?: number };
+								};
+							};
+						};
+					};
+				};
+			}
+		).wp?.media;
+
+		if (wpMedia) {
+			let restoreMediaModal: (() => void) | undefined;
+
+			const frame = wpMedia({
+				title: __('Select profile image', 'doublescale'),
+				frame: 'select',
+				button: {
+					text: __('Use this image', 'doublescale'),
+				},
+				library: { type: 'image' },
+				multiple: false,
+			});
+
+			frame.on('open', () => {
+				const content = (
+					frame as {
+						content?: { mode?: (view: string) => void };
+					}
+				).content;
+				content?.mode?.('browse');
+
+				window.setTimeout(() => {
+					restoreMediaModal?.();
+					restoreMediaModal = elevateWordPressMediaModal();
+				}, 10);
+			});
+
+			frame.on('close', () => {
+				restoreMediaModal?.();
+				restoreMediaModal = undefined;
+			});
+
+			frame.on('select', () => {
+				const attachment = frame
+					.state()
+					.get('selection')
+					.first()
+					?.toJSON();
+
+				if (attachment?.id) {
+					void handleAvatarSelect({ id: attachment.id });
+				}
+			});
+
+			frame.open();
+			return;
+		}
+
+		avatarFileInputRef.current?.click();
+	}, [isAvatarUploading, isUpdating]);
+
+	const handleAvatarFileChange = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0];
+		event.target.value = '';
+
+		if (!file || isUpdating || isAvatarUploading) {
+			return;
+		}
+
+		setIsAvatarUploading(true);
+		try {
+			const attachmentId = await uploadImageFile(file);
+			await handleAvatarSelect({ id: attachmentId });
+		} catch (error) {
+			showNotice?.({
+				type: 'error',
+				message:
+					error instanceof Error
+						? error.message
+						: __('Failed to upload image', 'doublescale'),
+			});
+		} finally {
+			setIsAvatarUploading(false);
+		}
+	};
+
+	const isAvatarBusy = isUpdating || isAvatarUploading;
 
 	// Calculate email analytics
 	const totalEmails = emailAnalytics?.total_sent || 0;
@@ -273,21 +413,67 @@ const ContactInformation: React.FC = () => {
 						className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-primary/[0.14] to-transparent"
 						aria-hidden
 					/>
-					<div className="relative flex flex-col items-center text-center">
-						<Avatar className="mb-4 h-[5.25rem] w-[5.25rem] border-[3px] border-background shadow-md ring-2 ring-border/30">
-							{avatarUrl ? (
-								<AvatarImage
-									src={avatarUrl}
-									alt={fullName}
-									className="rounded-full object-cover"
-								/>
-							) : null}
-							<AvatarFallback className="bg-primary/8 text-primary text-xl font-bold">
-								{initials || (
-									<UserRound className="h-10 w-10" />
+					<div className="relative z-[1] flex flex-col items-center text-center">
+						<input
+							ref={avatarFileInputRef}
+							type="file"
+							accept="image/*"
+							className="hidden"
+							onChange={(event) => {
+								void handleAvatarFileChange(event);
+							}}
+						/>
+						<div className="group mb-4 flex flex-col items-center">
+							<button
+								type="button"
+								onClick={openAvatarPicker}
+								disabled={isAvatarBusy}
+								className="relative cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+								aria-label={__(
+									'Change profile image',
+									'doublescale'
 								)}
-							</AvatarFallback>
-						</Avatar>
+							>
+								<Avatar className="h-[5.25rem] w-[5.25rem] border-[3px] border-background shadow-md ring-2 ring-border/30">
+									{avatarUrl ? (
+										<AvatarImage
+											src={avatarUrl}
+											alt={fullName}
+											className="rounded-full object-cover"
+										/>
+									) : null}
+									<AvatarFallback className="bg-primary/8 text-primary text-xl font-bold">
+										{initials || (
+											<UserRound className="h-10 w-10" />
+										)}
+									</AvatarFallback>
+								</Avatar>
+								<div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+									{isAvatarBusy ? (
+										<Loader2 className="h-6 w-6 animate-spin text-white" />
+									) : (
+										<Camera className="h-6 w-6 text-white" />
+									)}
+								</div>
+							</button>
+							<p className="mt-1 text-xs text-muted-foreground">
+								{__('Click to upload photo', 'doublescale')}
+							</p>
+							{hasCustomAvatar ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="mt-1 h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+									disabled={isAvatarBusy}
+									onClick={() => {
+										void handleAvatarRemove();
+									}}
+								>
+									{__('Remove photo', 'doublescale')}
+								</Button>
+							) : null}
+						</div>
 						<CardTitle className="mb-2 max-w-full break-words text-xl font-semibold tracking-tight text-foreground">
 							{fullName}
 						</CardTitle>

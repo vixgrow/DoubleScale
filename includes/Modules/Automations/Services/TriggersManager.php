@@ -183,12 +183,6 @@ final class TriggersManager {
 						'label'    => __( 'Webhooks', 'doublescale' ),
 						'triggers' => array(),
 					),
-					'deal'          => array(
-						'label'       => __( 'Deal', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'deals' ),
-					),
 				),
 			),
 			'woocommerce' => array(
@@ -329,6 +323,12 @@ final class TriggersManager {
 						'label'       => __( 'Credit Notes', 'doublescale' ),
 						'triggers'    => array(),
 						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) ),
+					),
+					'deal'          => array(
+						'label'       => __( 'Deal', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'deals' ),
 					),
 				),
 			),

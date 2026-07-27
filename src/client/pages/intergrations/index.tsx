@@ -36,6 +36,7 @@ import paypalImg from '@doublescale/assets/images/paypal/paypal.png';
 // @ts-ignore
 import metaWhatsappImg from '@doublescale/assets/images/meta-whatsapp/meta-whatsapp.svg';
 
+const freePluginUrl = ConfigAPI.getPluginDirUrl().replace(/\/?$/, '/');
 const proPluginUrl =
 	(typeof window !== 'undefined' &&
 		(
@@ -43,7 +44,7 @@ const proPluginUrl =
 				doublescalePro?: { proPluginUrl?: string };
 			}
 		).doublescalePro?.proPluginUrl) ||
-	ConfigAPI.getPluginDirUrl();
+	freePluginUrl;
 
 const integrationImages: Record<string, string> = {
 	slack: slackImg,
@@ -53,8 +54,9 @@ const integrationImages: Record<string, string> = {
 	'meta-whatsapp': metaWhatsappImg,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
-	typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
-	jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
+	// Typeform/Jotform logos ship in the free plugin package.
+	typeform: `${freePluginUrl}assets/images/typeform/typeform.svg`,
+	jotform: `${freePluginUrl}assets/images/jotform/jotform.png`,
 };
 
 const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'typeform', 'jotform', 'zapier', 'make'];

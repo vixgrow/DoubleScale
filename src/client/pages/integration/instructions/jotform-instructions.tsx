@@ -42,16 +42,7 @@ const ExternalHref: React.FC<{ href: string; children: React.ReactNode }> = ({
 );
 
 const JotformInstructions: React.FC = () => {
-	const proPluginUrl =
-		(typeof window !== 'undefined' &&
-			(
-				window as unknown as {
-					doublescalePro?: { proPluginUrl?: string };
-				}
-			).doublescalePro?.proPluginUrl) ||
-		ConfigAPI.getPluginDirUrl();
-
-	const logoUrl = `${proPluginUrl}assets/images/jotform/jotform.png`;
+	const logoUrl = `${ConfigAPI.getPluginDirUrl().replace(/\/?$/, '/')}assets/images/jotform/jotform.png`;
 
 	return (
 		<div className="space-y-4">

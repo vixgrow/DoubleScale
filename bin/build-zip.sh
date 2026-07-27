@@ -62,6 +62,9 @@ rsync -a \
 	--exclude="/dependencies/vendor.OFF" \
 	--exclude="/php-scoper.phar" \
 	--include="/assets/images/templates-images/***" \
+	--include="/assets/images/form-types/***" \
+	--include="/assets/images/typeform/***" \
+	--include="/assets/images/jotform/***" \
 	--exclude="/assets/images/**" \
 	--exclude="/assets/booking-icons" \
 	./ "$STAGE_DIR/"

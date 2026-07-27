@@ -78,16 +78,6 @@ const makeFormIconComponent = (src: string): GroupIconComponent => {
 	);
 };
 
-const getProPluginUrl = () => {
-	if (typeof window !== 'undefined') {
-		const pro = (window as unknown as { doublescalePro?: { proPluginUrl?: string } })
-			.doublescalePro;
-		if (pro?.proPluginUrl) return pro.proPluginUrl;
-	}
-
-	return config.getPluginDirUrl();
-};
-
 const basePluginUrl = config.getPluginDirUrl().replace(/\/?$/, '/');
 
 const formProviderIconSrcByKey: Record<FormProviderKey, string> = {
@@ -106,8 +96,9 @@ const formProviderIconSrcByKey: Record<FormProviderKey, string> = {
 	sureforms: `${basePluginUrl}assets/images/form-types/sureforms.png`,
 	eform: `${basePluginUrl}assets/images/form-types/eform.png`,
 	jetform: `${basePluginUrl}assets/images/form-types/jetform.svg`,
-	typeform: `${getProPluginUrl()}assets/images/typeform/typeform.svg`,
-	jotform: `${getProPluginUrl()}assets/images/jotform/jotform.png`,
+	// Free plugin ships these under assets/images/ (release packaging must include them).
+	typeform: `${basePluginUrl}assets/images/typeform/typeform.svg`,
+	jotform: `${basePluginUrl}assets/images/jotform/jotform.png`,
 };
 
 const getFormProviderKey = (label: string | undefined): FormProviderKey | null => {

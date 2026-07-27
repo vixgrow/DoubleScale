@@ -326,11 +326,19 @@ export type TriggersGroup = {
 	disabled_reason?: string;
 };
 
+export type TriggerCategoryTab = {
+	label: string;
+	groups: TriggersGroup[] | Record<string, TriggersGroup>;
+};
+
+export type AutomationTriggerCategory = {
+	label: string;
+	groups?: TriggersGroup[] | Record<string, TriggersGroup>;
+	tabs?: Record<string, TriggerCategoryTab>;
+};
+
 export type AutomationTriggers = {
-	[key: string]: {
-		label: string;
-		groups: TriggersGroup[];
-	};
+	[key: string]: AutomationTriggerCategory;
 };
 
 export type Action = {

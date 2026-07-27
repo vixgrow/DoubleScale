@@ -134,8 +134,16 @@ export const getGoal = (goal: string): Goal => {
 
 export const getTrigger = (trigger: string): Trigger => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
-	const triggersGroups = flatMap(automationTriggers, (group) =>
-		flatMap(group.groups, (group) => group.triggers)
+	const triggersGroups = flatMap(automationTriggers, (category) => {
+		const tabGroups = category.tabs
+			? flatMap(category.tabs, (tab) =>
+					normalizeTriggerGroups(tab.groups)
+				)
+			: [];
+		const directGroups = normalizeTriggerGroups(category.groups);
+		return [...tabGroups, ...directGroups];
+	}).flatMap((group) =>
+		group?.triggers ? [group.triggers] : []
 	);
 	const foundTrigger = find(triggersGroups, (triggers) => triggers[trigger]);
 
@@ -146,6 +154,21 @@ export const getTrigger = (trigger: string): Trigger => {
 			description: '',
 			fields: {},
 		};
+};
+
+const normalizeTriggerGroups = (
+	raw:
+		| Record<string, { triggers?: Record<string, Trigger> }>
+		| Array<{ triggers?: Record<string, Trigger> }>
+		| undefined
+): Array<{ triggers?: Record<string, Trigger> }> => {
+	if (!raw) {
+		return [];
+	}
+	if (Array.isArray(raw)) {
+		return raw;
+	}
+	return Object.values(raw);
 };
 
 export const convertDate = (date: string, addTime: boolean = false) => {

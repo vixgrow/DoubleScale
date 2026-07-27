@@ -185,38 +185,63 @@ final class TriggersManager {
 					),
 				),
 			),
-			'woocommerce' => array(
-				'label'  => __( 'WooCommerce', 'doublescale' ),
-				'groups' => array(
-					'order'        => array(
-						'label'       => __( 'Order', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			'ecommerce'   => array(
+				'label' => __( 'E-commerce', 'doublescale' ),
+				'tabs'  => array(
+					'woocommerce' => array(
+						'label'  => __( 'WooCommerce', 'doublescale' ),
+						'groups' => array(
+							'order'        => array(
+								'label'       => __( 'Order', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+							),
+							'cart'         => array(
+								'label'       => __( 'Cart', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+							),
+							'review'       => array(
+								'label'       => __( 'Review', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+							),
+							'subscription' => array(
+								'label'       => __( 'Subscription', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+							),
+							'wishlist'     => array(
+								'label'       => __( 'Wishlist', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
+							),
+							'membership'   => array(
+								'label'       => __( 'Membership', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+							),
+						),
 					),
-					'cart'         => array(
-						'label'       => __( 'Cart', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					'edd'         => array(
+						'label'  => __( 'Easy Digital Downloads', 'doublescale' ),
+						'groups' => array(
+							'order' => array(
+								'label'       => __( 'Order', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
+							),
+						),
 					),
-					'review'       => array(
-						'label'       => __( 'Review', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					),
-					'subscription' => array(
-						'label'       => __( 'Subscription', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
-					),
-					'wishlist'     => array(
-						'label'       => __( 'Wishlist', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
-					),
-					'membership'   => array(
-						'label'       => __( 'Membership', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+					'surecart'    => array(
+						'label'  => __( 'SureCart', 'doublescale' ),
+						'groups' => array(
+							'order' => array(
+								'label'       => __( 'Order', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+							),
+						),
 					),
 				),
 			),
@@ -226,16 +251,6 @@ final class TriggersManager {
 					'user' => array(
 						'label'    => __( 'User', 'doublescale' ),
 						'triggers' => array(),
-					),
-				),
-			),
-			'edd'         => array(
-				'label'  => __( 'Easy Digital Downloads', 'doublescale' ),
-				'groups' => array(
-					'order' => array(
-						'label'       => __( 'Order', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
 					),
 				),
 			),
@@ -335,16 +350,6 @@ final class TriggersManager {
 			'forms'       => array(
 				'label'  => __( 'Forms', 'doublescale' ),
 				'groups' => array(),
-			),
-			'surecart'    => array(
-				'label'  => __( 'SureCart', 'doublescale' ),
-				'groups' => array(
-					'order' => array(
-						'label'       => __( 'Order', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
-					),
-				),
 			),
 			'video'       => array(
 				'label'  => __( 'Video', 'doublescale' ),
@@ -514,6 +519,19 @@ final class TriggersManager {
 				$this->sources['forms']['groups'][ $trigger->group ]['disabled_reason'] = $trigger->slug . '_not_connected';
 			}
 			$this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+
+			return;
+		}
+
+		$ecommerce_sources = array( 'woocommerce', 'edd', 'surecart' );
+		if ( in_array( $trigger->source, $ecommerce_sources, true ) ) {
+			if ( ! isset( $this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ] ) ) {
+				$this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ] = array(
+					'label'    => $trigger->group,
+					'triggers' => array(),
+				);
+			}
+			$this->sources['ecommerce']['tabs'][ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
 
 			return;
 		}

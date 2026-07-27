@@ -36,6 +36,35 @@ import { cn } from '@/lib/utils';
 import TriggersGroupRender from './triggers-group-render';
 import { Input } from '@doublescale/shared/ui/input';
 import { Label } from '@doublescale/shared/ui/label';
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@doublescale/shared/ui/tabs';
+
+const normalizeTriggerGroups = (
+	raw: TriggersGroup[] | Record<string, TriggersGroup> | undefined
+): TriggersGroup[] => {
+	if (!raw) {
+		return [];
+	}
+	if (Array.isArray(raw)) {
+		return raw;
+	}
+	return Object.values(raw);
+};
+
+const groupContainsTrigger = (
+	groups: TriggersGroup[] | Record<string, TriggersGroup> | undefined,
+	triggerSlug: string
+): boolean =>
+	normalizeTriggerGroups(groups).some(
+		(group) =>
+			group?.triggers &&
+			Object.prototype.hasOwnProperty.call(group.triggers, triggerSlug)
+	);
+
 interface CreateAutomationModalProps {
 	visible: boolean;
 	isEditAutomation?: boolean;
@@ -71,6 +100,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
 	const [selectedCategory, setSelectedCategory] = useState('crm');
+	const [selectedEcommerceTab, setSelectedEcommerceTab] =
+		useState('woocommerce');
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const categoryData = {
@@ -377,7 +408,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				'doublescale'
 			),
 		},
-		woocommerce: {
+		ecommerce: {
 			image: (
 				<svg
 					width="68"
@@ -415,34 +446,6 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'WordPress user and content automation',
-				'doublescale'
-			),
-		},
-		edd: {
-			image: (
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 106 106"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M89.635 15.378C80.136 5.876 67.007 0 52.51 0C38.009 0 24.882 5.876 15.38 15.378C5.87601 24.88 0 38.009 0 52.508C0 67.007 5.87601 80.136 15.378 89.638C24.88 99.142 38.009 105.016 52.51 105.016C67.009 105.016 80.138 99.137 89.637 89.638C99.139 80.134 105.015 67.007 105.015 52.508C105.015 38.009 99.137 24.88 89.635 15.378ZM87.903 87.902C78.846 96.96 66.331 102.563 52.508 102.563C38.685 102.563 26.169 96.96 17.111 87.902C8.05301 78.844 2.45 66.33 2.45 52.508C2.45 38.685 8.05301 26.171 17.111 17.113C26.169 8.055 38.683 2.452 52.506 2.452C66.329 2.452 78.843 8.055 87.901 17.113C96.959 26.171 102.561 38.685 102.561 52.508C102.563 66.33 96.96 78.845 87.903 87.902Z"
-						fill="#35495C"
-					/>
-					<path
-						d="M97.678 52.0699C97.442 27.3239 77.311 7.33594 52.51 7.33594C27.707 7.33594 7.574 27.3259 7.342 52.0719L28.054 31.3599L35 38.3059L19.843 53.4629H85.176L70.019 38.3059L76.965 31.3599L97.678 52.0699ZM52.508 44.3079L33.262 24.1119H46.052V14.1569C46.052 11.5729 48.958 9.45494 52.508 9.45494C56.058 9.45494 58.964 11.5709 58.964 14.1569V24.1119H71.754L52.508 44.3079Z"
-						fill="#35495C"
-					/>
-					<path
-						d="M58.122 77.93C57.096 77.263 55.796 76.663 54.228 76.142C53.029 75.729 52.042 75.339 51.272 74.963C50.508 74.591 49.944 74.178 49.583 73.742C49.213 73.298 49.04 72.766 49.04 72.156C49.04 71.668 49.187 71.204 49.502 70.765C49.811 70.327 50.294 69.962 50.95 69.686C51.613 69.406 52.457 69.255 53.505 69.25C54.349 69.254 55.12 69.322 55.817 69.443C56.506 69.568 57.117 69.719 57.64 69.892C58.17 70.071 58.598 70.24 58.935 70.399L60.101 66.883C59.396 66.529 58.513 66.235 57.441 65.997C56.531 65.796 55.489 65.68 54.306 65.64V62.002H51.101V65.822C50.587 65.905 50.094 66.017 49.628 66.152C48.449 66.5 47.436 66.983 46.598 67.614C45.767 68.242 45.123 68.977 44.681 69.819C44.237 70.661 44.018 71.589 44.009 72.587C44.015 73.742 44.318 74.76 44.915 75.639C45.512 76.519 46.363 77.282 47.462 77.936C48.556 78.588 49.862 79.15 51.372 79.623C52.505 79.986 53.429 80.365 54.133 80.754C54.838 81.141 55.354 81.568 55.675 82.034C56.003 82.5 56.165 83.04 56.159 83.644C56.159 84.307 55.964 84.882 55.584 85.379C55.208 85.869 54.652 86.254 53.921 86.527C53.19 86.803 52.298 86.938 51.252 86.947C50.401 86.941 49.576 86.868 48.771 86.73C47.972 86.586 47.222 86.4 46.531 86.168C45.833 85.936 45.223 85.684 44.693 85.402L43.566 89.064C44.076 89.344 44.712 89.596 45.491 89.828C46.27 90.062 47.127 90.248 48.066 90.39C48.998 90.528 49.956 90.598 50.93 90.607L51.101 90.605V94.366H54.306V90.303C54.713 90.224 55.1 90.13 55.468 90.021C56.754 89.634 57.822 89.106 58.667 88.43C59.518 87.76 60.148 86.984 60.566 86.109C60.982 85.234 61.19 84.308 61.19 83.322C61.19 82.167 60.943 81.145 60.433 80.266C59.918 79.379 59.152 78.602 58.122 77.93Z"
-						fill="#35495C"
-					/>
-				</svg>
-			),
-			description: __(
-				'Easy Digital Downloads order automation',
 				'doublescale'
 			),
 		},
@@ -628,40 +631,6 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				'doublescale'
 			),
 		},
-		surecart: {
-			image: (
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
-						fill="#008B8B"
-					/>
-					<path
-						d="M12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z"
-						fill="#008B8B"
-					/>
-					<path
-						d="M7 10.5L9.5 13L7 15.5"
-						stroke="#008B8B"
-						strokeWidth="1.5"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					/>
-					<path
-						d="M9 13H15"
-						stroke="#008B8B"
-						strokeWidth="1.5"
-						strokeLinecap="round"
-					/>
-				</svg>
-			),
-			description: __('SureCart e-commerce automation', 'doublescale'),
-		},
 		video: {
 			image: (
 				<svg
@@ -715,17 +684,29 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		return automationTriggers[selectedCategory];
 	}, [automationTriggers, selectedCategory]);
 
-	// PHP sends `groups` as an object (associative array). TS types expect an array; normalize for the UI.
-	const triggerGroupsForCategory = useMemo((): TriggersGroup[] => {
-		const raw = currentCategoryData?.groups;
-		if ( ! raw ) {
+	const ecommerceTabs = useMemo(() => {
+		const tabs = currentCategoryData?.tabs;
+		if (!tabs || typeof tabs !== 'object') {
 			return [];
 		}
-		if ( Array.isArray( raw ) ) {
-			return raw as TriggersGroup[];
+		return Object.entries(tabs).map(([key, tab]) => ({
+			key,
+			label: tab.label,
+			groups: normalizeTriggerGroups(tab.groups),
+		}));
+	}, [currentCategoryData]);
+
+	// PHP sends `groups` as an object (associative array). TS types expect an array; normalize for the UI.
+	const triggerGroupsForCategory = useMemo((): TriggersGroup[] => {
+		if (ecommerceTabs.length > 0) {
+			const activeTab =
+				ecommerceTabs.find((tab) => tab.key === selectedEcommerceTab) ??
+				ecommerceTabs[0];
+			return activeTab?.groups ?? [];
 		}
-		return Object.values( raw ) as TriggersGroup[];
-	}, [ currentCategoryData ] );
+
+		return normalizeTriggerGroups(currentCategoryData?.groups);
+	}, [currentCategoryData, ecommerceTabs, selectedEcommerceTab]);
 
 	// When editing, switch to the category that contains the saved trigger.
 	useEffect(() => {
@@ -735,21 +716,18 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		for (const [categoryKey, category] of Object.entries(
 			automationTriggers
 		)) {
-			const rawGroups = category?.groups;
-			const groupsList = Array.isArray(rawGroups)
-				? rawGroups
-				: rawGroups && typeof rawGroups === 'object'
-					? Object.values(rawGroups)
-					: [];
-			const hasTrigger = groupsList.some(
-				(group) =>
-					group?.triggers &&
-					Object.prototype.hasOwnProperty.call(
-						group.triggers,
-						automation.trigger
-					)
-			);
-			if (hasTrigger) {
+			if (category?.tabs && typeof category.tabs === 'object') {
+				for (const [tabKey, tab] of Object.entries(category.tabs)) {
+					if (groupContainsTrigger(tab.groups, automation.trigger)) {
+						setSelectedCategory(categoryKey);
+						setSelectedEcommerceTab(tabKey);
+						return;
+					}
+				}
+				continue;
+			}
+
+			if (groupContainsTrigger(category?.groups, automation.trigger)) {
 				setSelectedCategory(categoryKey);
 				break;
 			}
@@ -907,19 +885,69 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 										)}
 										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[480px] overflow-y-auto"
 									>
-										<TriggersGroupRender
-											groups={
-												currentCategoryData?.groups ||
-												[]
-											}
-											value={automation.trigger}
-											onChange={(value) =>
-												onAutomationChange({
-													...automation,
-													trigger: value,
-												})
-											}
-										/>
+										{ecommerceTabs.length > 0 ? (
+											<Tabs
+												value={selectedEcommerceTab}
+												onValueChange={
+													setSelectedEcommerceTab
+												}
+												className="flex flex-col gap-4"
+											>
+												<TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-neutral-100 p-1">
+													{ecommerceTabs.map(
+														(tab) => (
+															<TabsTrigger
+																key={tab.key}
+																value={tab.key}
+																className="text-xs sm:text-sm"
+															>
+																{tab.label}
+															</TabsTrigger>
+														)
+													)}
+												</TabsList>
+												{ecommerceTabs.map((tab) => (
+													<TabsContent
+														key={tab.key}
+														value={tab.key}
+														className="mt-0"
+													>
+														<TriggersGroupRender
+															groups={
+																tab.groups
+															}
+															value={
+																automation.trigger
+															}
+															onChange={(
+																value
+															) =>
+																onAutomationChange(
+																	{
+																		...automation,
+																		trigger:
+																			value,
+																	}
+																)
+															}
+														/>
+													</TabsContent>
+												))}
+											</Tabs>
+										) : (
+											<TriggersGroupRender
+												groups={
+													triggerGroupsForCategory
+												}
+												value={automation.trigger}
+												onChange={(value) =>
+													onAutomationChange({
+														...automation,
+														trigger: value,
+													})
+												}
+											/>
+										)}
 									</div>
 								</div>
 							</div>

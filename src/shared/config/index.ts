@@ -134,6 +134,10 @@ const configData: ConfigData = {
 	storeNonce: (serverData.storeNonce as string | undefined) ?? '',
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
 	salesApprovalWorkflowEnabled: Boolean(serverData.salesApprovalWorkflowEnabled),
+	calendarWeekStartsOn: (() => {
+		const raw = Number(serverData.calendarWeekStartsOn);
+		return Number.isInteger(raw) && raw >= 0 && raw <= 6 ? raw : 1;
+	})(),
 	aiConfigured: Boolean(serverData.aiConfigured),
 	// White-label is a Pro feature; the free server never injects it, so this
 	// stays undefined on free. Kept here so shared components can safely call
@@ -973,6 +977,8 @@ export interface ConfigApi {
 	 */
 	getWhiteLabel: () => WhiteLabel | undefined;
 	isWhiteLabelShowSettings: () => boolean;
+	getCalendarWeekStartsOn: () => number;
+	setCalendarWeekStartsOn: (value: number) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -1056,6 +1062,19 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.getWhiteLabel = () => data.whiteLabel;
 	configApi.isWhiteLabelShowSettings = () =>
 		data.whiteLabelShowSettings ?? false;
+	configApi.getCalendarWeekStartsOn = () => {
+		const day = Number(data.calendarWeekStartsOn);
+		return Number.isInteger(day) && day >= 0 && day <= 6 ? day : 1;
+	};
+	configApi.setCalendarWeekStartsOn = (value: number) => {
+		const day = Number(value);
+		data.calendarWeekStartsOn =
+			Number.isInteger(day) && day >= 0 && day <= 6 ? day : 1;
+		if (typeof window !== 'undefined' && window.doublescaleConfig) {
+			window.doublescaleConfig.calendarWeekStartsOn =
+				data.calendarWeekStartsOn;
+		}
+	};
 	return configApi;
 };
 

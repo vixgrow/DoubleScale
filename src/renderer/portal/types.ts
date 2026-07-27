@@ -24,6 +24,8 @@ export interface PortalRendererConfig {
 	mount_id: string;
 	is_guest?: boolean;
 	guest_hash?: string;
+	/** First day of week for calendars (0 = Sunday … 6 = Saturday). */
+	calendarWeekStartsOn?: number;
 	/** True when the Credit Notes sales child module toggle is on. */
 	credit_notes_module_enabled?: boolean;
 	/** True when DoubleScale Pro is active and credit notes are available. */

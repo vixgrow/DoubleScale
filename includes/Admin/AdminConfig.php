@@ -196,6 +196,7 @@ final class AdminConfig {
 					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
 					: false,
 				'business'            => self::get_business_branding_config(),
+				'calendarWeekStartsOn' => Settings::get_calendar_week_starts_on(),
 			)
 		);
 

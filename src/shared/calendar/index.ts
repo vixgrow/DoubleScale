@@ -12,6 +12,7 @@
 export * from './types';
 export * from './colors';
 export * from './dates';
+export * from './week-start';
 export { default as EventChip } from './event-chip';
 export type { EventChipProps } from './event-chip';
 export { default as MonthGrid } from './month-grid';

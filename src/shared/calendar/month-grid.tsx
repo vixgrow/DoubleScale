@@ -14,18 +14,14 @@ import { format, isSameMonth, isToday } from 'date-fns';
 import type { CalendarEvent } from './types';
 import { eventDayKey } from './dates';
 import EventChip from './event-chip';
+import {
+	DEFAULT_WEEK_STARTS_ON,
+	getWeekdayLabels,
+	normalizeWeekStartsOn,
+	type WeekStartsOn,
+} from './week-start';
 
 const MAX_PER_CELL = 3;
-
-const WEEKDAYS = [
-	__( 'Sun', 'doublescale' ),
-	__( 'Mon', 'doublescale' ),
-	__( 'Tue', 'doublescale' ),
-	__( 'Wed', 'doublescale' ),
-	__( 'Thu', 'doublescale' ),
-	__( 'Fri', 'doublescale' ),
-	__( 'Sat', 'doublescale' ),
-];
 
 export interface MonthGridProps {
 	/** All 35/42 day cells (including adjacent-month spill days). */
@@ -35,9 +31,19 @@ export interface MonthGridProps {
 	events: CalendarEvent[];
 	/** Forwarded to each chip; omit for a read-only (non-clickable) grid. */
 	onSelect?: (event: CalendarEvent) => void;
+	/** First column weekday (0 = Sunday … 6 = Saturday). Default Monday. */
+	weekStartsOn?: WeekStartsOn | number;
 }
 
-const MonthGrid = ({ days, cursor, events, onSelect }: MonthGridProps) => {
+const MonthGrid = ({
+	days,
+	cursor,
+	events,
+	onSelect,
+	weekStartsOn = DEFAULT_WEEK_STARTS_ON,
+}: MonthGridProps) => {
+	const weekdayLabels = getWeekdayLabels(normalizeWeekStartsOn(weekStartsOn));
+
 	// Bucket events by civil day once.
 	const byDay = new Map<string, CalendarEvent[]>();
 	for (const event of events) {
@@ -53,9 +59,9 @@ const MonthGrid = ({ days, cursor, events, onSelect }: MonthGridProps) => {
 	return (
 		<div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
 			<div className="grid grid-cols-7 border-b border-border bg-muted/40">
-				{WEEKDAYS.map((label) => (
+				{weekdayLabels.map((label, index) => (
 					<div
-						key={label}
+						key={`${label}-${index}`}
 						className="px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
 					>
 						{label}

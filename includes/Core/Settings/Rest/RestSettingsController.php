@@ -129,6 +129,19 @@ class RestSettingsController extends RestController {
 						),
 					),
 				),
+				'calendar'         => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'week_starts_on' => array(
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 0,
+							'maximum' => 6,
+							'description' => 'First day of the week for CRM calendars. 0 = Sunday, 1 = Monday, … 6 = Saturday.',
+						),
+					),
+				),
 				'email'            => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
@@ -599,6 +612,18 @@ class RestSettingsController extends RestController {
 			$whatsapp_validation = $this->validate_whatsapp_settings( $settings['whatsapp'] );
 			if ( is_wp_error( $whatsapp_validation ) ) {
 				return $whatsapp_validation;
+			}
+		}
+
+		// Validate calendar week start (0 = Sunday … 6 = Saturday).
+		if ( isset( $settings['calendar']['week_starts_on'] ) ) {
+			$day = (int) $settings['calendar']['week_starts_on'];
+			if ( $day < 0 || $day > 6 ) {
+				return new \WP_Error(
+					'invalid_calendar_week_starts_on',
+					__( 'Calendar week start day must be between 0 (Sunday) and 6 (Saturday).', 'doublescale' ),
+					array( 'status' => 400 )
+				);
 			}
 		}
 

@@ -219,19 +219,20 @@ final class PortalFrontendHandler {
 		$user = wp_get_current_user();
 
 		$config = array(
-			'rest_root'       => esc_url_raw( rest_url() ),
-			'nonce'           => wp_create_nonce( 'wp_rest' ),
-			'portal_rest_url' => esc_url_raw( rest_url( 'doublescale/v1/portal' ) ),
-			'user'            => array(
+			'rest_root'            => esc_url_raw( rest_url() ),
+			'nonce'                => wp_create_nonce( 'wp_rest' ),
+			'portal_rest_url'      => esc_url_raw( rest_url( 'doublescale/v1/portal' ) ),
+			'user'                 => array(
 				'id'           => (int) $user->ID,
 				'email'        => sanitize_email( $user->user_email ),
 				'display_name' => $user->display_name ? sanitize_text_field( $user->display_name ) : '',
 				'avatar'       => esc_url_raw( (string) get_avatar_url( $user->ID, array( 'size' => 96 ) ) ),
 			),
-			'lang'            => get_locale(),
-			'mount_id'        => self::MOUNT_ID,
-			'is_guest'        => false,
-			'guest_hash'      => '',
+			'lang'                 => get_locale(),
+			'mount_id'             => self::MOUNT_ID,
+			'is_guest'             => false,
+			'guest_hash'           => '',
+			'calendarWeekStartsOn' => \DoubleScale\Core\Settings\Settings::get_calendar_week_starts_on(),
 		);
 
 		/**

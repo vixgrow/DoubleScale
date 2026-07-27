@@ -182,6 +182,29 @@ class Settings {
 	}
 
 	/**
+	 * First day of the week for CRM calendars (date-fns weekStartsOn).
+	 *
+	 * 0 = Sunday, 1 = Monday, … 6 = Saturday. Defaults to Monday.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int
+	 */
+	public static function get_calendar_week_starts_on() {
+		$calendar = self::get( 'calendar', array() );
+		if ( ! is_array( $calendar ) ) {
+			return 1;
+		}
+
+		$day = isset( $calendar['week_starts_on'] ) ? (int) $calendar['week_starts_on'] : 1;
+		if ( $day < 0 || $day > 6 ) {
+			return 1;
+		}
+
+		return $day;
+	}
+
+	/**
 	 * Resolve the currency to display for a sales document.
 	 *
 	 * Currency is a single global setting (like deals), but once a document has

@@ -20,10 +20,12 @@ import { useNavigate } from 'react-router-dom';
 import {
 	MonthGrid,
 	useCalendar,
+	normalizeWeekStartsOn,
 	type CalendarEvent,
 } from '@doublescale/shared/calendar';
 import type { PortalCalendarEventKind } from '../../types';
 import { fetchCalendar } from '../../api';
+import { getPortalConfig } from '../../config';
 import { ChevronLeftIcon, ChevronRightIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui';
 
@@ -40,8 +42,11 @@ const KIND_FILTERS: KindFilter[] = [
 
 const Calendar = () => {
 	const navigate = useNavigate();
+	const weekStartsOn = normalizeWeekStartsOn(
+		getPortalConfig()?.calendarWeekStartsOn
+	);
 	const { grid, events, loading, error, goPrev, goNext, goToday } =
-		useCalendar(fetchCalendar);
+		useCalendar(fetchCalendar, [], weekStartsOn);
 
 	// All kinds visible by default; toggling removes a kind from the view.
 	const [hidden, setHidden] = useState<Set<PortalCalendarEventKind>>(
@@ -137,6 +142,7 @@ const Calendar = () => {
 						cursor={grid.cursor}
 						events={visibleEvents}
 						onSelect={onSelect}
+						weekStartsOn={grid.weekStartsOn}
 					/>
 					{events.length === 0 && (
 						<EmptyState

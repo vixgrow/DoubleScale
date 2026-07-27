@@ -26,6 +26,11 @@ import {
 } from 'date-fns';
 
 import type { CalendarEvent, CalendarFeedResponse } from './types';
+import {
+	DEFAULT_WEEK_STARTS_ON,
+	normalizeWeekStartsOn,
+	type WeekStartsOn,
+} from './week-start';
 
 const ymd = (d: Date): string => format(d, 'yyyy-MM-dd');
 
@@ -37,17 +42,22 @@ export interface CalendarGrid {
 	/** Feed window bounds (YYYY-MM-DD) covering the whole grid. */
 	rangeStart: string;
 	rangeEnd: string;
+	weekStartsOn: WeekStartsOn;
 }
 
-/** Build the 6-week (Sun-start) grid for the month containing `cursor`. */
-const buildGrid = (cursor: Date): CalendarGrid => {
-	const gridStart = startOfWeek(startOfMonth(cursor), { weekStartsOn: 0 });
-	const gridEnd = endOfWeek(endOfMonth(cursor), { weekStartsOn: 0 });
+/** Build the 6-week grid for the month containing `cursor`. */
+const buildGrid = (
+	cursor: Date,
+	weekStartsOn: WeekStartsOn
+): CalendarGrid => {
+	const gridStart = startOfWeek(startOfMonth(cursor), { weekStartsOn });
+	const gridEnd = endOfWeek(endOfMonth(cursor), { weekStartsOn });
 	return {
 		cursor,
 		days: eachDayOfInterval({ start: gridStart, end: gridEnd }),
 		rangeStart: ymd(gridStart),
 		rangeEnd: ymd(gridEnd),
+		weekStartsOn,
 	};
 };
 
@@ -77,10 +87,15 @@ export interface UseCalendarResult {
 
 export const useCalendar = (
 	fetcher: CalendarFetcher,
-	extraDeps: unknown[] = []
+	extraDeps: unknown[] = [],
+	weekStartsOn: WeekStartsOn | number = DEFAULT_WEEK_STARTS_ON
 ): UseCalendarResult => {
+	const normalizedWeekStartsOn = normalizeWeekStartsOn(weekStartsOn);
 	const [cursor, setCursor] = useState<Date>(() => startOfMonth(new Date()));
-	const grid = useMemo(() => buildGrid(cursor), [cursor]);
+	const grid = useMemo(
+		() => buildGrid(cursor, normalizedWeekStartsOn),
+		[cursor, normalizedWeekStartsOn]
+	);
 
 	const [data, setData] = useState<CalendarFeedResponse | null>(null);
 	const [loading, setLoading] = useState(true);

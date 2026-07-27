@@ -769,6 +769,10 @@ export type Settings = {
 		business_address: string;
 		business_logo?: string;
 	};
+	calendar?: {
+		/** 0 = Sunday … 6 = Saturday. Default Monday (1). */
+		week_starts_on: number;
+	};
 	email: {
 		from_name: string;
 		from_email: string;

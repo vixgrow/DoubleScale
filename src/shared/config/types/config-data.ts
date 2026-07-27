@@ -40,6 +40,11 @@ export type ConfigData = Record<string, unknown> & {
 	modules: ModuleInfo[];
 	/** Sales approval workflow toggle from server settings (admin bootstrap). */
 	salesApprovalWorkflowEnabled: boolean;
+	/**
+	 * First day of the week for CRM calendars (date-fns weekStartsOn).
+	 * 0 = Sunday, 1 = Monday, … 6 = Saturday.
+	 */
+	calendarWeekStartsOn: number;
 	/** Add-on plugin catalog + install state from the store. */
 	addons: Addons;
 	/** Nonce for in-app store / installer requests. */

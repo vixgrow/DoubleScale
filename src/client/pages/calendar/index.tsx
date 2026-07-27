@@ -21,6 +21,7 @@ import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import ConfigAPI from '@doublescale/config';
 import {
 	MonthGrid,
 	useCalendar,
@@ -64,7 +65,7 @@ const AdminCalendar = () => {
 		[ viewUser ]
 	);
 	const { grid, events, loading, error, goPrev, goNext, goToday } =
-		useCalendar( fetcher, [ viewUser ] );
+		useCalendar( fetcher, [ viewUser ], ConfigAPI.getCalendarWeekStartsOn() );
 
 	// Build the staffer dropdown from the assignees seen while viewing All.
 	const staffers = useStafferRoster(
@@ -201,6 +202,7 @@ const AdminCalendar = () => {
 						cursor={ grid.cursor }
 						events={ visibleEvents }
 						onSelect={ onSelect }
+						weekStartsOn={ grid.weekStartsOn }
 					/>
 					{ events.length === 0 && (
 						<p className="py-8 text-center text-sm text-muted-foreground">

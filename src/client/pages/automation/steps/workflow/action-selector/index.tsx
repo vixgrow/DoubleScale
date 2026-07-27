@@ -19,7 +19,29 @@ import {
 	DialogDescription,
 } from "@/components/ui/dialog";
 import ConfigAPI from '@doublescale/config';
+import type { ActionsGroup } from '@doublescale/config';
 import { HelpdeskIcon } from '@doublescale/components';
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@doublescale/shared/ui/tabs';
+
+const normalizeActionGroupsRecord = (
+	raw: ActionsGroup[] | Record<string, ActionsGroup> | undefined
+): Record<string, ActionsGroup> => {
+	if (!raw) {
+		return {};
+	}
+	if (Array.isArray(raw)) {
+		return raw.reduce<Record<string, ActionsGroup>>((acc, group, index) => {
+			acc[String(index)] = group;
+			return acc;
+		}, {});
+	}
+	return raw;
+};
 
 interface ActionSelectorProps {
 	value: string;
@@ -38,6 +60,8 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('crm');
+	const [selectedCategoryTab, setSelectedCategoryTab] =
+		useState('woocommerce');
 	const automationActions = ConfigAPI.getAutomationActions();
 
 	// Filter out delay group from CRM
@@ -144,7 +168,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 			),
 			description: __('Learning management system automation', 'doublescale')
 		},
-		'woocommerce': {
+		'ecommerce': {
 			image: (
 				<svg
 					width="68"
@@ -202,7 +226,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 			),
 			description: __('Send data to external services', 'doublescale')
 		},
-		'memberpress': {
+		'membership': {
 			image: (
 				<svg
 					width="24"
@@ -214,89 +238,49 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					<path
 						opacity="0.4"
 						d="M17 2H7C4.24 2 2 4.24 2 7V17C2 19.76 4.24 22 7 22H17C19.76 22 22 19.76 22 17V7C22 4.24 19.76 2 17 2Z"
-						fill="url(#paint0_linear_mp_action)"
+						fill="url(#paint0_linear_membership_action)"
 					/>
 					<path
 						d="M15.5 9.75H8.5C8.09 9.75 7.75 9.41 7.75 9C7.75 8.59 8.09 8.25 8.5 8.25H15.5C15.91 8.25 16.25 8.59 16.25 9C16.25 9.41 15.91 9.75 15.5 9.75Z"
-						fill="url(#paint1_linear_mp_action)"
+						fill="url(#paint1_linear_membership_action)"
 					/>
 					<path
 						d="M12 12.75C10.9 12.75 10 11.85 10 10.75V7.25C10 6.15 10.9 5.25 12 5.25C13.1 5.25 14 6.15 14 7.25V10.75C14 11.85 13.1 12.75 12 12.75Z"
-						fill="url(#paint2_linear_mp_action)"
+						fill="url(#paint2_linear_membership_action)"
 					/>
 					<path
 						d="M17 15.75H7C6.59 15.75 6.25 15.41 6.25 15C6.25 14.59 6.59 14.25 7 14.25H17C17.41 14.25 17.75 14.59 17.75 15C17.75 15.41 17.41 15.75 17 15.75Z"
-						fill="url(#paint3_linear_mp_action)"
+						fill="url(#paint3_linear_membership_action)"
 					/>
 					<path
 						d="M14 18.75H10C9.59 18.75 9.25 18.41 9.25 18C9.25 17.59 9.59 17.25 10 17.25H14C14.41 17.25 14.75 17.59 14.75 18C14.75 18.41 14.41 18.75 14 18.75Z"
-						fill="url(#paint4_linear_mp_action)"
+						fill="url(#paint4_linear_membership_action)"
 					/>
 					<defs>
-						<linearGradient id="paint0_linear_mp_action" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+						<linearGradient id="paint0_linear_membership_action" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
 							<stop offset="0.610577" stop-color="#1E3A8A" />
 							<stop offset="1" stop-color="#3B82F6" />
 						</linearGradient>
-						<linearGradient id="paint1_linear_mp_action" x1="7.75" y1="9" x2="16.25" y2="9" gradientUnits="userSpaceOnUse">
+						<linearGradient id="paint1_linear_membership_action" x1="7.75" y1="9" x2="16.25" y2="9" gradientUnits="userSpaceOnUse">
 							<stop offset="0.610577" stop-color="#1E3A8A" />
 							<stop offset="1" stop-color="#3B82F6" />
 						</linearGradient>
-						<linearGradient id="paint2_linear_mp_action" x1="10" y1="9" x2="14" y2="9" gradientUnits="userSpaceOnUse">
+						<linearGradient id="paint2_linear_membership_action" x1="10" y1="9" x2="14" y2="9" gradientUnits="userSpaceOnUse">
 							<stop offset="0.610577" stop-color="#1E3A8A" />
 							<stop offset="1" stop-color="#3B82F6" />
 						</linearGradient>
-						<linearGradient id="paint3_linear_mp_action" x1="6.25" y1="15" x2="17.75" y2="15" gradientUnits="userSpaceOnUse">
+						<linearGradient id="paint3_linear_membership_action" x1="6.25" y1="15" x2="17.75" y2="15" gradientUnits="userSpaceOnUse">
 							<stop offset="0.610577" stop-color="#1E3A8A" />
 							<stop offset="1" stop-color="#3B82F6" />
 						</linearGradient>
-						<linearGradient id="paint4_linear_mp_action" x1="9.25" y1="18" x2="14.75" y2="18" gradientUnits="userSpaceOnUse">
+						<linearGradient id="paint4_linear_membership_action" x1="9.25" y1="18" x2="14.75" y2="18" gradientUnits="userSpaceOnUse">
 							<stop offset="0.610577" stop-color="#1E3A8A" />
 							<stop offset="1" stop-color="#3B82F6" />
 						</linearGradient>
 					</defs>
 				</svg>
 			),
-			description: __('MemberPress membership automation', 'doublescale')
-		},
-		'pmpro': {
-			image: (
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						opacity="0.4"
-						d="M12 2C9.38 2 3 4.5 3 4.5V14.5C3 18 7 21 12 22C17 21 21 18 21 14.5V4.5C21 4.5 14.62 2 12 2Z"
-						fill="url(#paint0_linear_pmpro_action)"
-					/>
-					<path
-						d="M12 7C10.9 7 10 7.9 10 9V10H9.5C9.22 10 9 10.22 9 10.5V14.5C9 14.78 9.22 15 9.5 15H14.5C14.78 15 15 14.78 15 14.5V10.5C15 10.22 14.78 10 14.5 10H14V9C14 7.9 13.1 7 12 7ZM13 10H11V9C11 8.45 11.45 8 12 8C12.55 8 13 8.45 13 9V10Z"
-						fill="url(#paint1_linear_pmpro_action)"
-					/>
-					<path
-						d="M12 17.5C11.17 17.5 10.5 16.83 10.5 16C10.5 15.17 11.17 14.5 12 14.5C12.83 14.5 13.5 15.17 13.5 16C13.5 16.83 12.83 17.5 12 17.5Z"
-						fill="url(#paint2_linear_pmpro_action)"
-					/>
-					<defs>
-						<linearGradient id="paint0_linear_pmpro_action" x1="3" y1="12" x2="21" y2="12" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
-						</linearGradient>
-						<linearGradient id="paint1_linear_pmpro_action" x1="9" y1="11" x2="15" y2="11" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
-						</linearGradient>
-						<linearGradient id="paint2_linear_pmpro_action" x1="10.5" y1="16" x2="13.5" y2="16" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
-						</linearGradient>
-					</defs>
-				</svg>
-			),
-			description: __('Paid Memberships Pro membership automation', 'doublescale')
+			description: __('Membership and subscription automation', 'doublescale')
 		},
 		'email': {
 			image: (
@@ -369,6 +353,40 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 
 	const currentCategoryData = filteredActions[selectedCategory];
 
+	const categoryTabs = useMemo(() => {
+		const tabs = currentCategoryData?.tabs;
+		if (!tabs || typeof tabs !== 'object') {
+			return [];
+		}
+		return Object.entries(tabs).map(([key, tab]) => ({
+			key,
+			label: tab.label,
+			groups: normalizeActionGroupsRecord(tab.groups),
+		}));
+	}, [currentCategoryData]);
+
+	const actionGroupsForCategory = useMemo((): Record<string, ActionsGroup> => {
+		if (categoryTabs.length > 0) {
+			const activeTab =
+				categoryTabs.find((tab) => tab.key === selectedCategoryTab) ??
+				categoryTabs[0];
+			return activeTab?.groups ?? {};
+		}
+
+		return currentCategoryData?.groups ?? {};
+	}, [categoryTabs, currentCategoryData, selectedCategoryTab]);
+
+	const handleCategorySelect = (categoryKey: string) => {
+		setSelectedCategory(categoryKey);
+		const tabs = filteredActions[categoryKey]?.tabs;
+		if (tabs && typeof tabs === 'object') {
+			const firstTab = Object.keys(tabs)[0];
+			if (firstTab) {
+				setSelectedCategoryTab(firstTab);
+			}
+		}
+	};
+
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150200]" />
@@ -384,17 +402,55 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 								<ActionSelectorCard
 									automationActions={filteredActions}
 									selectedCategory={selectedCategory}
-									setSelectedCategory={setSelectedCategory}
+									setSelectedCategory={handleCategorySelect}
 									categoryData={categoryData}
 								/>
 							</div>
 							<div className="w-full sm:w-1/2 sm:overflow-y-auto sm:pr-1">
-								<ActionsGroupRender
-									groups={currentCategoryData?.groups || {}}
-									onChange={(value) => handleActionSelect(value)}
-									value={value}
-									isSaving={isSaving}
-								/>
+								{categoryTabs.length > 0 ? (
+									<Tabs
+										value={selectedCategoryTab}
+										onValueChange={setSelectedCategoryTab}
+										className="flex flex-col gap-4"
+									>
+										<TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-neutral-100 p-1">
+											{categoryTabs.map((tab) => (
+												<TabsTrigger
+													key={tab.key}
+													value={tab.key}
+													className="text-xs sm:text-sm"
+												>
+													{tab.label}
+												</TabsTrigger>
+											))}
+										</TabsList>
+										{categoryTabs.map((tab) => (
+											<TabsContent
+												key={tab.key}
+												value={tab.key}
+												className="mt-0"
+											>
+												<ActionsGroupRender
+													groups={tab.groups}
+													onChange={(value) =>
+														handleActionSelect(value)
+													}
+													value={value}
+													isSaving={isSaving}
+												/>
+											</TabsContent>
+										))}
+									</Tabs>
+								) : (
+									<ActionsGroupRender
+										groups={actionGroupsForCategory}
+										onChange={(value) =>
+											handleActionSelect(value)
+										}
+										value={value}
+										isSaving={isSaving}
+									/>
+								)}
 							</div>
 						</div>
 					</div>

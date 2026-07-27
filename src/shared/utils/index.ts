@@ -99,8 +99,16 @@ export const convertToWordPressTimezone = (date: Dayjs): Dayjs => {
 
 export const getAction = (action: string): Action => {
 	const actions = ConfigAPI.getAutomationActions();
-	const actionGroups = flatMap(actions, (group) =>
-		flatMap(group.groups, (group) => group.actions)
+	const actionGroups = flatMap(actions, (category) => {
+		const tabGroups = category.tabs
+			? flatMap(category.tabs, (tab) =>
+					normalizeActionGroups(tab.groups)
+				)
+			: [];
+		const directGroups = normalizeActionGroups(category.groups);
+		return [...tabGroups, ...directGroups];
+	}).flatMap((group) =>
+		group?.actions ? [group.actions] : []
 	);
 	const foundAction = find(actionGroups, (actions) => actions[action]);
 
@@ -111,6 +119,21 @@ export const getAction = (action: string): Action => {
 			description: '',
 			fields: {},
 		};
+};
+
+const normalizeActionGroups = (
+	raw:
+		| Record<string, { actions?: Record<string, Action> }>
+		| Array<{ actions?: Record<string, Action> }>
+		| undefined
+): Array<{ actions?: Record<string, Action> }> => {
+	if (!raw) {
+		return [];
+	}
+	if (Array.isArray(raw)) {
+		return raw;
+	}
+	return Object.values(raw);
 };
 
 export const getGoal = (goal: string): Goal => {

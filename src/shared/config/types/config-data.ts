@@ -367,13 +367,19 @@ export type ActionsGroup = {
 	is_disabled?: boolean;
 };
 
+export type ActionCategoryTab = {
+	label: string;
+	groups: ActionsGroup[] | Record<string, ActionsGroup>;
+};
+
+export type AutomationActionCategory = {
+	label: string;
+	groups?: ActionsGroup[] | Record<string, ActionsGroup>;
+	tabs?: Record<string, ActionCategoryTab>;
+};
+
 export type AutomationActions = {
-	[key: string]: {
-		label: string;
-		groups: {
-			[key: string]: ActionsGroup;
-		};
-	};
+	[key: string]: AutomationActionCategory;
 };
 
 export type Goal = {

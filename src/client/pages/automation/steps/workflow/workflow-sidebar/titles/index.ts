@@ -15,7 +15,18 @@ import type { OrganizedStep } from '@doublescale/client';
 export const findActionLabel = (actionKey: string): string | null => {
 	const automationActions = ConfigAPI.getAutomationActions();
 	for (const category of Object.values(automationActions)) {
-		for (const group of Object.values(category.groups)) {
+		if (category.tabs && typeof category.tabs === 'object') {
+			for (const tab of Object.values(category.tabs)) {
+				for (const group of Object.values(tab.groups ?? {})) {
+					if (group.actions?.[actionKey]) {
+						return group.actions[actionKey].label;
+					}
+				}
+			}
+			continue;
+		}
+
+		for (const group of Object.values(category.groups ?? {})) {
 			if (group.actions?.[actionKey]) {
 				return group.actions[actionKey].label;
 			}

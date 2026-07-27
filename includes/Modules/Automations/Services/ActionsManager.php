@@ -98,14 +98,7 @@ final class ActionsManager {
 			$this->ensure_action_group_metadata( $action->source, $action->group );
 
 			// Update the sources array with the action's fields
-			$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
-				'label'             => $action->name,
-				'description'       => $action->description,
-				'fields'            => $action->get_fields(),
-				'is_integration'    => $action->is_integration,
-				'required_triggers' => $action->required_triggers,
-				'is_pro'            => $action->is_pro,
-			);
+			$this->store_action_in_sources( $action );
 		}
 
 		// Refresh integration is_disabled status after Pro plugin has registered integrations.
@@ -151,14 +144,7 @@ final class ActionsManager {
 
 		$this->actions[ $action->slug ] = $action;
 		$this->ensure_action_group_metadata( $action->source, $action->group );
-		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
-			'label'             => $action->name,
-			'description'       => $action->description,
-			'fields'            => $action->get_fields(),
-			'is_integration'    => $action->is_integration,
-			'required_triggers' => $action->required_triggers,
-			'is_pro'            => $action->is_pro,
-		);
+		$this->store_action_in_sources( $action );
 	}
 
 	/**
@@ -227,18 +213,23 @@ final class ActionsManager {
 					),
 				),
 			),
-			'woocommerce' => array(
-				'label'  => __( 'WooCommerce', 'doublescale' ),
-				'groups' => array(
-					'order'  => array(
-						'label'       => __( 'Order', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					),
-					'coupon' => array(
-						'label'       => __( 'Coupon', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			'ecommerce'   => array(
+				'label' => __( 'E-commerce', 'doublescale' ),
+				'tabs'  => array(
+					'woocommerce' => array(
+						'label'  => __( 'WooCommerce', 'doublescale' ),
+						'groups' => array(
+							'order'  => array(
+								'label'       => __( 'Order', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+							),
+							'coupon' => array(
+								'label'       => __( 'Coupon', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+							),
+						),
 					),
 				),
 			),
@@ -276,23 +267,28 @@ final class ActionsManager {
 					),
 				),
 			),
-			'memberpress' => array(
-				'label'  => __( 'MemberPress', 'doublescale' ),
-				'groups' => array(
+			'membership'  => array(
+				'label' => __( 'Membership', 'doublescale' ),
+				'tabs'  => array(
 					'memberpress' => array(
-						'label'       => __( 'MemberPress', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+						'label'  => __( 'MemberPress', 'doublescale' ),
+						'groups' => array(
+							'memberpress' => array(
+								'label'       => __( 'MemberPress', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+							),
+						),
 					),
-				),
-			),
-			'pmpro'       => array(
-				'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
-				'groups' => array(
-					'pmpro' => array(
-						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+					'pmpro'       => array(
+						'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
+						'groups' => array(
+							'pmpro' => array(
+								'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+							),
+						),
 					),
 				),
 			),
@@ -409,6 +405,28 @@ final class ActionsManager {
 	 * @param string $group_slug Group/integration slug.
 	 */
 	private function ensure_action_group_metadata( $source, $group_slug ) {
+		$tabbed_category = $this->resolve_tabbed_action_category( $source );
+		if ( $tabbed_category ) {
+			$groups_path = &$this->sources[ $tabbed_category ]['tabs'][ $source ]['groups'];
+			if ( ! isset( $groups_path[ $group_slug ] ) ) {
+				$groups_path[ $group_slug ] = array(
+					'label'   => $this->resolve_action_group_label( $source, $group_slug ),
+					'actions' => array(),
+				);
+				return;
+			}
+
+			if ( empty( $groups_path[ $group_slug ]['label'] ) ) {
+				$groups_path[ $group_slug ]['label'] = $this->resolve_action_group_label( $source, $group_slug );
+			}
+
+			if ( ! isset( $groups_path[ $group_slug ]['actions'] ) ) {
+				$groups_path[ $group_slug ]['actions'] = array();
+			}
+
+			return;
+		}
+
 		if ( ! isset( $this->sources[ $source ]['groups'][ $group_slug ] ) ) {
 			$this->sources[ $source ]['groups'][ $group_slug ] = array(
 				'label'   => $this->resolve_action_group_label( $source, $group_slug ),
@@ -451,6 +469,51 @@ final class ActionsManager {
 		}
 
 		return ucwords( str_replace( array( '_', '-' ), ' ', $group_slug ) );
+	}
+
+	/**
+	 * Resolve tabbed category key for an action source (e.g. woocommerce → ecommerce).
+	 *
+	 * @param string $source Action source key.
+	 * @return string|null Category key when the source lives under tabs.
+	 */
+	private function resolve_tabbed_action_category( $source ) {
+		$tabbed_sources = array(
+			'ecommerce'  => array( 'woocommerce' ),
+			'membership' => array( 'memberpress', 'pmpro' ),
+		);
+
+		foreach ( $tabbed_sources as $category_key => $source_keys ) {
+			if ( in_array( $source, $source_keys, true ) ) {
+				return $category_key;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Merge one action into {@see $this->sources}.
+	 *
+	 * @param Action $action Action instance.
+	 */
+	private function store_action_in_sources( Action $action ): void {
+		$row = array(
+			'label'             => $action->name,
+			'description'       => $action->description,
+			'fields'            => $action->get_fields(),
+			'is_integration'    => $action->is_integration,
+			'required_triggers' => $action->required_triggers,
+			'is_pro'            => $action->is_pro,
+		);
+
+		$tabbed_category = $this->resolve_tabbed_action_category( $action->source );
+		if ( $tabbed_category ) {
+			$this->sources[ $tabbed_category ]['tabs'][ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = $row;
+			return;
+		}
+
+		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = $row;
 	}
 
 }

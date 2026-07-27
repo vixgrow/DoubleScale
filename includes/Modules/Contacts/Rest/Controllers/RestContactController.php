@@ -697,6 +697,27 @@ class RestContactController extends RestController {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'company_name'    => array(
+					'description'  => __( 'Company or organization name.', 'doublescale' ),
+					'type'         => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'company_registration_number' => array(
+					'description'  => __( 'Company registration number.', 'doublescale' ),
+					'type'         => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'tax_vat_number'  => array(
+					'description'  => __( 'Tax or VAT identification number.', 'doublescale' ),
+					'type'         => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 				'email'           => array(
 					'description'  => __( 'Email of the contact (optional when a phone number is provided).', 'doublescale' ),
 					'type'         => 'string',
@@ -2904,9 +2925,12 @@ class RestContactController extends RestController {
 	 */
 	protected function prepare_contact( $request ) {
 		$contact = array(
-			'first_name'      => $request->get_param( 'first_name' ),
-			'last_name'       => $request->get_param( 'last_name' ),
-			'email'           => $request->get_param( 'email' ),
+			'first_name'                  => $request->get_param( 'first_name' ),
+			'last_name'                   => $request->get_param( 'last_name' ),
+			'company_name'                => $request->get_param( 'company_name' ),
+			'company_registration_number' => $request->get_param( 'company_registration_number' ),
+			'tax_vat_number'              => $request->get_param( 'tax_vat_number' ),
+			'email'                       => $request->get_param( 'email' ),
 			'phone'           => $request->get_param( 'phone' ),
 			'whatsapp_phone'  => $request->get_param( 'whatsapp_phone' ),
 			'address_1'       => $request->get_param( 'address_1' ),

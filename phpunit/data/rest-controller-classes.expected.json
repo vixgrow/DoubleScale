@@ -40,6 +40,7 @@
     "RestInvoiceReportsController",
     "RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController",
+    "RestLicenseController",
     "RestLinkTriggerController",
     "RestListController",
     "RestListPreferencesController",

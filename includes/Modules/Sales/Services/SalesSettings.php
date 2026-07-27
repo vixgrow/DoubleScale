@@ -51,6 +51,8 @@ final class SalesSettings {
 			),
 			'rep_notification_templates'      => SalesRepNotificationTemplates::defaults(),
 			'pdf_company_address'             => '',
+			'pdf_company_registration_number' => '',
+			'pdf_company_tax_vat_number'      => '',
 			'default_invoice_template'        => DocumentTemplate::DEFAULT,
 			'default_proposal_template'       => DocumentTemplate::DEFAULT,
 		);
@@ -188,6 +190,12 @@ final class SalesSettings {
 
 		if ( array_key_exists( 'pdf_company_address', $merged ) ) {
 			$clean['pdf_company_address'] = sanitize_textarea_field( (string) $merged['pdf_company_address'] );
+		}
+
+		foreach ( array( 'pdf_company_registration_number', 'pdf_company_tax_vat_number' ) as $legal_key ) {
+			if ( array_key_exists( $legal_key, $merged ) ) {
+				$clean[ $legal_key ] = sanitize_text_field( (string) $merged[ $legal_key ] );
+			}
 		}
 
 		foreach ( array( 'default_invoice_template', 'default_proposal_template' ) as $template_key ) {

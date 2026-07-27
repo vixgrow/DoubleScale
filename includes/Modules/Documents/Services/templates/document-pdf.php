@@ -205,9 +205,20 @@ if ( $is_invoice ) {
 } else {
 	$customer_fields = array( 'to_name', 'address', 'city', 'state', 'zip', 'country', 'email', 'phone' );
 	foreach ( $customer_fields as $field ) {
-		if ( ! empty( $document[ $field ] ) ) {
-			$customer_lines[] = (string) $document[ $field ];
+		if ( empty( $document[ $field ] ) ) {
+			continue;
 		}
+		if ( 'address' === $field ) {
+			$address_lines = preg_split( '/\r\n|\r|\n/', (string) $document[ $field ] ) ?: array();
+			foreach ( $address_lines as $line ) {
+				$line = trim( (string) $line );
+				if ( '' !== $line ) {
+					$customer_lines[] = $line;
+				}
+			}
+			continue;
+		}
+		$customer_lines[] = (string) $document[ $field ];
 	}
 }
 
@@ -234,6 +245,8 @@ $url_line = trim( (string) ( $company['url'] ?? '' ) );
 if ( '' !== $url_line ) {
 	$company_lines[] = $url_line;
 }
+
+$company_lines = \DoubleScale\Modules\Documents\Services\DocumentPdf::append_company_legal_lines( $company_lines, $company );
 
 $bill_label      = $is_invoice ? __( 'Bill To', 'doublescale' ) : __( 'To', 'doublescale' );
 $show_wave       = in_array( $variant, array( 'wave', 'goldwave' ), true );

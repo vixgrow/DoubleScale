@@ -61,6 +61,7 @@ class ProposalModel extends Model {
 		'email',
 		'phone',
 		'allow_comments',
+		'issuer_snapshot',
 		'sent_at',
 		'viewed_at',
 		'accepted_at',

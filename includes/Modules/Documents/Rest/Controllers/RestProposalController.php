@@ -22,6 +22,8 @@ use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\ConvertProposalToInvoice;
+use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
+use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DuplicateProposal;
 use DoubleScale\Modules\Documents\Services\ProposalNotifications;
@@ -364,6 +366,8 @@ class RestProposalController extends RestController {
 		if ( ProposalStatus::DRAFT === (string) $proposal->status ) {
 			$proposal->status = ProposalStatus::SENT;
 		}
+		DocumentCustomerDetails::snapshot_proposal_party_from_contact( $proposal );
+		DocumentIssuerSnapshot::freeze_if_needed( $proposal );
 		$proposal->sent_at = current_time( 'mysql' );
 		$proposal->save();
 

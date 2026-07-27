@@ -439,10 +439,13 @@ class RestPaymentController extends RestController {
 		}
 
 		if ( $with_receipt ) {
+			$company = DocumentPdf::resolved_company_block();
 			$row['company'] = array(
-				'name'    => (string) get_bloginfo( 'name' ),
-				'url'     => (string) home_url( '/' ),
-				'address' => DocumentPdf::resolved_company_address(),
+				'name'                => (string) ( $company['name'] ?? '' ),
+				'url'                 => (string) ( $company['url'] ?? '' ),
+				'address'             => (string) ( $company['address'] ?? '' ),
+				'registration_number' => (string) ( $company['registration_number'] ?? '' ),
+				'tax_vat_number'      => (string) ( $company['tax_vat_number'] ?? '' ),
 			);
 		}
 

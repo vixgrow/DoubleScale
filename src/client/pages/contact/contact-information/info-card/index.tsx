@@ -36,6 +36,9 @@ type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
 	| 'first_name'
 	| 'last_name'
+	| 'company_name'
+	| 'company_registration_number'
+	| 'tax_vat_number'
 	| 'email'
 	| 'phone'
 	| 'whatsapp_phone'
@@ -460,6 +463,21 @@ const InfoCard: React.FC = () => {
 							'last_name',
 							__('Last Name', 'doublescale'),
 							contact?.last_name || ''
+						)}
+						{renderField(
+							'company_name',
+							__('Company Name', 'doublescale'),
+							contact?.company_name || ''
+						)}
+						{renderField(
+							'company_registration_number',
+							__('Company Registration Number', 'doublescale'),
+							contact?.company_registration_number || ''
+						)}
+						{renderField(
+							'tax_vat_number',
+							__('Tax / VAT Number', 'doublescale'),
+							contact?.tax_vat_number || ''
 						)}
 						{renderField(
 							'email',

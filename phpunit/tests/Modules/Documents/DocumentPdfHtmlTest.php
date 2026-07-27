@@ -5,6 +5,8 @@
 
 namespace DoubleScale\Tests\Modules\Documents;
 
+require_once __DIR__ . '/../../../SupportImapTestStubs.php';
+
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use PHPUnit\Framework\TestCase;
 
@@ -107,5 +109,108 @@ final class DocumentPdfHtmlTest extends TestCase {
 		$this->assertStringContainsString( '2,400.00 USD', $html );
 		$this->assertStringContainsString( 'Retainer', $html );
 		$this->assertStringContainsString( 'Service level agreement terms.', $html );
+	}
+
+	public function test_resolved_company_block_includes_registration_and_tax(): void {
+		update_option(
+			'doublescale_sales_settings',
+			array(
+				'pdf_company_registration_number' => 'REG-12345',
+				'pdf_company_tax_vat_number'      => 'VAT-98765',
+			)
+		);
+
+		$company = DocumentPdf::resolved_company_block();
+
+		$this->assertSame( 'REG-12345', $company['registration_number'] );
+		$this->assertSame( 'VAT-98765', $company['tax_vat_number'] );
+	}
+
+	public function test_render_html_includes_supplier_legal_ids(): void {
+		update_option(
+			'doublescale_sales_settings',
+			array(
+				'pdf_company_registration_number' => 'REG-555',
+				'pdf_company_tax_vat_number'      => 'VAT-777',
+			)
+		);
+
+		$html = DocumentPdf::render_html(
+			array(
+				'invoice_number' => 'INV-LEGAL-1',
+				'currency'       => 'USD',
+				'invoice_date'   => '2026-06-01',
+				'due_date'       => '2026-06-15',
+				'billing_address'=> "Acme Corp\nRegistration: CUST-REG\nTax/VAT: CUST-VAT",
+				'line_items'     => array(
+					array(
+						'description' => 'Item',
+						'qty'         => 1,
+						'rate'        => 100,
+						'amount'      => 100,
+					),
+				),
+				'subtotal'       => 100.0,
+				'total_tax'      => 0.0,
+				'discount_type'  => 'none',
+				'discount_value' => 0,
+				'adjustment'     => 0,
+				'total'          => 100.0,
+				'amount_paid'    => 0.0,
+			),
+			'invoice'
+		);
+
+		$this->assertStringContainsString( 'Registration: REG-555', $html );
+		$this->assertStringContainsString( 'Tax/VAT: VAT-777', $html );
+		$this->assertStringContainsString( 'Registration: CUST-REG', $html );
+		$this->assertStringContainsString( 'Tax/VAT: CUST-VAT', $html );
+	}
+
+	public function test_render_html_uses_issuer_snapshot_when_sent(): void {
+		$live = DocumentPdf::resolved_company_block();
+		$snapshot = $live;
+		$snapshot['registration_number'] = 'SNAPSHOT-REG';
+		$snapshot['tax_vat_number']     = 'SNAPSHOT-VAT';
+
+		update_option(
+			'doublescale_sales_settings',
+			array(
+				'pdf_company_registration_number' => 'LIVE-REG',
+				'pdf_company_tax_vat_number'      => 'LIVE-VAT',
+			)
+		);
+
+		$html = DocumentPdf::render_html(
+			array(
+				'invoice_number'      => 'INV-SNAPSHOT-1',
+				'currency'            => 'USD',
+				'invoice_date'        => '2026-06-01',
+				'due_date'            => '2026-06-15',
+				'sent_at'             => '2026-06-01 10:00:00',
+				'issuer_snapshot_raw' => wp_json_encode( $snapshot ),
+				'billing_address'     => 'Customer',
+				'line_items'          => array(
+					array(
+						'description' => 'Item',
+						'qty'         => 1,
+						'rate'        => 50,
+						'amount'      => 50,
+					),
+				),
+				'subtotal'            => 50.0,
+				'total_tax'           => 0.0,
+				'discount_type'       => 'none',
+				'discount_value'      => 0,
+				'adjustment'          => 0,
+				'total'               => 50.0,
+				'amount_paid'         => 0.0,
+			),
+			'invoice'
+		);
+
+		$this->assertStringContainsString( 'Registration: SNAPSHOT-REG', $html );
+		$this->assertStringContainsString( 'Tax/VAT: SNAPSHOT-VAT', $html );
+		$this->assertStringNotContainsString( 'Registration: LIVE-REG', $html );
 	}
 }

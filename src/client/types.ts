@@ -46,6 +46,9 @@ export type Contact = {
 	email: string;
 	first_name: string;
 	last_name: string;
+	company_name?: string;
+	company_registration_number?: string;
+	tax_vat_number?: string;
 	phone: string;
 	whatsapp_phone: string;
 	address_1: string;

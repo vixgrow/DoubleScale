@@ -323,6 +323,8 @@ export interface PaymentDetail extends PaymentListItem {
 		name: string;
 		url: string;
 		address: string;
+		registration_number?: string;
+		tax_vat_number?: string;
 	};
 	invoice?: {
 		id: number;
@@ -468,6 +470,8 @@ export interface SalesSettings {
 	default_online_payment_gateways: string[];
 	rep_notification_templates?: Record<string, SalesRepNotificationTemplate>;
 	pdf_company_address?: string;
+	pdf_company_registration_number?: string;
+	pdf_company_tax_vat_number?: string;
 	default_invoice_template?: number;
 	default_proposal_template?: number;
 }

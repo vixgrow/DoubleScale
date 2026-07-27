@@ -64,6 +64,7 @@ final class ProposalShaper {
 			'signed_name'      => $proposal->signed_name ? (string) $proposal->signed_name : null,
 			'has_signature'    => ! empty( $proposal->signature ),
 			'is_expired'       => self::is_expired( $proposal ),
+			'issuer_snapshot_raw' => $proposal->issuer_snapshot ? (string) $proposal->issuer_snapshot : null,
 			'invoice_id'       => self::get_linked_invoice_id( $proposal ),
 			'public_url'       => ProposalUrl::get_public_url( $proposal ),
 			'created_at'       => $proposal->created_at,

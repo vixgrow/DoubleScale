@@ -21,6 +21,8 @@ use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
+use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
+use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
 use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
@@ -482,6 +484,8 @@ class RestInvoiceController extends RestController {
 		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
 			$invoice->status = InvoiceStatus::UNPAID;
 		}
+		DocumentCustomerDetails::snapshot_billing_from_contact( $invoice );
+		DocumentIssuerSnapshot::freeze_if_needed( $invoice );
 		$invoice->sent_at = current_time( 'mysql' );
 		$invoice->save();
 

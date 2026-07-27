@@ -27,7 +27,7 @@ final class DocumentPdf {
 	public static function render_html( array $shaped, string $type ): string {
 		$type = 'invoice' === $type ? 'invoice' : 'proposal';
 
-		$company = self::resolved_company_block();
+		$company = DocumentIssuerSnapshot::resolve_company_for_shaped( $shaped );
 		$design  = DocumentTemplate::normalize( $shaped['template'] ?? DocumentTemplate::DEFAULT );
 
 		return PvInvPdfHtml::render( $shaped, $type, $company, $design );
@@ -54,7 +54,7 @@ final class DocumentPdf {
 	/**
 	 * Company block for PDF and receipt headers.
 	 *
-	 * @return array{name: string, url: string, address: string, logo: string, logo_data_uri: string}
+	 * @return array{name: string, url: string, address: string, logo: string, logo_data_uri: string, registration_number: string, tax_vat_number: string}
 	 */
 	public static function resolved_company_block(): array {
 		$business = self::resolved_business_settings();
@@ -70,13 +70,54 @@ final class DocumentPdf {
 
 		$logo = $business['business_logo'];
 
-		return array(
-			'name'          => $name,
-			'url'           => (string) \home_url( '/' ),
-			'address'       => $address,
-			'logo'          => $logo,
-			'logo_data_uri' => self::resolved_company_logo_data_uri( $logo ),
+		return self::normalize_company_block(
+			array(
+				'name'                  => $name,
+				'url'                   => (string) \home_url( '/' ),
+				'address'               => $address,
+				'logo'                  => $logo,
+				'logo_data_uri'         => self::resolved_company_logo_data_uri( $logo ),
+				'registration_number'   => trim( (string) SalesSettings::get( 'pdf_company_registration_number', '' ) ),
+				'tax_vat_number'        => trim( (string) SalesSettings::get( 'pdf_company_tax_vat_number', '' ) ),
+			)
 		);
+	}
+
+	/**
+	 * @param array<string, mixed> $block Company block or snapshot payload.
+	 * @return array{name: string, url: string, address: string, logo: string, logo_data_uri: string, registration_number: string, tax_vat_number: string}
+	 */
+	public static function normalize_company_block( array $block ): array {
+		$logo = trim( (string) ( $block['logo'] ?? '' ) );
+
+		return array(
+			'name'                => trim( (string) ( $block['name'] ?? '' ) ),
+			'url'                 => trim( (string) ( $block['url'] ?? '' ) ),
+			'address'             => trim( (string) ( $block['address'] ?? '' ) ),
+			'logo'                => $logo,
+			'logo_data_uri'       => trim( (string) ( $block['logo_data_uri'] ?? '' ) ) ?: self::resolved_company_logo_data_uri( $logo ),
+			'registration_number' => trim( (string) ( $block['registration_number'] ?? '' ) ),
+			'tax_vat_number'      => trim( (string) ( $block['tax_vat_number'] ?? '' ) ),
+		);
+	}
+
+	/**
+	 * @param array<int, string>   $lines Existing header lines.
+	 * @param array<string, mixed> $company Company block.
+	 * @return array<int, string>
+	 */
+	public static function append_company_legal_lines( array $lines, array $company ): array {
+		$registration = trim( (string) ( $company['registration_number'] ?? '' ) );
+		if ( '' !== $registration ) {
+			$lines[] = DocumentCustomerDetails::registration_line( $registration );
+		}
+
+		$tax_vat = trim( (string) ( $company['tax_vat_number'] ?? '' ) );
+		if ( '' !== $tax_vat ) {
+			$lines[] = DocumentCustomerDetails::tax_vat_line( $tax_vat );
+		}
+
+		return $lines;
 	}
 
 	/**

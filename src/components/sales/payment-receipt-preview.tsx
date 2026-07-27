@@ -98,6 +98,10 @@ export const PaymentReceiptPreview: React.FC<PaymentReceiptPreviewProps> = ({
 	const customerName = contactDisplayName(payment);
 	const customerEmail = payment.contact?.email || '';
 
+	const companyAddress = payment.company?.address?.trim() || '';
+	const companyRegistration = payment.company?.registration_number?.trim() || '';
+	const companyTaxVat = payment.company?.tax_vat_number?.trim() || '';
+
 	return (
 		<div className="space-y-4">
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 border-b border-border pb-6">
@@ -110,6 +114,21 @@ export const PaymentReceiptPreview: React.FC<PaymentReceiptPreviewProps> = ({
 							{payment.company?.url ? (
 								<div className="text-sm text-muted-foreground">
 									{payment.company.url}
+								</div>
+							) : null}
+							{companyAddress ? (
+								<div className="whitespace-pre-line text-sm text-muted-foreground">
+									{companyAddress}
+								</div>
+							) : null}
+							{companyRegistration ? (
+								<div className="text-sm text-muted-foreground">
+									{__('Registration:', 'doublescale')} {companyRegistration}
+								</div>
+							) : null}
+							{companyTaxVat ? (
+								<div className="text-sm text-muted-foreground">
+									{__('Tax/VAT:', 'doublescale')} {companyTaxVat}
 								</div>
 							) : null}
 						</div>

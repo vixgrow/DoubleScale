@@ -63,6 +63,7 @@ class InvoiceShaper {
 			'shipping_address'      => $invoice->shipping_address,
 			'client_note'           => $invoice->client_note,
 			'terms'                 => $invoice->terms,
+			'issuer_snapshot_raw'   => $invoice->issuer_snapshot ? (string) $invoice->issuer_snapshot : null,
 			'public_url'            => InvoiceUrl::get_public_url( $invoice ),
 			'created_at'            => $invoice->created_at,
 			'updated_at'            => $invoice->updated_at,

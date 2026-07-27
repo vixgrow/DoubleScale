@@ -322,7 +322,7 @@ const SalesSettingsPage: FC = () => {
 							'Company address on PDFs and receipts',
 							'doublescale'
 						)}
-						className="!mb-0"
+						className="!mb-4"
 					>
 						<Textarea
 							value={form.pdf_company_address ?? ''}
@@ -333,6 +333,44 @@ const SalesSettingsPage: FC = () => {
 							className="rounded-lg border-[#D0D0D0]"
 							placeholder={__(
 								'Street, city, country — shown on proposal/invoice PDFs and payment receipts.',
+								'doublescale'
+							)}
+						/>
+					</FormField>
+					<FormField
+						label={__(
+							'Company registration number',
+							'doublescale'
+						)}
+						className="!mb-4"
+					>
+						<Input
+							value={form.pdf_company_registration_number ?? ''}
+							onChange={(e) =>
+								patch(
+									'pdf_company_registration_number',
+									e.target.value
+								)
+							}
+							className="rounded-lg border-[#D0D0D0]"
+							placeholder={__(
+								'Optional — shown on sales documents and receipts.',
+								'doublescale'
+							)}
+						/>
+					</FormField>
+					<FormField
+						label={__('Tax / VAT number', 'doublescale')}
+						className="!mb-0"
+					>
+						<Input
+							value={form.pdf_company_tax_vat_number ?? ''}
+							onChange={(e) =>
+								patch('pdf_company_tax_vat_number', e.target.value)
+							}
+							className="rounded-lg border-[#D0D0D0]"
+							placeholder={__(
+								'Optional — shown on sales documents and receipts.',
 								'doublescale'
 							)}
 						/>

@@ -62,6 +62,7 @@ class InvoiceModel extends Model {
 		'shipping_address',
 		'client_note',
 		'terms',
+		'issuer_snapshot',
 		'sent_at',
 		'viewed_at',
 	);

@@ -96,6 +96,7 @@ final class PvInvPdfHtml {
 		if ( '' !== $url_line ) {
 			$from_lines[] = $url_line;
 		}
+		$from_lines = DocumentPdf::append_company_legal_lines( $from_lines, $company );
 		if ( empty( $from_lines ) ) {
 			$from_lines[] = __( 'Your Company', 'doublescale' );
 		}
@@ -118,10 +119,24 @@ final class PvInvPdfHtml {
 				}
 			}
 		} else {
-			foreach ( array( 'to_name', 'address', 'city', 'state', 'zip', 'country', 'email', 'phone' ) as $field ) {
-				if ( ! empty( $document[ $field ] ) ) {
-					$to_lines[] = (string) $document[ $field ];
+			if ( ! empty( $document['to_name'] ) ) {
+				$to_lines[] = (string) $document['to_name'];
+			}
+			foreach ( array( 'address', 'city', 'state', 'zip', 'country', 'email', 'phone' ) as $field ) {
+				if ( empty( $document[ $field ] ) ) {
+					continue;
 				}
+				if ( 'address' === $field ) {
+					$address_lines = preg_split( '/\r\n|\r|\n/', (string) $document[ $field ] ) ?: array();
+					foreach ( $address_lines as $line ) {
+						$line = trim( (string) $line );
+						if ( '' !== $line ) {
+							$to_lines[] = $line;
+						}
+					}
+					continue;
+				}
+				$to_lines[] = (string) $document[ $field ];
 			}
 		}
 		$to_lines = array_values(

@@ -40,6 +40,7 @@
     "RestInvoiceReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestInvoiceReportsController",
     "RestLeadScoringRuleController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleLevelController",
+    "RestLicenseController": "DoubleScale\\Core\\Rest\\Controllers\\RestLicenseController",
     "RestLinkTriggerController": "DoubleScale\\Pro\\Modules\\LinkTriggers\\Rest\\Controllers\\RestLinkTriggerController",
     "RestListController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestListController",
     "RestListPreferencesController": "DoubleScale\\Core\\Rest\\Controllers\\RestListPreferencesController",

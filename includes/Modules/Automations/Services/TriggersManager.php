@@ -437,6 +437,20 @@ final class TriggersManager {
 				),
 			);
 		}
+
+		// Pro form vendors live in FormsManager only while the Pro add-on is active.
+		// Free-plugin TriggerPro stubs still register for those vendors so the UI can
+		// show them with a Pro badge when Pro is off — re-seed any missing rows after
+		// the FormsManager rebuild (AdminConfig / REST call sync_form_trigger_sources).
+		foreach ( $this->triggers as $trigger ) {
+			if ( ! $trigger instanceof Trigger || 'forms' !== $trigger->source ) {
+				continue;
+			}
+			if ( isset( $this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] ) ) {
+				continue;
+			}
+			$this->store_trigger_in_sources( $trigger );
+		}
 	}
 
 

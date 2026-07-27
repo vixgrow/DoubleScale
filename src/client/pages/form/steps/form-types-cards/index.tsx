@@ -98,17 +98,9 @@ const SAAS_FORM_INTEGRATIONS: Record<string, string> = {
 	jotform: 'jotform',
 };
 
-const getProPluginUrl = () =>
-	(typeof window !== 'undefined' &&
-		(
-			window as unknown as {
-				doublescalePro?: { proPluginUrl?: string };
-			}
-		).doublescalePro?.proPluginUrl) ||
-	ConfigAPI.getPluginDirUrl();
+const freePluginUrl = ConfigAPI.getPluginDirUrl().replace(/\/?$/, '/');
 
 const getFormIcon = (sourceKey: string) => {
-	const proPluginUrl = getProPluginUrl();
 	const iconMap: Record<string, string> = {
 		contact: contact,
 		contactform7: contact,
@@ -126,8 +118,8 @@ const getFormIcon = (sourceKey: string) => {
 		sureforms: sureForms,
 		eform: eForm,
 		jetformbuilder: jetForm,
-		typeform: `${proPluginUrl}assets/images/typeform/typeform.svg`,
-		jotform: `${proPluginUrl}assets/images/jotform/jotform.png`,
+		typeform: `${freePluginUrl}assets/images/typeform/typeform.svg`,
+		jotform: `${freePluginUrl}assets/images/jotform/jotform.png`,
 	};
 
 	return (

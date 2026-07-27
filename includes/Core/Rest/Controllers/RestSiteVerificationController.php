@@ -18,6 +18,7 @@ use WP_REST_Server;
 use WP_Application_Passwords;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\ModuleManager;
+use DoubleScale\Core\UserRoles\UserRoles;
 
 class RestSiteVerificationController extends RestController {
 	protected $rest_base = 'site';
@@ -153,6 +154,19 @@ class RestSiteVerificationController extends RestController {
 				),
 			)
 		);
+
+		// Authenticated mobile user profile (roles, caps, mobile flags).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/me',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_current_user_profile' ),
+					'permission_callback' => array( $this, 'check_authenticated_user' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -217,6 +231,137 @@ class RestSiteVerificationController extends RestController {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Permission check for authenticated mobile endpoints.
+	 *
+	 * @return true|WP_Error
+	 */
+	public function check_authenticated_user() {
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'rest_not_logged_in',
+				__( 'You are not currently logged in.', 'doublescale' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Current user profile for the mobile app.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_current_user_profile() {
+		$user = wp_get_current_user();
+		$roles = array_values( array_map( 'strval', (array) $user->roles ) );
+		$primary_role = $this->resolve_primary_role( $roles );
+		$mobile       = $this->build_mobile_flags( $roles, $user->ID );
+
+		return new WP_REST_Response(
+			array(
+				'success'      => true,
+				'id'           => (int) $user->ID,
+				'username'     => (string) $user->user_login,
+				'display_name' => (string) $user->display_name,
+				'roles'        => $roles,
+				'primary_role' => $primary_role,
+				'mobile'       => $mobile,
+				'capabilities' => $this->build_capabilities_payload( $user ),
+				'avatar_url'   => (string) get_avatar_url( $user->ID, array( 'size' => 96 ) ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * @param array<int, string> $roles
+	 */
+	private function resolve_primary_role( array $roles ): ?string {
+		$priority = array(
+			'administrator',
+			UserRoles::CRM_MANAGER,
+			UserRoles::SALES_MANAGER,
+			UserRoles::SALES_REP,
+			UserRoles::SUPPORT_MANAGER,
+			UserRoles::SUPPORT_AGENT,
+			UserRoles::BOOKING_MANAGER,
+			UserRoles::BOOKING_AGENT,
+			UserRoles::PROJECT_MANAGER,
+			UserRoles::PROJECT_MEMBER,
+		);
+
+		$normalized = array_map(
+			static function ( $role ) {
+				return strtolower( (string) $role );
+			},
+			$roles
+		);
+
+		foreach ( $priority as $role ) {
+			if ( in_array( strtolower( $role ), $normalized, true ) ) {
+				return $role;
+			}
+		}
+
+		return $roles[0] ?? null;
+	}
+
+	/**
+	 * @param array<int, string> $roles
+	 * @return array{show_license_status: bool, show_push_notifications: bool, calendar_own_only: bool}
+	 */
+	private function build_mobile_flags( array $roles, int $user_id ): array {
+		$normalized = array_map(
+			static function ( $role ) {
+				return strtolower( (string) $role );
+			},
+			$roles
+		);
+
+		$is_admin = in_array( 'administrator', $normalized, true )
+			|| user_can( $user_id, 'manage_options' );
+		$is_crm_manager = in_array( strtolower( UserRoles::CRM_MANAGER ), $normalized, true );
+		$is_sales_manager = in_array( strtolower( UserRoles::SALES_MANAGER ), $normalized, true );
+		$is_sales_rep = in_array( strtolower( UserRoles::SALES_REP ), $normalized, true );
+		$is_booking_agent = in_array( strtolower( UserRoles::BOOKING_AGENT ), $normalized, true );
+
+		$show_license_status = $is_admin || $is_crm_manager || $is_sales_manager || $is_sales_rep;
+		$show_push_notifications = $is_admin || $is_sales_manager || $is_sales_rep;
+		$calendar_own_only = $is_booking_agent && ! $is_admin && ! $is_crm_manager;
+
+		return array(
+			'show_license_status'     => $show_license_status,
+			'show_push_notifications'   => $show_push_notifications,
+			'calendar_own_only'         => $calendar_own_only,
+		);
+	}
+
+	/**
+	 * @param \WP_User $user
+	 * @return array<string, bool>
+	 */
+	private function build_capabilities_payload( $user ): array {
+		$capabilities = array();
+
+		foreach ( (array) $user->allcaps as $capability => $enabled ) {
+			if ( ! $enabled ) {
+				continue;
+			}
+
+			$capability = (string) $capability;
+			if (
+				0 === strpos( $capability, 'doublescale_' )
+				|| 'manage_options' === $capability
+			) {
+				$capabilities[ $capability ] = true;
+			}
+		}
+
+		return $capabilities;
 	}
 
 	/**

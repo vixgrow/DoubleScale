@@ -43,16 +43,7 @@ const ExternalHref: React.FC<{ href: string; children: React.ReactNode }> = ({
 );
 
 const TypeformInstructions: React.FC = () => {
-	const proPluginUrl =
-		(typeof window !== 'undefined' &&
-			(
-				window as unknown as {
-					doublescalePro?: { proPluginUrl?: string };
-				}
-			).doublescalePro?.proPluginUrl) ||
-		ConfigAPI.getPluginDirUrl();
-
-	const logoUrl = `${proPluginUrl}assets/images/typeform/typeform.svg`;
+	const logoUrl = `${ConfigAPI.getPluginDirUrl().replace(/\/?$/, '/')}assets/images/typeform/typeform.svg`;
 
 	return (
 		<div className="space-y-4">

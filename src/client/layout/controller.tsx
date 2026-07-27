@@ -234,6 +234,10 @@ export const HeaderBar = ({ page }: { page: any }) => {
 			<div className="doublescale-layout__header-right">
 				{!isProActive && <HeaderProBells />}
 				{isProActive &&
+					!(
+						config.getWhiteLabel()?.enabled &&
+						config.getWhiteLabel()?.hideLicense
+					) &&
 					Boolean(
 						applyFilters(
 							'doublescale_show_activate_license',
@@ -510,7 +514,10 @@ registerAdminPage('projects', {
 	),
 	label: __('Projects', 'doublescale'),
 	icon: <ProjectsIcon width={24} height={24} />,
+	// Projects: CRM Manager (full access) + Project Manager / Member.
+	// Sales Manager / Sales Rep must NOT see this.
 	requiredCapability: [
+		'doublescale_crm_manager',
 		'doublescale_project_manager',
 		'doublescale_project_member',
 		'doublescale_project_read_own_projects',
@@ -534,6 +541,7 @@ registerAdminPage('project-detail', {
 	label: __('Project Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: [
+		'doublescale_crm_manager',
 		'doublescale_project_manager',
 		'doublescale_project_member',
 		'doublescale_project_read_own_projects',

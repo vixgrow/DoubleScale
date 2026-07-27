@@ -85,12 +85,15 @@ class OrderStatus {
 	}
 
 	/**
-	 * Get all statuses
+	 * Get all order statuses for automation UI (triggers, actions, rules).
 	 *
-	 * @return array
+	 * Uses WooCommerce's registered statuses when available so custom statuses
+	 * (e.g. Abandoned Cart) appear alongside the core ones.
+	 *
+	 * @return array<string, string> Status slug (wc-*) => label.
 	 */
 	public static function get_all() {
-		return array(
+		$fallback = array(
 			self::PENDING_PAYMENT => __( 'Pending Payment', 'doublescale' ),
 			self::PROCESSING      => __( 'Processing', 'doublescale' ),
 			self::ON_HOLD         => __( 'On Hold', 'doublescale' ),
@@ -100,5 +103,26 @@ class OrderStatus {
 			self::FAILED          => __( 'Failed', 'doublescale' ),
 			self::CHECKOUT_DRAFT  => __( 'Checkout Draft', 'doublescale' ),
 		);
+
+		if ( ! function_exists( 'wc_get_order_statuses' ) ) {
+			return $fallback;
+		}
+
+		$statuses = wc_get_order_statuses();
+		if ( ! is_array( $statuses ) || empty( $statuses ) ) {
+			return $fallback;
+		}
+
+		// Ensure keys keep the wc- prefix WooCommerce / our triggers expect.
+		$normalized = array();
+		foreach ( $statuses as $slug => $label ) {
+			$slug = (string) $slug;
+			if ( 0 !== strpos( $slug, 'wc-' ) ) {
+				$slug = 'wc-' . ltrim( $slug, '-' );
+			}
+			$normalized[ $slug ] = (string) $label;
+		}
+
+		return $normalized;
 	}
 }

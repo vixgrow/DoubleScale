@@ -284,6 +284,17 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				) {
 					return false;
 				}
+
+				const whiteLabel = config.getWhiteLabel?.();
+				if (whiteLabel?.enabled) {
+					if (pageId === 'settings' && whiteLabel.hideSettingsMenu) {
+						return false;
+					}
+					if (pageId === 'extensions' && whiteLabel.hideExtensions) {
+						return false;
+					}
+				}
+
 				const optionalGate = FREE_OPTIONAL_SIDEBAR_PAGE_MODULE[pageId];
 				const defaultSidebar =
 					isProActive ||

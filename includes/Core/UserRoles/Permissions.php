@@ -164,6 +164,11 @@ final class Permissions {
 	 */
 	public static function can_manage_all_projects( $user_id = null ) {
 		$user_id = self::set_current_user_id( $user_id );
+
+		if ( user_can( $user_id, 'manage_options' ) || self::is_crm_manager( $user_id ) ) {
+			return true;
+		}
+
 		return user_can( $user_id, 'doublescale_project_manage_all_projects' );
 	}
 
@@ -237,8 +242,8 @@ final class Permissions {
 	/**
 	 * Check if the user can access the projects module at all.
 	 *
-	 * Unlike {@see has_booking_access()}, CRM Manager does NOT grant project
-	 * access — project roles (or WP admin) are required.
+	 * CRM Manager and WP admins have full project access (org-admin tier).
+	 * Sales Manager / Sales Rep do not — they need an explicit project role.
 	 *
 	 * @param int|null $user_id User ID (null for current user)
 	 * @return bool
@@ -246,7 +251,7 @@ final class Permissions {
 	public static function has_project_access( $user_id = null ) {
 		$user_id = self::set_current_user_id( $user_id );
 
-		if ( user_can( $user_id, 'manage_options' ) ) {
+		if ( user_can( $user_id, 'manage_options' ) || self::is_crm_manager( $user_id ) ) {
 			return true;
 		}
 

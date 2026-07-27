@@ -95,7 +95,10 @@ export type WhiteLabel = {
 	hideLicense: boolean;
 	hideExtensions: boolean;
 	hideAiAssistant: boolean;
+	/** Hide the White Labeling tab inside Settings (addon self-hide). */
 	hideSettingsTab: boolean;
+	/** Hide the Settings item from the left sidebar menu. */
+	hideSettingsMenu?: boolean;
 };
 
 export type ModuleInfo = {

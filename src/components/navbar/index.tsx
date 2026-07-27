@@ -352,6 +352,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					} else {
 						navItem.subMenu = [
 							{
+								path: 'contacts-analytics',
+								label: __('Contacts Analytics', 'doublescale'),
+							},
+							{
 								path: 'deals-analytics',
 								label: __('Deals Analytics', 'doublescale'),
 							},
@@ -371,10 +375,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'emails-analytics',
 								label: __('Emails Analytics', 'doublescale'),
-							},
-							{
-								path: 'contacts-analytics',
-								label: __('Contacts Analytics', 'doublescale'),
 							},
 							{
 								path: 'cart-analytics',

@@ -22,7 +22,7 @@ class UpdateCustomFieldDeal extends ProAutomationStubAction {
 
 	public $description = 'This action will update a deal custom field.';
 
-	public $source = 'crm';
+	public $source = 'sales';
 
 	public $group = 'deal';
 }

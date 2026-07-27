@@ -22,7 +22,7 @@ class UpdateOwnerDeal extends ProAutomationStubAction {
 
 	public $description = 'This action will update the owner of a deal.';
 
-	public $source = 'crm';
+	public $source = 'sales';
 
 	public $group = 'deal';
 }

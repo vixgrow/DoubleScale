@@ -22,7 +22,7 @@ class UpdateStatusDeal extends ProAutomationStubAction {
 
 	public $description = 'This action will update the status of a deal.';
 
-	public $source = 'crm';
+	public $source = 'sales';
 
 	public $group = 'deal';
 }

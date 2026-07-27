@@ -22,7 +22,7 @@ class AddNoteDeal extends ProAutomationStubAction {
 
 	public $description = 'This action will add a note to a deal.';
 
-	public $source = 'crm';
+	public $source = 'sales';
 
 	public $group = 'deal';
 }

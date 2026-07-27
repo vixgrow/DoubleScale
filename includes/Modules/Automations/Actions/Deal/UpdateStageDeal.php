@@ -22,7 +22,7 @@ class UpdateStageDeal extends ProAutomationStubAction {
 
 	public $description = 'This action will update the stage of a deal.';
 
-	public $source = 'crm';
+	public $source = 'sales';
 
 	public $group = 'deal';
 }

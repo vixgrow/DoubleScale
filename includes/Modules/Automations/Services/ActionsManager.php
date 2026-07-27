@@ -194,7 +194,12 @@ final class ActionsManager {
 						'label'   => __( 'Delay', 'doublescale' ),
 						'actions' => array(),
 					),
-					'deal'    => array(
+				),
+			),
+			'sales'       => array(
+				'label'  => __( 'Sales', 'doublescale' ),
+				'groups' => array(
+					'deal' => array(
 						'label'       => __( 'Deal', 'doublescale' ),
 						'actions'     => array(),
 						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )

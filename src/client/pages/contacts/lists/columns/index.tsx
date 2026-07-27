@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { List as ContactList } from '@doublescale/client';
-import { SortIcon, TimeAgoCell } from '@doublescale/components';
+import { SortIcon, TimeAgoCell, getRowNumber } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
@@ -18,11 +18,15 @@ import { Button } from '@doublescale/components/ui/button';
 interface ListColumnsProps {
 	onEditList: (list: ContactList) => void;
 	onViewContacts: (list: ContactList) => void;
+	page: number;
+	perPage: number;
 }
 
 export const getListColumns = ({
 	onEditList,
 	onViewContacts,
+	page,
+	perPage,
 }: ListColumnsProps): ColumnDef<ContactList>[] => {
 	const selectionColumn: ColumnDef<ContactList> = {
 		id: 'select',
@@ -49,19 +53,15 @@ export const getListColumns = ({
 	return [
 		selectionColumn,
 		{
-			accessorKey: 'id',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('ID', 'doublescale')}
-					<SortIcon />
-				</div>
+			id: 'row_number',
+			header: () => __('#', 'doublescale'),
+			cell: ({ row }) => (
+				<span className="text-muted-foreground font-mono text-xs">
+					{getRowNumber(row.index, page, perPage)}
+				</span>
 			),
-			cell: ({ row }) => <span className="text-muted-foreground font-mono text-xs">{row.original.id}</span>,
+			enableSorting: false,
+			enableHiding: false,
 		},
 		{
 			accessorKey: 'name',

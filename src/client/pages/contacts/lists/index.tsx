@@ -290,6 +290,8 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const columns = getListColumns({
 		onEditList: handleEditList,
 		onViewContacts: handleViewContacts,
+		page,
+		perPage,
 	});
 
 	const tableConfig: DataTableConfig<ContactList> = {

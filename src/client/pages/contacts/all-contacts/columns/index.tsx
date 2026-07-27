@@ -20,7 +20,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { SortIcon, TimeAgoCell } from '@doublescale/components';
+import { SortIcon, TimeAgoCell, getRowNumber } from '@doublescale/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 import { useContactsContext } from '../contexts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -93,23 +93,19 @@ export const selectionColumn: ColumnDef<Contact> = {
 export const useContactsColumns = () => {
 	const { isWooCommerceActive, getContactOrderDetails } =
 		useContactOrderDetails();
-	const { openContactDialog } = useContactsContext();
+	const { openContactDialog, page, perPage } = useContactsContext();
 
 	const baseColumns: ColumnDef<Contact>[] = [
 		{
-			accessorKey: 'id',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('ID', 'doublescale')}
-					<SortIcon />
-				</div>
+			id: 'row_number',
+			header: () => __('#', 'doublescale'),
+			cell: ({ row }) => (
+				<span className="text-muted-foreground font-mono text-xs">
+					{getRowNumber(row.index, page, perPage)}
+				</span>
 			),
-			cell: ({ row }) => <span className="text-muted-foreground font-mono text-xs">{row.original.id}</span>,
+			enableSorting: false,
+			enableHiding: false,
 		},
 		{
 			accessorKey: 'contact',

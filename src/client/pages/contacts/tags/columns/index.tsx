@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import type { Tag as ContactTag } from '@doublescale/client';
-import { SortIcon, TimeAgoCell } from '@doublescale/components';
+import { SortIcon, TimeAgoCell, getRowNumber } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
 import EditHeaderIcon from '@/components/icons/edit-header';
@@ -42,28 +42,28 @@ const selectionColumn: ColumnDef<ContactTag> = {
 interface UseTagsColumnsProps {
 	onEditTag: (tag: ContactTag) => void;
 	onViewContacts: (tag: ContactTag) => void;
+	page: number;
+	perPage: number;
 }
 
 export const useTagsColumns = ({
 	onEditTag,
 	onViewContacts,
+	page,
+	perPage,
 }: UseTagsColumnsProps): ColumnDef<ContactTag>[] => {
 	return [
 		selectionColumn,
 		{
-			accessorKey: 'id',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('ID', 'doublescale')}
-					<SortIcon />
-				</div>
+			id: 'row_number',
+			header: () => __('#', 'doublescale'),
+			cell: ({ row }) => (
+				<span className="text-muted-foreground font-mono text-xs">
+					{getRowNumber(row.index, page, perPage)}
+				</span>
 			),
-			cell: ({ row }) => <span className="text-muted-foreground font-mono text-xs">{row.original.id}</span>,
+			enableSorting: false,
+			enableHiding: false,
 		},
 		{
 			accessorKey: 'name',

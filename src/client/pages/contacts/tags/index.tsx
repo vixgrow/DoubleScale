@@ -290,6 +290,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const columns = useTagsColumns({
 		onEditTag: handleEditTag,
 		onViewContacts: handleViewContacts,
+		page,
+		perPage,
 	});
 
 	const tableConfig: DataTableConfig<ContactTag> = {

@@ -547,7 +547,7 @@ const SalesSettingsPage: FC = () => {
 		<div className="space-y-6">
 			<PageHeader
 				subtitle={__('Sales', 'doublescale')}
-				title={__('Settings', 'doublescale')}
+				title={__('Sales Settings', 'doublescale')}
 				actions={[]}
 				rowClassName="flex-row items-center justify-between w-full [&_h1]:min-w-0"
 				wrapperClassName="mb-0"

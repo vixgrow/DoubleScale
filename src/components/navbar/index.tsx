@@ -549,7 +549,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							? [
 									{
 										path: 'sales/settings',
-										label: __('Settings', 'doublescale'),
+										label: __('Sales Settings', 'doublescale'),
 										requiredCapability: [
 											'doublescale_manage_all_sales',
 											'doublescale_crm_manager',

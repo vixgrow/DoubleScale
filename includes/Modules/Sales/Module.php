@@ -116,7 +116,7 @@ final class Module extends AbstractModule {
 		MenuRegistry::add(
 			array(
 				'page_title'      => __( 'Sales Settings', 'doublescale' ),
-				'menu_title'      => __( 'Settings', 'doublescale' ),
+				'menu_title'      => __( 'Sales Settings', 'doublescale' ),
 				'capability'      => 'doublescale_access',
 				'slug'            => 'doublescale&path=sales/settings',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),

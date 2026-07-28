@@ -239,6 +239,7 @@
 
 	.pv-inv-total {
 		margin-left: auto;
+		margin-top: 12px;
 	}
 
 	.pv-inv-total table {
@@ -865,6 +866,10 @@
 		border-bottom: 1px solid #e2e8f0;
 	}
 
+	.pv-inv-six .pv-inv-total table tbody tr:first-child {
+		border-top: none;
+	}
+
 	.pv-inv-six .pv-inv-total table tbody tr:last-child {
 		border-bottom: none;
 	}
@@ -924,7 +929,7 @@
 
 	.pv-inv-six .pv-inv-total {
 		background-color: var(--pv-inv-primary-soft);
-		margin-top: -24px;
+		margin-top: 16px;
 		padding: 18px;
 	}
 
@@ -1054,6 +1059,10 @@
 
 	.pv-inv-seven .pv-inv-total table tbody tr {
 		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.pv-inv-seven .pv-inv-total table tbody tr:first-child {
+		border-top: none;
 	}
 
 	.pv-inv-seven .pv-inv-total table tbody tr:last-child {
@@ -1192,6 +1201,10 @@
 		border-bottom: 1px solid #718096;
 	}
 
+	.pv-inv-eight .pv-inv-total table tbody tr:first-child {
+		border-top: none;
+	}
+
 	.pv-inv-eight .pv-inv-total table tbody tr:last-child {
 		border-bottom: none;
 	}
@@ -1236,7 +1249,7 @@
 	}
 
 	.pv-inv-eight .pv-inv-total {
-		margin-top: -24px;
+		margin-top: 16px;
 	}
 }
 

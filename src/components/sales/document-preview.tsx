@@ -295,16 +295,16 @@ export const CreditNoteDocumentPreview: React.FC<CreditNoteDocumentPreviewProps>
 								<th>{__('Subtotal', 'doublescale')}</th>
 								<td>{formatMoney(creditNote.subtotal, creditNote.currency)}</td>
 							</tr>
-							{creditNote.total_tax > 0 ? (
-								<tr>
-									<th>{__('Tax', 'doublescale')}</th>
-									<td>{formatMoney(creditNote.total_tax, creditNote.currency)}</td>
-								</tr>
-							) : null}
 							{computed.discount > 0 ? (
 								<tr>
 									<th>{__('Discount', 'doublescale')}</th>
 									<td>-{formatMoney(computed.discount, creditNote.currency)}</td>
+								</tr>
+							) : null}
+							{creditNote.total_tax > 0 ? (
+								<tr>
+									<th>{__('Tax', 'doublescale')}</th>
+									<td>{formatMoney(creditNote.total_tax, creditNote.currency)}</td>
 								</tr>
 							) : null}
 							{creditNote.adjustment !== 0 ? (

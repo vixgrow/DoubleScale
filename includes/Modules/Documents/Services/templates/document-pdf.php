@@ -364,12 +364,14 @@ $corner_tri_svg = static function ( string $fill ): string {
 		.signature-line { border-bottom: 1px solid #b7c0cf; height: 30px; }
 		.signature-label { color: #8a94a6; font-size: 11px; font-weight: bold; }
 
-		table.totals { width: 100%; border-collapse: collapse; }
+		table.totals { width: 100%; border-collapse: collapse; margin-top: 12px; }
 		<?php if ( 'soft' === $total_style ) : ?>
-		.totals-wrap { background: #eef1f6; border-radius: 8px; padding: 12px 16px; }
+		.totals-wrap { background: #eef1f6; border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
 		<?php endif; ?>
 		table.totals th { color: #8a94a6; font-weight: normal; text-align: left; padding: 6px 0; font-size: 12px; }
 		table.totals td { color: #2d3748; font-weight: bold; text-align: right; padding: 6px 0; font-size: 12px; }
+		table.totals tr:first-child th,
+		table.totals tr:first-child td { border-top: none; }
 		table.totals .total-row th,
 		table.totals .total-row td {
 			<?php echo $total_row_css; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized colors above. ?>

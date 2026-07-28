@@ -263,16 +263,19 @@ const TotalTable: React.FC<
 						<th>{__('Subtotal', 'doublescale')}</th>
 						<td>{formatMoney(props.subtotal, props.currency)}</td>
 					</tr>
-					{(props.totalTax || 0) > 0 ? (
-						<tr className="pv-inv-e-bold">
-							<th>{__('Tax', 'doublescale')}</th>
-							<td>{formatMoney(props.totalTax || 0, props.currency)}</td>
-						</tr>
-					) : null}
 					{computed.discount > 0 ? (
 						<tr>
 							<th>{__('Discount', 'doublescale')}</th>
 							<td>-{formatMoney(computed.discount, props.currency)}</td>
+						</tr>
+					) : null}
+					{/* Tax comes after Discount: a before_tax discount reduces the
+					    taxable amount, so showing tax first misrepresents the order
+					    the totals are actually computed in. */}
+					{(props.totalTax || 0) > 0 ? (
+						<tr className="pv-inv-e-bold">
+							<th>{__('Tax', 'doublescale')}</th>
+							<td>{formatMoney(props.totalTax || 0, props.currency)}</td>
 						</tr>
 					) : null}
 					{props.adjustment !== 0 ? (

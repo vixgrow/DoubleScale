@@ -109,16 +109,16 @@ export const TotalsBlock: React.FC<{
 							<th>{__('Subtotal', 'doublescale')}</th>
 							<td>{formatMoney(subtotal, currency)}</td>
 						</tr>
-						{totalTax > 0 ? (
-							<tr>
-								<th>{__('Tax', 'doublescale')}</th>
-								<td>{formatMoney(totalTax, currency)}</td>
-							</tr>
-						) : null}
 						{computed.discount > 0 ? (
 							<tr>
 								<th>{__('Discount', 'doublescale')}</th>
 								<td>-{formatMoney(computed.discount, currency)}</td>
+							</tr>
+						) : null}
+						{totalTax > 0 ? (
+							<tr>
+								<th>{__('Tax', 'doublescale')}</th>
+								<td>{formatMoney(totalTax, currency)}</td>
 							</tr>
 						) : null}
 						{adjustment !== 0 ? (

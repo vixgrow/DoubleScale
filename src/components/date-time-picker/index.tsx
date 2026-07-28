@@ -135,14 +135,14 @@ export function DateTimePicker({
 					/>
 
 					<div className="flex justify-center pt-3 border-t">
-						<div className="flex items-center gap-1 border h-10 border-border/60 rounded-l-[8px]">
+						<div className="flex items-center gap-1 border h-10 border-border/60 border-x-0 rounded-l-[8px]">
 							<input
 								type="number"
 								value={hours.toString().padStart(2, '0')}
 								min={1}
 								max={12}
 								onChange={(e) => handleTimeChange('h', e.target.value)}
-								className="w-12 text-center text-sm text-foreground font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="text-center text-sm text-foreground font-medium !rounded-l-[8px] !border !border-border/60 !border-r-0 !outline-none focus:!outline-none focus:border-0 w-16"
 							/>
 							<span className="text-sm">:</span>
 							<input
@@ -151,7 +151,7 @@ export function DateTimePicker({
 								min={0}
 								max={59}
 								onChange={(e) => handleTimeChange('m', e.target.value)}
-								className="w-12 text-center text-sm text-foreground font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="w-16 text-center text-sm text-foreground font-medium !border !border-border/60 !border-x-0 !outline-none focus:!outline-none focus:border-0"
 							/>
 						</div>
 

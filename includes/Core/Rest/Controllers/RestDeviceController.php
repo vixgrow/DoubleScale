@@ -12,7 +12,7 @@ namespace DoubleScale\Core\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Notifications\Services\DeviceTokenService;
+use DoubleScale\Pro\Modules\Notifications\Services\DeviceTokenService;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -103,6 +103,10 @@ class RestDeviceController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function register_device( $request ) {
+		if ( ! self::has_device_token_layer() ) {
+			return self::pro_push_unavailable_error();
+		}
+
 		$user_id  = get_current_user_id();
 		$token    = $request->get_param( 'token' );
 		$platform = $request->get_param( 'platform' );
@@ -135,6 +139,10 @@ class RestDeviceController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function unregister_device( $request ) {
+		if ( ! self::has_device_token_layer() ) {
+			return self::pro_push_unavailable_error();
+		}
+
 		$user_id = get_current_user_id();
 		$token   = $request->get_param( 'token' );
 
@@ -158,5 +166,35 @@ class RestDeviceController extends WP_REST_Controller {
 	 */
 	public function permissions_check() {
 		return is_user_logged_in();
+	}
+
+	/**
+	 * Whether the Pro device-token layer is available.
+	 *
+	 * Device tokens are a Pro-only concern; the free plugin ships the route so
+	 * the mobile app always has a stable endpoint, but must not fatal when Pro
+	 * is inactive.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private static function has_device_token_layer(): bool {
+		return class_exists( 'DoubleScale\\Pro\\Modules\\Notifications\\Services\\DeviceTokenService' );
+	}
+
+	/**
+	 * Error returned when the Pro device-token layer is absent.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WP_Error
+	 */
+	private static function pro_push_unavailable_error(): WP_Error {
+		return new WP_Error(
+			'doublescale_pro_required',
+			__( 'This feature requires DoubleScale Pro (Notifications).', 'doublescale' ),
+			array( 'status' => 501 )
+		);
 	}
 }

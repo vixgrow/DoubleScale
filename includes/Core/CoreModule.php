@@ -68,6 +68,7 @@ final class CoreModule extends AbstractModule {
 			Rest\Controllers\RestPluginsController::class,
 			Rest\Controllers\RestSiteVerificationController::class,
 			Rest\Controllers\RestLicenseController::class,
+			Rest\Controllers\RestDeviceController::class,
 			Settings\Rest\RestSettingsController::class,
 			Settings\Rest\RestSettingsControllerPro::class,
 			Logger\Rest\RestLogController::class,

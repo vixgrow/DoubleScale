@@ -26,6 +26,7 @@
     "RestCustomFieldsController": "DoubleScale\\Pro\\Modules\\Support\\Rest\\Controllers\\RestCustomFieldsController",
     "RestCustomFieldsGroupController": "DoubleScale\\Pro\\Modules\\CustomFields\\Rest\\RestCustomFieldsGroupController",
     "RestDealController": "DoubleScale\\Pro\\Modules\\Deals\\Rest\\Controllers\\RestDealController",
+    "RestDeviceController": "DoubleScale\\Core\\Rest\\Controllers\\RestDeviceController",
     "RestEventController": "DoubleScale\\Modules\\Booking\\Rest\\Controllers\\RestEventController",
     "RestFormController": "DoubleScale\\Modules\\Forms\\Rest\\Controllers\\RestFormController",
     "RestGeneralController": "DoubleScale\\Core\\Rest\\Controllers\\RestGeneralController",

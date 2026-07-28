@@ -195,6 +195,18 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
+				NotificationCategories::TASKS_COMMENT      => array(
+					'bell'    => true,
+					'email'   => false, // Can be noisy on active tasks.
+					'browser' => true,
+					'push'    => true,
+				),
+				NotificationCategories::TASKS_COMMENT_MENTION => array(
+					'bell'    => true,
+					'email'   => true, // Direct mention — worth an email.
+					'browser' => true,
+					'push'    => true,
+				),
 				NotificationCategories::TASKS_COMPLETED    => array(
 					'bell'    => true,
 					'email'   => false, // Informational.
@@ -305,7 +317,7 @@ class NotificationPreferences {
 					'push'    => true,
 				),
 				// Sales — personal, actionable; push supported.
-				NotificationCategories::SALES_PROPOSAL_SENT     => array(
+				NotificationCategories::SALES_PROPOSAL_SENT => array(
 					'bell'    => true,
 					'email'   => true,
 					'browser' => true,
@@ -323,13 +335,13 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
-				NotificationCategories::SALES_INVOICE_PAID      => array(
+				NotificationCategories::SALES_INVOICE_PAID => array(
 					'bell'    => true,
 					'email'   => true,
 					'browser' => true,
 					'push'    => true,
 				),
-				NotificationCategories::SALES_CONTRACT_SENT   => array(
+				NotificationCategories::SALES_CONTRACT_SENT => array(
 					'bell'    => true,
 					'email'   => true,
 					'browser' => true,
@@ -378,13 +390,13 @@ class NotificationPreferences {
 					'push'    => true,
 				),
 				// Projects — personal, actionable; push supported.
-				NotificationCategories::PROJECTS_CREATED        => array(
+				NotificationCategories::PROJECTS_CREATED   => array(
 					'bell'    => true,
 					'email'   => false,
 					'browser' => true,
 					'push'    => true,
 				),
-				NotificationCategories::PROJECTS_ASSIGNED       => array(
+				NotificationCategories::PROJECTS_ASSIGNED  => array(
 					'bell'    => true,
 					'email'   => true,
 					'browser' => true,
@@ -396,13 +408,13 @@ class NotificationPreferences {
 					'browser' => true,
 					'push'    => true,
 				),
-				NotificationCategories::PROJECTS_COMMENT        => array(
+				NotificationCategories::PROJECTS_COMMENT   => array(
 					'bell'    => true,
 					'email'   => false,
 					'browser' => true,
 					'push'    => true,
 				),
-				NotificationCategories::PROJECTS_DUE_DATE       => array(
+				NotificationCategories::PROJECTS_DUE_DATE  => array(
 					'bell'    => true,
 					'email'   => true,
 					'browser' => true,
@@ -557,6 +569,14 @@ class NotificationPreferences {
 		// First check global channel setting.
 		if ( empty( $prefs['channels'][ $channel ] ) ) {
 			return false;
+		}
+
+		// A subcategory with no defaults row would otherwise read as disabled on
+		// every channel, silently dropping the notification. Fall back to the
+		// global channel setting so a registered-but-undefaulted subcategory
+		// still delivers instead of vanishing.
+		if ( ! isset( $prefs['subcategories'][ $subcategory ] ) ) {
+			return NotificationCategories::is_valid_subcategory( $subcategory );
 		}
 
 		// Check subcategory-specific setting.

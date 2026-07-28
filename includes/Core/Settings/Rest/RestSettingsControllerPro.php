@@ -2055,8 +2055,10 @@ class RestSettingsControllerPro {
 			'id'          => 0,
 			'title'       => __( 'Test Notification', 'doublescale' ),
 			'message'     => __( 'Push notifications are working! This is a test from your Plugin settings.', 'doublescale' ),
-			'mobile_link' => '',
-			'subcategory' => '',
+			// Point at the in-app notifications list so the test also exercises
+			// tap-to-navigate, not just delivery.
+			'mobile_link' => '/notifications',
+			'subcategory' => 'system_general',
 		);
 
 		$endpoint = sprintf( \DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::FCM_ENDPOINT, $config['project_id'] );
@@ -2064,23 +2066,9 @@ class RestSettingsControllerPro {
 		$failed   = 0;
 
 		foreach ( $tokens as $entry ) {
-			$payload  = array(
-				'message' => array(
-					'token'        => $entry['token'],
-					'notification' => array(
-						'title' => $push_data->title,
-						'body'  => $push_data->message,
-					),
-					'data'         => array(
-						'notification_id' => '0',
-						'mobile_link'     => '',
-						'subcategory'     => '',
-					),
-					'android'      => array(
-						'priority'     => 'high',
-						'notification' => array( 'channel_id' => 'doublescale' ),
-					),
-				),
+			$payload  = \DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::build_payload(
+				$entry['token'],
+				$push_data
 			);
 			$response = wp_remote_post(
 				$endpoint,

@@ -591,16 +591,17 @@ $corner_tri_svg = static function ( string $fill ): string {
 								<th><?php esc_html_e( 'Subtotal', 'doublescale' ); ?></th>
 								<td><?php echo esc_html( $format_money( $subtotal ) ); ?></td>
 							</tr>
-							<?php if ( $is_invoice && $total_tax > 0 ) : ?>
-								<tr>
-									<th><?php esc_html_e( 'Tax', 'doublescale' ); ?></th>
-									<td><?php echo esc_html( $format_money( $total_tax ) ); ?></td>
-								</tr>
-							<?php endif; ?>
 							<?php if ( $discount_amount > 0 ) : ?>
 								<tr>
 									<th><?php esc_html_e( 'Discount', 'doublescale' ); ?></th>
 									<td>-<?php echo esc_html( $format_money( $discount_amount ) ); ?></td>
+								</tr>
+							<?php endif; ?>
+							<?php // Tax follows Discount: a before_tax discount lowers the taxable amount. ?>
+							<?php if ( $is_invoice && $total_tax > 0 ) : ?>
+								<tr>
+									<th><?php esc_html_e( 'Tax', 'doublescale' ); ?></th>
+									<td><?php echo esc_html( $format_money( $total_tax ) ); ?></td>
 								</tr>
 							<?php endif; ?>
 							<?php if ( 0.0 !== $adjustment ) : ?>

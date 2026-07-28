@@ -21,6 +21,7 @@ import {
 	MonthGrid,
 	useCalendar,
 	normalizeWeekStartsOn,
+	kindTone,
 	type CalendarEvent,
 } from '@doublescale/shared/calendar';
 import type { PortalCalendarEventKind } from '../../types';
@@ -114,18 +115,25 @@ const Calendar = () => {
 				<div className="flex flex-wrap items-center gap-1.5">
 					{KIND_FILTERS.map(({ kind, label }) => {
 						const active = !hidden.has(kind);
+						const tone = kindTone(kind);
 						return (
 							<button
 								key={kind}
 								type="button"
 								onClick={() => toggleKind(kind)}
 								aria-pressed={active}
-								className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+								className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
 									active
 										? 'border-primary bg-primary/10 text-primary'
 										: 'border-border text-muted-foreground hover:bg-accent'
 								}`}
 							>
+								<span
+									className={`h-2 w-2 shrink-0 rounded-full ${tone.dot} ${
+										active ? '' : 'opacity-60'
+									}`}
+									aria-hidden="true"
+								/>
 								{label}
 							</button>
 						);

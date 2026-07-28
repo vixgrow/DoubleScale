@@ -6,8 +6,12 @@
  * Events bucket by their **civil day** via {@link eventDayKey} (never a Date
  * comparison) so all-day markers and late-evening timed events land on the right
  * cell regardless of the viewer's offset.
+ *
+ * Days with more than {@link MAX_PER_CELL} events show a "+N more" control that
+ * expands the cell to list the rest (and collapses again via "Show less").
  */
 
+import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { format, isSameMonth, isToday } from 'date-fns';
 
@@ -43,6 +47,7 @@ const MonthGrid = ({
 	weekStartsOn = DEFAULT_WEEK_STARTS_ON,
 }: MonthGridProps) => {
 	const weekdayLabels = getWeekdayLabels(normalizeWeekStartsOn(weekStartsOn));
+	const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
 	// Bucket events by civil day once.
 	const byDay = new Map<string, CalendarEvent[]>();
@@ -74,6 +79,10 @@ const MonthGrid = ({
 					const dayEvents = byDay.get(key) ?? [];
 					const inMonth = isSameMonth(day, cursor);
 					const today = isToday(day);
+					const isExpanded = expandedDay === key;
+					const visibleEvents = isExpanded
+						? dayEvents
+						: dayEvents.slice(0, MAX_PER_CELL);
 					const overflow = dayEvents.length - MAX_PER_CELL;
 
 					return (
@@ -81,7 +90,7 @@ const MonthGrid = ({
 							key={key}
 							className={`min-h-[6.5rem] border-b border-r border-border p-1.5 last:border-r-0 ${
 								inMonth ? '' : 'bg-muted/30'
-							}`}
+							} ${isExpanded ? 'relative z-10 bg-card shadow-md' : ''}`}
 						>
 							<div className="mb-1 flex justify-end">
 								<span
@@ -97,22 +106,35 @@ const MonthGrid = ({
 								</span>
 							</div>
 							<div className="space-y-1">
-								{dayEvents.slice(0, MAX_PER_CELL).map((event) => (
+								{visibleEvents.map((event) => (
 									<EventChip
 										key={event.id}
 										event={event}
 										onSelect={onSelect}
 									/>
 								))}
-								{overflow > 0 && (
-									<p className="px-1 text-xs font-medium text-muted-foreground">
+								{!isExpanded && overflow > 0 ? (
+									<button
+										type="button"
+										onClick={() => setExpandedDay(key)}
+										className="w-full rounded px-1 py-0.5 text-left text-xs font-medium text-primary hover:bg-primary/10"
+									>
 										{sprintf(
 											// translators: %d is the number of additional events.
-											__( '+%d more', 'doublescale' ),
+											__('+%d more', 'doublescale'),
 											overflow
 										)}
-									</p>
-								)}
+									</button>
+								) : null}
+								{isExpanded && overflow > 0 ? (
+									<button
+										type="button"
+										onClick={() => setExpandedDay(null)}
+										className="w-full rounded px-1 py-0.5 text-left text-xs font-medium text-muted-foreground hover:bg-muted"
+									>
+										{__('Show less', 'doublescale')}
+									</button>
+								) : null}
 							</div>
 						</div>
 					);

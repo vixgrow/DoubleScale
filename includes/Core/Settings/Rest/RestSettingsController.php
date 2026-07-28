@@ -134,10 +134,10 @@ class RestSettingsController extends RestController {
 					'additionalProperties' => false,
 					'properties'           => array(
 						'week_starts_on' => array(
-							'type'    => 'integer',
-							'default' => 1,
-							'minimum' => 0,
-							'maximum' => 6,
+							'type'        => 'integer',
+							'default'     => 1,
+							'minimum'     => 0,
+							'maximum'     => 6,
 							'description' => 'First day of the week for CRM calendars. 0 = Sunday, 1 = Monday, … 6 = Saturday.',
 						),
 					),

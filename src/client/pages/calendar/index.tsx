@@ -25,6 +25,7 @@ import ConfigAPI from '@doublescale/config';
 import {
 	MonthGrid,
 	useCalendar,
+	kindTone,
 	type CalendarEvent,
 	type CalendarEventKind,
 } from '@doublescale/shared/calendar';
@@ -96,9 +97,16 @@ const AdminCalendar = () => {
 	);
 
 	const onSelect = ( event: CalendarEvent ) => {
-		if ( event.route ) {
-			navigate( getToLink( event.route ) );
+		if ( ! event.route ) {
+			return;
 		}
+		// Tasks deep-link into the Tasks board and open the detail dialog.
+		if ( event.kind === 'task' ) {
+			const taskId = event.id.replace( /^task-/, '' );
+			navigate( getToLink( event.route, { task: taskId } ) );
+			return;
+		}
+		navigate( getToLink( event.route ) );
 	};
 
 	return (
@@ -166,18 +174,25 @@ const AdminCalendar = () => {
 				<div className="flex flex-wrap items-center gap-1.5">
 					{ KIND_FILTERS.map( ( { kind, label } ) => {
 						const active = ! hidden.has( kind );
+						const tone = kindTone( kind );
 						return (
 							<button
 								key={ kind }
 								type="button"
 								onClick={ () => toggleKind( kind ) }
 								aria-pressed={ active }
-								className={ `rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+								className={ `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
 									active
 										? 'border-primary bg-primary/10 text-primary'
 										: 'border-border text-muted-foreground hover:bg-accent'
 								}` }
 							>
+								<span
+									className={ `h-2 w-2 shrink-0 rounded-full ${tone.dot} ${
+										active ? '' : 'opacity-60'
+									}` }
+									aria-hidden="true"
+								/>
 								{ label }
 							</button>
 						);

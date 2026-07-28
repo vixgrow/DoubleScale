@@ -1,6 +1,7 @@
 /**
  * A single calendar event pill. Timed events (bookings) render as a solid colored
- * chip with their start time; all-day markers render as a dot + label.
+ * chip with their start time; all-day markers use the same solid kind/status tone
+ * so labels stay readable (white on a saturated color).
  *
  * Navigation is **injected**: the chip never knows whether it lives in the portal
  * (react-router relative routes) or the admin SPA (`getToLink` → `admin.php` URL).
@@ -29,8 +30,10 @@ const EventChip = ({ event, onSelect }: EventChipProps) => {
 	};
 
 	const baseCls =
-		'block w-full truncate rounded px-1.5 py-0.5 text-left text-xs leading-tight transition-opacity';
-	const interactive = clickable ? 'cursor-pointer hover:opacity-80' : '';
+		'block w-full truncate rounded px-1.5 py-0.5 text-left text-xs font-medium leading-tight transition-opacity';
+	const interactive = clickable
+		? 'cursor-pointer hover:opacity-90'
+		: 'cursor-default';
 
 	if (event.all_day) {
 		return (
@@ -39,10 +42,10 @@ const EventChip = ({ event, onSelect }: EventChipProps) => {
 				disabled={!clickable}
 				onClick={onActivate}
 				title={event.title}
-				className={`${baseCls} ${interactive} flex items-center gap-1.5 bg-secondary text-secondary-foreground disabled:cursor-default`}
+				className={`${baseCls} ${interactive} flex items-center gap-1.5 ${tone.solid} disabled:cursor-default disabled:opacity-100`}
 			>
 				<span
-					className={`h-2 w-2 shrink-0 rounded-full ${tone.dot}`}
+					className="h-2 w-2 shrink-0 rounded-full bg-white/90"
 					aria-hidden="true"
 				/>
 				<span className="truncate">{event.title}</span>
@@ -58,7 +61,7 @@ const EventChip = ({ event, onSelect }: EventChipProps) => {
 			disabled={!clickable}
 			onClick={onActivate}
 			title={`${time ? `${time} · ` : ''}${event.title}`}
-			className={`${baseCls} ${interactive} ${tone.solid} disabled:cursor-default`}
+			className={`${baseCls} ${interactive} ${tone.solid} disabled:cursor-default disabled:opacity-100`}
 		>
 			<span className="truncate">{event.title}</span>
 		</button>

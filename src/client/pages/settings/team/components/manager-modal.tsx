@@ -11,6 +11,7 @@ import { useModulesEnabled } from '@doublescale/hooks/use-module-enabled';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	ManagerRole,
+	ManagerRoleDescriptions,
 	ManagerRoleModuleRequirements,
 	ManagerRoleOptions,
 	ManagerRoleProRequirements,
@@ -253,7 +254,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="flex max-h-[min(90vh,720px)] max-w-md flex-col overflow-hidden p-0">
+			<DialogContent className="flex max-h-[min(90vh,720px)] max-w-lg flex-col overflow-hidden p-0">
 				<DialogHeader className="shrink-0 border-b border-border/60 p-6 pb-4">
 					<CustomDialogHeader
 						title={getTitle()}
@@ -348,7 +349,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 									return (
 										<div key={role.id} className="space-y-1">
-											<div className="flex items-center space-x-3">
+											<div className="flex items-start space-x-3">
 												<Checkbox
 													id={role.id}
 													checked={isAssigned}
@@ -359,18 +360,32 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 															checked === true
 														)
 													}
-													className="h-5 w-5"
+													className="mt-0.5 h-5 w-5"
 												/>
-												<Label
-													htmlFor={role.id}
-													className={
-														checkboxDisabled
-															? 'cursor-not-allowed text-sm font-normal text-gray-400'
-															: 'cursor-pointer text-sm font-normal text-gray-700'
-													}
-												>
-													{__(role.label, 'doublescale')}
-												</Label>
+												<div className="min-w-0 flex-1">
+													<Label
+														htmlFor={role.id}
+														className={
+															checkboxDisabled
+																? 'cursor-not-allowed text-sm font-medium text-gray-400'
+																: 'cursor-pointer text-sm font-medium text-gray-700'
+														}
+													>
+														{__(role.label, 'doublescale')}
+													</Label>
+													<p
+														className={
+															checkboxDisabled
+																? 'mt-0.5 text-xs leading-relaxed text-gray-400'
+																: 'mt-0.5 text-xs leading-relaxed text-gray-500'
+														}
+													>
+														{__(
+															ManagerRoleDescriptions[role.id],
+															'doublescale'
+														)}
+													</p>
+												</div>
 											</div>
 											{requiresPro && !isProActiveFlag && (
 												<p className="pl-8 text-xs text-amber-700">

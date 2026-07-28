@@ -58,6 +58,28 @@ export const ManagerRoleProRequirements: ManagerRole[] = [
 	'doublescale_project_member',
 ];
 
+/** Short capability summary shown under each role in Add/Edit Manager. */
+export const ManagerRoleDescriptions: Record<ManagerRole, string> = {
+	doublescale_crm_manager:
+		'Full CRM admin: all contacts, deals, pipelines, team, settings, reports, import/export, proposals, invoices, and support inbox.',
+	doublescale_sales_manager:
+		'Manage all contacts and deals, import/export data, and manage every proposal and invoice.',
+	doublescale_sales_rep:
+		'Work on own contacts and deals, create new records, and manage own proposals and invoices.',
+	doublescale_support_manager:
+		'View and manage every support ticket; assign agents and reply on any thread.',
+	doublescale_support_agent:
+		'View the support inbox and reply on tickets assigned to you.',
+	doublescale_booking_manager:
+		'Read and manage all team calendars, bookings, and availability schedules.',
+	doublescale_booking_agent:
+		'Manage only your own calendars, bookings, and availability.',
+	doublescale_project_manager:
+		'Create and manage all projects, kanban statuses, and assignments.',
+	doublescale_project_member:
+		'View and update projects assigned to you; join discussions and track progress.',
+};
+
 export const ManagerRoleOptions = [
 	{ id: 'doublescale_crm_manager' as ManagerRole, label: 'CRM Manager' },
 	{ id: 'doublescale_sales_manager' as ManagerRole, label: 'Sales Manager' },

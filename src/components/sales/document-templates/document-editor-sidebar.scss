@@ -34,6 +34,8 @@
 
 	&__preview-scroll {
 		padding: 0;
+		/* Keep width stable when scaled preview height crosses the scroll threshold. */
+		scrollbar-gutter: stable;
 	}
 
 	.document-preview-frame__content {

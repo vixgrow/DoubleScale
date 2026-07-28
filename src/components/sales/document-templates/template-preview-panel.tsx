@@ -60,7 +60,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 				{__('Template Preview', 'doublescale')}
 			</h3>
 			<div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-				<div className="max-h-[min(58vh,560px)] overflow-x-hidden overflow-y-auto p-0">
+				<div className="max-h-[min(58vh,560px)] overflow-x-hidden overflow-y-auto p-0 [scrollbar-gutter:stable]">
 					<DocumentPreviewFrame>
 						<DocumentDesign
 						template={normalizeTemplateId(templateId)}

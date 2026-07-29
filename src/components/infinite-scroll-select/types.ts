@@ -30,6 +30,7 @@ export interface InfiniteScrollSelectProps {
   loading?: boolean;
   error?: string;
   className?: string;
+  inputClassName?: string;
 }
 
 export interface InfiniteScrollSelectState {

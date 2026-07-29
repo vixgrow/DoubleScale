@@ -627,6 +627,9 @@ function doublescale_automation_condition_group_modules( string $group ): ?array
 			return array( 'sales', 'contracts' );
 		case 'credit_note':
 			return array( 'sales', 'credit_notes' );
+		case 'task':
+		case 'task_fields':
+			return array( 'tasks' );
 		default:
 			return null;
 	}

@@ -326,6 +326,23 @@ final class TriggersManager {
 					),
 				),
 			),
+			'tasks'       => array(
+				'label'  => __( 'Tasks', 'doublescale' ),
+				'groups' => array(
+					'task'    => array(
+						'label'       => __( 'Task', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'tasks' ),
+					),
+					'subtask' => array(
+						'label'       => __( 'Subtask', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'tasks' ),
+					),
+				),
+			),
 			'sales'       => array(
 				'label'  => __( 'Sales', 'doublescale' ),
 				'groups' => array(

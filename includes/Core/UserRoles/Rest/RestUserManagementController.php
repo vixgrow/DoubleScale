@@ -58,31 +58,41 @@ class RestUserManagementController extends RestController {
 					'callback'            => array( $this, 'get_crm_users_frontend' ),
 					'permission_callback' => array( $this, 'check_sales_rep_permissions' ),
 					'args'                => array(
-						'search'   => array(
+						'search'           => array(
 							'description'       => 'Search term for user name or email',
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'per_page' => array(
+						'include'          => array(
+							'description'       => 'Comma-separated user IDs to resolve for selected values',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'filter_crm_users' => array(
+							'description' => 'Limit results to known CRM roles (+ administrator)',
+							'type'        => array( 'boolean', 'string' ),
+							'default'     => false,
+						),
+						'per_page'         => array(
 							'description' => 'Number of users per page',
 							'type'        => 'integer',
 							'default'     => 50,
 							'minimum'     => 1,
 							'maximum'     => 100,
 						),
-						'page'     => array(
+						'page'             => array(
 							'description' => 'Page number',
 							'type'        => 'integer',
 							'default'     => 1,
 							'minimum'     => 1,
 						),
-						'orderby'  => array(
+						'orderby'          => array(
 							'description' => 'Order by field',
 							'type'        => 'string',
 							'default'     => 'display_name',
 							'enum'        => array( 'display_name', 'user_email', 'ID' ),
 						),
-						'order'    => array(
+						'order'            => array(
 							'description' => 'Order direction',
 							'type'        => 'string',
 							'default'     => 'asc',
@@ -225,6 +235,16 @@ class RestUserManagementController extends RestController {
 		$orderby          = $request->get_param( 'orderby' ) ?: 'display_name';
 		$order            = $request->get_param( 'order' ) ?: 'asc';
 		$filter_crm_users = $request->get_param( 'filter_crm_users' ) ?: false;
+		$include_raw      = $request->get_param( 'include' );
+
+		$include_ids = array();
+		if ( ! empty( $include_raw ) ) {
+			$include_ids = array_values(
+				array_filter(
+					array_map( 'absint', explode( ',', (string) $include_raw ) )
+				)
+			);
+		}
 
 		$user_args = array(
 			'number'  => $per_page,
@@ -234,12 +254,19 @@ class RestUserManagementController extends RestController {
 			'fields'  => 'all',
 		);
 
+		// Resolve specific user IDs (selected-value labels) without requiring search.
+		if ( ! empty( $include_ids ) ) {
+			$user_args['include'] = $include_ids;
+			$user_args['number']  = max( count( $include_ids ), (int) $per_page );
+			$user_args['offset']  = 0;
+		}
+
 		if ( ! empty( $search ) && strlen( $search ) >= 2 ) {
 			$user_args['search']         = '*' . esc_attr( $search ) . '*';
 			$user_args['search_columns'] = array( 'user_login', 'user_email', 'display_name' );
 		}
 
-		if ( $filter_crm_users ) {
+		if ( $filter_crm_users && empty( $include_ids ) ) {
 			$user_args['role__in'] = array_merge( UserRoles::get_known_role_slugs(), array( UserRoles::ADMINISTRATOR ) );
 		}
 

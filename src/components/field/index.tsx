@@ -48,6 +48,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { TooltipTrigger } from '@/components/ui/tooltip';
 import { TooltipContent } from '@/components/ui/tooltip';
 import { InfiniteScrollMultiSelect } from '@/components/infinite-scroll-select/infinite-scroll-multi-select';
+import { InfiniteScrollSelect } from '@/components/infinite-scroll-select';
 import EmailClicked from '@/components/email-clicked';
 import FormSubmission from '@/components/form-submission';
 import PageVisited from '@/components/page-visited';
@@ -419,6 +420,64 @@ const Field: React.FC<FieldProps> = ({
 					dataPath={ims?.dataPath}
 					totalPath={ims?.totalPath}
 					perPage={ims?.perPage ?? 20}
+					disabled={disabled}
+					className={className}
+				/>
+			);
+			break;
+		}
+		case 'infinite_scroll_select': {
+			const iss = settings;
+			const selectEndpoint = endpoint || '';
+			if (!selectEndpoint) {
+				fieldContent = (
+					<div className="text-sm text-destructive">
+						{__('Missing endpoint for this field.', 'doublescale')}
+					</div>
+				);
+				break;
+			}
+			const isUsersEndpoint = selectEndpoint.includes(
+				'user-management/users'
+			);
+			fieldContent = (
+				<InfiniteScrollSelect
+					value={
+						value !== undefined &&
+						value !== null &&
+						value !== '' &&
+						value !== 'any-user'
+							? value
+							: undefined
+					}
+					onValueChange={(next) => onChange(next)}
+					placeholder={
+						placeholder || __('Search and select…', 'doublescale')
+					}
+					apiEndpoint={selectEndpoint}
+					apiParams={iss?.apiParams}
+					searchParamName={iss?.searchParamName || 'search'}
+					getOptionLabel={(item: any) => {
+						if (item?.display_name) {
+							return item.email
+								? `${item.display_name} (${item.email})`
+								: String(item.display_name);
+						}
+						return (
+							item?.name ??
+							item?.label ??
+							String(item?.id ?? '')
+						);
+					}}
+					getOptionValue={(item: any) => item?.id ?? item?.value}
+					dataPath={
+						iss?.dataPath || (isUsersEndpoint ? 'users' : 'data')
+					}
+					totalPath={
+						iss?.totalPath ||
+						(isUsersEndpoint ? 'pagination.total' : 'total')
+					}
+					perPage={iss?.perPage ?? 20}
 					disabled={disabled}
 					className={className}
 				/>

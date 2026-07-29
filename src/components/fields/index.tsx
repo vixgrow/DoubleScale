@@ -26,10 +26,17 @@ type FieldType = {
 		ajax_action?: string;
 		button_text?: string;
 		templateData?: Record<string, any>;
+		apiParams?: Record<string, unknown>;
+		searchParamName?: string;
+		perPage?: number;
+		dataPath?: string;
+		totalPath?: string;
+		rootArrayResponse?: boolean;
 	};
 	'default-value'?: string;
 	tooltip?: string;
 	helperText?: string;
+	placeholder?: string;
 };
 
 type FieldsType = {
@@ -153,6 +160,9 @@ const Fields: React.FC<FieldsProps> = ({
 													endpoint={tabField.endpoint}
 													multiple={tabField.multiple}
 													settings={tabField.settings}
+													placeholder={
+														tabField.placeholder
+													}
 													allValues={values}
 													tooltip={tabField.tooltip}
 													defaultValue={
@@ -194,6 +204,7 @@ const Fields: React.FC<FieldsProps> = ({
 						endpoint={field.endpoint}
 						multiple={field.multiple}
 						settings={field.settings}
+						placeholder={field.placeholder}
 						allValues={values}
 						tooltip={field.tooltip}
 						defaultValue={field['default-value']}

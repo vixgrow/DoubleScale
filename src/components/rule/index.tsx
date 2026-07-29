@@ -85,6 +85,8 @@ const Rule: React.FC<RuleProps> = ({
 								value: key,
 							})
 						)}
+						endpoint={ruleSettings.endpoint}
+						settings={ruleSettings.settings}
 						className="w-full min-w-0 h-12 !border-border !rounded-lg [&_input]:w-full [&_textarea]:w-full"
 					/>
 				</div>

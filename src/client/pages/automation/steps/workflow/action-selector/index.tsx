@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import ConfigAPI from '@doublescale/config';
 import type { ActionsGroup } from '@doublescale/config';
-import { HelpdeskIcon, SalesIcon } from '@doublescale/components';
+import { HelpdeskIcon, SalesIcon, TaskDoneIcon } from '@doublescale/components';
 import {
 	Tabs,
 	TabsContent,
@@ -92,6 +92,12 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 				<HelpdeskIcon width={22} height={22} color="#1E3A8A" />
 			),
 			description: __('Manage helpdesk tickets and agents', 'doublescale')
+		},
+		'tasks': {
+			image: (
+				<TaskDoneIcon width={22} height={22} color="#1E3A8A" />
+			),
+			description: __('Create and update CRM tasks', 'doublescale')
 		},
 		'sales': {
 			image: (

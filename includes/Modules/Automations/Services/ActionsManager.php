@@ -218,6 +218,17 @@ final class ActionsManager {
 					),
 				),
 			),
+			'tasks'       => array(
+				'label'  => __( 'Tasks', 'doublescale' ),
+				'groups' => array(
+					'task' => array(
+						'label'       => __( 'Task', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'tasks' ),
+					),
+				),
+			),
 			'ecommerce'   => array(
 				'label' => __( 'E-commerce', 'doublescale' ),
 				'tabs'  => array(

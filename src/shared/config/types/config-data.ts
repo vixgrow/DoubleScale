@@ -291,6 +291,15 @@ export type Rule = {
 	options: {
 		[key: string]: string;
 	};
+	endpoint?: string;
+	settings?: {
+		apiParams?: Record<string, unknown>;
+		searchParamName?: string;
+		perPage?: number;
+		dataPath?: string;
+		totalPath?: string;
+		rootArrayResponse?: boolean;
+	};
 	required_triggers?: string[];
 	is_automation?: boolean;
 };

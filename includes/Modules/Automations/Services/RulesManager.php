@@ -259,6 +259,40 @@ final class RulesManager {
 				'rules'    => array(),
 				'triggers' => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
+			'task'                      => array(
+				'name'        => __( 'Task', 'doublescale' ),
+				'key'         => 'task',
+				'rules'       => array(),
+				'triggers'    => array(
+					'task_created',
+					'task_completed',
+					'task_assigned',
+					'task_status_changed',
+					'task_overdue',
+					'task_due_soon',
+					'subtask_created',
+					'subtask_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+					|| ! doublescale_is_module_active( 'tasks' ),
+			),
+			'task_fields'               => array(
+				'name'        => __( 'Task Fields', 'doublescale' ),
+				'key'         => 'task_fields',
+				'rules'       => array(),
+				'triggers'    => array(
+					'task_created',
+					'task_completed',
+					'task_assigned',
+					'task_status_changed',
+					'task_overdue',
+					'task_due_soon',
+					'subtask_created',
+					'subtask_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+					|| ! doublescale_is_module_active( 'tasks' ),
+			),
 			'support'                   => array(
 				'name'        => __( 'Helpdesk', 'doublescale' ),
 				'key'         => 'support',
@@ -368,6 +402,13 @@ final class RulesManager {
 			'required_triggers' => $rule->required_triggers,
 			'is_automation'     => $rule->is_automation,
 		);
+
+		if ( ! empty( $rule->endpoint ) ) {
+			$this->groups[ $rule->group ]['rules'][ $rule->slug ]['endpoint'] = $rule->endpoint;
+		}
+		if ( ! empty( $rule->settings ) && is_array( $rule->settings ) ) {
+			$this->groups[ $rule->group ]['rules'][ $rule->slug ]['settings'] = $rule->settings;
+		}
 	}
 
 	/**

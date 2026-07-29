@@ -71,6 +71,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
+		if (groupLabel === 'Task') {
+			return __(
+				'The Tasks module is turned off. Enable it under Settings → Modules to use these actions.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these actions.',

@@ -1672,6 +1672,16 @@ class RestAutomationController extends RestController {
 					'label'  => 'Helpdesk',
 				),
 			),
+			'tasks'       => array(
+				'task'    => array(
+					'module' => 'tasks',
+					'label'  => 'Tasks',
+				),
+				'subtask' => array(
+					'module' => 'tasks',
+					'label'  => 'Tasks',
+				),
+			),
 			'sales'       => array(
 				'sales' => array(
 					'plugin' => '',
@@ -1883,6 +1893,13 @@ class RestAutomationController extends RestController {
 				'support' => array(
 					'plugin' => '',
 					'module' => 'support',
+					'label'  => 'Double Scale Pro',
+				),
+			),
+			'tasks'       => array(
+				'task' => array(
+					'plugin' => '',
+					'module' => 'tasks',
 					'label'  => 'Double Scale Pro',
 				),
 			),

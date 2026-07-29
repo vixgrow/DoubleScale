@@ -355,6 +355,22 @@ final class MergeTagsManager {
 				'mergeTags' => array(),
 				'triggers'  => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
+			'task'           => array(
+				'name'        => __( 'Task', 'doublescale' ),
+				'mergeTags'   => array(),
+				'triggers'    => array(
+					'task_created',
+					'task_completed',
+					'task_assigned',
+					'task_status_changed',
+					'task_overdue',
+					'task_due_soon',
+					'subtask_created',
+					'subtask_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+					|| ! doublescale_is_module_active( 'tasks' ),
+			),
 			'booking'        => array(
 				'name'        => __( 'Booking', 'doublescale' ),
 				'mergeTags'   => array(),

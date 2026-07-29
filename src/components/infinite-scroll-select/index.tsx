@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { debounce } from 'lodash';
+import { createPortal } from 'react-dom';
 
 /**
  * Internal dependencies
@@ -24,6 +25,37 @@ import { InfiniteScrollSelectProps } from './types';
 const getNestedValue = (obj: any, path?: string): any => {
 	if (!path) return obj;
 	return path.split('.').reduce((acc, part) => acc?.[part], obj);
+};
+
+const toPositiveNumber = (value: unknown): number | undefined => {
+	if (typeof value === 'number' && Number.isFinite(value)) {
+		return value;
+	}
+	if (typeof value === 'string' && value.trim() !== '') {
+		const parsed = Number(value);
+		if (Number.isFinite(parsed)) {
+			return parsed;
+		}
+	}
+	return undefined;
+};
+
+const extractRows = (response: unknown, dataPath: string): any[] => {
+	if (Array.isArray(response)) {
+		return response;
+	}
+	const nested = getNestedValue(response, dataPath);
+	return Array.isArray(nested) ? nested : [];
+};
+
+type MenuStyle = {
+	position: 'fixed';
+	left: number;
+	width: number;
+	zIndex: number;
+	maxHeight: number;
+	top?: number;
+	bottom?: number;
 };
 
 /**
@@ -50,72 +82,179 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 }) => {
 	const [items, setItems] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [page, setPage] = useState(1);
-	const [hasMore, setHasMore] = useState(true);
 	const [search, setSearch] = useState('');
 	const [error, setError] = useState<string | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
+	const [menuStyle, setMenuStyle] = useState<MenuStyle | null>(null);
+	const [resolvedItem, setResolvedItem] = useState<any>(selectedItem);
 
 	const inputRef = useRef<HTMLInputElement>(null);
+	const rootRef = useRef<HTMLDivElement>(null);
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const loadingRef = useRef(false);
+	const hasMoreRef = useRef(true);
+	const pageRef = useRef(1);
+	const searchRef = useRef('');
+	const isOpenRef = useRef(false);
+	const fetchSeqRef = useRef(0);
+
+	const computeMenuStyle = useCallback((): MenuStyle | null => {
+		const el = inputRef.current;
+		if (!el) {
+			return null;
+		}
+		const rect = el.getBoundingClientRect();
+		if (!rect.width && !rect.height) {
+			return null;
+		}
+		const viewportPadding = 8;
+		const maxMenuHeight = 300;
+		const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
+		const spaceAbove = rect.top - viewportPadding;
+		const openUpward =
+			spaceBelow < Math.min(maxMenuHeight, 160) && spaceAbove > spaceBelow;
+		const available = Math.max(
+			120,
+			openUpward ? spaceAbove : spaceBelow
+		);
+		const height = Math.min(maxMenuHeight, available);
+
+		return {
+			position: 'fixed',
+			left: rect.left,
+			width: Math.max(rect.width, 180),
+			zIndex: 200000,
+			maxHeight: height,
+			...(openUpward
+				? { bottom: window.innerHeight - rect.top + 4 }
+				: { top: rect.bottom + 4 }),
+		};
+	}, []);
+
+	const updateMenuPosition = useCallback(() => {
+		const next = computeMenuStyle();
+		if (next) {
+			setMenuStyle(next);
+		}
+	}, [computeMenuStyle]);
 
 	/**
 	 * Fetch data from API
 	 */
-	const fetchData = async (pageNum: number, searchValue: string) => {
-		setLoading(true);
-		setError(null);
-
-		try {
-			const params: any = {
-				page: pageNum,
-				per_page: perPage,
-				...apiParams,
-			};
-
-			if (searchValue.trim()) {
-				params[searchParamName] = searchValue.trim();
+	const fetchData = useCallback(
+		async (pageNum: number, searchValue: string) => {
+			if (loadingRef.current && pageNum !== 1) {
+				return;
 			}
 
-			const response = await apiFetch({
-				path: addQueryArgs(apiEndpoint, params),
-				method: 'GET',
-			});
+			const seq = ++fetchSeqRef.current;
+			loadingRef.current = true;
+			setLoading(true);
+			setError(null);
 
-			const data = getNestedValue(response, dataPath) || [];
-			const total = getNestedValue(response, totalPath);
+			try {
+				const params: Record<string, unknown> = {
+					page: pageNum,
+					per_page: perPage,
+					...apiParams,
+				};
 
-			// If no total is provided, assume there are more pages if we got a full page of results
-			let hasMorePages = false;
-			if (total !== undefined && total !== null) {
-				const totalPages = Math.ceil(total / perPage);
-				hasMorePages = pageNum < totalPages;
-			} else {
-				// If no total, check if we got a full page (means there might be more)
-				hasMorePages = data.length >= perPage;
+				if (searchValue.trim()) {
+					params[searchParamName] = searchValue.trim();
+				}
+
+				const response = await apiFetch({
+					path: addQueryArgs(apiEndpoint, params),
+					method: 'GET',
+				});
+
+				// Ignore stale responses from an older request.
+				if (seq !== fetchSeqRef.current) {
+					return;
+				}
+
+				const rows = extractRows(response, dataPath);
+				const total = toPositiveNumber(
+					getNestedValue(response, totalPath)
+				);
+				const hasNext = getNestedValue(
+					response,
+					'pagination.has_next'
+				);
+
+				let hasMorePages = false;
+				if (typeof hasNext === 'boolean') {
+					hasMorePages = hasNext;
+				} else if (total !== undefined) {
+					const totalPages = Math.ceil(total / perPage);
+					hasMorePages = pageNum < totalPages;
+				} else {
+					hasMorePages = rows.length >= perPage;
+				}
+
+				if (pageNum === 1) {
+					setItems(rows);
+				} else {
+					setItems((prev) => [...prev, ...rows]);
+				}
+
+				hasMoreRef.current = hasMorePages;
+				pageRef.current = pageNum;
+			} catch (err: any) {
+				if (seq !== fetchSeqRef.current) {
+					return;
+				}
+				setError(
+					err.message || __('Failed to load data', 'doublescale')
+				);
+			} finally {
+				if (seq === fetchSeqRef.current) {
+					loadingRef.current = false;
+					setLoading(false);
+				}
 			}
+		},
+		[apiEndpoint, apiParams, dataPath, perPage, searchParamName, totalPath]
+	);
 
-			if (pageNum === 1) {
-				setItems(data);
-			} else {
-				setItems((prev) => [...prev, ...data]);
-			}
+	const closeMenu = useCallback(() => {
+		isOpenRef.current = false;
+		setIsOpen(false);
+		searchRef.current = '';
+		setSearch('');
+	}, []);
 
-			setHasMore(hasMorePages);
-			setPage(pageNum);
-		} catch (err: any) {
-			setError(err.message || __('Failed to load data', 'doublescale'));
-		} finally {
-			setLoading(false);
+	const openMenu = useCallback(() => {
+		if (disabled || externalLoading) {
+			return;
 		}
-	};
+
+		const wasOpen = isOpenRef.current;
+		isOpenRef.current = true;
+
+		const style = computeMenuStyle();
+		if (style) {
+			setMenuStyle(style);
+		}
+		setIsOpen(true);
+
+		// Always (re)load page 1 when opening from closed so the list is ready.
+		if (!wasOpen) {
+			fetchData(1, searchRef.current);
+		}
+	}, [
+		computeMenuStyle,
+		disabled,
+		externalLoading,
+		fetchData,
+	]);
 
 	/**
 	 * Debounced search
 	 */
 	const debouncedFetch = useRef(
-		debounce((searchValue: string) => {
-			fetchData(1, searchValue);
+		debounce((searchValue: string, load: typeof fetchData) => {
+			load(1, searchValue);
 		}, 300)
 	).current;
 
@@ -124,19 +263,18 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	 */
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = e.target.value;
+		searchRef.current = newValue;
 		setSearch(newValue);
 
-		// Open dropdown and fetch data
-		if (!isOpen) {
-			setIsOpen(true);
-			if (items.length === 0) {
-				fetchData(1, '');
-			}
+		if (!isOpenRef.current) {
+			openMenu();
 		}
 
-		// Debounced search for typed input
 		if (newValue.trim()) {
-			debouncedFetch(newValue);
+			debouncedFetch(newValue, fetchData);
+		} else {
+			debouncedFetch.cancel();
+			fetchData(1, '');
 		}
 	};
 
@@ -148,10 +286,10 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 
 		if (
 			scrollHeight - scrollTop - clientHeight < 50 &&
-			hasMore &&
-			!loading
+			hasMoreRef.current &&
+			!loadingRef.current
 		) {
-			fetchData(page + 1, search);
+			fetchData(pageRef.current + 1, searchRef.current);
 		}
 	};
 
@@ -159,73 +297,162 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	 * Handle item selection
 	 */
 	const handleSelect = (item: any) => {
+		setResolvedItem(item);
 		onValueChange(getOptionValue(item), item);
-		setSearch('');
-		setIsOpen(false);
+		closeMenu();
 	};
 
 	/**
-	 * Handle focus - only open dropdown, don't auto-load
+	 * Keep selectedItem prop in sync when the parent provides one.
 	 */
-	const handleFocus = () => {
-		// Don't open immediately to prevent auto-open on modal mount
-		// User needs to click/type to open
-	};
+	useEffect(() => {
+		if (selectedItem) {
+			setResolvedItem(selectedItem);
+		}
+	}, [selectedItem]);
 
 	/**
-	 * Handle blur - close dropdown
+	 * Resolve label for a saved value without opening the menu
+	 * (so "Name (email)" shows immediately in the closed input).
 	 */
-	const handleBlur = () => {
-		setTimeout(() => {
-			setIsOpen(false);
-			setSearch('');
-		}, 200);
-	};
+	useEffect(() => {
+		if (
+			value === undefined ||
+			value === null ||
+			value === '' ||
+			!apiEndpoint
+		) {
+			if (!value) {
+				setResolvedItem(undefined);
+			}
+			return;
+		}
+
+		const valueStr = String(value);
+		const fromItems = items.find(
+			(item) => String(getOptionValue(item)) === valueStr
+		);
+		if (fromItems) {
+			setResolvedItem(fromItems);
+			return;
+		}
+
+		if (
+			resolvedItem &&
+			String(getOptionValue(resolvedItem)) === valueStr
+		) {
+			return;
+		}
+
+		if (selectedItem && String(getOptionValue(selectedItem)) === valueStr) {
+			setResolvedItem(selectedItem);
+			return;
+		}
+
+		let cancelled = false;
+		(async () => {
+			try {
+				const response = await apiFetch({
+					path: addQueryArgs(apiEndpoint, {
+						include: valueStr,
+						per_page: 1,
+						...apiParams,
+					}),
+					method: 'GET',
+				});
+				if (cancelled) {
+					return;
+				}
+				const rows = extractRows(response, dataPath);
+				const match =
+					rows.find(
+						(item) => String(getOptionValue(item)) === valueStr
+					) || rows[0];
+				if (match) {
+					setResolvedItem(match);
+				}
+			} catch {
+				// Keep whatever label we already have.
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+		// Intentionally omit items/resolvedItem to avoid re-fetch loops;
+		// we only need to resolve when value/endpoint config changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [value, apiEndpoint, dataPath, JSON.stringify(apiParams ?? {})]);
 
 	/**
-	 * Close dropdown when clicking outside
+	 * Close dropdown when clicking outside (do NOT close on input blur —
+	 * blur fires before the list paints / while scrolling the portaled menu).
 	 */
 	useEffect(() => {
 		if (!isOpen) return;
 
 		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as Node;
 			if (
-				inputRef.current &&
-				!inputRef.current.contains(e.target as Node) &&
-				dropdownRef.current &&
-				!dropdownRef.current.contains(e.target as Node)
+				rootRef.current?.contains(target) ||
+				dropdownRef.current?.contains(target)
 			) {
-				setIsOpen(false);
-				setSearch('');
+				return;
 			}
+			closeMenu();
 		};
 
 		document.addEventListener('mousedown', handleClickOutside);
 		return () =>
 			document.removeEventListener('mousedown', handleClickOutside);
-	}, [isOpen]);
+	}, [isOpen, closeMenu]);
 
 	/**
-	 * Ensure selected item is in list 
+	 * Position the menu before paint when opening, and keep it aligned.
+	 */
+	useLayoutEffect(() => {
+		if (!isOpen) {
+			return;
+		}
+		updateMenuPosition();
+	}, [isOpen, updateMenuPosition, items.length, loading]);
+
+	useEffect(() => {
+		if (!isOpen) {
+			return;
+		}
+
+		const onReposition = () => updateMenuPosition();
+		window.addEventListener('resize', onReposition);
+		window.addEventListener('scroll', onReposition, true);
+
+		return () => {
+			window.removeEventListener('resize', onReposition);
+			window.removeEventListener('scroll', onReposition, true);
+		};
+	}, [isOpen, updateMenuPosition]);
+
+	/**
+	 * Ensure selected/resolved item is in the open list
 	 */
 	useEffect(() => {
-		if (selectedItem && value && items.length > 0) {
-			const selectedValue = String(value);
-			const exists = items.find(
-				(item) => String(getOptionValue(item)) === selectedValue
-			);
-			if (!exists) {
-				// Add selectedItem only if it's not already in the list
-				setItems((prev) => {
-					// Double-check it's not already there to prevent duplicates
-					const stillNotExists = !prev.find(
-						(item) => String(getOptionValue(item)) === selectedValue
-					);
-					return stillNotExists ? [selectedItem, ...prev] : prev;
-				});
-			}
+		const current = resolvedItem || selectedItem;
+		if (!current || !value || items.length === 0) {
+			return;
 		}
-	}, [selectedItem, value]);
+		const selectedValue = String(value);
+		const exists = items.find(
+			(item) => String(getOptionValue(item)) === selectedValue
+		);
+		if (!exists) {
+			setItems((prev) => {
+				const stillNotExists = !prev.find(
+					(item) => String(getOptionValue(item)) === selectedValue
+				);
+				return stillNotExists ? [current, ...prev] : prev;
+			});
+		}
+	}, [resolvedItem, selectedItem, value, items.length]);
 
 	/**
 	 * Cleanup debounce on unmount
@@ -237,21 +464,18 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	}, [debouncedFetch]);
 
 	/**
-	 * Get display value
+	 * Get display value — keep showing Name (email) while closed.
 	 */
 	const displayValue = () => {
-		// If typing, show the search input
 		if (search) return search;
-
-		// If dropdown is open, show empty (allow typing)
 		if (isOpen) return '';
 
-		// If closed and has value, show selected item label
 		if (value) {
 			const selected = items.find(
 				(item) => String(getOptionValue(item)) === String(value)
 			);
 			if (selected) return getOptionLabel(selected);
+			if (resolvedItem) return getOptionLabel(resolvedItem);
 			if (selectedItem) return getOptionLabel(selectedItem);
 		}
 
@@ -259,25 +483,106 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	};
 
 	const displayError = externalError || error;
+	const activeMenuStyle = isOpen ? menuStyle || computeMenuStyle() : null;
+
+	const dropdown =
+		isOpen && !disabled && activeMenuStyle
+			? createPortal(
+					<div
+						ref={dropdownRef}
+						style={activeMenuStyle}
+						onScroll={handleScroll}
+						onMouseDown={(event) => {
+							event.preventDefault();
+						}}
+						onWheel={(event) => event.stopPropagation()}
+						className="bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto overscroll-contain"
+					>
+						{loading && items.length === 0 && (
+							<div className="px-3 py-2 text-sm text-gray-500">
+								{__('Loading...', 'doublescale')}
+							</div>
+						)}
+
+						{!loading && displayError && (
+							<div className="px-3 py-2 text-sm text-destructive">
+								{displayError}
+							</div>
+						)}
+
+						{!loading && !displayError && items.length === 0 && (
+							<div className="px-3 py-2 text-sm text-gray-500">
+								{__('No items found', 'doublescale')}
+							</div>
+						)}
+
+						{items.length > 0 && (
+							<>
+								{items.map((item) => {
+									const itemValue = String(
+										getOptionValue(item)
+									);
+									const isSelected =
+										String(value) === itemValue;
+									return (
+										<div
+											key={itemValue}
+											role="button"
+											tabIndex={-1}
+											className={`px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
+												isSelected
+													? 'bg-blue-50 text-blue-600'
+													: ''
+											}`}
+											onMouseDown={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												handleSelect(item);
+											}}
+										>
+											{getOptionLabel(item)}
+										</div>
+									);
+								})}
+								{loading && (
+									<div className="px-3 py-2 text-sm text-center text-gray-500">
+										{__(
+											'Loading more...',
+											'doublescale'
+										)}
+									</div>
+								)}
+							</>
+						)}
+					</div>,
+					document.body
+				)
+			: null;
 
 	return (
-		<div className={`infinite-scroll-select relative ${className}`}>
+		<div
+			ref={rootRef}
+			className={`infinite-scroll-select relative ${className}`}
+		>
 			<div className="relative">
 				<Input
 					ref={inputRef}
 					type="text"
 					value={displayValue()}
 					onChange={handleSearchChange}
-					onFocus={handleFocus}
-					onBlur={handleBlur}
-					onClick={() => {
-						if (!isOpen) {
-							setIsOpen(true);
-							if (items.length === 0) {
-								fetchData(1, '');
-							}
+					onMouseDown={(e) => {
+						// Open on mousedown so fetch starts before click/focus quirks.
+						if (
+							!disabled &&
+							!externalLoading &&
+							!isOpenRef.current
+						) {
+							e.preventDefault();
+							inputRef.current?.focus();
+							openMenu();
 						}
 					}}
+					onClick={openMenu}
 					placeholder={placeholder}
 					disabled={disabled || externalLoading}
 					autoComplete="off"
@@ -306,78 +611,12 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 				</div>
 			</div>
 
-			{isOpen && !disabled && (
-				<div
-					ref={dropdownRef}
-					onScroll={handleScroll}
-					onWheel={(event) => event.stopPropagation()}
-					className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-[300px] overflow-y-auto overscroll-contain"
-				>
-					{loading && items.length === 0 && (
-						<div className="px-3 py-2 text-sm text-gray-500">
-							{__('Loading...', 'doublescale')}
-						</div>
-					)}
-
-					{!loading && displayError && (
-					<div className="px-3 py-2 text-sm text-destructive">
-						{displayError}
-					</div>
-					)}
-
-					{!loading && !displayError && items.length === 0 && (
-						<div className="px-3 py-2 text-sm text-gray-500">
-							{__('No items found', 'doublescale')}
-						</div>
-					)}
-
-					{items.length > 0 && (
-						<>
-							{items.map((item) => {
-								const itemValue = String(getOptionValue(item));
-								const isSelected = String(value) === itemValue;
-								return (
-									<div
-										key={itemValue}
-										role="button"
-										tabIndex={0}
-										className={`px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
-											isSelected
-												? 'bg-blue-50 text-blue-600'
-												: ''
-										}`}
-										onMouseDown={(e) => {
-											e.preventDefault();
-											handleSelect(item);
-										}}
-										onKeyDown={(e) => {
-											if (
-												e.key === 'Enter' ||
-												e.key === ' '
-											) {
-												e.preventDefault();
-												handleSelect(item);
-											}
-										}}
-									>
-										{getOptionLabel(item)}
-									</div>
-								);
-							})}
-							{loading && (
-								<div className="px-3 py-2 text-sm text-center text-gray-500">
-									{__('Loading more...', 'doublescale')}
-								</div>
-							)}
-						</>
-					)}
-				</div>
-			)}
+			{dropdown}
 
 			{displayError && (
-			<span className="text-sm text-destructive mt-1 block">
-				{displayError}
-			</span>
+				<span className="text-sm text-destructive mt-1 block">
+					{displayError}
+				</span>
 			)}
 		</div>
 	);

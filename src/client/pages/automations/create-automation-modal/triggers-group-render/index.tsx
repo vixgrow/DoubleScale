@@ -28,6 +28,7 @@ import {
 	OrdersIcon,
 	PremiumIcon,
 	SalesIcon,
+	TaskDoneIcon,
 	VideoBlockIcon,
 } from '@doublescale/components/icons/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -162,6 +163,9 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	}
 	if (l.includes('helpdesk') || l.includes('support') || l.includes('ticket')) {
 		return HelpdeskIcon;
+	}
+	if (l.includes('task')) {
+		return TaskDoneIcon;
 	}
 	if (
 		l.includes('sales') ||
@@ -308,6 +312,12 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		if (groupLabel === 'Helpdesk') {
 			return __(
 				'The Helpdesk module is turned off. Enable it under Settings → Modules to use these triggers.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Task' || groupLabel === 'Subtask') {
+			return __(
+				'The Tasks module is turned off. Enable it under Settings → Modules to use these triggers.',
 				'doublescale'
 			);
 		}

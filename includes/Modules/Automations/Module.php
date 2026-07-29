@@ -103,6 +103,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Memberpress/*.php',
 				'includes/Modules/Automations/Triggers/Pmpro/*.php',
 				'includes/Modules/Automations/Triggers/Deal/*.php',
+				'includes/Modules/Automations/Triggers/Task/*.php',
 				'includes/Modules/Automations/Triggers/Link/*.php',
 				'includes/Modules/Automations/Triggers/Forms/*.php',
 				'includes/Modules/Automations/Triggers/Booking/*.php',
@@ -123,6 +124,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Memberpress/*.php',
 				'includes/Modules/Automations/Actions/Pmpro/*.php',
 				'includes/Modules/Automations/Actions/Deal/*.php',
+				'includes/Modules/Automations/Actions/Task/*.php',
 				'includes/Modules/Automations/Actions/Support/*.php',
 				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/Email/*.php',
@@ -132,7 +134,7 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Goals/Woocommerce/*.php',
 				'includes/Modules/Automations/Rules/*/*.php',
 			),
-			'automations'
+			'automations_v2'
 		);
 
 		$this->load_pro_automation_rule_files_if_available();

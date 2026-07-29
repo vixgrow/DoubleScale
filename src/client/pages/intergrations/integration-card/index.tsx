@@ -16,13 +16,24 @@ import config from '@doublescale/config';
 import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 /**
+ * Integrations whose credentials are read-only (the user copies values out of
+ * DoubleScale into the third-party app) so there is nothing to "connect" here —
+ * the card opens a settings view instead.
+ */
+const SETTINGS_ONLY_INTEGRATIONS = ['zapier'];
+
+/**
  * Helper function to get button text based on state
  */
-const getButtonText = (isLoading: boolean, isConnected: boolean) => {
-	if (isLoading && isConnected) {
+const getButtonText = (
+	isLoading: boolean,
+	isConnected: boolean,
+	isSettingsOnly: boolean
+) => {
+	if (isLoading && (isConnected || isSettingsOnly)) {
 		return __('Updating...', 'doublescale');
 	}
-	if (isConnected) {
+	if (isConnected || isSettingsOnly) {
 		return __('Settings', 'doublescale');
 	}
 	if (isLoading) {
@@ -51,7 +62,12 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 	onNavigate,
 	onDisconnect,
 }) => {
-	const buttonText = getButtonText(isLoading, integration.is_connected);
+	const isSettingsOnly = SETTINGS_ONLY_INTEGRATIONS.includes(integrationKey);
+	const buttonText = getButtonText(
+		isLoading,
+		integration.is_connected,
+		isSettingsOnly
+	);
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
 		false

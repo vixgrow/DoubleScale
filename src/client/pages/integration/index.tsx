@@ -38,6 +38,12 @@ import { NoticeBanner } from '@doublescale/components';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import ConfigAPI from '@doublescale/config';
 
+/**
+ * Integrations whose fields are all read-only: the user copies these values into
+ * the third-party app, so there is nothing to submit and no connect action.
+ */
+const SETTINGS_ONLY_INTEGRATIONS = ['zapier'];
+
 interface IntegrationProps {
 	open: boolean;
 	onClose: () => void;
@@ -69,6 +75,7 @@ const Integration: React.FC<IntegrationProps> = ({
 	const isAppBased = !!fields.app;
 	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	const isProFeature = is_pro === true && !isProActive;
+	const isSettingsOnly = SETTINGS_ONLY_INTEGRATIONS.includes(slug);
 
 	const [fieldsValue, setFieldsValue] = useState<Record<string, any>>({});
 	const [isLoading, setIsLoading] = useState(true);
@@ -267,18 +274,19 @@ const Integration: React.FC<IntegrationProps> = ({
 										/>
 									)}
 								</CardContent>
-								<CardFooter className="mt-auto justify-end rounded-b-xl border-t bg-white p-4">
-								<Button
-									onClick={save}
-									disabled={isSaving || isLoading}
-
-									variant="default"
-								>
-										{isSaving
-											? __('Connecting...', 'doublescale')
-											: __(`Connect ${label}`, 'doublescale')}
-									</Button>
-								</CardFooter>
+								{!isSettingsOnly && (
+									<CardFooter className="mt-auto justify-end rounded-b-xl border-t bg-white p-4">
+										<Button
+											onClick={save}
+											disabled={isSaving || isLoading}
+											variant="default"
+										>
+											{isSaving
+												? __('Connecting...', 'doublescale')
+												: __(`Connect ${label}`, 'doublescale')}
+										</Button>
+									</CardFooter>
+								)}
 							</Card>
 						</div>
 					)}

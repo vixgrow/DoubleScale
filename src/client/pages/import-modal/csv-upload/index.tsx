@@ -52,6 +52,10 @@ const CsvUpload: React.FC = () => {
 		dispatch({ type: 'SET_IS_UPLOADING', payload: true });
 		dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 0 });
 
+		// Clear any mapping carried over from a previously uploaded file: its
+		// keys are the old header columns and do not apply to this one.
+		updateValues('mapping', {});
+
 		setFileInfo({ file, uploadedSize: 0 });
 
 		try {
@@ -148,6 +152,9 @@ const CsvUpload: React.FC = () => {
 		dispatch({ type: 'SET_FILE_DATA', payload: null });
 		setFileInfo({ file: null, uploadedSize: 0 });
 		updateValues('file_name', '');
+		// Drop the previous file's column mapping; its keys are the old
+		// header columns and would otherwise leak into the next upload.
+		updateValues('mapping', {});
 	};
 
 	const renderUploadArea = () => (

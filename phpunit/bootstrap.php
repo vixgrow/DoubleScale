@@ -208,6 +208,18 @@ if ( ! function_exists( 'esc_html' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_html__' ) ) {
+	/**
+	 * @param string $text
+	 * @param string $domain
+	 * @return string
+	 */
+	function esc_html__( $text, $domain = 'default' ) {
+		unset( $domain );
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
 if ( ! function_exists( 'esc_attr' ) ) {
 	/**
 	 * @param string $text

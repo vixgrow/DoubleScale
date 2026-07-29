@@ -146,7 +146,9 @@ class ContactFields {
 		);
 
 		if ( class_exists( CustomFieldModel::class ) ) {
-			$custom_fields = CustomFieldModel::all();
+			// Only contact-scoped fields belong on a contact; deal/task/project
+			// fields have their own storage and would never resolve here.
+			$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
 
 			foreach ( $custom_fields as $custom_field ) {
 				$this->fields[ $custom_field->id ] = array(

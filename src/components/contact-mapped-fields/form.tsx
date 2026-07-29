@@ -177,60 +177,74 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 }) => {
 	const contactFieldsGroups = ConfigAPI.getContactFieldsGroups();
 
-	// Initialize other fields from values on mount
-	const [otherFields, setOtherFields] = useState<
-		Array<{ fieldLabel: string; fieldValue: string; id: string }>
-	>(() => {
-		const allowedFields = ['first_name', 'last_name', 'email'];
-		const otherFieldsData: Array<{
-			fieldLabel: string;
-			fieldValue: string;
-			id: string;
-		}> = [];
-
-		// Extract fields that are not in allowedFields
-		Object.entries(values || {}).forEach(([key, value]) => {
-			if (!allowedFields.includes(key) && value) {
-				otherFieldsData.push({
-					fieldLabel: key,
-					fieldValue: value,
-					id: `other_field_${key}`,
-				});
-			}
-		});
-
-		return otherFieldsData;
-	});
-
-	// Filter to only show first_name, last_name, and email
+	// Primary fields are always rendered as fixed rows above.
 	const allowedFields = ['first_name', 'last_name', 'email'];
-	const contactFields = contactFieldsGroups[0]?.fields
-		? pick(contactFieldsGroups[0].fields, allowedFields)
+
+	/**
+	 * Build the "additional" rows from the stored mapping.
+	 *
+	 * `values` is keyed by contact field (matching the PHP side), so any key
+	 * outside the primary set becomes an extra row. Custom field keys are
+	 * numeric ids, so they are normalised to strings for comparison.
+	 */
+	const buildOtherFields = (
+		mapping: { [key: string]: string } | undefined
+	): Array<{ fieldLabel: string; fieldValue: string; id: string }> =>
+		Object.entries(mapping || {})
+			.filter(([key]) => !allowedFields.includes(key))
+			.map(([key, value]) => ({
+				fieldLabel: String(key),
+				fieldValue: value ?? '',
+				id: `other_field_${key}`,
+			}));
+
+	// Initialize other fields from values on mount
+	const [otherFields, setOtherFields] = useState(() =>
+		buildOtherFields(values)
+	);
+
+	// Filter to only show first_name, last_name, and email. The default group
+	// is looked up by its known contact keys rather than by position, because
+	// custom field groups are keyed by numeric id and can sort ahead of it.
+	const defaultFieldsGroup =
+		Object.values(contactFieldsGroups).find((group) =>
+			Object.keys(group?.fields || {}).some((key) =>
+				allowedFields.includes(key)
+			)
+		) ?? contactFieldsGroups[0];
+
+	const contactFields = defaultFieldsGroup?.fields
+		? pick(defaultFieldsGroup.fields, allowedFields)
 		: {};
 
-	// Sync otherFields back to values when component loads with existing data
+	// Re-sync rows whenever the stored mapping changes identity (e.g. the form
+	// finished loading from the server). Rows still being edited locally - a
+	// freshly added blank row, or one with a label but no value yet - are
+	// preserved so typing is never interrupted.
 	useEffect(() => {
-		const allowedFields = ['first_name', 'last_name', 'email'];
-		const existingOtherFields: Array<{
-			fieldLabel: string;
-			fieldValue: string;
-			id: string;
-		}> = [];
+		setOtherFields((current) => {
+			const fromValues = buildOtherFields(values);
+			const knownLabels = new Set(
+				fromValues.map((field) => field.fieldLabel)
+			);
 
-		Object.entries(values || {}).forEach(([key, value]) => {
-			if (!allowedFields.includes(key)) {
-				existingOtherFields.push({
-					fieldLabel: key,
-					fieldValue: value,
-					id: `other_field_${key}`,
-				});
-			}
+			const pendingRows = current.filter(
+				(field) => !knownLabels.has(field.fieldLabel)
+			);
+
+			const next = [...fromValues, ...pendingRows];
+
+			// Avoid a state update (and re-render loop) when nothing changed.
+			const isSame =
+				next.length === current.length &&
+				next.every(
+					(field, index) =>
+						current[index]?.fieldLabel === field.fieldLabel &&
+						current[index]?.fieldValue === field.fieldValue
+				);
+
+			return isSame ? current : next;
 		});
-
-		// Only update if there are existing other fields and local state is empty
-		if (existingOtherFields.length > 0 && otherFields.length === 0) {
-			setOtherFields(existingOtherFields);
-		}
 	}, [values]);
 
 	// Helper function to get field label
@@ -302,43 +316,37 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 		key: 'fieldLabel' | 'fieldValue',
 		value: string
 	) => {
+		const oldField = otherFields.find((field) => field.id === id);
 		const updatedFields = otherFields.map((field) =>
 			field.id === id ? { ...field, [key]: value } : field
 		);
 		setOtherFields(updatedFields);
 
-		// Sync with parent values
 		const updatedField = updatedFields.find((field) => field.id === id);
-		if (
-			updatedField &&
-			updatedField.fieldLabel &&
-			updatedField.fieldValue
-		) {
-			// If fieldLabel changed, remove old key
-			const oldField = otherFields.find((field) => field.id === id);
-			const newValues = { ...values };
 
-			if (
-				oldField &&
-				oldField.fieldLabel &&
-				oldField.fieldLabel !== updatedField.fieldLabel
-			) {
-				delete newValues[oldField.fieldLabel];
-			}
-
-			// Add/update new key
-			newValues[updatedField.fieldLabel] = updatedField.fieldValue;
-			onChange(newValues);
-		} else if (
-			updatedField &&
-			updatedField.fieldLabel &&
-			!updatedField.fieldValue
-		) {
-			// If value is empty but label exists, update with empty value
-			const newValues = { ...values };
-			newValues[updatedField.fieldLabel] = updatedField.fieldValue;
-			onChange(newValues);
+		if (!updatedField) {
+			return;
 		}
+
+		const newValues = { ...values };
+
+		// Renaming the contact field moves the mapping to the new key.
+		if (
+			oldField?.fieldLabel &&
+			oldField.fieldLabel !== updatedField.fieldLabel
+		) {
+			delete newValues[oldField.fieldLabel];
+		}
+
+		// A row without a contact field selected has nothing to store yet.
+		if (!updatedField.fieldLabel) {
+			onChange(newValues);
+			return;
+		}
+
+		// Keyed by contact field to match how the backend reads mapped_fields.
+		newValues[updatedField.fieldLabel] = updatedField.fieldValue;
+		onChange(newValues);
 	};
 
 	// Get all available contact fields for "Other Fields" dropdown
@@ -347,10 +355,39 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 	const allContactFieldOptions = map(contactFieldsGroups, (group) => ({
 		label: group.label,
 		options: map(omit(group.fields, excludedFields), (field, fieldKey) => ({
-			label: field.label,
-			value: fieldKey,
+			// Custom fields can arrive as { label: { label, type } }, so reuse
+			// the same accessor as the form-field side and fall back to the key.
+			label: getFieldLabel(field) || String(fieldKey),
+			// Custom field keys are numeric ids; keep them strings so lookups
+			// against the stored mapping compare consistently.
+			value: String(fieldKey),
 		})),
 	})).filter((group) => group.options.length > 0); // Remove empty groups
+
+	const flatContactFieldOptions = allContactFieldOptions.flatMap(
+		(group) => group.options
+	);
+
+	/**
+	 * Hide contact fields already mapped by another row, so the same field
+	 * cannot be selected twice and silently overwrite an existing mapping.
+	 */
+	const getAvailableOptions = (currentFieldLabel: string) => {
+		const takenLabels = new Set(
+			otherFields
+				.map((field) => field.fieldLabel)
+				.filter((label) => label && label !== currentFieldLabel)
+		);
+
+		return allContactFieldOptions
+			.map((group) => ({
+				...group,
+				options: group.options.filter(
+					(option) => !takenLabels.has(option.value)
+				),
+			}))
+			.filter((group) => group.options.length > 0);
+	};
 
 	const mappingSelectStyles = getMappingSelectStyles();
 
@@ -506,19 +543,22 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 										}}
 										value={
 											field.fieldLabel
-												? allContactFieldOptions
-														.flatMap(
-															(group) =>
-																group.options
-														)
-														.find(
-															(option) =>
-																option.value ===
-																field.fieldLabel
-														)
+												? (flatContactFieldOptions.find(
+														(option) =>
+															option.value ===
+															field.fieldLabel
+													) ?? {
+														// Mapped field that is no
+														// longer available (e.g. a
+														// deleted custom field).
+														label: field.fieldLabel,
+														value: field.fieldLabel,
+													})
 												: null
 										}
-										options={allContactFieldOptions}
+										options={getAvailableOptions(
+											field.fieldLabel
+										)}
 										styles={mappingSelectStyles}
 										placeholder={__(
 											'Select contact field',

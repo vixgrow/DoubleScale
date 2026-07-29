@@ -197,20 +197,32 @@ class Utils {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param string $scope Scope to load fields for. Defaults to contact.
+	 *
 	 * @return array
 	 */
-	public static function get_custom_fields() {
+	public static function get_custom_fields( $scope = 'contact' ) {
 		// Custom fields are PRO-only feature
 		if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel' ) ) {
 			return array();
 		}
 
-		$groups = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel::with( 'custom_fields' )->get();
+		// Groups and fields are both scoped, so filter on each side. Without
+		// this every scope (deal, task, project) leaks into contact mapping.
+		$groups = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel::where( 'scope', $scope )
+			->with(
+				array(
+					'custom_fields' => function ( $query ) use ( $scope ) {
+						$query->where( 'scope', $scope );
+					},
+				)
+			)
+			->get();
 
 		$fields = array();
 
 		foreach ( $groups as $group ) {
-			if ( empty( $group->custom_fields ) ) {
+			if ( empty( $group->custom_fields ) || count( $group->custom_fields ) === 0 ) {
 				continue;
 			}
 

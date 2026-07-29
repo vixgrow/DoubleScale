@@ -163,11 +163,16 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		setSelectedProAction(null);
 	};
 
-	// Hide unnamed placeholder groups only; disabled integrations stay visible with a tooltip.
+	// Hide unnamed placeholder groups, and groups that ship no actions at all —
+	// a declared-but-unimplemented source would otherwise render as a permanently
+	// empty card. Disabled integrations keep their actions, so they stay visible
+	// with a tooltip explaining what to enable.
 	const visibleGroups = pickBy(
 		groups,
 		(group) =>
-			typeof group.label === 'string' && group.label.trim() !== ''
+			typeof group.label === 'string' &&
+			group.label.trim() !== '' &&
+			Object.keys(group.actions ?? {}).length > 0
 	);
 
 	return (

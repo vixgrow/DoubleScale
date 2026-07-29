@@ -216,15 +216,24 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	>({});
 
 	// `groups` may arrive as an object (PHP-encoded assoc array) — normalise to an array.
-	const groupsList = useMemo<TriggersGroup[]>(
-		() =>
-			Array.isArray(groups)
-				? groups
-				: groups && typeof groups === 'object'
-					? (Object.values(groups) as TriggersGroup[])
-					: [],
-		[groups]
-	);
+	// Groups with no triggers at all are dropped: a declared-but-unimplemented
+	// source would otherwise render as a permanently empty card. Disabled
+	// integrations keep their triggers, so they stay visible with a tooltip.
+	const groupsList = useMemo<TriggersGroup[]>(() => {
+		const normalised = Array.isArray(groups)
+			? groups
+			: groups && typeof groups === 'object'
+				? (Object.values(groups) as TriggersGroup[])
+				: [];
+
+		return normalised.filter(
+			(group) =>
+				!!group &&
+				typeof group.label === 'string' &&
+				group.label.trim() !== '' &&
+				Object.keys(group.triggers ?? {}).length > 0
+		);
+	}, [groups]);
 
 	const groupsSignature = useMemo(
 		() => groupsList.map((g) => g?.label ?? '').join('|'),

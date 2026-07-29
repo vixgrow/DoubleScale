@@ -128,13 +128,12 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Support/*.php',
 				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/Email/*.php',
-				'includes/Modules/Automations/Actions/Prestoplayer/*.php',
 				'includes/Modules/Automations/Goals/*.php',
 				'includes/Modules/Automations/Goals/Surecart/*.php',
 				'includes/Modules/Automations/Goals/Woocommerce/*.php',
 				'includes/Modules/Automations/Rules/*/*.php',
 			),
-			'automations_v2'
+			'automations_v3'
 		);
 
 		$this->load_pro_automation_rule_files_if_available();

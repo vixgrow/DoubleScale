@@ -387,17 +387,11 @@ final class ActionsManager {
 					),
 				),
 			),
-			'video'       => array(
-				'label'  => __( 'Video', 'doublescale' ),
-				'groups' => array(
-					'prestoplayer' => array(
-						'label'       => __( 'Presto Player', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
-					),
-				),
-			),
 		);
+
+		// Note: Presto Player contributes triggers only (see TriggersManager). It
+		// has no actions, so no `video` action source is declared here — an empty
+		// source would render as a permanently empty category in the builder.
 
 		$this->sources = apply_filters( 'doublescale_automation_action_sources', $this->sources );
 	}

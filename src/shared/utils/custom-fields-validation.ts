@@ -68,7 +68,7 @@ export const buildCustomFieldAttributesPayload = (
 	type: string,
 	options: string[],
 	required: boolean
-): Record<string, unknown> | string[] | null => {
+): Record<string, unknown> => {
 	const needsOptions =
 		type === 'select' ||
 		type === 'multiselect' ||
@@ -83,11 +83,9 @@ export const buildCustomFieldAttributesPayload = (
 		};
 	}
 
-	if (required) {
-		return { required: true };
-	}
-
-	return null;
+	// Always persist `required`, including `false`, so unchecking the flag
+	// clears the stored required state instead of leaving attributes unchanged.
+	return { required };
 };
 
 export const isEmptyCrmCustomFieldValue = (

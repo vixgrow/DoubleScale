@@ -29,16 +29,18 @@ import {
 	ContactTotalEmailsIcon,
 	DealsIcon,
 	NotesIcon,
-	NovicesIcon,
 	PurchaseHistoryIcon,
 	CoursesIcon,
-	GradientProposalsIcon,
+	ProposalsIcon,
+	InvoicesIcon,
 	TaskDoneIcon,
 	PhoneIcon,
 	DealActivityIcon,
 	CalendarIcon,
 	UpcomingActivitiesIcon,
 	WebsiteIcon,
+	AttachmentsIcon,
+	ProFeatureNotice,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
@@ -50,8 +52,7 @@ import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
-import { Trophy, Paperclip } from 'lucide-react';
-import { ProFeatureNotice } from '@doublescale/components';
+import { Trophy } from 'lucide-react';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -161,12 +162,12 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 					{
 						value: 'proposals',
 						label: __('Proposals', 'doublescale'),
-						icon: <GradientProposalsIcon width={24} height={24} />,
+						icon: <ProposalsIcon width={24} height={24} />,
 					},
 					{
 						value: 'invoices',
 						label: __('Invoices', 'doublescale'),
-						icon: <NovicesIcon width={24} height={24} />,
+						icon: <InvoicesIcon width={24} height={24} />,
 					},
 				]
 			: []),
@@ -187,7 +188,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		{
 			value: 'attachments',
 			label: 'Attachments',
-			icon: <Paperclip width={24} height={24} />,
+			icon: <AttachmentsIcon width={24} height={24} />,
 		},
 		{
 			value: 'website_tracking',

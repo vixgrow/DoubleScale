@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { User } from 'lucide-react';
+import { Files, User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -270,6 +270,25 @@ const ProposalView: React.FC = () => {
 		}
 	};
 
+	const handleCopyLink = async () => {
+		if (!proposal?.public_url) {
+			setNotice(
+				__(
+					'Add a WordPress page with the [doublescale_proposal] shortcode first.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+		setNotice(null);
+		try {
+			await navigator.clipboard.writeText(proposal.public_url);
+			setNotice(__('Public link copied.', 'doublescale'));
+		} catch {
+			setNotice(proposal.public_url);
+		}
+	};
+
 	const handleMarkAccepted = async () => {
 		if (!proposalId) {
 			return;
@@ -461,6 +480,19 @@ const ProposalView: React.FC = () => {
 						>
 							<DownloadIcon />
 						</Button>
+						{proposal.public_url ? (
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-10 w-10 shrink-0 border-primary bg-white text-[#3A3A99]"
+								onClick={() => void handleCopyLink()}
+								disabled={busy}
+								aria-label={__('Copy Link', 'doublescale')}
+								title={__('Copy public link', 'doublescale')}
+							>
+								<CopyIcon width={20} height={20} />
+							</Button>
+						) : null}
 						<Button
 							variant="outline"
 							size="icon"
@@ -468,8 +500,9 @@ const ProposalView: React.FC = () => {
 							onClick={() => void handleDuplicate()}
 							disabled={busy}
 							aria-label={__('Duplicate', 'doublescale')}
+							title={__('Duplicate proposal', 'doublescale')}
 						>
-							<CopyIcon width={20} height={20} />
+							<Files width={20} height={20} />
 						</Button>
 						{canEdit ? (
 							<Button

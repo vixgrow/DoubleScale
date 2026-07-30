@@ -147,6 +147,10 @@ final class AdminConfig {
 				/** Base URL for DoubleScale Pro plugin assets (optional; empty when Pro is not active). */
 				'proPluginDirUrl'     => defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ? DOUBLESCALE_PRO_PLUGIN_URL : '',
 				'siteUrl'             => site_url(),
+				/** WordPress timezone, so date/time controls can default to the site's own zone instead of UTC. */
+				'siteTimezone'        => wp_timezone_string(),
+				/** All selectable timezone identifiers, grouped by region. */
+				'timezones'           => Utils::get_timezone_options(),
 				'forms'               => class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
 					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_options()
 					: array(),

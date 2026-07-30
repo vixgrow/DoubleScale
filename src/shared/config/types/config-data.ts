@@ -1,11 +1,22 @@
 import { __ } from '@wordpress/i18n';
 import type { InitialPayload } from './initial-payload';
 
+export type TimezoneOption = {
+	/** Timezone identifier, e.g. 'Africa/Cairo'. Labels are derived from this. */
+	value: string;
+	/** Current UTC offset, e.g. 'UTC+03:00'. */
+	offset: string;
+};
+
 export type ConfigData = Record<string, unknown> & {
 	initialPayload: InitialPayload;
 	blogName: string;
 	adminUrl: string;
 	siteUrl: string;
+	/** WordPress timezone identifier, e.g. 'Africa/Cairo'. Date/time controls default to this instead of UTC. */
+	siteTimezone: string;
+	/** Every selectable timezone, with a readable label and current UTC offset. */
+	timezones: TimezoneOption[];
 	pluginDirUrl: string;
 	/** Pro plugin base URL when Pro is active; used for assets bundled only in Pro (e.g. SMTP mailer logos). */
 	proPluginDirUrl: string;

@@ -125,6 +125,43 @@ class Utils {
 	}
 
 	/**
+	 * Get selectable timezone options
+	 *
+	 * Returns every PHP timezone identifier with its current UTC offset, so
+	 * date/time controls can offer a complete list instead of a hardcoded handful
+	 * of cities. Labels are derived from the identifier on the client to keep this
+	 * payload small - it ships on every admin page load.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array List of array{value:string,offset:string}.
+	 */
+	public static function get_timezone_options() {
+		$options = array();
+
+		foreach ( \DateTimeZone::listIdentifiers() as $identifier ) {
+			try {
+				$zone   = new \DateTimeZone( $identifier );
+				$offset = $zone->getOffset( new \DateTime( 'now', new \DateTimeZone( 'UTC' ) ) );
+			} catch ( \Exception $e ) {
+				continue;
+			}
+
+			$sign    = $offset < 0 ? '-' : '+';
+			$offset  = abs( $offset );
+			$hours   = str_pad( (string) floor( $offset / 3600 ), 2, '0', STR_PAD_LEFT );
+			$minutes = str_pad( (string) floor( ( $offset % 3600 ) / 60 ), 2, '0', STR_PAD_LEFT );
+
+			$options[] = array(
+				'value'  => $identifier,
+				'offset' => sprintf( 'UTC%s%s:%s', $sign, $hours, $minutes ),
+			);
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Get contact fields
 	 *
 	 * @since 1.0.0

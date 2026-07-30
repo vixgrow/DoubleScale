@@ -20,6 +20,7 @@ import type {
 	PlanLevels,
 	ProPluginData,
 	DoubleScaleInfo,
+	TimezoneOption,
 	UserCapabilities,
 	WhiteLabel,
 } from './types/config-data';
@@ -83,6 +84,15 @@ const configData: ConfigData = {
 	adminEmail: (serverData.adminEmail as string | undefined) ?? '',
 	ajaxUrl: (serverData.ajaxUrl as string | undefined) ?? '',
 	siteUrl: (serverData.siteUrl as string | undefined) ?? '',
+	// Fall back to the browser's zone (not UTC) so a countdown set to "09:00"
+	// means 09:00 as the person editing it reads the clock.
+	siteTimezone:
+		(serverData.siteTimezone as string | undefined) ||
+		(typeof Intl !== 'undefined'
+			? Intl.DateTimeFormat().resolvedOptions().timeZone
+			: '') ||
+		'UTC',
+	timezones: (serverData.timezones as TimezoneOption[] | undefined) ?? [],
 	nonce: (serverData.nonce as string | undefined) ?? '',
 	forms: (serverData.forms as Forms | undefined) ?? {},
 	customFieldsTypes:
@@ -603,6 +613,28 @@ export const setSiteUrl = (data: ConfigData) => (value: string) => {
 };
 
 /**
+ * Get the site timezone identifier
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns string
+ */
+export const getSiteTimezone = (data: ConfigData) => (): string => {
+	return data.siteTimezone;
+};
+
+/**
+ * Get the selectable timezone options
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns TimezoneOption[]
+ */
+export const getTimezones = (data: ConfigData) => (): TimezoneOption[] => {
+	return data.timezones;
+};
+
+/**
  * Get merge tags
  * 
  * @param data the json environment configuration to use for getting config values
@@ -934,6 +966,8 @@ export interface ConfigApi {
 	setIsWoocommerceActive: (value: boolean) => void;
 	getSiteUrl: () => string;
 	setSiteUrl: (value: string) => void;
+	getSiteTimezone: () => string;
+	getTimezones: () => TimezoneOption[];
 	getMergeTags: () => AutomationMergeTags;
 	setMergeTags: (value: AutomationMergeTags) => void;
 	getImporters: () => Importers;
@@ -1031,6 +1065,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setStoreNonce = setStoreNonce(data);
 	configApi.getSiteUrl = getSiteUrl(data);
 	configApi.setSiteUrl = setSiteUrl(data);
+	configApi.getSiteTimezone = getSiteTimezone(data);
+	configApi.getTimezones = getTimezones(data);
 	configApi.getMergeTags = () => getMergeTags(data);
 	configApi.setMergeTags = setMergeTags(data);
 	configApi.getImporters = () => getImporters(data);

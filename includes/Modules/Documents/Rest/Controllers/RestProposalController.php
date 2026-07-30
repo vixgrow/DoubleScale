@@ -762,6 +762,22 @@ class RestProposalController extends RestController {
 			return new WP_Error( 'invalid_status', __( 'Invalid proposal status.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
+		if ( array_key_exists( 'proposal_number', $params ) ) {
+			$number = SalesNumbering::validate_manual_number(
+				sanitize_text_field( (string) $params['proposal_number'] ),
+				ProposalModel::class,
+				'proposal_number',
+				(int) $request->get_param( 'id' )
+			);
+			if ( is_wp_error( $number ) ) {
+				return $number;
+			}
+			// An empty value leaves auto-numbering to the model's creating hook.
+			if ( '' !== $number ) {
+				$payload['proposal_number'] = $number;
+			}
+		}
+
 		return $payload;
 	}
 }

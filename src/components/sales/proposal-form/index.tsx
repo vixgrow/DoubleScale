@@ -134,6 +134,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const { data: assignableUsers, loading: usersLoading } = useAssignableSalesUsers();
 
 	const [subject, setSubject] = useState(initialSubject ?? '');
+	const [proposalNumber, setProposalNumber] = useState('');
 	const [status, setStatus] = useState('draft');
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [date, setDate] = useState(today());
@@ -255,6 +256,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			return;
 		}
 		setSubject(existing.subject);
+		setProposalNumber(existing.proposal_number || '');
 		setStatus(existing.status);
 		setContact(existing.contact || null);
 		setDate(existing.date || today());
@@ -292,6 +294,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 
 	const buildPayload = () => ({
 		subject: subject.trim(),
+		// Empty string lets the backend auto-generate the next sequential number.
+		proposal_number: proposalNumber.trim(),
 		status,
 		contact_id: contact!.id,
 		date,
@@ -534,7 +538,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		return {
 			id: proposalId || 0,
 			proposal_number:
-				existing?.proposal_number || __('Draft', 'doublescale'),
+				proposalNumber.trim() ||
+				existing?.proposal_number ||
+				__('Draft', 'doublescale'),
 			hash: existing?.hash || '',
 			subject,
 			status,
@@ -635,6 +641,21 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			<fieldset disabled={fieldsLocked} className="m-0 min-w-0 space-y-0 border-0 p-0">
 			<div className="grid grid-cols-1 lg:grid-cols-2 mb-6">
 				<div className="space-y-4 lg:border-r lg:border-[#DEE1E6] lg:pr-8">
+					<FormField
+						label={__('Proposal Number', 'doublescale')}
+						className="!mb-0"
+					>
+						<Input
+							value={proposalNumber}
+							onChange={(e) => setProposalNumber(e.target.value)}
+							maxLength={50}
+							placeholder={__(
+								'Leave empty to generate automatically',
+								'doublescale'
+							)}
+						/>
+					</FormField>
+
 					<FormField label={__('Subject', 'doublescale')} required className="!mb-0">
 						<Input value={subject} onChange={(e) => setSubject(e.target.value)} />
 					</FormField>

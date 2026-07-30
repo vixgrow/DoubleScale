@@ -159,6 +159,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		useAssignableSalesUsers();
 
 	const [status, setStatus] = useState('draft');
+	const [invoiceNumber, setInvoiceNumber] = useState('');
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [invoiceDate, setInvoiceDate] = useState(today());
 	const [dueDate, setDueDate] = useState(monthFromToday());
@@ -199,6 +200,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			return;
 		}
 		setStatus(existing.status);
+		setInvoiceNumber(existing.invoice_number || '');
 		setContact(existing.contact || null);
 		setInvoiceDate(existing.invoice_date || today());
 		setDueDate(existing.due_date || monthFromToday());
@@ -373,6 +375,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
 	const buildPayload = () => ({
 		status,
+		// Empty string lets the backend auto-generate the next sequential number.
+		invoice_number: invoiceNumber.trim(),
 		contact_id: contact!.id,
 		invoice_date: invoiceDate,
 		due_date: dueDate,
@@ -837,16 +841,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					</div>
 
 					<div className="space-y-4">
-						{!isNew && existing?.invoice_number ? (
-							<FormField
-								label={__('Invoice #', 'doublescale')}
-								className="!mb-0"
-							>
-								<div className="flex h-10 items-center rounded-lg border border-[#D0D0D0] bg-[#ECECEC] px-3 text-sm text-[#29292E]">
-									{existing.invoice_number}
-								</div>
-							</FormField>
-						) : null}
+						<FormField
+							label={__('Invoice #', 'doublescale')}
+							className="!mb-0"
+						>
+							<Input
+								value={invoiceNumber}
+								onChange={(e) => setInvoiceNumber(e.target.value)}
+								maxLength={50}
+								placeholder={__(
+									'Leave empty to generate automatically',
+									'doublescale'
+								)}
+							/>
+						</FormField>
 						<FormField
 							label={__('Status', 'doublescale')}
 							className="!mb-0"

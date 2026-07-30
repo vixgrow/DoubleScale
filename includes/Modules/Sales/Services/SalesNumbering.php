@@ -52,6 +52,54 @@ class SalesNumbering {
 	}
 
 	/**
+	 * Validate a user-supplied document number.
+	 *
+	 * Explicit numbers must not silently collide, because save_with_retry()
+	 * would blank the column and regenerate a sequential number instead of
+	 * keeping what the user typed.
+	 *
+	 * @param string       $number      Raw user-supplied number.
+	 * @param class-string $model_class Model class.
+	 * @param string       $column      Column storing the formatted number.
+	 * @param int          $exclude_id  Record to ignore (the one being updated).
+	 * @return string|\WP_Error Trimmed number, or an error when already taken.
+	 */
+	public static function validate_manual_number( string $number, string $model_class, string $column, int $exclude_id = 0 ) {
+		$number = trim( $number );
+
+		if ( '' === $number ) {
+			return '';
+		}
+
+		if ( mb_strlen( $number ) > 50 ) {
+			return new \WP_Error(
+				'invalid_number',
+				__( 'Number must be 50 characters or fewer.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$query = $model_class::query()->where( $column, $number );
+		if ( $exclude_id > 0 ) {
+			$query->where( 'id', '!=', $exclude_id );
+		}
+
+		if ( $query->exists() ) {
+			return new \WP_Error(
+				'duplicate_number',
+				sprintf(
+					/* translators: %s: the document number entered by the user. */
+					__( 'The number "%s" is already in use. Please enter a different one.', 'doublescale' ),
+					$number
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $number;
+	}
+
+	/**
 	 * @param string $prefix Number prefix.
 	 * @param class-string $model_class Model class.
 	 * @param string $column Column storing the formatted number.

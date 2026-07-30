@@ -428,7 +428,11 @@ export type CreateProposalPayload = Partial<
 		Proposal,
 		'id' | 'proposal_number' | 'hash' | 'created_at' | 'updated_at'
 	>
-> & { contact_id: number };
+> & {
+	contact_id: number;
+	/** Optional manual override. Omit or leave empty to auto-generate. */
+	proposal_number?: string;
+};
 
 export type CreateContractPayload = Partial<
 	Omit<
@@ -442,7 +446,11 @@ export type CreateInvoicePayload = Partial<
 		Invoice,
 		'id' | 'invoice_number' | 'hash' | 'created_at' | 'updated_at'
 	>
-> & { contact_id: number };
+> & {
+	contact_id: number;
+	/** Optional manual override. Omit or leave empty to auto-generate. */
+	invoice_number?: string;
+};
 
 export interface SalesRepNotificationTemplate {
 	title: string;

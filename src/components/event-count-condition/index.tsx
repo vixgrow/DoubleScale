@@ -1,3 +1,8 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 import Field from '../field';
 
 export interface EventCountConditionValue {
@@ -12,11 +17,11 @@ interface EventCountConditionProps {
 
 const EventCountCondition = ({ value, onChange }: EventCountConditionProps) => {
 	const eventCountConditionOptions = [
-		{ value: 'extactly', label: 'Extactly' },
-		{ value: 'less_than', label: 'Less than' },
-		{ value: 'more_than', label: 'More than' },
-		{ value: 'at_least', label: 'At least' },
-		{ value: 'at_most', label: 'At most' },
+		{ value: 'extactly', label: __('Exactly', 'doublescale') },
+		{ value: 'less_than', label: __('Less than', 'doublescale') },
+		{ value: 'more_than', label: __('More than', 'doublescale') },
+		{ value: 'at_least', label: __('At least', 'doublescale') },
+		{ value: 'at_most', label: __('At most', 'doublescale') },
 	];
 
 	const handleEventCountConditionTypeChange = (type: string) => {
@@ -48,10 +53,12 @@ const EventCountCondition = ({ value, onChange }: EventCountConditionProps) => {
 				type="number"
 				value={value?.count || 1}
 				onChange={handleCountChange}
-				placeholder="Enter number of events"
+				placeholder={__('Enter number of events', 'doublescale')}
 				compact={true}
 			/>
-			<span className="doublescale-event-count-label">Times</span>
+			<span className="doublescale-event-count-label">
+				{__('Times', 'doublescale')}
+			</span>
 		</div>
 	);
 };

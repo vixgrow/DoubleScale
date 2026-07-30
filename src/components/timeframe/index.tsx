@@ -1,3 +1,8 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 import Field from '../field';
 
 export interface TimeframeValue {
@@ -15,26 +20,50 @@ interface TimeframeProps {
 
 const Timeframe = ({ value, onChange }: TimeframeProps) => {
 	const timeframeOptions = [
-		{ value: 'at_any_time', label: 'At any time' },
-		{ value: 'today', label: 'Today' },
-		{ value: 'yesterday', label: 'Yesterday' },
-		{ value: 'this_week', label: 'This week' },
-		{ value: 'last_week', label: 'Last week' },
-		{ value: 'this_month', label: 'This month' },
-		{ value: 'last_month', label: 'Last month' },
-		{ value: 'this_year', label: 'This year' },
-		{ value: 'in_the_last_24_hours', label: 'In the last 24 hours' },
-		{ value: 'in_the_last_7_days', label: 'In the last 7 days' },
-		{ value: 'in_the_last_14_days', label: 'In the last 14 days' },
-		{ value: 'in_the_last_30_days', label: 'In the last 30 days' },
-		{ value: 'in_the_last_60_days', label: 'In the last 60 days' },
-		{ value: 'in_the_last_90_days', label: 'In the last 90 days' },
-		{ value: 'in_the_last_365_days', label: 'In the last 365 days' },
-		{ value: 'in_the_last_x_days', label: 'In the last X days' },
-		{ value: 'before', label: 'Before' },
-		{ value: 'after', label: 'After' },
-		{ value: 'between', label: 'Between' },
-		{ value: 'day_of', label: 'Day of' },
+		{ value: 'at_any_time', label: __('At any time', 'doublescale') },
+		{ value: 'today', label: __('Today', 'doublescale') },
+		{ value: 'yesterday', label: __('Yesterday', 'doublescale') },
+		{ value: 'this_week', label: __('This week', 'doublescale') },
+		{ value: 'last_week', label: __('Last week', 'doublescale') },
+		{ value: 'this_month', label: __('This month', 'doublescale') },
+		{ value: 'last_month', label: __('Last month', 'doublescale') },
+		{ value: 'this_year', label: __('This year', 'doublescale') },
+		{
+			value: 'in_the_last_24_hours',
+			label: __('In the last 24 hours', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_7_days',
+			label: __('In the last 7 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_14_days',
+			label: __('In the last 14 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_30_days',
+			label: __('In the last 30 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_60_days',
+			label: __('In the last 60 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_90_days',
+			label: __('In the last 90 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_365_days',
+			label: __('In the last 365 days', 'doublescale'),
+		},
+		{
+			value: 'in_the_last_x_days',
+			label: __('In the last X days', 'doublescale'),
+		},
+		{ value: 'before', label: __('Before', 'doublescale') },
+		{ value: 'after', label: __('After', 'doublescale') },
+		{ value: 'between', label: __('Between', 'doublescale') },
+		{ value: 'day_of', label: __('Day of', 'doublescale') },
 	];
 
 	const handleTimeframeTypeChange = (type: string) => {
@@ -82,7 +111,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 					type="number"
 					value={value?.count || 0}
 					onChange={handleCountChange}
-					placeholder="Enter number of days"
+					placeholder={__('Enter number of days', 'doublescale')}
 					compact={true}
 				/>
 			);
@@ -95,7 +124,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 					type="date"
 					value={value?.date || ''}
 					onChange={handleDateChange}
-					placeholder="Select date"
+					placeholder={__('Select date', 'doublescale')}
 					compact={true}
 				/>
 			);
@@ -109,16 +138,16 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 						type="date"
 						value={value?.date_from || ''}
 						onChange={handleDateFromChange}
-						placeholder="From"
-						label="From"
+						placeholder={__('From', 'doublescale')}
+						label={__('From', 'doublescale')}
 						compact={true}
 					/>
 					<Field
 						type="date"
 						value={value?.date_to || ''}
 						onChange={handleDateToChange}
-						placeholder="To"
-						label="To"
+						placeholder={__('To', 'doublescale')}
+						label={__('To', 'doublescale')}
 						compact={true}
 					/>
 				</>

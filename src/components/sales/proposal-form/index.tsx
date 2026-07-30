@@ -414,6 +414,19 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		}
 	};
 
+	/**
+	 * "Save as Draft" from inside the send dialog: persist the edits without
+	 * emailing the customer, so the dialog is not a send-or-lose-it dead end.
+	 */
+	const handleSaveWithoutSending = async () => {
+		const id = await persistProposal();
+		if (!id) {
+			return;
+		}
+		setSendOpen(false);
+		handleSaveSuccess(id);
+	};
+
 	const handleSaveAndSend = async (message: string) => {
 		const id = await persistProposal();
 		if (!id) {
@@ -943,6 +956,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 					confirmLabel={__('Save & Send', 'doublescale')}
 					busy={saving}
 					onConfirm={handleSaveAndSend}
+					onSecondary={handleSaveWithoutSending}
 				/>
 			</div>
 		);
@@ -968,6 +982,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				confirmLabel={__('Save & Send', 'doublescale')}
 				busy={saving}
 				onConfirm={handleSaveAndSend}
+				onSecondary={handleSaveWithoutSending}
 			/>
 		</>
 	);

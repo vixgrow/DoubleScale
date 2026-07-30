@@ -25,6 +25,15 @@ interface SendDocumentDialogProps {
 	confirmLabel?: string;
 	busy?: boolean;
 	onConfirm: (message: string) => void | Promise<void>;
+	/**
+	 * Optional "save without sending" escape hatch.
+	 *
+	 * Only pass this where the dialog is reached with unsaved edits (the
+	 * proposal/invoice forms). List and detail views open it on an
+	 * already-persisted document, where saving again would be a no-op.
+	 */
+	onSecondary?: () => void | Promise<void>;
+	secondaryLabel?: string;
 }
 
 export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
@@ -36,6 +45,8 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 	confirmLabel = __('Send', 'doublescale'),
 	busy = false,
 	onConfirm,
+	onSecondary,
+	secondaryLabel = __('Save as Draft', 'doublescale'),
 }) => {
 	const [message, setMessage] = useState('');
 
@@ -74,6 +85,18 @@ export const SendDocumentDialog: React.FC<SendDocumentDialogProps> = ({
 					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy} className="border-primary text-primary bg-white">
 						{__('Cancel', 'doublescale')}
 					</Button>
+					{onSecondary ? (
+						<Button
+							variant="outline"
+							onClick={() => {
+								void onSecondary();
+							}}
+							disabled={busy}
+							className="border-primary text-primary bg-white"
+						>
+							{secondaryLabel}
+						</Button>
+					) : null}
 					<Button
 						disabled={busy}
 						onClick={() => {

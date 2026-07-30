@@ -6,10 +6,14 @@
  *   {domain}-{locale}-{md5}.json
  * where the MD5 is hash of the relative path to the registered script.
  *
- * Since our custom make-pot.php doesn't emit #: file references, `wp i18n
- * make-json` can't split strings by source file. This script generates a
- * single JSON file containing ALL translated strings for the main admin
- * bundle (build/client/index.js).
+ * This script generates one JSON file per registered script handle, each
+ * containing ALL translated strings for the domain.
+ *
+ * Serving the full table to every handle is deliberate rather than a
+ * limitation: strings live in ~19 content-hashed async chunks that are never
+ * registered with WordPress, so there is no handle whose md5 could point at
+ * them. Folding everything into each entry bundle's JSON is what makes
+ * lazy-loaded routes (e.g. the booking calendar) translatable at all.
  *
  * Usage: php bin/make-json-translations.php [locale]
  *   e.g.: php bin/make-json-translations.php pt_BR
@@ -23,8 +27,26 @@ declare( strict_types=1 );
 $root     = dirname( __DIR__ );
 $lang_dir = $root . '/languages';
 $domain   = 'doublescale';
-$script   = 'build/client/index.js';
-$hash     = md5( $script );
+
+/*
+ * Every script path registered via wp_register_script() that also calls
+ * wp_set_script_translations().
+ *
+ * WordPress resolves a script's JSON from the *registered* handle's src
+ * (see _load_script_textdomain_from_src()), so one file is emitted per
+ * entry below. Webpack's async chunks are deliberately NOT listed: they are
+ * content-hashed (`[name].[contenthash].js`) and never registered with
+ * WordPress, so their filenames change every build and core would never
+ * look for them. Their strings are instead folded into the entry bundle's
+ * JSON, which is why each file below receives the *full* string table.
+ */
+$scripts = array(
+	'build/client/index.js',
+	'build/renderer/index.js',
+	'build/renderer/support/index.js',
+	'build/renderer/proposal/index.js',
+	'build/renderer/invoice/index.js',
+);
 
 $locale_arg = isset( $argv[1] ) ? $argv[1] : null;
 
@@ -76,22 +98,24 @@ foreach ( $po_files as $po_file ) {
 		}
 	}
 
-	$jed = array(
-		'translation-revision-date' => $header['PO-Revision-Date'] ?? gmdate( 'Y-m-d H:i' ) . '+0000',
-		'generator'                 => 'doublescale/bin/make-json-translations',
-		'source'                    => $script,
-		'domain'                    => 'messages',
-		'locale_data'               => array(
-			'messages' => array_merge(
-				array( '' => array( 'domain' => 'messages', 'lang' => str_replace( '_', '-', $locale ) ) ),
-				$messages
+	foreach ( $scripts as $script ) {
+		$jed = array(
+			'translation-revision-date' => $header['PO-Revision-Date'] ?? gmdate( 'Y-m-d H:i' ) . '+0000',
+			'generator'                 => 'doublescale/bin/make-json-translations',
+			'source'                    => $script,
+			'domain'                    => 'messages',
+			'locale_data'               => array(
+				'messages' => array_merge(
+					array( '' => array( 'domain' => 'messages', 'lang' => str_replace( '_', '-', $locale ) ) ),
+					$messages
+				),
 			),
-		),
-	);
+		);
 
-	$out_file = $lang_dir . '/' . $domain . '-' . $locale . '-' . $hash . '.json';
-	file_put_contents( $out_file, json_encode( $jed, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT ) );
-	printf( "Created %s (%d strings)\n", basename( $out_file ), count( $messages ) );
+		$out_file = $lang_dir . '/' . $domain . '-' . $locale . '-' . md5( $script ) . '.json';
+		file_put_contents( $out_file, json_encode( $jed, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT ) );
+		printf( "Created %s (%d strings) -> %s\n", basename( $out_file ), count( $messages ), $script );
+	}
 }
 
 /**

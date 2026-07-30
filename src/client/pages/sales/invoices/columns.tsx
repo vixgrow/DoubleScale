@@ -6,9 +6,8 @@ import { __ } from '@wordpress/i18n';
 import { ColumnDef } from '@tanstack/react-table';
 
 import { getToLink } from '@doublescale/navigation';
-import { DeleteIcon, EditHeaderIcon, FallbackCell, ViewIcon } from '@doublescale/components';
-import { Button } from '@/components/ui/button';
-import { InvoiceStatusPill } from '@/components/sales';
+import { FallbackCell } from '@doublescale/components';
+import { DocumentRowActions, InvoiceStatusPill } from '@/components/sales';
 import type { Invoice } from '@/types/sales';
 
 const formatTableAmount = (value: number, currency = 'USD') => {
@@ -41,6 +40,13 @@ export interface InvoiceColumnProps {
 	onEdit: (id: number) => void;
 	onDelete: (id: number) => void;
 	canEdit: (invoice: Invoice) => boolean;
+	onDuplicate: (invoice: Invoice) => void;
+	onSend: (invoice: Invoice) => void;
+	onDownloadPdf: (invoice: Invoice) => void;
+	/** Id of the row with a request in flight, if any. */
+	busyId: number | null;
+	/** Whether the direct send action is available for this document. */
+	canSend: (invoice: Invoice) => boolean;
 }
 
 export const getInvoiceColumns = ({
@@ -48,6 +54,11 @@ export const getInvoiceColumns = ({
 	onEdit,
 	onDelete,
 	canEdit,
+	onDuplicate,
+	onSend,
+	onDownloadPdf,
+	busyId,
+	canSend,
 }: InvoiceColumnProps): ColumnDef<Invoice>[] => [
 	{
 		accessorKey: 'invoice_number',
@@ -101,41 +112,19 @@ export const getInvoiceColumns = ({
 			const invoice = row.original;
 
 			return (
-				<div
-					className="flex items-center justify-center gap-1"
-					onClick={(e) => e.stopPropagation()}
-				>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="text-primary"
-						aria-label={__('View', 'doublescale')}
-						onClick={() =>
-							navigate(getToLink(`sales/invoices/${invoice.id}`))
-						}
-					>
-						<ViewIcon />
-					</Button>
-					{canEdit(invoice) ? (
-						<Button
-							variant="ghost"
-							size="icon"
-							aria-label={__('Edit', 'doublescale')}
-							onClick={() => onEdit(invoice.id)}
-						>
-							<EditHeaderIcon color="#0D9DFC" />
-						</Button>
-					) : null}
-					<Button
-						variant="ghost"
-						size="icon"
-						className="text-destructive"
-						aria-label={__('Delete', 'doublescale')}
-						onClick={() => onDelete(invoice.id)}
-					>
-						<DeleteIcon />
-					</Button>
-				</div>
+				<DocumentRowActions
+					busy={busyId === invoice.id}
+					onView={() =>
+						navigate(getToLink(`sales/invoices/${invoice.id}`))
+					}
+					onEdit={
+						canEdit(invoice) ? () => onEdit(invoice.id) : undefined
+					}
+					onDuplicate={() => onDuplicate(invoice)}
+					onSend={canSend(invoice) ? () => onSend(invoice) : undefined}
+					onDownloadPdf={() => onDownloadPdf(invoice)}
+					onDelete={() => onDelete(invoice.id)}
+				/>
 			);
 		},
 	},

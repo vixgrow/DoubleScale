@@ -52,7 +52,11 @@ import {
 } from '@/hooks/sales';
 import config from '@doublescale/config';
 import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
-import { DISCOUNT_TYPES, PROPOSAL_STATUSES } from '@/constants/sales';
+import {
+	DISCOUNT_TYPES,
+	PROPOSAL_STATUSES,
+	PROPOSAL_STATUS_LABELS,
+} from '@/constants/sales';
 import {
 	DesignPickerRow,
 	TemplateGallery,
@@ -749,7 +753,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 							>
 								{PROPOSAL_STATUSES.map((s) => (
 									<option key={s} value={s}>
-										{s}
+										{PROPOSAL_STATUS_LABELS[s]}
 									</option>
 								))}
 							</select>

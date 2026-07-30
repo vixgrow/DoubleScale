@@ -7877,6 +7877,9 @@ msgstr ""
 msgid "Failed to update template"
 msgstr ""
 
+msgid "Failed to update the proposal status."
+msgstr ""
+
 msgid "Failed to update trigger"
 msgstr ""
 
@@ -9521,6 +9524,9 @@ msgstr ""
 msgid "Invoice #"
 msgstr ""
 
+msgid "Invoice %1$s status changed manually from %2$s to %3$s."
+msgstr ""
+
 msgid "Invoice %s"
 msgstr ""
 
@@ -9603,6 +9609,9 @@ msgid "Invoice Summary"
 msgstr ""
 
 msgid "Invoice totals & financials"
+msgstr ""
+
+msgid "Invoice updated"
 msgstr ""
 
 msgid "Invoice updated successfully."
@@ -10664,6 +10673,9 @@ msgstr ""
 msgid "Mark a booking completed N minutes after its end time."
 msgstr ""
 
+msgid "Mark as Accepted"
+msgstr ""
+
 msgid "Mark as Subscribed"
 msgstr ""
 
@@ -10683,6 +10695,9 @@ msgid "Mark Complete"
 msgstr ""
 
 msgid "Marketing"
+msgstr ""
+
+msgid "Mark this proposal as accepted on the customer’s behalf? This may create a draft invoice automatically."
 msgstr ""
 
 msgid "Match all"
@@ -12686,6 +12701,9 @@ msgstr ""
 msgid "Paid Memberships Pro plugin is not installed or activated. Install Paid Memberships Pro to use these triggers."
 msgstr ""
 
+msgid "Paid statuses are derived from recorded payments. Record a payment on the invoice instead."
+msgstr ""
+
 msgid "Paragraph"
 msgstr ""
 
@@ -13715,6 +13733,9 @@ msgstr ""
 msgid "Proposal %1$s sent: %2$s"
 msgstr ""
 
+msgid "Proposal %1$s status changed manually from %2$s to %3$s."
+msgstr ""
+
 msgid "Proposal %1$s was accepted and converted to invoice %2$s."
 msgstr ""
 
@@ -13752,6 +13773,9 @@ msgid "Proposal Emails"
 msgstr ""
 
 msgid "Proposal link is invalid or missing."
+msgstr ""
+
+msgid "Proposal marked as accepted."
 msgstr ""
 
 msgid "Proposal No"
@@ -15614,6 +15638,9 @@ msgstr ""
 msgid "Send this contract to the customer by email? They will receive a link to view and sign."
 msgstr ""
 
+msgid "Send this invoice to the customer by email? They will receive a link to view and pay it."
+msgstr ""
+
 msgid "Send this invoice to the customer by email? They will receive a link to view and pay online."
 msgstr ""
 
@@ -15924,6 +15951,9 @@ msgid "Signature on file."
 msgstr ""
 
 msgid "Sign Contract"
+msgstr ""
+
+msgid "Signed"
 msgstr ""
 
 msgid "Signed at"

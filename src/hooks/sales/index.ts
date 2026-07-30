@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
-import { NAMESPACE } from '@/constants/sales';
+import { NAMESPACE, type InvoiceStatus, type ProposalStatus } from '@/constants/sales';
 import { downloadAdminPdf } from '@/utils/download-admin-pdf';
 import type {
 	ContactInvoicePayment,
@@ -767,6 +767,37 @@ export const duplicateProposal = (proposalId: number) =>
 	apiFetch<Proposal>({
 		path: `${NAMESPACE}/proposals/${proposalId}/duplicate`,
 		method: 'POST',
+	});
+
+export const duplicateInvoice = (invoiceId: number) =>
+	apiFetch<Invoice>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/duplicate`,
+		method: 'POST',
+	});
+
+/**
+ * Set a proposal status from the admin.
+ *
+ * Unlike a plain update, this fires the same lifecycle hooks as a customer
+ * accept/decline, so marking a proposal accepted can auto-create the draft
+ * invoice and run automations.
+ */
+export const changeProposalStatus = (
+	proposalId: number,
+	status: ProposalStatus,
+	declineReason?: string
+) =>
+	apiFetch<Proposal>({
+		path: `${NAMESPACE}/proposals/${proposalId}/status`,
+		method: 'POST',
+		data: declineReason ? { status, decline_reason: declineReason } : { status },
+	});
+
+export const changeInvoiceStatus = (invoiceId: number, status: InvoiceStatus) =>
+	apiFetch<Invoice>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/status`,
+		method: 'POST',
+		data: { status },
 	});
 
 export const downloadProposalPdf = (proposalId: number, filename: string) =>

@@ -13,13 +13,29 @@ import { formatDateForAPI } from '@doublescale/utils';
 import { GradientProposalsIcon, NoData, PageHeader, PlusIcon } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog, ProposalFormDialog } from '@/components/sales';
+import {
+	ConfirmDialog,
+	ConvertToInvoiceDialog,
+	ProposalFormDialog,
+	SendDocumentDialog,
+} from '@/components/sales';
 import {
 	canEditSalesDocument,
+	formatSalesRestError,
 	isApprovalWorkflowEnabled,
+	showDirectSendAction,
 } from '@/components/sales/sales-approval-utils';
 import { PROPOSAL_STATUSES, PROPOSAL_STATUS_LABELS } from '@/constants/sales';
-import { deleteProposal, useProposals, useSalesSettings } from '@/hooks/sales';
+import {
+	changeProposalStatus,
+	convertProposalToInvoice,
+	deleteProposal,
+	downloadProposalPdf,
+	duplicateProposal,
+	sendProposal,
+	useProposals,
+	useSalesSettings,
+} from '@/hooks/sales';
 import type { Proposal } from '@/types/sales';
 import { getProposalColumns } from './columns';
 
@@ -38,6 +54,11 @@ const ProposalsList: React.FC = () => {
 	const [deleting, setDeleting] = useState(false);
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [editDialogProposalId, setEditDialogProposalId] = useState<number | null>(null);
+	const [busyId, setBusyId] = useState<number | null>(null);
+	const [notice, setNotice] = useState<string | null>(null);
+	const [convertTarget, setConvertTarget] = useState<Proposal | null>(null);
+	const [acceptTarget, setAcceptTarget] = useState<Proposal | null>(null);
+	const [sendTarget, setSendTarget] = useState<Proposal | null>(null);
 
 	const { data, loading, error, refetch } = useProposals({
 		page,
@@ -77,6 +98,111 @@ const ProposalsList: React.FC = () => {
 			proposal
 		);
 
+	const canSend = (proposal: Proposal) =>
+		showDirectSendAction(
+			isApprovalWorkflowEnabled(salesSettings, proposal),
+			'proposal',
+			proposal.status,
+			proposal.approval,
+			proposal.status === 'declined',
+			proposal
+		);
+
+	/** Runs a row action with a per-row busy flag and shared error reporting. */
+	const runRowAction = async (
+		proposal: Proposal,
+		action: () => Promise<void>,
+		fallbackMessage: string,
+		errorOverrides?: Record<string, string>
+	) => {
+		setBusyId(proposal.id);
+		setNotice(null);
+		try {
+			await action();
+		} catch (err: unknown) {
+			setNotice(formatSalesRestError(err, fallbackMessage, errorOverrides));
+		} finally {
+			setBusyId(null);
+		}
+	};
+
+	const handleDuplicate = (proposal: Proposal) =>
+		void runRowAction(
+			proposal,
+			async () => {
+				const copy = await duplicateProposal(proposal.id);
+				// Land on the copy so the user can adjust it straight away.
+				navigate(getToLink(`sales/proposals/${copy.id}/edit`));
+			},
+			__('Duplicate failed.', 'doublescale')
+		);
+
+	const handleDownloadPdf = (proposal: Proposal) =>
+		void runRowAction(
+			proposal,
+			() => downloadProposalPdf(proposal.id, proposal.proposal_number),
+			__('PDF download failed.', 'doublescale')
+		);
+
+	const confirmConvert = () => {
+		if (!convertTarget) {
+			return;
+		}
+		const proposal = convertTarget;
+		void runRowAction(
+			proposal,
+			async () => {
+				const result = await convertProposalToInvoice(proposal.id);
+				navigate(getToLink(`sales/invoices/${result.invoice.id}`));
+			},
+			__('Convert to invoice failed.', 'doublescale'),
+			{
+				approval_required: __(
+					'This proposal must be approved before it can be converted to an invoice.',
+					'doublescale'
+				),
+			}
+		).then(() => setConvertTarget(null));
+	};
+
+	const confirmMarkAccepted = () => {
+		if (!acceptTarget) {
+			return;
+		}
+		const proposal = acceptTarget;
+		void runRowAction(
+			proposal,
+			async () => {
+				await changeProposalStatus(proposal.id, 'accepted');
+				await refetch();
+				setNotice(__('Proposal marked as accepted.', 'doublescale'));
+			},
+			__('Failed to update the proposal status.', 'doublescale')
+		).then(() => setAcceptTarget(null));
+	};
+
+	const confirmSend = (message: string) => {
+		if (!sendTarget) {
+			return;
+		}
+		const proposal = sendTarget;
+		void runRowAction(
+			proposal,
+			async () => {
+				await sendProposal(proposal.id, message);
+				await refetch();
+				setNotice(__('Proposal sent to the customer.', 'doublescale'));
+			},
+			__('Send failed.', 'doublescale'),
+			{
+				approval_required: __(
+					'This proposal must be approved before it can be sent. Submit it for approval first.',
+					'doublescale'
+				),
+			}
+		).then(() => setSendTarget(null));
+	};
+
 	const columns = useMemo(
 		() =>
 			getProposalColumns({
@@ -84,8 +210,15 @@ const ProposalsList: React.FC = () => {
 				onEdit: setEditDialogProposalId,
 				onDelete: setDeleteId,
 				canEdit,
+				onDuplicate: handleDuplicate,
+				onConvert: setConvertTarget,
+				onMarkAccepted: setAcceptTarget,
+				onSend: setSendTarget,
+				onDownloadPdf: handleDownloadPdf,
+				busyId,
+				canSend,
 			}),
-		[navigate, salesSettings]
+		[navigate, salesSettings, busyId]
 	);
 
 	const tableConfig: DataTableConfig<Proposal> = useMemo(
@@ -164,6 +297,12 @@ const ProposalsList: React.FC = () => {
 				<div className="text-sm text-red-600">{error}</div>
 			) : null}
 
+			{notice ? (
+				<div className="rounded border bg-slate-50 px-3 py-2 text-sm text-slate-700">
+					{notice}
+				</div>
+			) : null}
+
 			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
 				{loading && !hasRecords ? (
 					<div className="py-20 text-center text-sm text-muted-foreground">
@@ -232,6 +371,63 @@ const ProposalsList: React.FC = () => {
 				destructive
 				busy={deleting}
 				onConfirm={confirmDelete}
+			/>
+
+			<ConvertToInvoiceDialog
+				open={convertTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setConvertTarget(null);
+					}
+				}}
+				description={
+					convertTarget && convertTarget.status !== 'accepted'
+						? __(
+								'This will mark the proposal as Accepted.',
+								'doublescale'
+							)
+						: __(
+								'Create a draft invoice from this proposal?',
+								'doublescale'
+							)
+				}
+				busy={busyId !== null}
+				onConfirm={confirmConvert}
+			/>
+
+			<ConfirmDialog
+				open={acceptTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setAcceptTarget(null);
+					}
+				}}
+				title={__('Mark as Accepted', 'doublescale')}
+				description={__(
+					'Mark this proposal as accepted on the customer’s behalf? This may create a draft invoice automatically.',
+					'doublescale'
+				)}
+				confirmLabel={__('Mark as Accepted', 'doublescale')}
+				busy={busyId !== null}
+				onConfirm={confirmMarkAccepted}
+			/>
+
+			<SendDocumentDialog
+				open={sendTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setSendTarget(null);
+					}
+				}}
+				icon={<GradientProposalsIcon width={32} height={32} />}
+				title={__('Send Proposal', 'doublescale')}
+				description={__(
+					'Send this proposal to the customer by email? They will receive a link to view, accept, or decline.',
+					'doublescale'
+				)}
+				confirmLabel={__('Send', 'doublescale')}
+				busy={busyId !== null}
+				onConfirm={confirmSend}
 			/>
 		</div>
 	);

@@ -23,6 +23,7 @@ use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
 use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
+use DoubleScale\Modules\Documents\Services\DuplicateInvoice;
 use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
@@ -96,6 +97,30 @@ class RestInvoiceController extends RestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_summary' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'change_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 			)
 		);
@@ -427,6 +452,130 @@ class RestInvoiceController extends RestController {
 		$invoice->delete();
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_item( $request ) {
+		$disabled = $this->require_module( 'documents' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$invoice = InvoiceModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $invoice );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$copy = ( new DuplicateInvoice() )->duplicate( $invoice );
+
+		return new WP_REST_Response( InvoiceShaper::shape( $copy, true ), 201 );
+	}
+
+	/**
+	 * Change an invoice status manually from the admin.
+	 *
+	 * Paid states are rejected on purpose: `amount_paid` is the source of truth
+	 * for payment state, so flipping the status here would desync totals and
+	 * reporting. Payments must go through the payments flow.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function change_status( $request ) {
+		$disabled = $this->require_module( 'documents' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$invoice = InvoiceModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $invoice );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$status = isset( $params['status'] ) ? sanitize_text_field( (string) $params['status'] ) : '';
+		if ( ! InvoiceStatus::is_valid( $status ) ) {
+			return new WP_Error( 'invalid_status', __( 'Invalid invoice status.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		if ( in_array( $status, array( InvoiceStatus::PAID, InvoiceStatus::PARTIALLY_PAID ), true ) ) {
+			return new WP_Error(
+				'invalid_status',
+				__( 'Paid statuses are derived from recorded payments. Record a payment on the invoice instead.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$previous = (string) $invoice->status;
+
+		if ( $previous === $status ) {
+			return new WP_REST_Response( InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ), 200 );
+		}
+
+		$invoice->status = $status;
+		$invoice->save();
+
+		$this->log_manual_status_change( $invoice, $previous, $status );
+
+		do_action( 'doublescale_sales_invoice_updated', $invoice );
+
+		return new WP_REST_Response( InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ), 200 );
+	}
+
+	/**
+	 * Record an admin-driven status change on the activity timeline.
+	 *
+	 * @param InvoiceModel $invoice Invoice.
+	 * @param string       $previous Previous status.
+	 * @param string       $status New status.
+	 * @return void
+	 */
+	private function log_manual_status_change( InvoiceModel $invoice, string $previous, string $status ): void {
+		if ( ! class_exists( ActivityModel::class ) ) {
+			return;
+		}
+
+		$note = sprintf(
+			/* translators: 1: invoice number, 2: previous status label, 3: new status label */
+			__( 'Invoice %1$s status changed manually from %2$s to %3$s.', 'doublescale' ),
+			(string) $invoice->invoice_number,
+			InvoiceStatus::get_label( $previous ),
+			InvoiceStatus::get_label( $status )
+		);
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => (int) $invoice->contact_id,
+				'activity_type' => ActivityTypes::STATUS_CHANGED,
+				'data'          => array(
+					'title'           => __( 'Invoice updated', 'doublescale' ),
+					'type'            => 'system',
+					'note'            => $note,
+					'invoice_id'      => (int) $invoice->id,
+					'status'          => $status,
+					'previous_status' => $previous,
+					'manual'          => true,
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
 	}
 
 	/**

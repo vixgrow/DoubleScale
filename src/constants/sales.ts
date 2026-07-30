@@ -2,6 +2,8 @@
  * Sales module frontend constants.
  */
 
+import { __ } from '@wordpress/i18n';
+
 export const NAMESPACE = '/doublescale/v1/sales';
 
 export const PROPOSAL_STATUSES = [
@@ -35,27 +37,27 @@ export const INVOICE_STATUSES = [
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
 export const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, string> = {
-	draft: 'Draft',
-	sent: 'Sent',
-	open: 'Open',
-	declined: 'Declined',
-	accepted: 'Accepted',
+	draft: __('Draft', 'doublescale'),
+	sent: __('Sent', 'doublescale'),
+	open: __('Open', 'doublescale'),
+	declined: __('Declined', 'doublescale'),
+	accepted: __('Accepted', 'doublescale'),
 };
 
 export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
-	draft: 'Draft',
-	sent: 'Sent',
-	signed: 'Signed',
-	active: 'Active',
-	expired: 'Expired',
+	draft: __('Draft', 'doublescale'),
+	sent: __('Sent', 'doublescale'),
+	signed: __('Signed', 'doublescale'),
+	active: __('Active', 'doublescale'),
+	expired: __('Expired', 'doublescale'),
 };
 
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
-	draft: 'Draft',
-	unpaid: 'Unpaid',
-	partially_paid: 'Partially Paid',
-	paid: 'Paid',
-	overdue: 'Overdue',
+	draft: __('Draft', 'doublescale'),
+	unpaid: __('Unpaid', 'doublescale'),
+	partially_paid: __('Partially Paid', 'doublescale'),
+	paid: __('Paid', 'doublescale'),
+	overdue: __('Overdue', 'doublescale'),
 };
 
 export const CURRENCIES = ['USD', 'EUR', 'GBP'] as const;

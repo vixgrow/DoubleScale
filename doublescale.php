@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel)
+ * Plugin Name:       DoubleScale | Self-Hosted CRM & Business Platform 
  * Plugin URI:        https://www.doublescale.io/
- * Description:       DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel)
- * Version:           1.2.17
+ * Description:       DoubleScale | Self-Hosted CRM & Business Platform 
+ * Version:           1.2.18
  * Author:            vixgrowy
  * Author URI:        https://www.vixgrow.com
  * License:           GPL v2 or later

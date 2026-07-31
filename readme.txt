@@ -1,10 +1,10 @@
-=== DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
-Contributors: vixgrowy
+=== DoubleScale | Self-Hosted CRM & Business Platform ===
+Contributors: samuelgallegos, vixgrowy
 Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.2.17
+Stable tag: 1.2.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,9 +270,29 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
-= 1.2.17 = 26 Jul 2026
+= 1.2.18 = 29 Jul 2026
+- Add task automation triggers and actions
+- Improve Automations UI with tabbed action categories, clearer trigger groups (including e-commerce and Pro form vendors), and better empty-group handling
+- Add settings-only integration handling in the Integrations UI
+- Add Zapier integration support assets
+- Fix CSV importer mapping so mapped fields are not dropped
+- Improve custom fields: scope filtering and always persist the required state
+- Add company and legal identification fields to contacts and documents
+- Add custom contact avatars and improve contact field filtering in the UI
+- Add Contacts Analytics to the navbar
+- Add calendar week-start setting and improve calendar event handling/UI
+- Improve proposals/invoices tax display order and document preview scaling
+- Add mobile device REST endpoints and notification preference updates
+- Add role descriptions in the team manager modal and refine project role capabilities
+- Improve white-label visibility controls and admin menu icon handling
+- Rename Support references to Helpdesk in navigation/UI where applicable
+- Add Arabic text processing support (ar-php)
+- Update plugin title/description branding and Tested up to WordPress 7.0.2
+
+= 1.2.17 = 27 Jul 2026
 - Ship form-provider logos (form-types, Typeform, Jotform) in the WordPress.org package so Automations and Integrations icons load correctly
 - Load Typeform/Jotform logos from the free plugin assets instead of requiring Pro asset paths
+- Update plugin title/description branding and Tested up to WordPress 7.0.2
 
 = 1.2.16 = 26 Jul 2026
 - Harden Settings access for CRM Manager + Sales Rep multi-role users: compute the limited-settings gate on the server and treat manage_options / CRM Manager role membership as full access

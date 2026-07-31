@@ -166,7 +166,17 @@ final class Lifecycle {
 
 		register_deactivation_hook( $plugin_file, array( __CLASS__, 'on_deactivate' ) );
 
-		add_action( 'init', array( __CLASS__, 'load_textdomain' ) );
+		// Register the languages/ path before anything can call `__()`.
+		//
+		// Since WP 6.7 `load_plugin_textdomain()` only records a custom path;
+		// the .mo is loaded just-in-time on the first translate call. The boot
+		// below fires `doublescale_ready` at plugins_loaded priority 5 and many
+		// service managers call `__()` while registering, so hooking this on
+		// `init` resolved the domain to the plugin root (no .mo there) and
+		// cached NOOP_Translations for the whole request — every string stayed
+		// untranslated even with a valid languages/doublescale-<locale>.mo.
+		// Priority 4 guarantees the path is set before that first call.
+		add_action( 'plugins_loaded', array( __CLASS__, 'load_textdomain' ), 4 );
 		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ), 5 );
 
 		// Suppress WP 6.7+'s "translation loaded too early" notice for the

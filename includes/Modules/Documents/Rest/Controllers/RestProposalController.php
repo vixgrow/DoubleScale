@@ -130,6 +130,18 @@ class RestProposalController extends RestController {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'change_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				array(
@@ -613,6 +625,128 @@ class RestProposalController extends RestController {
 	}
 
 	/**
+	 * Change a proposal status manually from the admin.
+	 *
+	 * Mirrors the guest accept/decline flow so an agreement closed outside the
+	 * public link (phone, WhatsApp) produces the same side effects: timestamps,
+	 * activity log, lifecycle action (which drives auto invoice conversion and
+	 * automations) and the sales rep notification.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function change_status( $request ) {
+		$disabled = $this->require_module( 'documents' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$status = isset( $params['status'] ) ? sanitize_text_field( (string) $params['status'] ) : '';
+		if ( ! ProposalStatus::is_valid( $status ) ) {
+			return new WP_Error( 'invalid_status', __( 'Invalid proposal status.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$previous = (string) $proposal->status;
+
+		// Nothing to do: return early so repeated clicks do not re-fire hooks.
+		if ( $previous === $status ) {
+			return new WP_REST_Response( ProposalShaper::shape_admin( $proposal->fresh( array( 'contact', 'assigned_user' ) ), true ), 200 );
+		}
+
+		$reason = isset( $params['decline_reason'] ) ? sanitize_textarea_field( (string) $params['decline_reason'] ) : '';
+
+		$proposal->status = $status;
+
+		if ( ProposalStatus::ACCEPTED === $status ) {
+			if ( empty( $proposal->accepted_at ) ) {
+				$proposal->accepted_at = current_time( 'mysql' );
+			}
+			$proposal->declined_at    = null;
+			$proposal->decline_reason = null;
+		} elseif ( ProposalStatus::DECLINED === $status ) {
+			if ( empty( $proposal->declined_at ) ) {
+				$proposal->declined_at = current_time( 'mysql' );
+			}
+			if ( '' !== trim( $reason ) ) {
+				$proposal->decline_reason = $reason;
+			}
+		}
+
+		// Signature columns are intentionally untouched: a manual status change
+		// carries no customer signature.
+		$proposal->save();
+
+		$this->log_manual_status_change( $proposal, $previous, $status );
+
+		if ( ProposalStatus::ACCEPTED === $status ) {
+			do_action( 'doublescale_sales_proposal_accepted', $proposal );
+			( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'accepted' );
+		} elseif ( ProposalStatus::DECLINED === $status ) {
+			do_action( 'doublescale_sales_proposal_declined', $proposal, $reason );
+			( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'declined' );
+		}
+
+		return new WP_REST_Response( ProposalShaper::shape_admin( $proposal->fresh( array( 'contact', 'assigned_user' ) ), true ), 200 );
+	}
+
+	/**
+	 * Record an admin-driven status change on the activity timeline.
+	 *
+	 * Unlike the guest accept/decline log, this attributes the change to the
+	 * acting user so the timeline shows who closed the deal.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @param string        $previous Previous status.
+	 * @param string        $status New status.
+	 * @return void
+	 */
+	private function log_manual_status_change( ProposalModel $proposal, string $previous, string $status ): void {
+		if ( ! class_exists( ActivityModel::class ) ) {
+			return;
+		}
+
+		$note = sprintf(
+			/* translators: 1: proposal number, 2: previous status label, 3: new status label */
+			__( 'Proposal %1$s status changed manually from %2$s to %3$s.', 'doublescale' ),
+			(string) $proposal->proposal_number,
+			ProposalStatus::get_label( $previous ),
+			ProposalStatus::get_label( $status )
+		);
+
+		ActivityModel::create(
+			array(
+				'contact_id'    => (int) $proposal->contact_id,
+				'activity_type' => ActivityTypes::STATUS_CHANGED,
+				'data'          => array(
+					'title'           => __( 'Proposal updated', 'doublescale' ),
+					'type'            => 'system',
+					'note'            => $note,
+					'proposal_id'     => (int) $proposal->id,
+					'status'          => $status,
+					'previous_status' => $previous,
+					'manual'          => true,
+				),
+				'user_id'       => get_current_user_id() ?: null,
+			)
+		);
+	}
+
+	/**
 	 * @param ProposalModel $proposal Proposal.
 	 * @param string        $message Optional custom message.
 	 * @return void
@@ -760,6 +894,22 @@ class RestProposalController extends RestController {
 
 		if ( isset( $payload['status'] ) && ! ProposalStatus::is_valid( $payload['status'] ) ) {
 			return new WP_Error( 'invalid_status', __( 'Invalid proposal status.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		if ( array_key_exists( 'proposal_number', $params ) ) {
+			$number = SalesNumbering::validate_manual_number(
+				sanitize_text_field( (string) $params['proposal_number'] ),
+				ProposalModel::class,
+				'proposal_number',
+				(int) $request->get_param( 'id' )
+			);
+			if ( is_wp_error( $number ) ) {
+				return $number;
+			}
+			// An empty value leaves auto-numbering to the model's creating hook.
+			if ( '' !== $number ) {
+				$payload['proposal_number'] = $number;
+			}
 		}
 
 		return $payload;

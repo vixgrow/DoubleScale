@@ -3,6 +3,8 @@ export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './sta
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';
 export { ConvertToInvoiceDialog } from './convert-to-invoice-dialog';
+export { DocumentRowActions } from './document-row-actions';
+export type { DocumentRowActionsProps } from './document-row-actions';
 export { ApprovalStatusBanner } from './approval-status-banner';
 export { RejectApprovalDialog } from './reject-approval-dialog';
 export {

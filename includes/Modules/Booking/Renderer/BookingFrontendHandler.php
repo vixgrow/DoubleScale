@@ -81,6 +81,10 @@ class BookingFrontendHandler {
 			true
 		);
 
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'doublescale-booking-renderer', 'doublescale', $plugin_dir . 'languages' );
+		}
+
 		wp_register_style(
 			'doublescale-booking-renderer',
 			$plugin_url . 'build/renderer/style.css',

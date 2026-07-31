@@ -4,13 +4,14 @@
 
 import React, { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { User } from 'lucide-react';
+import { Files, User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import {
 	CalendarIcon,
 	ContactTotalEmailsIcon,
+	CopyIcon,
 	CurrencyIcon,
 	DeleteIcon,
 	DownloadIcon,
@@ -53,6 +54,7 @@ import {
 	formatSalesRestError,
 } from '@/components/sales/sales-approval-utils';
 import {
+	changeProposalStatus,
 	convertProposalToInvoice,
 	deleteProposal,
 	duplicateProposal,
@@ -91,10 +93,14 @@ const ProposalView: React.FC = () => {
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [convertOpen, setConvertOpen] = useState(false);
+	const [markAcceptedOpen, setMarkAcceptedOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
+	// Manual accept for deals closed outside the public link (phone, WhatsApp).
+	const showMarkAccepted = (status: string) =>
+		status !== 'accepted' && status !== 'declined';
 	const [signature, setSignature] = useState<ProposalSignature | null>(null);
 	const [signatureLoading, setSignatureLoading] = useState(false);
 	const [signatureError, setSignatureError] = useState<string | null>(null);
@@ -264,6 +270,48 @@ const ProposalView: React.FC = () => {
 		}
 	};
 
+	const handleCopyLink = async () => {
+		if (!proposal?.public_url) {
+			setNotice(
+				__(
+					'Add a WordPress page with the [doublescale_proposal] shortcode first.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+		setNotice(null);
+		try {
+			await navigator.clipboard.writeText(proposal.public_url);
+			setNotice(__('Public link copied.', 'doublescale'));
+		} catch {
+			setNotice(proposal.public_url);
+		}
+	};
+
+	const handleMarkAccepted = async () => {
+		if (!proposalId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await changeProposalStatus(proposalId, 'accepted');
+			await refetch();
+			setNotice(__('Proposal marked as accepted.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(
+				formatSalesRestError(
+					err,
+					__('Failed to update the proposal status.', 'doublescale')
+				)
+			);
+		} finally {
+			setBusy(false);
+			setMarkAcceptedOpen(false);
+		}
+	};
+
 	const handleDownloadPdf = async () => {
 		if (!proposalId || !proposal) {
 			return;
@@ -401,6 +449,16 @@ const ProposalView: React.FC = () => {
 								{__('Convert to Invoice', 'doublescale')}
 							</Button>
 						) : null}
+						{showMarkAccepted(proposal.status) ? (
+							<Button
+								variant="outline"
+								onClick={() => setMarkAcceptedOpen(true)}
+								disabled={busy}
+								className="border-primary text-primary bg-white"
+							>
+								{__('Mark as Accepted', 'doublescale')}
+							</Button>
+						) : null}
 						{showSend ? (
 							<Button
 								variant="outline"
@@ -422,35 +480,29 @@ const ProposalView: React.FC = () => {
 						>
 							<DownloadIcon />
 						</Button>
+						{proposal.public_url ? (
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-10 w-10 shrink-0 border-primary bg-white text-[#3A3A99]"
+								onClick={() => void handleCopyLink()}
+								disabled={busy}
+								aria-label={__('Copy Link', 'doublescale')}
+								title={__('Copy public link', 'doublescale')}
+							>
+								<CopyIcon width={20} height={20} />
+							</Button>
+						) : null}
 						<Button
 							variant="outline"
 							size="icon"
-							className="h-10 w-10 shrink-0 border-primary bg-white"
+							className="h-10 w-10 shrink-0 border-primary bg-white text-[#3A3A99]"
 							onClick={() => void handleDuplicate()}
 							disabled={busy}
 							aria-label={__('Duplicate', 'doublescale')}
+							title={__('Duplicate proposal', 'doublescale')}
 						>
-							<svg
-								width="20"
-								height="20"
-								viewBox="0 0 20 20"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									opacity="0.4"
-									d="M13.5 11.15H11.33C9.55 11.15 8.1 9.71 8.1 7.92V5.75C8.1 5.34 7.77 5 7.35 5H4.18C1.87 5 0 6.5 0 9.18V15.82C0 18.5 1.87 20 4.18 20H10.07C12.38 20 14.25 18.5 14.25 15.82V11.9C14.25 11.48 13.91 11.15 13.5 11.15Z"
-									fill="#3A3A99"
-								/>
-								<path
-									d="M15.8198 0H13.8498H12.7598H9.92977C7.66977 0 5.83977 1.44 5.75977 4.01C5.81977 4.01 5.86977 4 5.92977 4H8.75977H9.84977H11.8198C14.1298 4 15.9998 5.5 15.9998 8.18V10.15V12.86V14.83C15.9998 14.89 15.9898 14.94 15.9898 14.99C18.2198 14.92 19.9998 13.44 19.9998 10.83V8.86V6.15V4.18C19.9998 1.5 18.1298 0 15.8198 0Z"
-									fill="#3A3A99"
-								/>
-								<path
-									d="M9.98062 5.14975C9.67062 4.83975 9.14062 5.04975 9.14062 5.47975V8.09975C9.14062 9.19975 10.0706 10.0998 11.2106 10.0998C11.9206 10.1098 12.9106 10.1098 13.7606 10.1098C14.1906 10.1098 14.4106 9.60975 14.1106 9.30975C13.0206 8.21975 11.0806 6.26975 9.98062 5.14975Z"
-									fill="#3A3A99"
-								/>
-							</svg>
+							<Files width={20} height={20} />
 						</Button>
 						{canEdit ? (
 							<Button
@@ -828,6 +880,19 @@ const ProposalView: React.FC = () => {
 				description={convertWarning}
 				busy={busy}
 				onConfirm={handleConvert}
+			/>
+
+			<ConfirmDialog
+				open={markAcceptedOpen}
+				onOpenChange={setMarkAcceptedOpen}
+				title={__('Mark as Accepted', 'doublescale')}
+				description={__(
+					'Mark this proposal as accepted on the customer’s behalf? This may create a draft invoice automatically.',
+					'doublescale'
+				)}
+				confirmLabel={__('Mark as Accepted', 'doublescale')}
+				busy={busy}
+				onConfirm={handleMarkAccepted}
 			/>
 
 			{proposal ? (

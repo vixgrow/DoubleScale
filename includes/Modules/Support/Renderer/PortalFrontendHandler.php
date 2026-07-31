@@ -173,6 +173,10 @@ final class PortalFrontendHandler {
 			true
 		);
 
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::HANDLE, 'doublescale', $plugin_dir . 'languages' );
+		}
+
 		wp_register_style(
 			self::HANDLE,
 			$plugin_url . 'build/renderer/support/style.css',

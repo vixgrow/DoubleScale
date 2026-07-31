@@ -2,7 +2,7 @@
  * Edit Style color picker for document templates.
  */
 
-import React, { useId, useRef } from '@wordpress/element';
+import React, { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Ban, Pipette, X } from 'lucide-react';
 
@@ -27,10 +27,45 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 	compact = false,
 }) => {
 	const colorInputId = useId();
+	const hexInputId = useId();
 	const colorInputRef = useRef<HTMLInputElement>(null);
 	const normalized = normalizeTemplateColor(value);
 	const customValue = getCustomColorValue(normalized);
 	const isCustom = Boolean(normalized && !isPresetColor(normalized));
+
+	// Local draft so partially typed hex codes ("#4c6") don't reset the color.
+	const [hexDraft, setHexDraft] = useState(normalized ?? '');
+	const [hexInvalid, setHexInvalid] = useState(false);
+
+	useEffect(() => {
+		setHexDraft(normalized ?? '');
+		setHexInvalid(false);
+	}, [normalized]);
+
+	const commitHex = (raw: string) => {
+		const trimmed = raw.trim();
+		if (trimmed === '') {
+			setHexInvalid(false);
+			onChange(null);
+			return;
+		}
+		const withHash = trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+		const expanded = /^#[0-9a-fA-F]{3}$/.test(withHash)
+			? `#${withHash
+					.slice(1)
+					.split('')
+					.map((c) => c + c)
+					.join('')}`
+			: withHash;
+		const parsed = normalizeTemplateColor(expanded);
+		if (parsed === null) {
+			setHexInvalid(true);
+			setHexDraft(normalized ?? '');
+			return;
+		}
+		setHexInvalid(false);
+		onChange(parsed);
+	};
 
 	return (
 		<div
@@ -111,6 +146,71 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 							onChange(normalizeTemplateColor(e.target.value))
 						}
 					/>
+				</div>
+
+				<div className="space-y-1">
+					<label
+						htmlFor={hexInputId}
+						className="block text-xs font-medium text-muted-foreground"
+					>
+						{__('Hex code', 'doublescale')}
+					</label>
+					<div className="flex items-center gap-2">
+						<span
+							aria-hidden="true"
+							className="h-9 w-9 shrink-0 rounded-lg border border-border"
+							style={{
+								backgroundColor: normalized ?? '#f8fafc',
+							}}
+						/>
+						<input
+							id={hexInputId}
+							type="text"
+							inputMode="text"
+							spellCheck={false}
+							autoComplete="off"
+							maxLength={7}
+							placeholder={__('#4C6FFF', 'doublescale')}
+							value={hexDraft}
+							aria-invalid={hexInvalid}
+							onChange={(e) => {
+								setHexDraft(e.target.value);
+								setHexInvalid(false);
+							}}
+							onBlur={(e) => commitHex(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									commitHex(
+										(e.target as HTMLInputElement).value
+									);
+								}
+							}}
+							className={`h-9 w-full rounded-lg border bg-white px-3 font-mono text-sm uppercase text-foreground outline-none transition focus:ring-2 ${
+								hexInvalid
+									? 'border-destructive focus:border-destructive focus:ring-destructive/30'
+									: 'border-border focus:border-primary focus:ring-primary/30'
+							}`}
+						/>
+					</div>
+					<p
+						className={`text-xs ${
+							hexInvalid
+								? 'text-destructive'
+								: 'text-muted-foreground'
+						}`}
+						role={hexInvalid ? 'alert' : undefined}
+					>
+						{hexInvalid
+							? __(
+									'Enter a valid hex code, e.g. #4C6FFF.',
+									'doublescale'
+								)
+							: __(
+									'Leave empty to use the template default.',
+									'doublescale'
+								)}
+					</p>
 				</div>
 			</div>
 		</div>

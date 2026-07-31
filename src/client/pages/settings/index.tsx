@@ -498,17 +498,17 @@ const SettingsPage: React.FC = () => {
 	const allTabsList = [
 		{
 			value: 'business',
-			label: 'Business',
+			label: __('Business', 'doublescale'),
 			icon: <BusinessIcon />,
 		},
 		{
 			value: 'email',
-			label: 'Email',
+			label: __('Email', 'doublescale'),
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{
 			value: 'mailbox',
-			label: 'Mailbox',
+			label: __('Mailbox', 'doublescale'),
 			icon: <MailboxIcon width={24} height={24} />,
 		},
 		{
@@ -523,42 +523,42 @@ const SettingsPage: React.FC = () => {
 		},
 		{
 			value: 'cart',
-			label: 'Cart',
+			label: __('Cart', 'doublescale'),
 			icon: <CartIcon />,
 		},
 		{
 			value: 'currencies',
-			label: 'Currencies',
+			label: __('Currencies', 'doublescale'),
 			icon: <CurrencyIcon />,
 		},
 		{
 			value: 'website_tracking',
-			label: 'Website Tracking',
+			label: __('Website Tracking', 'doublescale'),
 			icon: <WebsiteIcon width={24} height={24} />,
 		},
 		{
 			value: 'client_portal',
-			label: 'Client Portal',
+			label: __('Client Portal', 'doublescale'),
 			icon: <WebsiteIcon width={24} height={24} />,
 		},
 		{
 			value: 'license',
-			label: 'License',
+			label: __('License', 'doublescale'),
 			icon: <LicenseIcon />,
 		},
 		{
 			value: 'system',
-			label: 'System',
+			label: __('System', 'doublescale'),
 			icon: <ToolsIcon width={24} height={24} />,
 		},
 		{
 			value: 'custom_fields',
-			label: 'Custom Fields',
+			label: __('Custom Fields', 'doublescale'),
 			icon: <CustomFieldsIcon width={24} height={24} />,
 		},
 		{
 			value: 'link_triggers',
-			label: 'Link Triggers',
+			label: __('Link Triggers', 'doublescale'),
 			icon: <LinkTriggersIcon width={24} height={24} />,
 		},
 		{
@@ -568,7 +568,7 @@ const SettingsPage: React.FC = () => {
 		},
 		{
 			value: 'notifications',
-			label: 'Notifications',
+			label: __('Notifications', 'doublescale'),
 			icon: <NotificationIcon width={24} height={24} />,
 		},
 	];

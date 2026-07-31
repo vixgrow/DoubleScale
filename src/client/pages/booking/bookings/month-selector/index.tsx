@@ -3,20 +3,10 @@
  */
 import { ChevronLeft as LeftOutlined, ChevronRight as RightOutlined } from 'lucide-react';
 
-const MONTHS = [
-	'January',
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-	'August',
-	'September',
-	'October',
-	'November',
-	'December',
-];
+/*
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 
 interface MonthSelectorProps {
 	year: number;
@@ -31,6 +21,21 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 	selectedMonth,
 	setSelectedMonth,
 }) => {
+	const MONTHS = [
+		__('January', 'doublescale'),
+		__('February', 'doublescale'),
+		__('March', 'doublescale'),
+		__('April', 'doublescale'),
+		__('May', 'doublescale'),
+		__('June', 'doublescale'),
+		__('July', 'doublescale'),
+		__('August', 'doublescale'),
+		__('September', 'doublescale'),
+		__('October', 'doublescale'),
+		__('November', 'doublescale'),
+		__('December', 'doublescale'),
+	];
+
 	// Handlers to update the year
 	const handlePrevYear = () => setYear((year) => year - 1);
 	const handleNextYear = () => setYear((year) => year + 1);
@@ -41,8 +46,8 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 				<button
 					onClick={handlePrevYear}
 					className="border p-2 rounded hover:bg-gray-100"
-					title="Previous Year"
-					aria-label="Previous Year"
+					title={__('Previous Year', 'doublescale')}
+					aria-label={__('Previous Year', 'doublescale')}
 				>
 					<LeftOutlined />
 				</button>
@@ -54,8 +59,8 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 				<button
 					onClick={handleNextYear}
 					className="border p-2 rounded hover:bg-gray-100"
-					title="Next Year"
-					aria-label="Next Year"
+					title={__('Next Year', 'doublescale')}
+					aria-label={__('Next Year', 'doublescale')}
 				>
 					<RightOutlined />
 				</button>
@@ -70,7 +75,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
 						return (
 							<button
-								key={month}
+								key={monthNumber}
 								onClick={() => setSelectedMonth(monthNumber)}
 								className={`px-3 py-1.5 rounded-md transition-colors text-sm font-semibold ${
 									isActive

@@ -58,6 +58,11 @@ function _doublescale_tests_enable_all_modules() {
 			'smtp'        => true,
 			'tracking'    => true,
 			'support'     => true,
+			// `sales` is the parent gate for `documents`; both must be on before
+			// the plugin boots, or ModuleRegistry::boot() skips them and their
+			// REST controllers never hook `rest_api_init` (every route 404s).
+			'sales'       => true,
+			'documents'   => true,
 		)
 	);
 }

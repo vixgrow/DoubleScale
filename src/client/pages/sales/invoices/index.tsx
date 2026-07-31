@@ -8,21 +8,36 @@ import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Plus } from 'lucide-react';
 
-import { useNavigate } from '@doublescale/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { ConfirmDialog, InvoiceFormDialog } from '@/components/sales';
+import {
+	ConfirmDialog,
+	InvoiceFormDialog,
+	SendDocumentDialog,
+} from '@/components/sales';
 import {
 	canEditSalesDocument,
+	formatSalesRestError,
 	isApprovalWorkflowEnabled,
+	showDirectSendAction,
 } from '@/components/sales/sales-approval-utils';
-import { deleteInvoice, useInvoices, useInvoiceSummary, useSalesSettings } from '@/hooks/sales';
+import {
+	deleteInvoice,
+	downloadInvoicePdf,
+	duplicateInvoice,
+	sendInvoice,
+	useInvoices,
+	useInvoiceSummary,
+	useSalesSettings,
+} from '@/hooks/sales';
 import { INVOICE_STATUS_LABELS, INVOICE_STATUSES, type InvoiceStatus } from '@/constants/sales';
 import type { Invoice } from '@/types/sales';
 import {
 	DashboardContentCard,
 	DraftIcon,
+	InvoicesIcon,
 	MessageStatsCard,
 	NoData,
 	NoticeBanner,
@@ -116,6 +131,8 @@ const InvoicesList: React.FC = () => {
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [editDialogInvoiceId, setEditDialogInvoiceId] = useState<number | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [busyId, setBusyId] = useState<number | null>(null);
+	const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
 	const closeNotice = () => setNotice(null);
 
 	const { data, loading, error, refetch } = useInvoices({
@@ -159,6 +176,79 @@ const InvoicesList: React.FC = () => {
 			invoice
 		);
 
+	const canSend = (invoice: Invoice) =>
+		showDirectSendAction(
+			isApprovalWorkflowEnabled(salesSettings, invoice),
+			'invoice',
+			invoice.status,
+			invoice.approval,
+			false,
+			invoice
+		);
+
+	/** Runs a row action with a per-row busy flag and shared error reporting. */
+	const runRowAction = async (
+		invoice: Invoice,
+		action: () => Promise<void>,
+		fallbackMessage: string,
+		errorOverrides?: Record<string, string>
+	) => {
+		setBusyId(invoice.id);
+		try {
+			await action();
+		} catch (err: unknown) {
+			setNotice({
+				type: 'error',
+				message: formatSalesRestError(err, fallbackMessage, errorOverrides),
+			});
+		} finally {
+			setBusyId(null);
+		}
+	};
+
+	const handleDuplicate = (invoice: Invoice) =>
+		void runRowAction(
+			invoice,
+			async () => {
+				const copy = await duplicateInvoice(invoice.id);
+				// Land on the copy so the user can adjust it straight away.
+				navigate(getToLink(`sales/invoices/${copy.id}/edit`));
+			},
+			__('Duplicate failed.', 'doublescale')
+		);
+
+	const handleDownloadPdf = (invoice: Invoice) =>
+		void runRowAction(
+			invoice,
+			() => downloadInvoicePdf(invoice.id, invoice.invoice_number),
+			__('PDF download failed.', 'doublescale')
+		);
+
+	const confirmSend = (message: string) => {
+		if (!sendTarget) {
+			return;
+		}
+		const invoice = sendTarget;
+		void runRowAction(
+			invoice,
+			async () => {
+				await sendInvoice(invoice.id, message);
+				refreshAll();
+				setNotice({
+					type: 'success',
+					message: __('Invoice sent to the customer.', 'doublescale'),
+				});
+			},
+			__('Send failed.', 'doublescale'),
+			{
+				approval_required: __(
+					'This invoice must be approved before it can be sent. Submit it for approval first.',
+					'doublescale'
+				),
+			}
+		).then(() => setSendTarget(null));
+	};
+
 	const columns = useMemo(
 		() =>
 			getInvoiceColumns({
@@ -166,8 +256,13 @@ const InvoicesList: React.FC = () => {
 				onEdit: setEditDialogInvoiceId,
 				onDelete: setDeleteId,
 				canEdit,
+				onDuplicate: handleDuplicate,
+				onSend: setSendTarget,
+				onDownloadPdf: handleDownloadPdf,
+				busyId,
+				canSend,
 			}),
-		[navigate, salesSettings]
+		[navigate, salesSettings, busyId]
 	);
 
 	const tableConfig: DataTableConfig<Invoice> = useMemo(
@@ -383,6 +478,24 @@ const InvoicesList: React.FC = () => {
 				destructive
 				busy={deleting}
 				onConfirm={confirmDelete}
+			/>
+
+			<SendDocumentDialog
+				open={sendTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setSendTarget(null);
+					}
+				}}
+				icon={<InvoicesIcon width={32} height={32} />}
+				title={__('Send Invoice', 'doublescale')}
+				description={__(
+					'Send this invoice to the customer by email? They will receive a link to view and pay it.',
+					'doublescale'
+				)}
+				confirmLabel={__('Send', 'doublescale')}
+				busy={busyId !== null}
+				onConfirm={confirmSend}
 			/>
 		</div>
 	);

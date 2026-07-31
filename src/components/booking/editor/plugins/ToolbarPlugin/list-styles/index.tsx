@@ -15,6 +15,11 @@ import { $isListNode } from '@lexical/list';
 import { $getSelection, $isRangeSelection } from 'lexical';
 import { Button } from '@/components/ui/button';
 
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 interface ListStylesProps {
 	activeEditor: any;
 }
@@ -88,7 +93,7 @@ export default function ListStyles({ activeEditor }: ListStylesProps) {
 				onClick={() =>
 					toggleList(INSERT_UNORDERED_LIST_COMMAND, 'bullet')
 				}
-				title="Bullet List"
+				title={__('Bullet List', 'doublescale')}
 				variant="ghost"
 				size="icon"
 				className="border-none shadow-none cursor-pointer [&_svg]:size-5"
@@ -103,7 +108,7 @@ export default function ListStyles({ activeEditor }: ListStylesProps) {
 				onClick={() =>
 					toggleList(INSERT_ORDERED_LIST_COMMAND, 'number')
 				}
-				title="Numbered List"
+				title={__('Numbered List', 'doublescale')}
 				variant="ghost"
 				size="icon"
 				className="border-none shadow-none cursor-pointer [&_svg]:size-5"
@@ -116,7 +121,7 @@ export default function ListStyles({ activeEditor }: ListStylesProps) {
 			</Button>
             <Button
 				onClick={() => toggleList(INSERT_CHECK_LIST_COMMAND, 'check')}
-				title="Checklist"
+				title={__('Checklist', 'doublescale')}
 				variant="ghost"
 				size="icon"
 				className="border-none shadow-none cursor-pointer [&_svg]:size-5"

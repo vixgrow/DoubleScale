@@ -59,10 +59,15 @@ export class EmailBuilderService {
       throw new Error(`Unknown block type: ${blockType}`);
     }
 
+    const props = { ...blockDef.defaultProps };
+    if (blockType === 'html' && !props.blockId) {
+      props.blockId = `html-block-${generateBlockId().replace(/^block-/, '')}`;
+    }
+
     return {
       id: generateBlockId(),
       type: blockType,
-      props: { ...blockDef.defaultProps },
+      props,
     };
   }
 

@@ -64,6 +64,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	const fontSize = props.fontSize;
 	const textColor = props.color?.trim() || '#333';
 	const linkColorResolved = props.linkColor?.trim() || '#458DC7';
+	const isRtl = props.textDirection === 'rtl';
+	const listPaddingProp = isRtl ? 'padding-right' : 'padding-left';
 
 	// Check if content is HTML
 	const isHtmlContent =
@@ -257,14 +259,16 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				}
 				.${rendererId} ul {
 					list-style-type: disc !important;
-					padding-left: 20px !important;
+					${listPaddingProp}: 20px !important;
+					padding-${isRtl ? 'left' : 'right'}: 0 !important;
 					margin: 10px 0 !important;
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				.${rendererId} ol {
 					list-style-type: decimal !important;
-					padding-left: 20px !important;
+					${listPaddingProp}: 20px !important;
+					padding-${isRtl ? 'left' : 'right'}: 0 !important;
 					margin: 10px 0 !important;
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
@@ -331,10 +335,12 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				}
 			`}</style>
 			<div
+				dir={isRtl ? 'rtl' : 'ltr'}
 				style={
 					{
 						fontSize: fontSize,
 						color: textColor,
+						direction: isRtl ? 'rtl' : 'ltr',
 						// Only apply textAlign from props if HTML doesn't have its own text-align
 						...(hasHtmlFormatting() &&
 							props.content.includes('text-align')
@@ -391,6 +397,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 					<div
 						ref={editRef}
 						contentEditable
+						dir={isRtl ? 'rtl' : 'ltr'}
 						suppressContentEditableWarning
 						role="textbox"
 						aria-multiline
@@ -405,6 +412,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 							caretColor: textColor,
 							lineHeight: 'inherit',
 							letterSpacing: 'inherit',
+							direction: isRtl ? 'rtl' : 'ltr',
 						}}
 						onFocus={() => {
 							editingRef.current = true;

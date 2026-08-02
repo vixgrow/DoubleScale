@@ -59,6 +59,7 @@ class TextBlock extends EmailBlock {
 			'linkColor'       => '#333',
 			'backgroundColor' => 'transparent',
 			'textAlign'       => 'left',
+			'textDirection'   => 'ltr',
 			'listType'        => 'none',
 			'headingStyle'    => 'p',
 			'padding'         => array(
@@ -93,10 +94,13 @@ class TextBlock extends EmailBlock {
 		$has_html_formatting = $this->has_html_formatting( $content );
 
 		// Build styles (matches frontend div styles)
+		$text_direction = ( isset( $props['textDirection'] ) && 'rtl' === $props['textDirection'] ) ? 'rtl' : 'ltr';
+
 		$styles = array(
 			'font-size'        => $font_size . 'px',
 			'color'            => $props['color'],
 			'text-align'       => $props['textAlign'],
+			'direction'        => $text_direction,
 			'font-family'      => $props['fontFamily'],
 			'line-height'      => $props['lineHeight'],
 			'letter-spacing'   => $props['letterSpacing'],
@@ -161,7 +165,7 @@ class TextBlock extends EmailBlock {
 			)
 		);
 
-		return "<div style=\"{$style_string}\">{$content}</div>";
+		return "<div dir=\"" . esc_attr( $text_direction ) . "\" style=\"{$style_string}\">{$content}</div>";
 	}
 
 	/**

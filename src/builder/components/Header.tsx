@@ -17,6 +17,7 @@ import { useUnsavedChanges } from '@doublescale/hooks/useUnsavedChanges';
 import { useTemplateActions } from '@doublescale/hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
+import { SendTestEmailPopover } from './SendTestEmailPopover';
 import { BuilderData } from '../index';
 import ArrowIcon from '@doublescale/shared/icons/dropdown-header';
 
@@ -208,6 +209,17 @@ const Header: React.FC<HeaderProps> = ({
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
+
+						<SendTestEmailPopover
+							campaignId={campaign.id}
+							disabled={isSaving || isBuilderEmpty}
+							onBeforeSend={async () => {
+								if (!ensureNotEmptyOrNotify()) {
+									return { success: false };
+								}
+								return save();
+							}}
+						/>
 
 						<Button
 							variant="default"

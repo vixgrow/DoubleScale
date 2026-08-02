@@ -35,6 +35,7 @@ const baseProps: TextBlockProps = {
 	linkColor: '#333',
 	backgroundColor: 'transparent',
 	textAlign: 'left',
+	textDirection: 'ltr',
 	listType: 'none',
 	headingStyle: 'p',
 	padding: { top: 4, right: 8, bottom: 4, left: 8 },

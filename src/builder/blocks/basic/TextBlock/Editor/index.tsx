@@ -34,6 +34,16 @@ export interface TextEditorProps {
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
+	const handleDirectionChange = (textDirection: 'ltr' | 'rtl') => {
+		const updates: Partial<TextBlockProps> = { textDirection };
+		if (textDirection === 'rtl' && props.textAlign === 'left') {
+			updates.textAlign = 'right';
+		} else if (textDirection === 'ltr' && props.textAlign === 'right') {
+			updates.textAlign = 'left';
+		}
+		onChange(updates);
+	};
+
 	return (
 		<BlockEditorErrorBoundary>
 			<BaseBlockEditor props={props} onChange={onChange}>
@@ -140,6 +150,52 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							label={__('Background Color', 'doublescale')}
 							id="bg-color"
 						/>
+
+						<LayoutControls.AlignmentControl
+							value={
+								(props.textAlign as
+									| 'left'
+									| 'center'
+									| 'right') || 'left'
+							}
+							onChange={(textAlign) => onChange({ textAlign })}
+							label={__('Text alignment', 'doublescale')}
+						/>
+
+						<div className="flex flex-col gap-2 text-white">
+							<label className="text-sm">
+								{__('Text direction', 'doublescale')}
+							</label>
+							<div
+								className="flex h-10 items-center justify-between rounded-lg"
+								style={{
+									backgroundColor: 'rgba(255, 255, 255, 0.05)',
+								}}
+							>
+								<button
+									type="button"
+									className={`flex-1 h-full rounded-lg text-sm transition-colors ${
+										(props.textDirection || 'ltr') === 'ltr'
+											? 'border border-white text-white'
+											: 'text-white/70 hover:bg-white/10'
+									}`}
+									onClick={() => handleDirectionChange('ltr')}
+								>
+									{__('LTR', 'doublescale')}
+								</button>
+								<button
+									type="button"
+									className={`flex-1 h-full rounded-lg text-sm transition-colors ${
+										props.textDirection === 'rtl'
+											? 'border border-white text-white'
+											: 'text-white/70 hover:bg-white/10'
+									}`}
+									onClick={() => handleDirectionChange('rtl')}
+								>
+									{__('RTL (Arabic)', 'doublescale')}
+								</button>
+							</div>
+						</div>
 
 						{/* Layout Controls - Padding */}
 						<LayoutControls.PaddingControl

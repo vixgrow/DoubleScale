@@ -20,6 +20,7 @@ import type {
 	Automation,
 	AutomationsResponse,
 	DataTableConfig,
+	ServerSortState,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
@@ -42,13 +43,30 @@ import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
+/**
+ * Columns the automations list can be sorted by.
+ *
+ * Mirrors RestAutomationController::SORTABLE_COLUMNS — the server rejects
+ * anything else, so keep the two in step.
+ */
+const AUTOMATION_SORTABLE_COLUMNS = [
+	'name',
+	'trigger',
+	'status',
+	'created_at',
+	'updated_at',
+] as const;
+
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
-	const [page, setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(
+		() => getListPreferences('automations').page ?? 1
+	);
 	const [perPage, setPerPage] = useState<number>(
 		() => getListPreferences('automations').per_page ?? 10
 	);
@@ -72,16 +90,24 @@ const AutomationsList: React.FC = () => {
 	}>(() =>
 		parseSavedDateRange(getListPreferences('automations').date_range)
 	);
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(
+			getListPreferences('automations').sort,
+			AUTOMATION_SORTABLE_COLUMNS
+		)
+	);
 
 	useListPreferencesPersistence(
 		'automations',
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keyword, perPage]
+			[dateRange, keyword, page, perPage, sort]
 		)
 	);
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
@@ -116,6 +142,9 @@ const AutomationsList: React.FC = () => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 				method: 'GET',
 			})) as AutomationsResponse;
@@ -133,9 +162,22 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	// Narrowing the result set invalidates the current page number: staying on
+	// page 3 of a different result set shows a confusingly empty table. Skipped
+	// on mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keyword, dateRange, sort]);
+
 	useEffect(() => {
 		fetchAutomations();
-	}, [page, perPage, keyword, dateRange]);
+	}, [page, perPage, keyword, dateRange, sort]);
 
 	const createAutomation = async () => {
 		if (!validate(automation)) {
@@ -496,6 +538,10 @@ const AutomationsList: React.FC = () => {
 			value: dateRange,
 			onDateChange: setDateRange,
 			placeholder: __('Date Range', 'doublescale'),
+		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
 		},
 	};
 

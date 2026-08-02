@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 interface UseServerSideTableProps {
     page: number;
@@ -33,6 +33,25 @@ export const useServerSideTable = ({
     setPage,
     setPerPage,
 }: UseServerSideTableProps): ServerSideTable => {
+    // A restored page number can point past the end of the current result set
+    // (records deleted, or a narrower filter applied since it was saved). Pull
+    // the user back to the last page that actually has rows instead of showing
+    // an empty table with no obvious way out.
+    //
+    // Guarded on totalRecords > 0 so this never fires during the initial fetch,
+    // when the total is still unknown and would clamp a valid restored page.
+    useEffect(() => {
+        if (totalRecords <= 0 || perPage <= 0) {
+            return;
+        }
+
+        const lastPage = Math.max(1, Math.ceil(totalRecords / perPage));
+
+        if (page > lastPage) {
+            setPage(lastPage);
+        }
+    }, [page, perPage, totalRecords, setPage]);
+
     const serverSideTable = useMemo(() => {
         const totalPages = Math.ceil(totalRecords / perPage);
 

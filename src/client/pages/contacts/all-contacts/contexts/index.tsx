@@ -16,6 +16,7 @@ import { useNavigate, useLocation, getToLink } from '@doublescale/navigation';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
@@ -26,8 +27,28 @@ import type {
 	Contact,
 	Filter as FilterType,
 	NoticeMessage,
+	ServerSortState,
 } from '@doublescale/client';
 import { parseContactsDeepLinkFilters } from '../../deep-link-filters';
+
+/**
+ * Columns the contacts list can be sorted by.
+ *
+ * Mirrors RestContactController::SORTABLE_COLUMNS. Note contacts have
+ * channel-specific status columns rather than a single `status`.
+ */
+export const CONTACT_SORTABLE_COLUMNS = [
+	'first_name',
+	'last_name',
+	'email',
+	'phone',
+	'city',
+	'country',
+	'email_status',
+	'sms_status',
+	'created_at',
+	'updated_at',
+] as const;
 
 export interface ContactsState {
 	// Data state
@@ -35,6 +56,7 @@ export interface ContactsState {
 	data: Contact[];
 	total: number;
 	page: number;
+	sort: ServerSortState | null;
 	perPage: number;
 	keywords: string;
 	totalRecords: number;
@@ -72,6 +94,7 @@ export interface ContactsActions {
 	setData: (data: Contact[]) => void;
 	setTotal: (total: number) => void;
 	setPage: (page: number) => void;
+	setSort: (sort: ServerSortState | null) => void;
 	setPerPage: (perPage: number) => void;
 	setKeywords: (keywords: string) => void;
 	setTotalRecords: (totalRecords: number) => void;
@@ -113,7 +136,10 @@ function buildContactsInitialState(): ContactsState {
 		loading: true,
 		data: [],
 		total: 0,
-		page: 1,
+		// A deep link (list_id / tag_id) applies its own filters, so the saved
+		// page belongs to a different result set — start at the top instead.
+		page: deepLinkFilters ? 1 : saved.page ?? 1,
+		sort: parseSavedSort(saved.sort, CONTACT_SORTABLE_COLUMNS),
 		perPage: saved.per_page ?? 10,
 		keywords: saved.keyword ?? '',
 		totalRecords: 0,
@@ -177,14 +203,19 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		setData: (data) => updateState({ data }),
 		setTotal: (total) => updateState({ total }),
 		setPage: (page) => updateState({ page }),
+		// Re-sorting reorders the whole result set server-side, so the current
+		// page number no longer points at the same rows.
+		setSort: (sort) => updateState({ sort, page: 1 }),
 		setPerPage: (perPage) => updateState({ perPage }),
-		setKeywords: (keywords) => updateState({ keywords }),
+		// Changing a filter narrows the result set, so the current page number no
+		// longer refers to the same rows — go back to the first page.
+		setKeywords: (keywords) => updateState({ keywords, page: 1 }),
 		setTotalRecords: (totalRecords) => updateState({ totalRecords }),
 		setHasRecords: (hasRecords) => updateState({ hasRecords }),
 		setShowFilters: (showFilters) => updateState({ showFilters }),
-		setFilters: (filters) => updateState({ filters }),
+		setFilters: (filters) => updateState({ filters, page: 1 }),
 		setIsFiltering: (isFiltering) => updateState({ isFiltering }),
-		setDateRange: (dateRange) => updateState({ dateRange }),
+		setDateRange: (dateRange) => updateState({ dateRange, page: 1 }),
 		setSelectedRowKeys: (selectedRowKeys) =>
 			updateState({ selectedRowKeys }),
 		setSelectedLists: (selectedLists) => updateState({ selectedLists }),
@@ -212,6 +243,8 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 
 	const persistenceValues = useMemo(
 		() => ({
+			page: state.page,
+			sort: state.sort,
 			per_page: state.perPage,
 			show_filters: state.showFilters,
 			keyword: state.keywords,
@@ -220,6 +253,8 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		[
 			state.dateRange,
 			state.keywords,
+			state.page,
+			state.sort,
 			state.perPage,
 			state.showFilters,
 		]

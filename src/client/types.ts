@@ -934,6 +934,14 @@ export type Log = {
 	};
 };
 
+/**
+ * A server-side sort: which column, and in which direction.
+ */
+export type ServerSortState = {
+	orderby: string;
+	order: 'asc' | 'desc';
+};
+
 export interface DataTableConfig<TData> {
 	manageColumns?: {
 		enabled: boolean;
@@ -996,6 +1004,18 @@ export interface DataTableConfig<TData> {
 		};
 		onFiltersChange: (filters: any) => void;
 		onClear: () => void;
+	};
+	/**
+	 * Server-side sorting.
+	 *
+	 * When provided, the table stops reordering rows locally and reports sort
+	 * changes to the page instead, which refetches. Without this the table can
+	 * only sort the rows it currently holds — one page — so "sort by name"
+	 * silently means "sort this page by name".
+	 */
+	sorting?: {
+		value: ServerSortState | null;
+		onSortChange: (sort: ServerSortState | null) => void;
 	};
 	initialColumnVisibility?: Record<string, boolean>;
 	toolbarClassName?: string;

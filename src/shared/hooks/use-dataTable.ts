@@ -24,7 +24,42 @@ export function useDataTable<TData>(
 	config: DataTableConfig<TData>,
 	initialPageSize?: number | undefined
 ) {
-	const [sorting, setSorting] = useState<SortingState>([]);
+	const [localSorting, setLocalSorting] = useState<SortingState>([]);
+
+	// When the page drives sorting we mirror its state into the table instead of
+	// keeping our own, so the header arrows reflect the order the server applied.
+	const serverSorting = config.sorting;
+	const sorting: SortingState = useMemo(() => {
+		if (!serverSorting) {
+			return localSorting;
+		}
+
+		return serverSorting.value
+			? [
+					{
+						id: serverSorting.value.orderby,
+						desc: serverSorting.value.order === 'desc',
+					},
+				]
+			: [];
+	}, [serverSorting, localSorting]);
+
+	const handleSortingChange = (updater: any) => {
+		const next: SortingState =
+			typeof updater === 'function' ? updater(sorting) : updater;
+
+		if (!serverSorting) {
+			setLocalSorting(next);
+			return;
+		}
+
+		const [first] = next;
+		serverSorting.onSortChange(
+			first
+				? { orderby: first.id, order: first.desc ? 'desc' : 'asc' }
+				: null
+		);
+	};
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
 		config.initialColumnVisibility || {}
@@ -85,8 +120,12 @@ export function useDataTable<TData>(
 		enableRowSelection: config.selection?.enabled || false,
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
-		onSortingChange: setSorting,
-		getSortedRowModel: getSortedRowModel(),
+		onSortingChange: handleSortingChange,
+		// With server-side sorting the rows already arrive in order; re-sorting
+		// them locally would only reorder the current page.
+		...(config.sorting
+			? { manualSorting: true }
+			: { getSortedRowModel: getSortedRowModel() }),
 		onColumnFiltersChange: setColumnFilters,
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,

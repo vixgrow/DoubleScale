@@ -20,6 +20,7 @@ import type {
 	Form as FormData,
 	FormsResponse,
 	DataTableConfig,
+	ServerSortState,
 	NoticeMessage,
 } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
@@ -40,13 +41,27 @@ import { useNavigate, getToLink } from '@doublescale/navigation';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
+/**
+ * Columns the forms list can be sorted by. Mirrors the server allow-list.
+ */
+const FORM_SORTABLE_COLUMNS = [
+	'name',
+	'form_type',
+	'status',
+	'created_at',
+	'updated_at',
+] as const;
+
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
-	const [page, setPage] = useState(1);
+	const [page, setPage] = useState(
+		() => getListPreferences('forms').page ?? 1
+	);
 	const [perPage, setPerPage] = useState(
 		() => getListPreferences('forms').per_page ?? 10
 	);
@@ -86,15 +101,21 @@ const FormsList: React.FC = () => {
 		to: Date | null;
 	}>(() => parseSavedDateRange(getListPreferences('forms').date_range));
 
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(getListPreferences('forms').sort, FORM_SORTABLE_COLUMNS)
+	);
+
 	useListPreferencesPersistence(
 		'forms',
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keyword, perPage]
+			[dateRange, keyword, page, perPage, sort]
 		)
 	);
 
@@ -143,6 +164,9 @@ const FormsList: React.FC = () => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 				method: 'GET',
 			})) as FormsResponse;
@@ -158,7 +182,20 @@ const FormsList: React.FC = () => {
 
 	useEffect(() => {
 		fetchForms();
-	}, [page, perPage, dateRange, keyword]);
+	}, [page, perPage, dateRange, keyword, sort]);
+
+	// Narrowing the result set invalidates the current page number. Skipped on
+	// mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keyword, dateRange, sort]);
+
 
 	const deleteSelected = async () => {
 		if (selectedRowKeys.length === 0) {
@@ -254,6 +291,10 @@ const FormsList: React.FC = () => {
 			value: dateRange,
 			onDateChange: setDateRange,
 			placeholder: __('Date Range', 'doublescale'),
+		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
 		},
 	};
 

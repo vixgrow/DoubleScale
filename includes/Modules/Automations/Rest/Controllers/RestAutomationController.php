@@ -48,6 +48,18 @@ class RestAutomationController extends RestController {
 	protected $rest_base = 'automations';
 
 	/**
+	 * Columns the list may be sorted by.
+	 *
+	 * Mirrors the sortable headers in the automations table UI. Kept as an
+	 * allow-list because the value reaches the ORDER BY clause.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string[]
+	 */
+	const SORTABLE_COLUMNS = array( 'name', 'trigger', 'status', 'created_at', 'updated_at' );
+
+	/**
 	 * Register routes
 	 *
 	 * @since 1.0.0
@@ -395,7 +407,7 @@ class RestAutomationController extends RestController {
 				'type'        => 'string',
 				'format'      => 'date',
 			),
-		);
+		) + $this->get_sorting_collection_params( self::SORTABLE_COLUMNS );
 	}
 
 	/**
@@ -609,7 +621,9 @@ class RestAutomationController extends RestController {
 			if ( $to ) {
 				$query->where( 'created_at', '<=', $to );
 			}
-			$automations = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$this->apply_sorting( $query, $request, self::SORTABLE_COLUMNS );
+
+			$automations = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// Check dependencies for each automation
 			foreach ( $automations as $automation ) {

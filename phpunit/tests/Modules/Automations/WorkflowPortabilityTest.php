@@ -38,6 +38,7 @@ class WorkflowPortabilityTest extends TestCase {
 	 */
 	public function test_envelope_constants(): void {
 		$this->assertSame( '_doublescale_workflow', WorkflowPortabilityManager::ENVELOPE_KEY );
+		$this->assertSame( '_doublescale_workflows', WorkflowPortabilityManager::BULK_ENVELOPE_KEY );
 		$this->assertSame( 1, WorkflowPortabilityManager::FORMAT_VERSION );
 	}
 
@@ -152,5 +153,74 @@ class WorkflowPortabilityTest extends TestCase {
 		);
 
 		$this->assertSame( array( 5, 7, 9 ), $ids );
+	}
+
+	/**
+	 * normalize_bulk_payload() unwraps a bulk envelope into single-workflow envelopes.
+	 */
+	public function test_normalize_bulk_payload_from_bulk_envelope(): void {
+		$method = new ReflectionMethod( WorkflowPortabilityManager::class, 'normalize_bulk_payload' );
+		$method->setAccessible( true );
+
+		$single = array(
+			WorkflowPortabilityManager::ENVELOPE_KEY => true,
+			'workflow'                               => array(
+				'automation' => array( 'name' => 'One' ),
+				'steps'      => array(),
+			),
+		);
+
+		$envelopes = $method->invoke(
+			WorkflowPortabilityManager::instance(),
+			array(
+				WorkflowPortabilityManager::BULK_ENVELOPE_KEY => true,
+				'workflows'                                   => array( $single ),
+			)
+		);
+
+		$this->assertSame( array( $single ), $envelopes );
+	}
+
+	/**
+	 * normalize_bulk_payload() accepts a plain list of single-workflow envelopes.
+	 */
+	public function test_normalize_bulk_payload_from_envelope_list(): void {
+		$method = new ReflectionMethod( WorkflowPortabilityManager::class, 'normalize_bulk_payload' );
+		$method->setAccessible( true );
+
+		$single = array(
+			WorkflowPortabilityManager::ENVELOPE_KEY => true,
+			'workflow'                               => array(
+				'automation' => array( 'name' => 'One' ),
+				'steps'      => array(),
+			),
+		);
+
+		$envelopes = $method->invoke(
+			WorkflowPortabilityManager::instance(),
+			array( $single )
+		);
+
+		$this->assertSame( array( $single ), $envelopes );
+	}
+
+	/**
+	 * import_bulk() returns a structured error when no valid envelopes are found.
+	 */
+	public function test_import_bulk_rejects_invalid_payload(): void {
+		$result = WorkflowPortabilityManager::instance()->import_bulk( 'not-an-array' );
+
+		$this->assertSame( array(), $result['results'] );
+		$this->assertCount( 1, $result['errors'] );
+	}
+
+	/**
+	 * export_bulk() refuses when no workflows can be exported.
+	 */
+	public function test_export_bulk_rejects_empty_ids(): void {
+		$result = WorkflowPortabilityManager::instance()->export_bulk( array() );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'workflow_export_failed', $result->get_error_code() );
 	}
 }

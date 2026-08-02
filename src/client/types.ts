@@ -863,6 +863,32 @@ export type AutomationsResponse = Response & {
 	total_count: number;
 };
 
+export type WorkflowImportResult = {
+	id: number;
+	name: string;
+	unresolved: unknown[];
+};
+
+export type WorkflowBulkImportResponse = {
+	results: WorkflowImportResult[];
+	errors: Array<{
+		name?: string;
+		message: string;
+	}>;
+};
+
+export type WorkflowBulkExportResponse = {
+	_doublescale_workflows: true;
+	format_version: number;
+	exported_from: string;
+	exported_at: string;
+	workflows: unknown[];
+	errors?: Array<{
+		id: number;
+		message: string;
+	}>;
+};
+
 export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
 
 export type CampaignsResponse = Response & {

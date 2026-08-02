@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useState } from 'react';
 import { uniq, flatten } from 'lodash';
+import { Download } from 'lucide-react';
 /**
  * internal dependencies
  */
@@ -85,6 +86,9 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 		} else if (value === 'remove_tag') {
 			setModalMode('remove');
 			setIsTagModalOpen(true);
+		} else if (value === 'export') {
+			doBulkAction('export');
+			setBulkAction('');
 		}
 	};
 
@@ -182,6 +186,19 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 			case 'custom-fields': // Custom Fields tab
 				return [
 					{ value: 'delete', label: __('Delete Fields', 'doublescale') },
+				];
+			case 'automations':
+				return [
+					{
+						value: 'export',
+						label: __('Export', 'doublescale'),
+						icon: <Download size={16} />,
+					},
+					{
+						value: 'delete',
+						label: __('Delete', 'doublescale'),
+						icon: <DeleteIcon />,
+					},
 				];
 			default:
 				return [

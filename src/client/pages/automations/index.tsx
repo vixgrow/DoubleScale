@@ -21,6 +21,9 @@ import type {
 	AutomationsResponse,
 	DataTableConfig,
 	ServerSortState,
+	WorkflowBulkExportResponse,
+	WorkflowBulkImportResponse,
+	WorkflowImportResult,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
@@ -61,6 +64,56 @@ const AUTOMATION_SORTABLE_COLUMNS = [
 	'created_at',
 	'updated_at',
 ] as const;
+
+const downloadJsonFile = (data: unknown, filename: string) => {
+	const blob = new Blob([JSON.stringify(data, null, 2)], {
+		type: 'application/json',
+	});
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = filename;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
+};
+
+const isSingleWorkflowEnvelope = (
+	payload: unknown
+): payload is Record<string, unknown> =>
+	typeof payload === 'object' &&
+	payload !== null &&
+	Boolean((payload as Record<string, unknown>)._doublescale_workflow) &&
+	typeof (payload as Record<string, unknown>).workflow === 'object';
+
+const isBulkWorkflowEnvelope = (
+	payload: unknown
+): payload is { workflows: unknown[] } =>
+	typeof payload === 'object' &&
+	payload !== null &&
+	Boolean((payload as Record<string, unknown>)._doublescale_workflows) &&
+	Array.isArray((payload as Record<string, unknown>).workflows);
+
+const extractWorkflowEnvelopes = (payloads: unknown[]): unknown[] => {
+	const envelopes: unknown[] = [];
+
+	payloads.forEach((payload) => {
+		if (isBulkWorkflowEnvelope(payload)) {
+			envelopes.push(...payload.workflows);
+		} else if (isSingleWorkflowEnvelope(payload)) {
+			envelopes.push(payload);
+		}
+	});
+
+	return envelopes;
+};
+
+const buildBulkImportPayload = (workflows: unknown[]) => ({
+	_doublescale_workflows: true,
+	format_version: 1,
+	workflows,
+});
 
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
@@ -417,22 +470,64 @@ const AutomationsList: React.FC = () => {
 				method: 'GET',
 			});
 
-			const blob = new Blob([JSON.stringify(envelope, null, 2)], {
-				type: 'application/json',
-			});
-			const url = URL.createObjectURL(blob);
 			const slug =
 				(automationToExport.name || 'workflow')
 					.toLowerCase()
 					.replace(/[^a-z0-9]+/g, '-')
 					.replace(/^-+|-+$/g, '') || 'workflow';
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = `workflow-${slug}.json`;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			URL.revokeObjectURL(url);
+			downloadJsonFile(envelope, `workflow-${slug}.json`);
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
+	const exportSelected = async () => {
+		if (!isPro) {
+			showProRequiredNotice();
+			return;
+		}
+
+		if (selectedRowKeys.length === 0) {
+			return;
+		}
+
+		try {
+			const envelope = (await apiFetch({
+				path: '/doublescale/v1/automations/export-bulk',
+				method: 'POST',
+				data: {
+					ids: selectedRowKeys.map((id) => Number(id)),
+				},
+			})) as WorkflowBulkExportResponse;
+
+			downloadJsonFile(envelope, 'workflows-export.json');
+			setSelectedRowKeys([]);
+			setBulkAction('');
+
+			const exportedCount = envelope.workflows.length;
+			const errorCount = envelope.errors?.length ?? 0;
+
+			if (errorCount > 0) {
+				setListError({
+					type: 'warning',
+					message: __(
+						`${exportedCount} workflow(s) exported. ${errorCount} could not be exported.`,
+						'doublescale'
+					),
+				});
+				return;
+			}
+
+			setListError({
+				type: 'success',
+				message: __(
+					`${exportedCount} workflow(s) exported successfully.`,
+					'doublescale'
+				),
+			});
 		} catch (error: any) {
 			setListError({
 				type: 'error',
@@ -449,41 +544,102 @@ const AutomationsList: React.FC = () => {
 		fileInputRef.current?.click();
 	};
 
-	// Import a workflow from a JSON file: POST the parsed envelope, then open the
-	// new (inactive) automation in the editor, which surfaces any unresolved refs.
+	// Import workflow(s) from JSON file(s): single file opens the editor;
+	// multiple files or a bulk envelope import all workflows and refresh the list.
 	const handleImportFile = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
-		const file = event.target.files?.[0];
+		const files = event.target.files;
 		// Reset so selecting the same file again still fires onChange.
 		event.target.value = '';
-		if (!file) {
+		if (!files?.length) {
 			return;
 		}
 
 		try {
-			const text = await file.text();
-			let payload: unknown;
-			try {
-				payload = JSON.parse(text);
-			} catch {
+			const payloads: unknown[] = [];
+
+			for (const file of Array.from(files)) {
+				const text = await file.text();
+				try {
+					payloads.push(JSON.parse(text));
+				} catch {
+					setListError({
+						type: 'error',
+						message: __(
+							'The selected file is not valid JSON.',
+							'doublescale'
+						),
+					});
+					return;
+				}
+			}
+
+			const envelopes = extractWorkflowEnvelopes(payloads);
+
+			if (envelopes.length === 0) {
 				setListError({
 					type: 'error',
 					message: __(
-						'The selected file is not valid JSON.',
+						'No valid workflow exports were found in the selected file(s).',
 						'doublescale'
 					),
 				});
 				return;
 			}
 
-			const response = (await apiFetch({
-				path: '/doublescale/v1/automations/import',
-				method: 'POST',
-				data: payload,
-			})) as { id: number; name: string; unresolved: unknown[] };
+			const importPayload =
+				payloads.length === 1 && isBulkWorkflowEnvelope(payloads[0])
+					? payloads[0]
+					: buildBulkImportPayload(envelopes);
 
-			navigate(getToLink(`automations/${response.id}`));
+			if (envelopes.length === 1 && !isBulkWorkflowEnvelope(payloads[0])) {
+				const response = (await apiFetch({
+					path: '/doublescale/v1/automations/import',
+					method: 'POST',
+					data: envelopes[0],
+				})) as WorkflowImportResult;
+
+				navigate(getToLink(`automations/${response.id}`));
+				return;
+			}
+
+			const response = (await apiFetch({
+				path: '/doublescale/v1/automations/import-bulk',
+				method: 'POST',
+				data: importPayload,
+			})) as WorkflowBulkImportResponse;
+
+			if (response.results.length === 1 && response.errors.length === 0) {
+				navigate(
+					getToLink(`automations/${response.results[0].id}`)
+				);
+				return;
+			}
+
+			setSelectedRowKeys([]);
+			fetchAutomations();
+
+			const importedCount = response.results.length;
+			const errorCount = response.errors.length;
+			const warningCount = response.results.filter(
+				(result) =>
+					Array.isArray(result.unresolved) &&
+					result.unresolved.length > 0
+			).length;
+
+			let message = `${importedCount} workflow(s) imported successfully.`;
+			if (warningCount > 0) {
+				message += ` ${warningCount} have items that need review.`;
+			}
+			if (errorCount > 0) {
+				message += ` ${errorCount} could not be imported.`;
+			}
+
+			setListError({
+				type: errorCount > 0 ? 'warning' : 'success',
+				message: __(message, 'doublescale'),
+			});
 		} catch (error: any) {
 			setListError({
 				type: 'error',
@@ -496,6 +652,9 @@ const AutomationsList: React.FC = () => {
 		switch (action) {
 			case 'delete':
 				deleteSelected();
+				break;
+			case 'export':
+				exportSelected();
 				break;
 			default:
 				break;
@@ -574,6 +733,7 @@ const AutomationsList: React.FC = () => {
 					ref={fileInputRef}
 					type="file"
 					accept="application/json,.json"
+					multiple
 					className="hidden"
 					onChange={handleImportFile}
 				/>
@@ -594,6 +754,7 @@ const AutomationsList: React.FC = () => {
 							columns={columns}
 							data={data}
 							config={tableConfig}
+							activeTab="automations"
 							showPagination={false}
 							initialPageSize={perPage}
 							setPage={setPage}

@@ -242,6 +242,45 @@ class RestAutomationController extends RestController {
 			)
 		);
 
+		// Export multiple workflows as a portable bulk JSON envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/export-bulk',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'export_bulk_workflows' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description'       => __( 'Automation IDs to export.', 'doublescale' ),
+							'type'              => 'array',
+							'required'          => true,
+							'items'             => array(
+								'type' => 'integer',
+							),
+							'sanitize_callback' => function ( $ids ) {
+								return array_values( array_filter( array_map( 'absint', (array) $ids ) ) );
+							},
+						),
+					),
+				),
+			)
+		);
+
+		// Import multiple workflows from a bulk envelope or list of envelopes.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/import-bulk',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_bulk_workflows' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
 		// Get the contacts of an automation.
 		register_rest_route(
 			$this->namespace,
@@ -892,39 +931,131 @@ class RestAutomationController extends RestController {
 			}
 
 			$payload = $request->get_json_params();
+
+			if ( is_array( $payload ) && ! empty( $payload[ WorkflowPortabilityManager::BULK_ENVELOPE_KEY ] ) ) {
+				return $this->import_bulk_workflows( $request );
+			}
+
 			$result  = WorkflowPortabilityManager::instance()->import( $payload );
 
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 
-			// Reload with active steps and compute dependency warnings using the
-			// same logic the editor uses, so the client can flag what needs review.
-			$automation = AutomationModel::with(
-				array(
-					'steps' => function ( $query ) {
-						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
-					},
-				)
-			)->find( $result->id );
-
-			$unresolved = array();
-			if ( $automation ) {
-				$automation = $this->check_and_mark_dependencies( $automation );
-				$unresolved = $automation->_warnings ?? array();
-			}
-
 			return new WP_REST_Response(
-				array(
-					'id'         => (int) $result->id,
-					'name'       => $result->name,
-					'unresolved' => $unresolved,
-				),
+				$this->format_imported_workflow_response( $result ),
 				201
 			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Export multiple workflows as a portable bulk JSON envelope.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function export_bulk_workflows( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$ids = $request->get_param( 'ids' );
+			if ( empty( $ids ) || ! is_array( $ids ) ) {
+				return new WP_Error(
+					'invalid_request',
+					__( 'At least one automation ID is required.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$result = WorkflowPortabilityManager::instance()->export_bulk( $ids );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Import multiple workflows from a bulk envelope or list of envelopes.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_bulk_workflows( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$payload = $request->get_json_params();
+			$result  = WorkflowPortabilityManager::instance()->import_bulk( $payload );
+
+			$formatted_results = array();
+			foreach ( $result['results'] as $automation ) {
+				$formatted_results[] = $this->format_imported_workflow_response( $automation );
+			}
+
+			$status = empty( $formatted_results ) ? 400 : 201;
+
+			return new WP_REST_Response(
+				array(
+					'results' => $formatted_results,
+					'errors'  => $result['errors'],
+				),
+				$status
+			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Format an imported automation for the REST response, including unresolved refs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param AutomationModel $automation Imported automation.
+	 *
+	 * @return array{id: int, name: string, unresolved: array}
+	 */
+	private function format_imported_workflow_response( $automation ) {
+		$original   = $automation;
+		$automation = AutomationModel::with(
+			array(
+				'steps' => function ( $query ) {
+					$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
+				},
+			)
+		)->find( $original->id );
+
+		$unresolved = array();
+		if ( $automation ) {
+			$automation = $this->check_and_mark_dependencies( $automation );
+			$unresolved = $automation->_warnings ?? array();
+		}
+
+		return array(
+			'id'         => (int) $original->id,
+			'name'       => $original->name,
+			'unresolved' => $unresolved,
+		);
 	}
 
 	/**

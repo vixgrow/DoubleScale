@@ -25,7 +25,12 @@ import AnalyticsPopup from '../components/analytics-popup';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { deleteStep, duplicateStep } from '../utils/step-utils';
+import {
+	deleteStep,
+	duplicateStep,
+	isStepDisabled,
+	toggleStepEnabled,
+} from '../utils/step-utils';
 import { updateStepCustomLabel } from '../utils/canvas-notes-utils';
 import { getActionLabel, getCatalogActionLabel, hasActionWarning } from '@doublescale/utils';
 import { ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
@@ -75,6 +80,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if action is configured - an action is configured if it has an action slug
 	const isConfigured = !!step.action;
 
+	// A disabled action stays on the canvas but is skipped when the automation runs.
+	const isDisabled = isStepDisabled(step);
+
 	// Get action label and warning status from backend
 	const actionName = getActionLabel(step);
 	const catalogActionName = getCatalogActionLabel(step);
@@ -84,8 +92,15 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if this action supports analytics
 	const hasAnalytics = supportsAnalytics(step.action || '');
 
+	const disabledBadge = isDisabled ? (
+		<span className="doublescale-reactflow-node__disabled-badge">
+			{__('Disabled', 'doublescale')}
+		</span>
+	) : null;
+
 	const subtitle = isConfigured ? (
-		<div className="flex items-center gap-2">
+		<div className="doublescale-reactflow-node__subtitle-inner flex items-center gap-2">
+			{disabledBadge}
 			{hasCustomLabel ? (
 				<TooltipProvider>
 					<Tooltip>
@@ -151,6 +166,18 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const handleDelete = async () => {
 		if (!viewMode) {
 			await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+		}
+	};
+
+	const handleToggleEnabled = async () => {
+		if (!viewMode) {
+			await toggleStepEnabled(
+				step,
+				isDisabled,
+				steps,
+				setSteps,
+				createNotice
+			);
 		}
 	};
 
@@ -225,7 +252,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				<SortableNodeContainer
 					step={step}
 					viewMode={viewMode}
-					className={`doublescale-reactflow-node doublescale-reactflow-node--action doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && ((hasAnalytics && isConfigured) || analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--action doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${isDisabled ? 'doublescale-reactflow-node--step-disabled' : ''} ${viewMode && ((hasAnalytics && isConfigured) || analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<Handle
 						type="target"
@@ -242,12 +269,19 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 						onDelete={handleDelete}
 						onDuplicate={handleDuplicate}
 						onRename={() => setIsRenameOpen(true)}
+						onToggleEnabled={handleToggleEnabled}
 						editLabel={__('Edit Action', 'doublescale')}
 						deleteLabel={__('Delete Action', 'doublescale')}
 						duplicateLabel={__('Duplicate Action', 'doublescale')}
 						renameLabel={__('Rename Action', 'doublescale')}
+						toggleEnabledLabel={
+							isDisabled
+								? __('Enable Action', 'doublescale')
+								: __('Disable Action', 'doublescale')
+						}
 						showDuplicate={isConfigured}
 						showRename={isConfigured}
+						showToggleEnabled={isConfigured}
 						deleteTitle={__('Delete this action?', 'doublescale')}
 						deleteDescription={__(
 							'This will remove the action from your workflow.',

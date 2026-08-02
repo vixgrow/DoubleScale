@@ -21,6 +21,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
+use DoubleScale\Modules\Automations\ProcessAutomation;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
@@ -29,6 +30,7 @@ use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Automations\Services\WorkflowPortabilityManager;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 
 /**
@@ -178,6 +180,26 @@ class RestAutomationController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'duplicate_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/test-run',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'test_run' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'contact_id' => array(
+							'description'       => __( 'The contact ID to run the automation for.', 'doublescale' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
@@ -679,7 +701,7 @@ class RestAutomationController extends RestController {
 			$automation = AutomationModel::with(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			)->find( $id );
@@ -867,7 +889,7 @@ class RestAutomationController extends RestController {
 			$automation = AutomationModel::with(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			)->find( $result->id );
@@ -943,7 +965,7 @@ class RestAutomationController extends RestController {
 		$automation = AutomationModel::with(
 			array(
 				'steps' => function ( $query ) {
-					$query->where( 'status', 'active' );
+					$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 				},
 			)
 		)->find( $id );
@@ -1053,7 +1075,7 @@ class RestAutomationController extends RestController {
 			$automation->load(
 				array(
 					'steps' => function ( $query ) {
-						$query->whereIn( 'status', array( 'active', 'draft' ) );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			);
@@ -1107,7 +1129,7 @@ class RestAutomationController extends RestController {
 			$new_automation = AutomationModel::with(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			)->find( $new_automation->id );
@@ -1115,6 +1137,77 @@ class RestAutomationController extends RestController {
 			$new_automation = $this->check_and_mark_dependencies( $new_automation );
 
 			return new WP_REST_Response( $new_automation, 201 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Run an automation for a chosen contact without waiting for the real trigger.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function test_run( $request ) {
+		try {
+			$id         = (int) $request->get_param( 'id' );
+			$contact_id = (int) $request->get_param( 'contact_id' );
+
+			$automation = AutomationModel::find( $id );
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			if ( $contact_id <= 0 ) {
+				return new WP_Error(
+					'invalid_contact',
+					__( 'A valid contact is required to run a test.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$contact = ContactModel::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', __( 'Contact not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$first_step = $automation->get_first_step();
+			if ( ! $first_step ) {
+				return new WP_Error(
+					'no_steps',
+					__( 'This automation has no active workflow steps to run.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$process = new ProcessAutomation(
+				$automation,
+				array(
+					'contact'   => $contact,
+					'test_mode' => true,
+					'data'      => array( '_test_run' => true ),
+				)
+			);
+
+			$automation_contact = $process->start();
+			if ( ! $automation_contact ) {
+				return new WP_Error(
+					'enrollment_failed',
+					__( 'Could not enroll the contact into this automation.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			return new WP_REST_Response(
+				array(
+					'enrolled'              => true,
+					'automation_contact_id' => (int) $automation_contact->id,
+				),
+				200
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -1132,7 +1225,7 @@ class RestAutomationController extends RestController {
 	 */
 	private function duplicate_automation_steps( $source_automation_id, $new_automation_id ) {
 		$steps = AutomationStepModel::where( 'automation_id', $source_automation_id )
-			->where( 'status', 'active' )
+			->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES )
 			->get()
 			->all();
 

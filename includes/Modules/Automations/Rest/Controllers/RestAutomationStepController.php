@@ -129,6 +129,25 @@ class RestAutomationStepController extends RestController {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/toggle',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'toggle_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'enabled' => array(
+							'description' => __( 'Whether the step should run. False disables it without deleting it.', 'doublescale' ),
+							'type'        => 'boolean',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -403,7 +422,7 @@ class RestAutomationStepController extends RestController {
 			if ( 'draft' === $automation_step->status ) {
 				$automation_step->delete();
 			} else {
-				$automation_step->status = 'deleted';
+				$automation_step->status = AutomationStepModel::STATUS_DELETED;
 				$automation_step->save();
 			}
 
@@ -416,6 +435,58 @@ class RestAutomationStepController extends RestController {
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_delete_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Enable or disable an Automation Step.
+	 *
+	 * A disabled step stays in the workflow and keeps its settings, but the
+	 * engine skips it, so contacts flow straight through to the next active
+	 * step. Only action steps may be toggled: disabling a condition, goal or
+	 * end_automation step has no well-defined meaning for the branch it owns.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function toggle_item( $request ) {
+		try {
+			$automation_step = AutomationStepModel::find( $request->get_param( 'id' ) );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			if ( 'action' !== $automation_step->type ) {
+				return new WP_Error(
+					'rest_automation_step_not_toggleable',
+					__( 'Only action steps can be enabled or disabled.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( AutomationStepModel::STATUS_DELETED === $automation_step->status ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$enabled = (bool) $request->get_param( 'enabled' );
+
+			$automation_step->status = $enabled
+				? AutomationStepModel::STATUS_ACTIVE
+				: AutomationStepModel::STATUS_DISABLED;
+			$automation_step->save();
+
+			$this->snapshot_version(
+				$automation_step,
+				$enabled ? __( 'Enabled step', 'doublescale' ) : __( 'Disabled step', 'doublescale' )
+			);
+
+			return new WP_REST_Response( $automation_step, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_toggle_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -575,7 +646,7 @@ class RestAutomationStepController extends RestController {
 
 		$query = AutomationStepModel::where( 'automation_id', $reference->automation_id )
 			->where( 'parent_id', $parent_id )
-			->where( 'status', '!=', 'deleted' )
+			->where( 'status', '!=', AutomationStepModel::STATUS_DELETED )
 			->where( 'order', '>=', $insert_order );
 
 		if ( $parent_id > 0 ) {
@@ -603,7 +674,7 @@ class RestAutomationStepController extends RestController {
 
 		if ( 'condition' === $step->type ) {
 			$children = AutomationStepModel::where( 'parent_id', $step->id )
-				->where( 'status', 'active' )
+				->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES )
 				->orderBy( 'order' )
 				->get();
 

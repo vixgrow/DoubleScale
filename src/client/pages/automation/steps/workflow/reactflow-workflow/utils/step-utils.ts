@@ -116,6 +116,82 @@ export const deleteStep = async (
     }
 };
 
+/**
+ * Whether a step is currently switched off.
+ *
+ * @param step The step to check
+ * @returns True when the step is kept in the workflow but skipped at runtime
+ */
+export const isStepDisabled = (step: AutomationStep): boolean =>
+    step.status === 'disabled';
+
+/**
+ * Enable or disable a step without removing it from the workflow.
+ *
+ * A disabled step keeps its settings and position but is skipped by the
+ * automation engine, so contacts flow straight to the next enabled step.
+ * Only action steps can be toggled.
+ *
+ * @param step The step to toggle
+ * @param enabled Whether the step should run
+ * @param steps All steps in the workflow
+ * @param setSteps Function to update steps state
+ * @param createNotice Function to show notifications
+ * @returns Promise resolving to whether the toggle succeeded
+ */
+export const toggleStepEnabled = async (
+    step: AutomationStep,
+    enabled: boolean,
+    steps: AutomationStep[],
+    setSteps: (steps: AutomationStep[]) => void,
+    createNotice: (notice: { type: string; message: string }) => void
+): Promise<boolean> => {
+    const nextStatus = enabled ? 'active' : 'disabled';
+    const previousStatus = step.status;
+
+    // Optimistically flip the node so the canvas responds immediately.
+    setSteps(
+        steps.map((s) =>
+            s.id === step.id ? { ...s, status: nextStatus } : s
+        )
+    );
+
+    try {
+        await apiFetch({
+            path: `/doublescale/v1/automation-steps/${step.id}/toggle`,
+            method: 'POST',
+            data: { enabled },
+        });
+
+        createNotice({
+            type: 'success',
+            message: enabled
+                ? __('Action enabled', 'doublescale')
+                : __('Action disabled', 'doublescale'),
+        });
+
+        return true;
+    } catch (error: any) {
+        // Roll back to the status the server still holds.
+        setSteps(
+            steps.map((s) =>
+                s.id === step.id ? { ...s, status: previousStatus } : s
+            )
+        );
+
+        createNotice({
+            type: 'error',
+            message:
+                error.message ||
+                (enabled
+                    ? __('Failed to enable action', 'doublescale')
+                    : __('Failed to disable action', 'doublescale')),
+        });
+
+        return false;
+    }
+};
+
 interface DuplicateStepResponse {
     new_step_id: number | null;
     steps: AutomationStep[];

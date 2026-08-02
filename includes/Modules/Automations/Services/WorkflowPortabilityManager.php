@@ -302,7 +302,11 @@ final class WorkflowPortabilityManager {
 				'action'        => isset( $step['action'] ) ? (string) $step['action'] : '',
 				'type'          => isset( $step['type'] ) ? (string) $step['type'] : '',
 				'condition'     => isset( $step['condition'] ) ? (string) $step['condition'] : '',
-				'status'        => 'active',
+				// Preserve a disabled step's off state across export/import; any
+				// other incoming status falls back to active.
+				'status'        => ( isset( $step['status'] ) && AutomationStepModel::STATUS_DISABLED === $step['status'] )
+					? AutomationStepModel::STATUS_DISABLED
+					: AutomationStepModel::STATUS_ACTIVE,
 				'settings'      => $settings,
 				'order'         => (int) ( $step['order'] ?? 1 ),
 			)

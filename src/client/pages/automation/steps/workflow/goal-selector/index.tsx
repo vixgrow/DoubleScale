@@ -16,7 +16,6 @@ import { ChevronDown, ChevronRight, Layers, Lock } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { AutomationsIcon, SureCartIcon } from '@doublescale/components'; 
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { cn } from '@/lib/utils';
 import config from '@doublescale/config';
 import { isProActive as checkProActive } from '@doublescale/hooks/use-is-pro-active';
@@ -79,11 +78,6 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	const [collapsedGroups, setCollapsedGroups] = useState<
 		Record<string, boolean>
 	>({});
-	const [showProModal, setShowProModal] = useState(false);
-	const [selectedProGoal, setSelectedProGoal] = useState<{
-		name: string;
-		key: string;
-	} | null>(null);
 
 	// Check if Pro plugin is active once
 	const isProActive = checkProActive();
@@ -178,12 +172,8 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	};
 
 	const handleSelect = async (goalKey: string, goal: any) => {
-		// Check if this is a Pro feature AND Pro plugin is not active
-		const isProFeatureLockedOut = goal.is_pro && !isProActive;
-
-		if (isProFeatureLockedOut) {
-			setSelectedProGoal({ name: goal.label, key: goalKey });
-			setShowProModal(true);
+		// Pro-locked goals are inert — the Select button is disabled below.
+		if (goal.is_pro && !isProActive) {
 			return;
 		}
 
@@ -196,11 +186,6 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 		} finally {
 			setIsSaving(false);
 		}
-	};
-
-	const handleCloseProModal = () => {
-		setShowProModal(false);
-		setSelectedProGoal(null);
 	};
 
 	return (
@@ -321,11 +306,13 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 																			goal
 																		)
 																	}
-																	disabled={
-																		!goal.is_pro &&
-																		(group.is_disabled ||
-																			isSaving)
-																	}
+											disabled={
+												(goal.is_pro &&
+													!isProActive) ||
+												(!goal.is_pro &&
+													(group.is_disabled ||
+														isSaving))
+											}
 																	className={cn(
 																		'h-9  shrink-0 rounded-md px-4 py-1 ',
 																		value !==
@@ -389,14 +376,6 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 					)}
 				</div>
 
-			{/* PRO Modal */}
-			{selectedProGoal && (
-				<ProAutomationModal
-					visible={showProModal}
-					onClose={handleCloseProModal}
-					featureName={selectedProGoal.name}
-				/>
-			)}
 		</>
 	);
 };

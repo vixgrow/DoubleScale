@@ -14,11 +14,18 @@ import { __ } from "@wordpress/i18n";
  */
 import { Pages, PageSettings } from "../types";
 import config from "@doublescale/config";
+import { isProActive } from "@doublescale/hooks/use-is-pro-active";
 
 const adminPages: Pages = {};
 
 /**
  * Whether a page tied to {@link PageSettings.requiresModule} should be registered.
+ *
+ * Deliberately does NOT check {@link PageSettings.requiresPro}: pages stay in
+ * the registry regardless of Pro state so path-based lookups (e.g. the navbar's
+ * submenu builders) can still find their settings. Use
+ * {@link adminPagePassesVisibilityGate} to decide whether to actually render
+ * a route/sidebar entry.
  */
 export const adminPagePassesModuleGate = (settings: PageSettings): boolean => {
 	if (settings.alwaysRegister) {
@@ -29,6 +36,18 @@ export const adminPagePassesModuleGate = (settings: PageSettings): boolean => {
 		return true;
 	}
 	return config.isModuleToggleEnabled(slug);
+};
+
+/**
+ * Whether a registered page should actually be rendered as a route/sidebar
+ * entry right now — same as {@link adminPagePassesModuleGate} plus the
+ * {@link PageSettings.requiresPro} check.
+ */
+export const adminPagePassesVisibilityGate = (settings: PageSettings): boolean => {
+	if (settings.requiresPro && !isProActive()) {
+		return false;
+	}
+	return adminPagePassesModuleGate(settings);
 };
 
 export const registerAdminPage = (id: string, settings: PageSettings) => {

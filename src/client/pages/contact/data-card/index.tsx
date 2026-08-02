@@ -44,6 +44,7 @@ import {
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import Courses from '../courses';
 import ContactSales from '../sales';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -222,6 +223,27 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			label: 'Courses',
 			icon: <CoursesIcon width={24} height={24} />, // Replace with a Courses icon when available
 		});
+	}
+
+	// These tabs have no free implementation (Pro registers the component via
+	// filter, or the tab is exclusively backed by Pro-gated sections) — drop
+	// the tab instead of opening to a ProFeatureNotice-only screen.
+	if (!isProActive()) {
+		const proOnlyTabValues = new Set([
+			'whatsapp',
+			'attachments',
+			'invoices',
+			'lead-score',
+			'website_tracking',
+			'deals',
+			'sms',
+			'tasks',
+		]);
+		for (let i = tabsList.length - 1; i >= 0; i--) {
+			if (proOnlyTabValues.has(tabsList[i].value)) {
+				tabsList.splice(i, 1);
+			}
+		}
 	}
 
 	const tabsContent = [

@@ -21,6 +21,7 @@ import {
 	useEvent,
 } from '@/hooks/booking';
 import { useParams } from '@doublescale/navigation';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	AvailabilityIcon,
 	CalendarsIcon,
@@ -58,6 +59,15 @@ interface NoticeType {
 	message: string;
 	type?: 'success' | 'error';
 }
+
+// Tabs whose content is 100% Pro-gated (renders only a ProFeatureNotice
+// stub in Free) — hidden entirely rather than shown-then-blocked.
+const PRO_ONLY_TAB_KEYS = new Set([
+	'sms-notifications',
+	'advanced-settings',
+	'payment-settings',
+	'waiting-list',
+]);
 
 const Event: React.FC = () => {
 	const {
@@ -436,7 +446,7 @@ const Event: React.FC = () => {
 			),
 			icon: <OutlinedClockIcon />,
 		},
-	];
+	].filter((t) => isProActive() || !PRO_ONLY_TAB_KEYS.has(t.key));
 
 	useEffect(() => {
 		if (tab) {

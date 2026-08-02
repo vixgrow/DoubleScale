@@ -24,8 +24,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
-
 interface ActionsGroupRenderProps {
 	groups: { [key: string]: ActionsGroup };
 	onChange: (value: string) => void;
@@ -42,11 +40,6 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 	const [collapsedGroups, setCollapsedGroups] = useState<
 		Record<string, boolean>
 	>({});
-	const [showProModal, setShowProModal] = useState(false);
-	const [selectedProAction, setSelectedProAction] = useState<{
-		name: string;
-		key: string;
-	} | null>(null);
 
 	// Check if Pro plugin is active once
 	const isProActive = checkProActive();
@@ -143,24 +136,13 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		action: any,
 		groupDisabled: boolean
 	) => {
-		if (groupDisabled) {
+		// Group-disabled and Pro-locked actions are inert — the Select
+		// button is disabled below.
+		if (groupDisabled || (action.is_pro && !isProActive)) {
 			return;
 		}
 
-		// Check if this is a Pro feature AND Pro plugin is not active
-		const isProFeatureLockedOut = action.is_pro && !isProActive;
-
-		if (isProFeatureLockedOut) {
-			setSelectedProAction({ name: action.label, key: actionKey });
-			setShowProModal(true);
-		} else {
-			onChange(actionKey);
-		}
-	};
-
-	const handleCloseProModal = () => {
-		setShowProModal(false);
-		setSelectedProAction(null);
+		onChange(actionKey);
 	};
 
 	// Hide unnamed placeholder groups, and groups that ship no actions at all —
@@ -247,7 +229,9 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 													}
 													disabled={
 														group.is_disabled ||
-														isSaving
+														isSaving ||
+														(action.is_pro &&
+															!isProActive)
 													}
 													className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === actionKey ? 'border-2 border-primary' : 'border'}`}
 												>
@@ -292,15 +276,6 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 					</Card>
 				))}
 			</div>
-
-			{/* PRO Modal */}
-			{selectedProAction && (
-				<ProAutomationModal
-					visible={showProModal}
-					onClose={handleCloseProModal}
-					featureName={selectedProAction.name}
-				/>
-			)}
 		</>
 	);
 };

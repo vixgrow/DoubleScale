@@ -8,7 +8,7 @@ import {
 	getHistory,
 	Routes,
 	Navigate,
-	adminPagePassesModuleGate,
+	adminPagePassesVisibilityGate,
 	getToLink,
 } from '@doublescale/navigation';
 
@@ -144,7 +144,7 @@ export const Layout = (props) => {
 const _PageLayout = () => {
 	const modulesTick = useModulesConfigTick();
 	const visiblePages = Object.values(getAdminPages()).filter(
-		adminPagePassesModuleGate
+		adminPagePassesVisibilityGate
 	);
 	const scopedLandingPath = getScopedDefaultLandingPath();
 	const defaultLandingPath =

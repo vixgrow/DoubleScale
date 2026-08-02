@@ -24,7 +24,9 @@ const LocationRow: React.FC<LocationRowProps> = ({
 	return (
 		<label
 			className={`flex items-center gap-3 border rounded-lg p-4 w-full transition-all duration-300 ${
-				disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+				disabled
+					? 'cursor-not-allowed opacity-60 pointer-events-none'
+					: 'cursor-pointer'
 			} ${
 				checked
 					? 'border-primary bg-secondary'

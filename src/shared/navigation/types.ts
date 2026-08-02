@@ -20,5 +20,11 @@ export type PageSettings = {
 	 * Used for SMTP so turning the module on after load does not require a full reload.
 	 */
 	alwaysRegister?: boolean;
+	/**
+	 * When true, this page is only registered/shown when DoubleScale Pro is active.
+	 * Use for pages whose free-plugin `component` is purely a `ProFeatureNotice` stub
+	 * with no real free functionality, so the nav entry doesn't tease a locked page.
+	 */
+	requiresPro?: boolean;
 };
 export type Pages = Record<string, PageSettings>;

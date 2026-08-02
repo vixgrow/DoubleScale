@@ -14,7 +14,6 @@ import { Lock } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { getAction } from '@doublescale/utils';
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import './style.scss';
 
 interface DelaySelectorProps {
@@ -31,11 +30,6 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 	onSave,
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
-	const [showProModal, setShowProModal] = useState(false);
-	const [selectedProDelay, setSelectedProDelay] = useState<{
-		name: string;
-		key: string;
-	} | null>(null);
 
 	const delayActions = DELAY_ACTION_KEYS.map((key) => ({
 		key,
@@ -43,9 +37,8 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 	})).filter(({ action }) => !!action);
 
 	const handleSelect = async (actionKey: string, action: any) => {
+		// Pro-locked delays are inert — the Select button is disabled below.
 		if (action.is_pro) {
-			setSelectedProDelay({ name: action.label, key: actionKey });
-			setShowProModal(true);
 			return;
 		}
 
@@ -59,11 +52,6 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 		} finally {
 			setIsSaving(false);
 		}
-	};
-
-	const handleCloseProModal = () => {
-		setShowProModal(false);
-		setSelectedProDelay(null);
 	};
 
 	return (
@@ -90,7 +78,7 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 								type="button"
 								size="sm"
 								onClick={() => handleSelect(key, action)}
-								disabled={!action?.is_pro && isSaving}
+								disabled={action?.is_pro || isSaving}
 								variant="secondaryDeepBlue"
 								className=" !shrink-0 !rounded-[4px] !px-2 !py-1"
 							>
@@ -107,14 +95,6 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 					</div>
 				))}
 			</div>
-
-			{selectedProDelay && (
-				<ProAutomationModal
-					visible={showProModal}
-					onClose={handleCloseProModal}
-					featureName={selectedProDelay.name}
-				/>
-			)}
 		</>
 	);
 };

@@ -6,10 +6,13 @@ import { ExtensionsIcon } from '@doublescale/components';
 import { registerAdminPage } from '@doublescale/navigation';
 import Extensions from './index';
 
+// Every addon in the catalog is plan-gated in Free (see Website\Store) — hide
+// the page entirely rather than showing a catalog of locked cards.
 registerAdminPage('extensions', {
 	path: 'extensions',
 	component: () => <Extensions />,
 	label: __('Extensions', 'doublescale'),
 	icon: <ExtensionsIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresPro: true,
 });

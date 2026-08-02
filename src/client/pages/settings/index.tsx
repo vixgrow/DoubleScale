@@ -40,6 +40,7 @@ import {
 	WhatsAppIcon,
 	WebsiteIcon,
 	AiIcon,
+	FailedEmailsIcon,
 } from '@doublescale/components';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { NotificationPreferences } from './notification-preferences';
@@ -47,6 +48,7 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import MailboxSettings from './mailbox';
+import { BounceHandler } from '@/components/bounce-handler';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -55,6 +57,7 @@ import SystemSettings from './system';
 import License from './license';
 import ClientPortalSettings from './client-portal';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -89,6 +92,7 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'notifications',
 	'mailbox',
 	'client_portal',
+	'bounce_handler',
 ];
 
 const SETTINGS_DEPENDENT_TABS = new Set([
@@ -103,6 +107,19 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 
 // Tabs that Sales Reps and Sales Managers can access (limited settings)
 const SALES_REP_ALLOWED_TABS = new Set(['notifications', 'mailbox']);
+
+// Tabs whose content is 100% Pro-gated (renders only a ProFeatureNotice
+// stub in Free) — hidden entirely rather than shown-then-blocked.
+const PRO_ONLY_TAB_VALUES = new Set([
+	'sms',
+	'whatsapp',
+	'cart',
+	'website_tracking',
+	'custom_fields',
+	'link_triggers',
+	'ai',
+	'bounce_handler',
+]);
 
 const SettingsPage: React.FC = () => {
 	const navigate = useNavigate();
@@ -414,6 +431,13 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
+			case 'bounce_handler': {
+				const BounceHandlerComponent = applyFilters(
+					'doublescale_settings_bounce_handler_settings',
+					BounceHandler
+				) as React.ComponentType;
+				return <BounceHandlerComponent />;
+			}
 			case 'license':
 				return <License />;
 			case 'client_portal':
@@ -542,6 +566,11 @@ const SettingsPage: React.FC = () => {
 			icon: <WebsiteIcon width={24} height={24} />,
 		},
 		{
+			value: 'bounce_handler',
+			label: __('Bounce Handler', 'doublescale'),
+			icon: <FailedEmailsIcon width={24} height={24} />,
+		},
+		{
 			value: 'license',
 			label: __('License', 'doublescale'),
 			icon: <LicenseIcon />,
@@ -573,7 +602,9 @@ const SettingsPage: React.FC = () => {
 		},
 	];
 
-	const filteredTabsList = applyFilters('doublescale_settings_tabs_list', allTabsList) as typeof allTabsList;
+	const filteredTabsList = (
+		applyFilters('doublescale_settings_tabs_list', allTabsList) as typeof allTabsList
+	).filter((tab) => !PRO_ONLY_TAB_VALUES.has(tab.value) || isProActive());
 
 	// Filter tabs based on user role - Sales Reps and Sales Managers only see allowed tabs
 	const tabsList = useMemo(() => {

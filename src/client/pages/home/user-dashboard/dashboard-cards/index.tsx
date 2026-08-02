@@ -10,7 +10,6 @@ import { applyFilters } from '@wordpress/hooks';
 import {
 	DashboardContentCard,
 	MessageStatsCard,
-	ProStatCard,
 	DealsWonValueIcon,
 	DealsClosedWonIcon,
 	ContactsIcon,
@@ -19,7 +18,6 @@ import {
 	AutomationsIcon,
 	DealsIcon,
 	ListsIcon,
-	PremiumIcon,
 	TaskDoneIcon,
 } from '@doublescale/components';
 import type { DashboardData } from '@doublescale/client';
@@ -101,8 +99,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					iconColor="text-white"
 				/>
 
-				{dealsModuleEnabled &&
-					(isProActive ? (
+				{dealsModuleEnabled && isProActive && (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -112,20 +109,9 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#0D9DFC]"
 						iconColor="text-white"
 					/>
-				) : (
-					<ProStatCard
-						layout="centered"
-						className="bg-[#F7F8FA]"
-						label={__('Total Deals', 'doublescale')}
-						value={formatStatCount(data.deals || 0)}
-						icon={<PremiumIcon width={29} height={29} />}
-						iconBgClass="bg-[#0D9DFC]"
-						iconColor="text-white"
-					/>
-				))}
+				)}
 
-				{dealsModuleEnabled &&
-					(isProActive ? (
+				{dealsModuleEnabled && isProActive && (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -135,20 +121,9 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#16A34A]"
 						iconColor="text-white"
 					/>
-				) : (
-					<ProStatCard
-						layout="centered"
+				)}
 
-						label={__('Deals Closed Won', 'doublescale')}
-						value={formatStatCount(data.deals_closed_won || 0)}
-						icon={<PremiumIcon width={29} height={29} />}
-						iconBgClass="bg-[#16A34A]"
-						iconColor="text-white"
-					/>
-				))}
-
-				{dealsModuleEnabled &&
-					(isProActive ? (
+				{dealsModuleEnabled && isProActive && (
 					<MessageStatsCard
 						layout="centered"
 						className="bg-[#F7F8FA]"
@@ -158,39 +133,19 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconBgClass="bg-[#16A34A]"
 						iconColor="text-white"
 					/>
-				) : (
-					<ProStatCard
+				)}
+
+				{projectsModuleEnabled && isProActive && (
+					<MessageStatsCard
 						layout="centered"
-						label={__('Deals Won Value', 'doublescale')}
-						value={formatDealsWonValue(data.deals_won_value || 0)}
-						icon={<PremiumIcon width={29} height={29} />}
-						iconBgClass="bg-[#16A34A]"
+						className="bg-[#F7F8FA]"
+						label={__('Total Projects', 'doublescale')}
+						value={formatStatCount(data.projects || 0)}
+						icon={<TaskDoneIcon width={29} height={29} />}
+						iconBgClass="bg-[#8775EC]"
 						iconColor="text-white"
 					/>
-				))}
-
-				{projectsModuleEnabled &&
-					(isProActive ? (
-						<MessageStatsCard
-							layout="centered"
-							className="bg-[#F7F8FA]"
-							label={__('Total Projects', 'doublescale')}
-							value={formatStatCount(data.projects || 0)}
-							icon={<TaskDoneIcon width={29} height={29} />}
-							iconBgClass="bg-[#8775EC]"
-							iconColor="text-white"
-						/>
-					) : (
-						<ProStatCard
-							layout="centered"
-							className="bg-[#F7F8FA]"
-							label={__('Total Projects', 'doublescale')}
-							value={formatStatCount(data.projects || 0)}
-							icon={<PremiumIcon width={29} height={29} />}
-							iconBgClass="bg-[#8775EC]"
-							iconColor="text-white"
-						/>
-					))}
+				)}
 			</div>
 		</DashboardContentCard>
 	);

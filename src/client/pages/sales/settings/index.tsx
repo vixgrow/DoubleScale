@@ -33,11 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
-import {
-	ApprovalsProGate,
-	InvoicesProGate,
-	PaymentsProGate,
-} from '../pro-gates';
+import { ApprovalsProGate, PaymentsProGate } from '../pro-gates';
 import { ApprovalWorkflowSettings } from './approval-workflow-settings';
 import { ContractTypesManager } from './contract-types-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
@@ -246,9 +242,7 @@ const SalesSettingsPage: FC = () => {
 					}
 					documentType="invoice"
 				/>
-			) : (
-				<InvoicesProGate />
-			)}
+			) : null}
 
 			{isProActive ? (
 				<EmailSettingsCard
@@ -498,8 +492,15 @@ const SalesSettingsPage: FC = () => {
 					]
 				: []),
 		];
-		return tabs;
-	}, [documentsEnabled]);
+		return isProActive
+			? tabs
+			: tabs.filter(
+					(t) =>
+						t.value !== 'payments' &&
+						t.value !== 'approvals' &&
+						t.value !== 'contract-types'
+				);
+	}, [documentsEnabled, isProActive]);
 
 	const tabsContent = useMemo(() => {
 		if (!form) {

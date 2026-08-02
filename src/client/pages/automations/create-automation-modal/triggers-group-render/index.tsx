@@ -39,7 +39,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import TriggerDocumentationCallout from '../../components/trigger-documentation-callout';
 import type { TriggersGroup, Trigger } from '@doublescale/config';
 import type { IconProps } from '@doublescale/config';
@@ -258,12 +257,6 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [groupsSignature, value]);
 
-	const [showProModal, setShowProModal] = useState(false);
-	const [selectedProTrigger, setSelectedProTrigger] = useState<{
-		name: string;
-		key: string;
-	} | null>(null);
-
 	// Check if Pro plugin is active once
 	const isProActive = checkProActive();
 
@@ -399,20 +392,12 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	};
 
 	const handleTriggerClick = (triggerKey: string, trigger: any) => {
-		// Check if this is a Pro feature AND Pro plugin is not active
-		const isProFeatureLockedOut = trigger.is_pro && !isProActive;
-
-		if (isProFeatureLockedOut) {
-			setSelectedProTrigger({ name: trigger.label, key: triggerKey });
-			setShowProModal(true);
-		} else {
-			onChange(triggerKey);
+		// Pro-locked triggers are inert — the Select button is disabled below.
+		if (trigger.is_pro && !isProActive) {
+			return;
 		}
-	};
 
-	const handleCloseProModal = () => {
-		setShowProModal(false);
-		setSelectedProTrigger(null);
+		onChange(triggerKey);
 	};
 
 	const sortTriggers = (
@@ -594,8 +579,10 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 														}
 														size="sm"
 														disabled={
-															!trigger.is_pro &&
-															group.is_disabled
+															(trigger.is_pro &&
+																!isProActive) ||
+															(!trigger.is_pro &&
+																group.is_disabled)
 														}
 														className={cn(
 															'h-8 shrink-0 rounded-md border px-4 text-xs font-semibold uppercase tracking-wide shadow-none',
@@ -655,15 +642,6 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 					/>
 				)}
 			</div>
-
-			{/* PRO Modal */}
-			{selectedProTrigger && (
-				<ProAutomationModal
-					visible={showProModal}
-					onClose={handleCloseProModal}
-					featureName={selectedProTrigger.name}
-				/>
-			)}
 		</>
 	);
 };

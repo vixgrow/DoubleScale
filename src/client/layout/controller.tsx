@@ -20,6 +20,7 @@ import { applyFilters } from '@wordpress/hooks';
  * Internal dependencies
  */
 import config from '@doublescale/config';
+import { isProActive as checkIsProActive } from '@doublescale/hooks/use-is-pro-active';
 import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
@@ -35,6 +36,7 @@ import Automation from '../pages/automation';
 import AutomationReports from '../pages/automation-reports';
 import Setting from '../pages/settings';
 import Dashboard from '../pages/home';
+import DiscoverPro from '../pages/discover-pro';
 import ContactAnalytics from '../pages/home/contacts-analytics';
 import EmailAnalytics from '../pages/home/emails-analytics';
 import { useDashboardData } from '../pages/home/use-analytics';
@@ -62,7 +64,6 @@ import {
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { SidebarTrigger } from '@doublescale/components/ui/sidebar';
-import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { RocketIcon } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -232,7 +233,6 @@ export const HeaderBar = ({ page }: { page: any }) => {
 				/>
 			</div>
 			<div className="doublescale-layout__header-right">
-				{!isProActive && <HeaderProBells />}
 				{isProActive &&
 					!(
 						config.getWhiteLabel()?.enabled &&
@@ -340,6 +340,22 @@ registerAdminPage('dashboard', {
 	],
 });
 
+// Only registered for Free installs — once Pro is active there is nothing
+// left to discover, and Pro activation always reloads the admin page anyway.
+if (!checkIsProActive()) {
+	registerAdminPage('discover-pro', {
+		path: 'discover-pro',
+		component: () => <DiscoverPro />,
+		label: __('Discover Pro', 'doublescale'),
+		icon: <RocketIcon />,
+		requiredCapability: [
+			'doublescale_crm_manager',
+			'doublescale_sales_manager',
+			'doublescale_sales_rep',
+		],
+	});
+}
+
 registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
@@ -393,6 +409,7 @@ registerAdminPage('lead-scoring', {
 	component: () => <ContactsLeadScoringRoute />,
 	label: __('Lead Score', 'doublescale'),
 	hidden: true,
+	requiresPro: true,
 	requiredCapability: ['doublescale_crm_manager'],
 });
 
@@ -412,6 +429,7 @@ registerAdminPage('sms-campaigns', {
 	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true,
 	requiresModule: 'campaigns',
+	requiresPro: true,
 });
 
 registerAdminPage('campaign', {
@@ -424,6 +442,7 @@ registerAdminPage('campaign', {
 
 registerAdminPage('email-sequences', {
 	path: 'email-sequences',
+	requiresPro: true,
 	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequences', 'doublescale'),
 	icon: <EmailSequenceIcon />,
@@ -434,6 +453,7 @@ registerAdminPage('email-sequences', {
 
 registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
+	requiresPro: true,
 	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequence', 'doublescale'),
 	hidden: true,
@@ -448,6 +468,7 @@ registerAdminPage('email-sequence', {
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
 	hidden: true,
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Sales Pipeline', 'doublescale')}
@@ -476,6 +497,7 @@ registerAdminPage('sales-pipeline', {
 // Deal Detail - stub registration that Pro plugin will override
 registerAdminPage('deal-detail', {
 	path: 'pipeline/deal/:id',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Deal Details', 'doublescale')}
@@ -496,6 +518,7 @@ registerAdminPage('deal-detail', {
 
 registerAdminPage('projects', {
 	path: 'projects',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Projects', 'doublescale')}
@@ -529,6 +552,7 @@ registerAdminPage('projects', {
 
 registerAdminPage('project-detail', {
 	path: 'projects/:id',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Project Details', 'doublescale')}
@@ -592,6 +616,7 @@ registerAdminPage('subscription-detail', {
 registerAdminPage('sales-credit-notes', {
 	path: 'sales/credit-notes',
 	hidden: true,
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Credit Notes', 'doublescale')}
@@ -622,6 +647,7 @@ registerAdminPage('sales-credit-notes', {
 
 registerAdminPage('sales-credit-note-new', {
 	path: 'sales/credit-notes/new',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Credit Notes', 'doublescale')}
@@ -642,6 +668,7 @@ registerAdminPage('sales-credit-note-new', {
 
 registerAdminPage('sales-credit-note', {
 	path: 'sales/credit-notes/:id',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Credit Note Details', 'doublescale')}
@@ -658,6 +685,7 @@ registerAdminPage('sales-credit-note', {
 
 registerAdminPage('sales-credit-note-edit', {
 	path: 'sales/credit-notes/:id/edit',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Edit Credit Note', 'doublescale')}
@@ -740,12 +768,15 @@ registerAdminPage('form', {
 	hidden: true,
 });
 
+// Every registered integration is plan-gated in Free (see IntegrationsManager)
+// — hide the page entirely rather than showing a catalog of locked cards.
 registerAdminPage('integrations', {
 	path: 'integrations/:id?/:tab?',
 	component: () => <Integrations />,
 	label: __('Integrations', 'doublescale'),
 	icon: <IntegrationsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresPro: true,
 });
 
 registerAdminPage('smtp', {
@@ -765,6 +796,7 @@ registerAdminPage('team-managers', {
 	icon: <ManagerIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_crm_manager'],
 	alwaysRegister: true,
+	requiresPro: true,
 });
 
 registerAdminPage('templates', {
@@ -785,6 +817,7 @@ registerAdminPage('template', {
 
 registerAdminPage('abandoned-carts', {
 	path: 'abandoned-carts',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Abandoned Carts', 'doublescale')}
@@ -803,6 +836,7 @@ registerAdminPage('abandoned-carts', {
 // Tasks - stub registration that Pro plugin will override via filter
 registerAdminPage('tasks', {
 	path: 'tasks',
+	requiresPro: true,
 	component: () => (
 		<ProFeatureNotice
 			featureName={__('Tasks', 'doublescale')}
@@ -844,6 +878,7 @@ registerAdminPage('analytics-and-reports', {
 
 registerAdminPage('deals-analytics', {
 	path: 'deals-analytics',
+	requiresPro: true,
 	component: (props) => <AnalyticsAndReports {...props} defaultTab="deals" />,
 	label: __('Deals Analytics', 'doublescale'),
 	hidden: true,
@@ -857,6 +892,7 @@ registerAdminPage('deals-analytics', {
 
 registerAdminPage('invoices-analytics', {
 	path: 'invoices-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="invoices-analytics" />
 	),
@@ -869,6 +905,7 @@ registerAdminPage('invoices-analytics', {
 
 registerAdminPage('contracts-analytics', {
 	path: 'contracts-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="contracts-analytics" />
 	),
@@ -885,6 +922,7 @@ registerAdminPage('contracts-analytics', {
 
 registerAdminPage('proposals-analytics', {
 	path: 'proposals-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="proposals-analytics" />
 	),
@@ -901,6 +939,7 @@ registerAdminPage('proposals-analytics', {
 
 registerAdminPage('credit-notes-analytics', {
 	path: 'credit-notes-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="credit-notes-analytics" />
 	),
@@ -917,6 +956,7 @@ registerAdminPage('credit-notes-analytics', {
 
 registerAdminPage('projects-analytics', {
 	path: 'projects-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="projects-analytics" />
 	),
@@ -935,6 +975,7 @@ registerAdminPage('projects-analytics', {
 // points here.
 registerAdminPage('sales-reports', {
 	path: 'sales-reports',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="sales-reports" />
 	),
@@ -952,6 +993,7 @@ registerAdminPage('sales-reports', {
 
 registerAdminPage('sales-rep-analytics', {
 	path: 'sales-rep-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="sales-rep" />
 	),
@@ -967,6 +1009,7 @@ registerAdminPage('sales-rep-analytics', {
 
 registerAdminPage('pipeline-analytics', {
 	path: 'pipeline-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="pipeline-analysis" />
 	),
@@ -982,6 +1025,7 @@ registerAdminPage('pipeline-analytics', {
 
 registerAdminPage('my-reports', {
 	path: 'my-reports',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="my-reports" />
 	),
@@ -998,6 +1042,7 @@ registerAdminPage('my-reports', {
 
 registerAdminPage('cart-analytics', {
 	path: 'cart-analytics',
+	requiresPro: true,
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="cart-analytics" />
 	),

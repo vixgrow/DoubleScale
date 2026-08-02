@@ -191,6 +191,8 @@ export type UserCapabilities = {
 	doublescale_project_manager?: boolean;
 	doublescale_project_member?: boolean;
 	doublescale_is_project_only?: boolean;
+	doublescale_is_booking_only?: boolean;
+	doublescale_is_support_only?: boolean;
 	doublescale_view_support?: boolean;
 	doublescale_manage_all_tickets?: boolean;
 	doublescale_manage_support_settings?: boolean;

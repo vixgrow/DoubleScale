@@ -48,6 +48,7 @@ import {
 import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
+import { getScopedDefaultLandingPath } from '@doublescale/hooks/use-capabilities';
 import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 
@@ -254,9 +255,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			false
 		) as boolean;
 
-		const projectOnly = Boolean(
-			config.getUserCapabilities().doublescale_is_project_only
-		);
+		const scopedLandingPath = getScopedDefaultLandingPath();
 
 		const builtItems = Object.entries(pages)
 			.filter(([, item]) => {
@@ -267,11 +266,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				);
 			})
 			.filter(([, item]) => {
-				if (projectOnly) {
-					const normalizedPath = item.path.replace(/^\//, '').split('/:')[0];
-					return normalizedPath === 'projects';
+				if (scopedLandingPath === '/') {
+					return true;
 				}
-				return true;
+
+				const normalizedPath = item.path.replace(/^\//, '').split('/:')[0];
+				return (
+					normalizedPath === scopedLandingPath ||
+					normalizedPath.startsWith(`${scopedLandingPath}/`)
+				);
 			})
 			.filter(([pageId, item]) => {
 				// While Sales documents (proposals/invoices) are gated, the

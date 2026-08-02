@@ -5,6 +5,27 @@ import { useCallback } from '@wordpress/element';
 import Config from '@doublescale/config';
 
 /**
+ * Default SPA landing path for users scoped to a single module.
+ */
+export const getScopedDefaultLandingPath = (): string => {
+	const caps = Config.getUserCapabilities();
+
+	if (caps.doublescale_is_project_only) {
+		return 'projects';
+	}
+
+	if (caps.doublescale_is_booking_only) {
+		return 'booking';
+	}
+
+	if (caps.doublescale_is_support_only) {
+		return 'support';
+	}
+
+	return '/';
+};
+
+/**
  * Custom hook for checking user capabilities
  * 
  * Returns memoized functions to prevent unnecessary re-renders

@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useNavigate, getToLink } from '@doublescale/navigation';
-import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import { useCapabilities, getScopedDefaultLandingPath } from '@doublescale/hooks/use-capabilities';
 import config from '@doublescale/config';
 
 interface ProtectedRouteProps {
@@ -61,16 +61,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 			page.requiredCapability &&
 			!hasRequiredCapability(page.requiredCapability)
 		) {
-			const fallbackPath = config.getUserCapabilities().doublescale_is_project_only
-				? 'projects'
-				: '/';
-			navigate(getToLink(fallbackPath));
+			navigate(getToLink(getScopedDefaultLandingPath()));
 		}
 	}, [page.requiredCapability, navigate, hasRequiredCapability]);
 
 	useEffect(() => {
 		if (isWhiteLabelHiddenPath(page.path)) {
-			navigate(getToLink('/'), { replace: true });
+			navigate(getToLink(getScopedDefaultLandingPath()), { replace: true });
 		}
 	}, [page.path, navigate]);
 
@@ -80,7 +77,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 			!page.alwaysRegister &&
 			!config.isModuleToggleEnabled(page.requiresModule)
 		) {
-			navigate(getToLink('/'), { replace: true });
+			navigate(getToLink(getScopedDefaultLandingPath()), { replace: true });
 		}
 	}, [page.requiresModule, page.alwaysRegister, navigate, moduleGateEpoch]);
 

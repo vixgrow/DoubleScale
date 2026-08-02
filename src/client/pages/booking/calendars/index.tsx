@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Plus as PlusOutlined } from 'lucide-react';
+import { Plus as PlusOutlined, Lock } from 'lucide-react';
 import { filter } from 'lodash';
 import { IoEllipsisHorizontal as SlOptions } from 'react-icons/io5';
 
@@ -36,6 +36,7 @@ import {
 	SettingsIcon,
 } from '@/components/booking';
 import { ProFeatureNotice } from '@doublescale/components';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import CalendarActions from './calendar-actions';
 import HostCalendarIntegrationIcons from './host-calendar-integration-icons';
 import CreateEvent from '../create-event';
@@ -359,14 +360,22 @@ const Calendars: React.FC = () => {
 					)}
 					{canManageAllCalendars && (
 						<Button
-							onClick={() => setType('team')}
+							onClick={() => {
+								if (isProActive()) {
+									setType('team');
+								}
+							}}
 							variant='default'
+							disabled={!isProActive()}
 							className=""
 						>
 							<PeopleWhiteIcon />
 							<span className="text-white text-[14px] font-[500]">
 								{__('Create Team', 'doublescale')}
 							</span>
+							{!isProActive() && (
+								<Lock className="h-4 w-4 shrink-0" aria-hidden />
+							)}
 						</Button>
 					)}
 				</div>
@@ -394,14 +403,16 @@ const Calendars: React.FC = () => {
 									<ProfileIcon />
 									{__('Single Events', 'doublescale')}
 								</TabsTrigger>
-								<TabsTrigger
-									value='team'
-									disabled={loading}
-									className="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:hover:text-foreground sm:px-4"
-								>
-									<PeopleFillIcon />
-									{__('Team Events', 'doublescale')}
-								</TabsTrigger>
+								{isProActive() && (
+									<TabsTrigger
+										value='team'
+										disabled={loading}
+										className="flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:hover:text-foreground sm:px-4"
+									>
+										<PeopleFillIcon />
+										{__('Team Events', 'doublescale')}
+									</TabsTrigger>
+								)}
 							</TabsList>
 						</Tabs>
 					</div>

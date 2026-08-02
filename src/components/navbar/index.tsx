@@ -60,6 +60,13 @@ interface SubMenuItem {
 	 * Mirrors the route-level `requiredCapability` so the link and the page agree.
 	 */
 	requiredCapability?: string[];
+	/**
+	 * Set on submenu entries that aren't backed by their own registered admin
+	 * page (e.g. a sub-tab reached only via a query param on a shared page),
+	 * so `page?.requiresPro` can't be looked up. Hides the item when Pro isn't
+	 * active, same as `PageSettings.requiresPro`.
+	 */
+	requiresPro?: boolean;
 }
 
 interface NavigationItem {
@@ -109,6 +116,7 @@ const navItemSortIndex = (sectionKey: string, path: string): number => {
 
 const PATH_TO_SECTION: Record<string, string> = {
 	'/': 'main',
+	'discover-pro': 'main',
 	contacts: 'crm',
 	sales: 'crm',
 	booking: 'crm',
@@ -131,6 +139,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 /** Top-level admin page ids shown in the free (non-Pro) sidebar without a module gate. */
 const FREE_CORE_PAGE_IDS = new Set([
 	'dashboard',
+	'discover-pro',
 	'contacts',
 	'campaigns',
 	'automations',
@@ -138,8 +147,6 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'booking-dashboard',
 	'smtp',
 	'team-managers',
-	'integrations',
-	'extensions',
 	'analytics-and-reports',
 ]);
 
@@ -238,7 +245,18 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			if (!items?.length) {
 				return items;
 			}
+			const pages = getAdminPages();
+			const proActive = applyFilters(
+				'doublescale_is_pro_active',
+				false
+			) as boolean;
 			return items.filter((sub) => {
+				const page = Object.values(pages).find(
+					(p) => p.path === sub.path
+				);
+				if ((page?.requiresPro || sub.requiresPro) && !proActive) {
+					return false;
+				}
 				const mod =
 					SUB_PATH_TO_MODULE[sub.path] ?? PATH_TO_MODULE[sub.path];
 				return !mod || config.isModuleToggleEnabled(mod);
@@ -272,6 +290,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					return normalizedPath === 'projects';
 				}
 				return true;
+			})
+			.filter(([, item]) => {
+				return !item.requiresPro || isProActive;
 			})
 			.filter(([pageId, item]) => {
 				// While Sales documents (proposals/invoices) are gated, the
@@ -436,10 +457,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						},
 						{ path: 'smtp/logs', label: __('Logs', 'doublescale') },
 						{ path: 'smtp/alerts', label: __('Alerts', 'doublescale') },
-						{
-							path: 'smtp/bounce',
-							label: __('Bounce Handler', 'doublescale'),
-						},
 					];
 				}
 
@@ -824,6 +841,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		const active = isItemActive(item.path);
 		const hasSubMenu = item.subMenu && item.subMenu.length > 0;
 		const isExpanded = expandedSubMenus.has(item.path);
+		const isDiscoverPro = item.path === 'discover-pro';
+		const linkClassName = `doublescale-navbar__link${isDiscoverPro ? ' doublescale-navbar__link--discover-pro' : ''}`;
 
 		if (isCollapsed) {
 			if (hasSubMenu) {
@@ -870,7 +889,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								<TooltipTrigger asChild>
 									<SidebarMenuButton
 										isActive={active}
-										className="doublescale-navbar__link"
+										className={linkClassName}
 										onClick={() => handleNavigation(item.path)}
 									>
 										<span className="doublescale-navbar__icon">{item.icon}</span>
@@ -891,7 +910,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				<SidebarMenuItem className="doublescale-navbar__item">
 					<SidebarMenuButton
 						isActive={active}
-						className="doublescale-navbar__link"
+						className={linkClassName}
 						onClick={() => {
 							if (hasSubMenu) {
 								toggleSubMenu(item.path);

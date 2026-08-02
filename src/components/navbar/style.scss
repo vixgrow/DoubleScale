@@ -183,6 +183,36 @@
 	}
 }
 
+/* "Discover Pro" — a warm, standout treatment so it reads as a promo
+ * entry rather than another plain nav item. */
+.doublescale-navbar__link--discover-pro {
+	background: linear-gradient(135deg, rgba(236, 72, 153, 0.28), rgba(249, 115, 22, 0.28)) !important;
+	color: #ffffff !important;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+
+	.doublescale-navbar__icon {
+		color: #fbbf24;
+	}
+
+	&:hover {
+		background: linear-gradient(135deg, rgba(236, 72, 153, 0.45), rgba(249, 115, 22, 0.45)) !important;
+		color: #ffffff !important;
+	}
+
+	&[data-active='true'] {
+		background: linear-gradient(135deg, #ec4899, #f97316) !important;
+		border-color: transparent;
+
+		&::before {
+			display: none;
+		}
+
+		.doublescale-navbar__icon {
+			color: #ffffff;
+		}
+	}
+}
+
 .doublescale-navbar__icon {
 	display: flex;
 	align-items: center;

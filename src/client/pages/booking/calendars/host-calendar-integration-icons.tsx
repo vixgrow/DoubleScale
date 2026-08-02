@@ -14,7 +14,7 @@ import googleIcon from '@doublescale/assets/booking-icons/google/icon.svg';
 import zoomIcon from '@doublescale/assets/booking-icons/zoom/icon.svg';
 import appleIcon from '@doublescale/assets/booking-icons/apple/icon.svg';
 import outlookIcon from '@doublescale/assets/booking-icons/outlook/icon.svg';
-import { ChevronDown, Plug2 } from 'lucide-react';
+import { ChevronDown, Lock, Plug2 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -172,6 +172,9 @@ const HostCalendarIntegrationIcons: FC<
 	};
 
 	const openIntegration = ( slug: CalendarIntegrationSlug ) => {
+		if ( ! isProActive ) {
+			return;
+		}
 		setIntegrationNotice( null );
 		setPanelSlug( slug );
 	};
@@ -209,6 +212,7 @@ const HostCalendarIntegrationIcons: FC<
 							key={ row.slug }
 							className="cursor-pointer gap-3 rounded-lg py-2.5 pl-2 pr-2"
 							onClick={ () => openIntegration( row.slug ) }
+							disabled={ ! isProActive }
 						>
 							<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#EDEBEB] bg-white">
 								<img
@@ -225,6 +229,12 @@ const HostCalendarIntegrationIcons: FC<
 									{ row.description }
 								</span>
 							</span>
+							{ ! isProActive && (
+								<Lock
+									className="h-4 w-4 shrink-0 text-muted-foreground"
+									aria-label={ __( 'Requires Pro', 'doublescale' ) }
+								/>
+							) }
 						</DropdownMenuItem>
 					) ) }
 				</DropdownMenuContent>

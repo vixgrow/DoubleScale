@@ -21,9 +21,6 @@ import config from '@doublescale/config';
  * Internal dependencies
  */
 import ModuleDisabledNotice from '@/components/module-disabled-notice';
-import { BounceHandler } from '@/components/bounce-handler';
-import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
-import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { getApiErrorMessage } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -78,7 +75,6 @@ const SmtpPage: React.FC = () => {
 	const { tab } = useParams<{ tab?: string }>();
 	const navigate = useNavigate();
 	const smtpOn = config.isModuleEnabled('smtp');
-	const proActive = isProActive();
 
 	const [alertsDirty, setAlertsDirty] = useState(false);
 	const [alertsSaving, setAlertsSaving] = useState(false);
@@ -112,36 +108,21 @@ const SmtpPage: React.FC = () => {
 		'email-test': __('Email Test', 'doublescale'),
 		logs: __('Logs', 'doublescale'),
 		alerts: __('Alerts', 'doublescale'),
-		bounce: __('Bounce Handler', 'doublescale'),
 	};
 
 	const section =
-		!tab || tab === 'home' || tab === 'debug' ? 'settings' : tab;
+		!tab || tab === 'home' || tab === 'debug' || tab === 'bounce'
+			? 'settings'
+			: tab;
 
 	useEffect(() => {
 		if (!smtpOn) {
 			return;
 		}
-		if (!tab || tab === 'home' || tab === 'debug') {
+		if (!tab || tab === 'home' || tab === 'debug' || tab === 'bounce') {
 			navigate(getToLink('smtp/settings'), { replace: true });
 		}
 	}, [smtpOn, tab, navigate]);
-
-	const bounceHandlerPanel = proActive ? (
-		<div className="mt-8 rounded-[20px] border border-gray-200 bg-background p-6 shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
-			<BounceHandler />
-		</div>
-	) : (
-		<div className="mt-8">
-			<ProFeatureNotice
-				featureName={__('Bounce Handler', 'doublescale')}
-				description={__(
-					'Configure webhook notifications from your email provider to automatically mark bounced contacts with DoubleScale Pro.',
-					'doublescale'
-				)}
-			/>
-		</div>
-	);
 
 	useEffect(() => {
 		const prevSection = prevSectionRef.current;
@@ -282,13 +263,10 @@ const SmtpPage: React.FC = () => {
 			)}
 
 			{section === 'settings' && (
-				<>
-					<BuiltinSmtpSettings
-						addConnectionRef={settingsAddConnectionRef}
-						connectionsView={smtpConnectionsView}
-					/>
-					{bounceHandlerPanel}
-				</>
+				<BuiltinSmtpSettings
+					addConnectionRef={settingsAddConnectionRef}
+					connectionsView={smtpConnectionsView}
+				/>
 			)}
 			{section === 'email-test' && (
 				<SmtpEmailTest
@@ -314,8 +292,6 @@ const SmtpPage: React.FC = () => {
 					onSettingsChange={setAlertsDraft}
 				/>
 			)}
-			{section === 'bounce' && bounceHandlerPanel}
-
 			<SmtpUnsavedChangesDialog
 				open={leaveConfirmOpen}
 				onOpenChange={(open) => {

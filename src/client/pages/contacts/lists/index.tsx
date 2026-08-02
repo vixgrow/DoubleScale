@@ -17,6 +17,7 @@ import type {
 	List as ContactList,
 	ListsResponse,
 	DataTableConfig,
+	ServerSortState,
 	NoticeMessage,
 } from '@doublescale/client';
 import {
@@ -37,6 +38,7 @@ import { formatDateForAPI } from '@doublescale/utils';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
@@ -50,6 +52,17 @@ interface ListsProps {
 	activeTab?: string;
 }
 
+/**
+ * Columns the lists list can be sorted by. Mirrors the server allow-list.
+ */
+const LIST_SORTABLE_COLUMNS = [
+	'name',
+	'slug',
+	'status',
+	'created_at',
+	'updated_at',
+] as const;
+
 const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
 	const navigate = useNavigate();
@@ -58,7 +71,9 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [perPage, setPerPage] = useState<number>(
 		() => getListPreferences('lists').per_page ?? 10
 	);
-	const [page, setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(
+		() => getListPreferences('lists').page ?? 1
+	);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [keyword, setKeyword] = useState<string>(
@@ -82,15 +97,21 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		to: Date | null;
 	}>(() => parseSavedDateRange(getListPreferences('lists').date_range));
 
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(getListPreferences('lists').sort, LIST_SORTABLE_COLUMNS)
+	);
+
 	useListPreferencesPersistence(
 		'lists',
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keyword, perPage]
+			[dateRange, keyword, page, perPage, sort]
 		)
 	);
 
@@ -139,6 +160,9 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 			})) as ListsResponse;
 
@@ -279,7 +303,20 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 	useEffect(() => {
 		fetchLists();
-	}, [page, perPage, keyword, dateRange]);
+	}, [page, perPage, keyword, dateRange, sort]);
+
+	// Narrowing the result set invalidates the current page number. Skipped on
+	// mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keyword, dateRange, sort]);
+
 
 	// Imperative handle
 	useImperativeHandle(ref, () => ({
@@ -318,6 +355,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			value: dateRange,
 			onDateChange: setDateRange,
 			placeholder: __('Date Range', 'doublescale'),
+		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
 		},
 	};
 

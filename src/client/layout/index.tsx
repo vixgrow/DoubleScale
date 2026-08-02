@@ -36,7 +36,7 @@ import './style.scss';
 import { MergeTagsModal } from '@doublescale/components';
 import { SidebarProvider } from '@doublescale/components/ui/sidebar';
 import config from '@doublescale/config';
-import { isProActive } from '@doublescale/hooks/use-is-pro-active';
+import { getScopedDefaultLandingPath } from '@doublescale/hooks/use-capabilities';
 
 // `<SnackbarList>` strips the `status` prop at the `<Snackbar>` boundary, so
 // success and error notices render identically. Color them via `className`
@@ -146,10 +146,9 @@ const _PageLayout = () => {
 	const visiblePages = Object.values(getAdminPages()).filter(
 		adminPagePassesVisibilityGate
 	);
+	const scopedLandingPath = getScopedDefaultLandingPath();
 	const defaultLandingPath =
-		isProActive() && config.getUserCapabilities().doublescale_is_project_only
-			? getToLink('projects')
-			: '/';
+		scopedLandingPath === '/' ? '/' : getToLink(scopedLandingPath);
 
 	return (
 		<>

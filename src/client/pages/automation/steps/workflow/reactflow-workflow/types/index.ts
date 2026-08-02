@@ -22,6 +22,7 @@ import EndNode from '../nodes/end-node';
 import GoalNode from '../nodes/goal-node';
 import MergeNode from '../nodes/merge-node';
 import TriggerNode from '../nodes/trigger-node';
+import StickyNoteNode from '../nodes/sticky-note-node';
 
 /**
  * Types and Interfaces
@@ -61,6 +62,7 @@ const NODE_TYPES = {
 	add_step: AddStepNode,
 	merge: MergeNode,
 	branch: BranchNode,
+	sticky_note: StickyNoteNode,
 };
 
 const EDGE_TYPES: EdgeTypes = {

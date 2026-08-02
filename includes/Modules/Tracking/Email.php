@@ -251,6 +251,17 @@ class Email {
 				$original_url = home_url();
 			}
 
+			// Link triggers need track-id to identify the contact; carry it through when
+			// the original URL was wrapped by generic email click tracking.
+			if ( false !== strpos( $original_url, 'doublescale-link-trigger' ) ) {
+				$original_url = add_query_arg(
+					array(
+						'track-id' => $hash_key,
+					),
+					$original_url
+				);
+			}
+
 			\doublescale_safe_redirect( $original_url );
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(

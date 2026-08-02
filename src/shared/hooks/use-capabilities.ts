@@ -3,6 +3,32 @@
  */
 import { useCallback } from '@wordpress/element';
 import Config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
+
+/**
+ * Default SPA landing path for users scoped to a single module.
+ */
+export const getScopedDefaultLandingPath = (): string => {
+	const caps = Config.getUserCapabilities();
+
+	// `projects` is a Pro-only route (see registerAdminPage('projects', {
+	// requiresPro: true })) — it isn't registered at all on Free, so routing
+	// a project-only free user there would fall straight into the catch-all
+	// redirect again and loop.
+	if (caps.doublescale_is_project_only && isProActive()) {
+		return 'projects';
+	}
+
+	if (caps.doublescale_is_booking_only) {
+		return 'booking';
+	}
+
+	if (caps.doublescale_is_support_only) {
+		return 'support';
+	}
+
+	return '/';
+};
 
 /**
  * Custom hook for checking user capabilities

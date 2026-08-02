@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 /**
  * external dependencies
  */
@@ -260,7 +260,11 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 		<Card className="shadow-none rounded-2xl">
 			<CardHeader>
 				<CardTitle className="text-2xl font-normal text-foreground">
-					{__(`${importer.name} Data Import Tool`, 'doublescale')}
+					{sprintf(
+						/* translators: %s: importer name, e.g. "HubSpot". */
+						__('%s Data Import Tool', 'doublescale'),
+						importer.name
+					)}
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
 					{source === 'csv'

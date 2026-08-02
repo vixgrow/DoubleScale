@@ -48,6 +48,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		dateRange,
 		selectedRowKeys,
 		keywords,
+		sort,
 		setTotalRecords,
 		setLoading,
 		setData,
@@ -75,6 +76,9 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keywords,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 				method: 'GET',
 			})) as ContactsResponse;

@@ -866,6 +866,51 @@
 		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 	}
 
+	// Disabled step: kept in the workflow but skipped at runtime. Muted and
+	// dashed so it reads as "parked" rather than broken, while the dropdown
+	// stays fully legible so the step can be re-enabled.
+	//
+	// Deliberately NOT named `--disabled`: that class already exists further
+	// down for view-mode nodes and sets `pointer-events: none`, which would
+	// make the node's own menu unclickable and leave no way to switch the
+	// step back on.
+	&--step-disabled {
+		border-style: dashed !important;
+		border-color: #c4c4c4 !important;
+		box-shadow: none !important;
+
+		// Mute the icon and the labels individually rather than the whole rows:
+		// a parent opacity would composite onto the badge too, and the badge is
+		// the one element that must stay legible — it explains why everything
+		// around it is greyed out.
+		//
+		// Do NOT put filter/opacity on __header-row: the actions dropdown lives
+		// inside it with removePortal, and CSS filter creates a containing block
+		// that clips position:fixed menus (so Enable/Delete get cut off).
+		.doublescale-reactflow-node__icon,
+		.doublescale-reactflow-node__title,
+		.doublescale-reactflow-node__subtitle-inner
+			> *:not(.doublescale-reactflow-node__disabled-badge) {
+			opacity: 0.5;
+			filter: grayscale(1);
+		}
+	}
+
+	&__disabled-badge {
+		display: inline-flex;
+		align-items: center;
+		flex-shrink: 0;
+		padding: 1px 8px;
+		border-radius: 10px;
+		background: #6b7280;
+		color: #fff;
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 18px;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+
 	&__drop-indicator {
 		position: absolute;
 		top: -3px;
@@ -1412,5 +1457,71 @@
 	to {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+.doublescale-reactflow-workflow__notes-panel {
+	margin: 12px;
+}
+
+.doublescale-reactflow-sticky-note {
+	width: 220px;
+	min-height: 140px;
+	border: 1px solid rgba(146, 64, 14, 0.18);
+	border-radius: 8px;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&--readonly {
+		cursor: default;
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	&__title {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		font-weight: 600;
+		color: #92400e;
+	}
+
+	&__delete {
+		color: #92400e;
+
+		&:hover {
+			background: rgba(146, 64, 14, 0.08);
+		}
+	}
+
+	&__textarea {
+		min-height: 96px;
+		resize: vertical;
+		border: 1px solid rgba(146, 64, 14, 0.15);
+		background: rgba(255, 255, 255, 0.55);
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
+	&__content {
+		font-size: 13px;
+		line-height: 1.45;
+		color: #78350f;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+
+	&__placeholder {
+		color: rgba(120, 53, 15, 0.55);
+		font-style: italic;
 	}
 }

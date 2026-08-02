@@ -26,6 +26,17 @@ use DoubleScale\Core\UserRoles\Permissions;
 abstract class RestTaxonomyController extends RestController {
 
 	/**
+	 * Columns lists and tags may be sorted by.
+	 *
+	 * Both live in the shared terms table; a child can narrow or extend this.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string[]
+	 */
+	const SORTABLE_COLUMNS = array( 'name', 'slug', 'status', 'created_at', 'updated_at' );
+
+	/**
 	 * REST Base - must be defined in child class
 	 *
 	 * @since 1.0.0
@@ -171,7 +182,7 @@ abstract class RestTaxonomyController extends RestController {
 				'type'        => 'string',
 				'format'      => 'date',
 			),
-		);
+		) + $this->get_sorting_collection_params( static::SORTABLE_COLUMNS );
 	}
 
 	/**
@@ -311,8 +322,9 @@ abstract class RestTaxonomyController extends RestController {
 			}
 
 			// Execute query with pagination
-			$items = $query->orderBy( 'created_at', 'desc' )
-				->paginate( $per_page, array( '*' ), 'page', $page );
+			$this->apply_sorting( $query, $request, static::SORTABLE_COLUMNS );
+
+			$items = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// Ensure contacts_count is calculated for each item
 			foreach ( $items->items() as $item ) {

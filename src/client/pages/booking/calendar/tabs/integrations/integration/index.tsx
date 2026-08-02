@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { applyFilters } from '@wordpress/hooks';
 
@@ -103,10 +103,18 @@ const getIntegrationRequirements = (
 			return {
 				[__('Requirements', 'doublescale')]: [
 					__('DoubleScale Pro Account.', 'doublescale'),
-					__(`A ${integrationName} account.`, 'doublescale'),
-					__(
-						`Give DoubleScale Full Access to manage ${integrationName}.`,
-						'doublescale'
+					sprintf(
+						/* translators: %s: integration name, e.g. "Google Calendar". */
+						__('A %s account.', 'doublescale'),
+						integrationName
+					),
+					sprintf(
+						/* translators: %s: integration name, e.g. "Google Calendar". */
+						__(
+							'Give DoubleScale Full Access to manage %s.',
+							'doublescale'
+						),
+						integrationName
 					),
 				],
 			};

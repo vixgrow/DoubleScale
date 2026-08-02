@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { map } from 'lodash';
 import { ArrowUpLeft, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -410,7 +410,11 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 
 	const getDefaultInstructions = (): PlatformInstructions => ({
 		steps: [
-			__(`Sign in to your ${importer.name} account`, 'doublescale'),
+			sprintf(
+				/* translators: %s: importer name, e.g. "HubSpot". */
+				__('Sign in to your %s account', 'doublescale'),
+				importer.name
+			),
 			__('Navigate to API settings or Developer section', 'doublescale'),
 			__('Generate or copy your API credentials', 'doublescale'),
 		],

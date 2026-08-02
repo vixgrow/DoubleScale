@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState, useMemo } from '@wordpress/element';
+import { useEffect, useState, useMemo, useRef } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ import {
 	CampaignsResponse,
 	CampaignType,
 	NoticeMessage,
+	ServerSortState,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import { DataTable } from '@/components/ui/data-table';
@@ -38,10 +39,23 @@ import {
 	getListPreferences,
 	parseSavedCampaignFilters,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 	type ListPreferenceKey,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
+
+/**
+ * Columns campaign lists can be sorted by. Mirrors the server allow-list.
+ */
+const CAMPAIGN_SORTABLE_COLUMNS = [
+	'name',
+	'status',
+	'type',
+	'execute_at',
+	'created_at',
+	'updated_at',
+] as const;
 
 export type CampaignChannel = 'email' | 'sms';
 
@@ -62,7 +76,9 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	const [keywords, setKeywords] = useState<string>(
 		() => getListPreferences(listPreferenceKey).keyword ?? ''
 	);
-	const [page, setPage] = useState(1);
+	const [page, setPage] = useState(
+		() => getListPreferences(listPreferenceKey).page ?? 1
+	);
 	const [perPage, setPerPage] = useState(
 		() => getListPreferences(listPreferenceKey).per_page ?? 10
 	);
@@ -89,15 +105,24 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 	const navigate = useNavigate();
 
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(
+			getListPreferences(listPreferenceKey).sort,
+			CAMPAIGN_SORTABLE_COLUMNS
+		)
+	);
+
 	useListPreferencesPersistence(
 		listPreferenceKey,
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword: keywords,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keywords, perPage]
+			[dateRange, keywords, page, perPage, sort]
 		)
 	);
 
@@ -119,12 +144,24 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords, channel, campaignFilters]);
+	}, [page, perPage, dateRange, keywords, channel, campaignFilters, sort]);
 
 	useEffect(() => {
 		setPage(1);
 		setSelectedRowKeys([]);
 	}, [channel]);
+
+	// Narrowing the result set invalidates the current page number. Skipped on
+	// mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keywords, dateRange, sort]);
 
 	const fetchCampaigns = async () => {
 		if (channel === 'sms' && !smsUiAvailable) {
@@ -153,6 +190,11 @@ const Campaigns: React.FC<CampaignsProps> = ({
 				keywords,
 				channel: channelMap[channel],
 			};
+
+			if (sort) {
+				queryParams.orderby = sort.orderby;
+				queryParams.order = sort.order;
+			}
 
 			// Add campaign filter parameters
 			if (campaignFilters.status && campaignFilters.status !== 'all') {
@@ -509,6 +551,10 @@ const Campaigns: React.FC<CampaignsProps> = ({
 								enabled: true,
 								value: dateRange,
 								onDateChange: setDateRange,
+							},
+							sorting: {
+								value: sort,
+								onSortChange: setSort,
 							},
 							campaignFilters: {
 								filters: campaignFilters,

@@ -33,15 +33,21 @@ interface NodeLayoutProps {
 	onDelete: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
+	onRename?: () => void;
+	onToggleEnabled?: () => void | Promise<void>;
 	editLabel: string;
 	deleteLabel: string;
 	duplicateLabel?: string;
 	changeTriggerLabel?: string;
+	renameLabel?: string;
+	toggleEnabledLabel?: string;
 	deleteTitle: string;
 	deleteDescription: string;
 	showDelete?: boolean;
 	showDuplicate?: boolean;
 	showChangeTrigger?: boolean;
+	showRename?: boolean;
+	showToggleEnabled?: boolean;
 	viewMode?: boolean;
 	analytics?: { contacts: number; conversion_rate: number };
 	customFooter?: React.ReactNode;
@@ -56,15 +62,21 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 	onDelete,
 	onDuplicate,
 	onChangeTrigger,
+	onRename,
+	onToggleEnabled,
 	editLabel,
 	deleteLabel,
 	duplicateLabel,
 	changeTriggerLabel,
+	renameLabel,
+	toggleEnabledLabel,
 	deleteTitle,
 	deleteDescription,
 	showDelete = true,
 	showDuplicate = false,
 	showChangeTrigger = false,
+	showRename = false,
+	showToggleEnabled = false,
 	viewMode = false,
 	analytics,
 	customFooter,
@@ -94,15 +106,21 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 						onDelete={onDelete}
 						onDuplicate={onDuplicate}
 						onChangeTrigger={onChangeTrigger}
+						onRename={onRename}
+						onToggleEnabled={onToggleEnabled}
 						editLabel={editLabel}
 						deleteLabel={deleteLabel}
 						duplicateLabel={duplicateLabel}
 						changeTriggerLabel={changeTriggerLabel}
+						renameLabel={renameLabel}
+						toggleEnabledLabel={toggleEnabledLabel}
 						deleteTitle={deleteTitle}
 						deleteDescription={deleteDescription}
 						showDelete={showDelete}
 						showDuplicate={showDuplicate}
 						showChangeTrigger={showChangeTrigger}
+						showRename={showRename}
+						showToggleEnabled={showToggleEnabled}
 					/>
 				)}
 			</div>

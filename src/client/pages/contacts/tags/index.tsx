@@ -19,6 +19,7 @@ import type {
 	Tag as ContactTag,
 	TagsResponse,
 	DataTableConfig,
+	ServerSortState,
 	NoticeMessage,
 } from '@doublescale/client';
 import {
@@ -39,6 +40,7 @@ import { formatDateForAPI } from '@doublescale/utils';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
@@ -52,6 +54,17 @@ interface TagsProps {
 	activeTab?: string;
 }
 
+/**
+ * Columns the tags list can be sorted by. Mirrors the server allow-list.
+ */
+const TAG_SORTABLE_COLUMNS = [
+	'name',
+	'slug',
+	'status',
+	'created_at',
+	'updated_at',
+] as const;
+
 const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const isCrmManager = useCapabilities().isCrmManager();
 	const navigate = useNavigate();
@@ -60,7 +73,9 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [perPage, setPerPage] = useState<number>(
 		() => getListPreferences('tags').per_page ?? 10
 	);
-	const [page, setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(
+		() => getListPreferences('tags').page ?? 1
+	);
 	const [keyword, setKeyword] = useState<string>(
 		() => getListPreferences('tags').keyword ?? ''
 	);
@@ -86,15 +101,21 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		to: Date | null;
 	}>(() => parseSavedDateRange(getListPreferences('tags').date_range));
 
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(getListPreferences('tags').sort, TAG_SORTABLE_COLUMNS)
+	);
+
 	useListPreferencesPersistence(
 		'tags',
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keyword, perPage]
+			[dateRange, keyword, page, perPage, sort]
 		)
 	);
 
@@ -148,6 +169,9 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 			})) as TagsResponse;
 
@@ -163,7 +187,20 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	useEffect(() => {
 		fetchTags();
-	}, [page, perPage, keyword, dateRange]);
+	}, [page, perPage, keyword, dateRange, sort]);
+
+	// Narrowing the result set invalidates the current page number. Skipped on
+	// mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keyword, dateRange, sort]);
+
 
 	const createTag = async () => {
 		if (!validate(tag)) {
@@ -320,6 +357,10 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			value: dateRange,
 			onDateChange: setDateRange,
 			placeholder: __('Date Range', 'doublescale'),
+		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
 		},
 	};
 

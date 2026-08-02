@@ -27,6 +27,7 @@ export interface TextBlockProps {
 	linkColor: string;
 	backgroundColor: string;
 	textAlign: string;
+	textDirection: 'ltr' | 'rtl';
 	listType: string;
 	headingStyle: string;
 	padding: {
@@ -63,6 +64,7 @@ const TextBlock = {
 		linkColor: '#333',
 		backgroundColor: 'transparent',
 		textAlign: 'left',
+		textDirection: 'ltr',
 		listType: 'none',
 		headingStyle: 'p',
 		padding: {

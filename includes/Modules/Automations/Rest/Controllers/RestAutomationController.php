@@ -21,6 +21,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
+use DoubleScale\Modules\Automations\ProcessAutomation;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
@@ -29,6 +30,7 @@ use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Automations\Services\WorkflowPortabilityManager;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 
 /**
@@ -44,6 +46,18 @@ class RestAutomationController extends RestController {
 	 * @var string
 	 */
 	protected $rest_base = 'automations';
+
+	/**
+	 * Columns the list may be sorted by.
+	 *
+	 * Mirrors the sortable headers in the automations table UI. Kept as an
+	 * allow-list because the value reaches the ORDER BY clause.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string[]
+	 */
+	const SORTABLE_COLUMNS = array( 'name', 'trigger', 'status', 'created_at', 'updated_at' );
 
 	/**
 	 * Register routes
@@ -182,6 +196,26 @@ class RestAutomationController extends RestController {
 			)
 		);
 
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/test-run',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'test_run' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'contact_id' => array(
+							'description'       => __( 'The contact ID to run the automation for.', 'doublescale' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
+			)
+		);
+
 		// Export a single workflow as a portable JSON envelope.
 		register_rest_route(
 			$this->namespace,
@@ -203,6 +237,45 @@ class RestAutomationController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import_workflow' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Export multiple workflows as a portable bulk JSON envelope.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/export-bulk',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'export_bulk_workflows' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description'       => __( 'Automation IDs to export.', 'doublescale' ),
+							'type'              => 'array',
+							'required'          => true,
+							'items'             => array(
+								'type' => 'integer',
+							),
+							'sanitize_callback' => function ( $ids ) {
+								return array_values( array_filter( array_map( 'absint', (array) $ids ) ) );
+							},
+						),
+					),
+				),
+			)
+		);
+
+		// Import multiple workflows from a bulk envelope or list of envelopes.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/import-bulk',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_bulk_workflows' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				),
 			)
@@ -373,7 +446,7 @@ class RestAutomationController extends RestController {
 				'type'        => 'string',
 				'format'      => 'date',
 			),
-		);
+		) + $this->get_sorting_collection_params( self::SORTABLE_COLUMNS );
 	}
 
 	/**
@@ -587,7 +660,9 @@ class RestAutomationController extends RestController {
 			if ( $to ) {
 				$query->where( 'created_at', '<=', $to );
 			}
-			$automations = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$this->apply_sorting( $query, $request, self::SORTABLE_COLUMNS );
+
+			$automations = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// Check dependencies for each automation
 			foreach ( $automations as $automation ) {
@@ -679,7 +754,7 @@ class RestAutomationController extends RestController {
 			$automation = AutomationModel::with(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			)->find( $id );
@@ -856,39 +931,131 @@ class RestAutomationController extends RestController {
 			}
 
 			$payload = $request->get_json_params();
+
+			if ( is_array( $payload ) && ! empty( $payload[ WorkflowPortabilityManager::BULK_ENVELOPE_KEY ] ) ) {
+				return $this->import_bulk_workflows( $request );
+			}
+
 			$result  = WorkflowPortabilityManager::instance()->import( $payload );
 
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 
-			// Reload with active steps and compute dependency warnings using the
-			// same logic the editor uses, so the client can flag what needs review.
-			$automation = AutomationModel::with(
-				array(
-					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
-					},
-				)
-			)->find( $result->id );
-
-			$unresolved = array();
-			if ( $automation ) {
-				$automation = $this->check_and_mark_dependencies( $automation );
-				$unresolved = $automation->_warnings ?? array();
-			}
-
 			return new WP_REST_Response(
-				array(
-					'id'         => (int) $result->id,
-					'name'       => $result->name,
-					'unresolved' => $unresolved,
-				),
+				$this->format_imported_workflow_response( $result ),
 				201
 			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Export multiple workflows as a portable bulk JSON envelope.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function export_bulk_workflows( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$ids = $request->get_param( 'ids' );
+			if ( empty( $ids ) || ! is_array( $ids ) ) {
+				return new WP_Error(
+					'invalid_request',
+					__( 'At least one automation ID is required.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$result = WorkflowPortabilityManager::instance()->export_bulk( $ids );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Import multiple workflows from a bulk envelope or list of envelopes.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_bulk_workflows( $request ) {
+		try {
+			$pro_guard = $this->require_pro_for_portability();
+			if ( is_wp_error( $pro_guard ) ) {
+				return $pro_guard;
+			}
+
+			$payload = $request->get_json_params();
+			$result  = WorkflowPortabilityManager::instance()->import_bulk( $payload );
+
+			$formatted_results = array();
+			foreach ( $result['results'] as $automation ) {
+				$formatted_results[] = $this->format_imported_workflow_response( $automation );
+			}
+
+			$status = empty( $formatted_results ) ? 400 : 201;
+
+			return new WP_REST_Response(
+				array(
+					'results' => $formatted_results,
+					'errors'  => $result['errors'],
+				),
+				$status
+			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Format an imported automation for the REST response, including unresolved refs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param AutomationModel $automation Imported automation.
+	 *
+	 * @return array{id: int, name: string, unresolved: array}
+	 */
+	private function format_imported_workflow_response( $automation ) {
+		$original   = $automation;
+		$automation = AutomationModel::with(
+			array(
+				'steps' => function ( $query ) {
+					$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
+				},
+			)
+		)->find( $original->id );
+
+		$unresolved = array();
+		if ( $automation ) {
+			$automation = $this->check_and_mark_dependencies( $automation );
+			$unresolved = $automation->_warnings ?? array();
+		}
+
+		return array(
+			'id'         => (int) $original->id,
+			'name'       => $original->name,
+			'unresolved' => $unresolved,
+		);
 	}
 
 	/**
@@ -943,7 +1110,7 @@ class RestAutomationController extends RestController {
 		$automation = AutomationModel::with(
 			array(
 				'steps' => function ( $query ) {
-					$query->where( 'status', 'active' );
+					$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 				},
 			)
 		)->find( $id );
@@ -1053,7 +1220,7 @@ class RestAutomationController extends RestController {
 			$automation->load(
 				array(
 					'steps' => function ( $query ) {
-						$query->whereIn( 'status', array( 'active', 'draft' ) );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			);
@@ -1107,7 +1274,7 @@ class RestAutomationController extends RestController {
 			$new_automation = AutomationModel::with(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES );
 					},
 				)
 			)->find( $new_automation->id );
@@ -1115,6 +1282,77 @@ class RestAutomationController extends RestController {
 			$new_automation = $this->check_and_mark_dependencies( $new_automation );
 
 			return new WP_REST_Response( $new_automation, 201 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Run an automation for a chosen contact without waiting for the real trigger.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function test_run( $request ) {
+		try {
+			$id         = (int) $request->get_param( 'id' );
+			$contact_id = (int) $request->get_param( 'contact_id' );
+
+			$automation = AutomationModel::find( $id );
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			if ( $contact_id <= 0 ) {
+				return new WP_Error(
+					'invalid_contact',
+					__( 'A valid contact is required to run a test.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$contact = ContactModel::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', __( 'Contact not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$first_step = $automation->get_first_step();
+			if ( ! $first_step ) {
+				return new WP_Error(
+					'no_steps',
+					__( 'This automation has no active workflow steps to run.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$process = new ProcessAutomation(
+				$automation,
+				array(
+					'contact'   => $contact,
+					'test_mode' => true,
+					'data'      => array( '_test_run' => true ),
+				)
+			);
+
+			$automation_contact = $process->start();
+			if ( ! $automation_contact ) {
+				return new WP_Error(
+					'enrollment_failed',
+					__( 'Could not enroll the contact into this automation.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			return new WP_REST_Response(
+				array(
+					'enrolled'              => true,
+					'automation_contact_id' => (int) $automation_contact->id,
+				),
+				200
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -1132,7 +1370,7 @@ class RestAutomationController extends RestController {
 	 */
 	private function duplicate_automation_steps( $source_automation_id, $new_automation_id ) {
 		$steps = AutomationStepModel::where( 'automation_id', $source_automation_id )
-			->where( 'status', 'active' )
+			->whereIn( 'status', AutomationStepModel::EDITABLE_STATUSES )
 			->get()
 			->all();
 

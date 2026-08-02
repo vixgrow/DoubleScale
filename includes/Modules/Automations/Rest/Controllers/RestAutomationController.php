@@ -1005,14 +1005,25 @@ class RestAutomationController extends RestController {
 			}
 
 			$payload = $request->get_json_params();
-			$result  = WorkflowPortabilityManager::instance()->import_bulk( $payload );
+
+			// apiFetch sends JSON in the body; if the body was empty or not JSON
+			// (some proxies strip it), fall back to the request params.
+			if ( empty( $payload ) ) {
+				$payload = $request->get_params();
+				unset( $payload['_locale'] );
+			}
+
+			$result = WorkflowPortabilityManager::instance()->import_bulk( $payload );
 
 			$formatted_results = array();
 			foreach ( $result['results'] as $automation ) {
 				$formatted_results[] = $this->format_imported_workflow_response( $automation );
 			}
 
-			$status = empty( $formatted_results ) ? 400 : 201;
+			// Always return 2xx with a structured body so the client can read
+			// per-workflow errors. A 400 with {results,errors} has no top-level
+			// `message`, so apiFetch surfaces a blank error in the UI.
+			$status = empty( $formatted_results ) && empty( $result['errors'] ) ? 400 : 201;
 
 			return new WP_REST_Response(
 				array(

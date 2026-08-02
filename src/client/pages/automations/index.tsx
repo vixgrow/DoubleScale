@@ -536,9 +536,107 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	const [isImporting, setIsImporting] = useState(false);
+
+	const getImportErrorMessage = (error: unknown): string => {
+		const err = error as {
+			message?: string;
+			code?: string;
+			results?: WorkflowImportResult[];
+			errors?: Array<{ name?: string; message?: string }>;
+		} | null;
+
+		if (!err || typeof err !== 'object') {
+			return __('Import failed.', 'doublescale');
+		}
+
+		// Bulk endpoint may reject with { results, errors } and no top-level message.
+		if (Array.isArray(err.errors) && err.errors.length > 0) {
+			return err.errors
+				.map((item) =>
+					item.name
+						? `${item.name}: ${item.message ?? ''}`.trim()
+						: item.message ?? ''
+				)
+				.filter(Boolean)
+				.join(' ');
+		}
+
+		if (typeof err.message === 'string' && err.message.trim() !== '') {
+			return err.message;
+		}
+
+		return __('Import failed.', 'doublescale');
+	};
+
+	const applyBulkImportResponse = async (
+		response: WorkflowBulkImportResponse
+	) => {
+		const results = Array.isArray(response?.results) ? response.results : [];
+		const errors = Array.isArray(response?.errors) ? response.errors : [];
+
+		if (results.length === 1 && errors.length === 0) {
+			navigate(getToLink(`automations/${results[0].id}`));
+			return;
+		}
+
+		setSelectedRowKeys([]);
+		// Show newest imports on page 1 even if the user was on a later page.
+		if (page !== 1) {
+			setPage(1);
+		} else {
+			await fetchAutomations();
+		}
+
+		const importedCount = results.length;
+		const errorCount = errors.length;
+		const warningCount = results.filter(
+			(result) =>
+				Array.isArray(result.unresolved) && result.unresolved.length > 0
+		).length;
+
+		if (importedCount === 0 && errorCount > 0) {
+			setListError({
+				type: 'error',
+				message: errors
+					.map((item) =>
+						item.name
+							? `${item.name}: ${item.message}`
+							: item.message
+					)
+					.filter(Boolean)
+					.join(' '),
+			});
+			return;
+		}
+
+		let message =
+			importedCount === 1
+				? __(
+						'1 workflow imported as inactive. Review it before activating.',
+						'doublescale'
+					)
+				: `${importedCount} workflow(s) imported as inactive. Review them before activating.`;
+
+		if (warningCount > 0) {
+			message += ` ${warningCount} have items that need review.`;
+		}
+		if (errorCount > 0) {
+			message += ` ${errorCount} could not be imported.`;
+		}
+
+		setListError({
+			type: errorCount > 0 ? 'warning' : 'success',
+			message,
+		});
+	};
+
 	const handleImportClick = () => {
 		if (!isPro) {
 			showProRequiredNotice();
+			return;
+		}
+		if (isImporting) {
 			return;
 		}
 		fileInputRef.current?.click();
@@ -555,6 +653,9 @@ const AutomationsList: React.FC = () => {
 		if (!files?.length) {
 			return;
 		}
+
+		setIsImporting(true);
+		setListError(null);
 
 		try {
 			const payloads: unknown[] = [];
@@ -610,41 +711,28 @@ const AutomationsList: React.FC = () => {
 				data: importPayload,
 			})) as WorkflowBulkImportResponse;
 
-			if (response.results.length === 1 && response.errors.length === 0) {
-				navigate(
-					getToLink(`automations/${response.results[0].id}`)
-				);
+			await applyBulkImportResponse(response);
+		} catch (error: unknown) {
+			const bulkError = error as WorkflowBulkImportResponse | null;
+			if (
+				bulkError &&
+				typeof bulkError === 'object' &&
+				(Array.isArray(bulkError.results) ||
+					Array.isArray(bulkError.errors))
+			) {
+				await applyBulkImportResponse({
+					results: bulkError.results ?? [],
+					errors: bulkError.errors ?? [],
+				});
 				return;
 			}
 
-			setSelectedRowKeys([]);
-			fetchAutomations();
-
-			const importedCount = response.results.length;
-			const errorCount = response.errors.length;
-			const warningCount = response.results.filter(
-				(result) =>
-					Array.isArray(result.unresolved) &&
-					result.unresolved.length > 0
-			).length;
-
-			let message = `${importedCount} workflow(s) imported successfully.`;
-			if (warningCount > 0) {
-				message += ` ${warningCount} have items that need review.`;
-			}
-			if (errorCount > 0) {
-				message += ` ${errorCount} could not be imported.`;
-			}
-
-			setListError({
-				type: errorCount > 0 ? 'warning' : 'success',
-				message: __(message, 'doublescale'),
-			});
-		} catch (error: any) {
 			setListError({
 				type: 'error',
-				message: error.message,
+				message: getImportErrorMessage(error),
 			});
+		} finally {
+			setIsImporting(false);
 		}
 	};
 
@@ -713,10 +801,13 @@ const AutomationsList: React.FC = () => {
 					className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
 					actions={[
 						{
-							label: __('Import', 'doublescale'),
+							label: isImporting
+								? __('Importing…', 'doublescale')
+								: __('Import', 'doublescale'),
 							onClick: handleImportClick,
 							variant: 'outline' as const,
 							icon: <Upload size={16} />,
+							disabled: isImporting,
 						},
 						{
 							label: __('Create Automation', 'doublescale'),
@@ -726,6 +817,7 @@ const AutomationsList: React.FC = () => {
 							},
 							variant: 'default' as const,
 							icon: <PlusIcon />,
+							disabled: isImporting,
 						},
 					]}
 				/>

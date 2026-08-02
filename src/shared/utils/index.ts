@@ -517,14 +517,21 @@ export const getTriggerWarningMessage = (automation: any): string => {
  * @param step - The automation step object
  * @returns The action label
  */
-export const getActionLabel = (step: any): string => {
-	// Use backend-provided label (works even when plugin is deactivated)
+export const getCatalogActionLabel = (step: any): string => {
 	if (step?.settings?._action_label) {
 		return step.settings._action_label;
 	}
 
-	// Fallback to action slug
 	return step?.action || __('Unknown Action', 'doublescale');
+};
+
+export const getActionLabel = (step: any): string => {
+	const customLabel = step?.settings?.custom_label?.trim();
+	if (customLabel) {
+		return customLabel;
+	}
+
+	return getCatalogActionLabel(step);
 };
 
 /**

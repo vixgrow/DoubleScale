@@ -35,22 +35,26 @@ import {
 } from '../../automation-dialog-presets';
 import { CopyIcon, DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
+import { Pencil } from 'lucide-react';
 
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
+	onRename?: () => void;
 	editLabel?: string;
 	deleteLabel?: string;
 	duplicateLabel?: string;
 	changeTriggerLabel?: string;
+	renameLabel?: string;
 	deleteTitle?: string;
 	deleteDescription?: string;
 	showEdit?: boolean;
 	showDelete?: boolean;
 	showDuplicate?: boolean;
 	showChangeTrigger?: boolean;
+	showRename?: boolean;
 	disabled?: boolean;
 }
 
@@ -59,16 +63,19 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onDelete,
 	onDuplicate,
 	onChangeTrigger,
+	onRename,
 	editLabel = __('Edit', 'doublescale'),
 	deleteLabel = __('Delete', 'doublescale'),
 	duplicateLabel = __('Duplicate', 'doublescale'),
 	changeTriggerLabel = __('Change Trigger', 'doublescale'),
+	renameLabel = __('Rename', 'doublescale'),
 	deleteTitle = __('Delete this item?', 'doublescale'),
 	deleteDescription = __('This action cannot be undone.', 'doublescale'),
 	showEdit = true,
 	showDelete = true,
 	showDuplicate = false,
 	showChangeTrigger = false,
+	showRename = false,
 	disabled = false,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -76,7 +83,11 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 
 	if (
 		disabled ||
-		(!showEdit && !showDelete && !showDuplicate && !showChangeTrigger)
+		(!showEdit &&
+			!showDelete &&
+			!showDuplicate &&
+			!showChangeTrigger &&
+			!showRename)
 	) {
 		return null;
 	}
@@ -136,6 +147,15 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							>
 								<EditHeaderIcon />
 								<span>{editLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showRename && onRename && (
+							<DropdownMenuItem
+								onClick={onRename}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<Pencil className="h-4 w-4" />
+								<span>{renameLabel}</span>
 							</DropdownMenuItem>
 						)}
 						{showChangeTrigger && onChangeTrigger && (

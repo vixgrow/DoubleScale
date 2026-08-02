@@ -1414,3 +1414,69 @@
 		transform: translateY(0);
 	}
 }
+
+.doublescale-reactflow-workflow__notes-panel {
+	margin: 12px;
+}
+
+.doublescale-reactflow-sticky-note {
+	width: 220px;
+	min-height: 140px;
+	border: 1px solid rgba(146, 64, 14, 0.18);
+	border-radius: 8px;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&--readonly {
+		cursor: default;
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	&__title {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		font-weight: 600;
+		color: #92400e;
+	}
+
+	&__delete {
+		color: #92400e;
+
+		&:hover {
+			background: rgba(146, 64, 14, 0.08);
+		}
+	}
+
+	&__textarea {
+		min-height: 96px;
+		resize: vertical;
+		border: 1px solid rgba(146, 64, 14, 0.15);
+		background: rgba(255, 255, 255, 0.55);
+		font-size: 13px;
+		line-height: 1.45;
+	}
+
+	&__content {
+		font-size: 13px;
+		line-height: 1.45;
+		color: #78350f;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+
+	&__placeholder {
+		color: rgba(120, 53, 15, 0.55);
+		font-style: italic;
+	}
+}

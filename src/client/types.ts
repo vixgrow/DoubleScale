@@ -185,6 +185,13 @@ export type AutomationProcess = {
 	updated_at: string;
 };
 
+export type CanvasNote = {
+	id: string;
+	content: string;
+	position: { x: number; y: number };
+	color?: string;
+};
+
 export type Automation = {
 	id: number;
 	name: string;
@@ -195,6 +202,8 @@ export type Automation = {
 		_trigger_label?: string;
 		_trigger_warning?: boolean;
 		_trigger_warning_message?: string;
+		reactflow_positions?: Record<string, { x: number; y: number }>;
+		canvas_notes?: CanvasNote[];
 		[key: string]: any;
 	};
 	created_by?: number | null;
@@ -552,6 +561,7 @@ export type AutomationStep = {
 		_action_warning?: boolean;
 		_action_warning_message?: string;
 		_condition_warning?: boolean;
+		custom_label?: string;
 		[key: string]: any;
 	};
 

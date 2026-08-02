@@ -24,8 +24,10 @@ import SortableNodeContainer from '../components/sortable-node-container';
 import AnalyticsPopup from '../components/analytics-popup';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 import { deleteStep, duplicateStep } from '../utils/step-utils';
-import { getActionLabel, hasActionWarning } from '@doublescale/utils';
+import { updateStepCustomLabel } from '../utils/canvas-notes-utils';
+import { getActionLabel, getCatalogActionLabel, hasActionWarning } from '@doublescale/utils';
 import { ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
 import { supportsAnalytics, getChannelType } from '../constants/action-types';
@@ -35,6 +37,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import RenameActionDialog from '../components/rename-action-dialog';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -56,8 +59,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 		analytics,
 	} = data as unknown as ActionNodeData;
 
-	const { steps, setSteps } = useAutomationContext();
+	const { steps, setSteps, updateStep } = useAutomationContext();
 	const { createNotice } = useDispatch('doublescale/core');
+	const [isRenameOpen, setIsRenameOpen] = useState(false);
 
 	// Use custom analytics hook
 	const {
@@ -73,6 +77,8 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	// Get action label and warning status from backend
 	const actionName = getActionLabel(step);
+	const catalogActionName = getCatalogActionLabel(step);
+	const hasCustomLabel = Boolean(step.settings?.custom_label?.trim());
 	const hasWarning = hasActionWarning(step);
 
 	// Check if this action supports analytics
@@ -80,12 +86,32 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
-			<span
-				className="doublescale-reactflow-action__configured"
-				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
-			>
-				{actionName}
-			</span>
+			{hasCustomLabel ? (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span
+								className="doublescale-reactflow-action__configured"
+								style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+							>
+								{actionName}
+							</span>
+						</TooltipTrigger>
+						<TooltipContent side="right" className="max-w-xs">
+							<p className="text-xs">
+								{__('Default:', 'doublescale')} {catalogActionName}
+							</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			) : (
+				<span
+					className="doublescale-reactflow-action__configured"
+					style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+				>
+					{actionName}
+				</span>
+			)}
 			{hasWarning && (
 				<TooltipProvider>
 					<Tooltip>
@@ -138,6 +164,17 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				__('Action duplicated', 'doublescale')
 			);
 		}
+	};
+
+	const handleRenameSave = async (label: string) => {
+		await updateStepCustomLabel(
+			step,
+			label,
+			steps,
+			setSteps,
+			updateStep,
+			createNotice
+		);
 	};
 
 	// Check if this node is selected
@@ -204,10 +241,13 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 						onEdit={handleEdit}
 						onDelete={handleDelete}
 						onDuplicate={handleDuplicate}
+						onRename={() => setIsRenameOpen(true)}
 						editLabel={__('Edit Action', 'doublescale')}
 						deleteLabel={__('Delete Action', 'doublescale')}
 						duplicateLabel={__('Duplicate Action', 'doublescale')}
+						renameLabel={__('Rename Action', 'doublescale')}
 						showDuplicate={isConfigured}
+						showRename={isConfigured}
 						deleteTitle={__('Delete this action?', 'doublescale')}
 						deleteDescription={__(
 							'This will remove the action from your workflow.',
@@ -240,6 +280,14 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 					}
 				/>
 			)}
+
+			<RenameActionDialog
+				open={isRenameOpen}
+				onOpenChange={setIsRenameOpen}
+				currentLabel={step.settings?.custom_label || ''}
+				catalogLabel={catalogActionName}
+				onSave={handleRenameSave}
+			/>
 		</>
 	);
 };

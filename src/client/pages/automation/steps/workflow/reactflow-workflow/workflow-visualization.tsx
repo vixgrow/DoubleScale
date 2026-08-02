@@ -19,9 +19,11 @@ import {
 	Background,
 	Controls,
 	MiniMap,
+	Panel,
 	useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { StickyNote } from 'lucide-react';
 import {
 	DndContext,
 	DragOverlay,
@@ -38,8 +40,14 @@ import { SortableContext } from '@dnd-kit/sortable';
  * Internal dependencies
  */
 import './style.scss';
-import type { Automation, AutomationStep } from '@doublescale/client';
+import type { Automation, AutomationStep, CanvasNote } from '@doublescale/client';
 import { useAutomationContext } from '../../../state/context';
+import { Button } from '@/components/ui/button';
+import {
+	createCanvasNote,
+	getCanvasNotes,
+	saveCanvasNotes,
+} from './utils/canvas-notes-utils';
 
 // Configuration constants
 import {
@@ -163,6 +171,85 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			JSON.stringify(automation?.settings?.reactflow_positions ?? {}),
 		[automation?.settings?.reactflow_positions]
 	);
+
+	const canvasNotesLayoutKey = useMemo(
+		() =>
+			JSON.stringify(
+				(automation?.settings?.canvas_notes ?? []).map((note: CanvasNote) => ({
+					id: note.id,
+					position: note.position,
+					color: note.color,
+				}))
+			),
+		[automation?.settings?.canvas_notes]
+	);
+
+	const handleNoteUpdate = useCallback(
+		async (noteId: string, content: string) => {
+			if (!automation) {
+				return;
+			}
+
+			const notes = getCanvasNotes(automation);
+			const updatedNotes = notes.map((note) =>
+				note.id === noteId ? { ...note, content } : note
+			);
+
+			try {
+				await saveCanvasNotes(automation, updatedNotes, updateAutomation);
+			} catch (error) {
+				console.error('Failed to save canvas note:', error);
+			}
+		},
+		[automation, updateAutomation]
+	);
+
+	const handleNoteDelete = useCallback(
+		async (noteId: string) => {
+			if (!automation) {
+				return;
+			}
+
+			const updatedNotes = getCanvasNotes(automation).filter(
+				(note) => note.id !== noteId
+			);
+
+			try {
+				await saveCanvasNotes(automation, updatedNotes, updateAutomation);
+			} catch (error) {
+				console.error('Failed to delete canvas note:', error);
+			}
+		},
+		[automation, updateAutomation]
+	);
+
+	const handleAddNote = useCallback(() => {
+		if (!automation || !reactFlowInstance) {
+			return;
+		}
+
+		const canvasEl = document.querySelector(
+			'.doublescale-reactflow-workflow__canvas'
+		);
+		const bounds = canvasEl?.getBoundingClientRect();
+
+		if (!bounds) {
+			return;
+		}
+
+		const position = reactFlowInstance.screenToFlowPosition({
+			x: bounds.left + bounds.width / 2 - 110,
+			y: bounds.top + bounds.height / 2 - 80,
+		});
+
+		const newNote = createCanvasNote(position);
+
+		void saveCanvasNotes(
+			automation,
+			[...getCanvasNotes(automation), newNote],
+			updateAutomation
+		);
+	}, [automation, reactFlowInstance, updateAutomation]);
 
 	const handleDragStart = useCallback(
 		(event: DragStartEvent) => {
@@ -486,6 +573,24 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			result
 		);
 
+		const canvasNotes = getCanvasNotes(automation);
+		canvasNotes.forEach((note) => {
+			initialNodes.push({
+				id: `sticky-note-${note.id}`,
+				type: 'sticky_note',
+				position: note.position,
+				draggable: !viewMode,
+				selectable: !viewMode,
+				zIndex: 5,
+				data: {
+					note,
+					viewMode,
+					onUpdate: handleNoteUpdate,
+					onDelete: handleNoteDelete,
+				},
+			});
+		});
+
 		setNodes(initialNodes);
 		setEdges(initialEdges);
 
@@ -493,6 +598,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	}, [
 		automation?.id,
 		savedPositionsKey,
+		canvasNotesLayoutKey,
 		steps,
 		onStepClick,
 		onDeleteStep,
@@ -500,9 +606,52 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		isTriggerVisible,
 		viewMode,
 		analyticsData,
+		handleNoteUpdate,
+		handleNoteDelete,
 	]);
 
-	// React Flow can keep stale node.data when analytics arrive after the first layout pass.
+	// Patch sticky note content without rebuilding the full workflow layout.
+	useEffect(() => {
+		const notes = getCanvasNotes(automation);
+		if (!notes.length) {
+			return;
+		}
+
+		setNodes((currentNodes) => {
+			let changed = false;
+
+			const nextNodes = currentNodes.map((node) => {
+				if (!node.id.startsWith('sticky-note-')) {
+					return node;
+				}
+
+				const noteId = node.id.replace('sticky-note-', '');
+				const note = notes.find((item) => item.id === noteId);
+				if (!note) {
+					return node;
+				}
+
+				const existingNote = (node.data as { note?: CanvasNote })?.note;
+				if (
+					existingNote?.content === note.content &&
+					existingNote?.color === note.color
+				) {
+					return node;
+				}
+
+				changed = true;
+				return {
+					...node,
+					data: {
+						...node.data,
+						note,
+					},
+				};
+			});
+
+			return changed ? nextNodes : currentNodes;
+		});
+	}, [automation?.settings?.canvas_notes, setNodes]);
 	// Patch analytics onto existing nodes whenever report data changes in view mode.
 	useEffect(() => {
 		if (!viewMode || !analyticsData.length) {
@@ -762,6 +911,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			} else if (
 				node.id !== 'trigger' &&
 				!node.id.startsWith('add-step') &&
+				!node.id.startsWith('sticky-note-') &&
 				onStepClick
 			) {
 				// Find the step data
@@ -783,6 +933,22 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			onNodesChange(changes);
 		},
 		[onNodesChange]
+	);
+
+	const onNodeDragStop = useCallback(
+		(_event: React.MouseEvent, node: Node) => {
+			if (!node.id.startsWith('sticky-note-') || !automation) {
+				return;
+			}
+
+			const noteId = node.id.replace('sticky-note-', '');
+			const updatedNotes = getCanvasNotes(automation).map((note) =>
+				note.id === noteId ? { ...note, position: node.position } : note
+			);
+
+			void saveCanvasNotes(automation, updatedNotes, updateAutomation);
+		},
+		[automation, updateAutomation]
 	);
 
 	// ========== RENDER LOGIC ==========
@@ -816,6 +982,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						onNodesChange={handleNodesChange}
 						onEdgesChange={onEdgesChange}
 						onNodeClick={viewMode ? undefined : onNodeClick}
+						onNodeDragStop={viewMode ? undefined : onNodeDragStop}
 						nodeTypes={NODE_TYPES}
 						edgeTypes={EDGE_TYPES}
 						nodesConnectable={false}
@@ -843,6 +1010,20 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					>
 						<Background />
 						<Controls />
+						{!viewMode && (
+							<Panel position="top-right" className="doublescale-reactflow-workflow__notes-panel">
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									className="bg-white shadow-sm"
+									onClick={handleAddNote}
+								>
+									<StickyNote className="mr-2 h-4 w-4" />
+									{__('Add note', 'doublescale')}
+								</Button>
+							</Panel>
+						)}
 
 						{/* Only show MiniMap when there are nodes */}
 						{nodesState.length > 0 && (
@@ -862,6 +1043,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 											return '#f5222d';
 										case 'add_step':
 											return '#d9d9d9';
+										case 'sticky_note':
+											return '#fbbf24';
 										default:
 											return '#d9d9d9';
 									}

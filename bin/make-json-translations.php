@@ -46,6 +46,9 @@ $scripts = array(
 	'build/renderer/support/index.js',
 	'build/renderer/proposal/index.js',
 	'build/renderer/invoice/index.js',
+	// Built and shipped by the free plugin, but registered by Pro's
+	// ContractFrontendHandler, which resolves it from DOUBLESCALE_PLUGIN_DIR.
+	'build/renderer/contract/index.js',
 );
 
 $locale_arg = isset( $argv[1] ) ? $argv[1] : null;

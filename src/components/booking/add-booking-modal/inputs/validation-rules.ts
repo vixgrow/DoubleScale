@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 interface ValidationRule {
     required?: boolean;
@@ -16,7 +16,11 @@ const getValidationRules = (field): ValidationRule[] => {
     if (required) {
         rules.push({
             required: true,
-            message: __(`${label} is required`, 'doublescale'),
+            message: sprintf(
+                /* translators: %s: field label. */
+                __('%s is required', 'doublescale'),
+                label
+            ),
         });
     }
 
@@ -39,14 +43,24 @@ const getValidationRules = (field): ValidationRule[] => {
             rules.push({
                 type: 'number',
                 min: settings.min,
-                message: __(`${label} must be at least ${settings.min}`, 'doublescale'),
+                message: sprintf(
+                    /* translators: 1: field label, 2: minimum value. */
+                    __('%1$s must be at least %2$s', 'doublescale'),
+                    label,
+                    settings.min
+                ),
             });
         }
         if (settings?.max !== undefined) {
             rules.push({
                 type: 'number',
                 max: settings.max,
-                message: __(`${label} must be at most ${settings.max}`, 'doublescale'),
+                message: sprintf(
+                    /* translators: 1: field label, 2: maximum value. */
+                    __('%1$s must be at most %2$s', 'doublescale'),
+                    label,
+                    settings.max
+                ),
             });
         }
         rules.push({

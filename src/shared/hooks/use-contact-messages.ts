@@ -11,7 +11,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Hook options interface
@@ -130,7 +130,11 @@ export const useContactMessages = ({
 		} catch (err: any) {
 			const errorMsg =
 				err.message ||
-				__(`Failed to fetch ${mode} messages`, 'doublescale');
+				sprintf(
+					/* translators: %s: message channel, e.g. "email" or "sms". */
+					__('Failed to fetch %s messages', 'doublescale'),
+					mode
+				);
 
 			setError(errorMsg);
 

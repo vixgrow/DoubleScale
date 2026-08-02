@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
@@ -313,7 +313,11 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 			}
 			const stored = values[`fields-${key}`];
 			if (stored === undefined || stored === '' || stored === null) {
-				return __(`${def.label} is required.`, 'doublescale');
+				return sprintf(
+					/* translators: %s: field label. */
+					__('%s is required.', 'doublescale'),
+					def.label
+				);
 			}
 		}
 

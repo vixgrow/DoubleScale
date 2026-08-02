@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.2.17\n"
+"Project-Id-Version: DoubleScale 1.2.18\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,6 +12,9 @@ msgstr ""
 "X-Domain: doublescale\n"
 
 msgid "\"%1$s\" exceeds the maximum upload size of %2$s."
+msgstr ""
+
+msgid "#4C6FFF"
 msgstr ""
 
 msgid "$30"
@@ -84,6 +87,12 @@ msgid "%1$s moved deal from \"%2$s\" to \"%3$s\""
 msgstr ""
 
 msgid "%1$s moved to %2$s."
+msgstr ""
+
+msgid "%1$s must be at least %2$s"
+msgstr ""
+
+msgid "%1$s must be at most %2$s"
 msgstr ""
 
 msgid "%1$s scheduled for %2$s."
@@ -204,6 +213,9 @@ msgid "%s created this project"
 msgstr ""
 
 msgid "%s created this record"
+msgstr ""
+
+msgid "%s Data Import Tool"
 msgstr ""
 
 msgid "%s Details"
@@ -447,6 +459,9 @@ msgid "400px"
 msgstr ""
 
 msgid "600px"
+msgstr ""
+
+msgid "A %s account."
 msgstr ""
 
 msgid "A/B Split Campaign"
@@ -747,6 +762,9 @@ msgid "Add Availability Per Users"
 msgstr ""
 
 msgid "Add a WordPress page with the [doublescale_invoice] shortcode first."
+msgstr ""
+
+msgid "Add a WordPress page with the [doublescale_proposal] shortcode first."
 msgstr ""
 
 msgid "Add basic information below to add new List"
@@ -4343,6 +4361,9 @@ msgstr ""
 msgid "Copy of %s"
 msgstr ""
 
+msgid "Copy public link"
+msgstr ""
+
 msgid "Copyright © {{general:business_name}}"
 msgstr ""
 
@@ -5933,6 +5954,9 @@ msgstr ""
 msgid "Duplicate Goal"
 msgstr ""
 
+msgid "Duplicate proposal"
+msgstr ""
+
 msgid "Duplicating campaign..."
 msgstr ""
 
@@ -6624,6 +6648,9 @@ msgid "Enter a title for the availability"
 msgstr ""
 
 msgid "Enter a valid email address."
+msgstr ""
+
+msgid "Enter a valid hex code, e.g. #4C6FFF."
 msgstr ""
 
 msgid "Enter block name"
@@ -7406,6 +7433,9 @@ msgstr ""
 msgid "Failed to export template."
 msgstr ""
 
+msgid "Failed to fetch %s messages"
+msgstr ""
+
 msgid "Failed to fetch automation"
 msgstr ""
 
@@ -7746,6 +7776,9 @@ msgid "Failed to schedule meeting"
 msgstr ""
 
 msgid "Failed to schedule meeting. Please try again."
+msgstr ""
+
+msgid "Failed to send %s"
 msgstr ""
 
 msgid "Failed to send alert."
@@ -8420,6 +8453,9 @@ msgstr ""
 msgid "Getting Started"
 msgstr ""
 
+msgid "Give DoubleScale Full Access to manage %s."
+msgstr ""
+
 msgid "Give DoubleScale Full Access to manage Calendar."
 msgstr ""
 
@@ -8688,6 +8724,9 @@ msgid "Hero"
 msgstr ""
 
 msgid "Hero Image"
+msgstr ""
+
+msgid "Hex code"
 msgstr ""
 
 msgid "Hi"
@@ -8970,6 +9009,9 @@ msgid "Imported workflow"
 msgstr ""
 
 msgid "Importer not found"
+msgstr ""
+
+msgid "Importing %s Contacts"
 msgstr ""
 
 msgid "Importing..."
@@ -9909,6 +9951,9 @@ msgid "Leave empty to generate automatically"
 msgstr ""
 
 msgid "Leave empty to trigger for all categories."
+msgstr ""
+
+msgid "Leave empty to use the template default."
 msgstr ""
 
 msgid "Left"
@@ -15966,6 +16011,9 @@ msgid "Signed in as"
 msgstr ""
 
 msgid "Sign failed."
+msgstr ""
+
+msgid "Sign in to your %s account"
 msgstr ""
 
 msgid "Sign in to your ActiveCampaign account"

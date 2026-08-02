@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -283,7 +283,11 @@ const Integration: React.FC<IntegrationProps> = ({
 										>
 											{isSaving
 												? __('Connecting...', 'doublescale')
-												: __(`Connect ${label}`, 'doublescale')}
+												: sprintf(
+													/* translators: %s: integration name. */
+													__('Connect %s', 'doublescale'),
+													label
+												)}
 										</Button>
 									</CardFooter>
 								)}

@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 /**
  * external dependencies
  */
@@ -50,10 +50,11 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 		<div className="w-full h-full flex flex-col items-start justify-start">
 			<p className="text-[#09090B] text-2xl text-start">
 				{showingCompletion
-					? __(`Import Completed!`, 'doublescale')
-					: __(
-							`Importing ${importer?.name || source} Contacts`,
-							'doublescale'
+					? __('Import Completed!', 'doublescale')
+					: sprintf(
+							/* translators: %s: import source name, e.g. "HubSpot". */
+							__('Importing %s Contacts', 'doublescale'),
+							importer?.name || source
 						)}
 			</p>
 			<span className="text-lg text-[#71717A]">

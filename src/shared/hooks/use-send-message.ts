@@ -9,7 +9,7 @@
 
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import type { Contact } from '@doublescale/client';
 
@@ -258,7 +258,11 @@ export const useSendMessage = ({
 			return true;
 		} catch (err: any) {
 			// Extract error message from various WordPress REST API error formats
-			let errorMessage = __(`Failed to send ${channel}`, 'doublescale');
+			let errorMessage = sprintf(
+				/* translators: %s: message channel, e.g. "email" or "sms". */
+				__('Failed to send %s', 'doublescale'),
+				channel
+			);
 
 			// Try different error formats in order of specificity
 			if (err.message && typeof err.message === 'string') {

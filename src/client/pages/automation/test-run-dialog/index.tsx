@@ -1,17 +1,13 @@
 /**
- * Manual test run: enroll a chosen contact into the automation without the trigger.
+ * Manual run: enroll a chosen contact into the automation without the trigger.
  */
 
-import React, {
-	useState,
-	useRef,
-	useEffect,
-	useCallback,
-} from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useState, useRef, useEffect, useCallback } from '@wordpress/element';
+import type React from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { Search, X } from 'lucide-react';
+import { History, Search, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +33,14 @@ interface ContactHit {
 	last_name: string | null;
 }
 
+interface EnrollmentHistory {
+	contact_id: number;
+	runs: number;
+	last_run_at: string | null;
+	last_status: string;
+	has_test_run: boolean;
+}
+
 interface Props {
 	automation: Automation;
 	open: boolean;
@@ -47,6 +51,49 @@ interface Props {
 const contactLabel = (c: ContactHit): string => {
 	const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
 	return name ? `${name} <${c.email}>` : c.email;
+};
+
+/**
+ * Human readable "ran before" hint for a contact, or null when never enrolled.
+ */
+const enrollmentHint = (history?: EnrollmentHistory): string | null => {
+	if (!history || history.runs < 1) {
+		return null;
+	}
+
+	const parsed = history.last_run_at
+		? new Date(history.last_run_at.replace(' ', 'T'))
+		: null;
+	const when =
+		parsed && !Number.isNaN(parsed.getTime())
+			? parsed.toLocaleDateString()
+			: '';
+
+	if (history.runs > 1) {
+		return when
+			? sprintf(
+					/* translators: 1: number of previous runs, 2: date of the last run. */
+					__(
+						'Ran this automation %1$d times — last on %2$s',
+						'doublescale'
+					),
+					history.runs,
+					when
+				)
+			: sprintf(
+					/* translators: %d: number of previous runs. */
+					__('Ran this automation %d times', 'doublescale'),
+					history.runs
+				);
+	}
+
+	return when
+		? sprintf(
+				/* translators: %s: date of the previous run. */
+				__('Ran this automation on %s', 'doublescale'),
+				when
+			)
+		: __('Ran this automation before', 'doublescale');
 };
 
 const TestRunDialog: React.FC<Props> = ({
@@ -61,6 +108,9 @@ const TestRunDialog: React.FC<Props> = ({
 	const [searching, setSearching] = useState(false);
 	const [picked, setPicked] = useState<ContactHit | null>(null);
 	const [submitting, setSubmitting] = useState(false);
+	const [history, setHistory] = useState<Record<number, EnrollmentHistory>>(
+		{}
+	);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const resetState = () => {
@@ -68,6 +118,7 @@ const TestRunDialog: React.FC<Props> = ({
 		setResults([]);
 		setPicked(null);
 		setSearching(false);
+		setHistory({});
 	};
 
 	const handleOpenChange = (nextOpen: boolean) => {
@@ -83,27 +134,63 @@ const TestRunDialog: React.FC<Props> = ({
 		setResults([]);
 	};
 
-	const runSearch = useCallback((term: string) => {
-		if (!term.trim()) {
-			setResults([]);
-			return;
-		}
-		setSearching(true);
-		apiFetch<{ data: ContactHit[] }>({
-			path: `/doublescale/v1/contacts?keywords=${encodeURIComponent(
-				term.trim()
-			)}&per_page=8`,
-		})
-			.then((res) => {
-				setResults(Array.isArray(res?.data) ? res.data : []);
+	/**
+	 * Ask the backend which of these contacts already went through this
+	 * automation, so each result can carry a "ran before" hint.
+	 */
+	const loadHistory = useCallback(
+		(contacts: ContactHit[]) => {
+			if (contacts.length === 0) {
+				return;
+			}
+			apiFetch<{ data: EnrollmentHistory[] }>({
+				path: `/doublescale/v1/automations/${automation.id}/enrollment-history?contact_ids=${contacts
+					.map((c) => c.id)
+					.join(',')}`,
 			})
-			.catch(() => {
+				.then((res) => {
+					const rows = Array.isArray(res?.data) ? res.data : [];
+					setHistory((prev) => {
+						const next = { ...prev };
+						rows.forEach((row) => {
+							next[row.contact_id] = row;
+						});
+						return next;
+					});
+				})
+				.catch(() => {
+					// A missing hint should never break contact selection.
+				});
+		},
+		[automation.id]
+	);
+
+	const runSearch = useCallback(
+		(term: string) => {
+			if (!term.trim()) {
 				setResults([]);
+				return;
+			}
+			setSearching(true);
+			apiFetch<{ data: ContactHit[] }>({
+				path: `/doublescale/v1/contacts?keywords=${encodeURIComponent(
+					term.trim()
+				)}&per_page=8`,
 			})
-			.finally(() => {
-				setSearching(false);
-			});
-	}, []);
+				.then((res) => {
+					const hits = Array.isArray(res?.data) ? res.data : [];
+					setResults(hits);
+					loadHistory(hits);
+				})
+				.catch(() => {
+					setResults([]);
+				})
+				.finally(() => {
+					setSearching(false);
+				});
+		},
+		[loadHistory]
+	);
 
 	useEffect(() => {
 		if (!open || picked) {
@@ -147,7 +234,7 @@ const TestRunDialog: React.FC<Props> = ({
 			createNotice({
 				type: 'success',
 				message: __(
-					'Test run started. Check the Contacts tab to follow progress.',
+					'Manual run started. Check the Contacts tab to follow progress.',
 					'doublescale'
 				),
 			});
@@ -159,7 +246,7 @@ const TestRunDialog: React.FC<Props> = ({
 				type: 'error',
 				message:
 					err?.message ||
-					__('Failed to start the test run.', 'doublescale'),
+					__('Failed to start the manual run.', 'doublescale'),
 			});
 		} finally {
 			setSubmitting(false);
@@ -171,7 +258,7 @@ const TestRunDialog: React.FC<Props> = ({
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>
-						{__('Run test', 'doublescale')}
+						{__('Run manually', 'doublescale')}
 					</DialogTitle>
 					<DialogDescription>
 						{__(
@@ -189,8 +276,20 @@ const TestRunDialog: React.FC<Props> = ({
 
 					{picked ? (
 						<div className="flex items-center justify-between rounded-lg border border-border bg-white px-3 py-2">
-							<span className="text-sm text-foreground">
-								{contactLabel(picked)}
+							<span className="flex flex-col gap-0.5">
+								<span className="text-sm text-foreground">
+									{contactLabel(picked)}
+								</span>
+								{enrollmentHint(history[picked.id]) && (
+									<span className="flex items-center gap-1 text-xs text-amber-600">
+										<History
+											width={12}
+											height={12}
+											className="shrink-0"
+										/>
+										{enrollmentHint(history[picked.id])}
+									</span>
+								)}
 							</span>
 							<button
 								type="button"
@@ -234,20 +333,37 @@ const TestRunDialog: React.FC<Props> = ({
 											)}
 										</div>
 									)}
-									{results.map((c) => (
-										<button
-											key={c.id}
-											type="button"
-											className="block w-full px-3 py-2 text-left text-sm hover:bg-muted/60"
-											onClick={() => {
-												setPicked(c);
-												setResults([]);
-												setQuery('');
-											}}
-										>
-											{contactLabel(c)}
-										</button>
-									))}
+									{results.map((c) => {
+										const hint = enrollmentHint(
+											history[c.id]
+										);
+										return (
+											<button
+												key={c.id}
+												type="button"
+												className="block w-full px-3 py-2 text-left text-sm hover:bg-muted/60"
+												onClick={() => {
+													setPicked(c);
+													setResults([]);
+													setQuery('');
+												}}
+											>
+												<span className="block">
+													{contactLabel(c)}
+												</span>
+												{hint && (
+													<span className="mt-0.5 flex items-center gap-1 text-xs text-amber-600">
+														<History
+															width={12}
+															height={12}
+															className="shrink-0"
+														/>
+														{hint}
+													</span>
+												)}
+											</button>
+										);
+									})}
 								</div>
 							)}
 						</div>

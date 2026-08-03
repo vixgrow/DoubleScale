@@ -216,6 +216,27 @@ class RestAutomationController extends RestController {
 			)
 		);
 
+		// Look up which of the given contacts already went through this automation.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/enrollment-history',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'enrollment_history' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'contact_ids' => array(
+							'description'       => __( 'Comma separated contact IDs to look up.', 'doublescale' ),
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			)
+		);
+
 		// Export a single workflow as a portable JSON envelope.
 		register_rest_route(
 			$this->namespace,
@@ -1364,6 +1385,77 @@ class RestAutomationController extends RestController {
 				),
 				200
 			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Report which of the given contacts have already been enrolled in this automation.
+	 *
+	 * Used by the "Run manually" dialog to hint that a contact went through the
+	 * workflow before, so the same person is not run twice by accident.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function enrollment_history( $request ) {
+		try {
+			$id = (int) $request->get_param( 'id' );
+
+			$automation = AutomationModel::find( $id );
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$contact_ids = array_values(
+				array_unique(
+					array_filter(
+						array_map( 'absint', explode( ',', (string) $request->get_param( 'contact_ids' ) ) )
+					)
+				)
+			);
+
+			if ( empty( $contact_ids ) ) {
+				return new WP_REST_Response( array( 'data' => array() ), 200 );
+			}
+
+			// Cap the lookup so a crafted request cannot ask for an unbounded IN () list.
+			$contact_ids = array_slice( $contact_ids, 0, 100 );
+
+			$rows = AutomationContactModel::where( 'automation_id', $id )
+				->whereIn( 'contact_id', $contact_ids )
+				->orderBy( 'created_at', 'asc' )
+				->get();
+
+			$history = array();
+			foreach ( $rows as $row ) {
+				$contact_id = (int) $row->contact_id;
+				$data       = is_array( $row->data ) ? $row->data : array();
+
+				if ( ! isset( $history[ $contact_id ] ) ) {
+					$history[ $contact_id ] = array(
+						'contact_id'   => $contact_id,
+						'runs'         => 0,
+						'last_run_at'  => null,
+						'last_status'  => '',
+						'has_test_run' => false,
+					);
+				}
+
+				++$history[ $contact_id ]['runs'];
+				$history[ $contact_id ]['last_run_at'] = $row->created_at;
+				$history[ $contact_id ]['last_status'] = (string) $row->status;
+
+				if ( ! empty( $data['_test_run'] ) ) {
+					$history[ $contact_id ]['has_test_run'] = true;
+				}
+			}
+
+			return new WP_REST_Response( array( 'data' => array_values( $history ) ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

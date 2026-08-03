@@ -22,8 +22,6 @@ import type {
 	DataTableConfig,
 	ServerSortState,
 	WorkflowBulkExportResponse,
-	WorkflowBulkImportResponse,
-	WorkflowImportResult,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
@@ -38,6 +36,7 @@ import { isEmpty } from 'validator';
 import { NoticeMessage } from '@doublescale/client';
 import { formatDateForAPI } from '@doublescale/utils';
 import CreateAutomationModal from './create-automation-modal';
+import ImportWorkflowsModal from './import-workflows-modal';
 import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
@@ -79,42 +78,6 @@ const downloadJsonFile = (data: unknown, filename: string) => {
 	URL.revokeObjectURL(url);
 };
 
-const isSingleWorkflowEnvelope = (
-	payload: unknown
-): payload is Record<string, unknown> =>
-	typeof payload === 'object' &&
-	payload !== null &&
-	Boolean((payload as Record<string, unknown>)._doublescale_workflow) &&
-	typeof (payload as Record<string, unknown>).workflow === 'object';
-
-const isBulkWorkflowEnvelope = (
-	payload: unknown
-): payload is { workflows: unknown[] } =>
-	typeof payload === 'object' &&
-	payload !== null &&
-	Boolean((payload as Record<string, unknown>)._doublescale_workflows) &&
-	Array.isArray((payload as Record<string, unknown>).workflows);
-
-const extractWorkflowEnvelopes = (payloads: unknown[]): unknown[] => {
-	const envelopes: unknown[] = [];
-
-	payloads.forEach((payload) => {
-		if (isBulkWorkflowEnvelope(payload)) {
-			envelopes.push(...payload.workflows);
-		} else if (isSingleWorkflowEnvelope(payload)) {
-			envelopes.push(payload);
-		}
-	});
-
-	return envelopes;
-};
-
-const buildBulkImportPayload = (workflows: unknown[]) => ({
-	_doublescale_workflows: true,
-	format_version: 1,
-	workflows,
-});
-
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [page, setPage] = useState<number>(
@@ -131,6 +94,7 @@ const AutomationsList: React.FC = () => {
 		() => getListPreferences('automations').keyword ?? ''
 	);
 	const [visible, setVisible] = useState<boolean>(false);
+	const [importModalOpen, setImportModalOpen] = useState(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [automation, setAutomation] = useState({
 		name: '',
@@ -443,8 +407,6 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
-	const fileInputRef = useRef<HTMLInputElement>(null);
-
 	// Workflow import/export is a Pro-only feature.
 	const isPro = isProActive();
 
@@ -536,203 +498,31 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
-	const [isImporting, setIsImporting] = useState(false);
-
-	const getImportErrorMessage = (error: unknown): string => {
-		const err = error as {
-			message?: string;
-			code?: string;
-			results?: WorkflowImportResult[];
-			errors?: Array<{ name?: string; message?: string }>;
-		} | null;
-
-		if (!err || typeof err !== 'object') {
-			return __('Import failed.', 'doublescale');
-		}
-
-		// Bulk endpoint may reject with { results, errors } and no top-level message.
-		if (Array.isArray(err.errors) && err.errors.length > 0) {
-			return err.errors
-				.map((item) =>
-					item.name
-						? `${item.name}: ${item.message ?? ''}`.trim()
-						: item.message ?? ''
-				)
-				.filter(Boolean)
-				.join(' ');
-		}
-
-		if (typeof err.message === 'string' && err.message.trim() !== '') {
-			return err.message;
-		}
-
-		return __('Import failed.', 'doublescale');
-	};
-
-	const applyBulkImportResponse = async (
-		response: WorkflowBulkImportResponse
-	) => {
-		const results = Array.isArray(response?.results) ? response.results : [];
-		const errors = Array.isArray(response?.errors) ? response.errors : [];
-
-		if (results.length === 1 && errors.length === 0) {
-			navigate(getToLink(`automations/${results[0].id}`));
-			return;
-		}
-
-		setSelectedRowKeys([]);
-		// Show newest imports on page 1 even if the user was on a later page.
-		if (page !== 1) {
-			setPage(1);
-		} else {
-			await fetchAutomations();
-		}
-
-		const importedCount = results.length;
-		const errorCount = errors.length;
-		const warningCount = results.filter(
-			(result) =>
-				Array.isArray(result.unresolved) && result.unresolved.length > 0
-		).length;
-
-		if (importedCount === 0 && errorCount > 0) {
-			setListError({
-				type: 'error',
-				message: errors
-					.map((item) =>
-						item.name
-							? `${item.name}: ${item.message}`
-							: item.message
-					)
-					.filter(Boolean)
-					.join(' '),
-			});
-			return;
-		}
-
-		let message =
-			importedCount === 1
-				? __(
-						'1 workflow imported as inactive. Review it before activating.',
-						'doublescale'
-					)
-				: `${importedCount} workflow(s) imported as inactive. Review them before activating.`;
-
-		if (warningCount > 0) {
-			message += ` ${warningCount} have items that need review.`;
-		}
-		if (errorCount > 0) {
-			message += ` ${errorCount} could not be imported.`;
-		}
-
-		setListError({
-			type: errorCount > 0 ? 'warning' : 'success',
-			message,
-		});
-	};
-
 	const handleImportClick = () => {
 		if (!isPro) {
 			showProRequiredNotice();
 			return;
 		}
-		if (isImporting) {
-			return;
-		}
-		fileInputRef.current?.click();
+		setImportModalOpen(true);
 	};
 
-	// Import workflow(s) from JSON file(s): single file opens the editor;
-	// multiple files or a bulk envelope import all workflows and refresh the list.
-	const handleImportFile = async (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const files = event.target.files;
-		// Reset so selecting the same file again still fires onChange.
-		event.target.value = '';
-		if (!files?.length) {
-			return;
-		}
+	const handleImportModalClose = async () => {
+		setImportModalOpen(false);
+	};
 
-		setIsImporting(true);
-		setListError(null);
+	const handleImportFinished = async (result: {
+		imported: number;
+		failed: number;
+		singleId?: number;
+	}) => {
+		setSelectedRowKeys([]);
 
-		try {
-			const payloads: unknown[] = [];
-
-			for (const file of Array.from(files)) {
-				const text = await file.text();
-				try {
-					payloads.push(JSON.parse(text));
-				} catch {
-					setListError({
-						type: 'error',
-						message: __(
-							'The selected file is not valid JSON.',
-							'doublescale'
-						),
-					});
-					return;
-				}
+		if (result.imported > 0) {
+			if (page !== 1) {
+				setPage(1);
+			} else {
+				await fetchAutomations();
 			}
-
-			const envelopes = extractWorkflowEnvelopes(payloads);
-
-			if (envelopes.length === 0) {
-				setListError({
-					type: 'error',
-					message: __(
-						'No valid workflow exports were found in the selected file(s).',
-						'doublescale'
-					),
-				});
-				return;
-			}
-
-			const importPayload =
-				payloads.length === 1 && isBulkWorkflowEnvelope(payloads[0])
-					? payloads[0]
-					: buildBulkImportPayload(envelopes);
-
-			if (envelopes.length === 1 && !isBulkWorkflowEnvelope(payloads[0])) {
-				const response = (await apiFetch({
-					path: '/doublescale/v1/automations/import',
-					method: 'POST',
-					data: envelopes[0],
-				})) as WorkflowImportResult;
-
-				navigate(getToLink(`automations/${response.id}`));
-				return;
-			}
-
-			const response = (await apiFetch({
-				path: '/doublescale/v1/automations/import-bulk',
-				method: 'POST',
-				data: importPayload,
-			})) as WorkflowBulkImportResponse;
-
-			await applyBulkImportResponse(response);
-		} catch (error: unknown) {
-			const bulkError = error as WorkflowBulkImportResponse | null;
-			if (
-				bulkError &&
-				typeof bulkError === 'object' &&
-				(Array.isArray(bulkError.results) ||
-					Array.isArray(bulkError.errors))
-			) {
-				await applyBulkImportResponse({
-					results: bulkError.results ?? [],
-					errors: bulkError.errors ?? [],
-				});
-				return;
-			}
-
-			setListError({
-				type: 'error',
-				message: getImportErrorMessage(error),
-			});
-		} finally {
-			setIsImporting(false);
 		}
 	};
 
@@ -801,13 +591,10 @@ const AutomationsList: React.FC = () => {
 					className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
 					actions={[
 						{
-							label: isImporting
-								? __('Importing…', 'doublescale')
-								: __('Import', 'doublescale'),
+							label: __('Import', 'doublescale'),
 							onClick: handleImportClick,
 							variant: 'outline' as const,
 							icon: <Upload size={16} />,
-							disabled: isImporting,
 						},
 						{
 							label: __('Create Automation', 'doublescale'),
@@ -817,17 +604,8 @@ const AutomationsList: React.FC = () => {
 							},
 							variant: 'default' as const,
 							icon: <PlusIcon />,
-							disabled: isImporting,
 						},
 					]}
-				/>
-				<input
-					ref={fileInputRef}
-					type="file"
-					accept="application/json,.json"
-					multiple
-					className="hidden"
-					onChange={handleImportFile}
 				/>
 			</div>
 
@@ -872,6 +650,12 @@ const AutomationsList: React.FC = () => {
 					/>
 				)}
 			</div>
+
+			<ImportWorkflowsModal
+				open={importModalOpen}
+				onClose={handleImportModalClose}
+				onImported={handleImportFinished}
+			/>
 
 			<CreateAutomationModal
 				visible={visible}

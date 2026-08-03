@@ -734,7 +734,7 @@ const Automation: React.FC = () => {
 											disabled={isSaving}
 											onClick={() => setTestRunOpen(true)}
 										>
-											{__('Run test', 'doublescale')}
+											{__('Run manually', 'doublescale')}
 										</Button>
 										<Button
 											variant="default"

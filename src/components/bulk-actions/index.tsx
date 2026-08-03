@@ -29,6 +29,7 @@ import {
 	DeleteModal,
 } from '@doublescale/components';
 import ContactDeleteModal from '../../client/pages/contacts/all-contacts/contact-delete-modal';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 interface BulkActionSelectProps {
 	bulkAction: string;
@@ -189,11 +190,17 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				];
 			case 'automations':
 				return [
-					{
-						value: 'export',
-						label: __('Export', 'doublescale'),
-						icon: <Download size={16} />,
-					},
+					// Workflow export is Pro-only — omit it entirely on Free
+					// rather than showing it and nagging on click.
+					...(isProActive()
+						? [
+								{
+									value: 'export',
+									label: __('Export', 'doublescale'),
+									icon: <Download size={16} />,
+								},
+							]
+						: []),
 					{
 						value: 'delete',
 						label: __('Delete', 'doublescale'),

@@ -407,25 +407,13 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
-	// Workflow import/export is a Pro-only feature.
+	// Workflow import/export is a Pro-only feature — hidden entirely from the
+	// UI on Free (see the PageHeader actions and bulk-actions list below), so
+	// these handlers are only ever reachable when Pro is active.
 	const isPro = isProActive();
-
-	const showProRequiredNotice = () => {
-		setListError({
-			type: 'warning',
-			message: __(
-				'Importing and exporting workflows is available in DoubleScale Pro.',
-				'doublescale'
-			),
-		});
-	};
 
 	// Export a single workflow: fetch its portable envelope and download as JSON.
 	const exportAutomation = async (automationToExport: Automation) => {
-		if (!isPro) {
-			showProRequiredNotice();
-			return;
-		}
 		try {
 			const envelope = await apiFetch({
 				path: `/doublescale/v1/automations/${automationToExport.id}/export`,
@@ -447,11 +435,6 @@ const AutomationsList: React.FC = () => {
 	};
 
 	const exportSelected = async () => {
-		if (!isPro) {
-			showProRequiredNotice();
-			return;
-		}
-
 		if (selectedRowKeys.length === 0) {
 			return;
 		}
@@ -499,10 +482,6 @@ const AutomationsList: React.FC = () => {
 	};
 
 	const handleImportClick = () => {
-		if (!isPro) {
-			showProRequiredNotice();
-			return;
-		}
 		setImportModalOpen(true);
 	};
 
@@ -590,12 +569,18 @@ const AutomationsList: React.FC = () => {
 					rowClassName="flex-row items-center justify-between w-full [&_h1]:min-w-0"
 					className="flex-row shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-6"
 					actions={[
-						{
-							label: __('Import', 'doublescale'),
-							onClick: handleImportClick,
-							variant: 'outline' as const,
-							icon: <Upload size={16} />,
-						},
+						// Workflow import is Pro-only — omit it entirely on
+						// Free rather than showing it and nagging on click.
+						...(isPro
+							? [
+									{
+										label: __('Import', 'doublescale'),
+										onClick: handleImportClick,
+										variant: 'outline' as const,
+										icon: <Upload size={16} />,
+									},
+								]
+							: []),
 						{
 							label: __('Create Automation', 'doublescale'),
 							onClick: () => {

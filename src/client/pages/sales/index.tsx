@@ -16,6 +16,7 @@ import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketin
 import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContractsProGate, InvoicesProGate, PaymentsProGate } from './pro-gates';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 const ProposalsList = lazy(() => import('./proposals'));
 const ProposalView = lazy(() => import('./proposals/view'));
@@ -47,6 +48,7 @@ const resolveSalesLandingPath = (): string | null => {
 		Object.values(getAdminPages()).map((page) => page.path)
 	);
 	if (
+		isProActive() &&
 		config.isModuleToggleEnabled('deals') &&
 		registeredPaths.has('sales-pipeline')
 	) {
@@ -158,6 +160,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <InvoicesProGate />,
 		label: __('Invoices', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -166,6 +169,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <InvoicesProGate />,
 		label: __('New Invoice', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -174,6 +178,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <InvoicesProGate />,
 		label: __('Invoice', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -182,6 +187,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <InvoicesProGate />,
 		label: __('Edit Invoice', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -190,6 +196,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <PaymentsProGate />,
 		label: __('Payments', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -199,6 +206,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <ContractsProGate />,
 		label: __('Contracts', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...contractPageDefaults,
 	});
 
@@ -207,6 +215,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <ContractsProGate />,
 		label: __('New Contract', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...contractPageDefaults,
 	});
 
@@ -215,6 +224,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <ContractsProGate />,
 		label: __('Contract', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...contractPageDefaults,
 	});
 
@@ -223,6 +233,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <ContractsProGate />,
 		label: __('Edit Contract', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...contractPageDefaults,
 	});
 
@@ -231,6 +242,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <ContractsProGate />,
 		label: __('Contract Types', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...contractPageDefaults,
 	});
 
@@ -239,6 +251,7 @@ if (isSalesDocumentsReady()) {
 		component: () => <PaymentsProGate />,
 		label: __('Payment', 'doublescale'),
 		hidden: true,
+		requiresPro: true,
 		...documentsPageDefaults,
 	});
 

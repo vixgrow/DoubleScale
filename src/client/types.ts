@@ -185,6 +185,13 @@ export type AutomationProcess = {
 	updated_at: string;
 };
 
+export type CanvasNote = {
+	id: string;
+	content: string;
+	position: { x: number; y: number };
+	color?: string;
+};
+
 export type Automation = {
 	id: number;
 	name: string;
@@ -195,6 +202,8 @@ export type Automation = {
 		_trigger_label?: string;
 		_trigger_warning?: boolean;
 		_trigger_warning_message?: string;
+		reactflow_positions?: Record<string, { x: number; y: number }>;
+		canvas_notes?: CanvasNote[];
 		[key: string]: any;
 	};
 	created_by?: number | null;
@@ -552,6 +561,7 @@ export type AutomationStep = {
 		_action_warning?: boolean;
 		_action_warning_message?: string;
 		_condition_warning?: boolean;
+		custom_label?: string;
 		[key: string]: any;
 	};
 
@@ -853,6 +863,32 @@ export type AutomationsResponse = Response & {
 	total_count: number;
 };
 
+export type WorkflowImportResult = {
+	id: number;
+	name: string;
+	unresolved: unknown[];
+};
+
+export type WorkflowBulkImportResponse = {
+	results: WorkflowImportResult[];
+	errors: Array<{
+		name?: string;
+		message: string;
+	}>;
+};
+
+export type WorkflowBulkExportResponse = {
+	_doublescale_workflows: true;
+	format_version: number;
+	exported_from: string;
+	exported_at: string;
+	workflows: unknown[];
+	errors?: Array<{
+		id: number;
+		message: string;
+	}>;
+};
+
 export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
 
 export type CampaignsResponse = Response & {
@@ -924,6 +960,14 @@ export type Log = {
 	};
 };
 
+/**
+ * A server-side sort: which column, and in which direction.
+ */
+export type ServerSortState = {
+	orderby: string;
+	order: 'asc' | 'desc';
+};
+
 export interface DataTableConfig<TData> {
 	manageColumns?: {
 		enabled: boolean;
@@ -986,6 +1030,18 @@ export interface DataTableConfig<TData> {
 		};
 		onFiltersChange: (filters: any) => void;
 		onClear: () => void;
+	};
+	/**
+	 * Server-side sorting.
+	 *
+	 * When provided, the table stops reordering rows locally and reports sort
+	 * changes to the page instead, which refetches. Without this the table can
+	 * only sort the rows it currently holds — one page — so "sort by name"
+	 * silently means "sort this page by name".
+	 */
+	sorting?: {
+		value: ServerSortState | null;
+		onSortChange: (sort: ServerSortState | null) => void;
 	};
 	initialColumnVisibility?: Record<string, boolean>;
 	toolbarClassName?: string;

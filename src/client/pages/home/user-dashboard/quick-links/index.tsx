@@ -22,6 +22,7 @@ import {
 } from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { cn } from '@/lib/utils';
 
 
@@ -40,9 +41,9 @@ export const QuickLinks: FC = () => {
 			to: getToLink('contacts'),
 			icon: <AddContactIcon color='#0D9DFC' width={27} height={27} />,
 		},
-		// Pipeline is a child feature of Sales — hide the deal shortcut when it
-		// is toggled off (same gate as the sidebar entry).
-		...(config.isModuleToggleEnabled('deals')
+		// Sales Pipeline is a Pro-only route — hide the deal shortcut on Free
+		// (same gate as the sidebar entry) or when the module is toggled off.
+		...(config.isModuleToggleEnabled('deals') && isProActive()
 			? [
 					{
 						label: __('Create Deal', 'doublescale'),

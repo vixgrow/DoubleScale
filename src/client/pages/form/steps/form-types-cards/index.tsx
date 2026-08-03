@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { ArrowRight, Info, Plug } from 'lucide-react';
-import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -21,7 +20,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { useTypeformIntegrationStatus } from '@/hooks/use-typeform-integration-status';
 import { useJotformIntegrationStatus } from '@/hooks/use-jotform-integration-status';
@@ -137,8 +135,6 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 	onSelect,
 }) => {
 	const navigate = useNavigate();
-	const [showProModal, setShowProModal] = useState(false);
-	const [selectedProFeature, setSelectedProFeature] = useState<string>('');
 	const proAddonActive = isProActive();
 	const { isConnected: isTypeformConnected, isLoading: isTypeformStatusLoading } =
 		useTypeformIntegrationStatus();
@@ -226,8 +222,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 		const setupRequired = needsIntegrationSetup(key, formType);
 
 		if (isProLocked) {
-			setSelectedProFeature(formType.label);
-			setShowProModal(true);
+			// Pro-locked cards are inert — no upgrade popup on click.
 			return;
 		}
 
@@ -458,14 +453,6 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 					) : undefined
 				)}
 			</div>
-
-			{showProModal && (
-				<ProAutomationModal
-					visible={showProModal}
-					onClose={() => setShowProModal(false)}
-					featureName={selectedProFeature}
-				/>
-			)}
 		</>
 	);
 };

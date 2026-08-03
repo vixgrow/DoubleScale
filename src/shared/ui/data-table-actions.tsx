@@ -21,7 +21,6 @@ import {
 	GradientColumnsIcon,
 	DeleteIcon,
 } from '@doublescale/components';
-import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { DataTableConfig } from '@doublescale/client';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './date-range-picker';
@@ -40,7 +39,7 @@ import { CampaignFilters } from '@/components/campaign-filters';
 import RulesBuilder from '@/components/rules-builder';
 import type { RuleItem } from '@/components/rules-builder';
 import { Delete, getFilteredRulesGroups, getInitialRule } from '@/utils';
-import { Lock, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
 	Select,
 	SelectContent,
@@ -70,7 +69,6 @@ export function DataTableActions<TData>({
 	const [tempCampaignFilters, setTempCampaignFilters] = useState<any>(null);
 	const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 	const [tempRules, setTempRules] = useState<Array<Array<RuleItem>>>([]);
-	const [showProModal, setShowProModal] = useState(false);
 
 	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
@@ -149,12 +147,6 @@ export function DataTableActions<TData>({
 
 	// Initialize temp rules when advanced filters dialog opens
 	const handleAdvancedFiltersDialogOpen = () => {
-		// Check if Pro is active before opening advanced filters
-		if (!isProActive) {
-			setShowProModal(true);
-			return;
-		}
-
 		if (config.filters) {
 			const currentFilters = config.filters.currentFilters || [];
 
@@ -329,84 +321,70 @@ export function DataTableActions<TData>({
 					</Dialog>
 				)}
 
-			{/* Advanced Filters Button */}
-			{config.filters?.enabled && (
-				<>
-					<Dialog
-						open={isAdvancedFiltersOpen}
-						onOpenChange={(open) => {
-							if (open) {
-								handleAdvancedFiltersDialogOpen();
-							} else {
-								setIsAdvancedFiltersOpen(false);
-							}
-						}}
-					>
-						<DialogTrigger asChild>
-							<Button
-								variant="outline"
-								onClick={handleAdvancedFiltersDialogOpen}
-								className={`${actionButtonClassName} relative`}
-							>
-								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
-									<FiltersIcon width={14} height={14} />
-								</span>
-								<span className="text-foreground">
-									{__('Advanced Filters', 'doublescale')}
-								</span>
-								{!isProActive && (
-									<Lock className="!h-6 !w-6 text-amber-500 absolute -top-2.5 -right-1.5 bg-white rounded-full p-1" />
-								)}
-							</Button>
-						</DialogTrigger>
-						<DialogContent className="max-w-[1100px] max-h-[90vh] min-w-0 overflow-x-hidden overflow-y-auto">
-							<DialogHeader>
-								<DialogTitle>
-									<CustomDialogHeader
-										title={__(
-											'Advanced Filters',
-											'doublescale'
-										)}
-										subtitle={__(
-											'Manage your filters for better data insights',
-											'doublescale'
-										)}
-										icon={<GradientFilterIcon />}
-									/>
-								</DialogTitle>
-							</DialogHeader>
-							{tempRules.length > 0 && (
-								<RulesBuilder
-									className="min-w-0 w-full"
-									rules={tempRules}
-									onChange={setTempRules}
-									rulesGroups={rulesGroups}
+			{/* Advanced Filters Button — Pro only, hidden entirely in Free */}
+			{config.filters?.enabled && isProActive && (
+				<Dialog
+					open={isAdvancedFiltersOpen}
+					onOpenChange={(open) => {
+						if (open) {
+							handleAdvancedFiltersDialogOpen();
+						} else {
+							setIsAdvancedFiltersOpen(false);
+						}
+					}}
+				>
+					<DialogTrigger asChild>
+						<Button
+							variant="outline"
+							onClick={handleAdvancedFiltersDialogOpen}
+							className={actionButtonClassName}
+						>
+							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
+								<FiltersIcon width={14} height={14} />
+							</span>
+							<span className="text-foreground">
+								{__('Advanced Filters', 'doublescale')}
+							</span>
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="max-w-[1100px] max-h-[90vh] min-w-0 overflow-x-hidden overflow-y-auto">
+						<DialogHeader>
+							<DialogTitle>
+								<CustomDialogHeader
+									title={__(
+										'Advanced Filters',
+										'doublescale'
+									)}
+									subtitle={__(
+										'Manage your filters for better data insights',
+										'doublescale'
+									)}
+									icon={<GradientFilterIcon />}
 								/>
-							)}
-							<DialogFooter>
-								<Button
-									onClick={handleApplyAdvancedFilters}
-									disabled={config.filters?.isApplying}
-									className="w-full"
-									variant="outline"
-								>
-									{config.filters?.isApplying
-										? __('Applying...', 'doublescale')
-										: __('Apply Filters', 'doublescale')}
-								</Button>
-							</DialogFooter>
-						</DialogContent>
-					</Dialog>
-
-					{/* Pro Feature Modal */}
-					{showProModal && (
-						<ProAutomationModal
-							visible={showProModal}
-							onClose={() => setShowProModal(false)}
-							featureName={__('Advanced Filters', 'doublescale')}
-						/>
-					)}
-				</>
+							</DialogTitle>
+						</DialogHeader>
+						{tempRules.length > 0 && (
+							<RulesBuilder
+								className="min-w-0 w-full"
+								rules={tempRules}
+								onChange={setTempRules}
+								rulesGroups={rulesGroups}
+							/>
+						)}
+						<DialogFooter>
+							<Button
+								onClick={handleApplyAdvancedFilters}
+								disabled={config.filters?.isApplying}
+								className="w-full"
+								variant="outline"
+							>
+								{config.filters?.isApplying
+									? __('Applying...', 'doublescale')
+									: __('Apply Filters', 'doublescale')}
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 			)}
 
 			{/* Manage Columns Dropdown */}

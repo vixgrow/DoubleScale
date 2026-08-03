@@ -1,10 +1,10 @@
-=== DoubleScale | Self-Hosted CRM & Business Platform ===
+=== DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
 Contributors: samuelgallegos, vixgrowy
 Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.2.18
+Stable tag: 1.2.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,16 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.2.19 = 31 Jul 2026
+- Add timezone configuration for more accurate date/time handling
+- Add duplicate and status-update actions for invoices and proposals
+- Add Save as Draft when sending invoices/proposals
+- Add copy public link for proposals
+- Add hex color input in document template style editor
+- Validate manual document numbers for proposals and invoices
+- Improve localization/translation loading across admin UI components
+- Restore plugin title branding (Alternative to HubSpot & GoHighLevel)
+
 = 1.2.18 = 29 Jul 2026
 - Add task automation triggers and actions
 - Improve Automations UI with tabbed action categories, clearer trigger groups (including e-commerce and Pro form vendors), and better empty-group handling

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Power } from 'lucide-react';
 import { useState } from 'react';
 /**
  * Internal dependencies
@@ -35,22 +35,29 @@ import {
 } from '../../automation-dialog-presets';
 import { CopyIcon, DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
+import { Pencil } from 'lucide-react';
 
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
+	onRename?: () => void;
+	onToggleEnabled?: () => void | Promise<void>;
 	editLabel?: string;
 	deleteLabel?: string;
 	duplicateLabel?: string;
 	changeTriggerLabel?: string;
+	renameLabel?: string;
+	toggleEnabledLabel?: string;
 	deleteTitle?: string;
 	deleteDescription?: string;
 	showEdit?: boolean;
 	showDelete?: boolean;
 	showDuplicate?: boolean;
 	showChangeTrigger?: boolean;
+	showRename?: boolean;
+	showToggleEnabled?: boolean;
 	disabled?: boolean;
 }
 
@@ -59,16 +66,22 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onDelete,
 	onDuplicate,
 	onChangeTrigger,
+	onRename,
+	onToggleEnabled,
 	editLabel = __('Edit', 'doublescale'),
 	deleteLabel = __('Delete', 'doublescale'),
 	duplicateLabel = __('Duplicate', 'doublescale'),
 	changeTriggerLabel = __('Change Trigger', 'doublescale'),
+	renameLabel = __('Rename', 'doublescale'),
+	toggleEnabledLabel = __('Disable', 'doublescale'),
 	deleteTitle = __('Delete this item?', 'doublescale'),
 	deleteDescription = __('This action cannot be undone.', 'doublescale'),
 	showEdit = true,
 	showDelete = true,
 	showDuplicate = false,
 	showChangeTrigger = false,
+	showRename = false,
+	showToggleEnabled = false,
 	disabled = false,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -76,7 +89,12 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 
 	if (
 		disabled ||
-		(!showEdit && !showDelete && !showDuplicate && !showChangeTrigger)
+		(!showEdit &&
+			!showDelete &&
+			!showDuplicate &&
+			!showChangeTrigger &&
+			!showRename &&
+			!showToggleEnabled)
 	) {
 		return null;
 	}
@@ -125,7 +143,16 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
 						align="end"
-						className="z-[150000]"
+						// The menu renders inside the node (removePortal), so Radix
+						// caps its height to the room below the trigger. Near the top
+						// or bottom of the canvas that clipped the lower items —
+						// Duplicate and Delete could scroll out of sight entirely.
+						// Flip to whichever side has space and keep clear of the edges.
+						side="bottom"
+						sideOffset={4}
+						avoidCollisions={true}
+						collisionPadding={16}
+						className="z-[150000] max-h-none"
 						removePortal={true}
 						onClick={(e) => e.stopPropagation()}
 					>
@@ -136,6 +163,15 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							>
 								<EditHeaderIcon />
 								<span>{editLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showRename && onRename && (
+							<DropdownMenuItem
+								onClick={onRename}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<Pencil className="h-4 w-4" />
+								<span>{renameLabel}</span>
 							</DropdownMenuItem>
 						)}
 						{showChangeTrigger && onChangeTrigger && (
@@ -156,6 +192,17 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							>
 								<CopyIcon />
 								<span>{duplicateLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showToggleEnabled && onToggleEnabled && (
+							<DropdownMenuItem
+								onClick={() => {
+									void onToggleEnabled();
+								}}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<Power className="h-4 w-4" />
+								<span>{toggleEnabledLabel}</span>
 							</DropdownMenuItem>
 						)}
 						{showDelete && onDelete && (

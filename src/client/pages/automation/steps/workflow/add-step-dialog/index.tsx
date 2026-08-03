@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { useState } from '@wordpress/element';
 import { map } from 'lodash';
 
 /**
@@ -39,7 +38,6 @@ import {
 	TimerBlockIcon,
 	WorkflowIcon,
 } from '@doublescale/components';
-import { ProAutomationModal } from '@doublescale/components/pro-automation-modal';
 import EndAutomationIcon from '@doublescale/shared/icons/end-automation';
 
 interface StepTypeOption {
@@ -123,8 +121,6 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 		false
 	) as boolean;
 
-	const [showProModal, setShowProModal] = useState(false);
-
 	return (
 		<>
 			<Dialog open={visible} onOpenChange={onVisibleChange}>
@@ -202,7 +198,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 												type.topBorder,
 												isEnd &&
 												'max-w-full sm:max-w-[calc(50%-0.75rem)]',
-												loading &&
+												(loading || isConditionLocked) &&
 												'pointer-events-none opacity-50'
 											)}
 										>
@@ -235,13 +231,9 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 													variant="secondaryDeepBlue"
 													size="sm"
 													className="mt-0.5 shrink-0 self-start shadow-none"
-													disabled={loading}
+													disabled={loading || isConditionLocked}
 													onClick={(e) => {
 														e.stopPropagation();
-														if (isConditionLocked) {
-															setShowProModal(true);
-															return;
-														}
 														onStepSelection(key);
 													}}
 												>
@@ -256,12 +248,6 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 					</div>
 				</DialogContent>
 			</Dialog>
-
-			<ProAutomationModal
-				visible={showProModal}
-				onClose={() => setShowProModal(false)}
-				featureName={__('Condition Step', 'doublescale')}
-			/>
 		</>
 	);
 };

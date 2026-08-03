@@ -4,6 +4,7 @@ import {
 	getListPreferences,
 	type ListPreferenceKey,
 	type ListPreferenceValues,
+	primeListPreferences,
 	updateListPreferences,
 } from '@doublescale/services/list-preferences-service';
 
@@ -19,6 +20,11 @@ export function useListPreferencesPersistence(
 ): void {
 	const { enabled = true, debounceMs = 400 } = options;
 	const isFirstRun = useRef(true);
+	const latestValues = useRef(values);
+	const listKeyRef = useRef(listKey);
+
+	latestValues.current = values;
+	listKeyRef.current = listKey;
 
 	const save = useMemo(
 		() =>
@@ -37,6 +43,13 @@ export function useListPreferencesPersistence(
 			// Flush pending debounced saves when the page unmounts (e.g. SPA tab change)
 			// so preferences are not lost before the 400ms debounce fires.
 			save.flush();
+
+			// flush() only fires a save that was already pending, and the PUT it
+			// starts is async — nothing can await it from a synchronous cleanup.
+			// Prime the in-memory config directly so a page remounting after SPA
+			// navigation reads the user's latest filters no matter where the
+			// network request got to.
+			primeListPreferences(listKeyRef.current, latestValues.current);
 		};
 	}, [save]);
 

@@ -121,6 +121,7 @@ registerAdminPage('support-custom-fields', {
 	icon: <SupportIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_manage_support_settings'],
 	requiresModule: 'support',
+	requiresPro: true,
 });
 
 registerAdminPage('support-incoming-webhook', {
@@ -131,6 +132,7 @@ registerAdminPage('support-incoming-webhook', {
 	icon: <SupportIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_manage_support_settings'],
 	requiresModule: 'support',
+	requiresPro: true,
 });
 
 registerAdminPage('support-auto-close', {
@@ -141,4 +143,5 @@ registerAdminPage('support-auto-close', {
 	icon: <SupportIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_manage_support_settings'],
 	requiresModule: 'support',
+	requiresPro: true,
 });

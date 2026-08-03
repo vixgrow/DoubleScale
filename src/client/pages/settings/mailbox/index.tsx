@@ -32,6 +32,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { PageTabs } from '@doublescale/components';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 interface SharedIdentity {
 	from_email: string;
@@ -239,9 +240,7 @@ const MailboxSettings: React.FC = () => {
 	const { isCrmManager } = useCapabilities();
 
 	const canManage = useMemo(() => isCrmManager(), [isCrmManager]);
-
-	const defaultTab = canManage ? 'shared' : 'personal';
-	const [activeTab, setActiveTab] = useState(defaultTab);
+	const proActive = isProActive();
 
 	const SharedEmailComponent = useMemo(
 		() =>
@@ -298,30 +297,49 @@ const MailboxSettings: React.FC = () => {
 			});
 		}
 
-		tabs.push({
-			value: 'personal',
-			label: 'Personal Email',
-			icon: <UserCircle size={18} />,
-		});
-
-		if (canManage) {
+		// Personal Email and Provider Setup have no free functionality — a
+		// bare "connect your email" stub with nothing to configure — so they
+		// stay hidden entirely until Pro is active, rather than showing a
+		// locked tab.
+		if (proActive) {
 			tabs.push({
-				value: 'provider-setup',
-				label: 'Email Provider Setup',
-				icon: <ShieldCheck size={18} />,
+				value: 'personal',
+				label: 'Personal Email',
+				icon: <UserCircle size={18} />,
 			});
+
+			if (canManage) {
+				tabs.push({
+					value: 'provider-setup',
+					label: 'Email Provider Setup',
+					icon: <ShieldCheck size={18} />,
+				});
+			}
 		}
 
 		return tabs;
-	}, [canManage]);
+	}, [canManage, proActive]);
+
+	const [activeTab, setActiveTab] = useState(mailboxTabsList[0]?.value);
+
+	useEffect(() => {
+		if (
+			mailboxTabsList.length > 0 &&
+			!mailboxTabsList.some((tab) => tab.value === activeTab)
+		) {
+			setActiveTab(mailboxTabsList[0].value);
+		}
+	}, [mailboxTabsList, activeTab]);
 
 	const mailboxTabsContent = useMemo(
 		() => [
 			...(canManage
 				? [{ value: 'shared', children: <SharedEmailComponent /> }]
 				: []),
-			{ value: 'personal', children: <PersonalEmailComponent /> },
-			...(canManage
+			...(proActive
+				? [{ value: 'personal', children: <PersonalEmailComponent /> }]
+				: []),
+			...(proActive && canManage
 				? [
 						{
 							value: 'provider-setup',
@@ -332,16 +350,30 @@ const MailboxSettings: React.FC = () => {
 		],
 		[
 			canManage,
+			proActive,
 			SharedEmailComponent,
 			PersonalEmailComponent,
 			EmailProviderSetupComponent,
 		]
 	);
 
+	if (mailboxTabsList.length === 0) {
+		return (
+			<div className="space-y-6">
+				<p className="text-sm text-muted-foreground">
+					{__(
+						'Nothing to configure here yet.',
+						'doublescale'
+					)}
+				</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
 			<PageTabs
-				defaultValue={defaultTab}
+				defaultValue={activeTab}
 				value={activeTab}
 				onValueChange={setActiveTab}
 				tabsList={mailboxTabsList}

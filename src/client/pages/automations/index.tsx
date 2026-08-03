@@ -20,6 +20,8 @@ import type {
 	Automation,
 	AutomationsResponse,
 	DataTableConfig,
+	ServerSortState,
+	WorkflowBulkExportResponse,
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
@@ -34,6 +36,7 @@ import { isEmpty } from 'validator';
 import { NoticeMessage } from '@doublescale/client';
 import { formatDateForAPI } from '@doublescale/utils';
 import CreateAutomationModal from './create-automation-modal';
+import ImportWorkflowsModal from './import-workflows-modal';
 import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
@@ -42,13 +45,44 @@ import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
 	getListPreferences,
 	parseSavedDateRange,
+	parseSavedSort,
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
 
+/**
+ * Columns the automations list can be sorted by.
+ *
+ * Mirrors RestAutomationController::SORTABLE_COLUMNS — the server rejects
+ * anything else, so keep the two in step.
+ */
+const AUTOMATION_SORTABLE_COLUMNS = [
+	'name',
+	'trigger',
+	'status',
+	'created_at',
+	'updated_at',
+] as const;
+
+const downloadJsonFile = (data: unknown, filename: string) => {
+	const blob = new Blob([JSON.stringify(data, null, 2)], {
+		type: 'application/json',
+	});
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = filename;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
+};
+
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
-	const [page, setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(
+		() => getListPreferences('automations').page ?? 1
+	);
 	const [perPage, setPerPage] = useState<number>(
 		() => getListPreferences('automations').per_page ?? 10
 	);
@@ -60,6 +94,7 @@ const AutomationsList: React.FC = () => {
 		() => getListPreferences('automations').keyword ?? ''
 	);
 	const [visible, setVisible] = useState<boolean>(false);
+	const [importModalOpen, setImportModalOpen] = useState(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [automation, setAutomation] = useState({
 		name: '',
@@ -72,16 +107,24 @@ const AutomationsList: React.FC = () => {
 	}>(() =>
 		parseSavedDateRange(getListPreferences('automations').date_range)
 	);
+	const [sort, setSort] = useState<ServerSortState | null>(() =>
+		parseSavedSort(
+			getListPreferences('automations').sort,
+			AUTOMATION_SORTABLE_COLUMNS
+		)
+	);
 
 	useListPreferencesPersistence(
 		'automations',
 		useMemo(
 			() => ({
+				page,
 				per_page: perPage,
 				keyword,
 				date_range: serializeDateRange(dateRange),
+				sort,
 			}),
-			[dateRange, keyword, perPage]
+			[dateRange, keyword, page, perPage, sort]
 		)
 	);
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
@@ -116,6 +159,9 @@ const AutomationsList: React.FC = () => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					...(sort
+						? { orderby: sort.orderby, order: sort.order }
+						: {}),
 				}),
 				method: 'GET',
 			})) as AutomationsResponse;
@@ -133,9 +179,22 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	// Narrowing the result set invalidates the current page number: staying on
+	// page 3 of a different result set shows a confusingly empty table. Skipped
+	// on mount so a restored page survives the initial render.
+	const isInitialFilterRun = useRef(true);
+	useEffect(() => {
+		if (isInitialFilterRun.current) {
+			isInitialFilterRun.current = false;
+			return;
+		}
+
+		setPage(1);
+	}, [keyword, dateRange, sort]);
+
 	useEffect(() => {
 		fetchAutomations();
-	}, [page, perPage, keyword, dateRange]);
+	}, [page, perPage, keyword, dateRange, sort]);
 
 	const createAutomation = async () => {
 		if (!validate(automation)) {
@@ -348,8 +407,6 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
-	const fileInputRef = useRef<HTMLInputElement>(null);
-
 	// Workflow import/export is a Pro-only feature.
 	const isPro = isProActive();
 
@@ -375,22 +432,64 @@ const AutomationsList: React.FC = () => {
 				method: 'GET',
 			});
 
-			const blob = new Blob([JSON.stringify(envelope, null, 2)], {
-				type: 'application/json',
-			});
-			const url = URL.createObjectURL(blob);
 			const slug =
 				(automationToExport.name || 'workflow')
 					.toLowerCase()
 					.replace(/[^a-z0-9]+/g, '-')
 					.replace(/^-+|-+$/g, '') || 'workflow';
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = `workflow-${slug}.json`;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			URL.revokeObjectURL(url);
+			downloadJsonFile(envelope, `workflow-${slug}.json`);
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
+	const exportSelected = async () => {
+		if (!isPro) {
+			showProRequiredNotice();
+			return;
+		}
+
+		if (selectedRowKeys.length === 0) {
+			return;
+		}
+
+		try {
+			const envelope = (await apiFetch({
+				path: '/doublescale/v1/automations/export-bulk',
+				method: 'POST',
+				data: {
+					ids: selectedRowKeys.map((id) => Number(id)),
+				},
+			})) as WorkflowBulkExportResponse;
+
+			downloadJsonFile(envelope, 'workflows-export.json');
+			setSelectedRowKeys([]);
+			setBulkAction('');
+
+			const exportedCount = envelope.workflows.length;
+			const errorCount = envelope.errors?.length ?? 0;
+
+			if (errorCount > 0) {
+				setListError({
+					type: 'warning',
+					message: __(
+						`${exportedCount} workflow(s) exported. ${errorCount} could not be exported.`,
+						'doublescale'
+					),
+				});
+				return;
+			}
+
+			setListError({
+				type: 'success',
+				message: __(
+					`${exportedCount} workflow(s) exported successfully.`,
+					'doublescale'
+				),
+			});
 		} catch (error: any) {
 			setListError({
 				type: 'error',
@@ -404,49 +503,26 @@ const AutomationsList: React.FC = () => {
 			showProRequiredNotice();
 			return;
 		}
-		fileInputRef.current?.click();
+		setImportModalOpen(true);
 	};
 
-	// Import a workflow from a JSON file: POST the parsed envelope, then open the
-	// new (inactive) automation in the editor, which surfaces any unresolved refs.
-	const handleImportFile = async (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const file = event.target.files?.[0];
-		// Reset so selecting the same file again still fires onChange.
-		event.target.value = '';
-		if (!file) {
-			return;
-		}
+	const handleImportModalClose = async () => {
+		setImportModalOpen(false);
+	};
 
-		try {
-			const text = await file.text();
-			let payload: unknown;
-			try {
-				payload = JSON.parse(text);
-			} catch {
-				setListError({
-					type: 'error',
-					message: __(
-						'The selected file is not valid JSON.',
-						'doublescale'
-					),
-				});
-				return;
+	const handleImportFinished = async (result: {
+		imported: number;
+		failed: number;
+		singleId?: number;
+	}) => {
+		setSelectedRowKeys([]);
+
+		if (result.imported > 0) {
+			if (page !== 1) {
+				setPage(1);
+			} else {
+				await fetchAutomations();
 			}
-
-			const response = (await apiFetch({
-				path: '/doublescale/v1/automations/import',
-				method: 'POST',
-				data: payload,
-			})) as { id: number; name: string; unresolved: unknown[] };
-
-			navigate(getToLink(`automations/${response.id}`));
-		} catch (error: any) {
-			setListError({
-				type: 'error',
-				message: error.message,
-			});
 		}
 	};
 
@@ -454,6 +530,9 @@ const AutomationsList: React.FC = () => {
 		switch (action) {
 			case 'delete':
 				deleteSelected();
+				break;
+			case 'export':
+				exportSelected();
 				break;
 			default:
 				break;
@@ -497,6 +576,10 @@ const AutomationsList: React.FC = () => {
 			onDateChange: setDateRange,
 			placeholder: __('Date Range', 'doublescale'),
 		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
+		},
 	};
 
 	return (
@@ -524,13 +607,6 @@ const AutomationsList: React.FC = () => {
 						},
 					]}
 				/>
-				<input
-					ref={fileInputRef}
-					type="file"
-					accept="application/json,.json"
-					className="hidden"
-					onChange={handleImportFile}
-				/>
 			</div>
 
 			{listError && (
@@ -548,6 +624,7 @@ const AutomationsList: React.FC = () => {
 							columns={columns}
 							data={data}
 							config={tableConfig}
+							activeTab="automations"
 							showPagination={false}
 							initialPageSize={perPage}
 							setPage={setPage}
@@ -573,6 +650,12 @@ const AutomationsList: React.FC = () => {
 					/>
 				)}
 			</div>
+
+			<ImportWorkflowsModal
+				open={importModalOpen}
+				onClose={handleImportModalClose}
+				onImported={handleImportFinished}
+			/>
 
 			<CreateAutomationModal
 				visible={visible}

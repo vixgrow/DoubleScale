@@ -62,6 +62,18 @@ class RestContactController extends RestController {
 	protected $rest_base = 'contacts';
 
 	/**
+	 * Columns the contacts list may be sorted by.
+	 *
+	 * Note the status columns are channel-specific (email_status / sms_status);
+	 * there is no single `status` column on this table.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string[]
+	 */
+	const SORTABLE_COLUMNS = array( 'first_name', 'last_name', 'email', 'phone', 'city', 'country', 'email_status', 'sms_status', 'created_at', 'updated_at' );
+
+	/**
 	 * Polymorphic attachable_type for contact file attachments.
 	 */
 	private const CONTACT_ATTACHABLE_TYPE = 'contact';
@@ -120,7 +132,7 @@ class RestContactController extends RestController {
 							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'doublescale' ),
 							'type'        => 'boolean',
 						),
-					),
+					) + $this->get_sorting_collection_params( self::SORTABLE_COLUMNS ),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -2273,7 +2285,9 @@ class RestContactController extends RestController {
 
 			// Paginate and get results (pagination automatically handles total count)
 			// Note: paginate() returns total in the response, so filtered_total comes from pagination
-			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$this->apply_sorting( $contacts, $request, self::SORTABLE_COLUMNS );
+
+			$contacts = $contacts->paginate( $per_page, array( '*' ), 'page', $page );
 
 			$this->attach_wc_orders_to_contacts( $contacts );
 

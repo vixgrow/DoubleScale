@@ -47,6 +47,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		dateRange,
 		setDateRange,
 		page,
+		sort,
+		setSort,
 		perPage,
 		totalRecords,
 		setPerPage,
@@ -149,6 +151,10 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			},
 			placeholder: __('Date Range', 'doublescale'),
 		},
+		sorting: {
+			value: sort,
+			onSortChange: setSort,
+		},
 		initialColumnVisibility: columnVisibility,
 		}),
 		[
@@ -170,6 +176,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			setFilters,
 			setKeywords,
 			setPage,
+			setSort,
+			sort,
 			setSelectedLists,
 			setSelectedRowKeys,
 			setSelectedTags,
@@ -181,7 +189,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 	useEffect(() => {
 		fetchContacts();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [perPage, page, keywords, dateRange, filters]);
+	}, [perPage, page, keywords, dateRange, filters, sort]);
 
 	return (
 		<>

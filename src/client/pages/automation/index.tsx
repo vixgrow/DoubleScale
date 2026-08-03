@@ -41,6 +41,7 @@ import {
 	AccordingRightIcon,
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
+import TestRunDialog from './test-run-dialog';
 import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
@@ -375,6 +376,7 @@ const Automation: React.FC = () => {
 		useState(false);
 	const [automationNameDraft, setAutomationNameDraft] =
 		useState('');
+	const [testRunOpen, setTestRunOpen] = useState(false);
 
 	useEffect(() => {
 		if (automation && !editingAutomationName) {
@@ -727,6 +729,14 @@ const Automation: React.FC = () => {
 										{/* divider */}
 										<div className="h-6 w-px bg-[#D0D0D0]"></div>
 										<Button
+											variant="outline"
+											className="shrink-0"
+											disabled={isSaving}
+											onClick={() => setTestRunOpen(true)}
+										>
+											{__('Run manually', 'doublescale')}
+										</Button>
+										<Button
 											variant="default"
 											className="shrink-0"
 											disabled={isSaving}
@@ -812,6 +822,12 @@ const Automation: React.FC = () => {
 									{renderContent()}
 								</div>
 							</div>
+							<TestRunDialog
+								automation={automation}
+								open={testRunOpen}
+								onOpenChange={setTestRunOpen}
+								onSuccess={() => setActiveTab('contacts')}
+							/>
 						</>
 					)}
 				</DialogContent>

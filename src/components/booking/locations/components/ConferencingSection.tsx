@@ -1,5 +1,6 @@
 import React from 'react';
 import { __, sprintf } from '@wordpress/i18n';
+import { Lock } from 'lucide-react';
 import type { ExtendedLocation, IntegrationType } from '../types';
 import { IntegrationHelper } from '../helpers';
 import { INTEGRATION_ICONS, INTEGRATION_NAMES } from '../constants';
@@ -108,19 +109,12 @@ const ConferencingSection: React.FC<ConferencingSectionProps> = ({
 		type: IntegrationType,
 		calendar?: Calendar
 	): { message: string; className?: string; color?: string } => {
-		// Conferencing integrations require the Pro plugin
+		// Conferencing integrations require the Pro plugin — the lock icon
+		// next to the item already communicates this, so skip the per-item
+		// "Upgrade to Pro" message here (the section header carries the one
+		// upgrade CTA).
 		if (!isProActive) {
-			return {
-				message: sprintf(
-					/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
-					__(
-						'Upgrade to Pro to use %s.',
-						'doublescale'
-					),
-					INTEGRATION_NAMES[type]
-				),
-				className: 'text-[#458DC7] text-[12px] italic',
-			};
+			return { message: '' };
 		}
 
 		// Service context: messages about provider readiness
@@ -275,6 +269,12 @@ const ConferencingSection: React.FC<ConferencingSectionProps> = ({
 						</div>
 					</div>
 				</div>
+				{!isProActive && (
+					<Lock
+						className="size-4 shrink-0 text-[#9197A4]"
+						aria-label={__('Requires Pro', 'doublescale')}
+					/>
+				)}
 			</LocationRow>
 		);
 	};

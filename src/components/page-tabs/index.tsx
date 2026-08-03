@@ -44,7 +44,7 @@ const underlineTabsTriggerClassName =
 	'group relative inline-flex items-center gap-1.5 whitespace-nowrap rounded-none border-0 border-b-[3px] border-transparent bg-transparent p-2 text-sm font-medium text-foreground shadow-none outline-none transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none';
 
 const underlineIconWrapClassName =
-	'inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors group-data-[state=active]:bg-primary/15 group-data-[state=active]:text-primary';
+	'inline-flex size-7 shrink-0 items-center justify-center text-muted-foreground transition-colors group-data-[state=active]:text-primary';
 
 const PageTabs: React.FC<PageTabsProps> = ({
 	defaultValue,

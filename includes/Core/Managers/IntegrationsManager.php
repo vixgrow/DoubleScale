@@ -93,6 +93,14 @@ final class IntegrationsManager {
 				'settings'     => array(),
 				'is_pro'       => true,
 			),
+			'evolution'     => array(
+				'label'        => __( 'Evolution API', 'doublescale' ),
+				'description'  => __( 'Send WhatsApp messages via Evolution API (Baileys / QR connection).', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
 			'paypal'        => array(
 				'label'        => __( 'PayPal', 'doublescale' ),
 				'description'  => __( 'Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.', 'doublescale' ),

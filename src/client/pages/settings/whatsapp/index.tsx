@@ -35,6 +35,11 @@ interface WhatsAppSettingsProps {
 	// since WhatsApp settings are managed via the integration page
 	settings?: SettingsType;
 	onChange?: (settings: SettingsType) => void;
+	/**
+	 * Hide the Meta connection card. Pro sets this when a non-Meta provider
+	 * (such as Evolution) is selected, and renders that provider's card instead.
+	 */
+	hideConnectionCard?: boolean;
 }
 
 interface WhatsAppStatus {
@@ -45,7 +50,7 @@ interface WhatsAppStatus {
 	phone_number_id?: string;
 }
 
-const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
+const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard = false }) => {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const [status, setStatus] = useState<WhatsAppStatus | null>(null);
@@ -187,6 +192,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 			</Card>
 
 			{/* Connection Status Card */}
+			{! hideConnectionCard && (
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle className="text-lg flex items-center gap-2">
@@ -295,6 +301,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = (_props) => {
 					)}
 				</CardContent>
 			</Card>
+			)}
 
 			{/* Features Card */}
 			<Card className="shadow-sm bg-gray-50">

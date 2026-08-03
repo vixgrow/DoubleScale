@@ -83,7 +83,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing {
 		$provider = $this->get_message_provider();
 
 		// Evolution / QR providers can send free-form text without Meta templates.
-		if ( $provider && ! $provider->requires_template( $this->channel ) ) {
+		if ( $provider && method_exists( $provider, 'requires_template' ) && ! $provider->requires_template( $this->channel ) ) {
 			add_filter( 'doublescale_active_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 			$contact = $contact_or_automation_contact instanceof ContactModel
@@ -226,7 +226,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing {
 			$body        = $message_data['body'] ?? '';
 
 			// Free-form providers (Evolution) send rendered body text directly.
-			if ( ! $provider->requires_template( $this->channel ) ) {
+			if ( method_exists( $provider, 'requires_template' ) && ! $provider->requires_template( $this->channel ) ) {
 				if ( empty( $body ) ) {
 					throw new \Exception( esc_html__( 'WhatsApp message body is empty.', 'doublescale' ) );
 				}

@@ -35,7 +35,7 @@ interface ActivityTimelineFiltersProps {
 	showCommunicationFilters?: boolean;
 	/** Extra Type options appended before Files (e.g. project comments/documents). */
 	extraTypeOptions?: Array<{ value: string; label: string }>;
-	/** Raise portaled selects above the task detail dialog (z-index 1800001). */
+	/** Raise portaled selects above fullscreen detail dialogs (z-index 1800001). */
 	nestedInTaskDialog?: boolean;
 }
 
@@ -52,10 +52,10 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 	extraTypeOptions = [],
 	nestedInTaskDialog = false,
 }) => {
-	const taskDialogSelectProps = nestedInTaskDialog
+	const elevatedSelectProps = nestedInTaskDialog
 		? {
 				'data-task-dialog-activity-select': '',
-				className: 'z-[1800004]',
+				className: '!z-[1800004] pointer-events-auto',
 				style: { zIndex: 1_800_004 },
 			}
 		: {};
@@ -74,7 +74,7 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 						<SelectTrigger className="h-10 w-full rounded-lg border border-border bg-background text-sm font-normal text-foreground shadow-none">
 							<SelectValue placeholder={__('All types', 'doublescale')} />
 						</SelectTrigger>
-						<SelectContent {...taskDialogSelectProps}>
+						<SelectContent {...elevatedSelectProps}>
 							<SelectItem value="all">
 								{__('All types', 'doublescale')}
 							</SelectItem>
@@ -152,7 +152,7 @@ const ActivityTimelineFilters: FC<ActivityTimelineFiltersProps> = ({
 								<SelectTrigger className="h-10 w-full rounded-lg border border-border bg-background text-sm font-normal text-foreground shadow-none">
 									<SelectValue placeholder={__('Sort by', 'doublescale')} />
 								</SelectTrigger>
-								<SelectContent {...taskDialogSelectProps}>
+								<SelectContent {...elevatedSelectProps}>
 									<SelectItem value="activity_date-desc">
 										{__('Newest', 'doublescale')}
 									</SelectItem>

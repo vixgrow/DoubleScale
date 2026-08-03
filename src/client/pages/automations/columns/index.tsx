@@ -37,6 +37,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { getAutomationWarnings } from '@doublescale/utils';
+import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { Input } from '@/components/ui/input';
 
 interface AutomationNameCellProps {
@@ -338,12 +339,14 @@ export const getAutomationColumns = ({
 									<CopyIcon />
 									{__('Duplicate', 'doublescale')}
 								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() => onExport(automation)}
-								>
-									<Download />
-									{__('Export', 'doublescale')}
-								</DropdownMenuItem>
+								{isProActive() && (
+									<DropdownMenuItem
+										onClick={() => onExport(automation)}
+									>
+										<Download />
+										{__('Export', 'doublescale')}
+									</DropdownMenuItem>
+								)}
 								<DropdownMenuItem
 									onClick={() => onDelete(automation.id)}
 									className="text-destructive hover:text-destructive focus:text-destructive"

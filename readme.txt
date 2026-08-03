@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.2.19
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,21 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.0 = 02 Aug 2026
+- Hide Pro-only tabs, pages, and actions entirely in the free version instead of showing locked cards or upgrade prompts (automations, booking, helpdesk, sales, mailbox, integrations, extensions, dashboard, and more)
+- Add a new "Discover Pro" page cataloging every Pro feature by category, with links to the live demo and pricing
+- Add automation test run: preview a workflow without enrolling real contacts
+- Add sticky canvas notes on the automation workflow builder
+- Add bulk export and import for automations/workflows
+- Improve bulk import error handling and UI feedback for automations
+- Add server-side sorting for contacts, lists, tags, forms, campaigns, and automations
+- Add per-user CRM landing path and improved role-aware navigation after login
+- Enhance user role management and capability checks in the admin shell
+- Add email tracking track-id support for more reliable open/click attribution
+- Add text direction (LTR/RTL) support in the email builder TextBlock
+- Add Send Test Email popover in the email builder
+- Improve localization and translation handling across admin components
+
 = 1.2.19 = 31 Jul 2026
 - Add timezone configuration for more accurate date/time handling
 - Add duplicate and status-update actions for invoices and proposals

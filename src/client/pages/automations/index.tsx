@@ -98,7 +98,7 @@ const AutomationsList: React.FC = () => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [automation, setAutomation] = useState({
 		name: '',
-		trigger: '',
+		trigger: 'user_login',
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [dateRange, setDateRange] = useState<{

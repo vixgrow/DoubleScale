@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useEffect, useMemo, useState } from 'react';
 import { map } from 'lodash';
-import { Star } from 'lucide-react';
+import { Check, Star } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -516,29 +516,40 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 												<div
 													key={triggerKey}
 													className={cn(
-														'flex items-center justify-between gap-4 px-4 py-3.5 transition-colors',
+														'flex items-center justify-between gap-4 border-l-4 border-l-transparent px-4 py-3.5 transition-colors',
 														isFeatured &&
-															'border-l-4 border-l-amber-400 bg-amber-50/40',
+															!isSelected &&
+															'border-l-amber-400 bg-amber-50/40',
 														isSelected
 															? isFeatured
-																? 'bg-amber-50'
-																: 'bg-brandPrimary/5'
+																? 'border-l-amber-400 bg-amber-50'
+																: 'border-l-brandPrimary bg-brandPrimary/10'
 															: !isFeatured &&
 																	'hover:bg-neutral-50/60'
 													)}
 												>
 													<div className="flex min-w-0 flex-1 items-center gap-3">
-														{isFeatured && (
-															<Star
-																className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500"
-																aria-hidden
-															/>
+														{isSelected ? (
+															<span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brandPrimary text-white">
+																<Check
+																	className="h-3.5 w-3.5"
+																	strokeWidth={3}
+																	aria-hidden
+																/>
+															</span>
+														) : (
+															isFeatured && (
+																<Star
+																	className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500"
+																	aria-hidden
+																/>
+															)
 														)}
 														<span
 															className={cn(
 																'text-sm leading-6',
 																isSelected
-																	? 'font-medium text-brandPrimary'
+																	? 'font-semibold text-brandPrimary'
 																	: isFeatured
 																		? 'font-medium text-amber-950'
 																		: 'text-foreground'
@@ -574,7 +585,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 														}}
 														variant={
 															isSelected
-																? 'outline'
+																? 'default'
 																: 'secondaryDeepBlue'
 														}
 														size="sm"
@@ -584,12 +595,15 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 															(!trigger.is_pro &&
 																group.is_disabled)
 														}
-														className={cn(
-															'h-8 shrink-0 rounded-md border px-4 text-xs font-semibold uppercase tracking-wide shadow-none',
-															isSelected &&
-																'border-brandPrimary text-brandPrimary'
-														)}
+														className="h-8 shrink-0 rounded-md px-4 text-xs font-semibold uppercase tracking-wide shadow-none"
 													>
+														{isSelected && (
+															<Check
+																className="h-3.5 w-3.5"
+																strokeWidth={3}
+																aria-hidden
+															/>
+														)}
 														{isSelected
 															? __(
 																	'Selected',

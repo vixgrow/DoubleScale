@@ -95,6 +95,8 @@ const configData: ConfigData = {
 	timezones: (serverData.timezones as TimezoneOption[] | undefined) ?? [],
 	nonce: (serverData.nonce as string | undefined) ?? '',
 	forms: (serverData.forms as Forms | undefined) ?? {},
+	activeFormPlugins:
+		(serverData.activeFormPlugins as string[] | undefined) ?? [],
 	customFieldsTypes:
 		(serverData.customFieldsTypes as CustomFieldsTypes | undefined) ?? {},
 	filtersGroups:
@@ -318,6 +320,16 @@ const setProPluginDirUrl = (data: ConfigData) => (value: string) => {
  */
 export const getForms = (data: ConfigData): Forms => {
 	return data.forms;
+};
+
+/**
+ * WordPress form-plugin slugs actually installed/active on this site.
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @returns string[]
+ */
+export const getActiveFormPlugins = (data: ConfigData): string[] => {
+	return data.activeFormPlugins ?? [];
 };
 
 /**
@@ -946,6 +958,7 @@ export interface ConfigApi {
 	getProPluginDirUrl: () => string;
 	getForms: () => Forms;
 	setForms: (value: Forms) => void;
+	getActiveFormPlugins: () => string[];
 	getCustomFieldsTypes: () => CustomFieldsTypes;
 	setCustomFieldsTypes: (value: CustomFieldsTypes) => void;
 	getFiltersGroups: () => FiltersGroups;
@@ -1035,6 +1048,7 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setProPluginDirUrl = setProPluginDirUrl(data);
 	configApi.getForms = () => getForms(data);
 	configApi.setForms = setForms(data);
+	configApi.getActiveFormPlugins = () => getActiveFormPlugins(data);
 	configApi.getCustomFieldsTypes = () => getCustomFieldsTypes(data);
 	configApi.setCustomFieldsTypes = setCustomFieldsTypes(data);
 	configApi.getFiltersGroups = () => getFiltersGroups(data);

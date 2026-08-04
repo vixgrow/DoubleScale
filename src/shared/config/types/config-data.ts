@@ -24,6 +24,8 @@ export type ConfigData = Record<string, unknown> & {
 	ajaxUrl: string;
 	nonce: string;
 	forms: Forms;
+	/** WordPress form-plugin slugs actually installed/active on this site, independent of Free/Pro Form-model coverage. */
+	activeFormPlugins: string[];
 	customFieldsTypes: CustomFieldsTypes;
 	filtersGroups: FiltersGroups;
 	contactFieldsGroups: ContactFieldsGroups;

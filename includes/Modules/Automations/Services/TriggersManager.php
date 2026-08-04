@@ -164,22 +164,133 @@ final class TriggersManager {
 	 */
 	public function set_sources() {
 		$this->sources = array(
-			'crm'         => array(
-				'label'  => __( 'CRM', 'doublescale' ),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'doublescale' ),
 				'groups' => array(
-					'contact'       => array(
-						'label'    => __( 'Contact', 'doublescale' ),
+					'user' => array(
+						'label'    => __( 'User', 'doublescale' ),
 						'triggers' => array(),
 					),
-					'messaging'     => array(
+				),
+			),
+			'modules'     => array(
+				'label' => __( 'DoubleScale Modules', 'doublescale' ),
+				'tabs'  => array(
+					'crm'      => array(
+						'label'  => __( 'Contact', 'doublescale' ),
+						'groups' => array(
+							'contact' => array(
+								'label'    => __( 'Contact', 'doublescale' ),
+								'triggers' => array(),
+							),
+						),
+					),
+					'sales'    => array(
+						'label'  => __( 'Sales', 'doublescale' ),
+						'groups' => array(
+							'sales'        => array(
+								'label'       => __( 'Proposals & Invoices', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
+							),
+							'contracts'    => array(
+								'label'       => __( 'Contracts', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
+							),
+							'credit_notes' => array(
+								'label'       => __( 'Credit Notes', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) ),
+							),
+							'deal'         => array(
+								'label'       => __( 'Deal', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'deals' ),
+							),
+						),
+					),
+					'booking'  => array(
+						'label'  => __( 'Booking', 'doublescale' ),
+						'groups' => array(
+							'booking' => array(
+								'label'       => __( 'Booking', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'booking' ),
+							),
+						),
+					),
+					'support'  => array(
+						'label'  => __( 'Helpdesk', 'doublescale' ),
+						'groups' => array(
+							'support' => array(
+								'label'       => __( 'Helpdesk', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'support' ),
+							),
+						),
+					),
+					'tasks'    => array(
+						'label'  => __( 'Tasks', 'doublescale' ),
+						'groups' => array(
+							'task'    => array(
+								'label'       => __( 'Task', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
+							),
+							'subtask' => array(
+								'label'       => __( 'Subtask', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
+							),
+						),
+					),
+					'projects' => array(
+						'label'  => __( 'Projects', 'doublescale' ),
+						'groups' => array(
+							'project'    => array(
+								'label'       => __( 'Project', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'projects' ),
+							),
+							'discussion' => array(
+								'label'       => __( 'Discussion', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'projects' ),
+							),
+						),
+					),
+				),
+			),
+			'messaging'     => array(
+				'label'  => __( 'Messaging', 'doublescale' ),
+				'groups' => array(
+					'messaging' => array(
 						'label'    => __( 'Messaging', 'doublescale' ),
 						'triggers' => array(),
 					),
+				),
+			),
+			'link_triggers' => array(
+				'label'  => __( 'Link Triggers', 'doublescale' ),
+				'groups' => array(
 					'link_triggers' => array(
 						'label'    => __( 'Link Triggers', 'doublescale' ),
 						'triggers' => array(),
 					),
-					'webhooks'      => array(
+				),
+			),
+			'webhooks'      => array(
+				'label'  => __( 'Webhooks', 'doublescale' ),
+				'groups' => array(
+					'webhooks' => array(
 						'label'    => __( 'Webhooks', 'doublescale' ),
 						'triggers' => array(),
 					),
@@ -189,8 +300,9 @@ final class TriggersManager {
 				'label' => __( 'E-commerce', 'doublescale' ),
 				'tabs'  => array(
 					'woocommerce' => array(
-						'label'  => __( 'WooCommerce', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'WooCommerce', 'doublescale' ),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+						'groups'      => array(
 							'order'        => array(
 								'label'       => __( 'Order', 'doublescale' ),
 								'triggers'    => array(),
@@ -224,8 +336,9 @@ final class TriggersManager {
 						),
 					),
 					'edd'         => array(
-						'label'  => __( 'Easy Digital Downloads', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'Easy Digital Downloads', 'doublescale' ),
+						'is_disabled' => ! doublescale_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
+						'groups'      => array(
 							'order' => array(
 								'label'       => __( 'Order', 'doublescale' ),
 								'triggers'    => array(),
@@ -234,23 +347,15 @@ final class TriggersManager {
 						),
 					),
 					'surecart'    => array(
-						'label'  => __( 'SureCart', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'SureCart', 'doublescale' ),
+						'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+						'groups'      => array(
 							'order' => array(
 								'label'       => __( 'Order', 'doublescale' ),
 								'triggers'    => array(),
 								'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
 							),
 						),
-					),
-				),
-			),
-			'wp'          => array(
-				'label'  => __( 'WordPress', 'doublescale' ),
-				'groups' => array(
-					'user' => array(
-						'label'    => __( 'User', 'doublescale' ),
-						'triggers' => array(),
 					),
 				),
 			),
@@ -283,8 +388,9 @@ final class TriggersManager {
 				'label' => __( 'Membership', 'doublescale' ),
 				'tabs'  => array(
 					'memberpress' => array(
-						'label'  => __( 'MemberPress', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'MemberPress', 'doublescale' ),
+						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+						'groups'      => array(
 							'memberpress' => array(
 								'label'       => __( 'MemberPress', 'doublescale' ),
 								'triggers'    => array(),
@@ -293,96 +399,15 @@ final class TriggersManager {
 						),
 					),
 					'pmpro'       => array(
-						'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+						'groups'      => array(
 							'pmpro' => array(
 								'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
 								'triggers'    => array(),
 								'is_disabled' => ! defined( 'PMPRO_VERSION' ),
 							),
 						),
-					),
-				),
-			),
-			'booking'     => array(
-				'label'  => __( 'Booking', 'doublescale' ),
-				'groups' => array(
-					'booking' => array(
-						'label'       => __( 'Booking', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'booking' ),
-					),
-				),
-			),
-			'support'     => array(
-				'label'  => __( 'Helpdesk', 'doublescale' ),
-				'groups' => array(
-					'support' => array(
-						'label'       => __( 'Helpdesk', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'support' ),
-					),
-				),
-			),
-			'tasks'       => array(
-				'label'  => __( 'Tasks', 'doublescale' ),
-				'groups' => array(
-					'task'    => array(
-						'label'       => __( 'Task', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'tasks' ),
-					),
-					'subtask' => array(
-						'label'       => __( 'Subtask', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'tasks' ),
-					),
-				),
-			),
-			'projects'    => array(
-				'label'  => __( 'Projects', 'doublescale' ),
-				'groups' => array(
-					'project'    => array(
-						'label'       => __( 'Project', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'projects' ),
-					),
-					'discussion' => array(
-						'label'       => __( 'Discussion', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'projects' ),
-					),
-				),
-			),
-			'sales'       => array(
-				'label'  => __( 'Sales', 'doublescale' ),
-				'groups' => array(
-					'sales' => array(
-						'label'       => __( 'Proposals & Invoices', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'documents' ) ),
-					),
-					'contracts' => array(
-						'label'       => __( 'Contracts', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'contracts' ) ),
-					),
-					'credit_notes' => array(
-						'label'       => __( 'Credit Notes', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! doublescale_automation_modules_available( array( 'sales', 'credit_notes' ) ),
-					),
-					'deal'          => array(
-						'label'       => __( 'Deal', 'doublescale' ),
-						'triggers'    => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'deals' ),
 					),
 				),
 			),
@@ -501,10 +526,17 @@ final class TriggersManager {
 	/**
 	 * Get sources
 	 *
+	 * "Pick one integration" categories are pruned to the vendor(s) actually
+	 * active on the site (and dropped entirely when none are) — see
+	 * {@see SourceTreePruner}.
+	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->sources;
+		return SourceTreePruner::prune(
+			$this->sources,
+			array( 'forms', 'ecommerce', 'lms', 'membership', 'video' )
+		);
 	}
 
 	/**
@@ -565,6 +597,7 @@ final class TriggersManager {
 		$tabbed_sources = array(
 			'ecommerce'  => array( 'woocommerce', 'edd', 'surecart' ),
 			'membership' => array( 'memberpress', 'pmpro' ),
+			'modules'    => array( 'crm', 'sales', 'booking', 'support', 'tasks', 'projects' ),
 		);
 
 		foreach ( $tabbed_sources as $category_key => $source_keys ) {
@@ -642,5 +675,44 @@ final class TriggersManager {
 			default:
 				return false;
 		}
+	}
+
+	/**
+	 * WordPress form-plugin slugs (matching the Forms page's Form Type picker)
+	 * whose plugin is actually installed/active on this site — independent of
+	 * whether Pro ships a full Form model for that vendor. Lets the Forms page
+	 * distinguish "Pro-locked but you have it installed" from "Pro-locked, not
+	 * installed", using the same detection {@see is_form_vendor_plugin_active()}
+	 * already relies on for trigger availability.
+	 *
+	 * @return string[]
+	 */
+	public function get_active_form_vendor_slugs(): array {
+		$slugs = array(
+			'bitform',
+			'contactform7',
+			'elementor',
+			'fluentforms',
+			'formidable',
+			'forminator',
+			'gravityforms',
+			'metform',
+			'ninjaforms',
+			'quillforms',
+			'sureforms',
+			'wpforms',
+			'wsform',
+			'eform',
+			'jetformbuilder',
+		);
+
+		$active = array();
+		foreach ( $slugs as $slug ) {
+			if ( $this->is_form_vendor_plugin_active( $slug ) ) {
+				$active[] = $slug;
+			}
+		}
+
+		return $active;
 	}
 }

@@ -25,7 +25,7 @@ class LinkTriggerClicked extends TriggerPro {
 
 	public $attributes = array();
 
-	public $source = 'crm';
+	public $source = 'link_triggers';
 
 	public $group = 'link_triggers';
 }

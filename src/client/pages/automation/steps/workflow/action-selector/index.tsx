@@ -7,6 +7,7 @@ import { useState, useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { X } from 'lucide-react';
 import ActionsGroupRender from './actions-group-render';
 import ActionSelectorCard from './action-selector-card';
 import './style.scss';
@@ -14,13 +15,18 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogTitle,
 	DialogOverlay,
-	DialogDescription,
 } from "@/components/ui/dialog";
 import ConfigAPI from '@doublescale/config';
 import type { ActionsGroup } from '@doublescale/config';
-import { HelpdeskIcon, SalesIcon, TaskDoneIcon, ProjectsIcon } from '@doublescale/components';
+import {
+	AccordingRightIcon,
+	HelpdeskIcon,
+	SalesIcon,
+	TaskDoneIcon,
+	ProjectsIcon,
+	LogoIcon,
+} from '@doublescale/components';
 import {
 	Tabs,
 	TabsContent,
@@ -59,18 +65,24 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	onClose,
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
-	const [selectedCategory, setSelectedCategory] = useState('crm');
-	const [selectedCategoryTab, setSelectedCategoryTab] =
-		useState('woocommerce');
+	const [selectedCategory, setSelectedCategory] = useState('modules');
+	const [selectedCategoryTab, setSelectedCategoryTab] = useState('crm');
 	const automationActions = ConfigAPI.getAutomationActions();
 
-	// Filter out delay group from CRM
+	// Filter out delay group from CRM (CRM now lives under modules.tabs.crm)
 	const filteredActions = { ...automationActions };
-	if (filteredActions.crm?.groups) {
-		const { delay, ...restGroups } = filteredActions.crm.groups;
-		filteredActions.crm = {
-			...filteredActions.crm,
-			groups: restGroups
+	const crmGroups = filteredActions.modules?.tabs?.crm?.groups;
+	if (crmGroups && !Array.isArray(crmGroups)) {
+		const { delay, ...restGroups } = crmGroups;
+		filteredActions.modules = {
+			...filteredActions.modules,
+			tabs: {
+				...filteredActions.modules.tabs,
+				crm: {
+					...filteredActions.modules.tabs!.crm,
+					groups: restGroups,
+				},
+			},
 		};
 	}
 
@@ -87,6 +99,17 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	};
 
 	const categoryData = {
+		modules: {
+			image: (
+				<span className="flex h-full w-full items-center justify-center rounded-md bg-[#1E3A8A]">
+					<LogoIcon width={16} height={16} />
+				</span>
+			),
+			description: __(
+				'Actions from CRM, Sales, Booking, Helpdesk, Tasks & Projects',
+				'doublescale'
+			),
+		},
 		'support': {
 			image: (
 				<HelpdeskIcon width={22} height={22} color="#1E3A8A" />
@@ -411,67 +434,123 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="z-[150200] flex max-h-[90vh] w-[calc(100vw-1rem)] max-w-[1000px] flex-col overflow-y-auto sm:h-[90vh] sm:overflow-hidden">
-				<DialogHeader className="shrink-0">
-					<DialogTitle>{__('Action Library', 'doublescale')}</DialogTitle>
-					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'doublescale')}</DialogDescription>
+			<DialogContent
+				className="left-0 top-0 z-[150200] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none border-0 bg-[#f7f8fa] p-0 shadow-none"
+				hideCloseButton
+			>
+				{/* Sticky header — breadcrumb, matches the trigger picker's top bar */}
+				<DialogHeader className="shrink-0 border-b border-neutral-200 bg-white px-4 py-3 sm:px-8">
+					<nav
+						className="mx-auto flex w-full max-w-5xl min-w-0 items-center justify-between gap-2"
+						aria-label={__('Breadcrumb', 'doublescale')}
+					>
+						<div className="flex min-w-0 items-center gap-1.5">
+							<button
+								type="button"
+								className="shrink-0 cursor-pointer text-base font-medium leading-7 text-foreground transition-colors hover:text-secondary"
+								onClick={onClose}
+							>
+								{__('Workflow', 'doublescale')}
+							</button>
+							<AccordingRightIcon
+								width={20}
+								height={20}
+								color="hsl(var(--foreground))"
+							/>
+							<span className="truncate text-base font-medium leading-7 text-muted-foreground">
+								{__('Action Library', 'doublescale')}
+							</span>
+						</div>
+						<button
+							type="button"
+							className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							onClick={onClose}
+							aria-label={__('Close', 'doublescale')}
+						>
+							<X className="h-6 w-6" />
+						</button>
+					</nav>
 				</DialogHeader>
-				<div className="doublescale-fields flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:overflow-hidden">
-					<div className="doublescale-field flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:overflow-hidden">
-						<div className="flex flex-col gap-5 sm:min-h-0 sm:flex-1 sm:flex-row sm:overflow-hidden">
-							<div className="w-full sm:w-1/2 sm:overflow-y-auto sm:pr-1">
-								<ActionSelectorCard
-									automationActions={filteredActions}
-									selectedCategory={selectedCategory}
-									setSelectedCategory={handleCategorySelect}
-									categoryData={categoryData}
-								/>
-							</div>
-							<div className="w-full sm:w-1/2 sm:overflow-y-auto sm:pr-1">
-								{categoryTabs.length > 0 ? (
-									<Tabs
-										value={selectedCategoryTab}
-										onValueChange={setSelectedCategoryTab}
-										className="flex flex-col gap-4"
-									>
-										<TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-neutral-100 p-1">
+
+				{/* Scrollable body — light gray page surface, white content card */}
+				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
+					<div className="mx-auto w-full max-w-5xl">
+						<div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-8">
+							<h2 className="mb-6 text-lg font-semibold text-foreground">
+								{__('Choose Action', 'doublescale')}
+							</h2>
+							<div className="grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr]">
+								<div className="min-w-0">
+									<ActionSelectorCard
+										automationActions={filteredActions}
+										selectedCategory={selectedCategory}
+										setSelectedCategory={handleCategorySelect}
+										categoryData={categoryData}
+									/>
+								</div>
+								<div
+									role="tabpanel"
+									aria-label={__('Actions', 'doublescale')}
+									className="min-w-0 max-h-[calc(100dvh-300px)] min-h-[420px] overflow-y-auto rounded-xl border border-neutral-200 bg-white p-4"
+								>
+									{categoryTabs.length > 0 ? (
+										<Tabs
+											value={selectedCategoryTab}
+											onValueChange={setSelectedCategoryTab}
+											className="flex flex-col gap-4"
+										>
+											<TabsList className="flex h-auto w-full flex-wrap justify-start gap-1.5 rounded-lg bg-transparent p-0">
+												{categoryTabs.map((tab) => (
+													<TabsTrigger
+														key={tab.key}
+														value={tab.key}
+														className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs text-neutral-700 shadow-none data-[state=active]:border-brandPrimary/30 data-[state=active]:bg-brandPrimary/10 data-[state=active]:text-brandPrimary data-[state=active]:shadow-none sm:text-sm"
+													>
+														{categoryData[
+															tab.key as keyof typeof categoryData
+														]?.image && (
+															<span className="flex h-4 w-4 shrink-0 items-center justify-center [&_svg]:max-h-4 [&_svg]:max-w-4">
+																{
+																	categoryData[
+																		tab.key as keyof typeof categoryData
+																	]?.image
+																}
+															</span>
+														)}
+														<span className="truncate">
+															{tab.label}
+														</span>
+													</TabsTrigger>
+												))}
+											</TabsList>
 											{categoryTabs.map((tab) => (
-												<TabsTrigger
+												<TabsContent
 													key={tab.key}
 													value={tab.key}
-													className="text-xs sm:text-sm"
+													className="mt-0"
 												>
-													{tab.label}
-												</TabsTrigger>
+													<ActionsGroupRender
+														groups={tab.groups}
+														onChange={(value) =>
+															handleActionSelect(value)
+														}
+														value={value}
+														isSaving={isSaving}
+													/>
+												</TabsContent>
 											))}
-										</TabsList>
-										{categoryTabs.map((tab) => (
-											<TabsContent
-												key={tab.key}
-												value={tab.key}
-												className="mt-0"
-											>
-												<ActionsGroupRender
-													groups={tab.groups}
-													onChange={(value) =>
-														handleActionSelect(value)
-													}
-													value={value}
-													isSaving={isSaving}
-												/>
-											</TabsContent>
-										))}
-									</Tabs>
-								) : (
-									<ActionsGroupRender
-										groups={actionGroupsForCategory}
-										onChange={(value) =>
-											handleActionSelect(value)
-										}
-										value={value}
-										isSaving={isSaving}
-									/>
-								)}
+										</Tabs>
+									) : (
+										<ActionsGroupRender
+											groups={actionGroupsForCategory}
+											onChange={(value) =>
+												handleActionSelect(value)
+											}
+											value={value}
+											isSaving={isSaving}
+										/>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>

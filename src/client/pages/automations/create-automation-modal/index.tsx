@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { map } from 'lodash';
+import { X } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -16,15 +17,17 @@ import ConfigAPI from '@doublescale/config';
 import type { TriggersGroup } from '@doublescale/config';
 import type { NoticeMessage } from '@doublescale/client';
 import {
-	CustomDialogHeader,
 	Field,
 	NoticeBanner,
 	GradientAutomationsIcon,
-	AutomationsIcon,
 	HelpdeskIcon,
 	SalesIcon,
 	TaskDoneIcon,
 	ProjectsIcon,
+	LogoIcon,
+	LinkTriggersIcon,
+	ContactsIcon,
+	AccordingRightIcon,
 } from '@doublescale/components';
 import { IntegrationsIcon } from '@doublescale/components/icons/index';
 import {
@@ -101,12 +104,84 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	removePortal = false,
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
-	const [selectedCategory, setSelectedCategory] = useState('crm');
+	const [selectedCategory, setSelectedCategory] = useState('wp');
 	const [selectedCategoryTab, setSelectedCategoryTab] =
 		useState('woocommerce');
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const categoryData = {
+		modules: {
+			image: (
+				<span className="flex h-full w-full items-center justify-center rounded-md bg-[#1E3A8A]">
+					<LogoIcon width={16} height={16} />
+				</span>
+			),
+			description: __(
+				'Trigger automations from CRM, Sales, Booking, Helpdesk, Tasks & Projects',
+				'doublescale'
+			),
+		},
+		messaging: {
+			image: (
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+					<mask id="mask0_trigger_messaging" style={{ maskType: 'luminance' }} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+						<path d="M24 0H0V24H24V0Z" fill="white" />
+					</mask>
+					<g mask="url(#mask0_trigger_messaging)">
+						<path opacity="0.4" d="M2 12.97V6.99C2 4.23 4.24 2 7 2H17C19.76 2 22 4.23 22 6.99V13.97C22 16.72 19.76 18.95 17 18.95H15.5C15.19 18.95 14.89 19.1 14.7 19.35L13.2 21.34C12.54 22.22 11.46 22.22 10.8 21.34L9.3 19.35C9.14 19.13 8.78 18.95 8.5 18.95H7C4.24 18.95 2 16.72 2 13.97V12.97Z" fill="url(#paint0_linear_trigger_messaging)" />
+						<path d="M17 8.75H7C6.59 8.75 6.25 8.41 6.25 8C6.25 7.59 6.59 7.25 7 7.25H17C17.41 7.25 17.75 7.59 17.75 8C17.75 8.41 17.41 8.75 17 8.75Z" fill="url(#paint1_linear_trigger_messaging)" />
+						<path d="M13 13.75H7C6.59 13.75 6.25 13.41 6.25 13C6.25 12.59 6.59 12.25 7 12.25H13C13.41 12.25 13.75 12.59 13.75 13C13.75 13.41 13.41 13.75 13 13.75Z" fill="url(#paint2_linear_trigger_messaging)" />
+					</g>
+					<defs>
+						<linearGradient id="paint0_linear_trigger_messaging" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient id="paint1_linear_trigger_messaging" x1="6.25" y1="8" x2="17.75" y2="8" gradientUnits="userSpaceOnUse">
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient id="paint2_linear_trigger_messaging" x1="6.25" y1="13" x2="13.75" y2="13" gradientUnits="userSpaceOnUse">
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+					</defs>
+				</svg>
+			),
+			description: __(
+				'Trigger automations from inbound email, SMS and WhatsApp messages',
+				'doublescale'
+			),
+		},
+		link_triggers: {
+			image: <LinkTriggersIcon width={22} height={22} />,
+			description: __(
+				'Trigger automations when a tracked link is clicked',
+				'doublescale'
+			),
+		},
+		webhooks: {
+			image: (
+				<svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M12.7138 0.299678C13.1006 0.693913 13.0945 1.32705 12.7003 1.71383L3.67027 10.5496L3.67025 10.5496C3.29581 10.9242 2.93244 11.2878 2.61629 11.531C2.32406 11.7558 1.66669 12.1995 0.918191 11.9089C0.169688 11.6184 0.0495281 10.8729 0.0173097 10.5221C-0.0175475 10.1426 0.00693504 9.64756 0.0321635 9.13741L0.0799707 8.16636C0.104352 7.66885 0.128132 7.18359 0.199446 6.80691C0.266694 6.4517 0.457656 5.72247 1.20958 5.38096C1.97311 5.03417 2.59082 5.41251 2.86995 5.61629C3.16305 5.83025 3.4909 6.15828 3.82421 6.49177L4.39382 7.06138L11.2997 0.286174C11.6939 -0.100604 12.327 -0.0945579 12.7138 0.299678Z" fill="url(#paint0_linear_trigger_webhooks)" />
+					<path opacity="0.4" d="M5.28619 15.7003C4.89941 15.3061 4.90546 14.673 5.29969 14.2862L14.3297 5.45037L14.3298 5.45036C14.7042 5.07576 15.0676 4.71225 15.3837 4.46902C15.6759 4.24421 16.3333 3.80051 17.0818 4.09106C17.8303 4.38161 17.9505 5.12713 17.9827 5.47788C18.0175 5.85736 17.9931 6.35244 17.9678 6.86259L17.92 7.83364C17.8956 8.33115 17.8719 8.81641 17.8006 9.19309C17.7333 9.5483 17.5423 10.2775 16.7904 10.619C16.0269 10.9658 15.4092 10.5875 15.13 10.3837C14.837 10.1697 14.5091 9.84172 14.1758 9.50823L13.6062 8.93862L6.70034 15.7138C6.3061 16.1006 5.67297 16.0946 5.28619 15.7003Z" fill="url(#paint1_linear_trigger_webhooks)" />
+					<defs>
+						<linearGradient id="paint0_linear_trigger_webhooks" x1="0" y1="6.00225" x2="13" y2="6.00225" gradientUnits="userSpaceOnUse">
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient id="paint1_linear_trigger_webhooks" x1="18" y1="9.99775" x2="5.00001" y2="9.99775" gradientUnits="userSpaceOnUse">
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+					</defs>
+				</svg>
+			),
+			description: __(
+				'Trigger automations when an external webhook is received',
+				'doublescale'
+			),
+		},
 		booking: {
 			image: (
 				<svg
@@ -269,35 +344,9 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 		},
 		crm: {
-			image: (
-				<svg
-					width="32"
-					height="16"
-					viewBox="0 0 32 16"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						d="M5.37143 13.21C4.36343 13.21 3.4931 12.9907 2.76043 12.552C2.03243 12.1133 1.4701 11.4997 1.07343 10.711C0.68143 9.92233 0.48543 9.00533 0.48543 7.96C0.48543 6.91467 0.68143 5.99767 1.07343 5.209C1.4701 4.42033 2.03243 3.80667 2.76043 3.368C3.4931 2.92933 4.36343 2.71 5.37143 2.71C6.52876 2.71 7.49943 2.997 8.28343 3.571C9.0721 4.145 9.62743 4.922 9.94943 5.902L8.03143 6.434C7.84476 5.82267 7.52976 5.349 7.08643 5.013C6.6431 4.67233 6.07143 4.502 5.37143 4.502C4.7321 4.502 4.19776 4.64433 3.76843 4.929C3.34376 5.21367 3.0241 5.615 2.80943 6.133C2.59476 6.651 2.48743 7.26 2.48743 7.96C2.48743 8.66 2.59476 9.269 2.80943 9.787C3.0241 10.305 3.34376 10.7063 3.76843 10.991C4.19776 11.2757 4.7321 11.418 5.37143 11.418C6.07143 11.418 6.6431 11.2477 7.08643 10.907C7.52976 10.5663 7.84476 10.0927 8.03143 9.486L9.94943 10.018C9.62743 10.998 9.0721 11.775 8.28343 12.349C7.49943 12.923 6.52876 13.21 5.37143 13.21ZM11.4907 13V2.92H15.7467C15.8447 2.92 15.9754 2.92467 16.1387 2.934C16.3067 2.93867 16.4561 2.95267 16.5867 2.976C17.1887 3.06933 17.6811 3.26767 18.0637 3.571C18.4511 3.87433 18.7357 4.257 18.9177 4.719C19.0997 5.17633 19.1907 5.68733 19.1907 6.252C19.1907 7.09667 18.9807 7.82 18.5607 8.422C18.1407 9.01933 17.4827 9.388 16.5867 9.528L15.7467 9.584H13.3947V13H11.4907ZM17.1747 13L15.1867 8.898L17.1467 8.52L19.3307 13H17.1747ZM13.3947 7.806H15.6627C15.7607 7.806 15.8681 7.80133 15.9847 7.792C16.1014 7.78267 16.2087 7.764 16.3067 7.736C16.5634 7.666 16.7617 7.54933 16.9017 7.386C17.0417 7.218 17.1374 7.03367 17.1887 6.833C17.2447 6.62767 17.2727 6.434 17.2727 6.252C17.2727 6.07 17.2447 5.87867 17.1887 5.678C17.1374 5.47267 17.0417 5.28833 16.9017 5.125C16.7617 4.957 16.5634 4.838 16.3067 4.768C16.2087 4.74 16.1014 4.72133 15.9847 4.712C15.8681 4.70267 15.7607 4.698 15.6627 4.698H13.3947V7.806ZM20.8696 13V2.92H22.5776L25.9096 9.612L29.2416 2.92H30.9496V13H29.1716V6.98L26.2456 13H25.5736L22.6476 6.98V13H20.8696Z"
-						fill="url(#paint0_linear_3934_36303)"
-					/>
-					<defs>
-						<linearGradient
-							id="paint0_linear_3934_36303"
-							x1="0"
-							y1="8"
-							x2="32"
-							y2="8"
-							gradientUnits="userSpaceOnUse"
-						>
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
-						</linearGradient>
-					</defs>
-				</svg>
-			),
+			image: <ContactsIcon width={22} height={22} color="#1E3A8A" />,
 			description: __(
-				'Automate your CRM workflows and tasks',
+				'Trigger automations from contact events',
 				'doublescale'
 			),
 		},
@@ -691,73 +740,101 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
 			<DialogContent
-				className="left-0 top-0 z-[150300] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none bg-[#fff] p-0 sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-[1100px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
+				className="left-0 top-0 z-[150300] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none border-0 bg-[#f7f8fa] p-0 shadow-none"
 				removePortal={removePortal}
+				hideCloseButton
 			>
-				{/* Sticky header */}
-				<DialogHeader className="shrink-0 bg-white p-4 sm:p-6">
-					<CustomDialogHeader
-						title={
-							isEditAutomation
-								? __('Edit Automation', 'doublescale')
-								: __('Create Automation', 'doublescale')
-						}
-						subtitle={
-							isEditAutomation
-								? __('Edit Automation', 'doublescale')
-								: __('Add New Automation', 'doublescale')
-						}
-						icon={
-							<AutomationsIcon width={24} height={24} color='#3A3A99' />
-						}
-					/>
+				{/* Sticky header — breadcrumb, matches the automation editor's top bar */}
+				<DialogHeader className="shrink-0 border-b border-neutral-200 bg-white px-4 py-3 sm:px-8">
+					<nav
+						className="mx-auto flex w-full max-w-5xl min-w-0 items-center justify-between gap-2"
+						aria-label={__('Breadcrumb', 'doublescale')}
+					>
+						<div className="flex min-w-0 items-center gap-1.5">
+							<button
+								type="button"
+								className="shrink-0 cursor-pointer text-base font-medium leading-7 text-foreground transition-colors hover:text-secondary"
+								onClick={onCancel}
+							>
+								{__('Automations List', 'doublescale')}
+							</button>
+							<AccordingRightIcon
+								width={20}
+								height={20}
+								color="hsl(var(--foreground))"
+							/>
+							<span className="truncate text-base font-medium leading-7 text-muted-foreground">
+								{isEditAutomation
+									? __('Edit Automation', 'doublescale')
+									: __('Create Automation', 'doublescale')}
+							</span>
+						</div>
+						<button
+							type="button"
+							className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							onClick={onCancel}
+							aria-label={__('Close', 'doublescale')}
+						>
+							<X className="h-6 w-6" />
+						</button>
+					</nav>
 				</DialogHeader>
 
-				{/* Scrollable body — light gray surface, 24px gutter around the inner card */}
-				<div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 sm:p-6 sm:pt-0">
-					{error && (
-						<div className="mb-4">
+				{/* Scrollable body — light gray page surface, white content cards */}
+				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
+					<div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+						{error && (
 							<NoticeBanner
 								ref={noticeBannerRef}
 								notice={error}
 								closeNotice={onClearError}
 							/>
-						</div>
-					)}
+						)}
 
-					<div className="rounded-2xl border border-border bg-[#f7f8fa] p-4 sm:p-6">
-						<div className="doublescale-fields doublescale-automation-modal-fields flex flex-col gap-6">
-							{/* Row 1 — Automation Name (full width) */}
-							<div className="min-w-0 flex flex-col gap-2">
-								<Label className="text-base font-normal text-foreground !p-0">
-									{__('Automation Name', 'doublescale')}
-									<span className="text-destructive">*</span>
-								</Label>
-								<Input
-									value={automation.name}
-									onChange={(e) =>
-										onAutomationChange({
-											...automation,
-											name: e.target.value,
-										})
-									}
-								/>
-							</div>
-
-							{/* Row 2 — full-width divider */}
-							<div
-								className="border-t border-neutral-200"
-								role="separator"
-							/>
-
-							{/* Row 3 — Trigger tabs (left) + Groups list (right) */}
-							<div className="doublescale-field min-w-0 flex flex-col gap-3">
-								<div className="doublescale-field-label flex items-center gap-1 text-base font-normal text-foreground">
-									{__('Trigger', 'doublescale')}
-									<span className="text-destructive">*</span>
+						{/* Card 1 — Automation Name */}
+						<div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-8">
+							<div className="flex flex-col gap-6">
+								<div>
+									<h2 className="text-lg font-semibold text-foreground">
+										{isEditAutomation
+											? __('Edit Automation', 'doublescale')
+											: __('Create Automation', 'doublescale')}
+									</h2>
+									<p className="mt-1 text-sm text-muted-foreground">
+										{__(
+											'Set up and customize a new automation workflow to streamline your tasks and improve efficiency.',
+											'doublescale'
+										)}
+									</p>
 								</div>
 
-								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+								<div className="min-w-0 flex flex-col gap-2">
+									<Label className="text-base font-normal text-foreground !p-0">
+										{__('Automation Name', 'doublescale')}
+										<span className="text-destructive">*</span>
+									</Label>
+									<Input
+										value={automation.name}
+										onChange={(e) =>
+											onAutomationChange({
+												...automation,
+												name: e.target.value,
+											})
+										}
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Card 2 — Choose Trigger */}
+						<div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-8">
+							<div className="doublescale-fields doublescale-automation-modal-fields flex flex-col gap-6">
+							<div className="doublescale-field min-w-0 flex flex-col gap-3">
+								<div className="doublescale-field-label flex items-center gap-1 text-lg font-semibold text-foreground">
+									{__('Choose Trigger', 'doublescale')}
+								</div>
+
+								<div className="grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr]">
 									{/* Left: vertical list of horizontal trigger tabs */}
 									<div
 										role="tablist"
@@ -766,7 +843,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 											'Trigger category',
 											'doublescale'
 										)}
-										className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 max-h-[480px] overflow-y-auto"
+										className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
 									>
 										{map(
 											automationTriggers,
@@ -808,11 +885,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 															}
 														}}
 														className={cn(
-															'flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors',
-															'focus:outline-none focus:ring-2 focus:ring-brandPrimary/20',
+															'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors',
+															'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/20',
 															isActive
-																? 'border-brandPrimary/40 bg-brandPrimary/5'
-																: 'border-transparent hover:bg-neutral-50'
+																? 'border-2 border-dashed border-brandPrimary/60 bg-brandPrimary/5'
+																: 'border-2 border-transparent hover:bg-neutral-50'
 														)}
 													>
 														<span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white [&_svg]:max-h-[28px] [&_svg]:max-w-[28px]">
@@ -846,7 +923,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 											'Triggers',
 											'doublescale'
 										)}
-										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[480px] overflow-y-auto"
+										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
 									>
 										{categoryTabs.length > 0 ? (
 											<Tabs
@@ -856,15 +933,29 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 												}
 												className="flex flex-col gap-4"
 											>
-												<TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-neutral-100 p-1">
+												<TabsList className="flex h-auto w-full flex-wrap justify-start gap-1.5 rounded-lg bg-transparent p-0">
 													{categoryTabs.map(
 														(tab) => (
 															<TabsTrigger
 																key={tab.key}
 																value={tab.key}
-																className="text-xs sm:text-sm"
+																className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs text-neutral-700 shadow-none data-[state=active]:border-brandPrimary/30 data-[state=active]:bg-brandPrimary/10 data-[state=active]:text-brandPrimary data-[state=active]:shadow-none sm:text-sm"
 															>
-																{tab.label}
+																{categoryData[
+																	tab.key as keyof typeof categoryData
+																]?.image && (
+																	<span className="flex h-4 w-4 shrink-0 items-center justify-center [&_svg]:max-h-4 [&_svg]:max-w-4">
+																		{
+																			categoryData[
+																				tab.key as keyof typeof categoryData
+																			]
+																				?.image
+																		}
+																	</span>
+																)}
+																<span className="truncate">
+																	{tab.label}
+																</span>
 															</TabsTrigger>
 														)
 													)}
@@ -917,31 +1008,29 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 					</div>
 				</div>
+				</div>
 
 				{/* Sticky footer */}
-				<DialogFooter className="shrink-0  bg-white px-6 py-4 flex flex-row items-end justify-end gap-6">
-					<Button
-						type="button"
-						variant="secondaryDeepBlue"
-
-						onClick={onCancel}
-						disabled={isSaving}
-					>
-						{__('Cancel', 'doublescale')}
-					</Button>
-					<Button
-						onClick={onOk}
-						disabled={isSaving}
-
-					>
-						{isSaving
-							? isEditAutomation
-								? __('Updating...', 'doublescale')
-								: __('Creating...', 'doublescale')
-							: isEditAutomation
-								? __('Update Automation', 'doublescale')
-								: __('Create Automation', 'doublescale')}
-					</Button>
+				<DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-4 py-4 sm:px-8">
+					<div className="mx-auto flex w-full max-w-5xl flex-row items-center justify-end gap-3">
+						<Button
+							type="button"
+							variant="secondaryDeepBlue"
+							onClick={onCancel}
+							disabled={isSaving}
+						>
+							{__('Cancel', 'doublescale')}
+						</Button>
+						<Button onClick={onOk} disabled={isSaving}>
+							{isSaving
+								? isEditAutomation
+									? __('Updating...', 'doublescale')
+									: __('Creating...', 'doublescale')
+								: isEditAutomation
+									? __('Update Automation', 'doublescale')
+									: __('Create Automation', 'doublescale')}
+						</Button>
+					</div>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

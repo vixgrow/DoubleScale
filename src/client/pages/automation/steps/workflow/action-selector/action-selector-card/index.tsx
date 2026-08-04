@@ -11,70 +11,76 @@ import { map } from 'lodash';
 /**
  * Internal dependencies
  */
-import {
-    Card,
-    CardContent,
-} from "@/components/ui/card";
+import { IntegrationsIcon } from '@doublescale/components/icons/index';
+import { cn } from '@/lib/utils';
 
 interface CategoryData {
-    [key: string]: {
-        image: React.ReactNode;
-        description: string;
-    };
+	[key: string]: {
+		image: React.ReactNode;
+		description: string;
+	};
 }
 
 interface ActionSelectorCardProps {
-    automationActions: Record<string, any>;
-    selectedCategory: string;
-    setSelectedCategory: (category: string) => void;
-    categoryData: CategoryData;
+	automationActions: Record<string, any>;
+	selectedCategory: string;
+	setSelectedCategory: (category: string) => void;
+	categoryData: CategoryData;
 }
 
 const ActionSelectorCard: React.FC<ActionSelectorCardProps> = ({
-    automationActions,
-    selectedCategory,
-    setSelectedCategory,
-    categoryData,
+	automationActions,
+	selectedCategory,
+	setSelectedCategory,
+	categoryData,
 }) => {
-    return (
-        <Card className="p-4 shadow-none">
-            <CardContent className="p-0 space-y-3">
-                {map(automationActions, (action, index) => {
-                    const isSelected = selectedCategory === index.toString();
+	return (
+		<div
+			role="tablist"
+			aria-orientation="vertical"
+			aria-label={__('Action category', 'doublescale')}
+			className="flex max-h-[calc(100dvh-300px)] min-h-[420px] flex-col gap-1.5 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-2"
+		>
+			{map(automationActions, (action, index) => {
+				const categoryKey = String(index);
+				const isActive = selectedCategory === categoryKey;
+				const meta = categoryData[categoryKey];
 
-                    return (
-                        <Card
-                            key={index}
-                            onClick={() => setSelectedCategory(index.toString())}
-                            className={`relative p-4 transition-all shadow-none border duration-200 cursor-pointer
-								${isSelected
-                                    ? 'border-[#274C77] bg-[#ECF3FC]'
-                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            <div className="flex items-center space-x-4">
-                                {categoryData[index] && categoryData[index].image && (
-                                    <div className="flex-shrink-0 w-12 h-12 border rounded-md p-2 flex items-center justify-center">
-                                        {categoryData[index].image}
-                                    </div>
-                                )}
-                                <div className="flex-1">
-                                    <h3 className="text-base font-semibold text-[#3F4254] mb-1">
-                                        {action.label}
-                                    </h3>
-                                    {categoryData[index]?.description && (
-                                        <p className="text-sm text-[#9197A4]">
-                                            {categoryData[index].description}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </Card>
-                    );
-                })}
-            </CardContent>
-        </Card>
-    );
+				return (
+					<button
+						key={categoryKey}
+						type="button"
+						role="tab"
+						aria-selected={isActive}
+						onClick={() => setSelectedCategory(categoryKey)}
+						className={cn(
+							'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors',
+							'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/20',
+							isActive
+								? 'border-2 border-dashed border-brandPrimary/60 bg-brandPrimary/5'
+								: 'border-2 border-transparent hover:bg-neutral-50'
+						)}
+					>
+						<span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white [&_svg]:max-h-[28px] [&_svg]:max-w-[28px]">
+							{meta?.image ?? (
+								<IntegrationsIcon width={22} height={22} />
+							)}
+						</span>
+						<span
+							className={cn(
+								'min-w-0 flex-1 truncate text-sm font-medium',
+								isActive
+									? 'text-brandPrimary'
+									: 'text-neutral-800'
+							)}
+						>
+							{action.label}
+						</span>
+					</button>
+				);
+			})}
+		</div>
+	);
 };
 
 export default ActionSelectorCard;

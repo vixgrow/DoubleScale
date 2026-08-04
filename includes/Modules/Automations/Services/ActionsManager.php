@@ -183,60 +183,65 @@ final class ActionsManager {
 	 */
 	public function set_sources() {
 		$this->sources = array(
-			'crm'         => array(
-				'label'  => __( 'CRM', 'doublescale' ),
-				'groups' => array(
-					'contact' => array(
-						'label'   => __( 'Contact', 'doublescale' ),
-						'actions' => array(),
+			'modules'     => array(
+				'label' => __( 'DoubleScale Modules', 'doublescale' ),
+				'tabs'  => array(
+					'crm'      => array(
+						'label'  => __( 'Contact', 'doublescale' ),
+						'groups' => array(
+							'contact' => array(
+								'label'   => __( 'Contact', 'doublescale' ),
+								'actions' => array(),
+							),
+							'delay'   => array(
+								'label'   => __( 'Delay', 'doublescale' ),
+								'actions' => array(),
+							),
+						),
 					),
-					'delay'   => array(
-						'label'   => __( 'Delay', 'doublescale' ),
-						'actions' => array(),
+					'sales'    => array(
+						'label'  => __( 'Sales', 'doublescale' ),
+						'groups' => array(
+							'deal' => array(
+								'label'       => __( 'Deal', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'deals' ),
+							),
+						),
 					),
-				),
-			),
-			'sales'       => array(
-				'label'  => __( 'Sales', 'doublescale' ),
-				'groups' => array(
-					'deal' => array(
-						'label'       => __( 'Deal', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'deals' ),
+					'support'  => array(
+						'label'  => __( 'Helpdesk', 'doublescale' ),
+						'groups' => array(
+							'support' => array(
+								'label'       => __( 'Ticket', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'support' ),
+							),
+						),
 					),
-				),
-			),
-			'support'     => array(
-				'label'  => __( 'Helpdesk', 'doublescale' ),
-				'groups' => array(
-					'support' => array(
-						'label'       => __( 'Ticket', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'support' ),
+					'tasks'    => array(
+						'label'  => __( 'Tasks', 'doublescale' ),
+						'groups' => array(
+							'task' => array(
+								'label'       => __( 'Task', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
+							),
+						),
 					),
-				),
-			),
-			'tasks'       => array(
-				'label'  => __( 'Tasks', 'doublescale' ),
-				'groups' => array(
-					'task' => array(
-						'label'       => __( 'Task', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'tasks' ),
-					),
-				),
-			),
-			'projects'    => array(
-				'label'  => __( 'Projects', 'doublescale' ),
-				'groups' => array(
-					'project' => array(
-						'label'       => __( 'Project', 'doublescale' ),
-						'actions'     => array(),
-						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							|| ! doublescale_is_module_active( 'projects' ),
+					'projects' => array(
+						'label'  => __( 'Projects', 'doublescale' ),
+						'groups' => array(
+							'project' => array(
+								'label'       => __( 'Project', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'projects' ),
+							),
+						),
 					),
 				),
 			),
@@ -244,8 +249,9 @@ final class ActionsManager {
 				'label' => __( 'E-commerce', 'doublescale' ),
 				'tabs'  => array(
 					'woocommerce' => array(
-						'label'  => __( 'WooCommerce', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'WooCommerce', 'doublescale' ),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+						'groups'      => array(
 							'order'  => array(
 								'label'       => __( 'Order', 'doublescale' ),
 								'actions'     => array(),
@@ -298,8 +304,9 @@ final class ActionsManager {
 				'label' => __( 'Membership', 'doublescale' ),
 				'tabs'  => array(
 					'memberpress' => array(
-						'label'  => __( 'MemberPress', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'MemberPress', 'doublescale' ),
+						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+						'groups'      => array(
 							'memberpress' => array(
 								'label'       => __( 'MemberPress', 'doublescale' ),
 								'actions'     => array(),
@@ -308,8 +315,9 @@ final class ActionsManager {
 						),
 					),
 					'pmpro'       => array(
-						'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
-						'groups' => array(
+						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+						'groups'      => array(
 							'pmpro' => array(
 								'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
 								'actions'     => array(),
@@ -410,13 +418,19 @@ final class ActionsManager {
 	/**
 	 * Get sources
 	 *
-	 * Disabled groups (module off, plugin missing) stay in the payload so the
-	 * builder can show them with an enable/install tooltip — same as triggers.
+	 * Module-off groups (CRM, Sales, Tasks, …) stay in the payload with an
+	 * enable tooltip — those aren't alternatives, a site can use several at
+	 * once. "Pick one integration" categories (E-commerce, LMS, Membership)
+	 * are pruned to the vendor(s) actually active and dropped entirely when
+	 * none are — see {@see SourceTreePruner}.
 	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->sources;
+		return SourceTreePruner::prune(
+			$this->sources,
+			array( 'ecommerce', 'lms', 'membership' )
+		);
 	}
 
 	/**
@@ -502,6 +516,7 @@ final class ActionsManager {
 		$tabbed_sources = array(
 			'ecommerce'  => array( 'woocommerce' ),
 			'membership' => array( 'memberpress', 'pmpro' ),
+			'modules'    => array( 'crm', 'sales', 'support', 'tasks', 'projects' ),
 		);
 
 		foreach ( $tabbed_sources as $category_key => $source_keys ) {

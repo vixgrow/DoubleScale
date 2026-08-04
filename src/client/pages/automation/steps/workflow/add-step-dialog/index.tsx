@@ -15,28 +15,17 @@ import { cn } from '@/lib/utils';
  * Internal dependencies
  */
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
-import {
-	automationDialogBodyClassName,
-	automationDialogHeaderClassName,
-	automationDialogSurfaceMedium,
-	automationModalOverlayClassName,
-} from '../automation-dialog-presets';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
 	ActionAutomationIcon,
 	ConditionAutomationIcon,
-	CustomDialogHeader,
 	GoalsAutomationIcon,
 	PlusIcon,
 	TimerBlockIcon,
-	WorkflowIcon,
 } from '@doublescale/components';
 import EndAutomationIcon from '@doublescale/shared/icons/end-automation';
 
@@ -44,7 +33,6 @@ interface StepTypeOption {
 	label: string;
 	description: string;
 	icon: React.ReactNode;
-	topBorder: string;
 	iconWrap: string;
 }
 
@@ -59,52 +47,32 @@ interface AddStepDialogProps {
 const defaultTypesOptions: Record<string, StepTypeOption> = {
 	action: {
 		label: __('Action', 'doublescale'),
-		description: __(
-			'Select one of the Actions to continue your workflow.',
-			'doublescale'
-		),
+		description: __('Do something in your workflow', 'doublescale'),
 		icon: <ActionAutomationIcon />,
-		topBorder: 'border-t-[3px] border-t-[#16A34A]',
 		iconWrap: 'bg-[#16A34A]/10 text-[#16A34A]',
 	},
 	condition: {
 		label: __('Condition', 'doublescale'),
-		description: __(
-			'Select one of the Conditions to continue your workflow.',
-			'doublescale'
-		),
+		description: __('Branch based on a condition', 'doublescale'),
 		icon: <ConditionAutomationIcon />,
-		topBorder: 'border-t-[3px] border-t-[#0D9DFC]',
 		iconWrap: 'bg-[#0D9DFC]/10 text-[#0D9DFC]',
 	},
 	delay: {
 		label: __('Delay', 'doublescale'),
-		description: __(
-			'A pause or waiting period introduced into a sequence of automated actions.',
-			'doublescale'
-		),
+		description: __('Wait before continuing', 'doublescale'),
 		icon: <TimerBlockIcon />,
-		topBorder: 'border-t-[3px] border-[#896900]',
 		iconWrap: 'bg-[#896900]/10 text-[#896900]',
 	},
 	goal: {
 		label: __('Goal', 'doublescale'),
-		description: __(
-			'Select one of the Goals to continue your workflow.',
-			'doublescale'
-		),
+		description: __('Wait until a chosen event happens', 'doublescale'),
 		icon: <GoalsAutomationIcon />,
-		topBorder: 'border-t-[3px] border-t-[#262666]',
 		iconWrap: 'bg-[#262666]/10 text-[#262666]',
 	},
 	end_automation: {
 		label: __('End Automation', 'doublescale'),
-		description: __(
-			'A pause or waiting period introduced into a sequence of automated actions.',
-			'doublescale'
-		),
+		description: __('Stop the automation here', 'doublescale'),
 		icon: <EndAutomationIcon />,
-		topBorder: 'border-t-[3px] border-t-[#C30A0A]',
 		iconWrap: 'bg-[#C30A0A]/10 text-[#C30A0A]',
 	},
 };
@@ -122,132 +90,92 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 	) as boolean;
 
 	return (
-		<>
-			<Dialog open={visible} onOpenChange={onVisibleChange}>
-				<button
-					type="button"
-					disabled={disabled}
-					className={cn(
-						'doublescale-automation-workflow__add-step nodrag nopan mx-auto flex items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none disabled:pointer-events-none disabled:opacity-40',
-						!disabled && 'cursor-pointer'
-					)}
-					onClick={(e) => {
-						e.stopPropagation();
-						if (!disabled) {
-							onVisibleChange(true);
-						}
-					}}
-					title={__('Add step here', 'doublescale')}
+		<div
+			className="doublescale-automation-workflow__add-step-wrapper"
+			onClick={(e) => {
+				e.stopPropagation();
+				e.preventDefault();
+			}}
+			onMouseDown={(e) => e.stopPropagation()}
+			onMouseUp={(e) => e.stopPropagation()}
+		>
+			<DropdownMenu open={visible} onOpenChange={onVisibleChange}>
+				<DropdownMenuTrigger
+					asChild
+					onClick={(e) => e.stopPropagation()}
 				>
-					<span className="doublescale-add-step-trigger">
-						<PlusIcon width={14} height={14} />
-					</span>
-				</button>
-
-				<DialogContent
-					className={cn(automationDialogSurfaceMedium, 'gap-0 p-0')}
-					overlayClassName={automationModalOverlayClassName}
-				>
-					{/* Sticky header */}
-					<DialogHeader
+					<button
+						type="button"
+						disabled={disabled}
 						className={cn(
-							automationDialogHeaderClassName,
-							'shrink-0'
+							'doublescale-automation-workflow__add-step nodrag nopan mx-auto flex items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none disabled:pointer-events-none disabled:opacity-40',
+							!disabled && 'cursor-pointer'
 						)}
+						title={__('Add step here', 'doublescale')}
 					>
-						<CustomDialogHeader
-							title={__('Add Step', 'doublescale')}
-							subtitle={__(
-								'Pick the next block in your automation. Each type controls how contacts move forward.',
-								'doublescale'
-							)}
-							icon={<WorkflowIcon />}
-						/>
-						<DialogTitle className="sr-only">
-							{__('Add Step', 'doublescale')}
-						</DialogTitle>
-						<DialogDescription className="sr-only">
-							{__(
-								'Pick the next block in your automation.',
-								'doublescale'
-							)}
-						</DialogDescription>
-					</DialogHeader>
+						<span className="doublescale-add-step-trigger">
+							<PlusIcon width={14} height={14} />
+						</span>
+					</button>
+				</DropdownMenuTrigger>
 
-					{/* Scrollable body — 24 px gap */}
-					<div className={cn(automationDialogBodyClassName)}>
-						<div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2">
-							{map(defaultTypesOptions, (type, key) => {
-								const isConditionLocked =
-									key === 'condition' && !isProActive;
-								const isEnd = key === 'end_automation';
+				{/* Renders inline (no portal) — a portalled menu here doesn't
+				 * receive pointer events reliably inside the React Flow canvas
+				 * (see node-actions-dropdown.tsx for the same fix). */}
+				<DropdownMenuContent
+					side="right"
+					align="start"
+					sideOffset={12}
+					avoidCollisions={true}
+					collisionPadding={16}
+					removePortal={true}
+					className="z-[150000] max-h-none w-80 rounded-2xl border-border/50 p-3 shadow-[0_22px_60px_-18px_rgba(15,23,42,0.28)]"
+					onClick={(e) => e.stopPropagation()}
+				>
+					<div className="flex flex-col divide-y divide-neutral-100">
+						{map(defaultTypesOptions, (type, key) => {
+							const isConditionLocked =
+								key === 'condition' && !isProActive;
+							const isDisabled = loading || isConditionLocked;
 
-								return (
-									<div
-										key={key}
+							return (
+								<DropdownMenuItem
+									key={key}
+									disabled={isDisabled}
+									onSelect={(e) => {
+										if (isDisabled) {
+											e.preventDefault();
+											return;
+										}
+										onStepSelection(key);
+									}}
+									className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-3 pointer-events-auto transition-colors focus:bg-neutral-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+								>
+									<span
 										className={cn(
-											'flex',
-											isEnd &&
-											'col-span-full justify-center'
+											'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+											type.iconWrap
 										)}
 									>
-										<Card
-											className={cn(
-												'group flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border-0 bg-white p-0 transition-shadow duration-150',
-												'shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] hover:shadow-[0_6px_24px_0_rgba(59,130,246,0.22)]',
-												type.topBorder,
-												isEnd &&
-												'max-w-full sm:max-w-[calc(50%-0.75rem)]',
-												(loading || isConditionLocked) &&
-												'pointer-events-none opacity-50'
+										{type.icon}
+									</span>
+									<span className="min-w-0 flex-1">
+										<span className="flex items-center gap-2 text-base font-medium text-foreground">
+											{type.label}
+											{isConditionLocked && (
+												<Lock className="h-4 w-4 shrink-0 text-amber-500" />
 											)}
-										>
-											<div className="flex flex-1 items-start gap-4 px-4 py-4 sm:px-5 sm:py-5">
-												{/* Icon */}
-												<div
-													className={cn(
-														'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
-														type.iconWrap
-													)}
-												>
-													{type.icon}
-												</div>
-
-												{/* Text */}
-												<div className="min-w-0 flex-1">
-													<h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-														{type.label}
-														{isConditionLocked && (
-															<Lock className="h-4 w-4 shrink-0 text-amber-500" />
-														)}
-													</h3>
-													<p className="mt-0.5 text-sm leading-snug text-muted-foreground">
-														{type.description}
-													</p>
-												</div>
-
-												{/* Select button */}
-												<Button
-													variant="secondaryDeepBlue"
-													size="sm"
-													className="mt-0.5 shrink-0 self-start shadow-none"
-													disabled={loading || isConditionLocked}
-													onClick={(e) => {
-														e.stopPropagation();
-														onStepSelection(key);
-													}}
-												>
-													{__('Select', 'doublescale')}
-												</Button>
-											</div>
-										</Card>
-									</div>
-								);
-							})}
-						</div>
+										</span>
+										<span className="block truncate text-xs text-muted-foreground">
+											{type.description}
+										</span>
+									</span>
+								</DropdownMenuItem>
+							);
+						})}
 					</div>
-				</DialogContent>
-			</Dialog>
-		</>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	);
 };

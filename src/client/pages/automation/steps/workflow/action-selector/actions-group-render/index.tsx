@@ -8,7 +8,7 @@ import { useState } from '@wordpress/element';
  * External dependencies
  */
 import { map, pickBy } from 'lodash';
-import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
+import { Check, ChevronUp, ChevronDown, Lock } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -206,13 +206,25 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 							<CardContent className="p-0">
 								<div className="flex flex-col divide-y">
 									{map(group.actions, (action, actionKey) => {
+										const isSelected = value === actionKey;
 										const actionButton = (
 											<div
 												key={actionKey}
-												className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
+												className={`flex items-center justify-between gap-4 border-l-4 px-4 py-2.5 transition-colors ${isSelected ? 'border-l-brandPrimary bg-brandPrimary/10' : 'border-l-transparent hover:bg-muted/50'}`}
 											>
 												<div className="flex items-center gap-2">
-													<span className="text-sm">
+													{isSelected && (
+														<span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brandPrimary text-white">
+															<Check
+																className="h-3.5 w-3.5"
+																strokeWidth={3}
+																aria-hidden
+															/>
+														</span>
+													)}
+													<span
+														className={`text-sm ${isSelected ? 'font-semibold text-brandPrimary' : ''}`}
+													>
 														{action.label}
 													</span>
 													{action.is_pro && !isProActive && (
@@ -233,18 +245,42 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 														(action.is_pro &&
 															!isProActive)
 													}
-													className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === actionKey ? 'border-2 border-primary' : 'border'}`}
+													variant={
+														isSelected
+															? 'default'
+															: 'secondaryDeepBlue'
+													}
+													size="sm"
+													className="h-8 shrink-0 rounded-md px-4 text-xs font-semibold uppercase tracking-wide shadow-none"
 												>
-													{isSaving &&
-													value === actionKey
-														? __(
+													{isSaving && isSelected && (
+														<span>
+															{__(
 																'Selecting...',
 																'doublescale'
-															)
-														: __(
-																'Select',
-																'doublescale'
 															)}
+														</span>
+													)}
+													{!(isSaving && isSelected) && (
+														<>
+															{isSelected && (
+																<Check
+																	className="h-3.5 w-3.5"
+																	strokeWidth={3}
+																	aria-hidden
+																/>
+															)}
+															{isSelected
+																? __(
+																		'Selected',
+																		'doublescale'
+																	)
+																: __(
+																		'Select',
+																		'doublescale'
+																	)}
+														</>
+													)}
 												</Button>
 											</div>
 										);

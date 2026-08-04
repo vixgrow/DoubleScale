@@ -25,17 +25,6 @@ import { IntegrationCard } from './integration-card';
 import { AddonCard } from './addon-card';
 import './style.scss';
 
-// @ts-ignore
-import slackImg from '@doublescale/assets/images/slack/slack.png';
-// @ts-ignore
-import twilioImg from '@doublescale/assets/images/twilio/twilio.png';
-// @ts-ignore
-import stripeImg from '@doublescale/assets/images/stripe/stripe.png';
-// @ts-ignore
-import paypalImg from '@doublescale/assets/images/paypal/paypal.png';
-// @ts-ignore
-import metaWhatsappImg from '@doublescale/assets/images/meta-whatsapp/meta-whatsapp.svg';
-
 const freePluginUrl = ConfigAPI.getPluginDirUrl().replace(/\/?$/, '/');
 const proPluginUrl =
 	(typeof window !== 'undefined' &&
@@ -46,26 +35,31 @@ const proPluginUrl =
 		).doublescalePro?.proPluginUrl) ||
 	freePluginUrl;
 
-const integrationImages: Record<string, string> = {
-	slack: slackImg,
-	twilio: twilioImg,
-	stripe: stripeImg,
-	paypal: paypalImg,
-	'meta-whatsapp': metaWhatsappImg,
-	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
-	make: `${proPluginUrl}assets/images/make/make.svg`,
-	// Typeform/Jotform logos ship in the free plugin package.
+/**
+ * Fallback icons for older payloads that omit `icon_url`.
+ * New integrations should set `show_in_catalog` + `get_icon_url()` in PHP.
+ */
+const fallbackIntegrationImages: Record<string, string> = {
+	slack: `${freePluginUrl}assets/images/slack/slack.png`,
+	twilio: `${freePluginUrl}assets/images/twilio/twilio.png`,
+	stripe: `${freePluginUrl}assets/images/stripe/stripe.png`,
+	paypal: `${freePluginUrl}assets/images/paypal/paypal.png`,
+	'meta-whatsapp': `${freePluginUrl}assets/images/meta-whatsapp/meta-whatsapp.svg`,
 	typeform: `${freePluginUrl}assets/images/typeform/typeform.svg`,
 	jotform: `${freePluginUrl}assets/images/jotform/jotform.png`,
+	zapier: `${freePluginUrl}assets/images/zapier/zapier.svg`,
+	make: `${proPluginUrl}assets/images/make/make.svg`,
 };
 
-const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'typeform', 'jotform', 'zapier', 'make'];
-
+/** Addon store cards when the addon plugin is not active yet. */
 const ADDON_INTEGRATIONS = ['zapier', 'make'];
 
+/**
+ * Catalog is backend-driven: any registered integration with `show_in_catalog: true`.
+ */
 const filterIntegrations = (allIntegrations: any) => {
 	return Object.keys(allIntegrations)
-		.filter((key) => INTEGRATIONS_TO_SHOW.includes(key))
+		.filter((key) => allIntegrations[key]?.show_in_catalog === true)
 		.reduce(
 			(obj, key) => {
 				obj[key] = allIntegrations[key];
@@ -73,6 +67,13 @@ const filterIntegrations = (allIntegrations: any) => {
 			},
 			{} as typeof allIntegrations
 		);
+};
+
+const getIntegrationImage = (key: string, integration: any): string | undefined => {
+	if (integration?.icon_url) {
+		return integration.icon_url as string;
+	}
+	return fallbackIntegrationImages[key];
 };
 
 const Integrations: React.FC = () => {
@@ -101,19 +102,24 @@ const Integrations: React.FC = () => {
 				method: 'GET',
 			});
 
-			setIntegrations((prev) => ({
-				...prev,
-				[integrationKey]: {
-					...prev[integrationKey],
-					// @ts-ignore
-					settings: response.settings,
-					// @ts-ignore
-					is_connected:
-						typeof response.is_connected === 'boolean'
-							? response.is_connected
-							: Object.keys(response.settings || {}).length > 0,
-				},
-			}));
+			setIntegrations((prev) => {
+				if (!prev[integrationKey]) {
+					return prev;
+				}
+				return {
+					...prev,
+					[integrationKey]: {
+						...prev[integrationKey],
+						// @ts-ignore
+						settings: response.settings,
+						// @ts-ignore
+						is_connected:
+							typeof response.is_connected === 'boolean'
+								? response.is_connected
+								: Object.keys(response.settings || {}).length > 0,
+					},
+				};
+			});
 
 			const connected =
 				typeof response.is_connected === 'boolean'
@@ -147,9 +153,10 @@ const Integrations: React.FC = () => {
 	}, [notice]);
 
 	useEffect(() => {
-		INTEGRATIONS_TO_SHOW.forEach((integrationKey) => {
+		Object.keys(integrations).forEach((integrationKey) => {
 			void refreshIntegration(integrationKey);
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- initial catalog hydrate only
 	}, []);
 
 	const handleSuccess = async (integrationLabel: string, integrationKey?: string) => {
@@ -235,7 +242,7 @@ const Integrations: React.FC = () => {
 								key={key}
 								integrationKey={key}
 								integration={integration}
-								imageUrl={integrationImages[key]}
+								imageUrl={getIntegrationImage(key, integration)}
 								isLoading={loadingIntegrations[key]}
 								onNavigate={() => navigate(getToLink(`integrations/${key}`))}
 								onDisconnect={() => handleDisconnect(key, integration.label)}
@@ -245,7 +252,7 @@ const Integrations: React.FC = () => {
 							<AddonCard
 								key={key}
 								addon={addons[key]}
-								imageUrl={integrationImages[key]}
+								imageUrl={fallbackIntegrationImages[key]}
 							/>
 						))}
 					</div>

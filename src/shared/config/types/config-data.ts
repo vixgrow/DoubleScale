@@ -450,6 +450,11 @@ export type Integration = {
 	fields: IntegrationFields;
 	is_connected: boolean;
 	is_pro?: boolean;
+	/** When true, Integrations page shows a card (set from PHP Integration::$show_in_catalog). */
+	show_in_catalog?: boolean;
+	/** Absolute image URL from PHP Integration::get_icon_url(). */
+	icon_url?: string;
+	required_plan?: string | null;
 	settings: {
 		[key: string]: string;
 	};

@@ -10,8 +10,9 @@
 
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import { Loader2, Paperclip } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
+import { AttachmentsIcon } from '@doublescale/components';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,7 +67,13 @@ const AttachmentLimitsCard: React.FC<Props> = ({ onNotice }) => {
 		<Card>
 			<CardContent className="p-6">
 				<div className="mb-4 flex items-center gap-2">
-					<Paperclip className="h-5 w-5 text-gray-500" />
+					<span className="shrink-0 text-gray-500">
+						<AttachmentsIcon
+							width={32}
+							height={32}
+							color="currentColor"
+						/>
+					</span>
 					<div>
 						<div className="font-semibold text-gray-900">
 							{__('Attachment limits', 'doublescale')}
@@ -101,6 +108,7 @@ const AttachmentLimitsCard: React.FC<Props> = ({ onNotice }) => {
 									min={1}
 									value={sizeMb}
 									onChange={(e) => setSizeMb(e.target.value)}
+									className='!rounded-lg border !border-border'
 								/>
 							</div>
 							<div className="flex-1 min-w-[180px] space-y-1">
@@ -116,6 +124,7 @@ const AttachmentLimitsCard: React.FC<Props> = ({ onNotice }) => {
 									min={1}
 									value={count}
 									onChange={(e) => setCount(e.target.value)}
+									className='!rounded-lg border !border-border'
 								/>
 							</div>
 						</div>

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,13 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.1 = 03 Aug 2026
+- Add automation enrollment history endpoint and show prior-enrollment hints when running a workflow manually
+- Rename automation “Run test” to “Run manually” for clearer UX
+- Add a dedicated Import Workflows modal for automation management
+- Add new project/status icons and refine checkbox styling
+- Small UI polish for page tabs, activity timeline filters, and progress styling
+
 = 1.3.0 = 02 Aug 2026
 - Hide Pro-only tabs, pages, and actions entirely in the free version instead of showing locked cards or upgrade prompts (automations, booking, helpdesk, sales, mailbox, integrations, extensions, dashboard, and more)
 - Add a new "Discover Pro" page cataloging every Pro feature by category, with links to the live demo and pricing

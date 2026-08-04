@@ -24,6 +24,8 @@ export interface InvoiceFormDialogProps {
 	initialLineItems?: LineItem[];
 	initialCurrency?: string;
 	onSaved?: (invoiceId: number) => void;
+	/** Raise above fullscreen shells (e.g. project detail). */
+	elevated?: boolean;
 }
 
 export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
@@ -34,6 +36,7 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 	initialLineItems,
 	initialCurrency,
 	onSaved,
+	elevated = false,
 }) => {
 	const isNew = invoiceId === null;
 	const pageTitle = isNew
@@ -43,7 +46,12 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 	return (
 		<Dialog open={open} modal={false} onOpenChange={onOpenChange}>
 			<DialogContent
-				className="doublescale-contact-page doublescale-invoice-form-dialog z-[150200] flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60"
+				overlayClassName={elevated ? '!z-[1800004]' : undefined}
+				className={`doublescale-contact-page doublescale-invoice-form-dialog flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60 ${
+					elevated
+						? '!z-[1800005] pointer-events-auto'
+						: 'z-[150200]'
+				}`}
 				style={{
 					paddingTop: 0,
 					paddingLeft: 0,

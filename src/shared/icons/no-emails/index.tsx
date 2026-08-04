@@ -31,8 +31,8 @@ const NoEmailsIcon: React.FC<IconProps> = ({ width = 100, height = 100 }) => {
 					y2="74.9998"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_31933_6080"
@@ -42,8 +42,8 @@ const NoEmailsIcon: React.FC<IconProps> = ({ width = 100, height = 100 }) => {
 					y2="47.9375"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint2_linear_31933_6080"
@@ -53,8 +53,8 @@ const NoEmailsIcon: React.FC<IconProps> = ({ width = 100, height = 100 }) => {
 					y2="39.8212"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 			</defs>
 		</svg>

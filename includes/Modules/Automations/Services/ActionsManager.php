@@ -229,6 +229,17 @@ final class ActionsManager {
 					),
 				),
 			),
+			'projects'    => array(
+				'label'  => __( 'Projects', 'doublescale' ),
+				'groups' => array(
+					'project' => array(
+						'label'       => __( 'Project', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'projects' ),
+					),
+				),
+			),
 			'ecommerce'   => array(
 				'label' => __( 'E-commerce', 'doublescale' ),
 				'tabs'  => array(

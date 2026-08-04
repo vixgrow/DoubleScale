@@ -343,6 +343,23 @@ final class TriggersManager {
 					),
 				),
 			),
+			'projects'    => array(
+				'label'  => __( 'Projects', 'doublescale' ),
+				'groups' => array(
+					'project'    => array(
+						'label'       => __( 'Project', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'projects' ),
+					),
+					'discussion' => array(
+						'label'       => __( 'Discussion', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'projects' ),
+					),
+				),
+			),
 			'sales'       => array(
 				'label'  => __( 'Sales', 'doublescale' ),
 				'groups' => array(

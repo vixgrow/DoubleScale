@@ -78,7 +78,14 @@ import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import type { VerifiedSender } from '@/shared/config/types/config-data';
 import AttachmentLimitsCard from './attachment-limits-card';
-import { CopyIcon, DeleteIcon, EditHeaderIcon, EmailActivityIcon, NotificationIcon, SettingsIcon } from '@doublescale/components';
+import {
+	CopyIcon,
+	DeleteIcon,
+	EditHeaderIcon,
+	EmailActivityIcon,
+	NotificationIcon,
+	SettingsIcon,
+} from '@doublescale/shared/icons';
 
 // One customer-facing notification template.
 interface NotificationTemplate {

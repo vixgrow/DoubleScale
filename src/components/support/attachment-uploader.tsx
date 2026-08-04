@@ -12,7 +12,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Paperclip, X } from 'lucide-react';
 
 import type { AttachmentUploadResult } from '@/types/support';
-import { AttachmentsIcon } from '@doublescale/components';
+import { AttachmentsIcon } from '@doublescale/shared/icons';
 
 export interface PendingAttachment {
 	file_hash: string;

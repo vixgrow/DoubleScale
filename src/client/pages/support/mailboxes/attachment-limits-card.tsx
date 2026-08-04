@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { Loader2 } from 'lucide-react';
 
-import { AttachmentsIcon } from '@doublescale/components';
+import { AttachmentsIcon } from '@doublescale/shared/icons';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

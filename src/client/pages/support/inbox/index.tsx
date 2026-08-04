@@ -21,7 +21,7 @@ import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import type { DataTableConfig } from '@doublescale/client';
-import { MailboxIcon, NoData, SearchIcon } from '@doublescale/components';
+import { NoData, SearchIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
@@ -47,7 +47,7 @@ import {
 	BulkReplyModal,
 } from './bulk-action-modals';
 import { getTicketColumns } from './columns';
-import { SupportIcon } from '@doublescale/components/support';
+import { SupportIcon } from '@/components/support';
 
 type BulkModal = 'reply' | 'agent' | 'mailbox' | 'tags' | null;
 

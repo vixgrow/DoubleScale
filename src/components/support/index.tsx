@@ -18,7 +18,7 @@ import {
 	Send,
 	StickyNote,
 } from 'lucide-react';
-import { HelpdeskIcon } from '@doublescale/components';
+import { HelpdeskIcon } from '@doublescale/shared/icons';
 
 import type { TicketPriority, TicketStatus } from '@/constants/support';
 import { PRIORITY_LABELS, STATUS_LABELS } from '@/constants/support';

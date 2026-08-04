@@ -42,6 +42,7 @@ import {
 	FolderCheck,
 	Bell,
 	AlertTriangle,
+	Lock,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -70,7 +71,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import ConfigAPI from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
@@ -1186,13 +1186,16 @@ const SupportMailboxes: React.FC = () => {
 
 								{/*
 								 * Receive-tickets-by-email (IMAP / email piping)
-								 * card — always rendered. Free shows the upsell
-								 * default below; Pro replaces it via
+								 * card — always rendered. Pro replaces the filter
+								 * default via
 								 * addFilter('doublescale_support_mailbox_email_channel', …)
 								 * with a toggle (flips box_type web↔email) and the
 								 * "Polling … over IMAP" / send-only status. The
 								 * context carries `receivableEmails` so Pro can
-								 * gate on the chosen from_email.
+								 * gate on the chosen from_email. On Free the
+								 * filter default is a disabled switch with a lock
+								 * icon — no upsell copy or CTA buttons, per Nick's
+								 * featured-plugin review (locked, not nagged).
 								 */}
 								<div className="rounded-lg border border-input p-4 space-y-3">
 									<div>
@@ -1212,16 +1215,16 @@ const SupportMailboxes: React.FC = () => {
 									{
 										applyFilters(
 											'doublescale_support_mailbox_email_channel',
-											<ProFeatureNotice
-												featureName={__(
-													'Email channel (IMAP intake)',
-													'doublescale'
-												)}
-												description={__(
-													'Create tickets from incoming email. Inbound is polled over IMAP using a Gmail or Outlook-connected account, or any mailbox via custom IMAP credentials. Available in DoubleScale Pro.',
-													'doublescale'
-												)}
-											/>,
+											<div className="flex items-center gap-3">
+												<Switch checked={false} disabled />
+												<span className="flex items-center gap-1.5 text-sm text-gray-700">
+													{__(
+														'Email channel (IMAP intake)',
+														'doublescale'
+													)}
+													<Lock className="h-3.5 w-3.5 text-orange-500" />
+												</span>
+											</div>,
 											{
 												editing,
 												setEditing,

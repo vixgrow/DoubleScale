@@ -24,6 +24,7 @@ import {
 	HelpdeskIcon,
 	SalesIcon,
 	TaskDoneIcon,
+	ProjectsIcon,
 } from '@doublescale/components';
 import { IntegrationsIcon } from '@doublescale/components/icons/index';
 import {
@@ -246,6 +247,15 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Trigger automations based on task and subtask events',
+				'doublescale'
+			),
+		},
+		projects: {
+			image: (
+				<ProjectsIcon width={22} height={22} color="#1E3A8A" />
+			),
+			description: __(
+				'Trigger automations based on project lifecycle events',
 				'doublescale'
 			),
 		},

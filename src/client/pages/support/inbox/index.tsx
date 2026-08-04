@@ -20,9 +20,11 @@ import { Plus, Inbox as InboxEmptyIcon, AlertTriangle } from 'lucide-react';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import type { DataTableConfig } from '@doublescale/client';
+import { NoData, SearchIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -33,7 +35,6 @@ import {
 	deleteTicket,
 	addReply,
 } from '@/hooks/support';
-import { StatusPill, PriorityPill } from '@/components/support';
 import type { Ticket, TicketFilters } from '@/types/support';
 import NewTicketModal from './new-ticket-modal';
 import { TicketDetailModal } from './ticket-detail-modal';
@@ -45,31 +46,10 @@ import {
 	AssignTagsModal,
 	BulkReplyModal,
 } from './bulk-action-modals';
-import { SearchIcon } from '@doublescale/components';
+import { getTicketColumns } from './columns';
+import { SupportIcon } from '@/components/support';
 
 type BulkModal = 'reply' | 'agent' | 'mailbox' | 'tags' | null;
-
-const formatDate = (raw: string | null): string => {
-	if (!raw) {
-		return '—';
-	}
-	try {
-		return new Date(raw + 'Z').toLocaleString();
-	} catch {
-		return raw;
-	}
-};
-
-const contactName = (ticket: Ticket): string => {
-	const c = ticket.contact;
-	if (!c) {
-		return `#${ticket.contact_id}`;
-	}
-	const first = c.first_name || '';
-	const last = c.last_name || '';
-	const full = `${first} ${last}`.trim();
-	return full || c.email;
-};
 
 const SupportInbox: React.FC = () => {
 	const navigate = useNavigate();
@@ -97,6 +77,7 @@ const SupportInbox: React.FC = () => {
 	const page = filters.page ?? 1;
 	const perPage = filters.per_page ?? 20;
 	const totalRecords = data?.meta.total ?? 0;
+	const tickets = data?.data ?? [];
 
 	const setPage = useCallback((nextPage: number) => {
 		setFilters((prev) => ({ ...prev, page: nextPage }));
@@ -116,19 +97,13 @@ const SupportInbox: React.FC = () => {
 
 	const ticketsById = useMemo(() => {
 		const map = new Map<number, Ticket>();
-		data?.data.forEach((ticket) => {
+		tickets.forEach((ticket) => {
 			map.set(ticket.id, ticket);
 		});
 		return map;
-	}, [data?.data]);
+	}, [tickets]);
 
-	const pageTicketIds = data?.data.map((ticket) => ticket.id) ?? [];
 	const selectedCount = selectedIds.size;
-	const allPageSelected =
-		pageTicketIds.length > 0 &&
-		pageTicketIds.every((id) => selectedIds.has(id));
-	const somePageSelected =
-		pageTicketIds.some((id) => selectedIds.has(id)) && !allPageSelected;
 
 	useEffect(() => {
 		setSelectedIds(new Set());
@@ -150,29 +125,29 @@ const SupportInbox: React.FC = () => {
 		setFilters((prev) => ({ ...prev, ...patch, page: 1 }));
 	};
 
-	const toggleSelectAll = () => {
-		setSelectedIds((prev) => {
-			const next = new Set(prev);
-			if (allPageSelected) {
-				pageTicketIds.forEach((id) => next.delete(id));
-			} else {
-				pageTicketIds.forEach((id) => next.add(id));
-			}
-			return next;
-		});
-	};
+	const openTicket = useCallback((ticketId: number) => {
+		setSelectedTicketId(ticketId);
+		setTicketModalVisible(true);
+	}, []);
 
-	const toggleSelect = (ticketId: number) => {
-		setSelectedIds((prev) => {
-			const next = new Set(prev);
-			if (next.has(ticketId)) {
-				next.delete(ticketId);
-			} else {
-				next.add(ticketId);
-			}
-			return next;
-		});
-	};
+	const columns = useMemo(
+		() => getTicketColumns({ onOpenTicket: openTicket }),
+		[openTicket]
+	);
+
+	const tableConfig: DataTableConfig<Ticket> = useMemo(
+		() => ({
+			manageColumns: { enabled: false },
+			selection: {
+				enabled: true,
+				selectedKeys: Array.from(selectedIds),
+				onSelectionChange: (keys) => {
+					setSelectedIds(new Set(keys.map((key) => Number(key))));
+				},
+			},
+		}),
+		[selectedIds]
+	);
 
 	const selectedIdList = useMemo(
 		() => Array.from(selectedIds),
@@ -297,17 +272,18 @@ const SupportInbox: React.FC = () => {
 	const hasNoMailboxes = mailboxes.length === 0;
 	const hasNoTickets =
 		!loading &&
-		data?.data.length === 0 &&
+		tickets.length === 0 &&
 		!filters.search &&
 		!filters.status &&
 		!filters.priority &&
 		!filters.mailbox_id &&
 		!filters.tag_id;
+	const isEmpty = !loading && tickets.length === 0;
 
 	return (
 		<div className="doublescale-support-inbox min-w-0 ">
 			{!mailboxesLoading && hasNoMailboxes && (
-				<Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
+				<Alert className="mb-6 flex items-center gap-2 border-amber-200 bg-amber-50 text-amber-800 [&>svg]:static [&>svg]:left-auto [&>svg]:top-auto [&>svg]:shrink-0 [&>svg+div]:translate-y-0 [&>svg~*]:pl-0">
 					<AlertTriangle className="h-4 w-4" />
 					<AlertDescription>
 						{__(
@@ -334,19 +310,8 @@ const SupportInbox: React.FC = () => {
 					</h1>
 				</div>
 				<div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
-					{/* <Button
-						variant="outline"
-						size="sm"
-						onClick={() => refetch()}
-						aria-label={__('Refresh', 'doublescale')}
-						className="flex-1 sm:flex-none"
-					>
-						<RefreshCw className="shrink-0" />
-							{__('Refresh', 'doublescale')}
-					</Button> */}
 					{canManageAllTickets && (
 						<Button
-							size="sm"
 							onClick={() => setShowNewModal(true)}
 							disabled={hasNoMailboxes}
 							title={
@@ -420,208 +385,64 @@ const SupportInbox: React.FC = () => {
 						/>
 					</div>
 				</div>
-				<div className="overflow-x-auto rounded-lg border border-border">
-					<table className="w-full min-w-[56rem] border-collapse text-sm">
-						<thead>
-							<tr className="border-b border-border bg-white text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-								<th className="w-10 px-4 py-3">
-									<Checkbox
-										checked={
-											allPageSelected
-												? true
-												: somePageSelected
-													? 'indeterminate'
-													: false
-										}
-										onCheckedChange={toggleSelectAll}
-										disabled={
-											loading ||
-											pageTicketIds.length === 0
-										}
-										aria-label={__(
-											'Select all on this page',
+
+				{isEmpty ? (
+					<NoData
+						icon={<SupportIcon width={64} height={64} className='text-primary'/>}
+						title={
+							hasNoTickets
+								? __('No tickets yet', 'doublescale')
+								: __(
+										'No tickets match these filters',
+										'doublescale'
+									)
+						}
+						subtitle={
+							hasNoTickets
+								? hasNoMailboxes
+									? __(
+											'Create a mailbox first, then open a ticket or wait for one to come in via the public portal.',
 											'doublescale'
-										)}
-									/>
-								</th>
-								<th className="min-w-[12rem] px-4 py-3">
-									{__('Title', 'doublescale')}
-								</th>
-								<th className="min-w-[8rem] px-4 py-3">
-									{__('Customer', 'doublescale')}
-								</th>
-								<th className="min-w-[7rem] whitespace-nowrap px-4 py-3">
-									{__('Mailbox', 'doublescale')}
-								</th>
-								<th className="min-w-[8rem] px-4 py-3">
-									{__('Assigned to', 'doublescale')}
-								</th>
-								<th className="whitespace-nowrap px-4 py-3">
-									{__('Status', 'doublescale')}
-								</th>
-								<th className="whitespace-nowrap px-4 py-3">
-									{__('Priority', 'doublescale')}
-								</th>
-								<th className="whitespace-nowrap px-4 py-3">
-									{__('Replies', 'doublescale')}
-								</th>
-								<th className="min-w-[9rem] whitespace-nowrap px-4 py-3">
-									{__('Updated', 'doublescale')}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{loading && (
-								<tr className=" bg-white">
-									<td
-										colSpan={9}
-										className="px-4 py-8 text-center text-gray-500"
-									>
-										{__('Loading tickets…', 'doublescale')}
-									</td>
-								</tr>
-							)}
-							{!loading && data?.data.length === 0 && (
-								<tr className=" bg-white">
-									<td
-										colSpan={9}
-										className="px-4 py-16 text-center"
-									>
-										<div className="flex flex-col items-center gap-3">
-											<InboxEmptyIcon
-												width={48}
-												height={48}
-												className="text-gray-300"
-											/>
-											{hasNoTickets ? (
-												<>
-													<div className="text-base font-medium text-gray-700">
-														{__(
-															'No tickets yet',
-															'doublescale'
-														)}
-													</div>
-													<div className="text-sm text-gray-500 max-w-md">
-														{hasNoMailboxes
-															? __(
-																	'Create a mailbox first, then open a ticket or wait for one to come in via the public portal.',
-																	'doublescale'
-																)
-															: __(
-																	'When customers submit through the portal or email, their tickets will appear here.',
-																	'doublescale'
-																)}
-													</div>
-													{!hasNoMailboxes && (
-														<Button
-															size="sm"
-															onClick={() =>
-																setShowNewModal(
-																	true
-																)
-															}
-														>
-															<Plus />
-															{__(
-																'Open the first ticket',
-																'doublescale'
-															)}
-														</Button>
-													)}
-												</>
-											) : (
-												<>
-													<div className="text-base font-medium text-gray-700">
-														{__(
-															'No tickets match these filters',
-															'doublescale'
-														)}
-													</div>
-													<div className="text-sm text-gray-500">
-														{__(
-															'Try clearing the search or status filters.',
-															'doublescale'
-														)}
-													</div>
-												</>
-											)}
-										</div>
-									</td>
-								</tr>
-							)}
-							{!loading &&
-								data?.data.map((ticket) => (
-									<tr
-										key={ticket.id}
-										className={`cursor-pointer border-b border-border odd:bg-[#F7F8FA] even:bg-white hover:bg-[#EFF1F4] ${
-											selectedIds.has(ticket.id)
-												? '!bg-blue-50/60 hover:!bg-blue-50/60'
-												: ''
-										}`}
-										onClick={() => {
-											setSelectedTicketId(ticket.id);
-											setTicketModalVisible(true);
-										}}
-									>
-										<td
-											className="px-4 py-3"
-											onClick={(e) => e.stopPropagation()}
-										>
-											<Checkbox
-												checked={selectedIds.has(
-													ticket.id
-												)}
-												onCheckedChange={() =>
-													toggleSelect(ticket.id)
-												}
-												aria-label={__(
-													'Select ticket',
-													'doublescale'
-												)}
-											/>
-										</td>
-										<td className="max-w-[20rem] truncate px-4 py-3 font-medium text-gray-900">
-											{ticket.title}
-										</td>
-										<td className="min-w-[8rem] px-4 py-3 text-gray-700">
-											{contactName(ticket)}
-										</td>
-										<td className="whitespace-nowrap px-4 py-3 text-gray-600">
-											{ticket.mailbox?.name ||
-												ticket.mailbox?.slug ||
-												'—'}
-										</td>
-										<td className="min-w-[8rem] px-4 py-3 text-gray-700">
-											{ticket.agent?.display_name || (
-												<span className="text-gray-400">
-													{__(
-														'Unassigned',
-														'doublescale'
-													)}
-												</span>
-											)}
-										</td>
-										<td className="whitespace-nowrap px-4 py-3">
-											<StatusPill
-												status={ticket.status}
-											/>
-										</td>
-										<td className="whitespace-nowrap px-4 py-3">
-											<PriorityPill
-												priority={ticket.priority}
-											/>
-										</td>
-										<td className="whitespace-nowrap px-4 py-3 text-gray-600">
-											{ticket.response_count}
-										</td>
-										<td className="whitespace-nowrap px-4 py-3 text-gray-500">
-											{formatDate(ticket.updated_at)}
-										</td>
-									</tr>
-								))}
-						</tbody>
-					</table>
-				</div>
+										)
+									: __(
+											'When customers submit through the portal or email, their tickets will appear here.',
+											'doublescale'
+										)
+								: __(
+										'Try clearing the search or status filters.',
+										'doublescale'
+									)
+						}
+						{...(hasNoTickets &&
+						!hasNoMailboxes &&
+						canManageAllTickets
+							? {
+									buttonLabel: __(
+										'Open the first ticket',
+										'doublescale'
+									),
+									onClick: () => setShowNewModal(true),
+									buttonIcon: <Plus />,
+								}
+							: {})}
+					/>
+				) : (
+					<>
+						<DataTable
+							columns={columns}
+							data={tickets}
+							config={tableConfig}
+							showMainActions={false}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						{totalRecords > 0 && (
+							<DataTablePagination table={serverSideTable} />
+						)}
+					</>
+				)}
 			</div>
 
 			{showNewModal && (
@@ -678,12 +499,6 @@ const SupportInbox: React.FC = () => {
 					onClose={() => setBulkModal(null)}
 					onSubmit={handleBulkAssignTags}
 				/>
-			)}
-
-			{data && totalRecords > 0 && (
-				<div className="mt-4 overflow-x-auto rounded border bg-white shadow-sm">
-					<DataTablePagination table={serverSideTable} />
-				</div>
 			)}
 		</div>
 	);

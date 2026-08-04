@@ -2023,6 +2023,16 @@ class RestAutomationController extends RestController {
 					'label'  => 'Tasks',
 				),
 			),
+			'projects'    => array(
+				'project'    => array(
+					'module' => 'projects',
+					'label'  => 'Projects',
+				),
+				'discussion' => array(
+					'module' => 'projects',
+					'label'  => 'Projects',
+				),
+			),
 			'sales'       => array(
 				'sales' => array(
 					'plugin' => '',
@@ -2241,6 +2251,13 @@ class RestAutomationController extends RestController {
 				'task' => array(
 					'plugin' => '',
 					'module' => 'tasks',
+					'label'  => 'Double Scale Pro',
+				),
+			),
+			'projects'    => array(
+				'project' => array(
+					'plugin' => '',
+					'module' => 'projects',
 					'label'  => 'Double Scale Pro',
 				),
 			),
@@ -2507,6 +2524,14 @@ class RestAutomationController extends RestController {
 			'support'                   => array(
 				'label'      => __( 'Helpdesk', 'doublescale' ),
 				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'support' ),
+			),
+			'project'                   => array(
+				'label'      => __( 'Projects', 'doublescale' ),
+				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'projects' ),
+			),
+			'project_fields'            => array(
+				'label'      => __( 'Projects', 'doublescale' ),
+				'is_enabled' => function_exists( 'doublescale_is_module_active' ) && doublescale_is_module_active( 'projects' ),
 			),
 		);
 

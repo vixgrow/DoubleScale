@@ -630,6 +630,9 @@ function doublescale_automation_condition_group_modules( string $group ): ?array
 		case 'task':
 		case 'task_fields':
 			return array( 'tasks' );
+		case 'project':
+		case 'project_fields':
+			return array( 'projects' );
 		default:
 			return null;
 	}

@@ -9,9 +9,17 @@ import { Plus } from 'lucide-react';
 import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
+import { summarizeProposals } from '@doublescale/shared/utils/proposal-summary';
 import { Button } from '@/components/ui/button';
 import { InvoiceFormDialog, InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
-import { GradientProposalsIcon, NovicesIcon } from '@doublescale/components';
+import {
+	GradientProposalsIcon,
+	MessageStatsCard,
+	NovicesIcon,
+	OutstandingInvoicesIcon,
+	PainInvoicesIcon,
+	ProposalsIcon,
+} from '@doublescale/components';
 import {
 	useContactSalesPayments,
 	useInvoices,
@@ -54,7 +62,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 
 	const { data: proposalsData, loading: proposalsLoading } = useProposals({
 		contact_id,
-		per_page: 10,
+		per_page: 100,
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
@@ -77,6 +85,8 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 	const payments = paymentsData?.data ?? [];
 	const showDocuments = config.isModuleToggleEnabled('documents');
 	const isProActive = useIsProActive();
+	const proposalSummary = summarizeProposals(proposals);
+	const proposalCurrency = proposals[0]?.currency || 'USD';
 
 	return (
 		<div className="space-y-8">
@@ -95,6 +105,32 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 						<Plus className="h-4 w-4 mr-1" />
 						{__('New Proposal', 'doublescale')}
 					</Button>
+				</div>
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+					<MessageStatsCard
+						label={__('Total', 'doublescale')}
+						value={formatMoney(proposalSummary.total, proposalCurrency)}
+						icon={<ProposalsIcon width={36} height={36} color="#fff" />}
+						iconBgClass="bg-[#0D9DFC]"
+						iconColor="text-white"
+						className="border border-border bg-white"
+					/>
+					<MessageStatsCard
+						label={__('Accepted', 'doublescale')}
+						value={formatMoney(proposalSummary.accepted, proposalCurrency)}
+						icon={<PainInvoicesIcon width={36} height={36} />}
+						iconBgClass="bg-[#16A34A]"
+						iconColor="text-white"
+						className="border border-border bg-white"
+					/>
+					<MessageStatsCard
+						label={__('Open', 'doublescale')}
+						value={formatMoney(proposalSummary.open, proposalCurrency)}
+						icon={<OutstandingInvoicesIcon width={36} height={36} />}
+						iconBgClass="bg-[#F59E0B]"
+						iconColor="text-white"
+						className="border border-border bg-white"
+					/>
 				</div>
 				<div className="border rounded-lg overflow-hidden">
 					<table className="w-full text-sm">

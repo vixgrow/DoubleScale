@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.2 = 04 Aug 2026
+- Add Projects automation registration surface (triggers/actions stubs, catalog, manager groups, gates, and builder category icons)
+- Bump automations manifest cache key so project automation stubs load cleanly
+
 = 1.3.1 = 03 Aug 2026
 - Add automation enrollment history endpoint and show prior-enrollment hints when running a workflow manually
 - Rename automation “Run test” to “Run manually” for clearer UX

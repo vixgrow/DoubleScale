@@ -35,7 +35,6 @@ import {
 	ArrowRight,
 	Copy,
 	Check,
-	Settings as SettingsIcon,
 	Mail,
 	MoreVertical,
 	Info,
@@ -79,6 +78,14 @@ import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import type { VerifiedSender } from '@/shared/config/types/config-data';
 import AttachmentLimitsCard from './attachment-limits-card';
+import {
+	CopyIcon,
+	DeleteIcon,
+	EditHeaderIcon,
+	EmailActivityIcon,
+	NotificationIcon,
+	SettingsIcon,
+} from '@doublescale/shared/icons';
 
 // One customer-facing notification template.
 interface NotificationTemplate {
@@ -261,6 +268,7 @@ const NotificationTemplatesEditor: React.FC<{
 											subject: e.target.value,
 										})
 									}
+									className='!rounded-lg border !border-border'
 								/>
 								<SupportRichText
 									message={tpl.body}
@@ -395,7 +403,7 @@ const PortalShortcodeCard: React.FC<{ boxId: number }> = ({ boxId }) => {
 						</>
 					) : (
 						<>
-							<Copy className="w-4 h-4 mr-1" />
+							<CopyIcon width={20} height={20} color='currentColor' />
 							{__('Copy', 'doublescale')}
 						</>
 					)}
@@ -752,7 +760,7 @@ const SupportMailboxes: React.FC = () => {
 						}
 						className="mt-1 inline-flex items-center gap-1 text-sm text-primary hover:underline"
 					>
-						<Bell className="w-3.5 h-3.5" />
+						<NotificationIcon width={20} height={20} color='currentColor' />
 						{__(
 							'Manage your support notification settings',
 							'doublescale'
@@ -784,20 +792,18 @@ const SupportMailboxes: React.FC = () => {
 
 			{notice && (
 				<Alert
-					className={
+					className={`flex items-center gap-2 [&>svg]:static [&>svg]:left-auto [&>svg]:top-auto [&>svg]:shrink-0 [&>svg+div]:translate-y-0 [&>svg~*]:pl-0 ${
 						notice.type === 'success'
 							? 'border-green-200 bg-green-50 text-green-800'
 							: 'border-red-200 bg-red-50 text-red-800'
-					}
+					}`}
 				>
-					<AlertDescription className="flex items-center gap-2">
-						{notice.type === 'success' ? (
-							<CheckCircle className="w-4 h-4" />
-						) : (
-							<XCircle className="w-4 h-4" />
-						)}
-						{notice.message}
-					</AlertDescription>
+					{notice.type === 'success' ? (
+						<CheckCircle className="h-4 w-4" />
+					) : (
+						<XCircle className="h-4 w-4" />
+					)}
+					<AlertDescription>{notice.message}</AlertDescription>
 				</Alert>
 			)}
 
@@ -1057,14 +1063,14 @@ const SupportMailboxes: React.FC = () => {
 									value="settings"
 									className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
-									<SettingsIcon size={16} />
+									<SettingsIcon width={20} height={20} />
 									{__('Settings', 'doublescale')}
 								</TabsTrigger>
 								<TabsTrigger
 									value="notifications"
 									className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
-									<Mail size={16} />
+									<EmailActivityIcon width={20} height={20} color='currentColor'/>
 									{__('Email Notifications', 'doublescale')}
 								</TabsTrigger>
 							</TabsList>
@@ -1097,6 +1103,7 @@ const SupportMailboxes: React.FC = () => {
 													name: e.target.value,
 												}))
 											}
+											className='!rounded-lg border !border-border'
 										/>
 									</div>
 
@@ -1276,7 +1283,7 @@ const SupportMailboxes: React.FC = () => {
 
 						<div className="flex justify-end gap-3 border-t border-input pt-5">
 							<Button
-								variant="outline"
+								variant="secondaryDeepBlue"
 								className="rounded-lg"
 								onClick={() => setEditing(null)}
 							>
@@ -1284,7 +1291,7 @@ const SupportMailboxes: React.FC = () => {
 							</Button>
 							<Button
 								variant="gradient"
-								className="rounded-lg min-w-[120px]"
+								className="rounded-lg"
 								onClick={handleSave}
 								disabled={saveDisabled}
 							>
@@ -1369,7 +1376,7 @@ const SupportMailboxes: React.FC = () => {
 													'doublescale'
 												)}
 											>
-												<SettingsIcon className="w-4 h-4" />
+												<SettingsIcon width={20} height={20} />
 											</Button>
 											{mailboxes.length > 1 && (
 												<DropdownMenu>
@@ -1423,7 +1430,7 @@ const SupportMailboxes: React.FC = () => {
 																)
 															}
 														>
-															<Pencil className="w-4 h-4" />
+															<EditHeaderIcon width={20} height={20} color='currentColor' />
 															{__(
 																'Move Tickets',
 																'doublescale'
@@ -1438,7 +1445,7 @@ const SupportMailboxes: React.FC = () => {
 																mb.is_default
 															}
 														>
-															<Trash2 className="w-4 h-4" />
+															<DeleteIcon width={20} height={20} color='currentColor' />
 															{__(
 																'Delete',
 																'doublescale'

@@ -12,6 +12,12 @@ export interface ProviderStatusResponse {
 	connected: boolean;
 	provider_name?: string;
 	provider_slug?: string;
+	/** The provider the user selected as default, which may differ from provider_slug. */
+	selected_slug?: string;
+	/** True when the selected provider was unusable and another one is being used instead. */
+	using_fallback?: boolean;
+	/** Human-readable explanation of the fallback, when using_fallback is true. */
+	fallback_notice?: string | null;
 	error?: string;
 	help_link?: string;
 }

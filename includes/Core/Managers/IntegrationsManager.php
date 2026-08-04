@@ -57,66 +57,65 @@ final class IntegrationsManager {
 	}
 
 	/**
+	 * Placeholder catalog when Pro is not active (locked Pro cards).
+	 *
 	 * @return array
 	 */
 	public function get_options() {
-		return array(
+		$base = defined( 'DOUBLESCALE_PLUGIN_URL' ) ? trailingslashit( DOUBLESCALE_PLUGIN_URL ) : '';
+
+		$placeholders = array(
 			'twilio'        => array(
-				'label'        => __( 'Twilio', 'doublescale' ),
-				'description'  => __( 'Send SMS messages to your contacts via Twilio.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Twilio', 'doublescale' ),
+				'description' => __( 'Send SMS messages to your contacts via Twilio.', 'doublescale' ),
+				'icon'        => 'assets/images/twilio/twilio.png',
 			),
 			'stripe'        => array(
-				'label'        => __( 'Stripe', 'doublescale' ),
-				'description'  => __( 'Accept payments and manage subscriptions through Stripe.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Stripe', 'doublescale' ),
+				'description' => __( 'Accept payments and manage subscriptions through Stripe.', 'doublescale' ),
+				'icon'        => 'assets/images/stripe/stripe.png',
 			),
 			'slack'         => array(
-				'label'        => __( 'Slack', 'doublescale' ),
-				'description'  => __( 'Send notifications and updates to your Slack channels.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Slack', 'doublescale' ),
+				'description' => __( 'Send notifications and updates to your Slack channels.', 'doublescale' ),
+				'icon'        => 'assets/images/slack/slack.png',
 			),
 			'meta-whatsapp' => array(
-				'label'        => __( 'Meta WhatsApp', 'doublescale' ),
-				'description'  => __( 'Send WhatsApp messages to your contacts via Meta WhatsApp Business.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Meta WhatsApp', 'doublescale' ),
+				'description' => __( 'Send WhatsApp messages to your contacts via Meta WhatsApp Business.', 'doublescale' ),
+				'icon'        => 'assets/images/meta-whatsapp/meta-whatsapp.svg',
 			),
 			'paypal'        => array(
-				'label'        => __( 'PayPal', 'doublescale' ),
-				'description'  => __( 'Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'PayPal', 'doublescale' ),
+				'description' => __( 'Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.', 'doublescale' ),
+				'icon'        => 'assets/images/paypal/paypal.png',
 			),
 			'typeform'      => array(
-				'label'        => __( 'Typeform', 'doublescale' ),
-				'description'  => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Typeform', 'doublescale' ),
+				'description' => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),
+				'icon'        => 'assets/images/typeform/typeform.svg',
 			),
 			'jotform'       => array(
-				'label'        => __( 'Jotform', 'doublescale' ),
-				'description'  => __( 'Connect your Jotform account with an API key.', 'doublescale' ),
-				'fields'       => array(),
-				'is_connected' => false,
-				'settings'     => array(),
-				'is_pro'       => true,
+				'label'       => __( 'Jotform', 'doublescale' ),
+				'description' => __( 'Connect your Jotform account with an API key.', 'doublescale' ),
+				'icon'        => 'assets/images/jotform/jotform.png',
 			),
 		);
+
+		$options = array();
+		foreach ( $placeholders as $slug => $row ) {
+			$options[ $slug ] = array(
+				'label'           => $row['label'],
+				'description'     => $row['description'],
+				'fields'          => array(),
+				'is_connected'    => false,
+				'settings'        => array(),
+				'is_pro'          => true,
+				'show_in_catalog' => true,
+				'icon_url'        => $base ? $base . $row['icon'] : '',
+			);
+		}
+
+		return $options;
 	}
 }

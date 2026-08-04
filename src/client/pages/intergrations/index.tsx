@@ -52,7 +52,6 @@ const integrationImages: Record<string, string> = {
 	stripe: stripeImg,
 	paypal: paypalImg,
 	'meta-whatsapp': metaWhatsappImg,
-	evolution: `${proPluginUrl}assets/images/evolution/evolution.svg`,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
 	// Typeform/Jotform logos ship in the free plugin package.
@@ -60,7 +59,7 @@ const integrationImages: Record<string, string> = {
 	jotform: `${freePluginUrl}assets/images/jotform/jotform.png`,
 };
 
-const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'evolution', 'typeform', 'jotform', 'zapier', 'make'];
+const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'paypal', 'slack', 'meta-whatsapp', 'typeform', 'jotform', 'zapier', 'make'];
 
 const ADDON_INTEGRATIONS = ['zapier', 'make'];
 

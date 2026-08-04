@@ -37,7 +37,7 @@ interface WhatsAppSettingsProps {
 	onChange?: (settings: SettingsType) => void;
 	/**
 	 * Hide the Meta connection card. Pro sets this when a non-Meta provider
-	 * (such as Evolution) is selected, and renders that provider's card instead.
+	 * is selected, and renders that provider's card instead.
 	 */
 	hideConnectionCard?: boolean;
 }

@@ -66,6 +66,8 @@
     "RestPortalPaymentsController",
     "RestPortalProjectController",
     "RestPortalTimelineController",
+    "RestProductController",
+    "RestProductGroupController",
     "RestProjectController",
     "RestProjectReportsController",
     "RestProjectStatusController",

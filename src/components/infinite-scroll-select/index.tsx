@@ -1,7 +1,14 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useCallback,
+	Fragment,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
@@ -70,6 +77,8 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	searchParamName = 'search',
 	getOptionLabel,
 	getOptionValue,
+	getOptionGroup,
+	renderOption,
 	dataPath = 'data',
 	totalPath = 'total',
 	perPage = 10,
@@ -518,30 +527,52 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 
 						{items.length > 0 && (
 							<>
-								{items.map((item) => {
+								{items.map((item, index) => {
 									const itemValue = String(
 										getOptionValue(item)
 									);
 									const isSelected =
 										String(value) === itemValue;
+
+									// Show a heading whenever the group changes
+									// from the previous row. Items arrive sorted
+									// by group, so this yields one label per run.
+									const group = getOptionGroup
+										? getOptionGroup(item)
+										: '';
+									const previousGroup =
+										index > 0 && getOptionGroup
+											? getOptionGroup(items[index - 1])
+											: null;
+									const showGroupHeading =
+										Boolean(group) && group !== previousGroup;
+
 									return (
-										<div
-											key={itemValue}
-											role="button"
-											tabIndex={-1}
-											className={`px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
-												isSelected
-													? 'bg-blue-50 text-blue-600'
-													: ''
-											}`}
-											onMouseDown={(e) => {
-												e.preventDefault();
-												e.stopPropagation();
-												handleSelect(item);
-											}}
-										>
-											{getOptionLabel(item)}
-										</div>
+										<Fragment key={itemValue}>
+											{showGroupHeading && (
+												<div className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-500">
+													{group}
+												</div>
+											)}
+											<div
+												role="button"
+												tabIndex={-1}
+												className={`px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
+													isSelected
+														? 'bg-blue-50 text-blue-600'
+														: ''
+												} ${getOptionGroup ? 'pl-6' : ''}`}
+												onMouseDown={(e) => {
+													e.preventDefault();
+													e.stopPropagation();
+													handleSelect(item);
+												}}
+											>
+												{renderOption
+													? renderOption(item)
+													: getOptionLabel(item)}
+											</div>
+										</Fragment>
 									);
 								})}
 								{loading && (

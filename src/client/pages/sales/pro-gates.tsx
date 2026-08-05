@@ -55,6 +55,23 @@ export const ContractsProGate = () => (
 	/>
 );
 
+export const ProductsProGate = () => (
+	<ProFeatureNotice
+		featureName={__('Products', 'doublescale')}
+		description={__(
+			'Save reusable products and services once, then insert them as line items instead of retyping them on every document, with DoubleScale Pro.',
+			'doublescale'
+		)}
+		features={[
+			__('A reusable library of products and services', 'doublescale'),
+			__('Insert saved products as line items in one click', 'doublescale'),
+			__('Inserted lines stay fully editable per document', 'doublescale'),
+			__('Default rate, unit, quantity, and taxes per product', 'doublescale'),
+			__('Works on invoices, proposals, and credit notes', 'doublescale'),
+		]}
+	/>
+);
+
 export const ApprovalsProGate = () => (
 	<ProFeatureNotice
 		featureName={__('Approval Workflow', 'doublescale')}

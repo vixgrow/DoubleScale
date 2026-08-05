@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.1\n"
+"Project-Id-Version: DoubleScale 1.3.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -524,10 +524,10 @@ msgstr ""
 msgid "Accept PayPal payments for invoices. Configure sandbox or live REST app credentials."
 msgstr ""
 
-msgid "Access Denied"
+msgid "Access denied"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access Denied"
 msgstr ""
 
 msgid "Access denied. Please ensure your API key has the necessary permissions."
@@ -560,10 +560,10 @@ msgstr ""
 msgid "Account id already exists"
 msgstr ""
 
-msgid "Account Name"
+msgid "Account name"
 msgstr ""
 
-msgid "Account name"
+msgid "Account Name"
 msgstr ""
 
 msgid "Account name is missing."
@@ -614,6 +614,9 @@ msgstr ""
 msgid "Action:"
 msgstr ""
 
+msgid "Action category"
+msgstr ""
+
 msgid "Action disabled"
 msgstr ""
 
@@ -648,6 +651,9 @@ msgid "Action saved"
 msgstr ""
 
 msgid "Action Settings"
+msgstr ""
+
+msgid "Actions from CRM, Sales, Booking, Helpdesk, Tasks & Projects"
 msgstr ""
 
 msgid "Activate"
@@ -836,6 +842,9 @@ msgstr ""
 msgid "Add Content"
 msgstr ""
 
+msgid "Add content in the builder before sending a test."
+msgstr ""
+
 msgid "Add contract type"
 msgstr ""
 
@@ -920,9 +929,6 @@ msgstr ""
 msgid "Add New"
 msgstr ""
 
-msgid "Add New Automation"
-msgstr ""
-
 msgid "Add New Availability"
 msgstr ""
 
@@ -932,10 +938,10 @@ msgstr ""
 msgid "Add New Field"
 msgstr ""
 
-msgid "Add new Manager"
+msgid "Add New Manager"
 msgstr ""
 
-msgid "Add New Manager"
+msgid "Add new Manager"
 msgstr ""
 
 msgid "Add New Option"
@@ -1035,9 +1041,6 @@ msgid "Add segment"
 msgstr ""
 
 msgid "Add SES identity"
-msgstr ""
-
-msgid "Add Step"
 msgstr ""
 
 msgid "Add step here"
@@ -1286,10 +1289,10 @@ msgstr ""
 msgid "All available custom fields have been added."
 msgstr ""
 
-msgid "All Categories"
+msgid "ALL CATEGORIES"
 msgstr ""
 
-msgid "ALL CATEGORIES"
+msgid "All Categories"
 msgstr ""
 
 msgid "All Contact on Selected list Segment"
@@ -1355,19 +1358,19 @@ msgstr ""
 msgid "All Status"
 msgstr ""
 
-msgid "All statuses"
+msgid "All Statuses"
 msgstr ""
 
-msgid "All Statuses"
+msgid "All statuses"
 msgstr ""
 
 msgid "All templates"
 msgstr ""
 
-msgid "All Types"
+msgid "All types"
 msgstr ""
 
-msgid "All types"
+msgid "All Types"
 msgstr ""
 
 msgid "All UTM fields are required when UTM is enabled"
@@ -1541,9 +1544,6 @@ msgstr ""
 msgid "Any Value"
 msgstr ""
 
-msgid "A pause or waiting period introduced into a sequence of automated actions."
-msgstr ""
-
 msgid "API connection, then map fields (3 steps)"
 msgstr ""
 
@@ -1559,10 +1559,10 @@ msgstr ""
 msgid "Api Key"
 msgstr ""
 
-msgid "API key"
+msgid "API Key"
 msgstr ""
 
-msgid "API Key"
+msgid "API key"
 msgstr ""
 
 msgid "API Key (optional for Ollama/local)"
@@ -1670,10 +1670,10 @@ msgstr ""
 msgid "Approval Withdrawn"
 msgstr ""
 
-msgid "Approval workflow"
+msgid "Approval Workflow"
 msgstr ""
 
-msgid "Approval Workflow"
+msgid "Approval workflow"
 msgstr ""
 
 msgid "Approve or reject with a required reason"
@@ -1689,6 +1689,9 @@ msgid "A rejection reason is required."
 msgstr ""
 
 msgid "A resolved or closed ticket was reopened."
+msgstr ""
+
+msgid "A reusable library of products and services"
 msgstr ""
 
 msgid "Are you sure?"
@@ -1976,10 +1979,10 @@ msgstr ""
 msgid "Automated"
 msgstr ""
 
-msgid "Automated campaign"
+msgid "Automated Campaign"
 msgstr ""
 
-msgid "Automated Campaign"
+msgid "Automated campaign"
 msgstr ""
 
 msgid "Automated campaign activated successfully!"
@@ -2063,10 +2066,10 @@ msgstr ""
 msgid "Automation List"
 msgstr ""
 
-msgid "Automation Name"
+msgid "Automation name"
 msgstr ""
 
-msgid "Automation name"
+msgid "Automation Name"
 msgstr ""
 
 msgid "Automation name is required"
@@ -2091,6 +2094,9 @@ msgid "Automation saved successfully."
 msgstr ""
 
 msgid "Automations help you engage smarter—send emails, assign deals, or trigger actions based on behavior."
+msgstr ""
+
+msgid "Automations List"
 msgstr ""
 
 msgid "Automations not found."
@@ -2682,6 +2688,9 @@ msgid "Bounce handling via provider webhooks"
 msgstr ""
 
 msgid "Boxed"
+msgstr ""
+
+msgid "Branch based on a condition"
 msgstr ""
 
 msgid "Brand Color"
@@ -3386,6 +3395,9 @@ msgstr ""
 msgid "Choose a contact to run this automation for. Steps execute for real; wait steps are skipped."
 msgstr ""
 
+msgid "Choose Action"
+msgstr ""
+
 msgid "Choose a design and accent color. You can change both later while editing."
 msgstr ""
 
@@ -3423,6 +3435,9 @@ msgid "Choose the correct Zoho domain, enter OAuth client credentials, save, the
 msgstr ""
 
 msgid "Choose the first day of the week for CRM calendars on the dashboard and client portal."
+msgstr ""
+
+msgid "Choose Trigger"
 msgstr ""
 
 msgid "Choose Trigger Type"
@@ -3536,10 +3551,10 @@ msgstr ""
 msgid "Click to insert a merge tag from form fields"
 msgstr ""
 
-msgid "Click to open rate"
+msgid "Click to Open Rate"
 msgstr ""
 
-msgid "Click to Open Rate"
+msgid "Click to open rate"
 msgstr ""
 
 msgid "Click to rename"
@@ -3578,10 +3593,10 @@ msgstr ""
 msgid "Client portal visibility for projects"
 msgstr ""
 
-msgid "Client secret"
+msgid "Client Secret"
 msgstr ""
 
-msgid "Client Secret"
+msgid "Client secret"
 msgstr ""
 
 msgid "Client Secret:"
@@ -3704,10 +3719,10 @@ msgstr ""
 msgid "Company or Policy & Terms Updates"
 msgstr ""
 
-msgid "Company Registration Number"
+msgid "Company registration number"
 msgstr ""
 
-msgid "Company registration number"
+msgid "Company Registration Number"
 msgstr ""
 
 msgid "Company registration number."
@@ -3995,10 +4010,10 @@ msgstr ""
 msgid "Connection ID"
 msgstr ""
 
-msgid "Connection Name"
+msgid "Connection name"
 msgstr ""
 
-msgid "Connection name"
+msgid "Connection Name"
 msgstr ""
 
 msgid "Connection name: %s"
@@ -4193,10 +4208,10 @@ msgstr ""
 msgid "Contact Profile settings help you organize and manage imported contacts efficiently. Assign contacts to lists for targeted campaigns, add tags for segmentation, set their subscription status, and control how duplicate contacts are handled. These settings ensure your contacts are properly categorized from the moment they enter your CRM."
 msgstr ""
 
-msgid "contacts"
+msgid "Contacts"
 msgstr ""
 
-msgid "Contacts"
+msgid "contacts"
 msgstr ""
 
 msgid "Contacts & CRM Insights"
@@ -4322,10 +4337,10 @@ msgstr ""
 msgid "Contract Reports"
 msgstr ""
 
-msgid "contracts"
+msgid "Contracts"
 msgstr ""
 
-msgid "Contracts"
+msgid "contracts"
 msgstr ""
 
 msgid "Contracts are unavailable"
@@ -4709,6 +4724,9 @@ msgstr ""
 msgid "Create and update CRM tasks"
 msgstr ""
 
+msgid "Create and update projects"
+msgstr ""
+
 msgid "Create an email template to get started with your campaign."
 msgstr ""
 
@@ -4899,9 +4917,6 @@ msgid "Create Ticket"
 msgstr ""
 
 msgid "Create tickets from forms, CRMs, and other sites"
-msgstr ""
-
-msgid "Create tickets from incoming email. Inbound is polled over IMAP using a Gmail or Outlook-connected account, or any mailbox via custom IMAP credentials. Available in DoubleScale Pro."
 msgstr ""
 
 msgid "Create trackable short links that count clicks, fire automations, and sync tags or lists on the contact — available with DoubleScale Pro."
@@ -5120,10 +5135,10 @@ msgstr ""
 msgid "Custom field not found"
 msgstr ""
 
-msgid "Custom Fields"
+msgid "Custom fields"
 msgstr ""
 
-msgid "Custom fields"
+msgid "Custom Fields"
 msgstr ""
 
 msgid "Custom fields and multi-step flows"
@@ -5423,10 +5438,10 @@ msgstr ""
 msgid "Default connection"
 msgstr ""
 
-msgid "Default Country Code"
+msgid "Default country Code"
 msgstr ""
 
-msgid "Default country Code"
+msgid "Default Country Code"
 msgstr ""
 
 msgid "Default Duration"
@@ -5439,6 +5454,9 @@ msgid "Default mailbox for new tickets"
 msgstr ""
 
 msgid "Default Payment Methods for New Invoices"
+msgstr ""
+
+msgid "Default rate, unit, quantity, and taxes per product"
 msgstr ""
 
 msgid "Default Time Format"
@@ -5495,10 +5513,10 @@ msgstr ""
 msgid "Delete %s?"
 msgstr ""
 
-msgid "Delete account"
+msgid "Delete Account"
 msgstr ""
 
-msgid "Delete Account"
+msgid "Delete account"
 msgstr ""
 
 msgid "Delete Action"
@@ -5507,10 +5525,10 @@ msgstr ""
 msgid "Delete after specific days"
 msgstr ""
 
-msgid "Delete All"
+msgid "Delete all"
 msgstr ""
 
-msgid "Delete all"
+msgid "Delete All"
 msgstr ""
 
 msgid "Delete all email log entries?"
@@ -5537,10 +5555,10 @@ msgstr ""
 msgid "Delete Contract"
 msgstr ""
 
-msgid "Delete Contract Type"
+msgid "Delete contract type"
 msgstr ""
 
-msgid "Delete contract type"
+msgid "Delete Contract Type"
 msgstr ""
 
 msgid "Deleted Contact"
@@ -5549,10 +5567,10 @@ msgstr ""
 msgid "Deleted step"
 msgstr ""
 
-msgid "Delete Event"
+msgid "Delete event"
 msgstr ""
 
-msgid "Delete event"
+msgid "Delete Event"
 msgstr ""
 
 msgid "Delete Exit"
@@ -5579,10 +5597,10 @@ msgstr ""
 msgid "Delete note"
 msgstr ""
 
-msgid "Delete payment"
+msgid "Delete Payment"
 msgstr ""
 
-msgid "Delete Payment"
+msgid "Delete payment"
 msgstr ""
 
 msgid "Delete Proposal"
@@ -5612,10 +5630,10 @@ msgstr ""
 msgid "Delete Tags"
 msgstr ""
 
-msgid "Delete Tax"
+msgid "Delete tax"
 msgstr ""
 
-msgid "Delete tax"
+msgid "Delete Tax"
 msgstr ""
 
 msgid "Delete the selected %s?"
@@ -5804,6 +5822,9 @@ msgstr ""
 msgid "Discover Pro"
 msgstr ""
 
+msgid "Discussion"
+msgstr ""
+
 msgid "Dismiss"
 msgstr ""
 
@@ -5816,10 +5837,10 @@ msgstr ""
 msgid "Display name"
 msgstr ""
 
-msgid "Display on booking"
+msgid "Display on Booking"
 msgstr ""
 
-msgid "Display on Booking"
+msgid "Display on booking"
 msgstr ""
 
 msgid "Display on booking page"
@@ -5909,6 +5930,9 @@ msgstr ""
 msgid "Don't want to stay in the loop? We'll be sad to see you go, but you can click here to"
 msgstr ""
 
+msgid "Do something in your workflow"
+msgstr ""
+
 msgid "Double Opt-In"
 msgstr ""
 
@@ -5931,6 +5955,9 @@ msgid "DoubleScale database migration pending:"
 msgstr ""
 
 msgid "DoubleScale Mobile App"
+msgstr ""
+
+msgid "DoubleScale Modules"
 msgstr ""
 
 msgid "Double Scale Pro"
@@ -6185,10 +6212,10 @@ msgstr ""
 msgid "Edit %s"
 msgstr ""
 
-msgid "Edit Account"
+msgid "Edit account"
 msgstr ""
 
-msgid "Edit account"
+msgid "Edit Account"
 msgstr ""
 
 msgid "Edit Action"
@@ -6329,10 +6356,10 @@ msgstr ""
 msgid "Edit tags"
 msgstr ""
 
-msgid "Edit Tax"
+msgid "Edit tax"
 msgstr ""
 
-msgid "Edit tax"
+msgid "Edit Tax"
 msgstr ""
 
 msgid "Edit Template"
@@ -6419,6 +6446,12 @@ msgstr ""
 msgid "Email Body (preview)"
 msgstr ""
 
+msgid "Email body: builder JSON or raw HTML"
+msgstr ""
+
+msgid "Email body is empty. Add content in the builder before sending a test."
+msgstr ""
+
 msgid "Email body is required."
 msgstr ""
 
@@ -6455,10 +6488,10 @@ msgstr ""
 msgid "Email Clicked Tracking Error"
 msgstr ""
 
-msgid "Email content"
+msgid "Email Content"
 msgstr ""
 
-msgid "Email Content"
+msgid "Email content"
 msgstr ""
 
 msgid "Email delivery"
@@ -6542,16 +6575,16 @@ msgstr ""
 msgid "Email queued for resending!"
 msgstr ""
 
-msgid "Email Received"
-msgstr ""
-
 msgid "Email received"
 msgstr ""
 
-msgid "Emails"
+msgid "Email Received"
 msgstr ""
 
 msgid "emails"
+msgstr ""
+
+msgid "Emails"
 msgstr ""
 
 msgid "Emails:"
@@ -6594,6 +6627,9 @@ msgid "Emails sent through this automated campaign will appear here grouped by e
 msgstr ""
 
 msgid "Emails sent through this campaign will appear here."
+msgstr ""
+
+msgid "Email subject"
 msgstr ""
 
 msgid "Email Subject"
@@ -6677,10 +6713,10 @@ msgstr ""
 msgid "Enable Booking Summary Notification."
 msgstr ""
 
-msgid "enable cart tracking"
+msgid "Enable Cart Tracking"
 msgstr ""
 
-msgid "Enable Cart Tracking"
+msgid "enable cart tracking"
 msgstr ""
 
 msgid "Enable CRM contacts above to apply these lists and tags when a cart is abandoned."
@@ -6902,6 +6938,9 @@ msgstr ""
 msgid "Enter number of events"
 msgstr ""
 
+msgid "Enter one or more addresses (comma-separated). The design currently in the builder will be sent."
+msgstr ""
+
 msgid "Enter one or more addresses (comma-separated). The latest saved design will be sent."
 msgstr ""
 
@@ -7004,10 +7043,10 @@ msgstr ""
 msgid "Entrance"
 msgstr ""
 
-msgid "Equal"
+msgid "equal"
 msgstr ""
 
-msgid "equal"
+msgid "Equal"
 msgstr ""
 
 msgid "Equal To"
@@ -7409,10 +7448,10 @@ msgstr ""
 msgid "External form builders — connect the integration first, then return here to configure."
 msgstr ""
 
-msgid "failed"
+msgid "Failed"
 msgstr ""
 
-msgid "Failed"
+msgid "failed"
 msgstr ""
 
 msgid "Failed contacts may have invalid email addresses or other data issues."
@@ -8150,10 +8189,10 @@ msgstr ""
 msgid "Field ID #%s"
 msgstr ""
 
-msgid "fields"
+msgid "Fields"
 msgstr ""
 
-msgid "Fields"
+msgid "fields"
 msgstr ""
 
 msgid "Fields & contact options"
@@ -8501,13 +8540,16 @@ msgstr ""
 msgid " from campaign \"%s\""
 msgstr ""
 
-msgid "From email"
-msgstr ""
-
 msgid "From Email"
 msgstr ""
 
+msgid "From email"
+msgstr ""
+
 msgid "From email (for email channel)"
+msgstr ""
+
+msgid "From email address"
 msgstr ""
 
 msgid "From email is not a valid email address"
@@ -8561,10 +8603,10 @@ msgstr ""
 msgid "General Host Settings"
 msgstr ""
 
-msgid "General Settings"
+msgid "General settings"
 msgstr ""
 
-msgid "General settings"
+msgid "General Settings"
 msgstr ""
 
 msgid "General system notifications."
@@ -8813,10 +8855,10 @@ msgstr ""
 msgid "Grant browser permission to receive desktop notifications."
 msgstr ""
 
-msgid "Greater Than"
+msgid "Greater than"
 msgstr ""
 
-msgid "Greater than"
+msgid "Greater Than"
 msgstr ""
 
 msgid "Green"
@@ -8987,10 +9029,10 @@ msgstr ""
 msgid "hour ago"
 msgstr ""
 
-msgid "hours"
+msgid "Hours"
 msgstr ""
 
-msgid "Hours"
+msgid "hours"
 msgstr ""
 
 msgid "hours ago"
@@ -9173,10 +9215,10 @@ msgstr ""
 msgid "Import Automations"
 msgstr ""
 
-msgid "Import completed"
+msgid "Import Completed"
 msgstr ""
 
-msgid "Import Completed"
+msgid "Import completed"
 msgstr ""
 
 msgid "Import Completed!"
@@ -9191,10 +9233,10 @@ msgstr ""
 msgid "Import contacts"
 msgstr ""
 
-msgid "imported"
+msgid "Imported"
 msgstr ""
 
-msgid "Imported"
+msgid "imported"
 msgstr ""
 
 msgid "Imported automations are created as inactive so you can review them first."
@@ -9284,19 +9326,19 @@ msgstr ""
 msgid "Includes"
 msgstr ""
 
-msgid "Includes all"
+msgid "includes all"
 msgstr ""
 
-msgid "includes all"
+msgid "Includes all"
 msgstr ""
 
 msgid "includes in"
 msgstr ""
 
-msgid "Includes none of (match all)"
+msgid "includes none of (match all)"
 msgstr ""
 
-msgid "includes none of (match all)"
+msgid "Includes none of (match all)"
 msgstr ""
 
 msgid "Incoming Webhook"
@@ -9356,22 +9398,28 @@ msgstr ""
 msgid "Insert"
 msgstr ""
 
-msgid "Insert Form Field"
+msgid "Inserted lines stay fully editable per document"
 msgstr ""
 
-msgid "Insert link"
+msgid "Insert Form Field"
 msgstr ""
 
 msgid "Insert Link"
 msgstr ""
 
-msgid "Insert merge tag"
+msgid "Insert link"
 msgstr ""
 
 msgid "Insert Merge Tag"
 msgstr ""
 
+msgid "Insert merge tag"
+msgstr ""
+
 msgid "Insert Merge Tags"
+msgstr ""
+
+msgid "Insert saved products as line items in one click"
 msgstr ""
 
 msgid "Insert URL"
@@ -9677,10 +9725,10 @@ msgstr ""
 msgid "Invalid Pipedrive credentials. Please check your API Domain and Token."
 msgstr ""
 
-msgid "Invalid Pipedrive credentials. Please verify your API Domain and Token."
+msgid "Invalid Pipedrive credentials. Please verify your Api Domain and Token."
 msgstr ""
 
-msgid "Invalid Pipedrive credentials. Please verify your Api Domain and Token."
+msgid "Invalid Pipedrive credentials. Please verify your API Domain and Token."
 msgstr ""
 
 msgid "Invalid Plugin Pro plugin installation detected"
@@ -9848,10 +9896,10 @@ msgstr ""
 msgid "Invoice Revenue"
 msgstr ""
 
-msgid "invoices"
+msgid "Invoices"
 msgstr ""
 
-msgid "Invoices"
+msgid "invoices"
 msgstr ""
 
 msgid "Invoices, payments & subscriptions"
@@ -9947,10 +9995,10 @@ msgstr ""
 msgid "Issue credit notes, apply credit to unpaid invoices, and track open customer balances with DoubleScale Pro."
 msgstr ""
 
-msgid "item"
+msgid "Item"
 msgstr ""
 
-msgid "Item"
+msgid "item"
 msgstr ""
 
 msgid "Item 1"
@@ -10076,10 +10124,10 @@ msgstr ""
 msgid "Last month"
 msgstr ""
 
-msgid "Last name"
+msgid "Last Name"
 msgstr ""
 
-msgid "Last Name"
+msgid "Last name"
 msgstr ""
 
 msgid "Last name of the contact."
@@ -10127,10 +10175,10 @@ msgstr ""
 msgid "Lead Score"
 msgstr ""
 
-msgid "Lead scoring"
+msgid "Lead Scoring"
 msgstr ""
 
-msgid "Lead Scoring"
+msgid "Lead scoring"
 msgstr ""
 
 msgid "Lead scoring is not available"
@@ -10139,10 +10187,10 @@ msgstr ""
 msgid "Lead scoring is turned off. Enable the Lead Scoring module under Settings → Modules."
 msgstr ""
 
-msgid "Lead with"
+msgid "lead with"
 msgstr ""
 
-msgid "lead with"
+msgid "Lead with"
 msgstr ""
 
 msgid "LearnDash"
@@ -10346,10 +10394,10 @@ msgstr ""
 msgid "Link your WordPress form, map fields to contacts, then activate or save a draft. Your connection saves automatically so field lists stay in sync."
 msgstr ""
 
-msgid "list"
+msgid "List"
 msgstr ""
 
-msgid "List"
+msgid "list"
 msgstr ""
 
 msgid "List created successfully"
@@ -10370,10 +10418,10 @@ msgstr ""
 msgid "List name is required"
 msgstr ""
 
-msgid "lists"
+msgid "Lists"
 msgstr ""
 
-msgid "Lists"
+msgid "lists"
 msgstr ""
 
 msgid "Lists: %1$d subscribed / %2$d assigned"
@@ -10523,9 +10571,6 @@ msgstr ""
 msgid "Loading templates..."
 msgstr ""
 
-msgid "Loading tickets…"
-msgstr ""
-
 msgid "Loading ticket…"
 msgstr ""
 
@@ -10640,10 +10685,10 @@ msgstr ""
 msgid "Lorem ipsum contains the typefaces more in use, an aspect that."
 msgstr ""
 
-msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
+msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview ."
 msgstr ""
 
-msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview ."
+msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
 msgstr ""
 
 msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
@@ -10667,10 +10712,10 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-msgid "Lower Than"
+msgid "Lower than"
 msgstr ""
 
-msgid "Lower than"
+msgid "Lower Than"
 msgstr ""
 
 msgid "LTR"
@@ -10958,10 +11003,10 @@ msgstr ""
 msgid "Mark as Accepted"
 msgstr ""
 
-msgid "Mark as subscribed"
+msgid "Mark as Subscribed"
 msgstr ""
 
-msgid "Mark as Subscribed"
+msgid "Mark as subscribed"
 msgstr ""
 
 msgid "Mark as Unavailable"
@@ -11276,9 +11321,6 @@ msgstr ""
 msgid "Meta WhatsApp Business API"
 msgstr ""
 
-msgid "Meta WhatsApp is not configured. Please configure it in Settings > Integrations."
-msgstr ""
-
 msgid "Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations."
 msgstr ""
 
@@ -11309,10 +11351,10 @@ msgstr ""
 msgid "Microsoft Teams is not enabled for your default account. Please enable it in the Outlook integration settings."
 msgstr ""
 
-msgid "Min"
+msgid "min"
 msgstr ""
 
-msgid "min"
+msgid "Min"
 msgstr ""
 
 msgid "Min Date"
@@ -11333,10 +11375,10 @@ msgstr ""
 msgid "Mins"
 msgstr ""
 
-msgid "minutes"
+msgid "Minutes"
 msgstr ""
 
-msgid "Minutes"
+msgid "minutes"
 msgstr ""
 
 msgid "minutes ago"
@@ -11660,10 +11702,10 @@ msgstr ""
 msgid "New Subscriber"
 msgstr ""
 
-msgid "New ticket"
+msgid "New Ticket"
 msgstr ""
 
-msgid "New Ticket"
+msgid "New ticket"
 msgstr ""
 
 msgid "New ticket from %s"
@@ -12200,19 +12242,19 @@ msgstr ""
 msgid "No taxes yet"
 msgstr ""
 
-msgid "Not Configured"
+msgid "Not configured"
 msgstr ""
 
-msgid "Not configured"
+msgid "Not Configured"
 msgstr ""
 
 msgid "Not Connected"
 msgstr ""
 
-msgid "note"
+msgid "Note"
 msgstr ""
 
-msgid "Note"
+msgid "note"
 msgstr ""
 
 msgid "Note:"
@@ -12266,10 +12308,10 @@ msgstr ""
 msgid "Not Equal To"
 msgstr ""
 
-msgid "notes"
+msgid "Notes"
 msgstr ""
 
-msgid "Notes"
+msgid "notes"
 msgstr ""
 
 msgid "Note saved successfully"
@@ -13310,12 +13352,6 @@ msgstr ""
 msgid "Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; other sources use two."
 msgstr ""
 
-msgid "Pick the next block in your automation."
-msgstr ""
-
-msgid "Pick the next block in your automation. Each type controls how contacts move forward."
-msgstr ""
-
 msgid "Pill"
 msgstr ""
 
@@ -13766,10 +13802,10 @@ msgstr ""
 msgid "Plus LTD"
 msgstr ""
 
-msgid "points"
+msgid "Points"
 msgstr ""
 
-msgid "Points"
+msgid "points"
 msgstr ""
 
 msgid "points!"
@@ -13859,10 +13895,10 @@ msgstr ""
 msgid "Presto Player plugin is not installed or activated. Install Presto Player to use these triggers."
 msgstr ""
 
-msgid "Preview"
+msgid "preview"
 msgstr ""
 
-msgid "preview"
+msgid "Preview"
 msgstr ""
 
 msgid "Preview & Share"
@@ -13985,6 +14021,9 @@ msgstr ""
 msgid "Product Launch"
 msgstr ""
 
+msgid "Products"
+msgstr ""
+
 msgid "Pro feature"
 msgstr ""
 
@@ -14019,6 +14058,9 @@ msgid "Project Created"
 msgstr ""
 
 msgid "Project Details"
+msgstr ""
+
+msgid "Project Fields"
 msgstr ""
 
 msgid "Project lifecycle notifications (created, assigned, status, comments, due dates)."
@@ -14132,10 +14174,10 @@ msgstr ""
 msgid "Proposals & Invoices"
 msgstr ""
 
-msgid "Proposal sent"
+msgid "Proposal Sent"
 msgstr ""
 
-msgid "Proposal Sent"
+msgid "Proposal sent"
 msgstr ""
 
 msgid "Proposal sent to customer"
@@ -14576,10 +14618,10 @@ msgstr ""
 msgid "Remove attachment"
 msgstr ""
 
-msgid "Remove CRM Access"
+msgid "Remove CRM access"
 msgstr ""
 
-msgid "Remove CRM access"
+msgid "Remove CRM Access"
 msgstr ""
 
 msgid "Remove field"
@@ -14648,10 +14690,10 @@ msgstr ""
 msgid "Replace Image"
 msgstr ""
 
-msgid "replies"
+msgid "Replies"
 msgstr ""
 
-msgid "Replies"
+msgid "replies"
 msgstr ""
 
 msgid "Replies sent."
@@ -14664,6 +14706,9 @@ msgid "reply"
 msgstr ""
 
 msgid "Reply-To"
+msgstr ""
+
+msgid "Reply-to address"
 msgstr ""
 
 msgid "Reply-to email (for email channel)"
@@ -14681,10 +14726,10 @@ msgstr ""
 msgid "Reply STOP to unsubscribe"
 msgstr ""
 
-msgid "Reply to"
+msgid "Reply To"
 msgstr ""
 
-msgid "Reply To"
+msgid "Reply to"
 msgstr ""
 
 msgid "Reply to tickets"
@@ -15092,10 +15137,10 @@ msgstr ""
 msgid "Save as Draft"
 msgstr ""
 
-msgid "Save as Template"
+msgid "Save as template"
 msgstr ""
 
-msgid "Save as template"
+msgid "Save as Template"
 msgstr ""
 
 msgid "Save Block"
@@ -15122,10 +15167,10 @@ msgstr ""
 msgid "Saved blocks library for reuse across emails"
 msgstr ""
 
-msgid "Save failed"
+msgid "Save Failed"
 msgstr ""
 
-msgid "Save Failed"
+msgid "Save failed"
 msgstr ""
 
 msgid "Save failed."
@@ -15149,13 +15194,19 @@ msgstr ""
 msgid "Save provider account"
 msgstr ""
 
+msgid "Save reusable products and services, then insert them as line items on invoices, proposals, and credit notes."
+msgstr ""
+
+msgid "Save reusable products and services once, then insert them as line items instead of retyping them on every document, with DoubleScale Pro."
+msgstr ""
+
 msgid "Save Setting Changes"
 msgstr ""
 
-msgid "Save Settings"
+msgid "Save settings"
 msgstr ""
 
-msgid "Save settings"
+msgid "Save Settings"
 msgstr ""
 
 msgid "Save Template"
@@ -15383,10 +15434,10 @@ msgstr ""
 msgid "Secret access key"
 msgstr ""
 
-msgid "Secret key"
+msgid "Secret Key"
 msgstr ""
 
-msgid "Secret Key"
+msgid "Secret key"
 msgstr ""
 
 msgid "Secret key is missing."
@@ -15465,9 +15516,6 @@ msgid "Select all options"
 msgstr ""
 
 msgid "Select All Owner"
-msgstr ""
-
-msgid "Select an action to add to your workflow"
 msgstr ""
 
 msgid "Select an approved WhatsApp Business template for your campaign. Templates must be pre-approved in your Meta Business Suite."
@@ -15569,10 +15617,10 @@ msgstr ""
 msgid "Select durations"
 msgstr ""
 
-msgid "selected"
+msgid "Selected"
 msgstr ""
 
-msgid "Selected"
+msgid "selected"
 msgstr ""
 
 msgid "Selected automations deleted successfully"
@@ -15692,15 +15740,6 @@ msgstr ""
 msgid "Select one of Merge tags that related to your input."
 msgstr ""
 
-msgid "Select one of the Actions to continue your workflow."
-msgstr ""
-
-msgid "Select one of the Conditions to continue your workflow."
-msgstr ""
-
-msgid "Select one of the Goals to continue your workflow."
-msgstr ""
-
 msgid "Select one of the Type to start creating your own template"
 msgstr ""
 
@@ -15734,10 +15773,10 @@ msgstr ""
 msgid "Select Stage"
 msgstr ""
 
-msgid "Select Status"
+msgid "Select status"
 msgstr ""
 
-msgid "Select status"
+msgid "Select Status"
 msgstr ""
 
 msgid "Select stored account %s"
@@ -15755,10 +15794,10 @@ msgstr ""
 msgid "Select Tag to Remove"
 msgstr ""
 
-msgid "Select team members"
+msgid "Select Team Members"
 msgstr ""
 
-msgid "Select Team Members"
+msgid "Select team members"
 msgstr ""
 
 msgid "Select Team Members and select one or more"
@@ -15941,10 +15980,10 @@ msgstr ""
 msgid "Sending emails via %s cURL Multi"
 msgstr ""
 
-msgid "Sending Identity"
+msgid "Sending identity"
 msgstr ""
 
-msgid "Sending identity"
+msgid "Sending Identity"
 msgstr ""
 
 msgid "Sending identity saved."
@@ -16007,10 +16046,10 @@ msgstr ""
 msgid "Send Test"
 msgstr ""
 
-msgid "Send test email"
+msgid "Send Test Email"
 msgstr ""
 
-msgid "Send Test Email"
+msgid "Send test email"
 msgstr ""
 
 msgid "Send Test Push"
@@ -16019,10 +16058,10 @@ msgstr ""
 msgid "Send Test SMS"
 msgstr ""
 
-msgid "Send test WhatsApp"
+msgid "Send Test WhatsApp"
 msgstr ""
 
-msgid "Send Test WhatsApp"
+msgid "Send test WhatsApp"
 msgstr ""
 
 msgid "Send the same reply to %d selected tickets."
@@ -16226,6 +16265,9 @@ msgstr ""
 msgid "Setup"
 msgstr ""
 
+msgid "Set up and customize a new automation workflow to streamline your tasks and improve efficiency."
+msgstr ""
+
 msgid "Setup did not finish"
 msgstr ""
 
@@ -16301,10 +16343,10 @@ msgstr ""
 msgid "Ship To"
 msgstr ""
 
-msgid "Short Code"
+msgid "Shortcode"
 msgstr ""
 
-msgid "Shortcode"
+msgid "Short Code"
 msgstr ""
 
 msgid "Show all tickets"
@@ -16397,10 +16439,10 @@ msgstr ""
 msgid "Skip Disabled Step Error"
 msgstr ""
 
-msgid "skipped"
+msgid "Skipped"
 msgstr ""
 
-msgid "Skipped"
+msgid "skipped"
 msgstr ""
 
 msgid "Skipped contacts already exist and \"Update existing\" was not enabled."
@@ -16442,10 +16484,10 @@ msgstr ""
 msgid "Slug of the calendar."
 msgstr ""
 
-msgid "Sms"
+msgid "SMS"
 msgstr ""
 
-msgid "SMS"
+msgid "Sms"
 msgstr ""
 
 msgid "SMS, WhatsApp & Unified Inbox"
@@ -16454,10 +16496,10 @@ msgstr ""
 msgid "Sms Campaigns"
 msgstr ""
 
-msgid "SMS Campaigns"
+msgid "SMS campaigns"
 msgstr ""
 
-msgid "SMS campaigns"
+msgid "SMS Campaigns"
 msgstr ""
 
 msgid "SMS campaigns and broadcast messaging"
@@ -16487,10 +16529,10 @@ msgstr ""
 msgid "SMS Notifications"
 msgstr ""
 
-msgid "SMS Preview"
+msgid "SMS preview"
 msgstr ""
 
-msgid "SMS preview"
+msgid "SMS Preview"
 msgstr ""
 
 msgid "SMS preview requires DoubleScale Pro."
@@ -16769,10 +16811,10 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-msgid "Start Date"
+msgid "Start date"
 msgstr ""
 
-msgid "Start date"
+msgid "Start Date"
 msgstr ""
 
 msgid "Start date (Y-m-d), paired with end_date."
@@ -16922,6 +16964,9 @@ msgstr ""
 msgid "Stop Listening"
 msgstr ""
 
+msgid "Stop the automation here"
+msgstr ""
+
 msgid "Store Logs For:"
 msgstr ""
 
@@ -17048,10 +17093,10 @@ msgstr ""
 msgid "Subtask"
 msgstr ""
 
-msgid "Sub Total"
+msgid "Subtotal"
 msgstr ""
 
-msgid "Subtotal"
+msgid "Sub Total"
 msgstr ""
 
 msgid "Subtract Points"
@@ -17171,10 +17216,10 @@ msgstr ""
 msgid "Sync with Outlook and optional Microsoft Teams."
 msgstr ""
 
-msgid "system"
+msgid "System"
 msgstr ""
 
-msgid "System"
+msgid "system"
 msgstr ""
 
 msgid "System Alerts"
@@ -17195,10 +17240,10 @@ msgstr ""
 msgid "Table View"
 msgstr ""
 
-msgid "tag"
+msgid "Tag"
 msgstr ""
 
-msgid "Tag"
+msgid "tag"
 msgstr ""
 
 msgid "Tag all imported contacts with specific labels. Tags help categorize and segment contacts for better filtering and automation."
@@ -17282,10 +17327,10 @@ msgstr ""
 msgid "Task activities require Plugin Pro plugin"
 msgstr ""
 
-msgid "Task Activity"
+msgid "Task activity"
 msgstr ""
 
-msgid "Task activity"
+msgid "Task Activity"
 msgstr ""
 
 msgid "Task Assigned"
@@ -17765,10 +17810,10 @@ msgstr ""
 msgid "The ID of the step."
 msgstr ""
 
-msgid "The IDs of the items to delete."
+msgid "The ids of the items to delete."
 msgstr ""
 
-msgid "The ids of the items to delete."
+msgid "The IDs of the items to delete."
 msgstr ""
 
 msgid "The IMAP folder where sent emails are stored. Common names: \"Sent\", \"Sent Items\", \"Sent Messages\"."
@@ -18332,10 +18377,10 @@ msgstr ""
 msgid "Time Slot Intervals"
 msgstr ""
 
-msgid "Time zone"
+msgid "Timezone"
 msgstr ""
 
-msgid "Timezone"
+msgid "Time zone"
 msgstr ""
 
 msgid "Timing"
@@ -18638,10 +18683,28 @@ msgstr ""
 msgid "Trigger automations based on helpdesk ticket events"
 msgstr ""
 
+msgid "Trigger automations based on project lifecycle events"
+msgstr ""
+
 msgid "Trigger automations based on sales document and deal events"
 msgstr ""
 
 msgid "Trigger automations based on task and subtask events"
+msgstr ""
+
+msgid "Trigger automations from contact events"
+msgstr ""
+
+msgid "Trigger automations from CRM, Sales, Booking, Helpdesk, Tasks & Projects"
+msgstr ""
+
+msgid "Trigger automations from inbound email, SMS and WhatsApp messages"
+msgstr ""
+
+msgid "Trigger automations when an external webhook is received"
+msgstr ""
+
+msgid "Trigger automations when a tracked link is clicked"
 msgstr ""
 
 msgid "Trigger category"
@@ -18842,10 +18905,10 @@ msgstr ""
 msgid "Unit"
 msgstr ""
 
-msgid "unknown"
+msgid "Unknown"
 msgstr ""
 
-msgid "Unknown"
+msgid "unknown"
 msgstr ""
 
 msgid "Unknown Action"
@@ -19373,10 +19436,10 @@ msgstr ""
 msgid "View full log details"
 msgstr ""
 
-msgid "View invoice"
+msgid "View Invoice"
 msgstr ""
 
-msgid "View Invoice"
+msgid "View invoice"
 msgstr ""
 
 msgid "View Journey"
@@ -19451,6 +19514,9 @@ msgstr ""
 msgid "WA"
 msgstr ""
 
+msgid "Wait before continuing"
+msgstr ""
+
 msgid "Waiting List"
 msgstr ""
 
@@ -19476,6 +19542,9 @@ msgid "Waiting List Spot Available"
 msgstr ""
 
 msgid "Wait Period (minutes)"
+msgstr ""
+
+msgid "Wait until a chosen event happens"
 msgstr ""
 
 msgid "Warning:"
@@ -19658,6 +19727,9 @@ msgstr ""
 msgid "Whatsapp Incoming Messages"
 msgstr ""
 
+msgid "WhatsApp message body is empty."
+msgstr ""
+
 msgid "Whatsapp message missing template ID. All WhatsApp messages must use approved Meta business templates."
 msgstr ""
 
@@ -19686,6 +19758,12 @@ msgid "Whatsapp Phone"
 msgstr ""
 
 msgid "Whatsapp phone number of the contact in E.164 format (e.g., +12025551234)."
+msgstr ""
+
+msgid "WhatsApp provider is not configured. Please configure it in Settings > Integrations."
+msgstr ""
+
+msgid "WhatsApp provider not configured. Please configure a WhatsApp provider in Settings > Integrations."
 msgstr ""
 
 msgid "Whatsapp Received"
@@ -19917,6 +19995,9 @@ msgid "Workflow not found."
 msgstr ""
 
 msgid "Working hours"
+msgstr ""
+
+msgid "Works on invoices, proposals, and credit notes"
 msgstr ""
 
 msgid "Workspace"
@@ -20276,10 +20357,10 @@ msgstr ""
 msgid "Your meeting has been Scheduled"
 msgstr ""
 
-msgid "Your name"
+msgid "Your Name"
 msgstr ""
 
-msgid "Your Name"
+msgid "Your name"
 msgstr ""
 
 msgid "your payment history and transaction details."

@@ -27,7 +27,9 @@ import {
 	LinkTriggersIcon,
 	OrdersIcon,
 	PremiumIcon,
+	ProjectsIcon,
 	SalesIcon,
+	ContactSMSIcon,
 	TaskDoneIcon,
 	VideoBlockIcon,
 } from '@doublescale/components/icons/index';
@@ -144,7 +146,8 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 		l.includes('contact') ||
 		l.includes('subscriber') ||
 		l.includes('list') ||
-		l.includes('tag')
+		l.includes('tag') ||
+		l.includes('user')
 	) {
 		return ContactsIcon;
 	}
@@ -162,6 +165,12 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	}
 	if (l.includes('helpdesk') || l.includes('support') || l.includes('ticket')) {
 		return HelpdeskIcon;
+	}
+	if (l.includes('messaging') || l.includes('sms') || l.includes('whatsapp')) {
+		return ContactSMSIcon;
+	}
+	if (l.includes('project') || l.includes('discussion')) {
+		return ProjectsIcon;
 	}
 	if (l.includes('task')) {
 		return TaskDoneIcon;
@@ -443,12 +452,12 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 					return (
 					<Card
 						key={key}
-						className="shadow-none overflow-hidden rounded-[10px] border border-neutral-200 bg-white"
+						className="shadow-none overflow-hidden rounded-lg border border-border bg-[#F7F8FA]"
 					>
 						<CardHeader
 							className={cn(
 								'cursor-pointer select-none space-y-0 p-0 transition-colors hover:bg-neutral-50/80',
-								!isCollapsed && 'border-b border-neutral-200'
+								!isCollapsed && 'border-b border-border'
 							)}
 						>
 							<button
@@ -458,9 +467,9 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 							>
 								<span
 									className={cn(
-										'flex  shrink-0 items-center justify-center text-sky-500',
+										'flex shrink-0 items-center justify-center text-[#0D9DFC]',
 										group.is_disabled &&
-											'bg-neutral-100 text-neutral-400'
+											'text-neutral-400'
 									)}
 								>
 									<GroupIcon
@@ -505,7 +514,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 						</CardHeader>
 						{!isCollapsed && (
 							<CardContent className="p-0">
-								<div className="flex flex-col divide-y divide-neutral-200">
+								<div className="flex flex-col divide-y divide-border">
 									{sortTriggers(group.triggers).map(
 										([triggerKey, trigger]) => {
 											const isSelected =
@@ -595,7 +604,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 															(!trigger.is_pro &&
 																group.is_disabled)
 														}
-														className="h-8 shrink-0 rounded-md px-4 text-xs font-semibold uppercase tracking-wide shadow-none"
+														className="h-8 shrink-0 rounded-md px-2 text-xs font-semibold uppercase tracking-wide shadow-none"
 													>
 														{isSelected && (
 															<Check

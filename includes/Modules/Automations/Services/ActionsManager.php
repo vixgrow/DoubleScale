@@ -421,8 +421,8 @@ final class ActionsManager {
 	 * Module-off groups (CRM, Sales, Tasks, …) stay in the payload with an
 	 * enable tooltip — those aren't alternatives, a site can use several at
 	 * once. "Pick one integration" categories (E-commerce, LMS, Membership)
-	 * are pruned to the vendor(s) actually active and dropped entirely when
-	 * none are — see {@see SourceTreePruner}.
+	 * are pruned to the vendor(s) actually active — see {@see SourceTreePruner}.
+	 * Empty categories remain so the sidebar stays complete.
 	 *
 	 * @return array
 	 */

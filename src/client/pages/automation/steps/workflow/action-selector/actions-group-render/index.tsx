@@ -79,7 +79,11 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	) {
 		return HelpdeskIcon;
 	}
-	if (l.includes('sms') || l.includes('whatsapp') || l.includes('messaging')) {
+	if (
+		l.includes('sms') ||
+		l.includes('whatsapp') ||
+		l.includes('messaging')
+	) {
 		return ContactSMSIcon;
 	}
 	if (l.includes('email') || l.includes('mail')) {
@@ -251,7 +255,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				return (
 					<Card
 						key={key}
-						className="overflow-hidden rounded-[10px] border border-neutral-200 bg-white shadow-none"
+						className="overflow-hidden rounded-[10px] border border-border bg-[#F7F8FA] shadow-none"
 					>
 						<CardHeader
 							className={cn(
@@ -267,8 +271,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 								<span
 									className={cn(
 										'flex shrink-0 items-center justify-center',
-										group.is_disabled &&
-											'text-neutral-400'
+										group.is_disabled && 'text-neutral-400'
 									)}
 								>
 									<GroupIcon

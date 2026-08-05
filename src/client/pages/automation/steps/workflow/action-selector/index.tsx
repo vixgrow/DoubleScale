@@ -529,7 +529,10 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 		}));
 	}, [currentCategoryData]);
 
-	const actionGroupsForCategory = useMemo((): Record<string, ActionsGroup> => {
+	const actionGroupsForCategory = useMemo((): Record<
+		string,
+		ActionsGroup
+	> => {
 		if (categoryTabs.length > 0) {
 			const activeTab =
 				categoryTabs.find((tab) => tab.key === selectedCategoryTab) ??
@@ -613,7 +616,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 								<div
 									role="tabpanel"
 									aria-label={__('Actions', 'doublescale')}
-									className="min-w-0 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-320px)] min-h-[320px] overflow-y-auto"
+									className="min-w-0 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-260px)] min-h-[320px] overflow-y-auto"
 								>
 									{categoryTabs.length > 0 ? (
 										<Tabs
@@ -658,9 +661,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 												>
 													<ActionsGroupRender
 														groups={tab.groups}
-														onChange={(
-															actionKey
-														) =>
+														onChange={(actionKey) =>
 															handleActionSelect(
 																actionKey
 															)

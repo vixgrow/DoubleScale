@@ -59,7 +59,7 @@ const ActionSelectorCard: React.FC<ActionSelectorCardProps> = ({
 			role="tablist"
 			aria-orientation="vertical"
 			aria-label={__('Action category', 'doublescale')}
-			className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-320px)] min-h-[320px] overflow-y-auto"
+			className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-260px)] min-h-[320px] overflow-y-auto"
 		>
 			{map(sidebarCategories, ([categoryKey, action]) => {
 				const isActive = selectedCategory === categoryKey;

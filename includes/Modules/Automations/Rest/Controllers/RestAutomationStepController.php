@@ -24,6 +24,10 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\Emails;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 /**
  * RestAutomationStepController class
@@ -126,6 +130,53 @@ class RestAutomationStepController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'duplicate_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Send a test email for a "Send Email" action. Content-based (no step id)
+		// so it also works while the step is still unsaved in the builder.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/send-test-email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_email' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'emails'     => array(
+							'description' => __( 'Array of email addresses to send test emails to', 'doublescale' ),
+							'type'        => 'array',
+							'items'       => array( 'type' => 'string' ),
+							'required'    => true,
+						),
+						'subject'    => array(
+							'description' => __( 'Email subject', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+						'body'       => array(
+							'description' => __( 'Email body: builder JSON or raw HTML', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'from_name'  => array(
+							'description' => __( 'From name', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+						'from_email' => array(
+							'description' => __( 'From email address', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+						'reply_to'   => array(
+							'description' => __( 'Reply-to address', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+					),
 				),
 			)
 		);
@@ -905,6 +956,162 @@ class RestAutomationStepController extends RestController {
 		}
 
 		return $step_data;
+	}
+
+	/**
+	 * Send a test email for a "Send Email" automation action.
+	 *
+	 * Mirrors the campaign builder's test send, but takes the content from the
+	 * request instead of a saved template: an automation step's body lives in
+	 * the builder's local state and may not be persisted yet.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_test_email( $request ) {
+		try {
+			$emails = $request->get_param( 'emails' );
+
+			if ( empty( $emails ) || ! is_array( $emails ) ) {
+				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			$invalid_emails = array();
+			foreach ( $emails as $email ) {
+				if ( ! is_email( $email ) ) {
+					$invalid_emails[] = $email;
+				}
+			}
+
+			if ( ! empty( $invalid_emails ) ) {
+				return new WP_Error(
+					'invalid_emails',
+					sprintf(
+						/* translators: %s: comma-separated list of invalid email addresses */
+						__( 'Invalid email address(es): %s', 'doublescale' ),
+						implode( ', ', $invalid_emails )
+					),
+					array( 'status' => 400 )
+				);
+			}
+
+			$body = $request->get_param( 'body' );
+
+			if ( empty( $body ) ) {
+				return new WP_Error( 'missing_body', __( 'Email body is empty. Add content in the builder before sending a test.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			$subject    = $request->get_param( 'subject' );
+			$subject    = ! empty( $subject ) ? $subject : __( 'Test Email', 'doublescale' );
+			$from_name  = $request->get_param( 'from_name' ) ?: get_option( 'blogname' );
+			$from_email = $request->get_param( 'from_email' ) ?: get_option( 'admin_email' );
+			$reply_to   = $request->get_param( 'reply_to' );
+
+			// The body arrives either as builder JSON ({"type":"builder","value":{...}})
+			// or as raw HTML. Only the former needs rendering.
+			$builder_data = null;
+			$decoded      = json_decode( $body, true );
+			if ( is_array( $decoded ) ) {
+				if ( isset( $decoded['type'] ) && 'builder' === $decoded['type'] && isset( $decoded['value'] ) ) {
+					$builder_data = $decoded['value'];
+				} elseif ( isset( $decoded['sections'] ) ) {
+					$builder_data = $decoded;
+				}
+			}
+
+			$sent_count    = 0;
+			$failed_count  = 0;
+			$failed_emails = array();
+			$last_detail   = '';
+
+			foreach ( $emails as $recipient_email ) {
+				$email_sender               = new Emails();
+				$email_sender->from_address = $from_email;
+				$email_sender->from_name    = $from_name;
+				if ( ! empty( $reply_to ) && is_email( $reply_to ) ) {
+					$email_sender->reply_to = $reply_to;
+				}
+
+				// Merge tags resolve against the recipient when they are a known contact.
+				$contact = ContactModel::get_by_email( $recipient_email ) ?? null;
+
+				if ( null !== $builder_data ) {
+					$renderer     = new EmailRenderer();
+					$body_content = $renderer->render_from_builder_data( $builder_data, $contact );
+				} else {
+					$body_content = MergeTagsManager::instance()->process_merge_tags( $body, $contact );
+				}
+
+				if ( empty( $body_content ) ) {
+					++$failed_count;
+					$failed_emails[] = $recipient_email;
+					continue;
+				}
+
+				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
+
+				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content ) ) {
+					++$sent_count;
+				} else {
+					++$failed_count;
+					$failed_emails[] = $recipient_email;
+					$detail          = Emails::get_last_send_failure_detail();
+					if ( '' !== $detail ) {
+						$last_detail = $detail;
+					}
+				}
+			}
+
+			if ( $sent_count > 0 && 0 === $failed_count ) {
+				return new WP_REST_Response(
+					array(
+						'success'    => true,
+						'message'    => sprintf(
+							/* translators: %d: number of emails sent */
+							_n(
+								'Test email sent successfully to %d recipient',
+								'Test emails sent successfully to %d recipients',
+								$sent_count,
+								'doublescale'
+							),
+							$sent_count
+						),
+						'sent_count' => $sent_count,
+					),
+					200
+				);
+			}
+
+			if ( $sent_count > 0 ) {
+				return new WP_REST_Response(
+					array(
+						'success'       => true,
+						'message'       => sprintf(
+							/* translators: 1: number of successful sends, 2: number of failures */
+							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'doublescale' ),
+							$sent_count,
+							$failed_count
+						),
+						'sent_count'    => $sent_count,
+						'failed_count'  => $failed_count,
+						'failed_emails' => $failed_emails,
+					),
+					200
+				);
+			}
+
+			$message = __( 'Failed to send test email', 'doublescale' );
+			if ( '' !== $last_detail ) {
+				$message .= ' ' . $last_detail;
+			}
+
+			return new WP_Error( 'send_failed', $message, array( 'status' => 500 ) );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**

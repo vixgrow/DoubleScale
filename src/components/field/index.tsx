@@ -83,6 +83,8 @@ interface FieldProps {
 		apiParams?: Record<string, unknown>;
 		dataPath?: string;
 		totalPath?: string;
+		/** open_builder: show "Send test email" inside the builder. */
+		supportsTestEmail?: boolean;
 	};
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
@@ -766,6 +768,19 @@ const Field: React.FC<FieldProps> = ({
 				<OpenBuilder
 					initialEmailBody={value}
 					onSave={(emailBodyJson) => onChange(emailBodyJson)}
+					// Opt-in (set by the action's field definition): shows
+					// "Send test email" inside the builder, using the sibling
+					// subject/from values from this same form.
+					getTestEmailContext={
+						settings?.supportsTestEmail
+							? () => ({
+									subject: allValues?.subject,
+									from_name: allValues?.from_name,
+									from_email: allValues?.from_email,
+									reply_to: allValues?.reply_to,
+								})
+							: undefined
+					}
 				/>
 			);
 			break;

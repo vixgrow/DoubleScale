@@ -73,6 +73,17 @@ export interface BuilderProps {
 	handleNavigate?: (href: string) => void;
 	/** When true (e.g. Pro OpenBuilder “pre-built templates” path), open My Templates in the sidebar on mount. */
 	openTemplates?: boolean;
+	/**
+	 * When set, shows "Send test email" while the builder is embedded (onSave
+	 * mode) — e.g. the automation "Send Email" action. Supplies the subject/from
+	 * values that accompany the current builder content.
+	 */
+	getTestEmailContext?: () => {
+		subject?: string;
+		from_name?: string;
+		from_email?: string;
+		reply_to?: string;
+	};
 }
 
 const BuilderContent: React.FC<BuilderProps> = ({
@@ -82,6 +93,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	autoSave = true,
 	handleNavigate,
 	openTemplates = false,
+	getTestEmailContext,
 }) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
@@ -351,6 +363,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						setTemplatesRefreshTrigger((prev) => prev + 1)
 					}
 					handleNavigate={handleNavigate}
+					getTestEmailContext={getTestEmailContext}
 				/>
 				{isBelowDesktop ? (
 					<div

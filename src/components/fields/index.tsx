@@ -32,6 +32,8 @@ type FieldType = {
 		dataPath?: string;
 		totalPath?: string;
 		rootArrayResponse?: boolean;
+		/** open_builder: show "Send test email" inside the builder. */
+		supportsTestEmail?: boolean;
 	};
 	'default-value'?: string;
 	tooltip?: string;

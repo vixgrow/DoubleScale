@@ -19,13 +19,26 @@ import {
 import { SendTestEmailIcon } from '@doublescale/components';
 
 interface SendTestEmailPopoverProps {
-	campaignId: number;
+	/** Campaign test send: the saved campaign template is rendered server-side. */
+	campaignId?: number;
+	/**
+	 * Content test send (automation "Send Email" action): the current builder
+	 * content is posted directly, so it works before the step is saved.
+	 */
+	getTestContent?: () => {
+		body: string;
+		subject?: string;
+		from_name?: string;
+		from_email?: string;
+		reply_to?: string;
+	};
 	disabled?: boolean;
 	onBeforeSend?: () => Promise<{ success: boolean }>;
 }
 
 export const SendTestEmailPopover: React.FC<SendTestEmailPopoverProps> = ({
 	campaignId,
+	getTestContent,
 	disabled = false,
 	onBeforeSend,
 }) => {
@@ -79,15 +92,32 @@ export const SendTestEmailPopover: React.FC<SendTestEmailPopoverProps> = ({
 			}
 		}
 
+		// Content mode posts the current builder content; campaign mode renders
+		// the saved campaign template server-side.
+		const content = getTestContent?.();
+
+		if (getTestContent && !content?.body) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Add content in the builder before sending a test.',
+					'doublescale'
+				),
+			});
+			return;
+		}
+
 		abortControllerRef.current?.abort();
 		abortControllerRef.current = new AbortController();
 		setIsSending(true);
 
 		try {
 			const response: { message?: string } = await apiFetch({
-				path: `/doublescale/v1/campaigns/${campaignId}/send-test-email`,
+				path: content
+					? '/doublescale/v1/automation-steps/send-test-email'
+					: `/doublescale/v1/campaigns/${campaignId}/send-test-email`,
 				method: 'POST',
-				data: { emails },
+				data: content ? { ...content, emails } : { emails },
 				signal: abortControllerRef.current.signal,
 			});
 
@@ -143,10 +173,15 @@ export const SendTestEmailPopover: React.FC<SendTestEmailPopoverProps> = ({
 						{__('Send a test email', 'doublescale')}
 					</p>
 					<p className="text-xs text-muted-foreground">
-						{__(
-							'Enter one or more addresses (comma-separated). The latest saved design will be sent.',
-							'doublescale'
-						)}
+						{getTestContent
+							? __(
+									'Enter one or more addresses (comma-separated). The design currently in the builder will be sent.',
+									'doublescale'
+								)
+							: __(
+									'Enter one or more addresses (comma-separated). The latest saved design will be sent.',
+									'doublescale'
+								)}
 					</p>
 					<Textarea
 						value={testEmails}

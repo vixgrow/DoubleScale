@@ -32,6 +32,7 @@ import {
 	ContactSMSIcon,
 	TaskDoneIcon,
 	VideoBlockIcon,
+	WebhooksIcon,
 } from '@doublescale/components/icons/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -169,6 +170,9 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	if (l.includes('messaging') || l.includes('sms') || l.includes('whatsapp')) {
 		return ContactSMSIcon;
 	}
+	if (l.includes('webhook')) {
+		return WebhooksIcon;
+	}
 	if (l.includes('project') || l.includes('discussion')) {
 		return ProjectsIcon;
 	}
@@ -204,6 +208,9 @@ function getGroupIcon(label: string | undefined): GroupIconComponent {
 	}
 	if (l.includes('paid')) {
 		return CurrencyIcon;
+	}
+	if (l.includes('webhook')) {
+		return WebhooksIcon;
 	}
 	return IntegrationsIcon;
 }

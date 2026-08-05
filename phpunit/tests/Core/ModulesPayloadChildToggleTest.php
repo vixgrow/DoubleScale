@@ -166,11 +166,12 @@ final class ModulesPayloadChildToggleTest extends TestCase {
 	public function test_child_module_parent_map_lists_sales_children(): void {
 		$this->assertSame(
 			array(
-				'deals'         => 'sales',
-				'documents'     => 'sales',
-				'contracts'     => 'sales',
-				'subscriptions' => 'sales',
-				'credit_notes'  => 'sales',
+				'deals'           => 'sales',
+				'documents'       => 'sales',
+				'contracts'       => 'sales',
+				'subscriptions'   => 'sales',
+				'credit_notes'    => 'sales',
+				'product_catalog' => 'sales',
 			),
 			doublescale_child_module_parent_map()
 		);

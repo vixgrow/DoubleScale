@@ -4,6 +4,7 @@
 
 import React, { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	isPercentDiscountType,
 	parseDiscountInput,
@@ -29,6 +30,19 @@ import {
 import { useSalesTaxes } from '@/hooks/sales';
 import type { LineItem, LineItemTax, SalesTax } from '@/types/sales';
 import NovicesIcon from '@doublescale/shared/icons/novices';
+
+/**
+ * Context handed to the `doublescale_line_items_product_picker` slot.
+ *
+ * `onInsert` appends only — rows are keyed by array index, so inserting
+ * mid-list would remount the rows below and scramble in-progress typing.
+ * It also stamps `amount`, keeping that invariant owned in one place.
+ */
+export interface LineItemProductPickerContext {
+	onInsert: (item: LineItem) => void;
+	disabled: boolean;
+	currency: string;
+}
 
 const emptyItem = (): LineItem => ({
 	description: '',
@@ -319,6 +333,19 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 
 	const addItem = () => onChange([...items, emptyItem()]);
 
+	// Append-only, and `amount` is stamped here rather than trusted from the
+	// caller: TotalsCalculator prefers a supplied `amount` over qty * rate, so a
+	// stale one would silently corrupt the saved total.
+	const insertItem = (item: LineItem) =>
+		onChange([...items, { ...item, amount: computeAmount(item) }]);
+
+	// Pro fills this slot with the saved-products picker; empty in free.
+	const productPickerSlot = applyFilters(
+		'doublescale_line_items_product_picker',
+		null,
+		{ onInsert: insertItem, disabled: readOnly, currency }
+	) as React.ReactNode;
+
 	const removeItem = (index: number) => {
 		onChange(items.filter((_, i) => i !== index));
 	};
@@ -361,16 +388,19 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 				{__('Items', 'doublescale')}
 			</Label>
 			{!readOnly ? (
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					className={addItemButtonClass}
-					onClick={addItem}
-				>
-					<Plus className="mr-1 h-4 w-4" />
-					{__('Add Item', 'doublescale')}
-				</Button>
+				<div className="flex items-center gap-2">
+					{productPickerSlot}
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className={addItemButtonClass}
+						onClick={addItem}
+					>
+						<Plus className="mr-1 h-4 w-4" />
+						{__('Add Item', 'doublescale')}
+					</Button>
+				</div>
 			) : null}
 		</div>
 	);
@@ -403,15 +433,18 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 							'doublescale'
 						)}
 					</p>
-					<Button
-						type="button"
-						variant="outline"
-						className={`mt-5 ${addItemButtonClass}`}
-						onClick={addItem}
-					>
-						<Plus className="mr-1 h-4 w-4" />
-						{__('Add Item', 'doublescale')}
-					</Button>
+					<div className="mt-5 flex items-center justify-center gap-2">
+						{productPickerSlot}
+						<Button
+							type="button"
+							variant="outline"
+							className={addItemButtonClass}
+							onClick={addItem}
+						>
+							<Plus className="mr-1 h-4 w-4" />
+							{__('Add Item', 'doublescale')}
+						</Button>
+					</div>
 				</div>
 				{totalsBlock}
 			</div>

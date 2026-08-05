@@ -2,6 +2,8 @@
  * TypeScript types for InfiniteScrollSelect component
  */
 
+import type { ReactNode } from 'react';
+
 export interface InfiniteScrollSelectProps {
   // Core props
   value?: string | number;
@@ -16,6 +18,14 @@ export interface InfiniteScrollSelectProps {
   // Data formatting
   getOptionLabel: (item: any) => string;
   getOptionValue: (item: any) => string | number;
+  /**
+   * Optional heading an item belongs under. When provided, consecutive items
+   * sharing a heading render beneath a sticky group label. Items returning an
+   * empty string are listed ungrouped. Omit for a flat list (the default).
+   */
+  getOptionGroup?: (item: any) => string;
+  /** Optional richer row content; falls back to getOptionLabel. */
+  renderOption?: (item: any) => ReactNode;
   dataPath?: string; // Path to data in response (e.g., 'data')
   totalPath?: string; // Path to total count (e.g., 'total')
 

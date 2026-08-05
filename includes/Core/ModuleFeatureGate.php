@@ -78,6 +78,7 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'leadscoring',
 		'credit_notes',
 		'contracts',
+		'product_catalog',
 		'tasks',
 		'projects',
 	);
@@ -110,11 +111,12 @@ function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
  */
 function doublescale_child_module_parent_map(): array {
 	$map = array(
-		'deals'         => 'sales',
-		'documents'     => 'sales',
-		'contracts'     => 'sales',
-		'subscriptions' => 'sales',
-		'credit_notes'  => 'sales',
+		'deals'           => 'sales',
+		'documents'       => 'sales',
+		'contracts'       => 'sales',
+		'subscriptions'   => 'sales',
+		'credit_notes'    => 'sales',
+		'product_catalog' => 'sales',
 	);
 
 	/**
@@ -213,6 +215,12 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'        => __( 'Contracts', 'doublescale' ),
 				'description'  => __( 'Manage customer contracts, types, attachments, and e-signatures.', 'doublescale' ),
+				'dependencies' => array( 'contacts', 'sales' ),
+			);
+		case 'product_catalog':
+			return array(
+				'label'        => __( 'Products', 'doublescale' ),
+				'description'  => __( 'Save reusable products and services, then insert them as line items on invoices, proposals, and credit notes.', 'doublescale' ),
 				'dependencies' => array( 'contacts', 'sales' ),
 			);
 		case 'tasks':

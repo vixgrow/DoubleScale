@@ -45,6 +45,7 @@ import {
 	XCircle,
 	Eye,
 } from 'lucide-react';
+import { DeleteIcon, ViewIcon } from '@doublescale/components';
 
 interface LogEntry {
 	id: number;
@@ -328,7 +329,7 @@ const DebuggingLogs: React.FC = () => {
 							disabled={isDeleting || logs.length === 0}
 							className="text-destructive hover:text-destructive"
 						>
-							<Trash2 className="h-4 w-4 mr-2" />
+							<DeleteIcon width={24} height={24} />
 							{isDeleting
 								? __('Deleting...', 'doublescale')
 								: __('Clear All', 'doublescale')}
@@ -429,7 +430,7 @@ const DebuggingLogs: React.FC = () => {
 														}}
 														title={__('View Details', 'doublescale')}
 													>
-														<Eye className="h-4 w-4" />
+														<ViewIcon width={24} height={24} />
 													</Button>
 													<Button
 														variant="ghost"
@@ -439,7 +440,7 @@ const DebuggingLogs: React.FC = () => {
 														className="text-destructive hover:text-destructive"
 														title={__('Delete', 'doublescale')}
 													>
-														<Trash2 className="h-4 w-4" />
+														<DeleteIcon width={24} height={24} />
 													</Button>
 												</div>
 											</TableCell>

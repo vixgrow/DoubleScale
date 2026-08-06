@@ -39,6 +39,7 @@ import {
 	NotificationIcon,
 	WhatsAppIcon,
 	WebsiteIcon,
+	WebsiteTrackingIcon,
 	AiIcon,
 	FailedEmailsIcon,
 } from '@doublescale/components';
@@ -558,7 +559,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'website_tracking',
 			label: __('Website Tracking', 'doublescale'),
-			icon: <WebsiteIcon width={24} height={24} />,
+			icon: <WebsiteTrackingIcon width={24} height={24} />,
 		},
 		{
 			value: 'client_portal',

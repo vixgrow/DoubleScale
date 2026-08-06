@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Clock, Bug } from 'lucide-react';
 import CronJobs from './cron-jobs';
 import DebuggingLogs from '../debugging';
+import { TimerBlockIcon } from '@doublescale/components';
 
 const SystemSettings: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<string>('cron');
@@ -21,7 +22,7 @@ const SystemSettings: React.FC = () => {
 		{
 			value: 'cron',
 			label: __('Cron Jobs', 'doublescale'),
-			icon: <Clock className="h-4 w-4" />,
+			icon: <TimerBlockIcon width={24} height={24} />,
 		},
 		{
 			value: 'debugging',

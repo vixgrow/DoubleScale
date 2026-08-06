@@ -44,7 +44,7 @@ import {
 	CardTitle,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon } from '@doublescale/components';
+import { AlertIcon, ContactTotalEmailsIcon, EmailProviderSetupIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -704,7 +704,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 		<Card className="shadow-sm">
 			<CardHeader>
 				<CardTitle className="text-lg flex items-center gap-2">
-					<Mail className="w-5 h-5" />
+					<ContactTotalEmailsIcon width={24} height={24} />
 					{__('Sending Identity', 'doublescale')}
 				</CardTitle>
 				<CardDescription>
@@ -746,7 +746,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 								}))
 							}
 						placeholder={defaults.from_name}
-						className=""
+						className="!border-border !rounded-lg"
 						/>
 					</div>
 					<div>
@@ -766,7 +766,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 							settings.from_email ||
 							defaults.reply_to
 						}
-						className=""
+						className="!border-border !rounded-lg"
 						/>
 					</div>
 				</div>
@@ -984,6 +984,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 													) || 993
 												)
 											}
+											className="!border-border !rounded-lg"
 										/>
 									</div>
 								</div>
@@ -1070,6 +1071,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 													e.target.value
 												)
 											}
+											className="!border-border !rounded-lg"
 										/>
 									</div>
 								</div>
@@ -1269,7 +1271,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 										return (
 											<div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
 												<div className="flex items-center gap-3">
-													<ShieldCheck className="w-5 h-5 text-green-600" />
+													<EmailProviderSetupIcon width={24} height={24} />
 													<div>
 														<p className="font-medium text-green-800">
 															{__(
@@ -1402,7 +1404,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 						{/* Test Connection */}
 						<div className="pt-2">
 							<Button
-								variant="outline"
+								variant="secondaryDeepBlue"
 								onClick={handleTestConnection}
 								disabled={isTestDisabled()}
 								className="flex items-center gap-2"
@@ -1410,7 +1412,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 								{isTesting ? (
 									<Loader2 className="w-4 h-4 animate-spin" />
 								) : (
-									<Mail className="w-4 h-4" />
+									<ContactTotalEmailsIcon width={24} height={24} />
 								)}
 								{isTesting
 									? __(

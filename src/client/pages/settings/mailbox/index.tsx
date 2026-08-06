@@ -17,9 +17,6 @@ import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
 import {
-	Mail,
-	UserCircle,
-	ShieldCheck,
 	Loader2,
 	CheckCircle,
 	XCircle,
@@ -30,7 +27,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
-import { PageTabs } from '@doublescale/components';
+import {
+	ContactTotalEmailsIcon,
+	EmailProviderSetupIcon,
+	PageTabs,
+	UserIcon,
+} from '@doublescale/components';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
@@ -293,7 +295,7 @@ const MailboxSettings: React.FC = () => {
 			tabs.push({
 				value: 'shared',
 				label: 'Shared Email',
-				icon: <Mail size={18} />,
+				icon: <ContactTotalEmailsIcon width={24} height={24} />,
 			});
 		}
 
@@ -305,14 +307,14 @@ const MailboxSettings: React.FC = () => {
 			tabs.push({
 				value: 'personal',
 				label: 'Personal Email',
-				icon: <UserCircle size={18} />,
+				icon: <UserIcon width={24} height={24} color="currentColor" />,
 			});
 
 			if (canManage) {
 				tabs.push({
 					value: 'provider-setup',
 					label: 'Email Provider Setup',
-					icon: <ShieldCheck size={18} />,
+					icon: <EmailProviderSetupIcon width={24} height={24} />,
 				});
 			}
 		}

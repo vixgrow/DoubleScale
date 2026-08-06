@@ -8,7 +8,7 @@ import { useState } from '@wordpress/element';
  * External dependencies
  */
 import { map } from 'lodash';
-import { Copy, CheckCheck } from 'lucide-react';
+import { CheckCheck } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@doublescale/components/ui/button';
 import SelectField from '../select-field';
+import { CopyIcon } from '@doublescale/components';
 
 const CopyButton: React.FC<{ value: string; label: string }> = ({ value, label }) => {
 	const [copied, setCopied] = useState(false);
@@ -46,7 +47,7 @@ const CopyButton: React.FC<{ value: string; label: string }> = ({ value, label }
 			{copied ? (
 				<CheckCheck className="w-4 h-4 text-green-600" />
 			) : (
-				<Copy className="w-4 h-4" />
+				<CopyIcon width={16} height={16} />
 			)}
 		</Button>
 	);

@@ -21,6 +21,7 @@ import {
 	TagField,
 	DynamicKeyValueInput,
 	TestButton,
+	CopyIcon,
 } from '@doublescale/components';
 import type { ReactSelectOptions } from '@doublescale/client';
 import ContactMappedFields from '../contact-mapped-fields';
@@ -184,7 +185,7 @@ const Field: React.FC<FieldProps> = ({
 						title={__('Click to copy', 'doublescale')}
 					>
 						{matches[i]}
-						<Copy className="h-3 w-3" />
+						<CopyIcon width={16} height={16} />
 					</span>
 				);
 			}

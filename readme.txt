@@ -271,8 +271,14 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 
 == Changelog ==
 = 1.3.2 = 04 Aug 2026
-- Add Projects automation registration surface (triggers/actions stubs, catalog, manager groups, gates, and builder category icons)
+- Add Projects automation triggers and actions (create/update/complete projects, owner/status/custom field changes, comments, due/overdue, and deal conversion)
+- Improve automation trigger/action picker: prune inactive integrations, clearer source categories (modules/messaging/webhooks), and better grouping UI
 - Bump automations manifest cache key so project automation stubs load cleanly
+- Rebuild support inbox with a DataTable for ticket management; polish mailboxes UI and Pro feature indicators
+- Improve support email notification HTML formatting
+- Show proposal totals (total/accepted/open) on the contact Sales tab
+- Fix invoice and proposal dialogs appearing under fullscreen shells (elevated z-index)
+- Improve Integrations catalog icons and visibility handling; remove unused Evolution API integration stubs
 
 = 1.3.1 = 03 Aug 2026
 - Add automation enrollment history endpoint and show prior-enrollment hints when running a workflow manually

@@ -28,6 +28,8 @@ import {
 import stripeImg from '@doublescale/assets/images/stripe/stripe.png';
 // @ts-ignore
 import paypalImg from '@doublescale/assets/images/paypal/paypal.png';
+// @ts-ignore
+import wooImg from '@doublescale/assets/images/woocoomerce/woo-icon.png';
 import { ArrowRight } from 'lucide-react';
 
 interface PaymentGatewaysSettingsProps {
@@ -38,6 +40,7 @@ interface PaymentGatewaysSettingsProps {
 const GATEWAY_IMAGES: Record<string, string> = {
 	stripe: stripeImg,
 	paypal: paypalImg,
+	woocommerce: wooImg,
 };
 
 const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {

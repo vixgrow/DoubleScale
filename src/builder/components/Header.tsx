@@ -28,6 +28,18 @@ interface HeaderProps {
 	autoSaveInterval?: number;
 	onTemplatesSaved?: () => void;
 	handleNavigate?: (href: string) => void;
+	/**
+	 * When set, shows "Send test email" in embedded (onSave) mode — e.g. the
+	 * automation "Send Email" action — using the current builder content plus
+	 * the subject/from values this returns. Called at send time so the values
+	 * are always current.
+	 */
+	getTestEmailContext?: () => {
+		subject?: string;
+		from_name?: string;
+		from_email?: string;
+		reply_to?: string;
+	};
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -37,6 +49,7 @@ const Header: React.FC<HeaderProps> = ({
 	autoSaveInterval = 10000,
 	onTemplatesSaved,
 	handleNavigate,
+	getTestEmailContext,
 }) => {
 	const dispatch = useDispatch();
 	const navigateFromRouter = useNavigate();
@@ -49,6 +62,14 @@ const Header: React.FC<HeaderProps> = ({
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = useSelect(
+		(select) => select(STORE_KEY).getGlobalSettings(),
+		[]
+	);
+	const buttonSettings = useSelect(
+		(select) => select(STORE_KEY).getAllButtonSettings(),
+		[]
+	);
 
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
 
@@ -236,6 +257,25 @@ const Header: React.FC<HeaderProps> = ({
 
 				{onSave && (
 					<>
+						{getTestEmailContext && (
+							<SendTestEmailPopover
+								disabled={isSaving || isBuilderEmpty}
+								getTestContent={() => ({
+									...getTestEmailContext(),
+									body: JSON.stringify({
+										type: 'builder',
+										value: {
+											sections,
+											globalSettings,
+											buttonSettings,
+										},
+									}),
+								})}
+								onBeforeSend={async () => ({
+									success: ensureNotEmptyOrNotify(),
+								})}
+							/>
+						)}
 						{onClose && (
 							<Button
 								variant="outline"

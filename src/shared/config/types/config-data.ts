@@ -358,6 +358,7 @@ export type TriggersGroup = {
 export type TriggerCategoryTab = {
 	label: string;
 	groups: TriggersGroup[] | Record<string, TriggersGroup>;
+	is_disabled?: boolean;
 };
 
 export type AutomationTriggerCategory = {

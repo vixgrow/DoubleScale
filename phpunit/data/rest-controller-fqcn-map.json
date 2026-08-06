@@ -66,6 +66,8 @@
     "RestPortalPaymentsController": "DoubleScale\\Modules\\Sales\\Rest\\Controllers\\RestPortalPaymentsController",
     "RestPortalProjectController": "DoubleScale\\Pro\\Modules\\Projects\\Rest\\Controllers\\RestPortalProjectController",
     "RestPortalTimelineController": "DoubleScale\\Modules\\Portal\\Rest\\Controllers\\RestPortalTimelineController",
+    "RestProductController": "DoubleScale\\Pro\\Modules\\ProductCatalog\\Rest\\Controllers\\RestProductController",
+    "RestProductGroupController": "DoubleScale\\Pro\\Modules\\ProductCatalog\\Rest\\Controllers\\RestProductGroupController",
     "RestProjectController": "DoubleScale\\Pro\\Modules\\Projects\\Rest\\Controllers\\RestProjectController",
     "RestProjectReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestProjectReportsController",
     "RestProjectStatusController": "DoubleScale\\Pro\\Modules\\Projects\\Rest\\Controllers\\RestProjectStatusController",

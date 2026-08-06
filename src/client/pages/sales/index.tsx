@@ -15,7 +15,12 @@ import { SalesIcon } from '@doublescale/components';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
 import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ContractsProGate, InvoicesProGate, PaymentsProGate } from './pro-gates';
+import {
+	ContractsProGate,
+	InvoicesProGate,
+	PaymentsProGate,
+	ProductsProGate,
+} from './pro-gates';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 
 const ProposalsList = lazy(() => import('./proposals'));
@@ -110,6 +115,11 @@ const contractPageDefaults = {
 	requiresModule: 'contracts' as const,
 };
 
+const productPageDefaults = {
+	...salesPageDefaults,
+	requiresModule: 'product_catalog' as const,
+};
+
 registerAdminPage('sales', {
 	path: 'sales',
 	component: wrap(RedirectToProposals),
@@ -117,6 +127,19 @@ registerAdminPage('sales', {
 	icon: <SalesIcon />,
 	...salesPageDefaults,
 });
+
+// Product routes — stub registrations the Pro plugin overrides via filter.
+// Registered outside the isSalesDocumentsReady() block: the Pro module opts out
+// of the documents release gate, since the picker is shared with credit notes.
+registerAdminPage('sales-products', {
+	path: 'sales/products',
+	component: () => <ProductsProGate />,
+	label: __('Products', 'doublescale'),
+	hidden: true,
+	requiresPro: true,
+	...productPageDefaults,
+});
+
 
 // Document routes (proposals/invoices) only exist once the feature is
 // released — see isSalesDocumentsReady(). Until then deep links fall through

@@ -92,10 +92,12 @@ class EmailTrackingHelper {
 		}
 
 		foreach ( $matches['href'] as $key => $href ) {
+			$href = html_entity_decode( $href, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
 			if ( false !== strpos( $href, 'doublescale-link-trigger' ) ) {
 				// Get query string
 				$query_string = wp_parse_url( $href, PHP_URL_QUERY );
-				parse_str( $query_string, $query_args );
+				parse_str( (string) $query_string, $query_args );
 
 				// Get link trigger hash
 				$hash = $query_args['doublescale-link-trigger'] ?? '';
@@ -117,7 +119,7 @@ class EmailTrackingHelper {
 
 				// Replace original link with click tracking link
 				$to_replace = $matches[0][ $key ];
-				$message    = str_replace( $to_replace, str_replace( $href, $link_trigger_url, $to_replace ), $message );
+				$message    = str_replace( $to_replace, str_replace( $matches['href'][ $key ], $link_trigger_url, $to_replace ), $message );
 				continue;
 			}
 
@@ -245,5 +247,66 @@ class EmailTrackingHelper {
 		$link_trigger_url = add_query_arg( $args, home_url() );
 
 		return $link_trigger_url;
+	}
+
+	/**
+	 * Append a per-recipient track-id placeholder to Link Trigger URLs in shared HTML.
+	 *
+	 * Bulk / curl-multi campaigns send one HTML body to many recipients, so the
+	 * concrete hash_key cannot be baked in at render time. Inject
+	 * `track-id={{tracking:hash_key}}` instead; mailers substitute it from
+	 * recipient_variables (same pattern as the open-tracking pixel).
+	 *
+	 * Skips URLs that already carry track-id or hash_key. Does not urlencode the
+	 * placeholder braces — add_query_arg would break merge-tag substitution.
+	 *
+	 * @since 1.3.3
+	 *
+	 * @param string $html Email HTML body.
+	 * @return string HTML with track-id placeholders on link-trigger hrefs.
+	 */
+	public static function inject_link_trigger_track_id_placeholder( $html ) {
+		if ( ! is_string( $html ) || '' === $html || false === strpos( $html, 'doublescale-link-trigger' ) ) {
+			return $html;
+		}
+
+		return preg_replace_callback(
+			'/<a\b[^>]*\bhref=([\'"])(?<href>[^\'"]*doublescale-link-trigger[^\'"]*)\1[^>]*>/i',
+			static function ( $matches ) {
+				$href = html_entity_decode( $matches['href'], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+				if ( false !== strpos( $href, 'track-id=' ) || false !== strpos( $href, 'hash_key=' ) ) {
+					return $matches[0];
+				}
+
+				$separator = false === strpos( $href, '?' ) ? '?' : '&';
+				$updated   = $href . $separator . 'track-id={{tracking:hash_key}}';
+
+				return str_replace( $matches['href'], $updated, $matches[0] );
+			},
+			$html
+		);
+	}
+
+	/**
+	 * Tracking vars every bulk/curl-multi recipient needs for open + link-trigger clicks.
+	 *
+	 * @since 1.3.3
+	 *
+	 * @param CommunicationTrackingModel $tracking Per-recipient tracking row.
+	 * @return array{hash_key: string, tracking_pixel: string, unsubscribe_url: string}
+	 */
+	public static function bulk_tracking_recipient_variables( CommunicationTrackingModel $tracking ) {
+		return array(
+			'hash_key'         => $tracking->hash_key,
+			'tracking_pixel'   => home_url( '?doublescale=email_open&hash_key=' . $tracking->hash_key ),
+			'unsubscribe_url'  => add_query_arg(
+				array(
+					'doublescale' => 'email_unsubscribe',
+					'hash_key'    => $tracking->hash_key,
+				),
+				home_url()
+			),
+		);
 	}
 }

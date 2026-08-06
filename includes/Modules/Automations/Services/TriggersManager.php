@@ -164,28 +164,75 @@ final class TriggersManager {
 	 */
 	public function set_sources() {
 		$this->sources = array(
-			'wp'          => array(
-				'label'  => __( 'WordPress', 'doublescale' ),
-				'groups' => array(
-					'user' => array(
-						'label'    => __( 'User', 'doublescale' ),
-						'triggers' => array(),
-					),
-				),
-			),
 			'modules'     => array(
-				'label' => __( 'DoubleScale Modules', 'doublescale' ),
+				'label' => __( 'DoubleScale', 'doublescale' ),
 				'tabs'  => array(
-					'crm'      => array(
-						'label'  => __( 'Contact', 'doublescale' ),
+					'booking'       => array(
+						'label'  => __( 'Booking', 'doublescale' ),
 						'groups' => array(
-							'contact' => array(
+							'booking' => array(
+								'label'       => __( 'Booking', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'booking' ),
+							),
+						),
+					),
+					'support'       => array(
+						'label'  => __( 'Helpdesk', 'doublescale' ),
+						'groups' => array(
+							'support' => array(
+								'label'       => __( 'Helpdesk', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'support' ),
+							),
+						),
+					),
+					'crm'           => array(
+						'label'  => __( 'Contacts', 'doublescale' ),
+						'groups' => array(
+							'contact'   => array(
 								'label'    => __( 'Contact', 'doublescale' ),
+								'triggers' => array(),
+							),
+							'messaging' => array(
+								'label'    => __( 'Messaging', 'doublescale' ),
+								'triggers' => array(),
+							),
+							'webhooks'  => array(
+								'label'    => __( 'Webhooks', 'doublescale' ),
 								'triggers' => array(),
 							),
 						),
 					),
-					'sales'    => array(
+					'link_triggers' => array(
+						'label'  => __( 'Link Triggers', 'doublescale' ),
+						'groups' => array(
+							'link_triggers' => array(
+								'label'    => __( 'Link Triggers', 'doublescale' ),
+								'triggers' => array(),
+							),
+						),
+					),
+					'tasks'         => array(
+						'label'  => __( 'Tasks', 'doublescale' ),
+						'groups' => array(
+							'task'    => array(
+								'label'       => __( 'Task', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
+							),
+							'subtask' => array(
+								'label'       => __( 'Subtask', 'doublescale' ),
+								'triggers'    => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
+							),
+						),
+					),
+					'sales'         => array(
 						'label'  => __( 'Sales', 'doublescale' ),
 						'groups' => array(
 							'sales'        => array(
@@ -211,46 +258,7 @@ final class TriggersManager {
 							),
 						),
 					),
-					'booking'  => array(
-						'label'  => __( 'Booking', 'doublescale' ),
-						'groups' => array(
-							'booking' => array(
-								'label'       => __( 'Booking', 'doublescale' ),
-								'triggers'    => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'booking' ),
-							),
-						),
-					),
-					'support'  => array(
-						'label'  => __( 'Helpdesk', 'doublescale' ),
-						'groups' => array(
-							'support' => array(
-								'label'       => __( 'Helpdesk', 'doublescale' ),
-								'triggers'    => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'support' ),
-							),
-						),
-					),
-					'tasks'    => array(
-						'label'  => __( 'Tasks', 'doublescale' ),
-						'groups' => array(
-							'task'    => array(
-								'label'       => __( 'Task', 'doublescale' ),
-								'triggers'    => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'tasks' ),
-							),
-							'subtask' => array(
-								'label'       => __( 'Subtask', 'doublescale' ),
-								'triggers'    => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'tasks' ),
-							),
-						),
-					),
-					'projects' => array(
+					'projects'      => array(
 						'label'  => __( 'Projects', 'doublescale' ),
 						'groups' => array(
 							'project'    => array(
@@ -266,33 +274,6 @@ final class TriggersManager {
 									|| ! doublescale_is_module_active( 'projects' ),
 							),
 						),
-					),
-				),
-			),
-			'messaging'     => array(
-				'label'  => __( 'Messaging', 'doublescale' ),
-				'groups' => array(
-					'messaging' => array(
-						'label'    => __( 'Messaging', 'doublescale' ),
-						'triggers' => array(),
-					),
-				),
-			),
-			'link_triggers' => array(
-				'label'  => __( 'Link Triggers', 'doublescale' ),
-				'groups' => array(
-					'link_triggers' => array(
-						'label'    => __( 'Link Triggers', 'doublescale' ),
-						'triggers' => array(),
-					),
-				),
-			),
-			'webhooks'      => array(
-				'label'  => __( 'Webhooks', 'doublescale' ),
-				'groups' => array(
-					'webhooks' => array(
-						'label'    => __( 'Webhooks', 'doublescale' ),
-						'triggers' => array(),
 					),
 				),
 			),
@@ -381,6 +362,15 @@ final class TriggersManager {
 						'label'       => __( 'LearnPress', 'doublescale' ),
 						'triggers'    => array(),
 						'is_disabled' => ! doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
+					),
+				),
+			),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'doublescale' ),
+				'groups' => array(
+					'user' => array(
+						'label'    => __( 'User', 'doublescale' ),
+						'triggers' => array(),
 					),
 				),
 			),
@@ -526,17 +516,13 @@ final class TriggersManager {
 	/**
 	 * Get sources
 	 *
-	 * "Pick one integration" categories are pruned to the vendor(s) actually
-	 * active on the site (and dropped entirely when none are) — see
-	 * {@see SourceTreePruner}.
+	 * Returns the full trigger tree, including inactive integrations marked
+	 * `is_disabled`, so the create-automation UI can list them as unavailable.
 	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return SourceTreePruner::prune(
-			$this->sources,
-			array( 'forms', 'ecommerce', 'lms', 'membership', 'video' )
-		);
+		return $this->sources;
 	}
 
 	/**
@@ -597,8 +583,29 @@ final class TriggersManager {
 		$tabbed_sources = array(
 			'ecommerce'  => array( 'woocommerce', 'edd', 'surecart' ),
 			'membership' => array( 'memberpress', 'pmpro' ),
-			'modules'    => array( 'crm', 'sales', 'booking', 'support', 'tasks', 'projects' ),
+			'modules'    => array(
+				'booking',
+				'support',
+				'crm',
+				'link_triggers',
+				'tasks',
+				'sales',
+				'projects',
+			),
 		);
+
+		// Messaging + webhooks live under DoubleScale → Contacts (not their own tabs).
+		if ( in_array( $trigger->source, array( 'messaging', 'webhooks' ), true ) ) {
+			if ( ! isset( $this->sources['modules']['tabs']['crm']['groups'][ $trigger->group ] ) ) {
+				$this->sources['modules']['tabs']['crm']['groups'][ $trigger->group ] = array(
+					'label'    => $trigger->group,
+					'triggers' => array(),
+				);
+			}
+			$this->sources['modules']['tabs']['crm']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+
+			return;
+		}
 
 		foreach ( $tabbed_sources as $category_key => $source_keys ) {
 			if ( in_array( $trigger->source, $source_keys, true ) ) {

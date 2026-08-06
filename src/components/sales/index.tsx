@@ -1,4 +1,11 @@
-export { LineItemsEditor, computeLineItemsTotals } from './line-items-editor';
+export {
+	LineItemsEditor,
+	computeLineItemsTotals,
+	computeAmount,
+	formatSalesAmount,
+} from './line-items-editor';
+export type { LineItemProductPickerContext } from './line-items-editor';
+export { getGlobalCurrency } from './sales-currency-utils';
 export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';

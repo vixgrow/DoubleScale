@@ -18,9 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * declare every vendor DoubleScale supports, each flagged `is_disabled` when
  * that vendor's plugin isn't installed/active. Left as-is, the builder would
  * show a wall of "not installed" tiles for plugins the site will never use.
- * This prunes each such category down to the vendor(s) actually active, and
- * drops the category entirely when none are — one clean choice instead of a
- * nag on every screen.
+ * This prunes each such category down to the vendor(s) actually active.
+ * Empty categories are kept so the sidebar still lists every top-level source.
  */
 final class SourceTreePruner {
 
@@ -46,11 +45,6 @@ final class SourceTreePruner {
 					}
 				);
 
-				if ( empty( $category['tabs'] ) ) {
-					unset( $sources[ $key ] );
-					continue;
-				}
-
 				$sources[ $key ] = $category;
 				continue;
 			}
@@ -62,11 +56,6 @@ final class SourceTreePruner {
 						return is_array( $group ) && empty( $group['is_disabled'] );
 					}
 				);
-
-				if ( empty( $category['groups'] ) ) {
-					unset( $sources[ $key ] );
-					continue;
-				}
 
 				$sources[ $key ] = $category;
 			}

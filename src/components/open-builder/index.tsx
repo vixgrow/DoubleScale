@@ -27,6 +27,17 @@ export interface OpenBuilderProps {
 		| 'link';
 	buttonClassName?: string;
 	builderKey?: string;
+	/**
+	 * When set, the builder shows "Send test email" (automation "Send Email"
+	 * action). Read lazily so the popover always sees the latest sibling
+	 * subject/from values.
+	 */
+	getTestEmailContext?: () => {
+		subject?: string;
+		from_name?: string;
+		from_email?: string;
+		reply_to?: string;
+	};
 }
 
 type BuilderMode = 'scratch' | 'templates' | null;
@@ -38,6 +49,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 	buttonVariant = 'default',
 	buttonClassName = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2',
 	builderKey = 'default',
+	getTestEmailContext,
 }) => {
 	const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 	const [showSelection, setShowSelection] = useState(false);
@@ -398,6 +410,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 								onClose={handleBuilderClose}
 								autoSave={false}
 								openTemplates={builderMode === 'templates'}
+								getTestEmailContext={getTestEmailContext}
 							/>
 						</div>,
 						document.body

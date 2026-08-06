@@ -20,22 +20,17 @@ import {
 	Field,
 	NoticeBanner,
 	GradientAutomationsIcon,
+	GradientLinkTriggersIcon,
 	HelpdeskIcon,
 	SalesIcon,
 	TaskDoneIcon,
 	ProjectsIcon,
 	LogoIcon,
-	LinkTriggersIcon,
 	ContactsIcon,
 	AccordingRightIcon,
 } from '@doublescale/components';
 import { IntegrationsIcon } from '@doublescale/components/icons/index';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogFooter,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import TriggersGroupRender from './triggers-group-render';
@@ -47,6 +42,32 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@doublescale/shared/ui/tabs';
+
+const sectionCardClassName =
+	'rounded-xl bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.08)]';
+
+const nestedSectionClassName =
+	'rounded-xl border border-border bg-[#F7F8FA] p-4 lg:p-6';
+
+const ActiveTriggerCategoryBorder = () => (
+	<svg
+		className="pointer-events-none absolute inset-0 h-full w-full text-primary"
+		aria-hidden="true"
+	>
+		<rect
+			x="1"
+			y="1"
+			width="calc(100% - 2px)"
+			height="calc(100% - 2px)"
+			rx="10"
+			ry="10"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1"
+			strokeDasharray="20 10"
+		/>
+	</svg>
+);
 
 const normalizeTriggerGroups = (
 	raw: TriggersGroup[] | Record<string, TriggersGroup> | undefined
@@ -69,6 +90,16 @@ const groupContainsTrigger = (
 			group?.triggers &&
 			Object.prototype.hasOwnProperty.call(group.triggers, triggerSlug)
 	);
+
+const TRIGGER_SIDEBAR_ORDER = [
+	'modules',
+	'ecommerce',
+	'lms',
+	'wp',
+	'membership',
+	'forms',
+	'video',
+] as const;
 
 interface CreateAutomationModalProps {
 	visible: boolean;
@@ -104,46 +135,113 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	removePortal = false,
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
-	const [selectedCategory, setSelectedCategory] = useState('wp');
+	const sidebarCategories = useMemo(
+		() =>
+			TRIGGER_SIDEBAR_ORDER.filter(
+				(key) => automationTriggers[key] !== undefined
+			).map((key) => [key, automationTriggers[key]] as const),
+		[automationTriggers]
+	);
+	const [selectedCategory, setSelectedCategory] = useState('modules');
 	const [selectedCategoryTab, setSelectedCategoryTab] =
-		useState('woocommerce');
+		useState('booking');
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const categoryData = {
 		modules: {
 			image: (
-				<span className="flex h-full w-full items-center justify-center rounded-md bg-[#1E3A8A]">
-					<LogoIcon width={16} height={16} />
+				<span className="flex h-full w-full items-center justify-center">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+					>
+						<path
+							d="M12.6127 17.6913C13.0821 16.7261 12.7581 15.982 12.0224 15.3498C11.8901 15.2358 11.7499 15.1303 11.6076 15.0289C10.9244 14.5416 10.2402 14.0559 9.55437 13.5722C8.0457 12.5094 7.36147 11.0238 7.37722 9.21215C7.39875 6.65008 9.21935 4.55747 11.7567 4.10482C13.5458 3.78607 15.1721 4.21142 16.6882 5.14823C17.2222 5.47854 17.7305 5.85032 18.273 6.21791C18.5208 5.71274 18.776 5.19287 19.058 4.61839C19.7134 6.23891 20.3498 7.81323 20.9999 9.42115C19.3164 9.17067 17.6701 8.92596 15.9808 8.67495C16.4298 8.29897 16.8489 7.94819 17.2731 7.5932C17.2605 7.5659 17.2569 7.53701 17.2406 7.52441C16.1977 6.7194 15.1128 6.00156 13.7963 5.70749C11.9552 5.29632 10.0028 6.21843 9.28499 7.85891C8.61283 9.39595 9.04816 11.1551 10.383 12.166C11.0935 12.7037 11.8429 13.1894 12.5675 13.7093C13.1683 14.1404 13.5532 14.7112 13.664 15.4574C13.7774 16.222 13.3069 17.2591 12.6137 17.6913H12.6127Z"
+							fill="#3A3A99"
+						/>
+						<path
+							d="M5.7905 18.2957C5.52899 18.8219 5.28008 19.3218 5.03065 19.8207C5.02382 19.8348 5.00492 19.8427 4.96763 19.8732C4.31543 18.3151 3.66638 16.7655 3 15.1733C4.68407 15.417 6.3235 15.6543 8.02805 15.9011C7.57697 16.2656 7.15739 16.6048 6.70631 16.9692C6.88958 17.1079 7.05814 17.2412 7.23196 17.3662C8.18033 18.0478 9.16861 18.6481 10.3323 18.897C12.0274 19.2598 13.5991 18.6775 14.5327 17.2265C15.5399 15.6617 15.2227 13.6001 13.6847 12.4443C12.9799 11.9144 12.2348 11.4381 11.5175 10.924C10.9362 10.5071 10.5376 9.96725 10.4205 9.23733C10.2682 8.28739 10.6563 7.58162 11.382 7.00977C11.1646 7.50023 11.1341 7.98439 11.3836 8.47171C11.6052 8.90493 11.9497 9.22526 12.3361 9.50095C13.0976 10.0439 13.8674 10.5759 14.6341 11.1115C15.8602 11.969 16.4704 13.1873 16.671 14.633C17.0029 17.0202 15.593 19.4562 13.0724 20.3069C11.6608 20.7832 10.2514 20.6813 8.86824 20.1426C7.82482 19.7361 6.88905 19.1506 6.01367 18.4611C5.94593 18.4075 5.87504 18.3577 5.79155 18.2957H5.7905Z"
+							fill="#3A3A99"
+						/>
+					</svg>
 				</span>
 			),
 			description: __(
-				'Trigger automations from CRM, Sales, Booking, Helpdesk, Tasks & Projects',
+				'Trigger automations from Booking, Helpdesk, Contacts, Link Triggers, Tasks, Sales & Projects',
 				'doublescale'
 			),
 		},
 		messaging: {
 			image: (
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-					<mask id="mask0_trigger_messaging" style={{ maskType: 'luminance' }} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+				>
+					<mask
+						id="mask0_trigger_messaging"
+						style={{ maskType: 'luminance' }}
+						maskUnits="userSpaceOnUse"
+						x="0"
+						y="0"
+						width="24"
+						height="24"
+					>
 						<path d="M24 0H0V24H24V0Z" fill="white" />
 					</mask>
 					<g mask="url(#mask0_trigger_messaging)">
-						<path opacity="0.4" d="M2 12.97V6.99C2 4.23 4.24 2 7 2H17C19.76 2 22 4.23 22 6.99V13.97C22 16.72 19.76 18.95 17 18.95H15.5C15.19 18.95 14.89 19.1 14.7 19.35L13.2 21.34C12.54 22.22 11.46 22.22 10.8 21.34L9.3 19.35C9.14 19.13 8.78 18.95 8.5 18.95H7C4.24 18.95 2 16.72 2 13.97V12.97Z" fill="url(#paint0_linear_trigger_messaging)" />
-						<path d="M17 8.75H7C6.59 8.75 6.25 8.41 6.25 8C6.25 7.59 6.59 7.25 7 7.25H17C17.41 7.25 17.75 7.59 17.75 8C17.75 8.41 17.41 8.75 17 8.75Z" fill="url(#paint1_linear_trigger_messaging)" />
-						<path d="M13 13.75H7C6.59 13.75 6.25 13.41 6.25 13C6.25 12.59 6.59 12.25 7 12.25H13C13.41 12.25 13.75 12.59 13.75 13C13.75 13.41 13.41 13.75 13 13.75Z" fill="url(#paint2_linear_trigger_messaging)" />
+						<path
+							opacity="0.4"
+							d="M2 12.97V6.99C2 4.23 4.24 2 7 2H17C19.76 2 22 4.23 22 6.99V13.97C22 16.72 19.76 18.95 17 18.95H15.5C15.19 18.95 14.89 19.1 14.7 19.35L13.2 21.34C12.54 22.22 11.46 22.22 10.8 21.34L9.3 19.35C9.14 19.13 8.78 18.95 8.5 18.95H7C4.24 18.95 2 16.72 2 13.97V12.97Z"
+							fill="url(#paint0_linear_trigger_messaging)"
+						/>
+						<path
+							d="M17 8.75H7C6.59 8.75 6.25 8.41 6.25 8C6.25 7.59 6.59 7.25 7 7.25H17C17.41 7.25 17.75 7.59 17.75 8C17.75 8.41 17.41 8.75 17 8.75Z"
+							fill="url(#paint1_linear_trigger_messaging)"
+						/>
+						<path
+							d="M13 13.75H7C6.59 13.75 6.25 13.41 6.25 13C6.25 12.59 6.59 12.25 7 12.25H13C13.41 12.25 13.75 12.59 13.75 13C13.75 13.41 13.41 13.75 13 13.75Z"
+							fill="url(#paint2_linear_trigger_messaging)"
+						/>
 					</g>
 					<defs>
-						<linearGradient id="paint0_linear_trigger_messaging" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+						<linearGradient
+							id="paint0_linear_trigger_messaging"
+							x1="2"
+							y1="12"
+							x2="22"
+							y2="12"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
-						<linearGradient id="paint1_linear_trigger_messaging" x1="6.25" y1="8" x2="17.75" y2="8" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+						<linearGradient
+							id="paint1_linear_trigger_messaging"
+							x1="6.25"
+							y1="8"
+							x2="17.75"
+							y2="8"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
-						<linearGradient id="paint2_linear_trigger_messaging" x1="6.25" y1="13" x2="13.75" y2="13" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+						<linearGradient
+							id="paint2_linear_trigger_messaging"
+							x1="6.25"
+							y1="13"
+							x2="13.75"
+							y2="13"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
@@ -154,7 +252,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 		},
 		link_triggers: {
-			image: <LinkTriggersIcon width={22} height={22} />,
+			image: <GradientLinkTriggersIcon width={24} height={24} />,
 			description: __(
 				'Trigger automations when a tracked link is clicked',
 				'doublescale'
@@ -162,17 +260,44 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		},
 		webhooks: {
 			image: (
-				<svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M12.7138 0.299678C13.1006 0.693913 13.0945 1.32705 12.7003 1.71383L3.67027 10.5496L3.67025 10.5496C3.29581 10.9242 2.93244 11.2878 2.61629 11.531C2.32406 11.7558 1.66669 12.1995 0.918191 11.9089C0.169688 11.6184 0.0495281 10.8729 0.0173097 10.5221C-0.0175475 10.1426 0.00693504 9.64756 0.0321635 9.13741L0.0799707 8.16636C0.104352 7.66885 0.128132 7.18359 0.199446 6.80691C0.266694 6.4517 0.457656 5.72247 1.20958 5.38096C1.97311 5.03417 2.59082 5.41251 2.86995 5.61629C3.16305 5.83025 3.4909 6.15828 3.82421 6.49177L4.39382 7.06138L11.2997 0.286174C11.6939 -0.100604 12.327 -0.0945579 12.7138 0.299678Z" fill="url(#paint0_linear_trigger_webhooks)" />
-					<path opacity="0.4" d="M5.28619 15.7003C4.89941 15.3061 4.90546 14.673 5.29969 14.2862L14.3297 5.45037L14.3298 5.45036C14.7042 5.07576 15.0676 4.71225 15.3837 4.46902C15.6759 4.24421 16.3333 3.80051 17.0818 4.09106C17.8303 4.38161 17.9505 5.12713 17.9827 5.47788C18.0175 5.85736 17.9931 6.35244 17.9678 6.86259L17.92 7.83364C17.8956 8.33115 17.8719 8.81641 17.8006 9.19309C17.7333 9.5483 17.5423 10.2775 16.7904 10.619C16.0269 10.9658 15.4092 10.5875 15.13 10.3837C14.837 10.1697 14.5091 9.84172 14.1758 9.50823L13.6062 8.93862L6.70034 15.7138C6.3061 16.1006 5.67297 16.0946 5.28619 15.7003Z" fill="url(#paint1_linear_trigger_webhooks)" />
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 18 16"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M12.7138 0.299678C13.1006 0.693913 13.0945 1.32705 12.7003 1.71383L3.67027 10.5496L3.67025 10.5496C3.29581 10.9242 2.93244 11.2878 2.61629 11.531C2.32406 11.7558 1.66669 12.1995 0.918191 11.9089C0.169688 11.6184 0.0495281 10.8729 0.0173097 10.5221C-0.0175475 10.1426 0.00693504 9.64756 0.0321635 9.13741L0.0799707 8.16636C0.104352 7.66885 0.128132 7.18359 0.199446 6.80691C0.266694 6.4517 0.457656 5.72247 1.20958 5.38096C1.97311 5.03417 2.59082 5.41251 2.86995 5.61629C3.16305 5.83025 3.4909 6.15828 3.82421 6.49177L4.39382 7.06138L11.2997 0.286174C11.6939 -0.100604 12.327 -0.0945579 12.7138 0.299678Z"
+						fill="url(#paint0_linear_trigger_webhooks)"
+					/>
+					<path
+						opacity="0.4"
+						d="M5.28619 15.7003C4.89941 15.3061 4.90546 14.673 5.29969 14.2862L14.3297 5.45037L14.3298 5.45036C14.7042 5.07576 15.0676 4.71225 15.3837 4.46902C15.6759 4.24421 16.3333 3.80051 17.0818 4.09106C17.8303 4.38161 17.9505 5.12713 17.9827 5.47788C18.0175 5.85736 17.9931 6.35244 17.9678 6.86259L17.92 7.83364C17.8956 8.33115 17.8719 8.81641 17.8006 9.19309C17.7333 9.5483 17.5423 10.2775 16.7904 10.619C16.0269 10.9658 15.4092 10.5875 15.13 10.3837C14.837 10.1697 14.5091 9.84172 14.1758 9.50823L13.6062 8.93862L6.70034 15.7138C6.3061 16.1006 5.67297 16.0946 5.28619 15.7003Z"
+						fill="url(#paint1_linear_trigger_webhooks)"
+					/>
 					<defs>
-						<linearGradient id="paint0_linear_trigger_webhooks" x1="0" y1="6.00225" x2="13" y2="6.00225" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+						<linearGradient
+							id="paint0_linear_trigger_webhooks"
+							x1="0"
+							y1="6.00225"
+							x2="13"
+							y2="6.00225"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
-						<linearGradient id="paint1_linear_trigger_webhooks" x1="18" y1="9.99775" x2="5.00001" y2="9.99775" gradientUnits="userSpaceOnUse">
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+						<linearGradient
+							id="paint1_linear_trigger_webhooks"
+							x1="18"
+							y1="9.99775"
+							x2="5.00001"
+							y2="9.99775"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
@@ -308,36 +433,28 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 		},
 		support: {
-			image: (
-				<HelpdeskIcon width={22} height={22} color="#1E3A8A" />
-			),
+			image: <HelpdeskIcon width={24} height={24} color="#0D9DFC" />,
 			description: __(
 				'Trigger automations based on helpdesk ticket events',
 				'doublescale'
 			),
 		},
 		tasks: {
-			image: (
-				<TaskDoneIcon width={22} height={22} color="#1E3A8A" />
-			),
+			image: <TaskDoneIcon width={22} height={22} color="#1E3A8A" />,
 			description: __(
 				'Trigger automations based on task and subtask events',
 				'doublescale'
 			),
 		},
 		projects: {
-			image: (
-				<ProjectsIcon width={22} height={22} color="#1E3A8A" />
-			),
+			image: <ProjectsIcon width={22} height={22} color="#0D9DFC" />,
 			description: __(
 				'Trigger automations based on project lifecycle events',
 				'doublescale'
 			),
 		},
 		sales: {
-			image: (
-				<SalesIcon width={22} height={22} color="#1E3A8A" />
-			),
+			image: <SalesIcon width={22} height={22} color="#1E3A8A" />,
 			description: __(
 				'Trigger automations based on sales document and deal events',
 				'doublescale'
@@ -346,7 +463,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		crm: {
 			image: <ContactsIcon width={22} height={22} color="#1E3A8A" />,
 			description: __(
-				'Trigger automations from contact events',
+				'Trigger automations from contact, messaging and webhook events',
 				'doublescale'
 			),
 		},
@@ -385,8 +502,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="12"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint1_linear_forms"
@@ -396,8 +513,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="5.41805"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint2_linear_forms"
@@ -407,8 +524,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="13"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint3_linear_forms"
@@ -418,8 +535,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="17"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
@@ -455,8 +572,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="8"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
+							<stop offset="0.610577" stop-color="#3a3a99" />
+							<stop offset="1" stop-color="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint1_linear_3934_36338"
@@ -466,8 +583,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="17.647"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stop-color="#1E3A8A" />
-							<stop offset="1" stop-color="#3B82F6" />
+							<stop offset="0.610577" stop-color="#3a3a99" />
+							<stop offset="1" stop-color="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
@@ -480,20 +597,90 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		ecommerce: {
 			image: (
 				<svg
-					width="68"
-					height="40"
-					viewBox="0 0 68 40"
-					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
 				>
 					<path
-						d="M6.23651 0H60.9343C64.396 0 67.1982 2.80211 67.1982 6.26387V27.1428C67.1982 30.6046 64.396 33.4067 60.9343 33.4067H41.319L44.0114 40L32.1706 33.4067H6.26381C2.80231 33.4067 0.000201614 30.6046 0.000201614 27.1428V6.26387C-0.0273602 2.82968 2.77449 0 6.23651 0Z"
-						fill="#9B5C8F"
+						d="M14.8251 20.0453C15.5859 20.0453 16.201 19.4302 16.201 18.6694C16.201 17.9086 15.5859 17.2935 14.8251 17.2935C14.0643 17.2935 13.4492 17.9086 13.4492 18.6694C13.4492 19.4302 14.0643 20.0453 14.8251 20.0453Z"
+						fill="url(#paint0_linear_2651_86569)"
 					/>
 					<path
-						d="M3.82559 5.71149C4.20805 5.19228 4.78159 4.91928 5.5465 4.86469C6.93981 4.75523 7.73202 5.41067 7.92311 6.83128C8.76991 12.5405 9.69861 17.3756 10.6819 21.3364L16.6641 9.9455C17.2106 8.90734 17.8936 8.36109 18.7131 8.30649C19.9151 8.2246 20.6524 8.98924 20.953 10.6009C21.636 14.2338 22.5101 17.3208 23.548 19.9431C24.2583 13.0049 25.4603 8.00594 27.1539 4.91928C27.5634 4.15438 28.1645 3.77193 28.9567 3.71707C29.5851 3.66273 30.1586 3.85383 30.6776 4.26358C31.1965 4.67333 31.4698 5.19228 31.5244 5.82069C31.5517 6.31234 31.4698 6.72209 31.2514 7.13184C30.1859 9.0987 29.3116 12.404 28.6015 16.9929C27.9188 21.4456 27.6728 24.915 27.8366 27.4008C27.8915 28.0832 27.782 28.6844 27.509 29.2036C27.1809 29.8044 26.6895 30.1323 26.0611 30.1869C25.3508 30.2415 24.6135 29.9139 23.9032 29.1763C21.3628 26.581 19.3413 22.7021 17.8663 17.5394C16.0906 21.0358 14.7794 23.6581 13.9326 25.4063C12.3209 28.4933 10.9552 30.0777 9.80781 30.1596C9.07021 30.2142 8.44206 29.5858 7.89581 28.2749C6.50276 24.6963 5.00025 17.7851 3.38881 7.54159C3.27935 6.83128 3.44314 6.20288 3.82559 5.71149ZM62.5285 10.0001C61.5452 8.2792 60.0973 7.2413 58.158 6.83128C57.6388 6.72209 57.1474 6.66749 56.6828 6.66749C54.0605 6.66749 51.9298 8.03324 50.2635 10.765C48.8429 13.0868 48.1328 15.6545 48.1328 18.4681C48.1328 20.5715 48.5699 22.3743 49.444 23.8768C50.4273 25.5977 51.8752 26.6356 53.8145 27.0453C54.3335 27.1548 54.8251 27.2094 55.2897 27.2094C57.9393 27.2094 60.07 25.8437 61.709 23.1119C63.1293 20.7626 63.8396 18.1949 63.8396 15.3815C63.8669 13.2508 63.4026 11.475 62.5285 10.0001ZM59.0867 17.5667C58.7042 19.3695 58.0212 20.708 57.0104 21.6094C56.2184 22.3197 55.4808 22.62 54.7981 22.4835C54.1424 22.347 53.5958 21.7734 53.1864 20.708C52.8582 19.8612 52.6947 19.0144 52.6947 18.2222C52.6947 17.5394 52.7493 16.8564 52.8858 16.2283C53.1318 15.1082 53.5961 14.0155 54.3335 12.9776C55.2351 11.6388 56.1911 11.0929 57.1744 11.284C57.8301 11.4204 58.3766 11.9943 58.7861 13.0595C59.114 13.9063 59.2778 14.7531 59.2778 15.5453C59.2778 16.2556 59.2232 16.9386 59.0867 17.5667ZM45.4284 10.0001C44.4451 8.2792 42.9699 7.2413 41.0579 6.83128C40.5389 6.72209 40.0473 6.66749 39.5827 6.66749C36.9603 6.66749 34.8297 8.03324 33.1634 10.765C31.743 13.0868 31.0327 15.6545 31.0327 18.4681C31.0327 20.5715 31.4698 22.3743 32.3439 23.8768C33.3272 25.5977 34.7751 26.6356 36.7144 27.0453C37.2336 27.1548 37.725 27.2094 38.1896 27.2094C40.8392 27.2094 42.9699 25.8437 44.6089 23.1119C46.0295 20.7626 46.7395 18.1949 46.7395 15.3815C46.7395 13.2508 46.3025 11.475 45.4284 10.0001ZM41.9593 17.5667C41.5768 19.3695 40.8938 20.708 39.8832 21.6094C39.091 22.3197 38.3534 22.62 37.6704 22.4835C37.0149 22.347 36.4687 21.7734 36.0587 20.708C35.7311 19.8612 35.5673 19.0144 35.5673 18.2222C35.5673 17.5394 35.6219 16.8564 35.7584 16.2283C36.0043 15.1082 36.4687 14.0155 37.2063 12.9776C38.1077 11.6388 39.0637 11.0929 40.047 11.284C40.7027 11.4204 41.2492 11.9943 41.6587 13.0595C41.9868 13.9063 42.1504 14.7531 42.1504 15.5453C42.1779 16.2556 42.0958 16.9386 41.9593 17.5667Z"
-						fill="white"
+						d="M8.51946 20.0453C9.28025 20.0453 9.89536 19.4302 9.89536 18.6694C9.89536 17.9086 9.28025 17.2935 8.51946 17.2935C7.75866 17.2935 7.14355 17.9086 7.14355 18.6694C7.14355 19.4302 7.75866 20.0453 8.51946 20.0453Z"
+						fill="url(#paint1_linear_2651_86569)"
 					/>
+					<path
+						opacity="0.4"
+						d="M18.8633 9.21618L18.5477 13.5624C18.4587 14.7441 17.4227 15.7153 16.241 15.7153L7.47572 15.7153C6.1241 15.7153 5.06385 14.5579 5.17716 13.2144L5.74371 6.53722L5.83274 5.42031C5.84892 5.16941 5.76799 4.9347 5.60612 4.75664C5.43615 4.57858 5.20953 4.48146 4.96673 4.48146H3.59082C3.26708 4.48146 3 4.21437 3 3.89063C3 3.56689 3.26708 3.2998 3.59082 3.2998L4.96673 3.2998C5.53327 3.2998 6.08364 3.54261 6.48022 3.95538C6.72303 4.23866 6.8768 4.5624 6.95774 4.91042L15.0756 4.91042C14.7356 5.09657 14.5252 5.4365 14.5252 5.84118C14.5252 6.33488 14.8408 6.73956 15.3022 6.86906L16.0953 7.08758C16.5 7.20089 16.8076 7.50845 16.9209 7.91312L17.1313 8.6982C17.2608 9.18381 17.6655 9.49136 18.1592 9.49136C18.4344 9.49136 18.6772 9.38615 18.8633 9.21618Z"
+						fill="url(#paint2_linear_2651_86569)"
+					/>
+					<path
+						d="M15.4067 9.16799C15.4067 9.52411 15.1153 9.81547 14.7592 9.81547H9.32034C8.96422 9.81547 8.67285 9.52411 8.67285 9.16799C8.67285 8.81187 8.96422 8.52051 9.32034 8.52051L14.7592 8.52051C15.1153 8.52051 15.4067 8.81187 15.4067 9.16799Z"
+						fill="url(#paint3_linear_2651_86569)"
+					/>
+					<path
+						d="M21.0002 5.85702C21.0002 5.91368 20.9678 6.04317 20.814 6.09173L20.0208 6.31026C19.3329 6.49641 18.8149 7.0144 18.6288 7.70235L18.4183 8.47933C18.3698 8.65739 18.2322 8.67357 18.1674 8.67357C18.1027 8.67357 17.9651 8.65739 17.9165 8.47933L17.7061 7.69425C17.5199 7.0144 16.9939 6.49641 16.314 6.31026L15.5289 6.09983C15.359 6.05127 15.3428 5.90558 15.3428 5.84893C15.3428 5.78418 15.359 5.63849 15.5289 5.58993L16.3221 5.3795C17.002 5.18526 17.5199 4.66727 17.7061 3.98741L17.9327 3.16187C17.9894 3.02428 18.1189 3 18.1674 3C18.216 3 18.3536 3.01619 18.4021 3.14568L18.6288 3.97932C18.8149 4.65918 19.341 5.17716 20.0208 5.37141L20.8302 5.59803C20.9921 5.66278 21.0002 5.80846 21.0002 5.85702Z"
+						fill="url(#paint4_linear_2651_86569)"
+					/>
+					<defs>
+						<linearGradient
+							id="paint0_linear_2651_86569"
+							x1="13.4492"
+							y1="18.6694"
+							x2="16.201"
+							y2="18.6694"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop stop-color="#3A3A99" />
+							<stop offset="1" stop-color="#1B1145" />
+						</linearGradient>
+						<linearGradient
+							id="paint1_linear_2651_86569"
+							x1="7.14355"
+							y1="18.6694"
+							x2="9.89536"
+							y2="18.6694"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop stop-color="#3A3A99" />
+							<stop offset="1" stop-color="#1B1145" />
+						</linearGradient>
+						<linearGradient
+							id="paint2_linear_2651_86569"
+							x1="3"
+							y1="9.50755"
+							x2="18.8633"
+							y2="9.50755"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop stop-color="#3A3A99" />
+							<stop offset="1" stop-color="#1B1145" />
+						</linearGradient>
+						<linearGradient
+							id="paint3_linear_2651_86569"
+							x1="8.67285"
+							y1="9.16799"
+							x2="15.4067"
+							y2="9.16799"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop stop-color="#3A3A99" />
+							<stop offset="1" stop-color="#1B1145" />
+						</linearGradient>
+						<linearGradient
+							id="paint4_linear_2651_86569"
+							x1="15.3428"
+							y1="5.83679"
+							x2="21.0002"
+							y2="5.83679"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop stop-color="#3A3A99" />
+							<stop offset="1" stop-color="#1B1145" />
+						</linearGradient>
+					</defs>
 				</svg>
 			),
 			description: __('E-commerce and order automation', 'doublescale'),
@@ -501,15 +688,15 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		wp: {
 			image: (
 				<svg
-					width="40"
-					height="40"
-					viewBox="0 0 40 40"
-					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
 				>
 					<path
-						d="M20.0003 39.9994C8.91686 39.9994 -0.0830149 31.166 0.000577643 19.9997C0.0841702 8.83347 8.50046 0 20.0003 0C31.5009 0 40 8.99987 40 19.9997C40 30.9996 31.0837 39.9994 20.0003 39.9994ZM25.9166 36.9159L20.2503 21.6661L14.9168 37.2495C18.8339 38.1666 21.5003 38.4159 25.9166 36.9159ZM12.084 36.0831L3.58412 12.8334C2.41695 15.3334 2.16773 17.4169 2.00055 19.9997C2.08414 26.8324 5.9169 33.0823 12.084 36.0831ZM37.9172 19.9997C38 15.5834 36.0008 12.0834 35.8337 11.5834C36.0008 15.0006 35.5001 16.7498 34.9173 18.6669L29.0837 35.4167C36.4172 30.9996 37.8328 24.4161 38 19.9997H37.9172ZM19.4175 19.2497L16.5839 11.4998L14.5004 11.3334C13.6676 10.7498 14.1668 9.83345 14.7504 9.83345C18.5003 10.0834 20.5831 10.0834 24.3338 9.83345C25.251 9.83345 25.5002 11.167 24.4166 11.3334L22.4167 11.4998L28.9158 30.666L31.9986 20.1661C32.1657 15.5834 30.915 15.0834 29.2486 11.7498C27.915 9.16628 29.3322 6.66631 31.9157 6.5835C29.8314 4.58353 25.5822 2.08356 19.9987 1.99997C14.4152 1.91638 8.49889 4.74993 4.99894 10.0834L11.166 9.91705C11.916 10.2506 11.5824 11.3334 11.166 11.417L8.99967 11.5834L15.4996 31.0832L19.4175 19.2497Z"
-						fill="#21759B"
+						d="M4.27125 12C4.27125 15.0656 6.03187 17.7066 8.6025 18.9457L4.95638 8.86969C4.53281 9.84788 4.27125 10.8919 4.27125 12ZM17.2172 11.6085C17.2172 10.6635 16.8583 9.97725 16.5647 9.489C16.1732 8.8365 15.8149 8.31506 15.8149 7.66313C15.8149 6.94594 16.3695 6.29344 17.1199 6.29344H17.2177C15.8475 5.02163 14.0216 4.27125 12 4.27125C10.7209 4.28257 9.46406 4.6064 8.33877 5.21454C7.21348 5.82267 6.25391 6.69667 5.54362 7.76044H6.033C6.84863 7.76044 8.08725 7.66256 8.08725 7.66256C8.51137 7.62994 8.544 8.24925 8.1525 8.31506C8.1525 8.31506 7.72837 8.38031 7.27219 8.38031L10.0768 16.7278L11.7722 11.6732L10.5656 8.37975L9.75 8.31562C9.32587 8.283 9.39112 7.66313 9.78262 7.66313C9.78262 7.66313 11.0539 7.761 11.8043 7.761C12.6199 7.761 13.8585 7.66313 13.8585 7.66313C14.2826 7.6305 14.3153 8.24981 13.9237 8.31562C13.9237 8.31562 13.4996 8.38088 13.0434 8.38088L15.8475 16.6969L16.635 14.1206C16.9613 13.0446 17.2217 12.2948 17.2217 11.6096L17.2172 11.6085ZM12.1305 12.6846L9.81525 19.4025C10.4998 19.5982 11.2496 19.7288 12 19.7288C12.9129 19.7288 13.7606 19.56 14.5763 19.3046C14.5436 19.272 14.5436 19.2394 14.511 19.2068L12.1305 12.6846ZM18.7826 8.31562L18.8479 9.10313C18.8479 9.89062 18.7174 10.7664 18.2612 11.8751L15.9133 18.6904C18.1959 17.3533 19.7608 14.8749 19.7608 12.0056C19.7282 10.6686 19.3693 9.42938 18.7821 8.32125L18.7826 8.31562ZM12 3C7.04325 3 3 7.04325 3 12C3 16.9567 7.04325 21 12 21C16.9567 21 21 16.9567 21 12C21 7.04325 16.9567 3 12 3ZM12 20.6085C7.27163 20.6085 3.42413 16.761 3.42413 12C3.4277 9.72663 4.33237 7.5474 5.93988 5.93988C7.5474 4.33237 9.72663 3.4277 12 3.42413C14.2734 3.4277 16.4526 4.33237 18.0601 5.93988C19.6676 7.5474 20.5723 9.72663 20.5759 12C20.5759 16.761 16.7284 20.6085 12 20.6085Z"
+						fill="#00749A"
 					/>
 				</svg>
 			),
@@ -557,11 +744,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="12"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint1_linear_membership_trigger"
@@ -571,11 +755,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="9"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint2_linear_membership_trigger"
@@ -585,11 +766,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="9"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint3_linear_membership_trigger"
@@ -599,11 +777,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="15"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint4_linear_membership_trigger"
@@ -613,16 +788,16 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="18"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop
-								offset="0.610577"
-								stopColor="#1E3A8A"
-							/>
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
 			),
-			description: __('Membership and subscription automation', 'doublescale'),
+			description: __(
+				'Membership and subscription automation',
+				'doublescale'
+			),
 		},
 		video: {
 			image: (
@@ -651,8 +826,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="12"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 						<linearGradient
 							id="paint1_linear_video"
@@ -662,8 +837,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							y2="12"
 							gradientUnits="userSpaceOnUse"
 						>
-							<stop offset="0.610577" stopColor="#1E3A8A" />
-							<stop offset="1" stopColor="#3B82F6" />
+							<stop offset="0.610577" stopColor="#3a3a99" />
+							<stop offset="1" stopColor="#1B1145" />
 						</linearGradient>
 					</defs>
 				</svg>
@@ -686,6 +861,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			key,
 			label: tab.label,
 			groups: normalizeTriggerGroups(tab.groups),
+			is_disabled: !!tab.is_disabled,
 		}));
 	}, [currentCategoryData]);
 
@@ -745,9 +921,9 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				hideCloseButton
 			>
 				{/* Sticky header — breadcrumb, matches the automation editor's top bar */}
-				<DialogHeader className="shrink-0 border-b border-neutral-200 bg-white px-4 py-3 sm:px-8">
+				<DialogHeader className="shrink-0 space-y-0 border-b border-[#E8ECF0] bg-white px-4 py-4 lg:px-6">
 					<nav
-						className="mx-auto flex w-full max-w-5xl min-w-0 items-center justify-between gap-2"
+						className="flex w-full min-w-0 items-center justify-between gap-2"
 						aria-label={__('Breadcrumb', 'doublescale')}
 					>
 						<div className="flex min-w-0 items-center gap-1.5">
@@ -780,9 +956,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					</nav>
 				</DialogHeader>
 
-				{/* Scrollable body — light gray page surface, white content cards */}
-				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
-					<div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				{/* Scrollable body — full-width card like task details */}
+				<div className="min-h-0 flex-1 overflow-y-auto bg-[#F7F8FA] px-4 py-4 lg:px-6 lg:py-6">
+					<div
+						className={`${sectionCardClassName} flex w-full flex-col gap-4 p-4 lg:gap-6 lg:p-6`}
+					>
 						{error && (
 							<NoticeBanner
 								ref={noticeBannerRef}
@@ -791,247 +969,247 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							/>
 						)}
 
-						{/* Card 1 — Automation Name */}
-						<div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-8">
-							<div className="flex flex-col gap-6">
-								<div>
-									<h2 className="text-lg font-semibold text-foreground">
-										{isEditAutomation
-											? __('Edit Automation', 'doublescale')
-											: __('Create Automation', 'doublescale')}
-									</h2>
-									<p className="mt-1 text-sm text-muted-foreground">
-										{__(
-											'Set up and customize a new automation workflow to streamline your tasks and improve efficiency.',
-											'doublescale'
-										)}
-									</p>
-								</div>
-
-								<div className="min-w-0 flex flex-col gap-2">
-									<Label className="text-base font-normal text-foreground !p-0">
-										{__('Automation Name', 'doublescale')}
-										<span className="text-destructive">*</span>
-									</Label>
-									<Input
-										value={automation.name}
-										onChange={(e) =>
-											onAutomationChange({
-												...automation,
-												name: e.target.value,
-											})
-										}
-									/>
-								</div>
+						{/* Create Automation */}
+						<section
+							className={`${nestedSectionClassName} flex flex-col gap-4`}
+						>
+							<div>
+								<h2 className="text-base font-semibold text-foreground sm:text-lg">
+									{isEditAutomation
+										? __('Edit Automation', 'doublescale')
+										: __(
+												'Create Automation',
+												'doublescale'
+											)}
+								</h2>
+								<p className="mt-1 text-sm text-muted-foreground">
+									{__(
+										'Set up and customize a new automation workflow to streamline your tasks and improve efficiency.',
+										'doublescale'
+									)}
+								</p>
 							</div>
-						</div>
 
-						{/* Card 2 — Choose Trigger */}
-						<div className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-8">
-							<div className="doublescale-fields doublescale-automation-modal-fields flex flex-col gap-6">
-							<div className="doublescale-field min-w-0 flex flex-col gap-3">
-								<div className="doublescale-field-label flex items-center gap-1 text-lg font-semibold text-foreground">
-									{__('Choose Trigger', 'doublescale')}
-								</div>
+							<div className="min-w-0 flex flex-col gap-2">
+								<Label className="text-sm font-normal text-foreground !p-0 sm:text-base">
+									{__('Automation Name', 'doublescale')}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Input
+									value={automation.name}
+									onChange={(e) =>
+										onAutomationChange({
+											...automation,
+											name: e.target.value,
+										})
+									}
+									placeholder={__(
+										'Automation Name',
+										'doublescale'
+									)}
+									className="bg-white"
+								/>
+							</div>
+						</section>
 
-								<div className="grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr]">
-									{/* Left: vertical list of horizontal trigger tabs */}
-									<div
-										role="tablist"
-										aria-orientation="vertical"
-										aria-label={__(
-											'Trigger category',
-											'doublescale'
-										)}
-										className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
-									>
-										{map(
-											automationTriggers,
-											(trigger, key) => {
-												const categoryKey = String(key);
-												const isActive =
-													selectedCategory ===
-													categoryKey;
-												const meta =
-													categoryData[categoryKey];
-												return (
-													<button
-														key={categoryKey}
-														type="button"
-														role="tab"
-														aria-selected={isActive}
-														onClick={() => {
-															setSelectedCategory(
+						{/* Choose Trigger */}
+						<section
+							className={`${nestedSectionClassName} doublescale-fields doublescale-automation-modal-fields flex min-w-0 flex-col gap-4`}
+						>
+							<h2 className="text-base font-semibold text-foreground sm:text-lg">
+								{__('Choose Trigger', 'doublescale')}
+							</h2>
+
+							<div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr] lg:gap-6">
+								{/* Left: vertical list of horizontal trigger tabs */}
+								<div
+									role="tablist"
+									aria-orientation="vertical"
+									aria-label={__(
+										'Trigger category',
+										'doublescale'
+									)}
+									className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
+								>
+									{map(
+										sidebarCategories,
+										([categoryKey, trigger]) => {
+											const isActive =
+												selectedCategory ===
+												categoryKey;
+											const meta =
+												categoryData[categoryKey];
+											return (
+												<button
+													key={categoryKey}
+													type="button"
+													role="tab"
+													aria-selected={isActive}
+													onClick={() => {
+														setSelectedCategory(
+															categoryKey
+														);
+														const tabs =
+															automationTriggers[
 																categoryKey
-															);
-															const tabs =
-																automationTriggers[
-																	categoryKey
-																]?.tabs;
-															if (
-																tabs &&
-																typeof tabs ===
-																	'object'
-															) {
-																const firstTab =
-																	Object.keys(
-																		tabs
-																	)[0];
-																if (firstTab) {
-																	setSelectedCategoryTab(
-																		firstTab
-																	);
-																}
+															]?.tabs;
+														if (
+															tabs &&
+															typeof tabs ===
+																'object'
+														) {
+															const firstTab =
+																Object.keys(
+																	tabs
+																)[0];
+															if (firstTab) {
+																setSelectedCategoryTab(
+																	firstTab
+																);
 															}
-														}}
+														}
+													}}
+													className={cn(
+														'relative flex w-full cursor-pointer items-center gap-3 rounded-xl p-3 text-left transition-colors',
+														'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
+														isActive
+															? 'border-1 border-transparent bg-[#EEEEFF]'
+															: 'border-1 border-transparent hover:bg-neutral-50'
+													)}
+												>
+													{isActive ? (
+														<ActiveTriggerCategoryBorder />
+													) : null}
+													<span className="relative flex shrink-0 items-center justify-center overflow-hidden bg-transparent [&_svg]:max-h-[28px] [&_svg]:max-w-[28px]">
+														{meta?.image ?? (
+															<IntegrationsIcon
+																width={22}
+																height={22}
+															/>
+														)}
+													</span>
+													<span
 														className={cn(
-															'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors',
-															'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/20',
-															isActive
-																? 'border-2 border-dashed border-brandPrimary/60 bg-brandPrimary/5'
-																: 'border-2 border-transparent hover:bg-neutral-50'
+															'relative min-w-0 flex-1 truncate text-sm font-medium text-foreground'
 														)}
 													>
-														<span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white [&_svg]:max-h-[28px] [&_svg]:max-w-[28px]">
-															{meta?.image ?? (
-																<IntegrationsIcon
-																	width={22}
-																	height={22}
-																/>
-															)}
-														</span>
-														<span
-															className={cn(
-																'min-w-0 flex-1 truncate text-sm font-medium',
-																isActive
-																	? 'text-brandPrimary'
-																	: 'text-neutral-800'
-															)}
-														>
-															{trigger.label}
-														</span>
-													</button>
-												);
-											}
-										)}
-									</div>
+														{trigger.label}
+													</span>
+												</button>
+											);
+										}
+									)}
+								</div>
 
-									{/* Right: trigger groups for selected category */}
-									<div
-										role="tabpanel"
-										aria-label={__(
-											'Triggers',
-											'doublescale'
-										)}
-										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
-									>
-										{categoryTabs.length > 0 ? (
-											<Tabs
-												value={selectedCategoryTab}
-												onValueChange={
-													setSelectedCategoryTab
-												}
-												className="flex flex-col gap-4"
-											>
-												<TabsList className="flex h-auto w-full flex-wrap justify-start gap-1.5 rounded-lg bg-transparent p-0">
-													{categoryTabs.map(
-														(tab) => (
-															<TabsTrigger
-																key={tab.key}
-																value={tab.key}
-																className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs text-neutral-700 shadow-none data-[state=active]:border-brandPrimary/30 data-[state=active]:bg-brandPrimary/10 data-[state=active]:text-brandPrimary data-[state=active]:shadow-none sm:text-sm"
-															>
-																{categoryData[
-																	tab.key as keyof typeof categoryData
-																]?.image && (
-																	<span className="flex h-4 w-4 shrink-0 items-center justify-center [&_svg]:max-h-4 [&_svg]:max-w-4">
-																		{
-																			categoryData[
-																				tab.key as keyof typeof categoryData
-																			]
-																				?.image
-																		}
-																	</span>
-																)}
-																<span className="truncate">
-																	{tab.label}
-																</span>
-															</TabsTrigger>
-														)
-													)}
-												</TabsList>
+								{/* Right: trigger groups for selected category */}
+								<div
+									role="tabpanel"
+									aria-label={__('Triggers', 'doublescale')}
+									className="min-w-0 rounded-xl border border-border bg-white p-4 max-h-[calc(100dvh-460px)] min-h-[320px] overflow-y-auto"
+								>
+									{categoryTabs.length > 0 ? (
+										<Tabs
+											value={selectedCategoryTab}
+											onValueChange={
+												setSelectedCategoryTab
+											}
+											className="flex flex-col gap-4"
+										>
+											<TabsList className="flex h-auto w-full flex-wrap justify-start gap-3 rounded-lg bg-transparent p-0">
 												{categoryTabs.map((tab) => (
-													<TabsContent
+													<TabsTrigger
 														key={tab.key}
 														value={tab.key}
-														className="mt-0"
+														className={cn(
+															'flex items-center whitespace-nowrap rounded-lg border border-border bg-white p-2 text-sm text-foreground font-normal data-[state=active]:font-medium shadow-none data-[state=active]:border-[#EEEEFF] data-[state=active]:bg-[#EEEEFF] data-[state=active]:text-primary data-[state=active]:shadow-none',
+															tab.is_disabled &&
+																'opacity-60'
+														)}
 													>
-														<TriggersGroupRender
-															groups={
-																tab.groups
-															}
-															value={
-																automation.trigger
-															}
-															onChange={(
-																value
-															) =>
-																onAutomationChange(
-																	{
-																		...automation,
-																		trigger:
-																			value,
-																	}
+														<span className="truncate">
+															{tab.label}
+														</span>
+														{tab.is_disabled ? (
+															<span className="truncate text-[10px] font-normal text-muted-foreground sm:text-xs">
+																(
+																{__(
+																	'Not Available',
+																	'doublescale'
+																)}
 																)
-															}
-														/>
-													</TabsContent>
+															</span>
+														) : null}
+													</TabsTrigger>
 												))}
-											</Tabs>
-										) : (
-											<TriggersGroupRender
-												groups={
-													triggerGroupsForCategory
-												}
-												value={automation.trigger}
-												onChange={(value) =>
-													onAutomationChange({
-														...automation,
-														trigger: value,
-													})
-												}
-											/>
-										)}
-									</div>
+											</TabsList>
+											{categoryTabs.map((tab) => (
+												<TabsContent
+													key={tab.key}
+													value={tab.key}
+													className="mt-0"
+												>
+													<TriggersGroupRender
+														groups={tab.groups}
+														value={
+															automation.trigger
+														}
+														onChange={(value) =>
+															onAutomationChange({
+																...automation,
+																trigger: value,
+															})
+														}
+													/>
+												</TabsContent>
+											))}
+										</Tabs>
+									) : triggerGroupsForCategory.length > 0 ? (
+										<TriggersGroupRender
+											groups={triggerGroupsForCategory}
+											value={automation.trigger}
+											onChange={(value) =>
+												onAutomationChange({
+													...automation,
+													trigger: value,
+												})
+											}
+										/>
+									) : (
+										<p className="text-sm text-muted-foreground">
+											{__(
+												'No active integrations available for this category. Install and activate a supported plugin to see triggers here.',
+												'doublescale'
+											)}
+										</p>
+									)}
 								</div>
 							</div>
+						</section>
+
+						<div className="flex flex-row items-center justify-end gap-3 pt-2">
+							<Button
+								type="button"
+								variant="secondaryDeepBlue"
+								onClick={onCancel}
+								disabled={isSaving}
+							>
+								{__('Cancel', 'doublescale')}
+							</Button>
+							<Button onClick={onOk} disabled={isSaving}>
+								{isSaving
+									? isEditAutomation
+										? __('Updating...', 'doublescale')
+										: __('Creating...', 'doublescale')
+									: isEditAutomation
+										? __('Update Automation', 'doublescale')
+										: __(
+												'Create Automation',
+												'doublescale'
+											)}
+							</Button>
 						</div>
 					</div>
 				</div>
-				</div>
-
-				{/* Sticky footer */}
-				<DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-4 py-4 sm:px-8">
-					<div className="mx-auto flex w-full max-w-5xl flex-row items-center justify-end gap-3">
-						<Button
-							type="button"
-							variant="secondaryDeepBlue"
-							onClick={onCancel}
-							disabled={isSaving}
-						>
-							{__('Cancel', 'doublescale')}
-						</Button>
-						<Button onClick={onOk} disabled={isSaving}>
-							{isSaving
-								? isEditAutomation
-									? __('Updating...', 'doublescale')
-									: __('Creating...', 'doublescale')
-								: isEditAutomation
-									? __('Update Automation', 'doublescale')
-									: __('Create Automation', 'doublescale')}
-						</Button>
-					</div>
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

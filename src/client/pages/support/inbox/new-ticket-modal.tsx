@@ -24,7 +24,7 @@ import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
 import { X, Search } from 'lucide-react';
 
-import { CustomDialogHeader } from '@doublescale/components';
+import { CustomDialogHeader, GradientTicketsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,7 +52,6 @@ import {
 } from '@/hooks/support';
 import {
 	AttachmentUploader,
-	SupportIcon,
 	toPendingAttachment,
 	removePendingByHash,
 	type PendingAttachment,
@@ -320,7 +319,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 								'Provide a brief summary of the issue. Be specific so your team can quickly understand and prioritize it.',
 								'doublescale'
 							)}
-							icon={<SupportIcon width={20} height={20} />}
+							icon={<GradientTicketsIcon width={20} height={20} />}
 						/>
 					</DialogTitle>
 				</DialogHeader>

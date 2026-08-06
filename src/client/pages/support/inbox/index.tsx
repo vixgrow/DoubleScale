@@ -15,13 +15,13 @@ import React, {
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { Plus, Inbox as InboxEmptyIcon, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import type { DataTableConfig } from '@doublescale/client';
-import { NoData, SearchIcon } from '@doublescale/components';
+import { GradientTicketsIcon, NoData, SearchIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
@@ -47,7 +47,6 @@ import {
 	BulkReplyModal,
 } from './bulk-action-modals';
 import { getTicketColumns } from './columns';
-import { SupportIcon } from '@/components/support';
 
 type BulkModal = 'reply' | 'agent' | 'mailbox' | 'tags' | null;
 
@@ -388,7 +387,7 @@ const SupportInbox: React.FC = () => {
 
 				{isEmpty ? (
 					<NoData
-						icon={<SupportIcon width={64} height={64} className='text-primary'/>}
+						icon={<GradientTicketsIcon width={64} height={64}/>}
 						title={
 							hasNoTickets
 								? __('No tickets yet', 'doublescale')

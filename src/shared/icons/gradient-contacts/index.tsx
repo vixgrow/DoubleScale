@@ -39,8 +39,8 @@ const GradientContactsIcon: React.FC<IconProps> = ({
 					y2="6.745"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_32496_199466"
@@ -50,8 +50,8 @@ const GradientContactsIcon: React.FC<IconProps> = ({
 					y2="17.3774"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint2_linear_32496_199466"
@@ -61,8 +61,8 @@ const GradientContactsIcon: React.FC<IconProps> = ({
 					y2="7.64599"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint3_linear_32496_199466"
@@ -72,8 +72,8 @@ const GradientContactsIcon: React.FC<IconProps> = ({
 					y2="16.1264"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 			</defs>
 		</svg>

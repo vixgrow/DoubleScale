@@ -41,6 +41,8 @@ export interface InfiniteScrollSelectProps {
   error?: string;
   className?: string;
   inputClassName?: string;
+  /** Raise above nested dialogs (e.g. contact detail → add deal). Default 200000. */
+  menuZIndex?: number;
 }
 
 export interface InfiniteScrollSelectState {

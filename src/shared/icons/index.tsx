@@ -81,7 +81,6 @@ export { default as TotalTagsIcon } from './total-tags';
 export { default as TotalCampaignsIcon } from './total-campaigns';
 export { default as ActiveAutomationIcon } from './active-automation';
 export { default as OutlineReportsIcon } from './outline-reports';
-
 export { default as UndoIcon } from './undo';
 export { default as RedoIcon } from './redo';
 export { default as PreviewIcon } from './preview';

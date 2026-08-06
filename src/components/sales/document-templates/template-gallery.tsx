@@ -114,42 +114,46 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 	};
 
 	return (
-		<div className="flex min-h-0 flex-col gap-6">
-			<div className="space-y-1">
-				<h1 className="text-2xl font-semibold text-foreground">
-					{__('Select Template', 'doublescale')}
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					{__(
-						'Choose a design and accent color. You can change both later while editing.',
-						'doublescale'
-					)}
-				</p>
+		<div className="flex min-h-0 flex-1 flex-col overflow-visible">
+			<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto">
+				<div className="flex flex-col gap-6 pb-6">
+					<div className="space-y-1">
+						<h1 className="text-2xl font-semibold text-foreground">
+							{__('Select Template', 'doublescale')}
+						</h1>
+						<p className="text-sm text-muted-foreground">
+							{__(
+								'Choose a design and accent color. You can change both later while editing.',
+								'doublescale'
+							)}
+						</p>
+					</div>
+
+					<div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
+						<div className="min-h-0 w-full self-start">
+							<TemplateCardGrid
+								docType={docType}
+								selectedId={selectedId}
+								onPick={setSelectedId}
+							/>
+						</div>
+						<div className="flex flex-col gap-4">
+							<TemplatePreviewPanel
+								docType={docType}
+								templateId={selectedId}
+								accentColor={draftColor}
+							/>
+							<TemplateStyleEditor
+								value={draftColor}
+								onChange={setDraftColor}
+								compact
+							/>
+						</div>
+					</div>
+				</div>
 			</div>
 
-			<div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]">
-				<div className="min-h-0 w-full self-start">
-					<TemplateCardGrid
-						docType={docType}
-						selectedId={selectedId}
-						onPick={setSelectedId}
-					/>
-				</div>
-				<div className="flex flex-col gap-4">
-					<TemplatePreviewPanel
-						docType={docType}
-						templateId={selectedId}
-						accentColor={draftColor}
-					/>
-					<TemplateStyleEditor
-						value={draftColor}
-						onChange={setDraftColor}
-						compact
-					/>
-				</div>
-			</div>
-
-			<div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-background/95 px-1 py-3 backdrop-blur">
+			<div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-white px-1 py-3">
 				<span className="text-sm text-muted-foreground">
 					{getTemplateMeta(selectedId).name}
 				</span>

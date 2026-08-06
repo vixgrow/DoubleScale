@@ -560,6 +560,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		</div>
 	);
 
+	const dialogGalleryShell = (children: React.ReactNode) => (
+		<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col overflow-hidden p-6">
+			<div className="flex min-h-0 flex-1 overflow-visible rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] p-6">
+				{children}
+			</div>
+		</div>
+	);
+
 	if (!isNew && loading) {
 		if (isDialog) {
 			return dialogScrollShell(
@@ -591,7 +599,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			/>
 		);
 		if (isDialog) {
-			return dialogScrollShell(gallery);
+			return dialogGalleryShell(gallery);
 		}
 		return panelShell(gallery);
 	}
@@ -1147,9 +1155,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	return (
 		<>
 			{panelShell(
-				<div className="space-y-6">
-					{formBody}
-					{formFooter}
+				<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]">
+					<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 overflow-y-auto p-6">
+						{formBody}
+					</div>
+					<div className="shrink-0 border-t border-border bg-white px-6 py-4">
+						{formFooter}
+					</div>
 				</div>
 			)}
 			<SendDocumentDialog

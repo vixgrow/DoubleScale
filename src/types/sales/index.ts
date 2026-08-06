@@ -244,18 +244,24 @@ export interface OnlinePaymentGatewayStatus {
 	enabled_for_sales?: boolean;
 	ready?: boolean;
 	integration_url?: string;
+	/** Shown when available but not configured (e.g. WooCommerce with no payment methods). */
+	configuration_hint?: string;
 	can_pay?: boolean;
 }
 
 export interface InvoiceOnlineInitResponse {
 	gateway?: string;
-	publishable_key: string;
+	publishable_key?: string;
 	client_secret?: string;
+	client_id?: string;
+	order_id?: string;
+	redirect_url?: string;
 	already_paid?: boolean;
 	invoice?: Invoice;
 	amount?: number;
 	currency?: string;
 	pi_status?: string;
+	status?: string;
 }
 
 export interface Invoice {

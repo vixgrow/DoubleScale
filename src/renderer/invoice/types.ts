@@ -48,10 +48,16 @@ export interface PublicInvoice {
 
 export interface OnlinePaymentInitResponse {
 	gateway?: string;
-	publishable_key: string;
+	publishable_key?: string;
 	client_secret?: string;
+	client_id?: string;
+	order_id?: string;
+	redirect_url?: string;
 	already_paid?: boolean;
 	invoice?: PublicInvoice;
+	amount?: number;
+	currency?: string;
+	status?: string;
 }
 
 /** @deprecated Use OnlinePaymentInitResponse */

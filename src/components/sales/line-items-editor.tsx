@@ -398,7 +398,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 						onClick={addItem}
 					>
 						<Plus className="mr-1 h-4 w-4" />
-						{__('Add Item', 'doublescale')}
+						{__('Add custom item', 'doublescale')}
 					</Button>
 				</div>
 			) : null}
@@ -442,7 +442,7 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 							onClick={addItem}
 						>
 							<Plus className="mr-1 h-4 w-4" />
-							{__('Add Item', 'doublescale')}
+							{__('Add custom item', 'doublescale')}
 						</Button>
 					</div>
 				</div>

@@ -24,6 +24,7 @@ class PaymentMode {
 	const CREDIT_NOTE   = 'credit_note';
 	const STRIPE        = 'stripe';
 	const PAYPAL        = 'paypal';
+	const WOOCOMMERCE   = 'woocommerce';
 	const OTHER         = 'other';
 
 	/**

@@ -26,6 +26,10 @@ import {
 	getStripePaymentReturnUrl,
 	getStripeRedirectStatus,
 } from '@doublescale/utils/stripe-payment';
+import {
+	clearWooCheckoutReturnParams,
+	isWooCheckoutReturn,
+} from '@doublescale/utils/woo-checkout-payment';
 
 interface Props {
 	hash: string;
@@ -93,6 +97,7 @@ const PublicOnlinePayment: React.FC<{
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 	const [paypalBusy, setPaypalBusy] = useState(false);
+	const [wooBusy, setWooBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
@@ -108,6 +113,9 @@ const PublicOnlinePayment: React.FC<{
 
 	// After redirect-based methods (Cash App, etc.) Stripe sends the user back here.
 	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			return;
+		}
 		const redirectStatus = getStripeRedirectStatus();
 		if (!redirectStatus) {
 			return;
@@ -151,7 +159,50 @@ const PublicOnlinePayment: React.FC<{
 		};
 	}, [hash, gateway.slug]);
 
+	// Return from WooCommerce checkout — confirm server-side (order status is authority).
 	useEffect(() => {
+		if (gateway.slug !== 'woocommerce' || !isWooCheckoutReturn()) {
+			return;
+		}
+
+		let cancelled = false;
+		setLoading(true);
+		setError(null);
+		void confirmPublicInvoicePayment(hash, gateway.slug)
+			.then(() => {
+				if (cancelled) {
+					return;
+				}
+				clearWooCheckoutReturnParams();
+				onPaidRef.current();
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) {
+					setError(
+						err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale')
+					);
+					clearWooCheckoutReturnParams();
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [hash, gateway.slug]);
+
+	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			// WooCommerce: order is created on button click, not on mount.
+			if (!isWooCheckoutReturn()) {
+				setLoading(false);
+			}
+			return;
+		}
 		if (getStripeRedirectStatus()) {
 			return;
 		}
@@ -171,7 +222,7 @@ const PublicOnlinePayment: React.FC<{
 					setPaypalClientId(response.client_id || null);
 					return;
 				}
-				setPublishableKey(response.publishable_key);
+				setPublishableKey(response.publishable_key || null);
 				setClientSecret(response.client_secret || null);
 			})
 			.catch((err: unknown) => {
@@ -217,6 +268,27 @@ const PublicOnlinePayment: React.FC<{
 		return response.order_id;
 	}, [hash, gateway.slug]);
 
+	const handleWooCheckout = useCallback(async () => {
+		setWooBusy(true);
+		setError(null);
+		try {
+			const response = await initPublicInvoicePayment(hash, gateway.slug);
+			if (response.already_paid) {
+				onPaidRef.current();
+				return;
+			}
+			if (!response.redirect_url) {
+				throw new Error(__('Could not start WooCommerce checkout.', 'doublescale'));
+			}
+			window.location.href = response.redirect_url;
+		} catch (err: unknown) {
+			setError(
+				err instanceof Error ? err.message : __('Could not start WooCommerce checkout.', 'doublescale')
+			);
+			setWooBusy(false);
+		}
+	}, [hash, gateway.slug]);
+
 	if (loading) {
 		return (
 			<div className="text-sm text-muted-foreground">{__('Loading payment options…', 'doublescale')}</div>
@@ -230,6 +302,25 @@ const PublicOnlinePayment: React.FC<{
 				{isUnavailable
 					? __('Online payment is not available on this site. Please use another payment method.', 'doublescale')
 					: error}
+			</div>
+		);
+	}
+
+	if (gateway.slug === 'woocommerce') {
+		return (
+			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
+				<div>
+					<h4 className="font-medium">{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}</h4>
+					<p className="text-sm text-muted-foreground">
+						{__('Balance due:', 'doublescale')}{' '}
+						{formatMoney(invoice.balance, invoice.currency)}
+					</p>
+				</div>
+				<Button onClick={() => void handleWooCheckout()} disabled={wooBusy}>
+					{wooBusy
+						? __('Redirecting…', 'doublescale')
+						: __('Pay via checkout', 'doublescale')}
+				</Button>
 			</div>
 		);
 	}

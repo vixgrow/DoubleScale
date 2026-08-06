@@ -357,6 +357,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
 				month: 'custom-calendar-month',
 				month_caption: 'custom-calendar-caption',
 				nav: 'hidden',
+				button_previous: 'hidden',
+				button_next: 'hidden',
 				month_grid: 'custom-calendar-grid',
 				weekdays: 'custom-calendar-weekdays',
 				weekday: 'custom-calendar-weekday',
@@ -370,7 +372,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
 			components={{
 				MonthCaption: MonthCaptionComponent,
 				DayButton: DayButtonComponent,
-				Chevron: () => <span />,
 			}}
 		/>
 	);

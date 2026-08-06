@@ -28,6 +28,7 @@ use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DuplicateProposal;
 use DoubleScale\Modules\Documents\Services\ProposalNotifications;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
+use DoubleScale\Modules\Sales\Rest\SendsDocumentViaWhatsapp;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
@@ -40,6 +41,8 @@ use WP_REST_Server;
  * RestProposalController class.
  */
 class RestProposalController extends RestController {
+
+	use SendsDocumentViaWhatsapp;
 
 	/**
 	 * @var string
@@ -75,6 +78,18 @@ class RestProposalController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'send_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-whatsapp',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_item_whatsapp' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 			)
@@ -366,15 +381,88 @@ class RestProposalController extends RestController {
 		}
 		$message = isset( $params['message'] ) ? sanitize_textarea_field( (string) $params['message'] ) : '';
 
-		$notifier = new ProposalNotifications();
-		if ( ! $notifier->send_proposal( $proposal, $message ) ) {
-			return new WP_Error(
-				'email_failed',
-				__( 'Failed to send the proposal email. Check the customer email and SMTP settings.', 'doublescale' ),
-				array( 'status' => 500 )
-			);
+		$channel = isset( $params['channel'] ) ? sanitize_key( (string) $params['channel'] ) : 'email';
+
+		// WhatsApp shares are delivered by the client opening wa.me; this call
+		// only records that the send happened.
+		if ( 'whatsapp' !== $channel ) {
+			$notifier = new ProposalNotifications();
+			if ( ! $notifier->send_proposal( $proposal, $message ) ) {
+				return new WP_Error(
+					'email_failed',
+					__( 'Failed to send the proposal email. Check the customer email and SMTP settings.', 'doublescale' ),
+					array( 'status' => 500 )
+				);
+			}
 		}
 
+		return $this->finish_proposal_send( $proposal, $message, $channel );
+	}
+
+	/**
+	 * Prepare or perform a WhatsApp share for a proposal.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_item_whatsapp( $request ) {
+		$disabled = $this->require_module( 'documents' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$proposal = ProposalModel::with( array( 'contact', 'assigned_user' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $proposal ) {
+			return new WP_Error( 'not_found', __( 'Proposal not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $proposal );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		if ( ProposalStatus::DECLINED === (string) $proposal->status ) {
+			return new WP_Error( 'invalid_status', __( 'Declined proposals cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$no_page = $this->require_public_page(
+			'proposal',
+			'no_proposal_page',
+			__( 'Create a WordPress page with the [doublescale_proposal] shortcode before sending proposals.', 'doublescale' )
+		);
+		if ( $no_page ) {
+			return $no_page;
+		}
+
+		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'proposal', $proposal );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
+		$params  = $this->read_whatsapp_params( $request );
+		$payload = $this->build_whatsapp_payload( $proposal, 'proposal', $params );
+
+		if ( 'auto' !== $params['mode'] ) {
+			return new WP_REST_Response( $this->whatsapp_link_response( $payload ), 200 );
+		}
+
+		$sent = $this->dispatch_whatsapp_auto( $proposal, 'proposal', $payload );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
+		}
+
+		return $this->finish_proposal_send( $proposal, $params['message'], 'whatsapp' );
+	}
+
+	/**
+	 * Advance status and record the send, once a channel has delivered.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @param string        $message  Custom message.
+	 * @param string        $channel  Delivery channel.
+	 * @return WP_REST_Response
+	 */
+	private function finish_proposal_send( ProposalModel $proposal, string $message, string $channel ): WP_REST_Response {
 		if ( ProposalStatus::DRAFT === (string) $proposal->status ) {
 			$proposal->status = ProposalStatus::SENT;
 		}
@@ -383,9 +471,9 @@ class RestProposalController extends RestController {
 		$proposal->sent_at = current_time( 'mysql' );
 		$proposal->save();
 
-		$this->log_proposal_sent( $proposal, $message );
+		$this->log_proposal_sent( $proposal, $message, $channel );
 
-		do_action( 'doublescale_sales_proposal_sent', $proposal, $message );
+		do_action( 'doublescale_sales_proposal_sent', $proposal, $message, $channel );
 
 		( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'sent' );
 
@@ -749,19 +837,27 @@ class RestProposalController extends RestController {
 	/**
 	 * @param ProposalModel $proposal Proposal.
 	 * @param string        $message Optional custom message.
+	 * @param string        $channel Delivery channel (email|whatsapp).
 	 * @return void
 	 */
-	private function log_proposal_sent( ProposalModel $proposal, string $message = '' ): void {
+	private function log_proposal_sent( ProposalModel $proposal, string $message = '', string $channel = 'email' ): void {
 		if ( ! class_exists( ActivityModel::class ) ) {
 			return;
 		}
 
-		$note = sprintf(
-			/* translators: 1: proposal number, 2: proposal subject */
-			__( 'Proposal %1$s sent: %2$s', 'doublescale' ),
-			(string) $proposal->proposal_number,
-			(string) $proposal->subject
-		);
+		$note = 'whatsapp' === $channel
+			? sprintf(
+				/* translators: 1: proposal number, 2: proposal subject */
+				__( 'Proposal %1$s sent via WhatsApp: %2$s', 'doublescale' ),
+				(string) $proposal->proposal_number,
+				(string) $proposal->subject
+			)
+			: sprintf(
+				/* translators: 1: proposal number, 2: proposal subject */
+				__( 'Proposal %1$s sent: %2$s', 'doublescale' ),
+				(string) $proposal->proposal_number,
+				(string) $proposal->subject
+			);
 		if ( '' !== trim( $message ) ) {
 			$note .= ' — ' . $message;
 		}

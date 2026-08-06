@@ -146,6 +146,7 @@ const configData: ConfigData = {
 	storeNonce: (serverData.storeNonce as string | undefined) ?? '',
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
 	salesApprovalWorkflowEnabled: Boolean(serverData.salesApprovalWorkflowEnabled),
+	salesWhatsappAutoAvailable: Boolean(serverData.salesWhatsappAutoAvailable),
 	calendarWeekStartsOn: (() => {
 		const raw = Number(serverData.calendarWeekStartsOn);
 		return Number.isInteger(raw) && raw >= 0 && raw <= 6 ? raw : 1;

@@ -43,6 +43,20 @@ const salesCaps = (): Record<string, boolean> =>
 	(config.getUserCapabilities() as Record<string, boolean>) ?? {};
 
 /**
+ * Whether a WhatsApp provider can deliver documents without the admin opening
+ * wa.me. False on Free, and on Pro until a provider is connected.
+ */
+export const isWhatsappAutoSendAvailable = (): boolean => {
+	if (typeof window === 'undefined') {
+		return false;
+	}
+	return Boolean(
+		(window.doublescaleConfig as { salesWhatsappAutoAvailable?: boolean } | undefined)
+			?.salesWhatsappAutoAvailable
+	);
+};
+
+/**
  * Mirrors server {@see Capabilities::can_approve_sales()} /
  * {@see Capabilities::can_manage_all_sales()} bypass rules.
  */

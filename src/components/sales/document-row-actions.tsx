@@ -17,6 +17,7 @@ import {
 	SendTestEmailIcon,
 	ThreeDotsIcon,
 	ViewIcon,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,6 +41,8 @@ export interface DocumentRowActionsProps {
 	/** Proposals only: manual accept for deals closed outside the public link. */
 	onMarkAccepted?: () => void;
 	onSend?: () => void;
+	/** Opens the WhatsApp share dialog for this document. */
+	onSendWhatsApp?: () => void;
 	onDownloadPdf?: () => void;
 	onDelete?: () => void;
 }
@@ -53,6 +56,7 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 	onViewInvoice,
 	onMarkAccepted,
 	onSend,
+	onSendWhatsApp,
 	onDownloadPdf,
 	onDelete,
 }) => (
@@ -116,6 +120,13 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 					<DropdownMenuItem onClick={onSend} disabled={busy}>
 						<SendTestEmailIcon width={20} height={20} />
 						{__('Send to Customer', 'doublescale')}
+					</DropdownMenuItem>
+				) : null}
+
+				{onSendWhatsApp ? (
+					<DropdownMenuItem onClick={onSendWhatsApp} disabled={busy}>
+						<WhatsAppIcon width={20} height={20} />
+						{__('Send via WhatsApp', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 

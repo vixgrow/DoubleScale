@@ -42,6 +42,7 @@ export interface InvoiceColumnProps {
 	canEdit: (invoice: Invoice) => boolean;
 	onDuplicate: (invoice: Invoice) => void;
 	onSend: (invoice: Invoice) => void;
+	onSendWhatsApp: (invoice: Invoice) => void;
 	onDownloadPdf: (invoice: Invoice) => void;
 	/** Id of the row with a request in flight, if any. */
 	busyId: number | null;
@@ -56,6 +57,7 @@ export const getInvoiceColumns = ({
 	canEdit,
 	onDuplicate,
 	onSend,
+	onSendWhatsApp,
 	onDownloadPdf,
 	busyId,
 	canSend,
@@ -122,6 +124,9 @@ export const getInvoiceColumns = ({
 					}
 					onDuplicate={() => onDuplicate(invoice)}
 					onSend={canSend(invoice) ? () => onSend(invoice) : undefined}
+					onSendWhatsApp={
+						canSend(invoice) ? () => onSendWhatsApp(invoice) : undefined
+					}
 					onDownloadPdf={() => onDownloadPdf(invoice)}
 					onDelete={() => onDelete(invoice.id)}
 				/>

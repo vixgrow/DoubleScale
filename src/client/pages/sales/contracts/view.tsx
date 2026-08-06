@@ -2,7 +2,7 @@
  * Contract read-only detail view.
  */
 
-import React, { useEffect, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
@@ -15,12 +15,14 @@ import {
 	PanelLayout,
 	SendTestEmailIcon,
 	UserActivityIcon,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
 	ConfirmDialog,
 	ContractStatusPill,
 	SendDocumentDialog,
+	SendWhatsappDialog,
 	ContractAttachmentsPanel,
 	ApprovalStatusBanner,
 } from '@/components/sales';
@@ -33,16 +35,20 @@ import {
 	isApprovalWorkflowEnabled,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from '@/components/sales/sales-approval-utils';
 import {
+	confirmWhatsappSent,
 	deleteContract,
 	downloadContractPdf,
 	fetchContractSignature,
 	sendContract,
+	sendContractWhatsapp,
 	submitContractForApproval,
 	withdrawContractApproval,
 	useContract,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { Contract } from '@/types/sales';
 
@@ -113,6 +119,7 @@ const ContractView: React.FC = () => {
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
+	const [whatsappOpen, setWhatsappOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [signature, setSignature] = useState<Awaited<
@@ -187,6 +194,16 @@ const ContractView: React.FC = () => {
 			setBusy(false);
 		}
 	};
+
+	const whatsappAutoAvailable = isWhatsappAutoSendAvailable();
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendContractWhatsapp(contractId, options),
+		[contractId]
+	);
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('contracts', contractId, message),
+		[contractId]
+	);
 
 	const handleSend = async (message: string) => {
 		if (!contractId) {
@@ -403,6 +420,17 @@ const ContractView: React.FC = () => {
 								<SendTestEmailIcon width={24} height={24} />
 							</Button>
 						) : null}
+						{showSend ? (
+							<Button
+								variant="outline"
+								onClick={() => setWhatsappOpen(true)}
+								disabled={busy}
+								className="border-primary bg-white text-primary"
+							>
+								{__('WhatsApp', 'doublescale')}
+								<WhatsAppIcon width={24} height={24} />
+							</Button>
+						) : null}
 						<Button
 							variant="outline"
 							size="icon"
@@ -527,6 +555,22 @@ const ContractView: React.FC = () => {
 				confirmLabel={__('Send', 'doublescale')}
 				busy={busy}
 				onConfirm={handleSend}
+			/>
+
+			<SendWhatsappDialog
+				open={whatsappOpen}
+				onOpenChange={setWhatsappOpen}
+				title={__('Send Contract via WhatsApp', 'doublescale')}
+				description={__(
+					'Share a link to this contract with the customer on WhatsApp.',
+					'doublescale'
+				)}
+				onPrepare={prepareWhatsapp}
+				onConfirmSent={confirmWhatsapp}
+				onSent={() => {
+					void refetch();
+				}}
+				autoSendAvailable={whatsappAutoAvailable}
 			/>
 		</div>
 	);

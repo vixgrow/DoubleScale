@@ -18,6 +18,7 @@ import {
 	InfiniteScrollSelect,
 	NovicesIcon,
 	PanelLayout,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
+import { SendWhatsappDialog } from '../send-whatsapp-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
 import { InvoiceDocumentPreview } from '../document-preview';
 import {
@@ -42,6 +44,7 @@ import {
 	requiresReapprovalAfterEdit,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from '@/components/sales/sales-approval-utils';
 import {
 	getDiscountValidationError,
@@ -53,13 +56,16 @@ import {
 	normalizeSalesContact,
 } from '@/components/sales/contact-sales-fields';
 import {
+	confirmWhatsappSent,
 	createInvoice,
 	sendInvoice,
+	sendInvoiceWhatsapp,
 	submitInvoiceForApproval,
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
 import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
@@ -340,6 +346,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	};
 
 	const [sendOpen, setSendOpen] = useState(false);
+	/**
+	 * Id of the invoice the WhatsApp dialog is sharing.
+	 *
+	 * The dialog builds its payload from a persisted document, so the form
+	 * saves first and only then opens it — an unsaved draft has no public URL.
+	 */
+	const [whatsappId, setWhatsappId] = useState<number | null>(null);
 	const [submittingApproval, setSubmittingApproval] = useState(false);
 
 	const workflowEnabled = isApprovalWorkflowEnabled(
@@ -501,6 +514,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			setSendOpen(false);
 		}
 	};
+
+	const handleSaveAndWhatsapp = async () => {
+		const id = await persistInvoice();
+		if (!id) {
+			return;
+		}
+		setWhatsappId(id);
+	};
+
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendInvoiceWhatsapp(whatsappId ?? 0, options),
+		[whatsappId]
+	);
+
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('invoices', whatsappId ?? 0, message),
+		[whatsappId]
+	);
 
 	const handleSubmitForApproval = async () => {
 		const id = await persistInvoice();
@@ -1092,6 +1123,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				) : null}
 				{showSend ? (
 					<Button
+						variant="outline"
+						onClick={() => void handleSaveAndWhatsapp()}
+						disabled={saving || submittingApproval}
+						className="rounded-lg border-primary text-primary bg-white"
+					>
+						<WhatsAppIcon width={20} height={20} />
+						{__('Save & WhatsApp', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button
 						variant="gradient"
 						onClick={() => setSendOpen(true)}
 						disabled={saving || submittingApproval}
@@ -1102,6 +1144,30 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				) : null}
 			</div>
 		</div>
+	);
+
+	const whatsappDialog = (
+		<SendWhatsappDialog
+			open={whatsappId !== null}
+			onOpenChange={(open) => {
+				if (!open) {
+					setWhatsappId(null);
+				}
+			}}
+			title={__('Send Invoice via WhatsApp', 'doublescale')}
+			description={__(
+				'Share a link to this invoice with the customer on WhatsApp.',
+				'doublescale'
+			)}
+			onPrepare={prepareWhatsapp}
+			onConfirmSent={confirmWhatsapp}
+			onSent={() => {
+				if (whatsappId) {
+					handleSaveSuccess(whatsappId);
+				}
+			}}
+			autoSendAvailable={isWhatsappAutoSendAvailable()}
+		/>
 	);
 
 	if (isDialog) {
@@ -1140,6 +1206,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					onConfirm={handleSaveAndSend}
 					onSecondary={handleSaveWithoutSending}
 				/>
+				{whatsappDialog}
 			</div>
 		);
 	}
@@ -1166,6 +1233,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				onConfirm={handleSaveAndSend}
 				onSecondary={handleSaveWithoutSending}
 			/>
+			{whatsappDialog}
 		</>
 	);
 };

@@ -2,7 +2,7 @@
  * Invoices list page with summary cards.
  */
 
-import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import type { DataTableConfig, NoticeMessage } from '@doublescale/client';
 import type { ComponentType } from 'react';
 import { __ } from '@wordpress/i18n';
@@ -16,21 +16,26 @@ import {
 	ConfirmDialog,
 	InvoiceFormDialog,
 	SendDocumentDialog,
+	SendWhatsappDialog,
 } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	formatSalesRestError,
 	isApprovalWorkflowEnabled,
+	isWhatsappAutoSendAvailable,
 	showDirectSendAction,
 } from '@/components/sales/sales-approval-utils';
 import {
+	confirmWhatsappSent,
 	deleteInvoice,
 	downloadInvoicePdf,
 	duplicateInvoice,
 	sendInvoice,
+	sendInvoiceWhatsapp,
 	useInvoices,
 	useInvoiceSummary,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import { INVOICE_STATUS_LABELS, INVOICE_STATUSES, type InvoiceStatus } from '@/constants/sales';
 import type { Invoice } from '@/types/sales';
@@ -133,6 +138,7 @@ const InvoicesList: React.FC = () => {
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [busyId, setBusyId] = useState<number | null>(null);
 	const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
+	const [whatsappTarget, setWhatsappTarget] = useState<Invoice | null>(null);
 	const closeNotice = () => setNotice(null);
 
 	const { data, loading, error, refetch } = useInvoices({
@@ -249,6 +255,17 @@ const InvoicesList: React.FC = () => {
 		).then(() => setSendTarget(null));
 	};
 
+	const whatsappAutoAvailable = isWhatsappAutoSendAvailable();
+	const whatsappInvoiceId = whatsappTarget?.id ?? 0;
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendInvoiceWhatsapp(whatsappInvoiceId, options),
+		[whatsappInvoiceId]
+	);
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('invoices', whatsappInvoiceId, message),
+		[whatsappInvoiceId]
+	);
+
 	const columns = useMemo(
 		() =>
 			getInvoiceColumns({
@@ -258,6 +275,7 @@ const InvoicesList: React.FC = () => {
 				canEdit,
 				onDuplicate: handleDuplicate,
 				onSend: setSendTarget,
+				onSendWhatsApp: setWhatsappTarget,
 				onDownloadPdf: handleDownloadPdf,
 				busyId,
 				canSend,
@@ -496,6 +514,30 @@ const InvoicesList: React.FC = () => {
 				confirmLabel={__('Send', 'doublescale')}
 				busy={busyId !== null}
 				onConfirm={confirmSend}
+			/>
+
+			<SendWhatsappDialog
+				open={whatsappTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setWhatsappTarget(null);
+					}
+				}}
+				title={__('Send Invoice via WhatsApp', 'doublescale')}
+				description={__(
+					'Share a link to this invoice with the customer on WhatsApp.',
+					'doublescale'
+				)}
+				onPrepare={prepareWhatsapp}
+				onConfirmSent={confirmWhatsapp}
+				onSent={() => {
+					refreshAll();
+					setNotice({
+						type: 'success',
+						message: __('Invoice sent to the customer.', 'doublescale'),
+					});
+				}}
+				autoSendAvailable={whatsappAutoAvailable}
 			/>
 		</div>
 	);

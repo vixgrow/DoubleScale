@@ -199,14 +199,25 @@ final class ActionsManager {
 							),
 						),
 					),
-					'support'  => array(
-						'label'  => __( 'Helpdesk', 'doublescale' ),
+					'message'  => array(
+						'label'  => __( 'Messaging', 'doublescale' ),
 						'groups' => array(
-							'support' => array(
-								'label'       => __( 'Ticket', 'doublescale' ),
-								'actions'     => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'support' ),
+							'sms'      => array(
+								'label'   => __( 'SMS', 'doublescale' ),
+								'actions' => array(),
+							),
+							'whatsapp' => array(
+								'label'   => __( 'WhatsApp', 'doublescale' ),
+								'actions' => array(),
+							),
+						),
+					),
+					'email'    => array(
+						'label'  => __( 'Email', 'doublescale' ),
+						'groups' => array(
+							'email' => array(
+								'label'   => __( 'Email', 'doublescale' ),
+								'actions' => array(),
 							),
 						),
 					),
@@ -221,17 +232,6 @@ final class ActionsManager {
 							),
 						),
 					),
-					'tasks'    => array(
-						'label'  => __( 'Tasks', 'doublescale' ),
-						'groups' => array(
-							'task' => array(
-								'label'       => __( 'Task', 'doublescale' ),
-								'actions'     => array(),
-								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-									|| ! doublescale_is_module_active( 'tasks' ),
-							),
-						),
-					),
 					'projects' => array(
 						'label'  => __( 'Projects', 'doublescale' ),
 						'groups' => array(
@@ -243,25 +243,25 @@ final class ActionsManager {
 							),
 						),
 					),
-					'email'    => array(
-						'label'  => __( 'Email', 'doublescale' ),
+					'tasks'    => array(
+						'label'  => __( 'Tasks', 'doublescale' ),
 						'groups' => array(
-							'email' => array(
-								'label'   => __( 'Email', 'doublescale' ),
-								'actions' => array(),
+							'task' => array(
+								'label'       => __( 'Task', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'tasks' ),
 							),
 						),
 					),
-					'message'  => array(
-						'label'  => __( 'Messaging', 'doublescale' ),
+					'support'  => array(
+						'label'  => __( 'Helpdesk', 'doublescale' ),
 						'groups' => array(
-							'sms'      => array(
-								'label'   => __( 'Sms', 'doublescale' ),
-								'actions' => array(),
-							),
-							'whatsapp' => array(
-								'label'   => __( 'WhatsApp', 'doublescale' ),
-								'actions' => array(),
+							'support' => array(
+								'label'       => __( 'Ticket', 'doublescale' ),
+								'actions'     => array(),
+								'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+									|| ! doublescale_is_module_active( 'support' ),
 							),
 						),
 					),
@@ -418,13 +418,18 @@ final class ActionsManager {
 	/**
 	 * Get sources
 	 *
-	 * Returns the full action tree, including inactive integrations marked
-	 * `is_disabled`, so the action selector can list them as unavailable.
+	 * Vendor-pick categories are pruned to the integrations actually active on
+	 * this site (and dropped when none are), so the selector never offers a
+	 * plugin the site doesn't have. Module categories keep their `is_disabled`
+	 * rows — those are DoubleScale features the user can switch on.
 	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->sources;
+		return SourceTreePruner::prune(
+			$this->sources,
+			array( 'ecommerce', 'lms', 'membership' )
+		);
 	}
 
 	/**
@@ -512,12 +517,12 @@ final class ActionsManager {
 			'membership' => array( 'memberpress', 'pmpro' ),
 			'modules'    => array(
 				'crm',
-				'sales',
-				'support',
-				'tasks',
-				'projects',
-				'email',
 				'message',
+				'email',
+				'sales',
+				'projects',
+				'tasks',
+				'support',
 			),
 		);
 

@@ -89,7 +89,9 @@ div#wpcontent {
 	display: flex;
 	box-sizing: border-box;
 	width: 100%;
-	min-height: 100vh;
+	height: 100dvh;
+	min-height: 100dvh;
+	overflow: hidden;
 	background: #f7f8fa;
 
 	/* Sidebar (fixed rail + spacer): default flex-shrink lets this column compress while the rail stays wide — content draws underneath. */
@@ -101,8 +103,9 @@ div#wpcontent {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		min-height: inherit;
+		min-height: 0;
 		min-width: 0;
+		overflow: hidden;
 	}
 
 	.doublescale-layout__header-bar {

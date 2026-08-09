@@ -1,7 +1,7 @@
 /**
  * Email builder attachments panel — pick files from the WordPress Media Library.
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useSelect, useDispatch, select } from '@wordpress/data';
 import { Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,12 @@ import type { EmailAttachment } from '../../stores/email-builder/types';
 
 export const MAX_EMAIL_ATTACHMENTS = 5;
 export const MAX_EMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Human-readable list of accepted file types, shown to the user in the panel
+ * hint and in rejection notices so they know exactly what is allowed.
+ */
+const ALLOWED_TYPES_LABEL = 'PDF, Word, Excel, TXT, ZIP, RTF';
 
 const ALLOWED_EXTENSIONS = new Set([
 	'.pdf',
@@ -39,10 +45,12 @@ const formatFileSize = (bytes: number): string => {
 	if (bytes < 1024) {
 		return `${bytes} B`;
 	}
+	const trim = (value: number): string =>
+		value.toFixed(1).replace(/\.0$/, '');
 	if (bytes < 1024 * 1024) {
-		return `${(bytes / 1024).toFixed(1)} KB`;
+		return `${trim(bytes / 1024)} KB`;
 	}
-	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	return `${trim(bytes / (1024 * 1024))} MB`;
 };
 
 const getFilename = (data: Record<string, unknown>): string => {
@@ -74,27 +82,67 @@ const getExtension = (filename: string): string => {
 	return dot >= 0 ? filename.slice(dot).toLowerCase() : '';
 };
 
-const isAllowedAttachment = (
+type RejectionReason = 'size' | 'type';
+
+/**
+ * Determine why a file cannot be attached, or null when it is allowed.
+ *
+ * Type is checked before size so the user always learns the most fundamental
+ * problem first (an unsupported file is never worth resizing).
+ */
+const getRejectionReason = (
 	mime: string,
 	size: number,
 	filename: string
-): boolean => {
-	if (size > MAX_EMAIL_ATTACHMENT_BYTES) {
-		return false;
-	}
-
+): RejectionReason | null => {
 	const ext = getExtension(filename);
-	if (ext && ALLOWED_EXTENSIONS.has(ext)) {
-		return true;
+	const hasAllowedExt = Boolean(ext) && ALLOWED_EXTENSIONS.has(ext);
+	const hasAllowedMime =
+		Boolean(mime) &&
+		ALLOWED_MIME_PREFIXES.some(
+			(prefix) => mime === prefix || mime.startsWith(prefix)
+		);
+
+	if (!hasAllowedExt && !hasAllowedMime) {
+		return 'type';
 	}
 
-	if (!mime) {
-		return false;
+	if (size > MAX_EMAIL_ATTACHMENT_BYTES) {
+		return 'size';
 	}
 
-	return ALLOWED_MIME_PREFIXES.some(
-		(prefix) => mime === prefix || mime.startsWith(prefix)
+	return null;
+};
+
+/**
+ * Join a list of file names for display, truncating long lists so a notice
+ * stays readable (e.g. "a.pdf, b.pdf and 2 more").
+ */
+const joinNames = (names: string[], max = 2): string => {
+	if (names.length <= max) {
+		return names.join(', ');
+	}
+	const shown = names.slice(0, max).join(', ');
+	const remaining = names.length - max;
+	return sprintf(
+		/* translators: %1$s: comma-separated file names, %2$d: number of additional files */
+		_n(
+			'%1$s and %2$d more',
+			'%1$s and %2$d more',
+			remaining,
+			'doublescale'
+		),
+		shown,
+		remaining
 	);
+};
+
+type AttachmentFeedback = {
+	added: EmailAttachment[];
+	rejectedByType: string[];
+	rejectedBySize: string[];
+	rejectedDuplicate: string[];
+	rejectedOverLimit: string[];
 };
 
 const AttachmentsPanel: React.FC = () => {
@@ -104,6 +152,107 @@ const AttachmentsPanel: React.FC = () => {
 		(s) => s(STORE_KEY).getAttachments?.() ?? [],
 		[]
 	);
+
+	/**
+	 * Surface exactly what happened after a Media Library selection: what was
+	 * added and, for anything rejected, the specific reason and file names.
+	 */
+	const showAttachmentFeedback = ({
+		added,
+		rejectedByType,
+		rejectedBySize,
+		rejectedDuplicate,
+		rejectedOverLimit,
+	}: AttachmentFeedback): void => {
+		if (rejectedByType.length > 0) {
+			createNotice({
+				type: 'error',
+				message: sprintf(
+					/* translators: %1$s: file names, %2$s: list of allowed file types */
+					__(
+						'%1$s can\u2019t be attached. Only %2$s files are allowed.',
+						'doublescale'
+					),
+					joinNames(rejectedByType),
+					ALLOWED_TYPES_LABEL
+				),
+			});
+		}
+
+		if (rejectedBySize.length > 0) {
+			createNotice({
+				type: 'error',
+				message: sprintf(
+					/* translators: %1$s: file names, %2$s: max file size */
+					__(
+						'%1$s is too large. Each file must be under %2$s.',
+						'doublescale'
+					),
+					joinNames(rejectedBySize),
+					formatFileSize(MAX_EMAIL_ATTACHMENT_BYTES)
+				),
+			});
+		}
+
+		if (rejectedDuplicate.length > 0) {
+			createNotice({
+				type: 'error',
+				message: sprintf(
+					/* translators: %s: file names */
+					__(
+						'%s is already attached.',
+						'doublescale'
+					),
+					joinNames(rejectedDuplicate)
+				),
+			});
+		}
+
+		if (rejectedOverLimit.length > 0) {
+			createNotice({
+				type: 'error',
+				message: sprintf(
+					/* translators: %d: maximum number of attachments */
+					__(
+						'You can attach up to %d files. Remove one to add more.',
+						'doublescale'
+					),
+					MAX_EMAIL_ATTACHMENTS
+				),
+			});
+		}
+
+		if (added.length > 0) {
+			createNotice({
+				type: 'success',
+				message: sprintf(
+					/* translators: %d: number of files attached */
+					_n(
+						'%d file attached.',
+						'%d files attached.',
+						added.length,
+						'doublescale'
+					),
+					added.length
+				),
+			});
+			return;
+		}
+
+		// Nothing rejected and nothing added means the user confirmed with an
+		// empty selection.
+		if (
+			rejectedByType.length === 0 &&
+			rejectedBySize.length === 0 &&
+			rejectedDuplicate.length === 0 &&
+			rejectedOverLimit.length === 0
+		) {
+			createNotice({
+				type: 'error',
+				message: __('No file was selected.', 'doublescale'),
+			});
+		}
+	};
 
 	const openMediaLibrary = () => {
 		if (attachments.length >= MAX_EMAIL_ATTACHMENTS) {
@@ -149,13 +298,15 @@ const AttachmentsPanel: React.FC = () => {
 			const current = storeSelect.getAttachments?.() ?? [];
 			const selection = frame.state().get('selection');
 			const added: EmailAttachment[] = [];
-			let rejected = 0;
+
+			// Track each rejection reason with the offending file name so the
+			// user gets a specific, actionable message instead of silence.
+			const rejectedByType: string[] = [];
+			const rejectedBySize: string[] = [];
+			const rejectedDuplicate: string[] = [];
+			const rejectedOverLimit: string[] = [];
 
 			selection.each((attachment: { toJSON: () => Record<string, unknown> }) => {
-				if (current.length + added.length >= MAX_EMAIL_ATTACHMENTS) {
-					return;
-				}
-
 				const data = attachment.toJSON();
 				const filename = getFilename(data);
 				const mime = String(data.mime || data.mime_type || '');
@@ -163,17 +314,33 @@ const AttachmentsPanel: React.FC = () => {
 					data.filesizeInBytes || data.filesize || 0
 				);
 
-				if (!isAllowedAttachment(mime, size, filename)) {
-					rejected += 1;
+				const reason = getRejectionReason(mime, size, filename);
+				if (reason === 'type') {
+					rejectedByType.push(filename);
+					return;
+				}
+				if (reason === 'size') {
+					rejectedBySize.push(filename);
 					return;
 				}
 
 				const id = Number(data.id);
 				if (
-					!id ||
-					current.some((item) => item.id === id) ||
-					added.some((item) => item.id === id)
+					id &&
+					(current.some((item) => item.id === id) ||
+						added.some((item) => item.id === id))
 				) {
+					rejectedDuplicate.push(filename);
+					return;
+				}
+
+				if (!id) {
+					rejectedByType.push(filename);
+					return;
+				}
+
+				if (current.length + added.length >= MAX_EMAIL_ATTACHMENTS) {
+					rejectedOverLimit.push(filename);
 					return;
 				}
 
@@ -185,47 +352,27 @@ const AttachmentsPanel: React.FC = () => {
 				});
 			});
 
-			if (added.length === 0) {
-				createNotice({
-					type: 'error',
-					message:
-						rejected > 0
-							? __(
-									'File not added. Use PDF, Word, Excel, TXT, or ZIP under 10 MB.',
-									'doublescale'
-							  )
-							: __(
-									'No file was selected.',
-									'doublescale'
-							  ),
-				});
-				return;
+			if (added.length > 0) {
+				if (typeof dispatch(STORE_KEY).setAttachments !== 'function') {
+					createNotice({
+						type: 'error',
+						message: __(
+							'Could not save attachment. Hard-refresh the page and try again.',
+							'doublescale'
+						),
+					});
+					return;
+				}
+
+				dispatch(STORE_KEY).setAttachments([...current, ...added]);
 			}
 
-			if (typeof dispatch(STORE_KEY).setAttachments !== 'function') {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Could not save attachment. Hard-refresh the page and try again.',
-						'doublescale'
-					),
-				});
-				return;
-			}
-
-			dispatch(STORE_KEY).setAttachments([...current, ...added]);
-			createNotice({
-				type: 'success',
-				message: sprintf(
-					/* translators: %d: number of files attached */
-					_n(
-						'%d file attached.',
-						'%d files attached.',
-						added.length,
-						'doublescale'
-					),
-					added.length
-				),
+			showAttachmentFeedback({
+				added,
+				rejectedByType,
+				rejectedBySize,
+				rejectedDuplicate,
+				rejectedOverLimit,
 			});
 		});
 
@@ -261,13 +408,14 @@ const AttachmentsPanel: React.FC = () => {
 				</div>
 				<p className="text-xs text-white/70">
 					{sprintf(
-						/* translators: %1$d: max files, %2$s: max size per file */
+						/* translators: %1$d: max files, %2$s: max size per file, %3$s: allowed file types */
 						__(
-							'Attach up to %1$d files (max %2$s each). Files are sent with the email.',
+							'Attach up to %1$d files (max %2$s each), sent with the email. Allowed types: %3$s.',
 							'doublescale'
 						),
 						MAX_EMAIL_ATTACHMENTS,
-						'10 MB'
+						formatFileSize(MAX_EMAIL_ATTACHMENT_BYTES),
+						ALLOWED_TYPES_LABEL
 					)}
 				</p>
 			</div>

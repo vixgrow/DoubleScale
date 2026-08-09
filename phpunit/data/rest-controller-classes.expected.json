@@ -102,5 +102,6 @@
     "RestTicketController",
     "RestUserEmailController",
     "RestUserManagementController",
-    "RestWhatsappTemplatesController"
+    "RestWhatsappTemplatesController",
+    "RestWooProductController"
 ]

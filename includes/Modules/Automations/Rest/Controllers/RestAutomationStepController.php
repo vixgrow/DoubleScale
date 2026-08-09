@@ -181,6 +181,28 @@ class RestAutomationStepController extends RestController {
 			)
 		);
 
+		// Renders builder content straight from the request, so the device
+		// preview works for steps that are still unsaved in the builder (the
+		// template render endpoint can only read already-saved templates).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/preview-email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_email' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'body' => array(
+							'description' => __( 'Email body: builder JSON or raw HTML', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/toggle',
@@ -964,6 +986,75 @@ class RestAutomationStepController extends RestController {
 	 * Mirrors the campaign builder's test send, but takes the content from the
 	 * request instead of a saved template: an automation step's body lives in
 	 * the builder's local state and may not be persisted yet.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+
+	/**
+	 * Render builder content to email HTML for the device preview.
+	 *
+	 * Takes the body from the request for the same reason send_test_email()
+	 * does: the step's content may still be unsaved. Rendering goes through the
+	 * same EmailRenderer the real send uses, so the preview shows the actual
+	 * email markup — including the responsive CSS — rather than an approximation.
+	 *
+	 * No contact is passed, so merge tags stay unresolved; this is a layout
+	 * preview, not a per-recipient one.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function preview_email( $request ) {
+		try {
+			$body = $request->get_param( 'body' );
+
+			if ( empty( $body ) ) {
+				return new WP_Error(
+					'missing_body',
+					__( 'Email body is empty. Add content in the builder before previewing.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// The body arrives either as builder JSON ({"type":"builder","value":{...}})
+			// or as raw HTML. Only the former needs rendering.
+			$builder_data = null;
+			$decoded      = json_decode( $body, true );
+			if ( is_array( $decoded ) ) {
+				if ( isset( $decoded['type'] ) && 'builder' === $decoded['type'] && isset( $decoded['value'] ) ) {
+					$builder_data = $decoded['value'];
+				} elseif ( isset( $decoded['sections'] ) ) {
+					$builder_data = $decoded;
+				}
+			}
+
+			if ( null !== $builder_data ) {
+				$renderer = new EmailRenderer();
+				$html     = $renderer->render_from_builder_data( $builder_data );
+			} else {
+				// Raw HTML body — preview it as-is.
+				$html = $body;
+			}
+
+			return new WP_REST_Response( array( 'html' => $html ), 200 );
+		} catch ( \Throwable $e ) {
+			return new WP_Error(
+				'preview_failed',
+				__( 'Failed to render the preview.', 'doublescale' ),
+				array( 'status' => 500 )
+			);
+		}
+	}
+
+	/**
+	 * Send a test email for an automation step.
 	 *
 	 * @since 1.0.0
 	 *

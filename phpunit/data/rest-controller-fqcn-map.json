@@ -102,5 +102,6 @@
     "RestTicketController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestTicketController",
     "RestUserEmailController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestUserEmailController",
     "RestUserManagementController": "DoubleScale\\Core\\UserRoles\\Rest\\RestUserManagementController",
-    "RestWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestWhatsappTemplatesController"
+    "RestWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestWhatsappTemplatesController",
+    "RestWooProductController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestWooProductController"
 }

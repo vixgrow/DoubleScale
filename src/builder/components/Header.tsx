@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { RedoIcon, UndoIcon } from '@doublescale/shared/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useAutoSave } from '@doublescale/hooks/useAutoSave';
@@ -18,6 +19,8 @@ import { useTemplateActions } from '@doublescale/hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
 import { SendTestEmailPopover } from './SendTestEmailPopover';
+import { DevicePreviewDialog } from './DevicePreviewDialog';
+import { shouldShowCampaignBreadcrumb } from '../utils/builderMode';
 import { BuilderData } from '../index';
 import ArrowIcon from '@doublescale/shared/icons/dropdown-header';
 
@@ -71,7 +74,19 @@ const Header: React.FC<HeaderProps> = ({
 		[]
 	);
 
+	// `onSave` is supplied only by the embedded hosts (automation "Send Email",
+	// email sequences); see builderMode for why campaign chrome must key off
+	// that rather than off the presence of a campaign.
+	const showCampaignBreadcrumb = shouldShowCampaignBreadcrumb({
+		hasOnSave: Boolean(onSave),
+		hasCampaign: Boolean(campaign),
+	});
+
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+	const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+	const [previewHtml, setPreviewHtml] = useState('');
+	const [previewLoading, setPreviewLoading] = useState(false);
+	const [previewError, setPreviewError] = useState<string | null>(null);
 
 	// Check if builder is empty
 	const isBuilderEmpty =
@@ -128,6 +143,67 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	};
 
+	/**
+	 * Render the current email for preview.
+	 *
+	 * Always renders the live builder state rather than a saved template. Going
+	 * through a saved template would show whatever was last persisted, so the
+	 * preview looked "stuck" on old content after every edit — and in embedded
+	 * mode (automation "Send Email", email sequences) there is often no saved
+	 * template to read at all.
+	 *
+	 * Reads sections/settings from the store at call time so reopening the
+	 * dialog always picks up the latest edits.
+	 */
+	const loadPreview = async () => {
+		setPreviewLoading(true);
+		setPreviewError(null);
+
+		try {
+			const {
+				getSections,
+				getGlobalSettings,
+				getAllButtonSettings,
+			} = select(STORE_KEY) as {
+				getSections: () => unknown;
+				getGlobalSettings: () => unknown;
+				getAllButtonSettings: () => unknown;
+			};
+
+			const { html } = await apiFetch<{ html: string }>({
+				path: '/doublescale/v1/automation-steps/preview-email',
+				method: 'POST',
+				data: {
+					body: JSON.stringify({
+						type: 'builder',
+						value: {
+							sections: getSections(),
+							globalSettings: getGlobalSettings(),
+							buttonSettings: getAllButtonSettings(),
+						},
+					}),
+				},
+			});
+			setPreviewHtml(html);
+		} catch (err) {
+			setPreviewError(
+				err instanceof Error
+					? err.message
+					: __('Failed to load preview.', 'doublescale')
+			);
+		} finally {
+			setPreviewLoading(false);
+		}
+	};
+
+	const handleOpenPreview = async () => {
+		if (!ensureNotEmptyOrNotify()) return;
+
+		setPreviewHtml('');
+		setIsPreviewOpen(true);
+		await loadPreview();
+	};
+
 	const handleChangeTemplate = () => {
 		if (!campaign) return;
 		const path = `campaigns/${campaign.id}/email-templates`;
@@ -154,7 +230,13 @@ const Header: React.FC<HeaderProps> = ({
 	return (
 		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				{campaign && (
+				{/*
+				 * Campaign-only. In embedded mode (automation "Send Email",
+				 * email sequences) the builder is a modal over an unrelated
+				 * screen, but a campaign may still be cached in the store —
+				 * showing its breadcrumb there points at the wrong flow.
+				 */}
+				{showCampaignBreadcrumb && campaign && (
 					<BreadcrumbComponent
 						items={[
 							{ label: __('Create Campaign', 'doublescale') },
@@ -231,6 +313,19 @@ const Header: React.FC<HeaderProps> = ({
 							</DropdownMenuContent>
 						</DropdownMenu>
 
+						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={handleOpenPreview}
+							disabled={isSaving || isBuilderEmpty}
+							title={__(
+								'Preview on desktop, tablet and mobile',
+								'doublescale'
+							)}
+						>
+							{__('Preview', 'doublescale')}
+						</Button>
+
 						<SendTestEmailPopover
 							campaignId={campaign.id}
 							disabled={isSaving || isBuilderEmpty}
@@ -257,6 +352,24 @@ const Header: React.FC<HeaderProps> = ({
 
 				{onSave && (
 					<>
+						{/*
+						 * Unlike the test send, preview needs no subject/from
+						 * context — it renders the builder content alone — so it
+						 * is offered wherever the embedded builder is used.
+						 */}
+						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={handleOpenPreview}
+							disabled={isSaving || isBuilderEmpty}
+							title={__(
+								'Preview on desktop, tablet and mobile',
+								'doublescale'
+							)}
+						>
+							{__('Preview', 'doublescale')}
+						</Button>
+
 						{getTestEmailContext && (
 							<SendTestEmailPopover
 								disabled={isSaving || isBuilderEmpty}
@@ -309,6 +422,16 @@ const Header: React.FC<HeaderProps> = ({
 				onClose={() => setIsTemplateDialogOpen(false)}
 				onSave={handleSaveAsTemplate}
 				isSaving={isSavingTemplate}
+			/>
+
+			{/* Desktop / tablet / mobile preview */}
+			<DevicePreviewDialog
+				open={isPreviewOpen}
+				onOpenChange={setIsPreviewOpen}
+				html={previewHtml}
+				loading={previewLoading}
+				error={previewError}
+				onRetry={loadPreview}
 			/>
 		</div>
 	);

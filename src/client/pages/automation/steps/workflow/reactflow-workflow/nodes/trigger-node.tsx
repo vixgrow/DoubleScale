@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -30,8 +31,12 @@ import {
 } from '@/components/ui/tooltip';
 import CreateAutomationModal from '../../../../../automations/create-automation-modal';
 import { useAutomationContext } from '../../../../state/context';
-import apiFetch from '@wordpress/api-fetch';
 import { TriggerIcon } from '@doublescale/components';
+import {
+	getFreeformWhatsappSteps,
+	resetFreeformWhatsappSettings,
+} from '../../utils/whatsapp-automation';
+import type { AutomationStep } from '@doublescale/client';
 
 interface TriggerNodeData {
 	automation: Automation;
@@ -51,7 +56,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 		analytics,
 	} = data as unknown as TriggerNodeData;
 
-	const { saveAutomation, refetchAutomation, isSaving } =
+	const { saveAutomation, refetchAutomation, isSaving, steps, updateStep } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('doublescale/core');
 	const [showChangeTriggerModal, setShowChangeTriggerModal] = useState(false);
@@ -107,6 +112,26 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 			}
 
 			if (triggerChanged) {
+				const leavingWhatsappReceived =
+					automation?.trigger === 'whatsapp_received' &&
+					tempAutomation.trigger !== 'whatsapp_received';
+				const hasFreeformWhatsappSteps =
+					leavingWhatsappReceived &&
+					getFreeformWhatsappSteps(steps).length > 0;
+
+				if (hasFreeformWhatsappSteps) {
+					const confirmed = window.confirm(
+						__(
+							'Changing the trigger will disable the free-form text option in existing WhatsApp actions and reset them to unconfigured. You will need to select a template for those steps.',
+							'doublescale'
+						)
+					);
+
+					if (!confirmed) {
+						return;
+					}
+				}
+
 				// check if you have any condtions is related with this trigger
 				const response = await apiFetch({
 					path: '/doublescale/v1/automations/check-conditions',
@@ -152,6 +177,26 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
+	const resetFreeformWhatsappSteps = async () => {
+		const affectedSteps = getFreeformWhatsappSteps(steps);
+
+		for (const step of affectedSteps) {
+			const response = (await apiFetch({
+				path: `/doublescale/v1/automation-steps/${step.id}`,
+				method: 'POST',
+				data: {
+					...step,
+					settings: resetFreeformWhatsappSettings(
+						step.settings || {}
+					),
+					status: 'active',
+				},
+			})) as AutomationStep;
+
+			updateStep(response.id, response);
+		}
+	};
+
 	const handleChangeTriggerConfirm = async () => {
 		const nameTrimmed = tempAutomation.name.trim();
 		if (!nameTrimmed) {
@@ -161,6 +206,15 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 			});
 			return;
 		}
+
+		const leavingWhatsappReceived =
+			automation?.trigger === 'whatsapp_received' &&
+			tempAutomation.trigger !== 'whatsapp_received';
+
+		if (leavingWhatsappReceived && getFreeformWhatsappSteps(steps).length > 0) {
+			await resetFreeformWhatsappSteps();
+		}
+
 		await saveAutomation({
 			trigger: tempAutomation.trigger,
 			name: nameTrimmed,

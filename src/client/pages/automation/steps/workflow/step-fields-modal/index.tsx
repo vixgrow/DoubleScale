@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -57,6 +57,10 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const navigate = useNavigate();
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('doublescale/core');
+	const currentTrigger = useSelect(
+		(select) => select('doublescale/core').getCurrentTrigger(),
+		[]
+	);
 	const { steps, setSteps } = useAutomationContext();
 
 	// Determine if this is a messaging action that requires provider
@@ -113,6 +117,41 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	);
 
 	const handleSave = useCallback(async () => {
+		if (isWhatsAppAction) {
+			const whatsappTemplate = settings?.whatsapp_template;
+			const messageType = whatsappTemplate?.message_type || 'template';
+
+			if (messageType === 'text') {
+				if (currentTrigger !== 'whatsapp_received') {
+					createNotice({
+						type: 'error',
+						message: __(
+							'Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received.',
+							'doublescale'
+						),
+					});
+					return;
+				}
+
+				if (!whatsappTemplate?.body?.trim()) {
+					createNotice({
+						type: 'error',
+						message: __('Message body is required.', 'doublescale'),
+					});
+					return;
+				}
+			} else if (!whatsappTemplate?.template_sid) {
+				createNotice({
+					type: 'error',
+					message: __(
+						'WhatsApp template is required.',
+						'doublescale'
+					),
+				});
+				return;
+			}
+		}
+
 		// Block save when any required field is empty, and surface which one.
 		const missing = requiredFieldKeys.filter((key) => {
 			const value = settings?.[key];
@@ -151,7 +190,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		// `action` is read for the error label only and is intentionally omitted
 		// to keep handleSave's identity stable (it feeds the footer effect).
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [step, settings, saveStep, requiredFieldKeys, createNotice]);
+	}, [step, settings, saveStep, requiredFieldKeys, createNotice, isWhatsAppAction, currentTrigger]);
 
 	const handleDelete = useCallback(async () => {
 		setIsDeleting(true);
@@ -347,6 +386,23 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					)}
 				</>
 			)}
+
+			{isWhatsAppAction &&
+				settings?.whatsapp_template?.message_type === 'text' &&
+				currentTrigger !== 'whatsapp_received' && (
+					<Alert
+						variant="destructive"
+						className="mb-4 border-orange-500 bg-orange-50"
+					>
+						<AlertTriangle className="h-4 w-4 text-orange-600" />
+						<AlertDescription className="text-sm text-orange-800">
+							{__(
+								'Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received. Switch to a template or change the trigger.',
+								'doublescale'
+							)}
+						</AlertDescription>
+					</Alert>
+				)}
 
 			<div className="mb-4">
 				<Fields

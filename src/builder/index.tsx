@@ -36,12 +36,14 @@ import {
 	GlobalSettings,
 	ButtonSettings,
 	ButtonType,
+	EmailAttachment,
 } from './types/common';
 
 export interface BuilderData {
 	sections: EmailSection[];
 	globalSettings: GlobalSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+	attachments?: EmailAttachment[];
 }
 
 // The email builder canvas needs desktop real estate; below 1024px we show a
@@ -147,7 +149,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			dispatch(STORE_KEY).setLoading(true);
 			dispatch(STORE_KEY).resetBuilder();
 
-			const { sections, globalSettings, buttonSettings } = data;
+			const { sections, globalSettings, buttonSettings, attachments } = data;
 
 			if (sections?.length) {
 				dispatch(STORE_KEY).setBuilderState(sections);
@@ -159,6 +161,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 				Object.entries(buttonSettings).forEach(([type, settings]) => {
 					dispatch(STORE_KEY).updateButtonSettings(type, settings);
 				});
+			}
+			if (attachments) {
+				dispatch(STORE_KEY).setAttachments(attachments);
 			}
 
 			setTimeout(() => dispatch(STORE_KEY).setLoading(false), 100);
@@ -233,7 +238,14 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						: template.body;
 
 				if (body?.type === 'builder' && body.value) {
-					hydrateBuilder(body.value as BuilderData);
+					const builderData = body.value as BuilderData;
+					if (
+						!builderData.attachments?.length &&
+						template.settings?.attachments?.length
+					) {
+						builderData.attachments = template.settings.attachments;
+					}
+					hydrateBuilder(builderData);
 				} else {
 					dispatch(STORE_KEY).resetBuilder();
 				}

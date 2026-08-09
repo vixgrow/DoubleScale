@@ -44,6 +44,7 @@ const defaultTemplateSettings = (): EmailTemplate['settings'] => ({
 	utm_name: '',
 	utm_term: '',
 	utm_content: '',
+	attachments: [],
 });
 
 /** API responses include legacy root subject/preview_text; keep values in settings only. */

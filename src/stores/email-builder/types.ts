@@ -69,6 +69,13 @@ export interface GlobalEmailSettings {
 	canvasWidth: number;
 }
 
+export interface EmailAttachment {
+	id: number;
+	filename: string;
+	mime: string;
+	size: number;
+}
+
 export interface EmailBuilderState {
 	sections: EmailSection[];
 	selectedBlockId: string | null;
@@ -77,6 +84,7 @@ export interface EmailBuilderState {
 	draggedBlock: EmailBlock | null;
 	globalSettings: GlobalEmailSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+	attachments: EmailAttachment[];
 	isLoading: boolean;
 	history: {
 		past: EmailSection[][];
@@ -233,6 +241,13 @@ export interface SetButtonSettingsAction {
 	};
 }
 
+export interface SetAttachmentsAction {
+	type: 'SET_ATTACHMENTS';
+	payload: {
+		attachments: EmailAttachment[];
+	};
+}
+
 export interface SetLoadingAction {
 	type: 'SET_LOADING';
 	payload: {
@@ -261,4 +276,5 @@ export type EmailBuilderActionTypes =
 	| RedoAction
 	| UpdateButtonSettingsAction
 	| SetButtonSettingsAction
+	| SetAttachmentsAction
 	| SetLoadingAction;

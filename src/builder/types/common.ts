@@ -266,6 +266,17 @@ export interface DropTarget {
 }
 
 // ============================================================================
+// Attachment Types
+// ============================================================================
+
+export interface EmailAttachment {
+	id: number;
+	filename: string;
+	mime: string;
+	size: number;
+}
+
+// ============================================================================
 // API Types
 // ============================================================================
 
@@ -279,6 +290,7 @@ export interface EmailTemplate {
 			sections: EmailSection[];
 			globalSettings: GlobalSettings;
 			buttonSettings: Record<ButtonType, ButtonSettings>;
+			attachments?: EmailAttachment[];
 		};
 	};
 	thumbnail?: string;
@@ -300,6 +312,7 @@ export interface EmailTemplateSettings {
 	utm_name: string;
 	utm_term: string;
 	utm_content: string;
+	attachments?: EmailAttachment[];
 }
 
 // ============================================================================

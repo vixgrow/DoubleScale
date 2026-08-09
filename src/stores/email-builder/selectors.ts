@@ -133,6 +133,10 @@ export const getAllButtonSettings = (
 	return state.buttonSettings;
 };
 
+export const getAttachments = (state: EmailBuilderState) => {
+	return state.attachments;
+};
+
 export const getButtonSettings = (
 	state: EmailBuilderState,
 	buttonType: ButtonType

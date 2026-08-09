@@ -12,6 +12,7 @@ import {
 	SELECT_COLUMN,
 	SELECT_SECTION,
 	SET_BUILDER_STATE,
+	SET_ATTACHMENTS,
 	SET_BUTTON_SETTINGS,
 	SET_LOADING,
 	UNDO,
@@ -26,6 +27,7 @@ import type {
 	ButtonSettings,
 	ButtonType,
 	EmailBlock,
+	EmailAttachment,
 	EmailBuilderActionTypes,
 	EmailSection,
 	GlobalEmailSettings,
@@ -166,6 +168,13 @@ export const updateGlobalSettings = (
 ): EmailBuilderActionTypes => ({
 	type: UPDATE_GLOBAL_SETTINGS,
 	payload: { settings },
+});
+
+export const setAttachments = (
+	attachments: EmailAttachment[]
+): EmailBuilderActionTypes => ({
+	type: SET_ATTACHMENTS,
+	payload: { attachments },
 });
 
 // History actions

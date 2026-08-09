@@ -25,6 +25,7 @@ use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 use DoubleScale\Modules\Emails\EmailRenderer;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
@@ -1118,6 +1119,15 @@ class RestAutomationStepController extends RestController {
 			$failed_emails = array();
 			$last_detail   = '';
 
+			$attachment_paths = array();
+			if ( null !== $builder_data && ! empty( $builder_data['attachments'] ) ) {
+				$attachment_paths = EmailAttachmentResolver::resolve_paths( $builder_data['attachments'] );
+			} elseif ( $request->get_param( 'attachments' ) ) {
+				$attachment_paths = EmailAttachmentResolver::resolve_paths(
+					(array) $request->get_param( 'attachments' )
+				);
+			}
+
 			foreach ( $emails as $recipient_email ) {
 				$email_sender               = new Emails();
 				$email_sender->from_address = $from_email;
@@ -1144,7 +1154,7 @@ class RestAutomationStepController extends RestController {
 
 				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
 
-				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content ) ) {
+				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content, $attachment_paths ) ) {
 					++$sent_count;
 				} else {
 					++$failed_count;

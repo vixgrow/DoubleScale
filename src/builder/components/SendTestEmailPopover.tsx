@@ -31,6 +31,12 @@ interface SendTestEmailPopoverProps {
 		from_name?: string;
 		from_email?: string;
 		reply_to?: string;
+		attachments?: Array<{
+			id: number;
+			filename: string;
+			mime: string;
+			size: number;
+		}>;
 	};
 	disabled?: boolean;
 	onBeforeSend?: () => Promise<{ success: boolean }>;

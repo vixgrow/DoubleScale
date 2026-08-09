@@ -21,6 +21,7 @@ use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Campaigns\Services\CampaignStatusManager;
 use DoubleScale\Pro\Modules\Inbox\Services\MessageProviderRegistry;
+use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
@@ -587,12 +588,22 @@ class RestCampaignController extends AbstractCampaignController {
 			}
 
 			$for_testing_body = ! empty( $body ) ? $body : $this->get_default_test_email_content();
+			$attachment_paths = array();
+			if ( $request->get_param( 'attachments' ) ) {
+				$attachment_paths = EmailAttachmentResolver::resolve_paths(
+					(array) $request->get_param( 'attachments' )
+				);
+			} else {
+				$attachment_paths = EmailAttachmentResolver::extract_from_builder_body( $body );
+				$attachment_paths = EmailAttachmentResolver::resolve_paths( $attachment_paths );
+			}
 
 			$contact = ContactModel::get_by_email( $email ) ?? null;
 			$result  = $emails->send(
 				$email,
 				$subject,
-				$this->process_merge_tags( $for_testing_body, $contact )
+				$this->process_merge_tags( $for_testing_body, $contact ),
+				$attachment_paths
 			);
 
 			if ( ! $result ) {
@@ -712,8 +723,10 @@ class RestCampaignController extends AbstractCampaignController {
 				// Process subject with merge tags
 				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
 
+				$attachment_paths = EmailAttachmentResolver::resolve_template_paths( $template );
+
 				// Send email
-				$result = $email_sender->send( $recipient_email, $processed_subject, $body_content );
+				$result = $email_sender->send( $recipient_email, $processed_subject, $body_content, $attachment_paths );
 
 				if ( $result ) {
 					++$sent_count;

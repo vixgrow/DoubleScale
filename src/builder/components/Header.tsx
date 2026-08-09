@@ -73,6 +73,10 @@ const Header: React.FC<HeaderProps> = ({
 		(select) => select(STORE_KEY).getAllButtonSettings(),
 		[]
 	);
+	const attachments = useSelect(
+		(select) => select(STORE_KEY).getAttachments(),
+		[]
+	);
 
 	// `onSave` is supplied only by the embedded hosts (automation "Send Email",
 	// email sequences); see builderMode for why campaign chrome must key off
@@ -381,8 +385,10 @@ const Header: React.FC<HeaderProps> = ({
 											sections,
 											globalSettings,
 											buttonSettings,
+											attachments,
 										},
 									}),
+									attachments,
 								})}
 								onBeforeSend={async () => ({
 									success: ensureNotEmptyOrNotify(),

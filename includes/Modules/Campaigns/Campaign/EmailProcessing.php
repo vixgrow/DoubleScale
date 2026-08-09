@@ -24,6 +24,7 @@ use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
 use DoubleScale\Modules\Emails\BulkEmailSender;
 use DoubleScale\Modules\Emails\CurlMultiEmailSender;
+use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Emails\EmailTrackingHelper;
 use DoubleScale\Modules\Campaigns\Pipeline\CampaignProcessingPipeline;
@@ -94,6 +95,11 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			return $this->use_bulk_sending;
 		}
 
+		if ( $this->campaign_has_attachments( $campaign ) ) {
+			$this->use_bulk_sending = false;
+			return false;
+		}
+
 		// Bulk batch class must be present (bundled with CRM).
 		if ( ! class_exists( '\DoubleScale\Modules\Emails\BulkEmailSender' ) ) {
 			$this->use_bulk_sending = false;
@@ -144,6 +150,11 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			return $this->use_curl_multi_sending;
 		}
 
+		if ( $this->campaign_has_attachments( $campaign ) ) {
+			$this->use_curl_multi_sending = false;
+			return false;
+		}
+
 		// Curl multi batch class must be present (bundled with CRM).
 		if ( ! class_exists( '\DoubleScale\Modules\Emails\CurlMultiEmailSender' ) ) {
 			$this->use_curl_multi_sending = false;
@@ -190,14 +201,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * @return string|null From email address or null if not set
 	 */
 	protected function get_campaign_from_email( CampaignModel $campaign ) {
-		$template_ids = $campaign->get_template_ids();
-
-		if ( empty( $template_ids ) ) {
-			return null;
-		}
-
-		$template_id = reset( $template_ids );
-		$template    = TemplateModel::find( $template_id );
+		$template = $this->get_campaign_template( $campaign );
 
 		if ( ! $template ) {
 			return null;
@@ -206,6 +210,36 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$from_email = $template->get_setting( 'from_email' );
 
 		return $from_email ?: null;
+	}
+
+	/**
+	 * Get the primary email template for a campaign.
+	 *
+	 * @param CampaignModel $campaign Campaign model.
+	 * @return TemplateModel|null
+	 */
+	protected function get_campaign_template( CampaignModel $campaign ) {
+		$template_ids = $campaign->get_template_ids();
+
+		if ( empty( $template_ids ) ) {
+			return null;
+		}
+
+		$template_id = reset( $template_ids );
+
+		return TemplateModel::find( $template_id );
+	}
+
+	/**
+	 * Whether the campaign's email template includes file attachments.
+	 *
+	 * @param CampaignModel $campaign Campaign model.
+	 * @return bool
+	 */
+	protected function campaign_has_attachments( CampaignModel $campaign ) {
+		return EmailAttachmentResolver::template_has_attachments(
+			$this->get_campaign_template( $campaign )
+		);
 	}
 
 	/**
@@ -1981,15 +2015,18 @@ class EmailProcessing extends AbstractCampaignProcessing {
 				home_url()
 			);
 
+			$attachment_paths = EmailAttachmentResolver::resolve_template_paths( $template );
+
 			$campaign_for_log = $campaign_message->get_campaign();
 			if ( $campaign_for_log && class_exists( EmailLogContext::class ) ) {
 				$result = $this->with_smtp_campaign_log_context(
 					$campaign_for_log,
-					function () use ( $emails, $contact, $message_data, $complete_message ) {
+					function () use ( $emails, $contact, $message_data, $complete_message, $attachment_paths ) {
 						return $emails->send(
 							$contact->email,
 							$message_data['subject'],
-							$complete_message
+							$complete_message,
+							$attachment_paths
 						);
 					}
 				);
@@ -1997,7 +2034,8 @@ class EmailProcessing extends AbstractCampaignProcessing {
 				$result = $emails->send(
 					$contact->email,
 					$message_data['subject'],
-					$complete_message
+					$complete_message,
+					$attachment_paths
 				);
 			}
 

@@ -93,6 +93,7 @@ const groupContainsTrigger = (
 
 const TRIGGER_SIDEBAR_ORDER = [
 	'modules',
+	'webhooks',
 	'ecommerce',
 	'lms',
 	'wp',
@@ -143,8 +144,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		[automationTriggers]
 	);
 	const [selectedCategory, setSelectedCategory] = useState('modules');
-	const [selectedCategoryTab, setSelectedCategoryTab] =
-		useState('booking');
+	const [selectedCategoryTab, setSelectedCategoryTab] = useState('crm');
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const categoryData = {

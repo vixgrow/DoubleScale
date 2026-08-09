@@ -321,12 +321,17 @@ export function DataTableActions<TData>({
 					</Dialog>
 				)}
 
-			{/* Advanced Filters Button — Pro only, hidden entirely in Free */}
-			{config.filters?.enabled && isProActive && (
+			{/* Advanced Filters Button — Pro only. Shown in Free as a disabled
+			    button so the capability stays discoverable; the dialog can never
+			    be opened without Pro. */}
+			{config.filters?.enabled && (
 				<Dialog
 					open={isAdvancedFiltersOpen}
 					onOpenChange={(open) => {
 						if (open) {
+							if (!isProActive) {
+								return;
+							}
 							handleAdvancedFiltersDialogOpen();
 						} else {
 							setIsAdvancedFiltersOpen(false);
@@ -336,7 +341,12 @@ export function DataTableActions<TData>({
 					<DialogTrigger asChild>
 						<Button
 							variant="outline"
-							onClick={handleAdvancedFiltersDialogOpen}
+							disabled={!isProActive}
+							onClick={
+								isProActive
+									? handleAdvancedFiltersDialogOpen
+									: undefined
+							}
 							className={actionButtonClassName}
 						>
 							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">

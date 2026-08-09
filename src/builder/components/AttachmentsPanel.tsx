@@ -2,7 +2,7 @@
  * Email builder attachments panel — pick files from the WordPress Media Library.
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select } from '@wordpress/data';
 import { Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -11,15 +11,31 @@ import type { EmailAttachment } from '../../stores/email-builder/types';
 export const MAX_EMAIL_ATTACHMENTS = 5;
 export const MAX_EMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
+const ALLOWED_EXTENSIONS = new Set([
+	'.pdf',
+	'.doc',
+	'.docx',
+	'.xls',
+	'.xlsx',
+	'.txt',
+	'.zip',
+	'.rtf',
+]);
+
 const ALLOWED_MIME_PREFIXES = [
 	'application/pdf',
 	'application/msword',
 	'application/vnd.',
 	'text/plain',
 	'application/zip',
+	'application/x-zip-compressed',
+	'application/rtf',
 ];
 
 const formatFileSize = (bytes: number): string => {
+	if (bytes <= 0) {
+		return '';
+	}
 	if (bytes < 1024) {
 		return `${bytes} B`;
 	}
@@ -29,10 +45,53 @@ const formatFileSize = (bytes: number): string => {
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const isAllowedAttachment = (mime: string, size: number): boolean => {
+const getFilename = (data: Record<string, unknown>): string => {
+	const filename = data.filename;
+	if (typeof filename === 'string' && filename.trim()) {
+		return filename;
+	}
+	const title = data.title;
+	if (typeof title === 'string' && title.trim()) {
+		return title;
+	}
+	const url = data.url;
+	if (typeof url === 'string' && url) {
+		try {
+			const path = new URL(url, window.location.origin).pathname;
+			const base = path.split('/').pop();
+			if (base) {
+				return decodeURIComponent(base);
+			}
+		} catch {
+			// Fall through.
+		}
+	}
+	return __('Attachment', 'doublescale');
+};
+
+const getExtension = (filename: string): string => {
+	const dot = filename.lastIndexOf('.');
+	return dot >= 0 ? filename.slice(dot).toLowerCase() : '';
+};
+
+const isAllowedAttachment = (
+	mime: string,
+	size: number,
+	filename: string
+): boolean => {
 	if (size > MAX_EMAIL_ATTACHMENT_BYTES) {
 		return false;
 	}
+
+	const ext = getExtension(filename);
+	if (ext && ALLOWED_EXTENSIONS.has(ext)) {
+		return true;
+	}
+
+	if (!mime) {
+		return false;
+	}
+
 	return ALLOWED_MIME_PREFIXES.some(
 		(prefix) => mime === prefix || mime.startsWith(prefix)
 	);
@@ -40,8 +99,9 @@ const isAllowedAttachment = (mime: string, size: number): boolean => {
 
 const AttachmentsPanel: React.FC = () => {
 	const dispatch = useDispatch();
+	const { createNotice } = useDispatch('doublescale/core');
 	const attachments = useSelect(
-		(select) => select(STORE_KEY).getAttachments(),
+		(s) => s(STORE_KEY).getAttachments?.() ?? [],
 		[]
 	);
 
@@ -50,7 +110,28 @@ const AttachmentsPanel: React.FC = () => {
 			return;
 		}
 
+		const storeSelect = select(STORE_KEY) as {
+			getAttachments?: () => EmailAttachment[];
+		};
+		if (typeof storeSelect.getAttachments !== 'function') {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Attachments could not load. Hard-refresh the page and try again.',
+					'doublescale'
+				),
+			});
+			return;
+		}
+
 		if (typeof window.wp === 'undefined' || !window.wp.media) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Media Library is unavailable. Reload the page and try again.',
+					'doublescale'
+				),
+			});
 			return;
 		}
 
@@ -65,39 +146,87 @@ const AttachmentsPanel: React.FC = () => {
 		});
 
 		frame.on('select', () => {
+			const current = storeSelect.getAttachments?.() ?? [];
 			const selection = frame.state().get('selection');
-			const next: EmailAttachment[] = [...attachments];
+			const added: EmailAttachment[] = [];
+			let rejected = 0;
 
-			selection.each((attachment: any) => {
-				if (next.length >= MAX_EMAIL_ATTACHMENTS) {
+			selection.each((attachment: { toJSON: () => Record<string, unknown> }) => {
+				if (current.length + added.length >= MAX_EMAIL_ATTACHMENTS) {
 					return;
 				}
 
 				const data = attachment.toJSON();
+				const filename = getFilename(data);
 				const mime = String(data.mime || data.mime_type || '');
-				const size = Number(data.filesizeInBytes || data.filesize || 0);
+				const size = Number(
+					data.filesizeInBytes || data.filesize || 0
+				);
 
-				if (!isAllowedAttachment(mime, size)) {
+				if (!isAllowedAttachment(mime, size, filename)) {
+					rejected += 1;
 					return;
 				}
 
 				const id = Number(data.id);
-				if (!id || next.some((item) => item.id === id)) {
+				if (
+					!id ||
+					current.some((item) => item.id === id) ||
+					added.some((item) => item.id === id)
+				) {
 					return;
 				}
 
-				next.push({
+				added.push({
 					id,
-					filename:
-						data.filename ||
-						data.title ||
-						__('Attachment', 'doublescale'),
-					mime,
+					filename,
+					mime: mime || 'application/octet-stream',
 					size,
 				});
 			});
 
-			dispatch(STORE_KEY).setAttachments(next);
+			if (added.length === 0) {
+				createNotice({
+					type: 'error',
+					message:
+						rejected > 0
+							? __(
+									'File not added. Use PDF, Word, Excel, TXT, or ZIP under 10 MB.',
+									'doublescale'
+							  )
+							: __(
+									'No file was selected.',
+									'doublescale'
+							  ),
+				});
+				return;
+			}
+
+			if (typeof dispatch(STORE_KEY).setAttachments !== 'function') {
+				createNotice({
+					type: 'error',
+					message: __(
+						'Could not save attachment. Hard-refresh the page and try again.',
+						'doublescale'
+					),
+				});
+				return;
+			}
+
+			dispatch(STORE_KEY).setAttachments([...current, ...added]);
+			createNotice({
+				type: 'success',
+				message: sprintf(
+					/* translators: %d: number of files attached */
+					_n(
+						'%d file attached.',
+						'%d files attached.',
+						added.length,
+						'doublescale'
+					),
+					added.length
+				),
+			});
 		});
 
 		frame.on('open', () => {
@@ -158,9 +287,11 @@ const AttachmentsPanel: React.FC = () => {
 								>
 									{file.filename}
 								</div>
-								<div className="text-xs text-white/60">
-									{formatFileSize(file.size)}
-								</div>
+								{file.size > 0 && (
+									<div className="text-xs text-white/60">
+										{formatFileSize(file.size)}
+									</div>
+								)}
 							</div>
 							<Button
 								type="button"

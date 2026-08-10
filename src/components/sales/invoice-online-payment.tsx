@@ -1,5 +1,5 @@
 /**
- * Online payment UI for an invoice (Stripe + PayPal).
+ * Online payment UI for an invoice (Stripe, PayPal, WooCommerce Checkout).
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
@@ -88,6 +88,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 	const [paypalBusy, setPaypalBusy] = useState(false);
+	const [wooBusy, setWooBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
@@ -102,6 +103,9 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	);
 
 	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			return;
+		}
 		const redirectStatus = getStripeRedirectStatus();
 		if (!redirectStatus) {
 			return;
@@ -148,6 +152,10 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	}, [invoice.id, gateway.slug]);
 
 	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			setLoading(false);
+			return;
+		}
 		if (getStripeRedirectStatus()) {
 			return;
 		}
@@ -167,7 +175,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 					setPaypalClientId(response.client_id || null);
 					return;
 				}
-				setPublishableKey(response.publishable_key);
+				setPublishableKey(response.publishable_key || null);
 				setClientSecret(response.client_secret || null);
 			})
 			.catch((err: unknown) => {
@@ -215,6 +223,27 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return response.order_id;
 	}, [invoice.id, gateway.slug]);
 
+	const handleWooCheckout = useCallback(async () => {
+		setWooBusy(true);
+		setError(null);
+		try {
+			const response = await initInvoiceOnlinePayment(invoice.id, gateway.slug);
+			if (response.already_paid && response.invoice) {
+				onPaidRef.current(response.invoice);
+				return;
+			}
+			if (!response.redirect_url) {
+				throw new Error(__('Could not start WooCommerce checkout.', 'doublescale'));
+			}
+			window.location.href = response.redirect_url;
+		} catch (err: unknown) {
+			setError(
+				err instanceof Error ? err.message : __('Could not start WooCommerce checkout.', 'doublescale')
+			);
+			setWooBusy(false);
+		}
+	}, [invoice.id, gateway.slug]);
+
 	if (loading) {
 		return (
 			<div className="text-sm text-muted-foreground">{__('Loading payment options…', 'doublescale')}</div>
@@ -223,6 +252,27 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 
 	if (error) {
 		return <div className="text-sm text-red-600">{error}</div>;
+	}
+
+	if (gateway.slug === 'woocommerce') {
+		return (
+			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
+				<div>
+					<h4 className="font-medium">
+						{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}
+					</h4>
+					<p className="text-sm text-muted-foreground">
+						{__('Balance due:', 'doublescale')}{' '}
+						{formatMoney(balanceDue, invoice.currency)}
+					</p>
+				</div>
+				<Button onClick={() => void handleWooCheckout()} disabled={wooBusy}>
+					{wooBusy
+						? __('Redirecting…', 'doublescale')
+						: __('Pay via checkout', 'doublescale')}
+				</Button>
+			</div>
+		);
 	}
 
 	if (gateway.slug === 'paypal') {

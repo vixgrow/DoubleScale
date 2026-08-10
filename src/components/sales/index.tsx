@@ -9,6 +9,7 @@ export { getGlobalCurrency } from './sales-currency-utils';
 export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';
+export { SendWhatsappDialog } from './send-whatsapp-dialog';
 export { ConvertToInvoiceDialog } from './convert-to-invoice-dialog';
 export { DocumentRowActions } from './document-row-actions';
 export type { DocumentRowActionsProps } from './document-row-actions';
@@ -28,6 +29,7 @@ export {
 	canApplyCreditNote,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from './sales-approval-utils';
 export {
 	getDiscountValidationError,

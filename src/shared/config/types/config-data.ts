@@ -54,6 +54,12 @@ export type ConfigData = Record<string, unknown> & {
 	/** Sales approval workflow toggle from server settings (admin bootstrap). */
 	salesApprovalWorkflowEnabled: boolean;
 	/**
+	 * Whether a configured WhatsApp provider can deliver documents server-side.
+	 * False on Free, and on Pro until a provider is connected — the wa.me share
+	 * link stays available either way.
+	 */
+	salesWhatsappAutoAvailable: boolean;
+	/**
 	 * First day of the week for CRM calendars (date-fns weekStartsOn).
 	 * 0 = Sunday, 1 = Monday, … 6 = Saturday.
 	 */

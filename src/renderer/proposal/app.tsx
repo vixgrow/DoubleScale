@@ -34,8 +34,23 @@ const PublicProposalApp = ({ hash }: Props) => {
 	const [declineReason, setDeclineReason] = useState('');
 	const [signedName, setSignedName] = useState('');
 	const [signature, setSignature] = useState('');
+	const [agreedTerms, setAgreedTerms] = useState(false);
+
+	const hasTerms = Boolean(
+		data?.terms && data.terms.replace(/<[^>]*>/g, '').trim()
+	);
 
 	const handleAccept = async () => {
+		if (hasTerms && !agreedTerms) {
+			setActionError(
+				__(
+					'Please agree to the Terms & Conditions before accepting.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
 		if (data?.require_signature && (!signedName.trim() || !signature)) {
 			setActionError(
 				__('Please enter your name and sign to accept this proposal.', 'doublescale')
@@ -49,6 +64,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 			await acceptPublicProposal(hash, {
 				signed_name: signedName.trim(),
 				signature,
+				agreed_terms: hasTerms ? agreedTerms : undefined,
 			});
 			setShowAccept(false);
 			refetch();
@@ -93,6 +109,10 @@ const PublicProposalApp = ({ hash }: Props) => {
 
 	const previewProposal = data as unknown as Proposal;
 	const showActions = data.can_accept || data.can_decline;
+	const signatureLocked = hasTerms && !agreedTerms;
+	const canConfirmAccept =
+		!busy && (!hasTerms || agreedTerms) &&
+		(!data.require_signature || (signedName.trim() && signature));
 
 	return (
 		<div className="doublescale-proposal-renderer">
@@ -168,6 +188,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 								setShowAccept((v) => !v);
 								setShowDecline(false);
 								setSignedName(data.to_name || '');
+								setAgreedTerms(false);
 							}}
 							disabled={busy}
 						>
@@ -180,6 +201,23 @@ const PublicProposalApp = ({ hash }: Props) => {
 
 			{showAccept ? (
 				<div className="doublescale-proposal-renderer__accept">
+					{hasTerms ? (
+						<label className="flex items-start gap-3 mb-4 cursor-pointer">
+							<input
+								type="checkbox"
+								className="mt-1"
+								checked={agreedTerms}
+								onChange={(e) => setAgreedTerms(e.target.checked)}
+								disabled={busy}
+							/>
+							<span className="text-sm">
+								{__(
+									'I have read and agree to the Terms & Conditions.',
+									'doublescale'
+								)}
+							</span>
+						</label>
+					) : null}
 					{data.require_signature ? (
 						<>
 							<label className="text-sm font-medium block mb-2" htmlFor="signed-name">
@@ -190,11 +228,15 @@ const PublicProposalApp = ({ hash }: Props) => {
 								value={signedName}
 								onChange={(e) => setSignedName(e.target.value)}
 								className="mb-4"
+								disabled={busy || signatureLocked}
 							/>
 							<label className="text-sm font-medium block mb-2">
 								{__('Signature', 'doublescale')}
 							</label>
-							<SignaturePad onChange={setSignature} disabled={busy} />
+							<SignaturePad
+								onChange={setSignature}
+								disabled={busy || signatureLocked}
+							/>
 						</>
 					) : (
 						<p className="text-sm text-muted-foreground mb-4">
@@ -205,7 +247,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 						<Button variant="ghost" onClick={() => setShowAccept(false)} disabled={busy}>
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button onClick={() => void handleAccept()} disabled={busy}>
+						<Button onClick={() => void handleAccept()} disabled={!canConfirmAccept}>
 							{__('Confirm Accept', 'doublescale')}
 						</Button>
 					</div>

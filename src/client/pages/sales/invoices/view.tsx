@@ -25,6 +25,7 @@ import {
 	SendTestEmailIcon,
 	UserActivityIcon,
 	UserIcon,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +45,7 @@ import {
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
+	SendWhatsappDialog,
 	ApprovalStatusBanner,
 } from '@/components/sales';
 import { DocumentEditorSidebar } from '@/components/sales/document-templates/document-editor-sidebar';
@@ -56,21 +58,25 @@ import {
 	canSubmitForApproval,
 	canWithdrawApproval,
 	isApprovalWorkflowEnabled,
+	isWhatsappAutoSendAvailable,
 	showDirectSendAction,
 	formatSalesRestError,
 } from '@/components/sales/sales-approval-utils';
 import {
+	confirmWhatsappSent,
 	deleteInvoice,
 	deleteInvoicePayment,
 	downloadInvoicePdf,
 	recordInvoicePayment,
 	sendInvoice,
+	sendInvoiceWhatsapp,
 	submitInvoiceForApproval,
 	withdrawInvoiceApproval,
 	useInvoice,
 	useInvoicePayments,
 	useSalesOnlinePaymentGateways,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
 
@@ -192,6 +198,7 @@ const InvoiceView: React.FC = () => {
 
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
+	const [whatsappOpen, setWhatsappOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
@@ -260,6 +267,21 @@ const InvoiceView: React.FC = () => {
 		} finally {
 			setBusy(false);
 		}
+	};
+
+	const whatsappAutoAvailable = isWhatsappAutoSendAvailable();
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendInvoiceWhatsapp(invoiceId, options),
+		[invoiceId]
+	);
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('invoices', invoiceId, message),
+		[invoiceId]
+	);
+
+	const handleWhatsappSent = async () => {
+		await refetch();
+		showNotice('success', __('Invoice sent to the customer.', 'doublescale'));
 	};
 
 	const handleSend = async (message: string) => {
@@ -517,6 +539,17 @@ const InvoiceView: React.FC = () => {
 
 								{__('Send to Customer', 'doublescale')}
 								<SendTestEmailIcon width={24} height={24} />
+							</Button>
+						) : null}
+						{showSend ? (
+							<Button
+								variant="outline"
+								onClick={() => setWhatsappOpen(true)}
+								disabled={busy}
+								className="border-primary text-primary bg-white"
+							>
+								{__('WhatsApp', 'doublescale')}
+								<WhatsAppIcon width={24} height={24} />
 							</Button>
 						) : null}
 						<Button
@@ -777,6 +810,20 @@ const InvoiceView: React.FC = () => {
 				confirmLabel={__('Send', 'doublescale')}
 				busy={busy}
 				onConfirm={handleSend}
+			/>
+
+			<SendWhatsappDialog
+				open={whatsappOpen}
+				onOpenChange={setWhatsappOpen}
+				title={__('Send Invoice via WhatsApp', 'doublescale')}
+				description={__(
+					'Share a link to this invoice with the customer on WhatsApp.',
+					'doublescale'
+				)}
+				onPrepare={prepareWhatsapp}
+				onConfirmSent={confirmWhatsapp}
+				onSent={() => void handleWhatsappSent()}
+				autoSendAvailable={whatsappAutoAvailable}
 			/>
 
 			<ConfirmDialog

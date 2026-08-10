@@ -205,6 +205,9 @@ final class AdminConfig {
 				'salesApprovalWorkflowEnabled' => class_exists( \DoubleScale\Modules\Sales\Services\SalesSettings::class )
 					? (bool) \DoubleScale\Modules\Sales\Services\SalesSettings::get( 'approval_workflow_enabled', false )
 					: false,
+				/** Whether a configured WhatsApp provider can send documents without
+				 * the admin opening wa.me — Pro answers this filter. */
+				'salesWhatsappAutoAvailable' => (bool) apply_filters( 'doublescale_sales_whatsapp_auto_available', false ),
 				'business'            => self::get_business_branding_config(),
 				'calendarWeekStartsOn' => Settings::get_calendar_week_starts_on(),
 			)

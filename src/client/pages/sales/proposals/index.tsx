@@ -2,7 +2,7 @@
  * Proposals list page.
  */
 
-import React, { useEffect, useMemo, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { RefreshCw } from 'lucide-react';
 
@@ -18,23 +18,28 @@ import {
 	ConvertToInvoiceDialog,
 	ProposalFormDialog,
 	SendDocumentDialog,
+	SendWhatsappDialog,
 } from '@/components/sales';
 import {
 	canEditSalesDocument,
 	formatSalesRestError,
 	isApprovalWorkflowEnabled,
+	isWhatsappAutoSendAvailable,
 	showDirectSendAction,
 } from '@/components/sales/sales-approval-utils';
 import { PROPOSAL_STATUSES, PROPOSAL_STATUS_LABELS } from '@/constants/sales';
 import {
 	changeProposalStatus,
+	confirmWhatsappSent,
 	convertProposalToInvoice,
 	deleteProposal,
 	downloadProposalPdf,
 	duplicateProposal,
 	sendProposal,
+	sendProposalWhatsapp,
 	useProposals,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { Proposal } from '@/types/sales';
 import { getProposalColumns } from './columns';
@@ -59,6 +64,7 @@ const ProposalsList: React.FC = () => {
 	const [convertTarget, setConvertTarget] = useState<Proposal | null>(null);
 	const [acceptTarget, setAcceptTarget] = useState<Proposal | null>(null);
 	const [sendTarget, setSendTarget] = useState<Proposal | null>(null);
+	const [whatsappTarget, setWhatsappTarget] = useState<Proposal | null>(null);
 
 	const { data, loading, error, refetch } = useProposals({
 		page,
@@ -203,6 +209,17 @@ const ProposalsList: React.FC = () => {
 		).then(() => setSendTarget(null));
 	};
 
+	const whatsappAutoAvailable = isWhatsappAutoSendAvailable();
+	const whatsappProposalId = whatsappTarget?.id ?? 0;
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendProposalWhatsapp(whatsappProposalId, options),
+		[whatsappProposalId]
+	);
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('proposals', whatsappProposalId, message),
+		[whatsappProposalId]
+	);
+
 	const columns = useMemo(
 		() =>
 			getProposalColumns({
@@ -214,6 +231,7 @@ const ProposalsList: React.FC = () => {
 				onConvert: setConvertTarget,
 				onMarkAccepted: setAcceptTarget,
 				onSend: setSendTarget,
+				onSendWhatsApp: setWhatsappTarget,
 				onDownloadPdf: handleDownloadPdf,
 				busyId,
 				canSend,
@@ -428,6 +446,26 @@ const ProposalsList: React.FC = () => {
 				confirmLabel={__('Send', 'doublescale')}
 				busy={busyId !== null}
 				onConfirm={confirmSend}
+			/>
+
+			<SendWhatsappDialog
+				open={whatsappTarget !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setWhatsappTarget(null);
+					}
+				}}
+				title={__('Send Proposal via WhatsApp', 'doublescale')}
+				description={__(
+					'Share a link to this proposal with the customer on WhatsApp.',
+					'doublescale'
+				)}
+				onPrepare={prepareWhatsapp}
+				onConfirmSent={confirmWhatsapp}
+				onSent={() => {
+					void refetch();
+				}}
+				autoSendAvailable={whatsappAutoAvailable}
 			/>
 		</div>
 	);

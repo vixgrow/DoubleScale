@@ -22,6 +22,8 @@ import type {
 	InvoiceFilters,
 	InvoiceOnlineInitResponse,
 	InvoicePayment,
+	InvoiceRecurrence,
+	InvoiceRecurrencePayload,
 	InvoiceSummary,
 	OnlinePaymentGatewayStatus,
 	PaginatedResponse,
@@ -500,6 +502,22 @@ export const deleteInvoice = (id: number) =>
 		method: 'DELETE',
 	});
 
+/**
+ * Save (or clear) the recurrence rule for an invoice.
+ *
+ * Served by the Pro Recurring Invoices module; the endpoint 404s when that
+ * module is inactive, so callers should treat failures as non-fatal.
+ */
+export const saveInvoiceRecurrence = (
+	invoiceId: number,
+	payload: InvoiceRecurrencePayload
+) =>
+	apiFetch<{ data: InvoiceRecurrence | null }>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/recurrence`,
+		method: 'POST',
+		data: payload,
+	});
+
 export const useAssignableSalesUsers = () => {
 	const [data, setData] = useState<SalesAssignableUser[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -761,6 +779,70 @@ export const sendInvoice = (invoiceId: number, message = '') =>
 		path: `${NAMESPACE}/invoices/${invoiceId}/send`,
 		method: 'POST',
 		data: message ? { message } : {},
+	});
+
+/**
+ * Prepared WhatsApp share.
+ *
+ * `sent` is false in link mode: the server only builds the payload, and the
+ * document is marked sent by a follow-up confirm call once the admin has
+ * actually sent it from WhatsApp.
+ */
+export interface WhatsappShareResponse {
+	sent: boolean;
+	link: string;
+	phone: string;
+	text: string;
+	url: string;
+}
+
+export interface WhatsappShareOptions {
+	message?: string;
+	/** 'link' builds a wa.me URL; 'auto' delivers via a configured provider. */
+	mode?: 'link' | 'auto';
+	/** Overrides the contact's stored number for this send only. */
+	phone?: string;
+}
+
+const whatsappShare = <T>(base: string, id: number, options: WhatsappShareOptions = {}) =>
+	apiFetch<T>({
+		path: `${NAMESPACE}/${base}/${id}/send-whatsapp`,
+		method: 'POST',
+		data: {
+			message: options.message ?? '',
+			mode: options.mode ?? 'link',
+			...(options.phone ? { phone: options.phone } : {}),
+		},
+	});
+
+export const sendInvoiceWhatsapp = (invoiceId: number, options?: WhatsappShareOptions) =>
+	whatsappShare<WhatsappShareResponse | SendInvoiceResponse>('invoices', invoiceId, options);
+
+export const sendProposalWhatsapp = (proposalId: number, options?: WhatsappShareOptions) =>
+	whatsappShare<WhatsappShareResponse | SendProposalResponse>('proposals', proposalId, options);
+
+export const sendContractWhatsapp = (contractId: number, options?: WhatsappShareOptions) =>
+	whatsappShare<WhatsappShareResponse | { sent: boolean; contract: Contract }>(
+		'contracts',
+		contractId,
+		options
+	);
+
+/**
+ * Record that a document was shared over WhatsApp.
+ *
+ * Reuses the /send route with an explicit channel so status transitions and
+ * activity logging stay in one place per document type.
+ */
+export const confirmWhatsappSent = (
+	base: 'invoices' | 'proposals' | 'contracts' | 'credit-notes',
+	id: number,
+	message = ''
+) =>
+	apiFetch<{ sent: boolean }>({
+		path: `${NAMESPACE}/${base}/${id}/send`,
+		method: 'POST',
+		data: { message, channel: 'whatsapp' },
 	});
 
 export const duplicateProposal = (proposalId: number) =>

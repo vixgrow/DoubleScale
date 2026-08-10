@@ -28,6 +28,8 @@ import {
 import stripeImg from '@doublescale/assets/images/stripe/stripe.png';
 // @ts-ignore
 import paypalImg from '@doublescale/assets/images/paypal/paypal.png';
+// @ts-ignore
+import wooImg from '@doublescale/assets/images/woocoomerce/woo-icon.png';
 import { ArrowRight } from 'lucide-react';
 
 interface PaymentGatewaysSettingsProps {
@@ -38,6 +40,7 @@ interface PaymentGatewaysSettingsProps {
 const GATEWAY_IMAGES: Record<string, string> = {
 	stripe: stripeImg,
 	paypal: paypalImg,
+	woocommerce: wooImg,
 };
 
 const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
@@ -64,6 +67,22 @@ const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
 		configured: false,
 		enabled_for_sales: false,
 		ready: false,
+	},
+	woocommerce: {
+		slug: 'woocommerce',
+		name: 'WooCommerce Checkout',
+		description: __(
+			'Pay via the store WooCommerce checkout. Requires at least one enabled WooCommerce payment method.',
+			'doublescale'
+		),
+		available: false,
+		configured: false,
+		enabled_for_sales: false,
+		ready: false,
+		configuration_hint: __(
+			'Enable at least one payment method in WooCommerce → Settings → Payments (e.g. Cash on Delivery).',
+			'doublescale'
+		),
 	},
 };
 
@@ -159,6 +178,9 @@ const GatewayCard: FC<{
 					</p>
 				) : null}
 				<GatewayStatusBadge gateway={gateway} />
+				{gateway.available && !gateway.configured && gateway.configuration_hint ? (
+					<p className="text-sm text-[#896900]">{gateway.configuration_hint}</p>
+				) : null}
 			</div>
 		</div>
 
@@ -180,7 +202,9 @@ const GatewayCard: FC<{
 					className="h-9 whitespace-nowrap rounded-lg px-3 text-sm"
 					onClick={onConfigure}
 				>
-					{__('Configure in Integrations', 'doublescale')}
+					{gateway.slug === 'woocommerce'
+						? __('Configure in WooCommerce', 'doublescale')
+						: __('Configure in Integrations', 'doublescale')}
 					<ArrowRight className='w-4 h-4' />
 				</Button>
 			) : null}
@@ -242,6 +266,10 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 	const openIntegration = (gateway: OnlinePaymentGatewayStatus) => {
 		if (gateway.slug === 'stripe' || gateway.slug === 'paypal') {
 			navigate(getToLink(`integrations/${gateway.slug}`));
+			return;
+		}
+		if (gateway.integration_url) {
+			window.open(gateway.integration_url, '_blank', 'noopener,noreferrer');
 		}
 	};
 

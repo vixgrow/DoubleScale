@@ -854,6 +854,9 @@ msgstr ""
 msgid "Add Custom Field"
 msgstr ""
 
+msgid "Add custom item"
+msgstr ""
+
 msgid "Add Custom Location"
 msgstr ""
 
@@ -885,9 +888,6 @@ msgid "Adding…"
 msgstr ""
 
 msgid "Add instruction"
-msgstr ""
-
-msgid "Add Item"
 msgstr ""
 
 msgid "Add item…"
@@ -2025,6 +2025,9 @@ msgid "Automatically sent to attendees when their booking is confirmed. Includes
 msgstr ""
 
 msgid "Automatic provisioning for booking hosts and notifications"
+msgstr ""
+
+msgid "Automatic WhatsApp sending is not available. Connect a WhatsApp provider, or share the link manually."
 msgstr ""
 
 msgid "Automation"
@@ -3833,6 +3836,9 @@ msgstr ""
 msgid "Configure in Integrations"
 msgstr ""
 
+msgid "Configure in WooCommerce"
+msgstr ""
+
 msgid "Configure Meta WhatsApp"
 msgstr ""
 
@@ -4595,6 +4601,9 @@ msgstr ""
 msgid "Could not load SMTP settings."
 msgstr ""
 
+msgid "Could not prepare the WhatsApp message."
+msgstr ""
+
 msgid "Could not refresh tokens."
 msgstr ""
 
@@ -4640,6 +4649,9 @@ msgstr ""
 msgid "Could not send test email."
 msgstr ""
 
+msgid "Could not send the WhatsApp message."
+msgstr ""
+
 msgid "Could not start online payment."
 msgstr ""
 
@@ -4647,6 +4659,12 @@ msgid "Could not start PayPal checkout."
 msgstr ""
 
 msgid "Could not start sign-in (invalid authorization URL). Check your connection or OAuth settings."
+msgstr ""
+
+msgid "Could not start WooCommerce checkout."
+msgstr ""
+
+msgid "Could not update the document status."
 msgstr ""
 
 msgid "Country"
@@ -6167,6 +6185,9 @@ msgstr ""
 msgid "E.164 format: +[country code][number] (e.g., +1234567890)"
 msgstr ""
 
+msgid "e.g. +20 100 123 4567"
+msgstr ""
+
 msgid "E.g., Create a promotional email for our summer sale with 30% off all products. Include a hero section, product highlights, and a call-to-action button."
 msgstr ""
 
@@ -6708,6 +6729,9 @@ msgid "Enable Action"
 msgstr ""
 
 msgid "Enable Apple Calendar Integration"
+msgstr ""
+
+msgid "Enable at least one payment method in WooCommerce → Settings → Payments (e.g. Cash on Delivery)."
 msgstr ""
 
 msgid "Enable Booking Summary Notification."
@@ -8939,6 +8963,18 @@ msgstr ""
 msgid "Height"
 msgstr ""
 
+msgid "Hello {{contact:first_name}},\n\nCredit note {{sales:credit_note_number}} for {{sales:credit_note_total}} has been issued for your account.\nDate: {{sales:credit_note_date}}\n\nYou can view it here:"
+msgstr ""
+
+msgid "Hello {{contact:first_name}},\n\nYour contract {{sales:contract_number}} for {{sales:contract_value}} is ready to review and sign.\nEnd date: {{sales:contract_end_date}}\n\nYou can open it here:"
+msgstr ""
+
+msgid "Hello {{contact:first_name}},\n\nYour invoice {{sales:invoice_number}} for {{sales:invoice_total}} is ready.\nDue date: {{sales:invoice_due_date}}\n\nYou can view and pay it here:"
+msgstr ""
+
+msgid "Hello {{contact:first_name}},\n\nYour proposal {{sales:proposal_number}} for {{sales:proposal_total}} is ready.\nOpen till: {{sales:proposal_open_till}}\n\nYou can review it here:"
+msgstr ""
+
 msgid "Helpdesk"
 msgstr ""
 
@@ -9840,6 +9876,9 @@ msgid "Invoice %s"
 msgstr ""
 
 msgid "Invoice %s sent to customer."
+msgstr ""
+
+msgid "Invoice %s sent to customer via WhatsApp."
 msgstr ""
 
 msgid "Invoice, proposal, contract & credit note reports"
@@ -11003,6 +11042,9 @@ msgstr ""
 msgid "Mark as Accepted"
 msgstr ""
 
+msgid "Mark as sent"
+msgstr ""
+
 msgid "Mark as Subscribed"
 msgstr ""
 
@@ -11736,6 +11778,9 @@ msgid "No %s IDs provided."
 msgstr ""
 
 msgid "No-Show"
+msgstr ""
+
+msgid "No active integrations available for this category. Install and activate a supported plugin to see triggers here."
 msgstr ""
 
 msgid "No activities found—this space is ready for your next action."
@@ -12737,6 +12782,9 @@ msgstr ""
 msgid "Onboarding Guide"
 msgstr ""
 
+msgid "Once you have sent it in WhatsApp, mark the document as sent below."
+msgstr ""
+
 msgid "One Invitee"
 msgstr ""
 
@@ -12861,6 +12909,9 @@ msgid "Open tickets"
 msgstr ""
 
 msgid "Open Till"
+msgstr ""
+
+msgid "Open WhatsApp"
 msgstr ""
 
 msgid "Opt-in email sent successfully"
@@ -13221,6 +13272,12 @@ msgid "PayPal checkout — credentials in Integrations → PayPal."
 msgstr ""
 
 msgid "PayPal payment failed."
+msgstr ""
+
+msgid "Pay via checkout"
+msgstr ""
+
+msgid "Pay via the store WooCommerce checkout. Requires at least one enabled WooCommerce payment method."
 msgstr ""
 
 msgid "Pay with %s"
@@ -13886,6 +13943,9 @@ msgstr ""
 msgid "Premium triggers & actions across integrations"
 msgstr ""
 
+msgid "Preparing message…"
+msgstr ""
+
 msgid "Presto Player"
 msgstr ""
 
@@ -14106,6 +14166,9 @@ msgid "Proposal #"
 msgstr ""
 
 msgid "Proposal %1$s sent: %2$s"
+msgstr ""
+
+msgid "Proposal %1$s sent via WhatsApp: %2$s"
 msgstr ""
 
 msgid "Proposal %1$s status changed manually from %2$s to %3$s."
@@ -14493,6 +14556,9 @@ msgid "Recurring tasks, subtasks & subtask groups"
 msgstr ""
 
 msgid "Red"
+msgstr ""
+
+msgid "Redirecting…"
 msgstr ""
 
 msgid "Redirect to URL"
@@ -15120,6 +15186,9 @@ msgid "Save & Submit for Approval"
 msgstr ""
 
 msgid "Save & Validate Credentials"
+msgstr ""
+
+msgid "Save & WhatsApp"
 msgstr ""
 
 msgid "Save app & open sign-in window"
@@ -15905,10 +15974,16 @@ msgstr ""
 msgid "Send a test WhatsApp to"
 msgstr ""
 
+msgid "Send automatically"
+msgstr ""
+
 msgid "Send Campaign Now"
 msgstr ""
 
 msgid "Send Contract"
+msgstr ""
+
+msgid "Send Contract via WhatsApp"
 msgstr ""
 
 msgid "Send Data"
@@ -16001,6 +16076,9 @@ msgstr ""
 msgid "Send Invoice"
 msgstr ""
 
+msgid "Send Invoice via WhatsApp"
+msgstr ""
+
 msgid "SendLayer"
 msgstr ""
 
@@ -16029,6 +16107,9 @@ msgid "Send personalized SMS messages to your contacts, create bulk SMS campaign
 msgstr ""
 
 msgid "Send Proposal"
+msgstr ""
+
+msgid "Send Proposal via WhatsApp"
 msgstr ""
 
 msgid "Send reply"
@@ -16083,6 +16164,9 @@ msgid "Send to"
 msgstr ""
 
 msgid "Send to Customer"
+msgstr ""
+
+msgid "Send via WhatsApp"
 msgstr ""
 
 msgid "Send Whatsapp Message"
@@ -16305,6 +16389,15 @@ msgid "Shape"
 msgstr ""
 
 msgid "Share"
+msgstr ""
+
+msgid "Share a link to this contract with the customer on WhatsApp."
+msgstr ""
+
+msgid "Share a link to this invoice with the customer on WhatsApp."
+msgstr ""
+
+msgid "Share a link to this proposal with the customer on WhatsApp."
 msgstr ""
 
 msgid "Shared Mailbox"
@@ -18026,6 +18119,12 @@ msgstr ""
 msgid "This contact does not have a WhatsApp phone number. Please add a WhatsApp phone number in the contact details to send WhatsApp messages."
 msgstr ""
 
+msgid "This contact has no saved number — add one here, or leave it empty to pick the recipient inside WhatsApp."
+msgstr ""
+
+msgid "This contact has no WhatsApp number. Add one, or share the link manually."
+msgstr ""
+
 msgid "This contact is not linked to the project."
 msgstr ""
 
@@ -18692,10 +18791,10 @@ msgstr ""
 msgid "Trigger automations based on task and subtask events"
 msgstr ""
 
-msgid "Trigger automations from contact events"
+msgid "Trigger automations from Booking, Helpdesk, Contacts, Link Triggers, Tasks, Sales & Projects"
 msgstr ""
 
-msgid "Trigger automations from CRM, Sales, Booking, Helpdesk, Tasks & Projects"
+msgid "Trigger automations from contact, messaging and webhook events"
 msgstr ""
 
 msgid "Trigger automations from inbound email, SMS and WhatsApp messages"
@@ -19749,6 +19848,9 @@ msgid "Whatsapp messages require an approved business template. Please create an
 msgstr ""
 
 msgid "WhatsApp messaging is available for individual contact messaging and automations. All messages use Meta-approved templates."
+msgstr ""
+
+msgid "WhatsApp number"
 msgstr ""
 
 msgid "WhatsApp Phone"

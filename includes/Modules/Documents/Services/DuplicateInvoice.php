@@ -61,6 +61,7 @@ final class DuplicateInvoice {
 				'shipping_address'      => $source->shipping_address,
 				'client_note'           => $source->client_note,
 				'terms'                 => $source->terms,
+				'sections'              => is_array( $source->sections ) ? $source->sections : array(),
 			)
 		);
 		SalesNumbering::save_with_retry( $copy );

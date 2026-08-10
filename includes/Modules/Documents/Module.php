@@ -80,6 +80,7 @@ final class Module extends AbstractSalesChildModule {
 			$this->sales_migration_path( 'SalesProposalsTable.php' ),
 			$this->sales_migration_path( 'SalesProposalTableViewedAt.php' ),
 			$this->sales_migration_path( 'SalesProposalTableSignatureColumns.php' ),
+			$this->sales_migration_path( 'SalesProposalTableContentColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalTableResponseColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalTableTemplateColumn.php' ),
 			$this->sales_migration_path( 'SalesProposalTableTemplateColorColumn.php' ),
@@ -92,6 +93,8 @@ final class Module extends AbstractSalesChildModule {
 			$this->sales_migration_path( 'SalesInvoiceTableTemplateColorColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoicePaymentsTable.php' ),
 			$this->sales_migration_path( 'SalesInvoiceTableIssuerSnapshotColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableContentColumns.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableRecurrenceColumn.php' ),
 			$this->sales_migration_path( 'SalesProposalTableIssuerSnapshotColumn.php' ),
 		);
 	}

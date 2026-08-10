@@ -20,12 +20,14 @@ use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
+use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
 use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
 use DoubleScale\Modules\Documents\Services\DuplicateInvoice;
 use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Sales\Rest\SendsDocumentViaWhatsapp;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
 use WP_Error;
@@ -37,6 +39,8 @@ use WP_REST_Server;
  * RestInvoiceController class.
  */
 class RestInvoiceController extends RestController {
+
+	use SendsDocumentViaWhatsapp;
 
 	/**
 	 * @var string
@@ -72,6 +76,18 @@ class RestInvoiceController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'send_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-whatsapp',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_item_whatsapp' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 			)
@@ -621,15 +637,88 @@ class RestInvoiceController extends RestController {
 		}
 		$message = isset( $params['message'] ) ? sanitize_textarea_field( (string) $params['message'] ) : '';
 
-		$notifier = new InvoiceNotifications();
-		if ( ! $notifier->send_invoice( $invoice, $message ) ) {
-			return new WP_Error(
-				'email_failed',
-				__( 'Failed to send the invoice email. Check the customer email and SMTP settings.', 'doublescale' ),
-				array( 'status' => 500 )
-			);
+		$channel = isset( $params['channel'] ) ? sanitize_key( (string) $params['channel'] ) : 'email';
+
+		// WhatsApp shares are delivered by the client opening wa.me; this call
+		// only records that the send happened.
+		if ( 'whatsapp' !== $channel ) {
+			$notifier = new InvoiceNotifications();
+			if ( ! $notifier->send_invoice( $invoice, $message ) ) {
+				return new WP_Error(
+					'email_failed',
+					__( 'Failed to send the invoice email. Check the customer email and SMTP settings.', 'doublescale' ),
+					array( 'status' => 500 )
+				);
+			}
 		}
 
+		return $this->finish_invoice_send( $invoice, $message, $channel );
+	}
+
+	/**
+	 * Prepare or perform a WhatsApp share for an invoice.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_item_whatsapp( $request ) {
+		$disabled = $this->require_module( 'documents' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$invoice = InvoiceModel::with( array( 'contact', 'sale_agent', 'proposal' ) )->find( (int) $request->get_param( 'id' ) );
+		if ( ! $invoice ) {
+			return new WP_Error( 'not_found', __( 'Invoice not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ownership( $invoice );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		if ( InvoiceStatus::PAID === (string) $invoice->status ) {
+			return new WP_Error( 'invalid_status', __( 'Paid invoices cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$no_page = $this->require_public_page(
+			'invoice',
+			'no_invoice_page',
+			__( 'Create a WordPress page with the [doublescale_invoice] shortcode before sending invoices.', 'doublescale' )
+		);
+		if ( $no_page ) {
+			return $no_page;
+		}
+
+		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'invoice', $invoice );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
+		$params  = $this->read_whatsapp_params( $request );
+		$payload = $this->build_whatsapp_payload( $invoice, 'invoice', $params );
+
+		if ( 'auto' !== $params['mode'] ) {
+			return new WP_REST_Response( $this->whatsapp_link_response( $payload ), 200 );
+		}
+
+		$sent = $this->dispatch_whatsapp_auto( $invoice, 'invoice', $payload );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
+		}
+
+		return $this->finish_invoice_send( $invoice, $params['message'], 'whatsapp' );
+	}
+
+	/**
+	 * Advance status and record the send, once a channel has delivered.
+	 *
+	 * @param InvoiceModel $invoice Invoice.
+	 * @param string       $message Custom message.
+	 * @param string       $channel Delivery channel.
+	 * @return WP_REST_Response
+	 */
+	private function finish_invoice_send( InvoiceModel $invoice, string $message, string $channel ): WP_REST_Response {
 		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
 			$invoice->status = InvoiceStatus::UNPAID;
 		}
@@ -638,9 +727,9 @@ class RestInvoiceController extends RestController {
 		$invoice->sent_at = current_time( 'mysql' );
 		$invoice->save();
 
-		$this->log_invoice_sent( $invoice, $message );
+		$this->log_invoice_sent( $invoice, $message, $channel );
 
-		do_action( 'doublescale_sales_invoice_sent', $invoice, $message );
+		do_action( 'doublescale_sales_invoice_sent', $invoice, $message, $channel );
 
 		return new WP_REST_Response(
 			array(
@@ -687,18 +776,25 @@ class RestInvoiceController extends RestController {
 	/**
 	 * @param InvoiceModel $invoice Invoice.
 	 * @param string       $message Optional custom message.
+	 * @param string       $channel Delivery channel (email|whatsapp).
 	 * @return void
 	 */
-	private function log_invoice_sent( InvoiceModel $invoice, string $message = '' ): void {
+	private function log_invoice_sent( InvoiceModel $invoice, string $message = '', string $channel = 'email' ): void {
 		if ( ! class_exists( ActivityModel::class ) ) {
 			return;
 		}
 
-		$note = sprintf(
-			/* translators: %s: invoice number */
-			__( 'Invoice %s sent to customer.', 'doublescale' ),
-			(string) $invoice->invoice_number
-		);
+		$note = 'whatsapp' === $channel
+			? sprintf(
+				/* translators: %s: invoice number */
+				__( 'Invoice %s sent to customer via WhatsApp.', 'doublescale' ),
+				(string) $invoice->invoice_number
+			)
+			: sprintf(
+				/* translators: %s: invoice number */
+				__( 'Invoice %s sent to customer.', 'doublescale' ),
+				(string) $invoice->invoice_number
+			);
 		if ( '' !== trim( $message ) ) {
 			$note .= ' — ' . $message;
 		}
@@ -798,8 +894,10 @@ class RestInvoiceController extends RestController {
 
 		foreach ( $string_fields as $field ) {
 			if ( array_key_exists( $field, $params ) ) {
-				if ( in_array( $field, array( 'billing_address', 'shipping_address', 'client_note', 'terms' ), true ) ) {
+				if ( in_array( $field, array( 'billing_address', 'shipping_address' ), true ) ) {
 					$payload[ $field ] = sanitize_textarea_field( (string) $params[ $field ] );
+				} elseif ( in_array( $field, array( 'client_note', 'terms' ), true ) ) {
+					$payload[ $field ] = wp_kses_post( (string) $params[ $field ] );
 				} else {
 					$payload[ $field ] = sanitize_text_field( (string) $params[ $field ] );
 				}
@@ -827,6 +925,10 @@ class RestInvoiceController extends RestController {
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'sections', $params ) && is_array( $params['sections'] ) ) {
+			$payload['sections'] = DocumentSectionsSanitizer::sanitize( $params['sections'] );
 		}
 
 		if ( array_key_exists( 'template', $params ) ) {

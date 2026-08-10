@@ -66,6 +66,8 @@ class ConvertProposalToInvoice {
 					(string) $proposal->proposal_number,
 					(string) $proposal->subject
 				),
+				'terms'               => $proposal->terms,
+				'sections'            => is_array( $proposal->sections ) ? $proposal->sections : array(),
 			)
 		);
 		SalesNumbering::save_with_retry( $invoice );

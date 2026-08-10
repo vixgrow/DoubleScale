@@ -145,16 +145,17 @@ final class GatewayManager {
 		foreach ( $this->all( self::CONTEXT_INVOICE ) as $gateway ) {
 			$enabled_for_sales = $this->is_enabled_for_sales( $gateway->slug );
 			$list[]            = array(
-				'slug'              => (string) $gateway->slug,
-				'name'              => (string) $gateway->name,
-				'description'       => (string) $gateway->description,
-				'available'         => $gateway->is_available(),
-				'configured'        => $gateway->is_configured(),
-				'enabled_for_sales' => $enabled_for_sales,
-				'ready'             => $enabled_for_sales
+				'slug'                => (string) $gateway->slug,
+				'name'                => (string) $gateway->name,
+				'description'         => (string) $gateway->description,
+				'available'           => $gateway->is_available(),
+				'configured'          => $gateway->is_configured(),
+				'enabled_for_sales'   => $enabled_for_sales,
+				'ready'               => $enabled_for_sales
 					&& $gateway->is_available()
 					&& $gateway->is_configured(),
-				'integration_url'   => $this->integration_url_for( $gateway->slug ),
+				'integration_url'     => $this->integration_url_for( $gateway->slug ),
+				'configuration_hint'  => $this->configuration_hint_for( $gateway ),
 			);
 		}
 		return $list;
@@ -370,6 +371,31 @@ final class GatewayManager {
 
 		if ( 'paypal' === $slug ) {
 			return admin_url( 'admin.php?page=doublescale&path=integrations/paypal' );
+		}
+
+		if ( 'woocommerce' === $slug ) {
+			return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Human-readable reason when a gateway is available but not configured.
+	 *
+	 * @param Gateway $gateway Gateway.
+	 * @return string
+	 */
+	private function configuration_hint_for( Gateway $gateway ): string {
+		if ( $gateway->is_configured() || ! $gateway->is_available() ) {
+			return '';
+		}
+
+		if ( 'woocommerce' === $gateway->slug ) {
+			return __(
+				'Enable at least one payment method in WooCommerce → Settings → Payments (e.g. Cash on Delivery).',
+				'doublescale'
+			);
 		}
 
 		return '';

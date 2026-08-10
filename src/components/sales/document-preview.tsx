@@ -14,6 +14,10 @@ import {
 	type ContractStatus,
 } from '@/constants/sales';
 import { computeLineItemsTotals } from './line-items-editor';
+import {
+	mergeDocumentSections,
+	splitDocumentSections,
+} from './document-sections-utils';
 import type { Invoice, LineItem, Proposal } from '@/types/sales';
 import { getCompanyFrom } from './document-templates/company-from';
 import { DocumentDesign } from './document-templates/designs';
@@ -67,6 +71,19 @@ export const ProposalDocumentPreview: React.FC<ProposalDocumentPreviewProps> = (
 		});
 	}
 
+	const { beforeItems, afterTotals } = splitDocumentSections(proposal.sections);
+
+	const sectionsAfter: { title: string; body: string }[] = [];
+	if (proposal.terms) {
+		sectionsAfter.push({
+			title: __('Terms & Conditions', 'doublescale'),
+			body: proposal.terms,
+		});
+	}
+	if (afterTotals.length) {
+		sectionsAfter.push(...afterTotals);
+	}
+
 	return (
 		<DocumentDesign
 			template={normalizeTemplateId(proposal.template)}
@@ -89,6 +106,8 @@ export const ProposalDocumentPreview: React.FC<ProposalDocumentPreviewProps> = (
 			discountValue={proposal.discount_value}
 			adjustment={proposal.adjustment}
 			total={proposal.total}
+			sectionsBefore={beforeItems.length ? beforeItems : undefined}
+			sectionsAfter={sectionsAfter.length ? sectionsAfter : undefined}
 		/>
 	);
 };
@@ -129,18 +148,23 @@ export const InvoiceDocumentPreview: React.FC<InvoiceDocumentPreviewProps> = ({
 		});
 	}
 
-	const sections: { title: string; body: string }[] = [];
+	const { beforeItems, afterTotals } = splitDocumentSections(invoice.sections);
+
+	const sectionsAfter: { title: string; body: string }[] = [];
+	if (invoice.terms) {
+		sectionsAfter.push({
+			title: __('Terms & Conditions', 'doublescale'),
+			body: invoice.terms,
+		});
+	}
 	if (invoice.client_note) {
-		sections.push({
+		sectionsAfter.push({
 			title: __('Client Note', 'doublescale'),
 			body: invoice.client_note,
 		});
 	}
-	if (invoice.terms) {
-		sections.push({
-			title: __('Terms', 'doublescale'),
-			body: invoice.terms,
-		});
+	if (afterTotals.length) {
+		sectionsAfter.push(...afterTotals);
 	}
 
 	return (
@@ -176,7 +200,8 @@ export const InvoiceDocumentPreview: React.FC<InvoiceDocumentPreviewProps> = ({
 			adjustment={invoice.adjustment}
 			total={invoice.total}
 			amountPaid={invoice.amount_paid}
-			sections={sections}
+			sectionsBefore={beforeItems.length ? beforeItems : undefined}
+			sectionsAfter={sectionsAfter.length ? sectionsAfter : undefined}
 		/>
 	);
 };

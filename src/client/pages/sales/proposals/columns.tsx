@@ -34,6 +34,7 @@ export interface ProposalColumnProps {
 	onConvert: (proposal: Proposal) => void;
 	onMarkAccepted: (proposal: Proposal) => void;
 	onSend: (proposal: Proposal) => void;
+	onSendWhatsApp: (proposal: Proposal) => void;
 	onDownloadPdf: (proposal: Proposal) => void;
 	/** Id of the row with a request in flight, if any. */
 	busyId: number | null;
@@ -50,6 +51,7 @@ export const getProposalColumns = ({
 	onConvert,
 	onMarkAccepted,
 	onSend,
+	onSendWhatsApp,
 	onDownloadPdf,
 	busyId,
 	canSend,
@@ -144,6 +146,9 @@ export const getProposalColumns = ({
 							: undefined
 					}
 					onSend={canSend(proposal) ? () => onSend(proposal) : undefined}
+					onSendWhatsApp={
+						canSend(proposal) ? () => onSendWhatsApp(proposal) : undefined
+					}
 					onDownloadPdf={() => onDownloadPdf(proposal)}
 					onDelete={() => onDelete(proposal.id)}
 				/>

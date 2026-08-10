@@ -6,9 +6,8 @@ import React, { useCallback, useEffect, useRef, useState } from '@wordpress/elem
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
-
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
-import { FormField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon } from '@doublescale/components';
+import { FormField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon, WhatsAppIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +20,14 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentSectionsEditor } from '../document-sections-editor';
+import {
+	mergeDocumentSections,
+	splitDocumentSections,
+} from '../document-sections-utils';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
+import { SendWhatsappDialog } from '../send-whatsapp-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
 import { ProposalDocumentPreview } from '../document-preview';
 import {
@@ -31,6 +37,7 @@ import {
 	requiresReapprovalAfterEdit,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from '@/components/sales/sales-approval-utils';
 import {
 	getDiscountValidationError,
@@ -42,16 +49,19 @@ import {
 	proposalFieldsFromContact,
 } from '@/components/sales/contact-sales-fields';
 import {
+	confirmWhatsappSent,
 	createProposal,
 	sendProposal,
+	sendProposalWhatsapp,
 	submitProposalForApproval,
 	updateProposal,
 	useAssignableSalesUsers,
 	useProposal,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
-import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
+import type { ContactSummary, DocumentSection, LineItem, Proposal } from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
 	PROPOSAL_STATUSES,
@@ -161,6 +171,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
 	);
+	const [sectionsBeforeItems, setSectionsBeforeItems] = useState<DocumentSection[]>([]);
+	const [sectionsAfterTotals, setSectionsAfterTotals] = useState<DocumentSection[]>([]);
+	const [terms, setTerms] = useState('');
 	const [template, setTemplate] = useState(DEFAULT_TEMPLATE_ID);
 	const [templateColor, setTemplateColor] = useState<string | null>(null);
 	const [templatePicked, setTemplatePicked] = useState(!isNew);
@@ -280,6 +293,10 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		setAssignedUserId(existing.assigned_user_id ?? null);
 		hydratedContactIdRef.current = existing.contact_id ?? null;
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
+		const split = splitDocumentSections(existing.sections ?? []);
+		setSectionsBeforeItems(split.beforeItems);
+		setSectionsAfterTotals(split.afterTotals);
+		setTerms(existing.terms || '');
 		setTemplate(normalizeTemplateId(existing.template));
 		setTemplateColor(normalizeTemplateColor(existing.template_color));
 		setTemplatePicked(true);
@@ -318,6 +335,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		phone,
 		assigned_user_id: assignedUserId,
 		line_items: lineItems,
+		sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
+		terms,
 		template,
 		template_color: templateColor,
 	});
@@ -347,6 +366,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	};
 
 	const [sendOpen, setSendOpen] = useState(false);
+	/** Set once the proposal is persisted — an unsaved draft has no public URL. */
+	const [whatsappId, setWhatsappId] = useState<number | null>(null);
 	const [submittingApproval, setSubmittingApproval] = useState(false);
 
 	const workflowEnabled = isApprovalWorkflowEnabled(salesSettings, existing ?? undefined);
@@ -426,6 +447,24 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		setSendOpen(false);
 		handleSaveSuccess(id);
 	};
+
+	const handleSaveAndWhatsapp = async () => {
+		const id = await persistProposal();
+		if (!id) {
+			return;
+		}
+		setWhatsappId(id);
+	};
+
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendProposalWhatsapp(whatsappId ?? 0, options),
+		[whatsappId]
+	);
+
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('proposals', whatsappId ?? 0, message),
+		[whatsappId]
+	);
 
 	const handleSaveAndSend = async (message: string) => {
 		const id = await persistProposal();
@@ -580,6 +619,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			discount_type: discountType,
 			discount_value: discountValue,
 			line_items: lineItems,
+			sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
+			terms,
 			subtotal: totals.subtotal,
 			adjustment,
 			total: totals.total,
@@ -856,6 +897,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			</div>
 
 			<div className="border-t border-[#DEE1E6] pt-6">
+				<DocumentSectionsEditor
+					sections={sectionsBeforeItems}
+					onChange={setSectionsBeforeItems}
+					disabled={fieldsLocked}
+					heading={__('Content Sections', 'doublescale')}
+				/>
+			</div>
+
+			<div className="border-t border-[#DEE1E6] pt-6">
 			<LineItemsEditor
 				items={lineItems}
 				onChange={setLineItems}
@@ -869,6 +919,32 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				hideDiscountTypeSelect
 				readOnly={fieldsLocked}
 			/>
+			</div>
+
+			<div className="border-t border-[#DEE1E6] pt-6 space-y-4">
+				<FormField label={__('Terms & Conditions', 'doublescale')} className="!mb-0">
+					<div
+						className={
+							fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+						}
+					>
+						<RichTextEditor
+							content={terms}
+							onChange={setTerms}
+							placeholder={__(
+								'Terms the client must agree to before accepting.',
+								'doublescale'
+							)}
+							className="[&_.prose]:min-h-[120px]"
+						/>
+					</div>
+				</FormField>
+
+				<DocumentSectionsEditor
+					sections={sectionsAfterTotals}
+					onChange={setSectionsAfterTotals}
+					disabled={fieldsLocked}
+				/>
 			</div>
 			</fieldset>
 
@@ -919,6 +995,17 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				) : null}
 				{showSend ? (
 					<Button
+						variant="outline"
+						className={`border-primary text-primary bg-white${isDialog ? ' rounded-lg' : ''}`}
+						onClick={() => void handleSaveAndWhatsapp()}
+						disabled={saving || submittingApproval}
+					>
+						<WhatsAppIcon width={20} height={20} />
+						{__('Save & WhatsApp', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button
 						variant={isDialog ? 'gradient' : 'default'}
 						className={isDialog ? 'rounded-lg' : undefined}
 						onClick={() => setSendOpen(true)}
@@ -929,6 +1016,30 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				) : null}
 			</div>
 		</div>
+	);
+
+	const whatsappDialog = (
+		<SendWhatsappDialog
+			open={whatsappId !== null}
+			onOpenChange={(open) => {
+				if (!open) {
+					setWhatsappId(null);
+				}
+			}}
+			title={__('Send Proposal via WhatsApp', 'doublescale')}
+			description={__(
+				'Share a link to this proposal with the customer on WhatsApp.',
+				'doublescale'
+			)}
+			onPrepare={prepareWhatsapp}
+			onConfirmSent={confirmWhatsapp}
+			onSent={() => {
+				if (whatsappId) {
+					handleSaveSuccess(whatsappId);
+				}
+			}}
+			autoSendAvailable={isWhatsappAutoSendAvailable()}
+		/>
 	);
 
 	if (isDialog) {
@@ -967,6 +1078,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 					onConfirm={handleSaveAndSend}
 					onSecondary={handleSaveWithoutSending}
 				/>
+				{whatsappDialog}
 			</div>
 		);
 	}
@@ -997,6 +1109,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				onConfirm={handleSaveAndSend}
 				onSecondary={handleSaveWithoutSending}
 			/>
+			{whatsappDialog}
 		</>
 	);
 };

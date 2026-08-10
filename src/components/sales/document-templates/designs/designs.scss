@@ -317,6 +317,15 @@
 		margin-bottom: 10px;
 	}
 
+	.pv-inv-section-content {
+		color: var(--pv-inv-text-5th);
+		font-family: Inter;
+		font-size: var(--pv-inv-micro);
+		font-style: normal;
+		font-weight: 400;
+		line-height: 200%;
+	}
+
 	.pv-inv-section-content ul {
 		list-style-type: unset;
 	}
@@ -546,6 +555,10 @@
 	.pv-inv-four-bottom__left {
 		flex: 1 1 55%;
 		min-width: 0;
+	}
+
+	.pv-inv-four .pv-inv-sections {
+		margin-top: 16px;
 	}
 
 	.pv-inv-four .pv-inv-total {

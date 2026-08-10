@@ -228,7 +228,11 @@ export const DesignSections: React.FC<{
 		{(sections || []).map((section) => (
 			<div key={section.title} className="ds-sales-doc__section">
 				<h4 className="ds-sales-doc__section-title">{section.title}</h4>
-				<p className="ds-sales-doc__section-body">{section.body}</p>
+				<div
+					className="ds-sales-doc__section-body"
+					// eslint-disable-next-line react/no-danger
+					dangerouslySetInnerHTML={{ __html: section.body }}
+				/>
 			</div>
 		))}
 	</>

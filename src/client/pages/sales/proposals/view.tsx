@@ -2,7 +2,7 @@
  * Proposal read-only detail view.
  */
 
-import React, { useEffect, useState } from '@wordpress/element';
+import React, { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Files, User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
@@ -24,6 +24,7 @@ import {
 	SendEmailIcon,
 	SendTestEmailIcon,
 	UserActivityIcon,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +38,7 @@ import {
 import {
 	ConfirmDialog,
 	SendDocumentDialog,
+	SendWhatsappDialog,
 	ConvertToInvoiceDialog,
 	ApprovalStatusBanner,
 	ProposalStatusPill,
@@ -52,19 +54,23 @@ import {
 	isApprovalWorkflowEnabled,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from '@/components/sales/sales-approval-utils';
 import {
 	changeProposalStatus,
+	confirmWhatsappSent,
 	convertProposalToInvoice,
 	deleteProposal,
 	duplicateProposal,
 	downloadProposalPdf,
 	fetchProposalSignature,
 	sendProposal,
+	sendProposalWhatsapp,
 	submitProposalForApproval,
 	withdrawProposalApproval,
 	useProposal,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { ProposalSignature } from '@/types/sales';
 
@@ -95,6 +101,7 @@ const ProposalView: React.FC = () => {
 	const [convertOpen, setConvertOpen] = useState(false);
 	const [markAcceptedOpen, setMarkAcceptedOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
+	const [whatsappOpen, setWhatsappOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
@@ -170,6 +177,16 @@ const ProposalView: React.FC = () => {
 			setBusy(false);
 		}
 	};
+
+	const whatsappAutoAvailable = isWhatsappAutoSendAvailable();
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendProposalWhatsapp(proposalId, options),
+		[proposalId]
+	);
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('proposals', proposalId, message),
+		[proposalId]
+	);
 
 	const handleSend = async (message: string) => {
 		if (!proposalId) {
@@ -468,6 +485,17 @@ const ProposalView: React.FC = () => {
 							>
 								<SendTestEmailIcon width={24} height={24} />
 								{__('Send to Customer', 'doublescale')}
+							</Button>
+						) : null}
+						{showSend ? (
+							<Button
+								variant="outline"
+								onClick={() => setWhatsappOpen(true)}
+								disabled={busy}
+								className="border-primary text-primary bg-white"
+							>
+								<WhatsAppIcon width={24} height={24} />
+								{__('WhatsApp', 'doublescale')}
 							</Button>
 						) : null}
 						<Button
@@ -872,6 +900,22 @@ const ProposalView: React.FC = () => {
 				confirmLabel={__('Send', 'doublescale')}
 				busy={busy}
 				onConfirm={handleSend}
+			/>
+
+			<SendWhatsappDialog
+				open={whatsappOpen}
+				onOpenChange={setWhatsappOpen}
+				title={__('Send Proposal via WhatsApp', 'doublescale')}
+				description={__(
+					'Share a link to this proposal with the customer on WhatsApp.',
+					'doublescale'
+				)}
+				onPrepare={prepareWhatsapp}
+				onConfirmSent={confirmWhatsapp}
+				onSent={() => {
+					void refetch();
+				}}
+				autoSendAvailable={whatsappAutoAvailable}
 			/>
 
 			<ConvertToInvoiceDialog

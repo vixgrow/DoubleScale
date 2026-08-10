@@ -332,12 +332,6 @@ const BankInfo: React.FC<{ placeholder?: boolean }> = ({ placeholder }) => {
 	);
 };
 
-const SignatureBlock: React.FC = () => (
-	<div className="pv-inv-sign">
-		<div className="pv-inv-sign__line" />
-	</div>
-);
-
 const Sections: React.FC<{ sections?: DocumentDesignProps['sections'] }> = ({
 	sections,
 }) =>
@@ -348,9 +342,11 @@ const Sections: React.FC<{ sections?: DocumentDesignProps['sections'] }> = ({
 					{section.title ? (
 						<h4 className="pv-inv-section-title">{section.title}</h4>
 					) : null}
-					<div className="pv-inv-section-content">
-						<p>{section.body}</p>
-					</div>
+					<div
+						className="pv-inv-section-content"
+						// eslint-disable-next-line react/no-danger
+						dangerouslySetInnerHTML={{ __html: section.body }}
+					/>
 				</div>
 			))}
 		</div>
@@ -421,9 +417,10 @@ export const DoubleScaleLayout: React.FC<
 								<ToBlock party={billTo} />
 							</div>
 						</div>
+						<Sections sections={props.sectionsBefore} />
 						{items}
 						{account}
-						<Sections sections={props.sections} />
+						<Sections sections={props.sectionsAfter} />
 					</div>
 				</div>
 			</div>
@@ -456,9 +453,10 @@ export const DoubleScaleLayout: React.FC<
 								<ToBlock party={billTo} />
 							</div>
 						</div>
+						<Sections sections={props.sectionsBefore} />
 						{items}
 						{account}
-						<Sections sections={props.sections} />
+						<Sections sections={props.sectionsAfter} />
 					</div>
 					<FooterShapeTwo />
 				</div>
@@ -492,9 +490,10 @@ export const DoubleScaleLayout: React.FC<
 								<ToBlock party={billTo} />
 							</div>
 						</div>
+						<Sections sections={props.sectionsBefore} />
 						{items}
 						{account}
-						<Sections sections={props.sections} />
+						<Sections sections={props.sectionsAfter} />
 						<CornerShapeThree footer />
 					</div>
 				</div>
@@ -528,15 +527,15 @@ export const DoubleScaleLayout: React.FC<
 								<ToBlock party={billTo} />
 							</div>
 						</div>
+						<Sections sections={props.sectionsBefore} />
 						{items}
 						<div className="pv-inv-four-bottom">
 							<div className="pv-inv-four-bottom__left">
 								<BankInfo placeholder />
-								<Sections sections={props.sections} />
 							</div>
 							<TotalTable {...props} />
 						</div>
-						<SignatureBlock />
+						<Sections sections={props.sectionsAfter} />
 					</div>
 					<FooterShapeFour />
 				</div>
@@ -584,9 +583,10 @@ export const DoubleScaleLayout: React.FC<
 							</div>
 						</div>
 						<div className="pv-inv-item-wrap">
-							{items}
+							<Sections sections={props.sectionsBefore} />
+						{items}
 							{account}
-							<Sections sections={props.sections} />
+							<Sections sections={props.sectionsAfter} />
 						</div>
 					</div>
 				</div>
@@ -634,9 +634,10 @@ export const DoubleScaleLayout: React.FC<
 							</div>
 						</div>
 						<div className="pv-inv-item-wrap">
-							{items}
+							<Sections sections={props.sectionsBefore} />
+						{items}
 							{account}
-							<Sections sections={props.sections} />
+							<Sections sections={props.sectionsAfter} />
 						</div>
 					</div>
 				</div>
@@ -684,9 +685,10 @@ export const DoubleScaleLayout: React.FC<
 							</div>
 						</div>
 						<div className="pv-inv-item-wrap">
-							{items}
+							<Sections sections={props.sectionsBefore} />
+						{items}
 							{account}
-							<Sections sections={props.sections} />
+							<Sections sections={props.sectionsAfter} />
 						</div>
 					</div>
 				</div>
@@ -730,9 +732,10 @@ export const DoubleScaleLayout: React.FC<
 						</div>
 					</div>
 					<div className="pv-inv-item-wrap">
+						<Sections sections={props.sectionsBefore} />
 						{items}
 						{account}
-						<Sections sections={props.sections} />
+						<Sections sections={props.sectionsAfter} />
 					</div>
 				</div>
 			</div>

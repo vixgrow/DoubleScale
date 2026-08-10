@@ -26,6 +26,10 @@ import {
 	getStripePaymentReturnUrl,
 	getStripeRedirectStatus,
 } from '@doublescale/utils/stripe-payment';
+import {
+	clearWooCheckoutReturnParams,
+	isWooCheckoutReturn,
+} from '@doublescale/utils/woo-checkout-payment';
 
 interface Props {
 	hash: string;
@@ -88,11 +92,13 @@ const PublicOnlinePayment: React.FC<{
 	invoice: PublicInvoice;
 	gateway: OnlinePaymentGatewayStatus;
 	onPaid: () => void;
-}> = ({ hash, invoice, gateway, onPaid }) => {
+	agreedTerms: boolean;
+}> = ({ hash, invoice, gateway, onPaid, agreedTerms }) => {
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 	const [paypalBusy, setPaypalBusy] = useState(false);
+	const [wooBusy, setWooBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
@@ -108,6 +114,9 @@ const PublicOnlinePayment: React.FC<{
 
 	// After redirect-based methods (Cash App, etc.) Stripe sends the user back here.
 	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			return;
+		}
 		const redirectStatus = getStripeRedirectStatus();
 		if (!redirectStatus) {
 			return;
@@ -151,14 +160,59 @@ const PublicOnlinePayment: React.FC<{
 		};
 	}, [hash, gateway.slug]);
 
+	// Return from WooCommerce checkout — confirm server-side (order status is authority).
 	useEffect(() => {
+		if (gateway.slug !== 'woocommerce' || !isWooCheckoutReturn()) {
+			return;
+		}
+
+		let cancelled = false;
+		setLoading(true);
+		setError(null);
+		void confirmPublicInvoicePayment(hash, gateway.slug)
+			.then(() => {
+				if (cancelled) {
+					return;
+				}
+				clearWooCheckoutReturnParams();
+				onPaidRef.current();
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) {
+					setError(
+						err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale')
+					);
+					clearWooCheckoutReturnParams();
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [hash, gateway.slug]);
+
+	useEffect(() => {
+		if (gateway.slug === 'woocommerce') {
+			// WooCommerce: order is created on button click, not on mount.
+			if (!isWooCheckoutReturn()) {
+				setLoading(false);
+			}
+			return;
+		}
 		if (getStripeRedirectStatus()) {
 			return;
 		}
 		let cancelled = false;
 		setLoading(true);
 		setError(null);
-		void initPublicInvoicePayment(hash, gateway.slug)
+		void initPublicInvoicePayment(hash, gateway.slug, {
+			agreed_terms: agreedTerms,
+		})
 			.then((response) => {
 				if (cancelled) {
 					return;
@@ -171,7 +225,7 @@ const PublicOnlinePayment: React.FC<{
 					setPaypalClientId(response.client_id || null);
 					return;
 				}
-				setPublishableKey(response.publishable_key);
+				setPublishableKey(response.publishable_key || null);
 				setClientSecret(response.client_secret || null);
 			})
 			.catch((err: unknown) => {
@@ -189,7 +243,7 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, agreedTerms]);
 
 	const handlePayPalApprove = useCallback(async () => {
 		setPaypalBusy(true);
@@ -206,7 +260,9 @@ const PublicOnlinePayment: React.FC<{
 	}, [hash, gateway.slug]);
 
 	const createPayPalOrder = useCallback(async () => {
-		const response = await initPublicInvoicePayment(hash, gateway.slug);
+		const response = await initPublicInvoicePayment(hash, gateway.slug, {
+			agreed_terms: agreedTerms,
+		});
 		if (response.already_paid) {
 			onPaidRef.current();
 			throw new Error(__('Invoice is already paid.', 'doublescale'));
@@ -215,7 +271,30 @@ const PublicOnlinePayment: React.FC<{
 			throw new Error(__('Could not start PayPal checkout.', 'doublescale'));
 		}
 		return response.order_id;
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, agreedTerms]);
+
+	const handleWooCheckout = useCallback(async () => {
+		setWooBusy(true);
+		setError(null);
+		try {
+			const response = await initPublicInvoicePayment(hash, gateway.slug, {
+				agreed_terms: agreedTerms,
+			});
+			if (response.already_paid) {
+				onPaidRef.current();
+				return;
+			}
+			if (!response.redirect_url) {
+				throw new Error(__('Could not start WooCommerce checkout.', 'doublescale'));
+			}
+			window.location.href = response.redirect_url;
+		} catch (err: unknown) {
+			setError(
+				err instanceof Error ? err.message : __('Could not start WooCommerce checkout.', 'doublescale')
+			);
+			setWooBusy(false);
+		}
+	}, [hash, gateway.slug, agreedTerms]);
 
 	if (loading) {
 		return (
@@ -230,6 +309,25 @@ const PublicOnlinePayment: React.FC<{
 				{isUnavailable
 					? __('Online payment is not available on this site. Please use another payment method.', 'doublescale')
 					: error}
+			</div>
+		);
+	}
+
+	if (gateway.slug === 'woocommerce') {
+		return (
+			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
+				<div>
+					<h4 className="font-medium">{__('Pay with %s', 'doublescale').replace('%s', gateway.name)}</h4>
+					<p className="text-sm text-muted-foreground">
+						{__('Balance due:', 'doublescale')}{' '}
+						{formatMoney(invoice.balance, invoice.currency)}
+					</p>
+				</div>
+				<Button onClick={() => void handleWooCheckout()} disabled={wooBusy}>
+					{wooBusy
+						? __('Redirecting…', 'doublescale')
+						: __('Pay via checkout', 'doublescale')}
+				</Button>
 			</div>
 		);
 	}
@@ -281,6 +379,7 @@ const PublicOnlinePayment: React.FC<{
 
 const PublicInvoiceApp = ({ hash }: Props) => {
 	const { data, loading, error, refetch } = usePublicInvoice(hash);
+	const [agreedTerms, setAgreedTerms] = useState(false);
 
 	if (loading) {
 		return (
@@ -303,6 +402,8 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 	const previewInvoice = data as unknown as Invoice;
 	const payments = data.payments ?? [];
 	const payableGateways = (data.online_payment_gateways ?? []).filter((gateway) => gateway.can_pay);
+	const hasTerms = Boolean(data.terms && data.terms.replace(/<[^>]*>/g, '').trim());
+	const canPay = !hasTerms || agreedTerms;
 
 	return (
 		<div className="doublescale-invoice-renderer">
@@ -368,15 +469,34 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 
 			{data.can_pay && payableGateways.length > 0 ? (
 				<div className="doublescale-invoice-renderer__pay mt-6 space-y-4">
-					{payableGateways.map((gateway) => (
-						<PublicOnlinePayment
-							key={gateway.slug}
-							hash={hash}
-							invoice={data}
-							gateway={gateway}
-							onPaid={refetch}
-						/>
-					))}
+					{hasTerms ? (
+						<label className="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								className="mt-1"
+								checked={agreedTerms}
+								onChange={(e) => setAgreedTerms(e.target.checked)}
+							/>
+							<span className="text-sm">
+								{__(
+									'I have read and agree to the Terms & Conditions.',
+									'doublescale'
+								)}
+							</span>
+						</label>
+					) : null}
+					{canPay
+						? payableGateways.map((gateway) => (
+								<PublicOnlinePayment
+									key={gateway.slug}
+									hash={hash}
+									invoice={data}
+									gateway={gateway}
+									onPaid={refetch}
+									agreedTerms={agreedTerms}
+								/>
+							))
+						: null}
 				</div>
 			) : null}
 		</div>

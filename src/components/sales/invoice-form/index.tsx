@@ -8,7 +8,7 @@ import React, {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
 
@@ -18,6 +18,7 @@ import {
 	InfiniteScrollSelect,
 	NovicesIcon,
 	PanelLayout,
+	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +33,14 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentSectionsEditor } from '../document-sections-editor';
+import {
+	mergeDocumentSections,
+	splitDocumentSections,
+} from '../document-sections-utils';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
+import { SendWhatsappDialog } from '../send-whatsapp-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
 import { InvoiceDocumentPreview } from '../document-preview';
 import {
@@ -42,6 +50,7 @@ import {
 	requiresReapprovalAfterEdit,
 	showDirectSendAction,
 	formatSalesRestError,
+	isWhatsappAutoSendAvailable,
 } from '@/components/sales/sales-approval-utils';
 import {
 	getDiscountValidationError,
@@ -53,24 +62,38 @@ import {
 	normalizeSalesContact,
 } from '@/components/sales/contact-sales-fields';
 import {
+	confirmWhatsappSent,
 	createInvoice,
+	saveInvoiceRecurrence,
 	sendInvoice,
+	sendInvoiceWhatsapp,
 	submitInvoiceForApproval,
 	updateInvoice,
 	useAssignableSalesUsers,
 	useInvoice,
 	useSalesSettings,
+	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
-import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
+import type {
+	ContactSummary,
+	DocumentSection,
+	Invoice,
+	InvoiceRecurrencePayload,
+	LineItem,
+	RecurrenceEndMode,
+	RecurrenceUnit,
+} from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
 	INVOICE_STATUS_LABELS,
+	MONTHLY_RECURRENCE_CHOICES,
 	OFFLINE_PAYMENT_MODES,
 	OFFLINE_PAYMENT_MODE_LABELS,
 	ONLINE_PAYMENT_GATEWAYS,
 	ONLINE_PAYMENT_GATEWAY_LABELS,
+	RECURRENCE_UNITS,
 } from '@/constants/sales';
 import {
 	DesignPickerRow,
@@ -168,6 +191,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
+	// Recurrence (Pro). `recurrenceMode` drives the dropdown: 'no' | '1'…'12'
+	// (whole months) | 'custom'. Custom exposes the raw interval + unit.
+	const [recurrenceMode, setRecurrenceMode] = useState<string>('no');
+	const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+	const [recurrenceUnit, setRecurrenceUnit] =
+		useState<RecurrenceUnit>('month');
+	// How the series stops. A single choice rather than three independent
+	// controls: "Infinity" alongside an open End Date let the user save a rule
+	// that claims to run forever while carrying a stop date.
+	const [recurrenceEndMode, setRecurrenceEndMode] =
+		useState<RecurrenceEndMode>('never');
+	const [recurrenceTotalCycles, setRecurrenceTotalCycles] = useState(12);
+	const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
+	const [recurrenceAutoSend, setRecurrenceAutoSend] = useState(false);
+	const [recurrenceRequirePaid, setRecurrenceRequirePaid] = useState(false);
 	const [adjustment, setAdjustment] = useState(0);
 	const [allowedPaymentModes, setAllowedPaymentModes] = useState<string[]>(
 		[]
@@ -176,6 +214,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [shippingAddress, setShippingAddress] = useState('');
 	const [clientNote, setClientNote] = useState('');
 	const [terms, setTerms] = useState('');
+	const [sectionsBeforeItems, setSectionsBeforeItems] = useState<DocumentSection[]>([]);
+	const [sectionsAfterTotals, setSectionsAfterTotals] = useState<DocumentSection[]>([]);
 	const [saleAgentUserId, setSaleAgentUserId] = useState<number | null>(null);
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
@@ -213,12 +253,49 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		setShippingAddress(existing.shipping_address || '');
 		setClientNote(existing.client_note || '');
 		setTerms(existing.terms || '');
+		const split = splitDocumentSections(existing.sections ?? []);
+		setSectionsBeforeItems(split.beforeItems);
+		setSectionsAfterTotals(split.afterTotals);
 		setSaleAgentUserId(existing.sale_agent_user_id ?? null);
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
 		setTemplate(normalizeTemplateId(existing.template));
 		setTemplateColor(normalizeTemplateColor(existing.template_color));
 		setTemplatePicked(true);
 		hydratedInvoiceIdRef.current = existing.id;
+
+		const rule = existing.recurrence;
+		if (rule && rule.is_active) {
+			// Whole-month cadences map back onto the shortcut list; anything
+			// else (days, weeks, years, multi-month) shows as Custom.
+			const isShortcut =
+				rule.interval_unit === 'month' &&
+				rule.interval_value >= 1 &&
+				rule.interval_value <= 12;
+			setRecurrenceMode(
+				isShortcut ? String(rule.interval_value) : 'custom'
+			);
+			setRecurrenceInterval(rule.interval_value);
+			setRecurrenceUnit(rule.interval_unit);
+
+			// Collapse the stored columns back onto the single choice. A cycle
+			// cap wins when both are somehow present (older rules could carry
+			// both), because it is the stricter, more explicit limit.
+			if (!rule.is_infinite && rule.total_cycles > 0) {
+				setRecurrenceEndMode('after_cycles');
+			} else if (rule.end_date) {
+				setRecurrenceEndMode('on_date');
+			} else {
+				setRecurrenceEndMode('never');
+			}
+			setRecurrenceTotalCycles(
+				rule.total_cycles > 0 ? rule.total_cycles : 12
+			);
+			setRecurrenceEndDate(rule.end_date || '');
+			setRecurrenceAutoSend(rule.auto_send);
+			setRecurrenceRequirePaid(rule.require_paid);
+		} else {
+			setRecurrenceMode('no');
+		}
 	}, [existing]);
 
 	const applyContactFields = useCallback((raw: ContactSummary) => {
@@ -340,6 +417,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	};
 
 	const [sendOpen, setSendOpen] = useState(false);
+	/**
+	 * Id of the invoice the WhatsApp dialog is sharing.
+	 *
+	 * The dialog builds its payload from a persisted document, so the form
+	 * saves first and only then opens it — an unsaved draft has no public URL.
+	 */
+	const [whatsappId, setWhatsappId] = useState<number | null>(null);
 	const [submittingApproval, setSubmittingApproval] = useState(false);
 
 	const workflowEnabled = isApprovalWorkflowEnabled(
@@ -389,6 +473,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		shipping_address: shippingAddress,
 		client_note: clientNote,
 		terms,
+		sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
 		sale_agent_user_id: saleAgentUserId,
 		line_items: lineItems,
 		template,
@@ -402,6 +487,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		}
 		if (lineItems.length === 0) {
 			setError(__('Please add at least one item.', 'doublescale'));
+			return false;
+		}
+		if (
+			recurrenceMode !== 'no' &&
+			recurrenceEndMode === 'on_date' &&
+			!recurrenceEndDate
+		) {
+			setError(
+				__(
+					'Please choose the date the recurring invoice should stop on.',
+					'doublescale'
+				)
+			);
 			return false;
 		}
 
@@ -424,6 +522,65 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		return true;
 	};
 
+	/**
+	 * Save the recurrence rule alongside the invoice.
+	 *
+	 * The endpoint only exists while the Pro Recurring Invoices module is
+	 * active. A failure here must not discard the invoice the user just saved,
+	 * so it surfaces as a warning rather than aborting the save — except when
+	 * the user was actually trying to set up recurrence and nothing was stored.
+	 */
+	const persistRecurrence = async (id: number): Promise<void> => {
+		const enabled = recurrenceMode !== 'no';
+
+		// Skip entirely when recurrence is off and never was: no endpoint call
+		// on sites without Pro, and nothing to clear.
+		if (!enabled && !existing?.recurrence) {
+			return;
+		}
+
+		const payload: InvoiceRecurrencePayload = enabled
+			? {
+					enabled: true,
+					interval_value:
+						recurrenceMode === 'custom'
+							? Math.max(1, recurrenceInterval)
+							: Number(recurrenceMode),
+					interval_unit:
+						recurrenceMode === 'custom' ? recurrenceUnit : 'month',
+					// Exactly one stop condition is ever sent, so the stored rule
+					// can't hold a contradictory pair.
+					total_cycles:
+						recurrenceEndMode === 'after_cycles'
+							? Math.max(1, recurrenceTotalCycles)
+							: 0,
+					is_infinite: recurrenceEndMode !== 'after_cycles',
+					end_date:
+						recurrenceEndMode === 'on_date'
+							? recurrenceEndDate || null
+							: null,
+					auto_send: recurrenceAutoSend,
+					require_paid: recurrenceRequirePaid,
+				}
+			: { enabled: false };
+
+		try {
+			await saveInvoiceRecurrence(id, payload);
+		} catch (err: unknown) {
+			if (enabled) {
+				setError(
+					formatSalesRestError(
+						err,
+						__(
+							'The invoice was saved, but the recurring schedule could not be stored.',
+							'doublescale'
+						)
+					)
+				);
+			}
+		}
+	};
+
 	const persistInvoice = async (): Promise<number | null> => {
 		if (!validateForm()) {
 			return null;
@@ -439,6 +596,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				id = created.id;
 			} else if (invoiceId) {
 				await updateInvoice(invoiceId, buildPayload());
+			}
+			if (id) {
+				await persistRecurrence(id);
 			}
 			return id ?? null;
 		} catch (err: unknown) {
@@ -501,6 +661,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			setSendOpen(false);
 		}
 	};
+
+	const handleSaveAndWhatsapp = async () => {
+		const id = await persistInvoice();
+		if (!id) {
+			return;
+		}
+		setWhatsappId(id);
+	};
+
+	const prepareWhatsapp = useCallback(
+		(options: WhatsappShareOptions) => sendInvoiceWhatsapp(whatsappId ?? 0, options),
+		[whatsappId]
+	);
+
+	const confirmWhatsapp = useCallback(
+		(message: string) => confirmWhatsappSent('invoices', whatsappId ?? 0, message),
+		[whatsappId]
+	);
 
 	const handleSubmitForApproval = async () => {
 		const id = await persistInvoice();
@@ -637,6 +815,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			shipping_address: shippingAddress,
 			client_note: clientNote,
 			terms,
+			sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
 			created_at: existing?.created_at ?? null,
 			updated_at: existing?.updated_at ?? null,
 			contact: contact ?? null,
@@ -895,6 +1074,44 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 						</FormField>
 						<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 							<FormField
+								label={__('Recurring Invoice?', 'doublescale')}
+								className="!mb-0"
+							>
+								<Select
+									value={recurrenceMode}
+									onValueChange={setRecurrenceMode}
+								>
+									<SelectTrigger className={selectTriggerClass}>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="no">
+											{__('No', 'doublescale')}
+										</SelectItem>
+										{MONTHLY_RECURRENCE_CHOICES.map((n) => (
+											<SelectItem
+												key={n}
+												value={String(n)}
+											>
+												{sprintf(
+													/* translators: %d: number of months */
+													_n(
+														'Every %d month',
+														'Every %d months',
+														n,
+														'doublescale'
+													),
+													n
+												)}
+											</SelectItem>
+										))}
+										<SelectItem value="custom">
+											{__('Custom', 'doublescale')}
+										</SelectItem>
+									</SelectContent>
+								</Select>
+							</FormField>
+							<FormField
 								label={__('Discount Type', 'doublescale')}
 								className="!mb-0"
 							>
@@ -920,6 +1137,202 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 								</Select>
 							</FormField>
 						</div>
+						{recurrenceMode !== 'no' ? (
+							<div className="space-y-4 rounded-lg border border-border p-4">
+								{recurrenceMode === 'custom' ? (
+									<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+										<FormField
+											label={__('Every', 'doublescale')}
+											className="!mb-0"
+										>
+											<Input
+												type="number"
+												min={1}
+												step="1"
+												value={recurrenceInterval}
+												onChange={(e) =>
+													setRecurrenceInterval(
+														Math.max(
+															1,
+															Number(
+																e.target.value
+															) || 1
+														)
+													)
+												}
+												className="rounded-lg border-[#D0D0D0]"
+											/>
+										</FormField>
+										<FormField
+											label={__('Unit', 'doublescale')}
+											className="!mb-0"
+										>
+											<Select
+												value={recurrenceUnit}
+												onValueChange={(next) =>
+													setRecurrenceUnit(
+														next as RecurrenceUnit
+													)
+												}
+											>
+												<SelectTrigger
+													className={
+														selectTriggerClass
+													}
+												>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													{RECURRENCE_UNITS.map(
+														(option) => (
+															<SelectItem
+																key={
+																	option.value
+																}
+																value={
+																	option.value
+																}
+															>
+																{option.label}
+															</SelectItem>
+														)
+													)}
+												</SelectContent>
+											</Select>
+										</FormField>
+									</div>
+								) : null}
+								<fieldset className="m-0 border-0 p-0">
+									<legend className="mb-2 text-sm font-medium">
+										{__('Ends', 'doublescale')}
+									</legend>
+									<div className="space-y-2">
+										<label className="flex items-center gap-2 text-sm">
+											<input
+												type="radio"
+												name="ds-recurrence-end"
+												checked={
+													recurrenceEndMode ===
+													'never'
+												}
+												onChange={() =>
+													setRecurrenceEndMode(
+														'never'
+													)
+												}
+											/>
+											{__('Never', 'doublescale')}
+										</label>
+
+										<label className="flex flex-wrap items-center gap-2 text-sm">
+											<input
+												type="radio"
+												name="ds-recurrence-end"
+												checked={
+													recurrenceEndMode ===
+													'after_cycles'
+												}
+												onChange={() =>
+													setRecurrenceEndMode(
+														'after_cycles'
+													)
+												}
+											/>
+											{__('After', 'doublescale')}
+											<Input
+												type="number"
+												min={1}
+												step="1"
+												value={recurrenceTotalCycles}
+												disabled={
+													recurrenceEndMode !==
+													'after_cycles'
+												}
+												onChange={(e) =>
+													setRecurrenceTotalCycles(
+														Math.max(
+															1,
+															Number(
+																e.target.value
+															) || 1
+														)
+													)
+												}
+												className="h-9 w-24 rounded-lg border-[#D0D0D0]"
+											/>
+											{__('invoices', 'doublescale')}
+										</label>
+
+										<label className="flex flex-wrap items-center gap-2 text-sm">
+											<input
+												type="radio"
+												name="ds-recurrence-end"
+												checked={
+													recurrenceEndMode ===
+													'on_date'
+												}
+												onChange={() =>
+													setRecurrenceEndMode(
+														'on_date'
+													)
+												}
+											/>
+											{__('On', 'doublescale')}
+											<Input
+												type="date"
+												value={recurrenceEndDate}
+												disabled={
+													recurrenceEndMode !==
+													'on_date'
+												}
+												onChange={(e) =>
+													setRecurrenceEndDate(
+														e.target.value
+													)
+												}
+												className="h-9 w-auto rounded-lg border-[#D0D0D0]"
+											/>
+										</label>
+									</div>
+								</fieldset>
+								<label className="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										checked={recurrenceAutoSend}
+										onChange={(e) =>
+											setRecurrenceAutoSend(
+												e.target.checked
+											)
+										}
+									/>
+									{__(
+										'Automatically email each new invoice to the customer',
+										'doublescale'
+									)}
+								</label>
+								<label className="flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										checked={recurrenceRequirePaid}
+										onChange={(e) =>
+											setRecurrenceRequirePaid(
+												e.target.checked
+											)
+										}
+									/>
+									{__(
+										'Only generate the next invoice once this one is paid',
+										'doublescale'
+									)}
+								</label>
+								<p className="text-xs text-muted-foreground">
+									{__(
+										'The next invoice is scheduled from this invoice’s date, so the billing day never drifts.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						) : null}
 						{discountType !== 'none' ? (
 							<FormField
 								label={
@@ -1007,6 +1420,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
 				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
 
+				<DocumentSectionsEditor
+					sections={sectionsBeforeItems}
+					onChange={setSectionsBeforeItems}
+					disabled={fieldsLocked}
+					heading={__('Content Sections', 'doublescale')}
+				/>
+
+				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
+
 				<LineItemsEditor
 					items={lineItems}
 					onChange={setLineItems}
@@ -1021,32 +1443,51 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
 				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
 
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<div className="space-y-2">
-						<Label className="text-sm !p-0 font-medium text-[#29292E]">
-							{__('Client Note', 'doublescale')}
-						</Label>
-						<Textarea
-							value={clientNote}
-							onChange={(e) => setClientNote(e.target.value)}
-							rows={5}
-							placeholder={__('Client Note', 'doublescale')}
-							className="rounded-lg border-[#D0D0D0] bg-white"
-						/>
-					</div>
+				<div className="space-y-4">
 					<div className="space-y-2">
 						<Label className="text-sm p-0 font-medium text-[#29292E]">
 							{__('Terms & Conditions', 'doublescale')}
 						</Label>
-						<Textarea
-							value={terms}
-							onChange={(e) => setTerms(e.target.value)}
-							rows={5}
-							placeholder={__(
-								'Terms & Conditions',
-								'doublescale'
-							)}
-							className="rounded-lg border-[#D0D0D0] bg-white"
+						<div
+							className={
+								fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+							}
+						>
+							<RichTextEditor
+								content={terms}
+								onChange={setTerms}
+								placeholder={__(
+									'Terms the client must agree to before paying.',
+									'doublescale'
+								)}
+								className="[&_.prose]:min-h-[120px]"
+							/>
+						</div>
+					</div>
+
+					<DocumentSectionsEditor
+						sections={sectionsAfterTotals}
+						onChange={setSectionsAfterTotals}
+						disabled={fieldsLocked}
+					/>
+				</div>
+
+				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
+
+				<div className="space-y-2">
+					<Label className="text-sm !p-0 font-medium text-[#29292E]">
+						{__('Client Note', 'doublescale')}
+					</Label>
+					<div
+						className={
+							fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+						}
+					>
+						<RichTextEditor
+							content={clientNote}
+							onChange={setClientNote}
+							placeholder={__('Client Note', 'doublescale')}
+							className="[&_.prose]:min-h-[120px]"
 						/>
 					</div>
 				</div>
@@ -1100,6 +1541,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				) : null}
 				{showSend ? (
 					<Button
+						variant="outline"
+						onClick={() => void handleSaveAndWhatsapp()}
+						disabled={saving || submittingApproval}
+						className="rounded-lg border-primary text-primary bg-white"
+					>
+						<WhatsAppIcon width={20} height={20} />
+						{__('Save & WhatsApp', 'doublescale')}
+					</Button>
+				) : null}
+				{showSend ? (
+					<Button
 						variant="gradient"
 						onClick={() => setSendOpen(true)}
 						disabled={saving || submittingApproval}
@@ -1110,6 +1562,30 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				) : null}
 			</div>
 		</div>
+	);
+
+	const whatsappDialog = (
+		<SendWhatsappDialog
+			open={whatsappId !== null}
+			onOpenChange={(open) => {
+				if (!open) {
+					setWhatsappId(null);
+				}
+			}}
+			title={__('Send Invoice via WhatsApp', 'doublescale')}
+			description={__(
+				'Share a link to this invoice with the customer on WhatsApp.',
+				'doublescale'
+			)}
+			onPrepare={prepareWhatsapp}
+			onConfirmSent={confirmWhatsapp}
+			onSent={() => {
+				if (whatsappId) {
+					handleSaveSuccess(whatsappId);
+				}
+			}}
+			autoSendAvailable={isWhatsappAutoSendAvailable()}
+		/>
 	);
 
 	if (isDialog) {
@@ -1148,6 +1624,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 					onConfirm={handleSaveAndSend}
 					onSecondary={handleSaveWithoutSending}
 				/>
+				{whatsappDialog}
 			</div>
 		);
 	}
@@ -1178,6 +1655,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				onConfirm={handleSaveAndSend}
 				onSecondary={handleSaveWithoutSending}
 			/>
+			{whatsappDialog}
 		</>
 	);
 };

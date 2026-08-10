@@ -126,7 +126,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 						discountValue={0}
 						adjustment={0}
 						total={total}
-						sections={[
+						sectionsAfter={[
 							{
 								title: __('Note', 'doublescale'),
 								body: __('Thank you for your business.', 'doublescale'),

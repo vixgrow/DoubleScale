@@ -25,6 +25,7 @@ use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 use DoubleScale\Modules\Emails\EmailRenderer;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
@@ -175,6 +176,28 @@ class RestAutomationStepController extends RestController {
 							'description' => __( 'Reply-to address', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Renders builder content straight from the request, so the device
+		// preview works for steps that are still unsaved in the builder (the
+		// template render endpoint can only read already-saved templates).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/preview-email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_email' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'body' => array(
+							'description' => __( 'Email body: builder JSON or raw HTML', 'doublescale' ),
+							'type'        => 'string',
+							'required'    => true,
 						),
 					),
 				),
@@ -971,6 +994,75 @@ class RestAutomationStepController extends RestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
+
+	/**
+	 * Render builder content to email HTML for the device preview.
+	 *
+	 * Takes the body from the request for the same reason send_test_email()
+	 * does: the step's content may still be unsaved. Rendering goes through the
+	 * same EmailRenderer the real send uses, so the preview shows the actual
+	 * email markup — including the responsive CSS — rather than an approximation.
+	 *
+	 * No contact is passed, so merge tags stay unresolved; this is a layout
+	 * preview, not a per-recipient one.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function preview_email( $request ) {
+		try {
+			$body = $request->get_param( 'body' );
+
+			if ( empty( $body ) ) {
+				return new WP_Error(
+					'missing_body',
+					__( 'Email body is empty. Add content in the builder before previewing.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// The body arrives either as builder JSON ({"type":"builder","value":{...}})
+			// or as raw HTML. Only the former needs rendering.
+			$builder_data = null;
+			$decoded      = json_decode( $body, true );
+			if ( is_array( $decoded ) ) {
+				if ( isset( $decoded['type'] ) && 'builder' === $decoded['type'] && isset( $decoded['value'] ) ) {
+					$builder_data = $decoded['value'];
+				} elseif ( isset( $decoded['sections'] ) ) {
+					$builder_data = $decoded;
+				}
+			}
+
+			if ( null !== $builder_data ) {
+				$renderer = new EmailRenderer();
+				$html     = $renderer->render_from_builder_data( $builder_data );
+			} else {
+				// Raw HTML body — preview it as-is.
+				$html = $body;
+			}
+
+			return new WP_REST_Response( array( 'html' => $html ), 200 );
+		} catch ( \Throwable $e ) {
+			return new WP_Error(
+				'preview_failed',
+				__( 'Failed to render the preview.', 'doublescale' ),
+				array( 'status' => 500 )
+			);
+		}
+	}
+
+	/**
+	 * Send a test email for an automation step.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
 	public function send_test_email( $request ) {
 		try {
 			$emails = $request->get_param( 'emails' );
@@ -1027,6 +1119,15 @@ class RestAutomationStepController extends RestController {
 			$failed_emails = array();
 			$last_detail   = '';
 
+			$attachment_paths = array();
+			if ( null !== $builder_data && ! empty( $builder_data['attachments'] ) ) {
+				$attachment_paths = EmailAttachmentResolver::resolve_paths( $builder_data['attachments'] );
+			} elseif ( $request->get_param( 'attachments' ) ) {
+				$attachment_paths = EmailAttachmentResolver::resolve_paths(
+					(array) $request->get_param( 'attachments' )
+				);
+			}
+
 			foreach ( $emails as $recipient_email ) {
 				$email_sender               = new Emails();
 				$email_sender->from_address = $from_email;
@@ -1053,7 +1154,7 @@ class RestAutomationStepController extends RestController {
 
 				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
 
-				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content ) ) {
+				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content, $attachment_paths ) ) {
 					++$sent_count;
 				} else {
 					++$failed_count;

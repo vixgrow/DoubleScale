@@ -88,6 +88,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	error: externalError,
 	className = '',
 	inputClassName,
+	menuZIndex = 200000,
 }) => {
 	const [items, setItems] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -132,13 +133,13 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 			position: 'fixed',
 			left: rect.left,
 			width: Math.max(rect.width, 180),
-			zIndex: 200000,
+			zIndex: menuZIndex,
 			maxHeight: height,
 			...(openUpward
 				? { bottom: window.innerHeight - rect.top + 4 }
 				: { top: rect.bottom + 4 }),
 		};
-	}, []);
+	}, [menuZIndex]);
 
 	const updateMenuPosition = useCallback(() => {
 		const next = computeMenuStyle();

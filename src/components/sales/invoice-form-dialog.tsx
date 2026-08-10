@@ -28,6 +28,9 @@ export interface InvoiceFormDialogProps {
 	elevated?: boolean;
 }
 
+const elevatedShellClassName =
+	'!fixed !inset-0 !left-0 !top-0 !right-0 !bottom-0 !h-[100dvh] !max-h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !z-[1800005] pointer-events-auto';
+
 export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 	open,
 	onOpenChange,
@@ -44,13 +47,11 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 		: __('Edit Invoice', 'doublescale');
 
 	return (
-		<Dialog open={open} modal={false} onOpenChange={onOpenChange}>
+		<Dialog open={open} modal={elevated} onOpenChange={onOpenChange}>
 			<DialogContent
 				overlayClassName={elevated ? '!z-[1800004]' : undefined}
-				className={`doublescale-contact-page doublescale-invoice-form-dialog flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60 ${
-					elevated
-						? '!z-[1800005] pointer-events-auto'
-						: 'z-[150200]'
+				className={`doublescale-contact-page doublescale-invoice-form-dialog !flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60 ${
+					elevated ? elevatedShellClassName : 'z-[150200]'
 				}`}
 				style={{
 					paddingTop: 0,
@@ -84,19 +85,21 @@ export const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 					</div>
 				</DialogHeader>
 
-				<InvoiceForm
-					key={`${invoiceId ?? 'new'}-${initialContactId ?? ''}-${initialCurrency ?? ''}-${initialLineItems?.[0]?.description ?? ''}-${initialLineItems?.[0]?.rate ?? ''}-${open}`}
-					invoiceId={invoiceId}
-					initialContactId={initialContactId}
-					initialLineItems={initialLineItems}
-					initialCurrency={initialCurrency}
-					mode="dialog"
-					onClose={() => onOpenChange(false)}
-					onSaved={(id) => {
-						onSaved?.(id);
-						onOpenChange(false);
-					}}
-				/>
+				<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+					<InvoiceForm
+						key={`${invoiceId ?? 'new'}-${initialContactId ?? ''}-${initialCurrency ?? ''}-${initialLineItems?.[0]?.description ?? ''}-${initialLineItems?.[0]?.rate ?? ''}-${open}`}
+						invoiceId={invoiceId}
+						initialContactId={initialContactId}
+						initialLineItems={initialLineItems}
+						initialCurrency={initialCurrency}
+						mode="dialog"
+						onClose={() => onOpenChange(false)}
+						onSaved={(id) => {
+							onSaved?.(id);
+							onOpenChange(false);
+						}}
+					/>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

@@ -39,6 +39,7 @@ import {
 import { getAutomationWarnings } from '@doublescale/utils';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import { Input } from '@/components/ui/input';
+import ArrowRight from '@doublescale/shared/icons/arrow-rightt';
 
 interface AutomationNameCellProps {
 	automation: Automation;
@@ -126,7 +127,7 @@ const AutomationNameCell: React.FC<AutomationNameCellProps> = ({
 						title={__('Open automation', 'doublescale')}
 						onClick={(e) => e.stopPropagation()}
 					>
-						<ExternalLink className="h-3.5 w-3.5" />
+						<ArrowRight width={16} height={16} />
 					</NavLink>
 				</>
 			)}

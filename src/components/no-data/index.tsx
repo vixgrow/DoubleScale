@@ -30,13 +30,13 @@ export const NoData: React.FC<NoDataProps> = ({
 			)}
 		>
 			<div className="flex flex-col items-center max-w-sm text-center">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-5">
+				<div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-2">
 					{icon}
 				</div>
-				<h3 className="text-lg font-semibold text-foreground mb-1.5">
+				<h3 className="text-lg font-semibold text-foreground mb-1">
 					{title}
 				</h3>
-				<p className="text-sm text-muted-foreground leading-relaxed mb-6">
+				<p className="text-sm text-muted-foreground leading-relaxed mb-2">
 					{subtitle}
 				</p>
 				{onClick && buttonLabel && (

@@ -38,6 +38,7 @@ const App: React.FC<AppProps> = ({
 							});
 						}}
 						type="text"
+						className="!rounded-lg !border-border"
 					/>
 				);
 			})}

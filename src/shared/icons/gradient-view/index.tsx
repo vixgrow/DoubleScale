@@ -42,8 +42,8 @@ const GradientViewIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 					y2="11.9947"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_31491_15832"
@@ -53,8 +53,8 @@ const GradientViewIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 					y2="11.9956"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<clipPath id="clip0_31491_15832">
 					<rect width="24" height="24" fill="white" />

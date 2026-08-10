@@ -44,6 +44,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		(select) => select(STORE_KEY).getAllButtonSettings(),
 		[]
 	);
+	const attachments = useSelect(
+		(select) => select(STORE_KEY).getAttachments(),
+		[]
+	);
 
 	// Get campaign data
 	const campaign = useSelect(
@@ -62,6 +66,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		sections,
 		globalSettings,
 		buttonSettings,
+		attachments,
 	});
 
 	// Initialize baseline after initial hydration settles to avoid false diffs
@@ -126,11 +131,13 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			const freshSections = store.getSections();
 			const freshGlobalSettings = store.getGlobalSettings();
 			const freshButtonSettings = store.getAllButtonSettings();
+			const freshAttachments = store.getAttachments();
 
 			return {
 				sections: freshSections,
 				globalSettings: freshGlobalSettings,
 				buttonSettings: freshButtonSettings,
+				attachments: freshAttachments,
 			};
 		};
 
@@ -200,6 +207,9 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 						type: 'builder',
 						value: builderData,
 					}),
+					settings: {
+						attachments: builderData.attachments ?? [],
+					},
 					campaign_id: campaign.id,
 					hidden: true,
 				});
@@ -226,6 +236,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 						type: 'builder',
 						value: builderData,
 					}),
+					settings: {
+						...(template.settings ?? {}),
+						attachments: builderData.attachments ?? [],
+					},
 					campaign_id: campaign.id,
 					hidden: true, // Auto-save should be hidden from user templates
 				};

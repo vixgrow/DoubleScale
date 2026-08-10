@@ -176,6 +176,15 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
+
+		svg {
+			display: block;
+			flex-shrink: 0;
+		}
+
+		path {
+			fill: currentColor;
+		}
 	}
 }
 

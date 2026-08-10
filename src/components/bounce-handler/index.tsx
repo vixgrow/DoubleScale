@@ -8,12 +8,12 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { Check, ExternalLink } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
-import { NoticeBanner } from '@doublescale/components';
+import { CopyIcon, NoticeBanner } from '@doublescale/components';
 import type { NoticeMessage } from '@doublescale/client';
 import {
 	Select,
@@ -158,13 +158,13 @@ export const BounceHandler: React.FC = () => {
 										type="text"
 										value={selectedWebhook.url}
 										readOnly
-										className="flex-1 px-3 py-2 text-sm border rounded-md bg-gray-50 font-mono text-gray-600"
+										className="flex-1 px-3 py-2 text-sm border !border-border !rounded-lg bg-gray-50 font-mono text-gray-600"
 									/>
 									<Button
 										onClick={handleCopyWebhook}
 										variant="outline"
 										size="sm"
-										className="shrink-0"
+										className="shrink-0 h-10"
 									>
 										{copied ? (
 											<>
@@ -173,7 +173,7 @@ export const BounceHandler: React.FC = () => {
 											</>
 										) : (
 											<>
-												<Copy className="h-4 w-4 mr-1" />
+												<CopyIcon width={24} height={24} />
 												{__('Copy', 'doublescale')}
 											</>
 										)}

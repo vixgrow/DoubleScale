@@ -494,7 +494,7 @@ const SmtpEmailTest: React.FC<{
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							autoComplete="email"
-							className=" !border-border text-foreground placeholder:text-muted-foreground"
+							className=" !border-border !rounded-lg text-foreground placeholder:text-muted-foreground"
 							placeholder={__('Email Address', 'doublescale')}
 						/>
 					</div>

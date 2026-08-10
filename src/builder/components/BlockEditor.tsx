@@ -21,6 +21,7 @@ import {
 	LayoutSettingsIcon,
 } from '@doublescale/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
+import AttachmentsPanel from './AttachmentsPanel';
 import LayoutSettings, {
 	type LayoutSettingsData,
 } from '../blocks/layout/LayoutSettings';
@@ -284,7 +285,10 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 										onSettingsChange={handleLayoutSettingsChange}
 									/>
 								) : (
-									<GlobalEmailSettings />
+									<>
+										<GlobalEmailSettings />
+										<AttachmentsPanel />
+									</>
 								)}
 							</div>
 						</div>
@@ -328,7 +332,10 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 									onSettingsChange={handleLayoutSettingsChange}
 								/>
 							) : (
-								<GlobalEmailSettings />
+								<>
+									<GlobalEmailSettings />
+									<AttachmentsPanel />
+								</>
 							)}
 						</div>
 					</div>

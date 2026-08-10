@@ -21,6 +21,7 @@ import {
 	TagField,
 	DynamicKeyValueInput,
 	TestButton,
+	CopyIcon,
 } from '@doublescale/components';
 import type { ReactSelectOptions } from '@doublescale/client';
 import ContactMappedFields from '../contact-mapped-fields';
@@ -184,7 +185,7 @@ const Field: React.FC<FieldProps> = ({
 						title={__('Click to copy', 'doublescale')}
 					>
 						{matches[i]}
-						<Copy className="h-3 w-3" />
+						<CopyIcon width={16} height={16} />
 					</span>
 				);
 			}
@@ -705,15 +706,20 @@ const Field: React.FC<FieldProps> = ({
 				'WhatsAppTemplateField'
 			) as React.ComponentType<{
 				value: {
+					message_type?: 'template' | 'text';
+					body?: string;
 					template_sid?: string;
 					template_variables?: Record<string, string>;
 				};
 				onChange: (value: {
-					template_sid: string;
-					template_variables: Record<string, string>;
+					message_type?: 'template' | 'text';
+					body?: string;
+					template_sid?: string;
+					template_variables?: Record<string, string>;
 				}) => void;
 				options: Record<string, string>;
 				templateData?: Record<string, any>;
+				settings?: Record<string, any>;
 			}> | null;
 
 			if (WhatsAppTemplateFieldComponent) {
@@ -729,6 +735,7 @@ const Field: React.FC<FieldProps> = ({
 						onChange={onChange}
 						options={templateOptions}
 						templateData={settings?.templateData}
+						settings={settings}
 					/>
 				);
 			} else {

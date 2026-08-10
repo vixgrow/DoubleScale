@@ -505,7 +505,29 @@ final class MergeTagsManager {
 					return '';
 				}
 
-				return $merge_tag->get_tag_value( $contact, $slug );
+				// A tag resolves against whatever context the message carries,
+				// so missing orders, deleted products or absent cart data are
+				// normal input. Losing the whole email because one placeholder
+				// could not resolve is never the right trade — blank the tag,
+				// log it, and let the rest of the message go out.
+				try {
+					return $merge_tag->get_tag_value( $contact, $slug );
+				} catch ( \Throwable $e ) {
+					doublescale_get_logger()->error(
+						__( 'Merge tag failed to resolve', 'doublescale' ),
+						array(
+							'code'  => 'merge_tag_resolution_failed',
+							'error' => array(
+								'tag'     => "{$group}:{$merge_tag_slug}",
+								'message' => $e->getMessage(),
+								'file'    => $e->getFile(),
+								'line'    => $e->getLine(),
+							),
+						)
+					);
+
+					return '';
+				}
 			},
 			$content
 		);

@@ -14,6 +14,7 @@ import {
 	SELECT_COLUMN,
 	SELECT_SECTION,
 	SET_BUILDER_STATE,
+	SET_ATTACHMENTS,
 	SET_BUTTON_SETTINGS,
 	SET_LOADING,
 	UNDO,
@@ -94,6 +95,7 @@ const initialState: EmailBuilderState = {
 			strikethrough: false,
 		},
 	},
+	attachments: [],
 	history: {
 		past: [],
 		present: [],
@@ -487,6 +489,13 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 			return {
 				...state,
 				buttonSettings: settings,
+			};
+		}
+
+		case SET_ATTACHMENTS: {
+			return {
+				...state,
+				attachments: action.payload.attachments,
 			};
 		}
 

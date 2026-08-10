@@ -701,7 +701,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 					<DialogFooter className="shrink-0 flex-row justify-end gap-3  bg-white px-4 py-4 sm:space-x-0 sm:px-6">
 						<Button
 							type="button"
-							variant="outline"
+							variant="secondaryDeepBlue"
 
 							onClick={onClose}
 							disabled={submitting}

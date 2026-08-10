@@ -2,9 +2,15 @@
  * Edit Style color picker for document templates.
  */
 
-import React, { useEffect, useId, useRef, useState } from '@wordpress/element';
+import React, { useEffect, useId, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Ban, Pipette, X } from 'lucide-react';
+import { HexColorPicker } from 'react-colorful';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
 
 import {
 	TEMPLATE_COLOR_PRESETS,
@@ -28,7 +34,6 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 }) => {
 	const colorInputId = useId();
 	const hexInputId = useId();
-	const colorInputRef = useRef<HTMLInputElement>(null);
 	const normalized = normalizeTemplateColor(value);
 	const customValue = getCustomColorValue(normalized);
 	const isCustom = Boolean(normalized && !isPresetColor(normalized));
@@ -36,6 +41,7 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 	// Local draft so partially typed hex codes ("#4c6") don't reset the color.
 	const [hexDraft, setHexDraft] = useState(normalized ?? '');
 	const [hexInvalid, setHexInvalid] = useState(false);
+	const [customPickerOpen, setCustomPickerOpen] = useState(false);
 
 	useEffect(() => {
 		setHexDraft(normalized ?? '');
@@ -69,7 +75,7 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 
 	return (
 		<div
-			className={`rounded-xl border border-border bg-white shadow-sm ${
+			className={`rounded-xl border border-border bg-[#f7f8fa] ${
 				compact ? 'p-4' : 'p-5'
 			}`}
 		>
@@ -122,30 +128,64 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 						);
 					})}
 
-					<button
-						type="button"
-						title={__('Custom color', 'doublescale')}
-						onClick={() => colorInputRef.current?.click()}
-						className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border transition ${
-							isCustom
-								? 'border-primary ring-2 ring-primary/30'
-								: 'border-border hover:border-primary/40'
-						}`}
-						style={{ backgroundColor: customValue }}
+					<Popover
+						open={customPickerOpen}
+						onOpenChange={setCustomPickerOpen}
 					>
-						<Pipette className="h-4 w-4 text-white drop-shadow" />
-					</button>
-
-					<input
-						ref={colorInputRef}
-						id={colorInputId}
-						type="color"
-						className="sr-only"
-						value={customValue}
-						onChange={(e) =>
-							onChange(normalizeTemplateColor(e.target.value))
-						}
-					/>
+						<PopoverTrigger asChild>
+							<button
+								type="button"
+								title={__('Custom color', 'doublescale')}
+								className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border transition ${
+									isCustom
+										? 'border-primary ring-2 ring-primary/30'
+										: 'border-border hover:border-primary/40'
+								}`}
+								style={{ backgroundColor: customValue }}
+							>
+								<Pipette className="h-4 w-4 text-white drop-shadow" />
+							</button>
+						</PopoverTrigger>
+						<PopoverContent
+							align="end"
+							side="top"
+							className="z-[1900000] w-[248px] p-3"
+						>
+							<div className="space-y-3">
+								<HexColorPicker
+									color={customValue}
+									onChange={(nextColor) => {
+										onChange(
+											normalizeTemplateColor(nextColor)
+										);
+									}}
+								/>
+								<input
+									id={colorInputId}
+									type="text"
+									value={hexDraft}
+									onChange={(e) => {
+										setHexDraft(e.target.value);
+										setHexInvalid(false);
+									}}
+									onBlur={(e) =>
+										commitHex(e.target.value)
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+											commitHex(
+												(
+													e.target as HTMLInputElement
+												).value
+											);
+										}
+									}}
+									className="h-9 w-full !rounded-lg border !border-border bg-white px-2 font-mono text-sm uppercase"
+								/>
+							</div>
+						</PopoverContent>
+					</Popover>
 				</div>
 
 				<div className="space-y-1">
@@ -186,7 +226,7 @@ export const TemplateStyleEditor: React.FC<TemplateStyleEditorProps> = ({
 									);
 								}
 							}}
-							className={`h-9 w-full rounded-lg border bg-white px-3 font-mono text-sm uppercase text-foreground outline-none transition focus:ring-2 ${
+							className={`h-9 w-full !rounded-lg border !border-border bg-white px-3 font-mono text-sm uppercase text-foreground outline-none transition focus:ring-2 ${
 								hexInvalid
 									? 'border-destructive focus:border-destructive focus:ring-destructive/30'
 									: 'border-border focus:border-primary focus:ring-primary/30'

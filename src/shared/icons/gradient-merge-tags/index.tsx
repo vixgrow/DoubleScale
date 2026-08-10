@@ -53,8 +53,8 @@ const GradientMergeTagsIcon: React.FC<IconProps> = ({
 					y2="15"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_32478_28909"
@@ -64,8 +64,8 @@ const GradientMergeTagsIcon: React.FC<IconProps> = ({
 					y2="15.0002"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint2_linear_32478_28909"
@@ -75,8 +75,8 @@ const GradientMergeTagsIcon: React.FC<IconProps> = ({
 					y2="14.9924"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint3_linear_32478_28909"
@@ -86,8 +86,8 @@ const GradientMergeTagsIcon: React.FC<IconProps> = ({
 					y2="5.005"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<clipPath id="clip0_32478_28909">
 					<rect width="24" height="24" fill="white" />

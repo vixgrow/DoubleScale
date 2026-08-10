@@ -31,7 +31,7 @@ import {
 	CardTitle,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon } from '@doublescale/components';
+import { AlertIcon, CopyIcon, EmailProviderSetupIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -181,7 +181,7 @@ const EmailProviderSetup: React.FC = () => {
 			<Card className="shadow-sm">
 				<CardHeader>
 					<CardTitle className="text-lg flex items-center gap-2">
-						<ShieldCheck className="w-5 h-5" />
+						<EmailProviderSetupIcon width={24} height={24} />
 						{__('Provider Credentials', 'doublescale')}
 					</CardTitle>
 					<CardDescription>
@@ -306,11 +306,11 @@ const EmailProviderSetup: React.FC = () => {
 												type="text"
 												value={oauthApps.oauth_redirect_uri}
 												readOnly
-												className="bg-gray-50 font-mono text-xs"
+												className="bg-gray-50 font-mono text-xs !border-border !rounded-lg"
 											/>
 											<Button
 												variant="outline"
-												className="h-12 px-3"
+												className="h-10 px-3"
 												type="button"
 												onClick={() => {
 													navigator.clipboard.writeText(
@@ -326,7 +326,7 @@ const EmailProviderSetup: React.FC = () => {
 												{copiedRedirectUri ? (
 													<CheckCircle className="w-4 h-4 text-green-600" />
 												) : (
-													<Copy className="w-4 h-4" />
+													<CopyIcon width={24} height={24} />
 												)}
 											</Button>
 										</div>
@@ -361,7 +361,7 @@ const EmailProviderSetup: React.FC = () => {
 													? 'your-gmail-client-id.apps.googleusercontent.com'
 													: 'your-outlook-application-id'
 											}
-											className=""
+											className="!border-border !rounded-lg"
 										/>
 									</div>
 									<div>
@@ -385,7 +385,7 @@ const EmailProviderSetup: React.FC = () => {
 													? '••••••••'
 													: __('Enter client secret', 'doublescale')
 											}
-											className=""
+											className="!border-border !rounded-lg"
 										/>
 									</div>
 								</div>

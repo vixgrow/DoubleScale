@@ -58,7 +58,7 @@ const ModalShell: FC<ModalShellProps> = ({
 		}}
 	>
 		<DialogContent
-			className={`rounded-xl ${wide ? 'max-w-2xl' : 'max-w-lg'}`}
+			className={`rounded-xl bg-white ${wide ? 'max-w-2xl' : 'max-w-lg'}`}
 		>
 			<DialogHeader>
 				<DialogTitle>{title}</DialogTitle>
@@ -120,7 +120,7 @@ export const AssignAgentModal: FC<AssignAgentModalProps> = ({
 			footer={
 				<>
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						className="rounded-lg"
 						onClick={onClose}
 						disabled={saving}
@@ -223,7 +223,7 @@ export const AssignMailboxModal: FC<AssignMailboxModalProps> = ({
 			footer={
 				<>
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						className="rounded-lg"
 						onClick={onClose}
 						disabled={saving}
@@ -320,7 +320,7 @@ export const AssignTagsModal: FC<AssignTagsModalProps> = ({
 			footer={
 				<>
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						className="rounded-lg"
 						onClick={onClose}
 						disabled={saving}
@@ -402,7 +402,7 @@ export const BulkReplyModal: FC<BulkReplyModalProps> = ({
 			footer={
 				<>
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						className="rounded-lg"
 						onClick={onClose}
 						disabled={saving}

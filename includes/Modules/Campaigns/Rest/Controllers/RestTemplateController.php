@@ -11,6 +11,8 @@
 
 namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 
+use DoubleScale\Modules\Emails\EmailAttachmentResolver;
+
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
@@ -698,6 +700,10 @@ class RestTemplateController extends RestController {
 
 		if ( $preview_text !== null && ! array_key_exists( 'preview_text', $settings ) ) {
 			$settings['preview_text'] = $preview_text;
+		}
+
+		if ( isset( $settings['attachments'] ) ) {
+			$settings['attachments'] = EmailAttachmentResolver::sanitize_attachments( $settings['attachments'] );
 		}
 
 		$template_data = array(

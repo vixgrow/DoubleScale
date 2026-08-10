@@ -54,7 +54,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
 
 	return (
 		<div
-			className={`rounded-xl border border-border bg-[#f8fafc] p-4 ${className}`}
+			className={`rounded-xl border border-border bg-[#f7f8fa] p-4 ${className}`}
 		>
 			<h3 className="mb-3 text-base font-semibold text-foreground">
 				{__('Template Preview', 'doublescale')}

@@ -34,7 +34,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Loader2, Bell, Mail, Save, Monitor, Smartphone, CheckCircle2, AlertCircle, XCircle, Wifi, Receipt, Pencil, FolderKanban } from 'lucide-react';
+import { Loader2, Mail, Save, CheckCircle2, AlertCircle, XCircle, Wifi, Pencil } from 'lucide-react';
 import {
 	isBrowserNotificationSupported,
 	getBrowserNotificationPermission,
@@ -49,6 +49,13 @@ import {
 	PiplelinesIcon,
 	SettingsIcon as SystemIcon,
 	TaskDoneIcon as TasksIcon,
+	SalesIcon,
+	ProjectsIcon,
+	NotificationIcon,
+	DesktopNotificationsIcon,
+	MobileNotificationsIcon,
+	PageTabs,
+	ContactTotalEmailsIcon,
 } from '@doublescale/components';
 import { UpcomingCalendarIcon } from '@/components/booking';
 import { SupportIcon } from '@/components/support';
@@ -65,8 +72,8 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 	system: <SystemIcon width={18} height={18} />,
 	booking: <UpcomingCalendarIcon width={18} height={18} />,
 	support: <SupportIcon width={18} height={18} />,
-	sales: <Receipt size={18} />,
-	projects: <FolderKanban width={18} height={18} />,
+	sales: <SalesIcon width={18} height={18} />,
+	projects: <ProjectsIcon width={18} height={18} />,
 };
 
 interface PushConfig {
@@ -123,7 +130,7 @@ function ProChannelsUpsell() {
 			<CardContent className="flex items-start justify-between gap-4 py-5">
 				<div className="flex items-start gap-3">
 					<div className="p-2 bg-amber-50 rounded-lg">
-						<Bell className="w-5 h-5 text-amber-600" />
+						<NotificationIcon width={20} height={20} color="#d97706" />
 					</div>
 					<div>
 						<div className="font-medium flex items-center gap-2">
@@ -176,17 +183,17 @@ function ChannelHeaderIcons({
 		<div className="flex items-center shrink-0">
 			{showBell && (
 				<div className="w-14 flex justify-center text-muted-foreground">
-					<Bell className="w-4 h-4" />
+					<NotificationIcon width={16} height={16} />
 				</div>
 			)}
 			{showEmail && (
 				<div className="w-14 flex justify-center text-muted-foreground">
-					<Mail className="w-4 h-4" />
+					<ContactTotalEmailsIcon width={16} height={16} />
 				</div>
 			)}
 			{hasBrowser && (
 				<div className="w-14 flex justify-center text-muted-foreground">
-					<Monitor className="w-4 h-4" />
+					<DesktopNotificationsIcon width={16} height={16} />
 				</div>
 			)}
 		</div>
@@ -357,7 +364,7 @@ function EmailDesktopTab({
 						<div className="flex items-center justify-between">
 							<div className="flex items-start gap-3">
 								<div className="p-2 bg-blue-50 rounded-lg">
-									<Bell className="w-5 h-5 text-blue-600" />
+									<NotificationIcon width={20} height={20} color="#2563eb" />
 								</div>
 								<div>
 									<div className="font-medium">
@@ -383,8 +390,8 @@ function EmailDesktopTab({
 					{/* Email */}
 					<div className="flex items-center justify-between">
 						<div className="flex items-start gap-3">
-							<div className="p-2 bg-green-50 rounded-lg">
-								<Mail className="w-5 h-5 text-green-600" />
+							<div className="p-2 bg-green-50 rounded-lg text-[#16a34a]">
+								<ContactTotalEmailsIcon width={20} height={20} />
 							</div>
 							<div>
 								<div className="font-medium">
@@ -411,7 +418,7 @@ function EmailDesktopTab({
 						<div className="flex items-center justify-between">
 							<div className="flex items-start gap-3">
 								<div className="p-2 bg-purple-50 rounded-lg">
-									<Monitor className="w-5 h-5 text-purple-600" />
+									<DesktopNotificationsIcon width={20} height={20} color="#9333ea" />
 								</div>
 								<div>
 									<div className="font-medium flex items-center gap-2">
@@ -516,7 +523,7 @@ function EmailDesktopTab({
 										</>
 									) : (
 										<>
-											<Bell className="w-4 h-4 mr-2" />
+											<span className="mr-2 inline-flex"><NotificationIcon width={16} height={16} /></span>
 											{__('Enable', 'doublescale')}
 										</>
 									)}
@@ -562,7 +569,7 @@ function EmailDesktopTab({
 									</>
 								) : (
 									<>
-										<Monitor className="w-4 h-4 mr-2" />
+										<span className="mr-2 inline-flex"><DesktopNotificationsIcon width={16} height={16} /></span>
 										{__('Test', 'doublescale')}
 									</>
 								)}
@@ -648,7 +655,6 @@ function EmailDesktopTab({
 										value={key}
 										className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 									>
-										{CATEGORY_ICONS[key] || null}
 										{categories[key].label}
 									</TabsTrigger>
 								))}
@@ -1010,7 +1016,7 @@ function MobileAppTab({
 											</>
 										) : (
 											<>
-												<Smartphone className="w-4 h-4 mr-2" />
+												<span className="mr-2 inline-flex"><MobileNotificationsIcon width={16} height={16} /></span>
 												{__(
 													'Send Test Push',
 													'doublescale'
@@ -1066,7 +1072,7 @@ function MobileAppTab({
 			{/* 2. Info Note */}
 			<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
 				<div className="flex gap-3">
-					<Smartphone className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+					<span className="mt-0.5 inline-flex shrink-0"><MobileNotificationsIcon width={20} height={20} color="#2563eb" /></span>
 					<div className="text-sm text-blue-900">
 						{__(
 							'Push and in-app notifications will be sent to your mobile device if you have the DoubleScale app installed. You can also change your mobile notification settings in the DoubleScale mobile app.',
@@ -1100,7 +1106,7 @@ function MobileAppTab({
 									</>
 								) : (
 									<>
-										<Smartphone className="w-4 h-4 mr-2" />
+										<span className="mr-2 inline-flex"><MobileNotificationsIcon width={16} height={16} /></span>
 										{__('Send Test Push', 'doublescale')}
 									</>
 								)}
@@ -1166,7 +1172,7 @@ function MobileAppTab({
 					<div className="flex items-center justify-between pb-4 mb-4 border-b">
 						<div className="flex items-start gap-3">
 							<div className="p-2 bg-orange-50 rounded-lg">
-								<Smartphone className="w-5 h-5 text-orange-600" />
+								<MobileNotificationsIcon width={20} height={20} color="#ea580c" />
 							</div>
 							<div>
 								<div className="font-medium">
@@ -1197,7 +1203,7 @@ function MobileAppTab({
 							{__('Category', 'doublescale')}
 						</div>
 						<div className="text-sm font-medium text-muted-foreground text-center">
-							<Smartphone className="w-4 h-4 mx-auto" />
+							<span className="mx-auto inline-flex"><MobileNotificationsIcon width={16} height={16} /></span>
 						</div>
 					</div>
 
@@ -1583,6 +1589,24 @@ export function NotificationPreferences({
 		}
 	};
 
+	const [activeChannelTab, setActiveChannelTab] = useState('email-desktop');
+
+	const notificationTabsList = useMemo(
+		() => [
+			{
+				value: 'email-desktop',
+				label: __('Email & Desktop', 'doublescale'),
+				icon: <DesktopNotificationsIcon width={24} height={24} />,
+			},
+			{
+				value: 'mobile-app',
+				label: __('Mobile app', 'doublescale'),
+				icon: <MobileNotificationsIcon width={24} height={24} />,
+			},
+		],
+		[]
+	);
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center p-8">
@@ -1605,6 +1629,61 @@ export function NotificationPreferences({
 		}
 	};
 
+	const emailDesktopContent = (
+		<EmailDesktopTab
+			preferences={preferences}
+			categories={categories}
+			subcategories={subcategories}
+			updateChannel={updateChannel}
+			updateSubcategory={updateSubcategory}
+			hasChanges={hasChanges}
+			isSaving={isSaving}
+			onSave={handleSave}
+			canManageRetentionSettings={canManageRetentionSettings}
+			channelsAllowed={channelsAllowed}
+			browserPermission={browserPermission}
+			isRequestingPermission={isRequestingPermission}
+			testNotificationShown={testNotificationShown}
+			onRequestPermission={handleRequestPermission}
+			onTestNotification={handleTestNotification}
+			initialCategory={initialCategory}
+			canEditSalesTemplates={canEditSalesTemplates}
+		/>
+	);
+
+	const notificationTabsContent = [
+		{ value: 'email-desktop', children: emailDesktopContent },
+		{
+			value: 'mobile-app',
+			children: (
+				<MobileAppTab
+					preferences={preferences}
+					categories={categories}
+					subcategories={subcategories}
+					updateChannel={updateChannel}
+					updateSubcategory={updateSubcategory}
+					hasChanges={hasChanges}
+					isSaving={isSaving}
+					onSave={handleSave}
+					canManagePushSetup={canManagePushSetup}
+					whiteLabel={whiteLabel}
+					pushConfig={pushConfig}
+					pushConfigLoading={pushConfigLoading}
+					pushToggling={pushToggling}
+					pushTesting={pushTesting}
+					pushMessage={pushMessage}
+					pushCategories={pushCategories}
+					pushExcludedSubcategories={pushExcludedSubcategories}
+					onPushToggle={handlePushToggle}
+					onPushTest={handlePushTest}
+					pushSending={pushSending}
+					pushSendMessage={pushSendMessage}
+					onPushSend={handlePushSend}
+				/>
+			),
+		},
+	];
+
 	return (
 		<div className="space-y-6 max-w-4xl">
 			{/* Header */}
@@ -1624,87 +1703,19 @@ export function NotificationPreferences({
 			    push is available on this install. With push unavailable there is a
 			    single panel, so we drop the tab chrome entirely. */}
 			{channelsAllowed.push ? (
-				<Tabs defaultValue="email-desktop">
-					<TabsList>
-						<TabsTrigger value="email-desktop">
-							<Monitor className="w-4 h-4 mr-2" />
-							{__('Email & Desktop', 'doublescale')}
-						</TabsTrigger>
-						<TabsTrigger value="mobile-app">
-							<Smartphone className="w-4 h-4 mr-2" />
-							{__('Mobile app', 'doublescale')}
-						</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="email-desktop" className="mt-6">
-						<EmailDesktopTab
-							preferences={preferences}
-							categories={categories}
-							subcategories={subcategories}
-							updateChannel={updateChannel}
-							updateSubcategory={updateSubcategory}
-							hasChanges={hasChanges}
-							isSaving={isSaving}
-							onSave={handleSave}
-							canManageRetentionSettings={canManageRetentionSettings}
-							channelsAllowed={channelsAllowed}
-							browserPermission={browserPermission}
-							isRequestingPermission={isRequestingPermission}
-							testNotificationShown={testNotificationShown}
-							onRequestPermission={handleRequestPermission}
-							onTestNotification={handleTestNotification}
-							initialCategory={initialCategory}
-							canEditSalesTemplates={canEditSalesTemplates}
-						/>
-					</TabsContent>
-
-					<TabsContent value="mobile-app" className="mt-6">
-						<MobileAppTab
-							preferences={preferences}
-							categories={categories}
-							subcategories={subcategories}
-							updateChannel={updateChannel}
-							updateSubcategory={updateSubcategory}
-							hasChanges={hasChanges}
-							isSaving={isSaving}
-							onSave={handleSave}
-							canManagePushSetup={canManagePushSetup}
-							whiteLabel={whiteLabel}
-							pushConfig={pushConfig}
-							pushConfigLoading={pushConfigLoading}
-							pushToggling={pushToggling}
-							pushTesting={pushTesting}
-							pushMessage={pushMessage}
-							pushCategories={pushCategories}
-							pushExcludedSubcategories={pushExcludedSubcategories}
-							onPushToggle={handlePushToggle}
-							onPushTest={handlePushTest}
-							pushSending={pushSending}
-							pushSendMessage={pushSendMessage}
-							onPushSend={handlePushSend}
-						/>
-					</TabsContent>
-				</Tabs>
-			) : (
-				<EmailDesktopTab
-					preferences={preferences}
-					categories={categories}
-					subcategories={subcategories}
-					updateChannel={updateChannel}
-					updateSubcategory={updateSubcategory}
-					hasChanges={hasChanges}
-					isSaving={isSaving}
-					onSave={handleSave}
-					canManageRetentionSettings={canManageRetentionSettings}
-					channelsAllowed={channelsAllowed}
-					browserPermission={browserPermission}
-					isRequestingPermission={isRequestingPermission}
-					testNotificationShown={testNotificationShown}
-					onRequestPermission={handleRequestPermission}
-					onTestNotification={handleTestNotification}
-					initialCategory={initialCategory}
-					canEditSalesTemplates={canEditSalesTemplates}
+				<PageTabs
+					defaultValue={activeChannelTab}
+					value={activeChannelTab}
+					onValueChange={setActiveChannelTab}
+					tabsList={notificationTabsList}
+					tabsContent={notificationTabsContent}
+					enableHorizontalScroll
+					tabsListWrapperClassName=""
+					tabsListClassName="gap-2 bg-transparent text-foreground"
+					scrollArrowBg="bg-white"
 				/>
+			) : (
+				emailDesktopContent
 			)}
 		</div>
 	);

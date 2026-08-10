@@ -26,8 +26,8 @@ const CreateFormsIcon: React.FC<IconProps> = ({ width = 28, height = 28 }) => {
 					y2="6.32009"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_3893_3159"
@@ -37,8 +37,8 @@ const CreateFormsIcon: React.FC<IconProps> = ({ width = 28, height = 28 }) => {
 					y2="13.9997"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3a3a99" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 			</defs>
 		</svg>

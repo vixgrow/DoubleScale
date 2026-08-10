@@ -14,14 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
-	Clock,
-	Play,
 	AlertTriangle,
-	Copy,
 	ExternalLink,
 	Terminal,
 	RefreshCw,
 } from 'lucide-react';
+import { CopyIcon, PlayIcon, TimerBlockIcon } from '@doublescale/components';
 
 interface CronEvent {
 	hook: string;
@@ -238,7 +236,7 @@ const CronJobs: React.FC = () => {
 			<div className="mb-6">
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-2">
-						<Clock className="h-5 w-5" />
+						<TimerBlockIcon width={24} height={24} />
 						<h3 className="text-[#09090B] font-semibold text-lg">
 							{__('CRON Job Status', 'doublescale')}
 						</h3>
@@ -311,7 +309,7 @@ const CronJobs: React.FC = () => {
 								disabled={runningHook === event.hook}
 								className="ml-4"
 							>
-								<Play className="h-3 w-3 mr-1" />
+								<PlayIcon width={24} height={24} />
 								{runningHook === event.hook
 									? __('Running...', 'doublescale')
 									: __('Run Now', 'doublescale')}
@@ -374,7 +372,7 @@ const CronJobs: React.FC = () => {
 										copyToClipboard(wpConfigCode, 'wp-config')
 									}
 								>
-									<Copy className="h-3 w-3 mr-1" />
+									<CopyIcon width={24} height={24} />
 									{copiedText === 'wp-config'
 										? __('Copied!', 'doublescale')
 										: __('Copy', 'doublescale')}
@@ -410,7 +408,7 @@ const CronJobs: React.FC = () => {
 										className="absolute top-2 right-2"
 										onClick={() => copyToClipboard(cronCommand, 'wget')}
 									>
-										<Copy className="h-3 w-3 mr-1" />
+										<CopyIcon width={24} height={24} />
 										{copiedText === 'wget'
 											? __('Copied!', 'doublescale')
 											: __('Copy', 'doublescale')}
@@ -434,7 +432,7 @@ const CronJobs: React.FC = () => {
 											copyToClipboard(cronCommandCurl, 'curl')
 										}
 									>
-										<Copy className="h-3 w-3 mr-1" />
+										<CopyIcon width={24} height={24} />
 										{copiedText === 'curl'
 											? __('Copied!', 'doublescale')
 											: __('Copy', 'doublescale')}

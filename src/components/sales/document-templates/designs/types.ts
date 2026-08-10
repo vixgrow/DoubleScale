@@ -50,5 +50,8 @@ export interface DocumentDesignProps {
 	adjustment: number;
 	total: number;
 	amountPaid?: number;
-	sections?: DocumentDesignSection[];
+	/** Custom sections rendered above the line items table. */
+	sectionsBefore?: DocumentDesignSection[];
+	/** Custom sections rendered below totals (terms/client note are injected separately). */
+	sectionsAfter?: DocumentDesignSection[];
 }

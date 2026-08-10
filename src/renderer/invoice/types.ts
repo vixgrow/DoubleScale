@@ -42,6 +42,7 @@ export interface PublicInvoice {
 	shipping_address: string | null;
 	client_note: string | null;
 	terms: string | null;
+	sections?: { title: string; body: string }[];
 	contact: { first_name: string | null; last_name: string | null } | null;
 	payments?: PublicPayment[];
 }

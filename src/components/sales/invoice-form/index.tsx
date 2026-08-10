@@ -33,6 +33,12 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentSectionsEditor } from '../document-sections-editor';
+import {
+	mergeDocumentSections,
+	splitDocumentSections,
+} from '../document-sections-utils';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
 import { SendWhatsappDialog } from '../send-whatsapp-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
@@ -68,7 +74,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
-import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
+import type { ContactSummary, DocumentSection, Invoice, LineItem } from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
 	INVOICE_STATUSES,
@@ -182,6 +188,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [shippingAddress, setShippingAddress] = useState('');
 	const [clientNote, setClientNote] = useState('');
 	const [terms, setTerms] = useState('');
+	const [sectionsBeforeItems, setSectionsBeforeItems] = useState<DocumentSection[]>([]);
+	const [sectionsAfterTotals, setSectionsAfterTotals] = useState<DocumentSection[]>([]);
 	const [saleAgentUserId, setSaleAgentUserId] = useState<number | null>(null);
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
@@ -219,6 +227,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		setShippingAddress(existing.shipping_address || '');
 		setClientNote(existing.client_note || '');
 		setTerms(existing.terms || '');
+		const split = splitDocumentSections(existing.sections ?? []);
+		setSectionsBeforeItems(split.beforeItems);
+		setSectionsAfterTotals(split.afterTotals);
 		setSaleAgentUserId(existing.sale_agent_user_id ?? null);
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
 		setTemplate(normalizeTemplateId(existing.template));
@@ -402,6 +413,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		shipping_address: shippingAddress,
 		client_note: clientNote,
 		terms,
+		sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
 		sale_agent_user_id: saleAgentUserId,
 		line_items: lineItems,
 		template,
@@ -668,6 +680,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			shipping_address: shippingAddress,
 			client_note: clientNote,
 			terms,
+			sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
 			created_at: existing?.created_at ?? null,
 			updated_at: existing?.updated_at ?? null,
 			contact: contact ?? null,
@@ -1038,6 +1051,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
 				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
 
+				<DocumentSectionsEditor
+					sections={sectionsBeforeItems}
+					onChange={setSectionsBeforeItems}
+					disabled={fieldsLocked}
+					heading={__('Content Sections', 'doublescale')}
+				/>
+
+				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
+
 				<LineItemsEditor
 					items={lineItems}
 					onChange={setLineItems}
@@ -1052,32 +1074,51 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
 				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
 
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<div className="space-y-2">
-						<Label className="text-sm !p-0 font-medium text-[#29292E]">
-							{__('Client Note', 'doublescale')}
-						</Label>
-						<Textarea
-							value={clientNote}
-							onChange={(e) => setClientNote(e.target.value)}
-							rows={5}
-							placeholder={__('Client Note', 'doublescale')}
-							className="rounded-lg border-[#D0D0D0] bg-white"
-						/>
-					</div>
+				<div className="space-y-4">
 					<div className="space-y-2">
 						<Label className="text-sm p-0 font-medium text-[#29292E]">
 							{__('Terms & Conditions', 'doublescale')}
 						</Label>
-						<Textarea
-							value={terms}
-							onChange={(e) => setTerms(e.target.value)}
-							rows={5}
-							placeholder={__(
-								'Terms & Conditions',
-								'doublescale'
-							)}
-							className="rounded-lg border-[#D0D0D0] bg-white"
+						<div
+							className={
+								fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+							}
+						>
+							<RichTextEditor
+								content={terms}
+								onChange={setTerms}
+								placeholder={__(
+									'Terms the client must agree to before paying.',
+									'doublescale'
+								)}
+								className="[&_.prose]:min-h-[120px]"
+							/>
+						</div>
+					</div>
+
+					<DocumentSectionsEditor
+						sections={sectionsAfterTotals}
+						onChange={setSectionsAfterTotals}
+						disabled={fieldsLocked}
+					/>
+				</div>
+
+				<div className=" h-[1px] w-full bg-[#DEE1E6] my-6"> </div>
+
+				<div className="space-y-2">
+					<Label className="text-sm !p-0 font-medium text-[#29292E]">
+						{__('Client Note', 'doublescale')}
+					</Label>
+					<div
+						className={
+							fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+						}
+					>
+						<RichTextEditor
+							content={clientNote}
+							onChange={setClientNote}
+							placeholder={__('Client Note', 'doublescale')}
+							className="[&_.prose]:min-h-[120px]"
 						/>
 					</div>
 				</div>

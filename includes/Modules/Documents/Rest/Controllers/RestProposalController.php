@@ -24,7 +24,7 @@ use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\ConvertProposalToInvoice;
 use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
 use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
-use DoubleScale\Modules\Documents\Services\DocumentPdf;
+use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DuplicateProposal;
 use DoubleScale\Modules\Documents\Services\ProposalNotifications;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
@@ -978,6 +978,14 @@ class RestProposalController extends RestController {
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'terms', $params ) ) {
+			$payload['terms'] = wp_kses_post( (string) $params['terms'] );
+		}
+
+		if ( array_key_exists( 'sections', $params ) && is_array( $params['sections'] ) ) {
+			$payload['sections'] = DocumentSectionsSanitizer::sanitize( $params['sections'] );
 		}
 
 		if ( array_key_exists( 'template', $params ) ) {

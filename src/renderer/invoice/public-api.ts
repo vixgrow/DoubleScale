@@ -56,10 +56,17 @@ export const usePublicInvoice = (hash: string | null) => {
 	return { data, loading, error, refetch };
 };
 
-export const initPublicInvoicePayment = (hash: string, gateway: string) =>
+export const initPublicInvoicePayment = (
+	hash: string,
+	gateway: string,
+	options?: { agreed_terms?: boolean }
+) =>
 	fetch(`${getPublicBase()}/${hash}/pay/${gateway}/init`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(
+			options?.agreed_terms ? { agreed_terms: true } : {}
+		),
 	}).then(async (res) => {
 		if (!res.ok) {
 			return parseError(res);

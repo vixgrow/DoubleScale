@@ -20,6 +20,7 @@ use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\PaymentMode;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
+use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
 use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
@@ -893,8 +894,10 @@ class RestInvoiceController extends RestController {
 
 		foreach ( $string_fields as $field ) {
 			if ( array_key_exists( $field, $params ) ) {
-				if ( in_array( $field, array( 'billing_address', 'shipping_address', 'client_note', 'terms' ), true ) ) {
+				if ( in_array( $field, array( 'billing_address', 'shipping_address' ), true ) ) {
 					$payload[ $field ] = sanitize_textarea_field( (string) $params[ $field ] );
+				} elseif ( in_array( $field, array( 'client_note', 'terms' ), true ) ) {
+					$payload[ $field ] = wp_kses_post( (string) $params[ $field ] );
 				} else {
 					$payload[ $field ] = sanitize_text_field( (string) $params[ $field ] );
 				}
@@ -922,6 +925,10 @@ class RestInvoiceController extends RestController {
 		}
 		if ( array_key_exists( 'line_items', $params ) && is_array( $params['line_items'] ) ) {
 			$payload['line_items'] = $params['line_items'];
+		}
+
+		if ( array_key_exists( 'sections', $params ) && is_array( $params['sections'] ) ) {
+			$payload['sections'] = DocumentSectionsSanitizer::sanitize( $params['sections'] );
 		}
 
 		if ( array_key_exists( 'template', $params ) ) {

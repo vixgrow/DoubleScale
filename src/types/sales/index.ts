@@ -62,6 +62,13 @@ export interface ContractAttachmentLimits {
 	max_file_count: number;
 }
 
+export interface DocumentSection {
+	title: string;
+	body: string;
+	/** Where the section appears on the document. Defaults to after totals. */
+	position?: 'before_items' | 'after_totals';
+}
+
 export interface ProposalSignature {
 	signed_name: string | null;
 	signature: string;
@@ -131,6 +138,8 @@ export interface Proposal {
 	discount_type: string;
 	discount_value: number;
 	line_items: LineItem[];
+	sections?: DocumentSection[];
+	terms?: string | null;
 	subtotal: number;
 	adjustment: number;
 	total: number;
@@ -290,6 +299,7 @@ export interface Invoice {
 	shipping_address: string | null;
 	client_note: string | null;
 	terms: string | null;
+	sections?: DocumentSection[];
 	sent_at?: string | null;
 	viewed_at?: string | null;
 	public_url?: string | null;

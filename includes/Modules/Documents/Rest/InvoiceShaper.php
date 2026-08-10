@@ -18,6 +18,7 @@ use DoubleScale\Modules\Documents\Models\PaymentModel;
 use DoubleScale\Core\Payment\GatewayManager;
 use DoubleScale\Modules\Documents\Services\InvoicePayable;
 use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Sales\Services\SalesEmailMergeTags;
 use DoubleScale\Core\Settings\Settings;
 
 /**
@@ -63,6 +64,7 @@ class InvoiceShaper {
 			'shipping_address'      => $invoice->shipping_address,
 			'client_note'           => $invoice->client_note,
 			'terms'                 => $invoice->terms,
+			'sections'              => is_array( $invoice->sections ) ? $invoice->sections : array(),
 			'issuer_snapshot_raw'   => $invoice->issuer_snapshot ? (string) $invoice->issuer_snapshot : null,
 			'public_url'            => InvoiceUrl::get_public_url( $invoice ),
 			'created_at'            => $invoice->created_at,
@@ -100,7 +102,10 @@ class InvoiceShaper {
 		return apply_filters( 'doublescale_sales_invoice_admin_shape', $data, $invoice );
 	}
 	public static function shape_public( InvoiceModel $invoice ): array {
+		SalesEmailMergeTags::ensure_document_contact_loaded( $invoice );
 		$contact = $invoice->relationLoaded( 'contact' ) ? $invoice->contact : null;
+		$merge_context = SalesEmailMergeTags::for_invoice( $invoice );
+		$sections      = is_array( $invoice->sections ) ? $invoice->sections : array();
 
 		return array(
 			'invoice_number'        => (string) $invoice->invoice_number,
@@ -127,8 +132,15 @@ class InvoiceShaper {
 			'online_payment_gateways' => GatewayManager::instance()->shape_for_invoice( $invoice ),
 			'billing_address'       => $invoice->billing_address,
 			'shipping_address'      => $invoice->shipping_address,
-			'client_note'           => $invoice->client_note,
-			'terms'                 => $invoice->terms,
+			'client_note'           => SalesEmailMergeTags::resolve_rich_text(
+				$invoice->client_note ? (string) $invoice->client_note : null,
+				$merge_context
+			),
+			'terms'                 => SalesEmailMergeTags::resolve_rich_text(
+				$invoice->terms ? (string) $invoice->terms : null,
+				$merge_context
+			),
+			'sections'              => SalesEmailMergeTags::resolve_sections( $sections, $merge_context ),
 			'contact'               => $contact ? array(
 				'first_name' => $contact->first_name,
 				'last_name'  => $contact->last_name,

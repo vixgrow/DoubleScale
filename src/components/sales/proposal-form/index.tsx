@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useRef, useState } from '@wordpress/elem
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useParams } from '@doublescale/navigation';
-
 import { useNavigate, getToLink, useLocation } from '@doublescale/navigation';
 import { FormField, InfiniteScrollSelect, PanelLayout, GradientProposalsIcon, WhatsAppIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,12 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentSectionsEditor } from '../document-sections-editor';
+import {
+	mergeDocumentSections,
+	splitDocumentSections,
+} from '../document-sections-utils';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { SendDocumentDialog } from '../send-document-dialog';
 import { SendWhatsappDialog } from '../send-whatsapp-dialog';
 import { ApprovalStatusBanner } from '../approval-status-banner';
@@ -56,7 +61,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
-import type { ContactSummary, LineItem, Proposal } from '@/types/sales';
+import type { ContactSummary, DocumentSection, LineItem, Proposal } from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
 	PROPOSAL_STATUSES,
@@ -166,6 +171,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const [lineItems, setLineItems] = useState<LineItem[]>(() =>
 		isNew && initialLineItems?.length ? initialLineItems : []
 	);
+	const [sectionsBeforeItems, setSectionsBeforeItems] = useState<DocumentSection[]>([]);
+	const [sectionsAfterTotals, setSectionsAfterTotals] = useState<DocumentSection[]>([]);
+	const [terms, setTerms] = useState('');
 	const [template, setTemplate] = useState(DEFAULT_TEMPLATE_ID);
 	const [templateColor, setTemplateColor] = useState<string | null>(null);
 	const [templatePicked, setTemplatePicked] = useState(!isNew);
@@ -285,6 +293,10 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		setAssignedUserId(existing.assigned_user_id ?? null);
 		hydratedContactIdRef.current = existing.contact_id ?? null;
 		setLineItems(existing.line_items?.length ? existing.line_items : []);
+		const split = splitDocumentSections(existing.sections ?? []);
+		setSectionsBeforeItems(split.beforeItems);
+		setSectionsAfterTotals(split.afterTotals);
+		setTerms(existing.terms || '');
 		setTemplate(normalizeTemplateId(existing.template));
 		setTemplateColor(normalizeTemplateColor(existing.template_color));
 		setTemplatePicked(true);
@@ -323,6 +335,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		phone,
 		assigned_user_id: assignedUserId,
 		line_items: lineItems,
+		sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
+		terms,
 		template,
 		template_color: templateColor,
 	});
@@ -605,6 +619,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			discount_type: discountType,
 			discount_value: discountValue,
 			line_items: lineItems,
+			sections: mergeDocumentSections(sectionsBeforeItems, sectionsAfterTotals),
+			terms,
 			subtotal: totals.subtotal,
 			adjustment,
 			total: totals.total,
@@ -881,6 +897,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			</div>
 
 			<div className="border-t border-[#DEE1E6] pt-6">
+				<DocumentSectionsEditor
+					sections={sectionsBeforeItems}
+					onChange={setSectionsBeforeItems}
+					disabled={fieldsLocked}
+					heading={__('Content Sections', 'doublescale')}
+				/>
+			</div>
+
+			<div className="border-t border-[#DEE1E6] pt-6">
 			<LineItemsEditor
 				items={lineItems}
 				onChange={setLineItems}
@@ -894,6 +919,32 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 				hideDiscountTypeSelect
 				readOnly={fieldsLocked}
 			/>
+			</div>
+
+			<div className="border-t border-[#DEE1E6] pt-6 space-y-4">
+				<FormField label={__('Terms & Conditions', 'doublescale')} className="!mb-0">
+					<div
+						className={
+							fieldsLocked ? 'pointer-events-none opacity-60' : undefined
+						}
+					>
+						<RichTextEditor
+							content={terms}
+							onChange={setTerms}
+							placeholder={__(
+								'Terms the client must agree to before accepting.',
+								'doublescale'
+							)}
+							className="[&_.prose]:min-h-[120px]"
+						/>
+					</div>
+				</FormField>
+
+				<DocumentSectionsEditor
+					sections={sectionsAfterTotals}
+					onChange={setSectionsAfterTotals}
+					disabled={fieldsLocked}
+				/>
 			</div>
 			</fieldset>
 

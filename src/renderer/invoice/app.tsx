@@ -92,7 +92,8 @@ const PublicOnlinePayment: React.FC<{
 	invoice: PublicInvoice;
 	gateway: OnlinePaymentGatewayStatus;
 	onPaid: () => void;
-}> = ({ hash, invoice, gateway, onPaid }) => {
+	agreedTerms: boolean;
+}> = ({ hash, invoice, gateway, onPaid, agreedTerms }) => {
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
@@ -209,7 +210,9 @@ const PublicOnlinePayment: React.FC<{
 		let cancelled = false;
 		setLoading(true);
 		setError(null);
-		void initPublicInvoicePayment(hash, gateway.slug)
+		void initPublicInvoicePayment(hash, gateway.slug, {
+			agreed_terms: agreedTerms,
+		})
 			.then((response) => {
 				if (cancelled) {
 					return;
@@ -240,7 +243,7 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, agreedTerms]);
 
 	const handlePayPalApprove = useCallback(async () => {
 		setPaypalBusy(true);
@@ -257,7 +260,9 @@ const PublicOnlinePayment: React.FC<{
 	}, [hash, gateway.slug]);
 
 	const createPayPalOrder = useCallback(async () => {
-		const response = await initPublicInvoicePayment(hash, gateway.slug);
+		const response = await initPublicInvoicePayment(hash, gateway.slug, {
+			agreed_terms: agreedTerms,
+		});
 		if (response.already_paid) {
 			onPaidRef.current();
 			throw new Error(__('Invoice is already paid.', 'doublescale'));
@@ -266,13 +271,15 @@ const PublicOnlinePayment: React.FC<{
 			throw new Error(__('Could not start PayPal checkout.', 'doublescale'));
 		}
 		return response.order_id;
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, agreedTerms]);
 
 	const handleWooCheckout = useCallback(async () => {
 		setWooBusy(true);
 		setError(null);
 		try {
-			const response = await initPublicInvoicePayment(hash, gateway.slug);
+			const response = await initPublicInvoicePayment(hash, gateway.slug, {
+				agreed_terms: agreedTerms,
+			});
 			if (response.already_paid) {
 				onPaidRef.current();
 				return;
@@ -287,7 +294,7 @@ const PublicOnlinePayment: React.FC<{
 			);
 			setWooBusy(false);
 		}
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, agreedTerms]);
 
 	if (loading) {
 		return (
@@ -372,6 +379,7 @@ const PublicOnlinePayment: React.FC<{
 
 const PublicInvoiceApp = ({ hash }: Props) => {
 	const { data, loading, error, refetch } = usePublicInvoice(hash);
+	const [agreedTerms, setAgreedTerms] = useState(false);
 
 	if (loading) {
 		return (
@@ -394,6 +402,8 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 	const previewInvoice = data as unknown as Invoice;
 	const payments = data.payments ?? [];
 	const payableGateways = (data.online_payment_gateways ?? []).filter((gateway) => gateway.can_pay);
+	const hasTerms = Boolean(data.terms && data.terms.replace(/<[^>]*>/g, '').trim());
+	const canPay = !hasTerms || agreedTerms;
 
 	return (
 		<div className="doublescale-invoice-renderer">
@@ -459,15 +469,34 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 
 			{data.can_pay && payableGateways.length > 0 ? (
 				<div className="doublescale-invoice-renderer__pay mt-6 space-y-4">
-					{payableGateways.map((gateway) => (
-						<PublicOnlinePayment
-							key={gateway.slug}
-							hash={hash}
-							invoice={data}
-							gateway={gateway}
-							onPaid={refetch}
-						/>
-					))}
+					{hasTerms ? (
+						<label className="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								className="mt-1"
+								checked={agreedTerms}
+								onChange={(e) => setAgreedTerms(e.target.checked)}
+							/>
+							<span className="text-sm">
+								{__(
+									'I have read and agree to the Terms & Conditions.',
+									'doublescale'
+								)}
+							</span>
+						</label>
+					) : null}
+					{canPay
+						? payableGateways.map((gateway) => (
+								<PublicOnlinePayment
+									key={gateway.slug}
+									hash={hash}
+									invoice={data}
+									gateway={gateway}
+									onPaid={refetch}
+									agreedTerms={agreedTerms}
+								/>
+							))
+						: null}
 				</div>
 			) : null}
 		</div>

@@ -59,6 +59,7 @@ export const usePublicProposal = (hash: string | null) => {
 export interface AcceptProposalPayload {
 	signed_name?: string;
 	signature?: string;
+	agreed_terms?: boolean;
 }
 
 export const acceptPublicProposal = (hash: string, payload: AcceptProposalPayload = {}) =>

@@ -62,6 +62,7 @@ class InvoiceModel extends Model {
 		'shipping_address',
 		'client_note',
 		'terms',
+		'sections',
 		'issuer_snapshot',
 		'sent_at',
 		'viewed_at',
@@ -72,6 +73,7 @@ class InvoiceModel extends Model {
 	 */
 	protected $casts = array(
 		'template'              => 'int',
+		'sections'              => 'array',
 		'line_items'            => 'array',
 		'allowed_payment_modes' => 'array',
 		'discount_value'        => 'float',

@@ -33,6 +33,8 @@ export interface PublicProposal {
 	zip: string | null;
 	email: string | null;
 	phone: string | null;
+	sections?: DocumentSection[];
+	terms?: string | null;
 	require_signature: boolean;
 	signed_name: string | null;
 	has_signature: boolean;

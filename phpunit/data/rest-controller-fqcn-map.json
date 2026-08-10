@@ -38,6 +38,7 @@
     "RestInvoiceController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoiceController",
     "RestInvoiceOnlinePaymentController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoiceOnlinePaymentController",
     "RestInvoicePaymentController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoicePaymentController",
+    "RestInvoiceRecurrenceController": "DoubleScale\\Pro\\Modules\\RecurringInvoices\\Rest\\Controllers\\RestInvoiceRecurrenceController",
     "RestInvoiceReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestInvoiceReportsController",
     "RestLeadScoringRuleController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleLevelController",

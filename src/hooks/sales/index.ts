@@ -22,6 +22,8 @@ import type {
 	InvoiceFilters,
 	InvoiceOnlineInitResponse,
 	InvoicePayment,
+	InvoiceRecurrence,
+	InvoiceRecurrencePayload,
 	InvoiceSummary,
 	OnlinePaymentGatewayStatus,
 	PaginatedResponse,
@@ -498,6 +500,22 @@ export const deleteInvoice = (id: number) =>
 	apiFetch<{ deleted: boolean }>({
 		path: `${NAMESPACE}/invoices/${id}`,
 		method: 'DELETE',
+	});
+
+/**
+ * Save (or clear) the recurrence rule for an invoice.
+ *
+ * Served by the Pro Recurring Invoices module; the endpoint 404s when that
+ * module is inactive, so callers should treat failures as non-fatal.
+ */
+export const saveInvoiceRecurrence = (
+	invoiceId: number,
+	payload: InvoiceRecurrencePayload
+) =>
+	apiFetch<{ data: InvoiceRecurrence | null }>({
+		path: `${NAMESPACE}/invoices/${invoiceId}/recurrence`,
+		method: 'POST',
+		data: payload,
 	});
 
 export const useAssignableSalesUsers = () => {

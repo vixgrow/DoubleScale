@@ -38,6 +38,7 @@
     "RestInvoiceController",
     "RestInvoiceOnlinePaymentController",
     "RestInvoicePaymentController",
+    "RestInvoiceRecurrenceController",
     "RestInvoiceReportsController",
     "RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController",

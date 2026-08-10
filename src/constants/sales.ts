@@ -70,6 +70,22 @@ export const DISCOUNT_TYPES = [
 	{ value: 'after_tax', label: 'After Tax' },
 ] as const;
 
+/**
+ * Whole-month shortcuts offered by the recurring-invoice dropdown. Anything
+ * outside this range (days, weeks, years, longer month spans) goes through the
+ * Custom option.
+ */
+export const MONTHLY_RECURRENCE_CHOICES = [
+	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+] as const;
+
+export const RECURRENCE_UNITS = [
+	{ value: 'day', label: __('Day(s)', 'doublescale') },
+	{ value: 'week', label: __('Week(s)', 'doublescale') },
+	{ value: 'month', label: __('Month(s)', 'doublescale') },
+	{ value: 'year', label: __('Year(s)', 'doublescale') },
+] as const;
+
 export const OFFLINE_PAYMENT_MODES = [
 	'bank_transfer',
 	'cash',

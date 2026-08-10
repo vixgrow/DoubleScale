@@ -43,6 +43,7 @@ class InvoiceModel extends Model {
 		'contact_id',
 		'proposal_id',
 		'subscription_id',
+		'recurrence_id',
 		'sale_agent_user_id',
 		'invoice_date',
 		'due_date',

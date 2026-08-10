@@ -94,6 +94,7 @@ final class Module extends AbstractSalesChildModule {
 			$this->sales_migration_path( 'SalesInvoicePaymentsTable.php' ),
 			$this->sales_migration_path( 'SalesInvoiceTableIssuerSnapshotColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoiceTableContentColumns.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableRecurrenceColumn.php' ),
 			$this->sales_migration_path( 'SalesProposalTableIssuerSnapshotColumn.php' ),
 		);
 	}

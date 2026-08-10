@@ -103,6 +103,5 @@
     "RestUserEmailController",
     "RestUserManagementController",
     "RestWhatsappTemplatesController",
-    "RestWooCommerceSettingsController",
     "RestWooProductController"
 ]

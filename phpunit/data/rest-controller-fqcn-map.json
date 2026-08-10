@@ -103,6 +103,5 @@
     "RestUserEmailController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestUserEmailController",
     "RestUserManagementController": "DoubleScale\\Core\\UserRoles\\Rest\\RestUserManagementController",
     "RestWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestWhatsappTemplatesController",
-    "RestWooCommerceSettingsController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestWooCommerceSettingsController",
     "RestWooProductController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestWooProductController"
 }

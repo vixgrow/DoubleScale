@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { Field } from '@doublescale/components';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useExportContext } from '../contexts';
 
 const SegmentFields: React.FC = () => {
@@ -24,11 +24,10 @@ const SegmentFields: React.FC = () => {
 			<div className="flex flex-wrap gap-8">
 				{segments.map(({ key, label }) => (
 					<div key={key} className="flex items-center gap-2">
-						<Field
-							type="checkbox"
-							value={selectedFields.includes(key)}
-							onChange={() => toggleField(key)}
-						/>
+					<Checkbox
+						checked={selectedFields.includes(key)}
+						onCheckedChange={() => toggleField(key)}
+					/>
 						<div className="text-[#3F4254] font-semibold text-base">
 							{label}
 						</div>

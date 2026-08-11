@@ -38,7 +38,6 @@
     "RestInvoiceController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoiceController",
     "RestInvoiceOnlinePaymentController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoiceOnlinePaymentController",
     "RestInvoicePaymentController": "DoubleScale\\Modules\\Documents\\Rest\\Controllers\\RestInvoicePaymentController",
-    "RestInvoiceRecurrenceController": "DoubleScale\\Pro\\Modules\\RecurringInvoices\\Rest\\Controllers\\RestInvoiceRecurrenceController",
     "RestInvoiceReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestInvoiceReportsController",
     "RestLeadScoringRuleController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController": "DoubleScale\\Pro\\Modules\\LeadScoring\\Rest\\Controllers\\RestLeadScoringRuleLevelController",
@@ -48,6 +47,7 @@
     "RestListPreferencesController": "DoubleScale\\Core\\Rest\\Controllers\\RestListPreferencesController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
     "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
+    "RestMcpSettingsController": "DoubleScale\\Core\\Rest\\Controllers\\RestMcpSettingsController",
     "RestMessagingController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestMessagingController",
     "RestMetaWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestMetaWhatsappTemplatesController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",
@@ -104,6 +104,5 @@
     "RestUserEmailController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestUserEmailController",
     "RestUserManagementController": "DoubleScale\\Core\\UserRoles\\Rest\\RestUserManagementController",
     "RestWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestWhatsappTemplatesController",
-    "RestWooCommerceSettingsController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestWooCommerceSettingsController",
     "RestWooProductController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestWooProductController"
 }

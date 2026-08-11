@@ -38,7 +38,6 @@
     "RestInvoiceController",
     "RestInvoiceOnlinePaymentController",
     "RestInvoicePaymentController",
-    "RestInvoiceRecurrenceController",
     "RestInvoiceReportsController",
     "RestLeadScoringRuleController",
     "RestLeadScoringRuleLevelController",
@@ -48,6 +47,7 @@
     "RestListPreferencesController",
     "RestLogController",
     "RestMailboxController",
+    "RestMcpSettingsController",
     "RestMessagingController",
     "RestMetaWhatsappTemplatesController",
     "RestModulesController",
@@ -104,6 +104,5 @@
     "RestUserEmailController",
     "RestUserManagementController",
     "RestWhatsappTemplatesController",
-    "RestWooCommerceSettingsController",
     "RestWooProductController"
 ]

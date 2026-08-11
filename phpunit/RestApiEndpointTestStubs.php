@@ -76,15 +76,18 @@ if ( ! class_exists( 'WP_Error', false ) ) {
 		/** @var string */
 		private $message = '';
 
+		/** @var mixed */
+		private $data = '';
+
 		/**
 		 * @param string|int $code
 		 * @param string     $message
-		 * @param mixed      $data Optional error data (WordPress parity; ignored by this stub).
+		 * @param mixed      $data Optional error data (status code, context).
 		 */
 		public function __construct( $code = '', $message = '', $data = '' ) {
-			unset( $data );
 			$this->code    = (string) $code;
 			$this->message = (string) $message;
+			$this->data    = $data;
 		}
 
 		public function get_error_code(): string {
@@ -94,6 +97,62 @@ if ( ! class_exists( 'WP_Error', false ) ) {
 		public function get_error_message(): string {
 			return $this->message;
 		}
+
+		/**
+		 * Real WP_Error carries the `status` and context callers assert on;
+		 * dropping it here made those assertions impossible to write.
+		 *
+		 * @return mixed
+		 */
+		public function get_error_data() {
+			return $this->data;
+		}
+	}
+}
+
+if ( ! function_exists( 'is_wp_error' ) ) {
+	/**
+	 * @param mixed $thing Value to check.
+	 * @return bool
+	 */
+	function is_wp_error( $thing ) {
+		return $thing instanceof \WP_Error;
+	}
+}
+
+if ( ! function_exists( 'get_current_user_id' ) ) {
+	/**
+	 * Tests set $GLOBALS['__doublescale_phpunit_current_user_id'] to switch user.
+	 *
+	 * @return int
+	 */
+	function get_current_user_id() {
+		return (int) ( $GLOBALS['__doublescale_phpunit_current_user_id'] ?? 0 );
+	}
+}
+
+if ( ! function_exists( 'get_userdata' ) ) {
+	/**
+	 * Minimal user stub. Tests populate
+	 * $GLOBALS['__doublescale_phpunit_users'][ $user_id ] = array( 'roles' => array( … ) ).
+	 *
+	 * @param int $user_id User id.
+	 * @return object|false
+	 */
+	function get_userdata( $user_id ) {
+		$users = $GLOBALS['__doublescale_phpunit_users'] ?? array();
+		if ( ! isset( $users[ $user_id ] ) ) {
+			return false;
+		}
+
+		return (object) array_merge(
+			array(
+				'ID'         => (int) $user_id,
+				'roles'      => array(),
+				'user_email' => '',
+			),
+			(array) $users[ $user_id ]
+		);
 	}
 }
 

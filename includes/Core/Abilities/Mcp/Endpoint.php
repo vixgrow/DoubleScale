@@ -1,0 +1,308 @@
+<?php
+/**
+ * Self-contained MCP endpoint for DoubleScale.
+ *
+ * @package DoubleScale\Core
+ */
+
+namespace DoubleScale\Core\Abilities\Mcp;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\Abilities\AbilityRegistrar;
+use WP_REST_Request;
+use WP_REST_Response;
+
+/**
+ * Speaks MCP over HTTP with no third-party plugin involved.
+ *
+ * DoubleScale must not depend on another vendor's plugin staying installed,
+ * activated, or API-compatible to keep its own integration working, so the
+ * protocol lives here. The surface is deliberately small: we publish tools
+ * only — no resources, no prompts — which is four methods plus a handshake.
+ *
+ * Authorisation is NOT re-implemented. Every call resolves to a WordPress user
+ * and then runs the ability's own permission callback, so the module gate, the
+ * role check, and record ownership all apply exactly as they do in the admin.
+ */
+final class Endpoint {
+
+	public const NAMESPACE_ROUTE = 'doublescale';
+	public const ROUTE           = 'mcp';
+
+	/**
+	 * MCP revision this endpoint implements.
+	 */
+	public const PROTOCOL_VERSION = '2024-11-05';
+
+	/**
+	 * Register the REST route.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function register_routes(): void {
+		register_rest_route(
+			self::NAMESPACE_ROUTE,
+			'/' . self::ROUTE,
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( self::class, 'handle' ),
+					// Auth happens inside handle() so failures come back as
+					// JSON-RPC errors the client can read, not bare HTTP 401s.
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Public endpoint URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function url(): string {
+		return get_rest_url( null, self::NAMESPACE_ROUTE . '/' . self::ROUTE );
+	}
+
+	/**
+	 * Handle one JSON-RPC request.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public static function handle( WP_REST_Request $request ): WP_REST_Response {
+		$body = json_decode( (string) $request->get_body(), true );
+
+		if ( ! is_array( $body ) ) {
+			return self::respond( JsonRpc::error( null, JsonRpc::PARSE_ERROR, 'Parse error' ), 400 );
+		}
+
+		$id     = $body['id'] ?? null;
+		$method = isset( $body['method'] ) ? (string) $body['method'] : '';
+		$params = isset( $body['params'] ) && is_array( $body['params'] ) ? $body['params'] : array();
+
+		if ( '' === $method ) {
+			return self::respond( JsonRpc::error( $id, JsonRpc::INVALID_REQUEST, 'Missing method' ), 400 );
+		}
+
+		// Notifications carry no id and expect no response body.
+		$is_notification = ! array_key_exists( 'id', $body );
+
+		$user_id = Authenticator::resolve( $request );
+		if ( $user_id <= 0 ) {
+			return self::respond(
+				JsonRpc::error( $id, JsonRpc::INVALID_REQUEST, 'Authentication required. Send an Authorization header with a DoubleScale MCP API key or a WordPress application password.' ),
+				401
+			);
+		}
+
+		// Everything downstream — capability checks, ownership scoping — reads
+		// the current user, so establish it before dispatching.
+		wp_set_current_user( $user_id );
+
+		if ( 0 === strpos( $method, 'notifications/' ) || $is_notification ) {
+			return self::respond( null, 202 );
+		}
+
+		switch ( $method ) {
+			case 'initialize':
+				return self::respond( JsonRpc::result( $id, self::initialize() ) );
+
+			case 'ping':
+				return self::respond( JsonRpc::result( $id, new \stdClass() ) );
+
+			case 'tools/list':
+				return self::respond( JsonRpc::result( $id, array( 'tools' => self::tools() ) ) );
+
+			case 'tools/call':
+				return self::respond( self::call_tool( $id, $params ) );
+
+			// Declared in capabilities as absent, but a client may still ask.
+			case 'resources/list':
+				return self::respond( JsonRpc::result( $id, array( 'resources' => array() ) ) );
+
+			case 'prompts/list':
+				return self::respond( JsonRpc::result( $id, array( 'prompts' => array() ) ) );
+
+			default:
+				return self::respond(
+					JsonRpc::error( $id, JsonRpc::METHOD_NOT_FOUND, sprintf( 'Method not found: %s', $method ) ),
+					404
+				);
+		}
+	}
+
+	/**
+	 * Handshake payload.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function initialize(): array {
+		return array(
+			'protocolVersion' => self::PROTOCOL_VERSION,
+			'capabilities'    => array(
+				'tools' => array( 'listChanged' => false ),
+			),
+			'serverInfo'      => array(
+				'name'    => 'DoubleScale CRM',
+				'version' => defined( 'DOUBLESCALE_VERSION' ) ? DOUBLESCALE_VERSION : '1.0.0',
+			),
+			'instructions'    => __( 'Read-only access to DoubleScale CRM. Call doublescale/get-context first: it reports which modules are active on this site and which tools you can actually use. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see.', 'doublescale' ),
+		);
+	}
+
+	/**
+	 * Published tools, in MCP's tool descriptor shape.
+	 *
+	 * Reads the live ability registry and filters by the connecting user's own
+	 * permissions, so a client never sees a tool it would be refused.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function tools(): array {
+		if ( ! function_exists( 'wp_get_abilities' ) ) {
+			return array();
+		}
+
+		$tools = array();
+
+		foreach ( wp_get_abilities() as $ability ) {
+			if ( ! is_object( $ability ) || ! method_exists( $ability, 'get_name' ) ) {
+				continue;
+			}
+
+			$name = (string) $ability->get_name();
+			if ( 0 !== strpos( $name, AbilityRegistrar::NAMESPACE_PREFIX ) ) {
+				continue;
+			}
+
+			if ( method_exists( $ability, 'check_permissions' ) && true !== $ability->check_permissions() ) {
+				continue;
+			}
+
+			$schema = method_exists( $ability, 'get_input_schema' ) ? $ability->get_input_schema() : array();
+			if ( empty( $schema ) || ! is_array( $schema ) ) {
+				$schema = array(
+					'type'       => 'object',
+					'properties' => new \stdClass(),
+				);
+			}
+
+			$descriptor = array(
+				'name'        => $name,
+				'description' => method_exists( $ability, 'get_description' ) ? $ability->get_description() : '',
+				'inputSchema' => $schema,
+			);
+
+			$meta = method_exists( $ability, 'get_meta' ) ? (array) $ability->get_meta() : array();
+			if ( ! empty( $meta['annotations'] ) && is_array( $meta['annotations'] ) ) {
+				$annotations = $meta['annotations'];
+
+				$descriptor['annotations'] = array(
+					'title'           => method_exists( $ability, 'get_label' ) ? $ability->get_label() : $name,
+					// MCP spells these readOnlyHint / destructiveHint; our own
+					// definitions use the shorter internal keys.
+					'readOnlyHint'    => (bool) ( $annotations['readonly'] ?? false ),
+					'destructiveHint' => (bool) ( $annotations['destructive'] ?? false ),
+				);
+			}
+
+			$tools[] = $descriptor;
+		}
+
+		return $tools;
+	}
+
+	/**
+	 * Execute one tool.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed                $id     Request id.
+	 * @param array<string, mixed> $params Call params.
+	 * @return array<string, mixed>
+	 */
+	private static function call_tool( $id, array $params ): array {
+		$name = isset( $params['name'] ) ? (string) $params['name'] : '';
+		$args = isset( $params['arguments'] ) && is_array( $params['arguments'] ) ? $params['arguments'] : array();
+
+		if ( '' === $name ) {
+			return JsonRpc::error( $id, JsonRpc::INVALID_PARAMS, 'Missing tool name' );
+		}
+
+		// Only our own abilities are callable here — this endpoint must not
+		// become a generic bridge to every ability on the site.
+		if ( 0 !== strpos( $name, AbilityRegistrar::NAMESPACE_PREFIX ) ) {
+			return JsonRpc::error( $id, JsonRpc::METHOD_NOT_FOUND, sprintf( 'Unknown tool: %s', $name ) );
+		}
+
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			return JsonRpc::error( $id, JsonRpc::INTERNAL_ERROR, 'Abilities API unavailable' );
+		}
+
+		$ability = wp_get_ability( $name );
+		if ( ! is_object( $ability ) ) {
+			return JsonRpc::error( $id, JsonRpc::METHOD_NOT_FOUND, sprintf( 'Unknown tool: %s', $name ) );
+		}
+
+		$permitted = method_exists( $ability, 'check_permissions' ) ? $ability->check_permissions() : true;
+		if ( true !== $permitted ) {
+			$message = is_wp_error( $permitted )
+				? $permitted->get_error_message()
+				: __( 'You do not have permission to use this tool.', 'doublescale' );
+
+			// A tool-level refusal is a normal outcome, not a protocol fault:
+			// returning it as tool content lets the agent read the reason and
+			// choose another tool instead of treating the session as broken.
+			return JsonRpc::result( $id, JsonRpc::tool_result( array( 'error' => $message ), true ) );
+		}
+
+		$result = $ability->execute( $args );
+
+		if ( is_wp_error( $result ) ) {
+			return JsonRpc::result(
+				$id,
+				JsonRpc::tool_result(
+					array(
+						'error' => $result->get_error_message(),
+						'code'  => $result->get_error_code(),
+					),
+					true
+				)
+			);
+		}
+
+		return JsonRpc::result( $id, JsonRpc::tool_result( $result ) );
+	}
+
+	/**
+	 * Wrap a payload in a REST response with no-store headers.
+	 *
+	 * MCP responses are per-user and must never be served from an edge cache
+	 * to a differently-authenticated caller.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed>|null $payload Response body.
+	 * @param int                       $status  HTTP status.
+	 * @return WP_REST_Response
+	 */
+	private static function respond( ?array $payload, int $status = 200 ): WP_REST_Response {
+		$response = new WP_REST_Response( $payload, $status );
+		$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, private' );
+		$response->header( 'Pragma', 'no-cache' );
+
+		return $response;
+	}
+}

@@ -49,6 +49,7 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import MailboxSettings from './mailbox';
+import McpSettings from './mcp';
 import { BounceHandler } from '@/components/bounce-handler';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -87,6 +88,8 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
 	'link_triggers',
 	'system',
+	// MCP saves through its own endpoint the moment the switch is flipped.
+	'mcp',
 	'license',
 	'whatsapp',
 	'debugging',
@@ -402,6 +405,8 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'system':
 				return <SystemSettings />;
+			case 'mcp':
+				return <McpSettings />;
 			case 'currencies':
 				return (
 					<CurrenciesSettings
@@ -594,6 +599,11 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'ai',
 			label: 'AI',
+			icon: <AiIcon width={24} height={24} />,
+		},
+		{
+			value: 'mcp',
+			label: __('MCP for AI Agents', 'doublescale'),
 			icon: <AiIcon width={24} height={24} />,
 		},
 		{

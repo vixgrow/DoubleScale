@@ -153,7 +153,7 @@ const AdminCalendar = () => {
 								setViewUser( Number( e.target.value ) )
 							}
 							aria-label={ __( 'Filter by assignee', 'doublescale' ) }
-							className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground"
+							className="!rounded-lg border !border-border !bg-transparent px-3 py-1.5 text-sm font-medium text-foreground"
 						>
 							<option value={ ASSIGNEE_ALL }>
 								{ __( 'All assignees', 'doublescale' ) }

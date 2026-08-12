@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Contacts\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
+use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -118,6 +119,235 @@ final class ContactAbilities {
 				),
 				'execute_callback' => array( self::class, 'list_segments' ),
 			),
+
+			'doublescale/create-contact'        => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Create a contact', 'doublescale' ),
+				'description'      => __( 'Add a new contact. Email must be unique — if someone already has that address, use update-contact instead. Creating a contact does not email them.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'email'        => array(
+							'type'        => 'string',
+							'description' => 'Email address. Must not already belong to another contact.',
+						),
+						'first_name'   => array(
+							'type'        => 'string',
+							'description' => 'First name.',
+						),
+						'last_name'    => array(
+							'type'        => 'string',
+							'description' => 'Last name.',
+						),
+						'phone'        => array(
+							'type'        => 'string',
+							'description' => 'Phone number, digits with an optional leading +.',
+						),
+						'company_name' => array(
+							'type'        => 'string',
+							'description' => 'Company the contact works for.',
+						),
+					),
+					'required'   => array( 'email' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						// No welcome email or automation fires on a bare create.
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_contact' ),
+			),
+
+			'doublescale/update-contact'        => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Update a contact', 'doublescale' ),
+				'description'      => __( 'Change a contact\'s name, phone, or company. Email and subscription status are deliberately not editable here — changing those affects deliverability and consent.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'id'           => array(
+							'type'        => 'integer',
+							'description' => 'Contact id.',
+						),
+						'first_name'   => array(
+							'type'        => 'string',
+							'description' => 'New first name.',
+						),
+						'last_name'    => array(
+							'type'        => 'string',
+							'description' => 'New last name.',
+						),
+						'phone'        => array(
+							'type'        => 'string',
+							'description' => 'New phone number.',
+						),
+						'company_name' => array(
+							'type'        => 'string',
+							'description' => 'New company name.',
+						),
+					),
+					'required'   => array( 'id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'update_contact' ),
+			),
+		);
+	}
+
+	/**
+	 * Gate 2 for contact writes.
+	 *
+	 * Reading a contact is broad (project users need it to pick one); changing
+	 * one is a sales-team action, so the write gate is deliberately narrower
+	 * than the read gate on the same module.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public static function can_write_contacts(): bool {
+		return Permissions::has_sales_rep_access();
+	}
+
+	/**
+	 * Create a contact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_contact( array $input ) {
+		$invalid = AbilityInput::required( $input, array( 'email' ) );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$email = trim( (string) $input['email'] );
+
+		if ( ! is_email( $email ) ) {
+			return new \WP_Error(
+				'doublescale_invalid_email',
+				sprintf(
+					/* translators: %s: the supplied address */
+					__( '"%s" is not a valid email address.', 'doublescale' ),
+					$email
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		// The model allows duplicates; the admin UI blocks them. Without this an
+		// agent asked twice to "add Layla" silently creates two records that
+		// then split her history between them.
+		$existing = ContactModel::query()->where( 'email', $email )->first();
+		if ( $existing ) {
+			return new \WP_Error(
+				'doublescale_contact_exists',
+				sprintf(
+					/* translators: 1: email address, 2: existing contact id */
+					__( 'A contact with the address %1$s already exists (id %2$d). Use update-contact to change it.', 'doublescale' ),
+					$email,
+					(int) $existing->id
+				),
+				array(
+					'status'     => 409,
+					'contact_id' => (int) $existing->id,
+				)
+			);
+		}
+
+		$contact = ContactModel::create(
+			array(
+				'email'        => $email,
+				'first_name'   => isset( $input['first_name'] ) ? (string) $input['first_name'] : '',
+				'last_name'    => isset( $input['last_name'] ) ? (string) $input['last_name'] : '',
+				'phone'        => isset( $input['phone'] ) ? (string) $input['phone'] : '',
+				'company_name' => isset( $input['company_name'] ) ? (string) $input['company_name'] : '',
+				'email_status' => 'unverified',
+			)
+		);
+
+		if ( ! $contact ) {
+			return new \WP_Error(
+				'doublescale_contact_not_created',
+				__( 'The contact could not be created.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return array(
+			'created'    => true,
+			'contact_id' => (int) $contact->id,
+			'email'      => $contact->email,
+		);
+	}
+
+	/**
+	 * Update a contact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function update_contact( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'id' ) ),
+				AbilityInput::id( $input['id'] ?? null, 'id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$contact = ContactModel::query()->where( 'id', (int) $input['id'] )->first();
+		if ( ! $contact ) {
+			return AbilityResult::not_found( __( 'No contact found with that id.', 'doublescale' ) );
+		}
+
+		$changed = array();
+		foreach ( array( 'first_name', 'last_name', 'phone', 'company_name' ) as $field ) {
+			if ( ! isset( $input[ $field ] ) ) {
+				continue;
+			}
+			$value = (string) $input[ $field ];
+			if ( $value !== (string) $contact->{$field} ) {
+				$contact->{$field} = $value;
+				$changed[]         = $field;
+			}
+		}
+
+		if ( array() === $changed ) {
+			return array(
+				'updated'    => false,
+				'contact_id' => (int) $contact->id,
+				'message'    => __( 'Nothing to change — the contact already has those values.', 'doublescale' ),
+			);
+		}
+
+		$contact->save();
+
+		return array(
+			'updated'    => true,
+			'contact_id' => (int) $contact->id,
+			'changed'    => $changed,
 		);
 	}
 

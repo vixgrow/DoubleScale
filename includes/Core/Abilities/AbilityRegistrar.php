@@ -51,6 +51,71 @@ final class AbilityRegistrar {
 	}
 
 	/**
+	 * Find which module owns an ability, even when that module is switched off.
+	 *
+	 * Registration skips inactive modules so their tools vanish from tools/list,
+	 * but MCP clients often keep a cached list. Resolving ownership here lets
+	 * tools/call refuse with "module switched off" instead of "unknown tool".
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $name Full ability name (slash form).
+	 * @return array{module_slug: string, module_label: string}|null
+	 */
+	public static function find_owner( string $name ): ?array {
+		return self::find_owner_among( $name, ModuleManager::all() );
+	}
+
+	/**
+	 * Same as {@see find_owner()} against an explicit module map (for tests).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string                              $name    Full ability name.
+	 * @param array<string, ProvidesAbilities|object> $modules Slug => module.
+	 * @return array{module_slug: string, module_label: string}|null
+	 */
+	public static function find_owner_among( string $name, array $modules ): ?array {
+		foreach ( AbilityContext::definitions() as $ability_name => $definition ) {
+			if ( $ability_name !== $name || ! is_array( $definition ) ) {
+				continue;
+			}
+
+			$slug = isset( $definition['module_slug'] ) ? (string) $definition['module_slug'] : 'core';
+
+			return array(
+				'module_slug'  => $slug,
+				'module_label' => AbilityGuard::module_label( $slug ),
+			);
+		}
+
+		foreach ( $modules as $slug => $module ) {
+			if ( ! $module instanceof ProvidesAbilities ) {
+				continue;
+			}
+
+			$abilities = $module->abilities();
+			if ( ! isset( $abilities[ $name ] ) || ! is_array( $abilities[ $name ] ) ) {
+				continue;
+			}
+
+			$definition  = $abilities[ $name ];
+			$module_slug = isset( $definition['module_slug'] ) && '' !== (string) $definition['module_slug']
+				? (string) $definition['module_slug']
+				: (string) $slug;
+
+			$label = method_exists( $module, 'label' ) ? (string) $module->label() : AbilityGuard::module_label( $module_slug );
+
+			return array(
+				'module_slug'  => $module_slug,
+				'module_label' => $label,
+			);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Register a set of definitions with the full gate stack applied.
 	 *
 	 * Public so DoubleScale Pro can push abilities that have no owning module

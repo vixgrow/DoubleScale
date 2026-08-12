@@ -107,6 +107,21 @@ final class AbilityGuardTest extends TestCase {
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertSame( 'doublescale_module_inactive', $result->get_error_code() );
 		$this->assertSame( 403, $result->get_error_data()['status'] );
+		$this->assertSame( 'support', $result->get_error_data()['module'] );
+		$this->assertStringContainsString( 'switched off', $result->get_error_message() );
+		$this->assertStringContainsString( 'Helpdesk', $result->get_error_message() );
+	}
+
+	public function test_inactive_module_error_uses_supplied_label(): void {
+		$error = AbilityGuard::inactive_module_error(
+			'doublescale/list-tickets',
+			'support',
+			'Helpdesk'
+		);
+
+		$this->assertSame( 'doublescale_module_inactive', $error->get_error_code() );
+		$this->assertStringContainsString( 'Helpdesk', $error->get_error_message() );
+		$this->assertStringNotContainsString( '"support"', $error->get_error_message() );
 	}
 
 	public function test_permission_denied_when_module_capability_fails(): void {

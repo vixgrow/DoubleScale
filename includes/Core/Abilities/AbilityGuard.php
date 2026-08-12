@@ -50,6 +50,56 @@ final class AbilityGuard {
 	}
 
 	/**
+	 * Clear refusal when a tool belongs to a module that is switched off.
+	 *
+	 * Agents often still hold a cached tools/list from before the toggle, so
+	 * the refusal must name the module and say it is disabled — not look like
+	 * an unknown tool or an opaque server error.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string      $ability_name Full ability name.
+	 * @param string      $module_slug  Leaf module slug.
+	 * @param string|null $module_label Optional human label (e.g. Helpdesk).
+	 * @return WP_Error
+	 */
+	public static function inactive_module_error( string $ability_name, string $module_slug, ?string $module_label = null ): WP_Error {
+		$label = ( null !== $module_label && '' !== $module_label )
+			? $module_label
+			: self::module_label( $module_slug );
+
+		return new WP_Error(
+			'doublescale_module_inactive',
+			sprintf(
+				/* translators: %s: module label (e.g. Helpdesk) */
+				__( 'The "%s" module is switched off on this site. Enable it in DoubleScale settings to use this tool, or call doublescale/get-context for the tools that are currently available.', 'doublescale' ),
+				$label
+			),
+			array(
+				'status'  => 403,
+				'module'  => $module_slug,
+				'ability' => $ability_name,
+			)
+		);
+	}
+
+	/**
+	 * Human-readable module label for refusal messages.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug Module slug.
+	 * @return string
+	 */
+	public static function module_label( string $slug ): string {
+		if ( function_exists( 'doublescale_automation_module_label' ) ) {
+			return doublescale_automation_module_label( $slug );
+		}
+
+		return ucwords( str_replace( array( '_', '-' ), ' ', $slug ) );
+	}
+
+	/**
 	 * Compose Gate 1 + Gate 2 into the permission_callback WP core will call.
 	 *
 	 * Order is deliberate: AI access first (broadest denial and it already
@@ -71,19 +121,7 @@ final class AbilityGuard {
 			}
 
 			if ( ! self::module_active( $module_slug ) ) {
-				return new WP_Error(
-					'doublescale_module_inactive',
-					sprintf(
-						/* translators: %s: module slug */
-						__( 'The "%s" module is not active on this site.', 'doublescale' ),
-						$module_slug
-					),
-					array(
-						'status'  => 403,
-						'module'  => $module_slug,
-						'ability' => $name,
-					)
-				);
+				return self::inactive_module_error( $name, $module_slug );
 			}
 
 			if ( is_callable( $module_permission ) && ! call_user_func( $module_permission ) ) {

@@ -9,6 +9,7 @@ namespace DoubleScale\Core\Abilities\Mcp;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Abilities\AbilityGuard;
 use DoubleScale\Core\Abilities\AbilityRegistrar;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -301,19 +302,39 @@ final class Endpoint {
 
 		$ability = wp_get_ability( $name );
 		if ( ! is_object( $ability ) ) {
+			// tools/list omits disabled-module tools, but clients often cache the
+			// previous list — refuse with a clear "module off" tool error instead
+			// of a protocol-level Unknown tool that agents gloss over as opaque.
+			$owner = AbilityRegistrar::find_owner( $name );
+			if ( null !== $owner && ! AbilityGuard::module_active( $owner['module_slug'] ) ) {
+				return JsonRpc::result(
+					$id,
+					JsonRpc::tool_result(
+						self::tool_error_payload(
+							AbilityGuard::inactive_module_error(
+								$name,
+								$owner['module_slug'],
+								$owner['module_label']
+							)
+						),
+						true
+					)
+				);
+			}
+
 			return JsonRpc::error( $id, JsonRpc::METHOD_NOT_FOUND, sprintf( 'Unknown tool: %s', $name ) );
 		}
 
 		$permitted = method_exists( $ability, 'check_permissions' ) ? $ability->check_permissions() : true;
 		if ( true !== $permitted ) {
-			$message = is_wp_error( $permitted )
-				? $permitted->get_error_message()
-				: __( 'You do not have permission to use this tool.', 'doublescale' );
-
 			// A tool-level refusal is a normal outcome, not a protocol fault:
 			// returning it as tool content lets the agent read the reason and
 			// choose another tool instead of treating the session as broken.
-			return JsonRpc::result( $id, JsonRpc::tool_result( array( 'error' => $message ), true ) );
+			$payload = is_wp_error( $permitted )
+				? self::tool_error_payload( $permitted )
+				: array( 'error' => __( 'You do not have permission to use this tool.', 'doublescale' ) );
+
+			return JsonRpc::result( $id, JsonRpc::tool_result( $payload, true ) );
 		}
 
 		$result = $ability->execute( $args );
@@ -321,17 +342,33 @@ final class Endpoint {
 		if ( is_wp_error( $result ) ) {
 			return JsonRpc::result(
 				$id,
-				JsonRpc::tool_result(
-					array(
-						'error' => $result->get_error_message(),
-						'code'  => $result->get_error_code(),
-					),
-					true
-				)
+				JsonRpc::tool_result( self::tool_error_payload( $result ), true )
 			);
 		}
 
 		return JsonRpc::result( $id, JsonRpc::tool_result( $result ) );
+	}
+
+	/**
+	 * Shape a WP_Error as tool content the agent can read and act on.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WP_Error $error Error.
+	 * @return array<string, mixed>
+	 */
+	private static function tool_error_payload( $error ): array {
+		$payload = array(
+			'error' => $error->get_error_message(),
+			'code'  => $error->get_error_code(),
+		);
+
+		$data = $error->get_error_data();
+		if ( is_array( $data ) && isset( $data['module'] ) && is_string( $data['module'] ) ) {
+			$payload['module'] = $data['module'];
+		}
+
+		return $payload;
 	}
 
 	/**

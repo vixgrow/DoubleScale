@@ -195,7 +195,6 @@ const ImportModalInner: React.FC<Props> = ({
 	return (
 		<Dialog
 			open={open}
-			modal={false}
 			onOpenChange={(value) => {
 				if (!value) {
 					handleDismiss();
@@ -204,7 +203,7 @@ const ImportModalInner: React.FC<Props> = ({
 		>
 			<DialogContent
 				className={cn(
-					'doublescale-import-modal z-[150000] flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none',
+					'doublescale-import-modal left-0 top-0 z-[150000] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none',
 					'[&>button]:right-6 [&>button]:top-4 [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60 sm:[&>button]:right-10 sm:[&>button]:top-5'
 				)}
 				style={{

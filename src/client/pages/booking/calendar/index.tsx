@@ -258,7 +258,7 @@ const Calendar: React.FC = () => {
                         handleClose();
                 }}><DialogContent
                     hideCloseButton
-                    className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'>
+                    className='fixed inset-0 !bg-white max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'>
                     <div className="border-b px-4 py-2 overflow-x-hidden">
                         <div className='flex flex-col gap-3 max-[768px]:gap-3 md:flex-row md:justify-between md:items-center'>
                             <div className='flex gap-2.5 items-center min-w-0'>

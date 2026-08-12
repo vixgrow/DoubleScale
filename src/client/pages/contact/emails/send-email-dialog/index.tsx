@@ -16,8 +16,6 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
 	DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -29,6 +27,7 @@ import {
 import { Button } from '@doublescale/components/ui/button';
 import { Label } from '@doublescale/components/ui/label';
 import { useSendMessage } from '@doublescale/hooks/use-send-message';
+import { isWordPressMediaElement } from '@doublescale/shared/utils/wordpress-media-modal';
 import type { EmailRow } from '@doublescale/utils';
 
 interface SendEmailDialogProps {
@@ -49,19 +48,16 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 	const [subject, setSubject] = useState('');
 	const [body, setBody] = useState('');
 
-	// Use the send message hook
 	const { isSending, sendMessage, validationError } = useSendMessage({
 		contact,
 		channel: 'email',
 		onSuccess: () => {
-			// Reset form and close dialog on success
 			setSubject('');
 			setBody('');
 			onClose();
 		},
 	});
 
-	// Update toEmail when contact changes
 	useEffect(() => {
 		if (contact?.email) {
 			setToEmail(contact.email);
@@ -76,130 +72,71 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 		});
 	};
 
-	const isInteractableElement = (target: HTMLElement) => {
-		if (!target) return false;
-
-		// Check if target is inside WordPress media modal or shadcn dialogs
-		// Only prevent close if clicking inside media modal content, not on backdrop
-		return !!(
-			target.closest('.media-modal') ||
-			target.closest('[role="dialog"]') ||
-			target.closest('[data-radix-dialog-content]') ||
-			target.closest('[data-radix-select-content]')
-		);
-	};
-
-	// Disable Radix focus trap when modals are open
-	useEffect(() => {
-		if (!open) return;
-
-		const handleFocusTrap = (e: FocusEvent) => {
-			const target = e.target as HTMLElement;
-			if (isInteractableElement(target)) {
-				e.stopPropagation();
-			}
-		};
-
-		// Listen for focus events at capture phase to intercept before Radix
-		document.addEventListener('focusin', handleFocusTrap, true);
-		document.addEventListener('focusout', handleFocusTrap, true);
-
-		return () => {
-			document.removeEventListener('focusin', handleFocusTrap, true);
-			document.removeEventListener('focusout', handleFocusTrap, true);
-		};
-	}, [open]);
-
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogPortal>
-				<DialogOverlay className="z-[150200] pointer-events-none" />
-				<DialogContent
-					className="pointer-events-auto z-[150200] flex min-w-0 w-[min(calc(100vw-2rem),600px)] max-w-[min(calc(100vw-2rem),600px)] max-h-[90vh] flex-col overflow-x-hidden overflow-y-auto"
-					onEscapeKeyDown={(e) => {
-						// Prevent dialog from closing when WordPress media modal is open
-						const mediaModal =
-							document.querySelector('.media-modal');
-						if (mediaModal) {
-							e.preventDefault();
-							return;
-						}
-
-						// Prevent dialog from closing when other dialogs are open
-						const nestedDialog = document.querySelector(
-							'[data-radix-dialog-content]'
-						);
-						if (nestedDialog && nestedDialog !== e.currentTarget) {
-							e.preventDefault();
-						}
-					}}
-					onPointerDownOutside={(e) => {
-						// Allow interaction with WordPress media modal and shadcn dialogs
-						const target = e.target as HTMLElement;
-						if (isInteractableElement(target)) {
-							e.preventDefault();
-						}
-					}}
-					onInteractOutside={(e) => {
-						// Allow interaction with WordPress media modal and shadcn dialogs
-						const target = e.target as HTMLElement;
-						if (isInteractableElement(target)) {
-							e.preventDefault();
-						}
-					}}
-					onFocusOutside={(e) => {
-						// Allow focus to move to shadcn dialogs
-						const target = e.target as HTMLElement;
-						if (isInteractableElement(target)) {
-							e.preventDefault();
-						}
-					}}
-				>
-					<DialogHeader>
-						<DialogTitle>
-							<CustomDialogHeader
-								title={__('Send Email', 'doublescale')}
-								subtitle={__(
-									'Send an email to the contact',
-									'doublescale'
-								)}
-								icon={<GradientEmailIcon />}
+			<DialogContent
+				className="z-[150200] flex min-w-0 w-[min(calc(100vw-2rem),600px)] max-w-[min(calc(100vw-2rem),600px)] max-h-[90vh] flex-col overflow-x-hidden overflow-y-auto"
+				onEscapeKeyDown={(e) => {
+					if (document.querySelector('.media-modal')) {
+						e.preventDefault();
+					}
+				}}
+				onPointerDownOutside={(e) => {
+					if (isWordPressMediaElement(e.target as HTMLElement)) {
+						e.preventDefault();
+					}
+				}}
+				onInteractOutside={(e) => {
+					if (isWordPressMediaElement(e.target as HTMLElement)) {
+						e.preventDefault();
+					}
+				}}
+			>
+				<DialogHeader>
+					<DialogTitle>
+						<CustomDialogHeader
+							title={__('Send Email', 'doublescale')}
+							subtitle={__(
+								'Send an email to the contact',
+								'doublescale'
+							)}
+							icon={<GradientEmailIcon />}
+						/>
+					</DialogTitle>
+				</DialogHeader>
+				<div className="flex min-w-0 flex-col gap-4 overflow-x-hidden">
+					{validationError && (
+						<div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+							{validationError}
+						</div>
+					)}
+					<Field
+						label={__('To', 'doublescale')}
+						placeholder={__('Enter To Email', 'doublescale')}
+						value={toEmail || contact?.email || ''}
+						onChange={(value) => setToEmail(value)}
+						type="text"
+						disabled={true}
+					/>
+					<Field
+						label={__('Subject', 'doublescale')}
+						placeholder={__('Enter Subject', 'doublescale')}
+						value={subject}
+						onChange={(value) => setSubject(value)}
+						type="text"
+					/>
+					<div className="min-w-0 max-w-full">
+						<Label className="text-base font-normal text-[#09090B]">
+							{__('Body', 'doublescale')}
+						</Label>
+						<div className="send-email-dialog-editor !border-0 mt-2 min-w-0 max-w-full overflow-hidden max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
+							<Editor
+								message={body}
+								onChange={(content) => setBody(content)}
 							/>
-						</DialogTitle>
-					</DialogHeader>
-					<div className="flex min-w-0 flex-col gap-4 overflow-x-hidden">
-						{validationError && (
-							<div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-								{validationError}
-							</div>
-						)}
-						<Field
-							label={__('To', 'doublescale')}
-							placeholder={__('Enter To Email', 'doublescale')}
-							value={toEmail || contact?.email || ''}
-							onChange={(value) => setToEmail(value)}
-							type="text"
-							disabled={true}
-						/>
-						<Field
-							label={__('Subject', 'doublescale')}
-							placeholder={__('Enter Subject', 'doublescale')}
-							value={subject}
-							onChange={(value) => setSubject(value)}
-							type="text"
-						/>
-						<div className="min-w-0 max-w-full">
-							<Label className="text-base font-normal text-[#09090B]">
-								{__('Body', 'doublescale')}
-							</Label>
-							<div className="send-email-dialog-editor mt-2 min-w-0 max-w-full overflow-hidden rounded-lg max-sm:[&_.email-body-editor]:max-w-full max-sm:[&_.email-body-editor_.editor-container]:max-w-full max-sm:[&_.toolbar]:flex-col max-sm:[&_.toolbar]:gap-2 max-sm:[&_.toolbar]:p-3 max-sm:[&_.toolbar>div]:w-full max-sm:[&_.toolbar>div]:flex-wrap max-sm:[&_.toolbar>div]:justify-center max-sm:[&_.editor-inner]:min-w-0 max-sm:[&_.editor-inner]:overflow-x-hidden max-sm:[&_.editor-input]:break-words max-sm:[&_.editor-input_img]:h-auto max-sm:[&_.editor-input_img]:max-w-full">
-								<Editor
-									message={body}
-									onChange={(content) => setBody(content)}
-								/>
-							</div>
 						</div>
 					</div>
+				</div>
 				<DialogFooter className="mt-4">
 					<Button
 						onClick={handleSendEmail}
@@ -213,8 +150,7 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							: __('Send Email', 'doublescale')}
 					</Button>
 				</DialogFooter>
-				</DialogContent>
-			</DialogPortal>
+			</DialogContent>
 		</Dialog>
 	);
 };

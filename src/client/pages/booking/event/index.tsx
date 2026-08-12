@@ -552,7 +552,7 @@ const Event: React.FC = () => {
                     handleClose();
             }}><DialogContent
                 hideCloseButton
-                className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'
+                className='doublescale-event-setup-dialog !bg-white fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-y-auto overflow-x-hidden min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-0'
                 {...eventDialogOutsideProps}>
                 <div className="border-b px-4 py-2 overflow-x-hidden">
                     <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">

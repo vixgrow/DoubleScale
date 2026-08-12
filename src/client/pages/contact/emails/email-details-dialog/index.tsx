@@ -19,17 +19,15 @@ import {
 	OpenRateIcon,
 	TimeAgoCell,
 } from '@doublescale/components';
+import { Button } from '@/components/ui/button';
+import AttachmentList from '@/components/support/attachment-list';
 import {
 	Dialog,
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import AttachmentList from '@/components/support/attachment-list';
 import { useResendEmail } from '@/hooks/use-resend-email';
 import { useContactContext } from '../../state/context';
 
@@ -217,50 +215,41 @@ const EmailDetails: React.FC< EmailDetailsProps > = ( {
 		};
 	}, [ campaignEmail, isInbound ] );
 
-	const zIndex = 150200;
-
 	return (
 		<Dialog
 			open={ !! campaignEmail }
 			onOpenChange={ ( open ) => ! open && onClose() }
 		>
-			<DialogPortal>
-				<DialogOverlay style={ { zIndex } } />
-				<DialogContent
-					className="max-w-[800px] max-h-[90vh] overflow-y-auto p-0"
-					style={ { zIndex } }
-				>
-					<DialogHeader className="px-6 pt-6 pb-0">
-						<DialogTitle>
-							<CustomDialogHeader
-								title={
-									isInbound
-										? __(
-												'Received Email Details',
-												'doublescale'
-										  )
-										: __( 'Email Details', 'doublescale')
-								}
-								subtitle={
-									isInbound
-										? __(
-												'View the details of the received email',
-												'doublescale'
-										  )
-										: __(
-												'View the details of the email',
-												'doublescale'
-										  )
-								}
-								icon={
-									<NoEmailsIcon width={ 24 } height={ 24 } />
-								}
-							/>
-						</DialogTitle>
-					</DialogHeader>
+			<DialogContent className="z-[150200] max-h-[90vh] w-[min(calc(100vw-2rem),800px)] max-w-[min(calc(100vw-2rem),800px)] overflow-y-auto p-0">
+				<DialogHeader className="px-6 pt-6 pb-0">
+					<DialogTitle>
+						<CustomDialogHeader
+							title={
+								isInbound
+									? __(
+											'Received Email Details',
+											'doublescale'
+									  )
+									: __( 'Email Details', 'doublescale' )
+							}
+							subtitle={
+								isInbound
+									? __(
+											'View the details of the received email',
+											'doublescale'
+									  )
+									: __(
+											'View the details of the email',
+											'doublescale'
+									  )
+							}
+							icon={ <NoEmailsIcon width={ 24 } height={ 24 } /> }
+						/>
+					</DialogTitle>
+				</DialogHeader>
 
-					{ campaignEmail && (
-						<div className="flex flex-col w-full">
+				{ campaignEmail && (
+					<div className="flex w-full flex-col">
 							{ /* Subject + Status banner */ }
 							<div className="px-6 py-4 border-b bg-gray-50/60">
 								<div className="flex items-start justify-between gap-3">
@@ -464,41 +453,39 @@ const EmailDetails: React.FC< EmailDetailsProps > = ( {
 									/>
 								</div>
 							) : null }
-						</div>
-					) }
+					</div>
+				) }
 
-					{ /* Footer action */ }
-					{ campaignEmail && (
-						<DialogFooter className="px-6 pb-6 pt-0">
-							{ isInbound ? (
-								<Button
-									size="xl"
-									variant="gradient"
-									onClick={ handleReplyClick }
-									className="w-full"
-								>
-									{ __( 'Reply', 'doublescale') }
-								</Button>
-							) : (
-								<Button
-									size="xl"
-									variant="gradient"
-									onClick={ handleResendClick }
-									disabled={ isResending }
-									className="w-full"
-								>
-									{ isResending
-										? __( 'Resending...', 'doublescale')
-										: __(
-												'Resend Email again',
-												'doublescale'
-										  ) }
-								</Button>
-							) }
-						</DialogFooter>
-					) }
-				</DialogContent>
-			</DialogPortal>
+				{ campaignEmail && (
+					<DialogFooter className="px-6 pb-6 pt-0">
+						{ isInbound ? (
+							<Button
+								size="xl"
+								variant="gradient"
+								onClick={ handleReplyClick }
+								className="w-full"
+							>
+								{ __( 'Reply', 'doublescale' ) }
+							</Button>
+						) : (
+							<Button
+								size="xl"
+								variant="gradient"
+								onClick={ handleResendClick }
+								disabled={ isResending }
+								className="w-full"
+							>
+								{ isResending
+									? __( 'Resending...', 'doublescale' )
+									: __(
+											'Resend Email again',
+											'doublescale'
+									  ) }
+							</Button>
+						) }
+					</DialogFooter>
+				) }
+			</DialogContent>
 		</Dialog>
 	);
 };

@@ -192,11 +192,7 @@ const Form: React.FC<FormProps> = ({
 	};
 
 	const connectionIsComplete = (f: FormType | null) =>
-		!!(
-			f?.name?.trim() &&
-			f.form_type &&
-			f.form_id
-		);
+		!!(f?.name?.trim() && f.form_type && f.form_id);
 
 	// Persist connection (name + builder + form) shortly after edits so mapping can load.
 	useEffect(() => {
@@ -247,8 +243,11 @@ const Form: React.FC<FormProps> = ({
 			}
 
 			const mappedFields =
-				(stateRef.current.form?.data as { mapped_fields?: Record<string, string> })
-					?.mapped_fields || {};
+				(
+					stateRef.current.form?.data as {
+						mapped_fields?: Record<string, string>;
+					}
+				)?.mapped_fields || {};
 			const requiredContactFields = ['email'];
 			const allRequiredFieldsMapped = requiredContactFields.every(
 				(key) => mappedFields[key] && mappedFields[key] !== ''
@@ -446,7 +445,10 @@ const Form: React.FC<FormProps> = ({
 						if (formWasSaved && onSuccess) {
 							const onSuccessMessage = isNewForm
 								? __('Form created successfully', 'doublescale')
-								: __('Form updated successfully', 'doublescale');
+								: __(
+										'Form updated successfully',
+										'doublescale'
+									);
 							onSuccess(onSuccessMessage);
 						}
 						// Close the form if it's a new form in modal, otherwise navigate
@@ -499,8 +501,14 @@ const Form: React.FC<FormProps> = ({
 								</p>
 								<h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
 									{isNewForm
-										? __('New form integration', 'doublescale')
-										: __('Edit form integration', 'doublescale')}
+										? __(
+												'New form integration',
+												'doublescale'
+											)
+										: __(
+												'Edit form integration',
+												'doublescale'
+											)}
 								</h1>
 								<p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
 									{__(
@@ -522,7 +530,10 @@ const Form: React.FC<FormProps> = ({
 									{__('Mapping', 'doublescale')}
 								</p>
 								<h2 className="mt-1.5 text-lg font-semibold text-foreground">
-									{__('Fields & contact options', 'doublescale')}
+									{__(
+										'Fields & contact options',
+										'doublescale'
+									)}
 								</h2>
 								<p className="mt-1 max-w-xl text-sm text-muted-foreground">
 									{__(

@@ -217,8 +217,9 @@ const InvoicesList: React.FC = () => {
 			invoice,
 			async () => {
 				const copy = await duplicateInvoice(invoice.id);
-				// Land on the copy so the user can adjust it straight away.
-				navigate(getToLink(`sales/invoices/${copy.id}/edit`));
+				refreshAll();
+				// Open the copy in the same edit dialog Edit uses.
+				setEditDialogInvoiceId(copy.id);
 			},
 			__('Duplicate failed.', 'doublescale')
 		);

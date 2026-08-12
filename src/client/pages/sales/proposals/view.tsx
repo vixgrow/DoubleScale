@@ -102,7 +102,7 @@ const ProposalView: React.FC = () => {
 	const [markAcceptedOpen, setMarkAcceptedOpen] = useState(false);
 	const [sendOpen, setSendOpen] = useState(false);
 	const [whatsappOpen, setWhatsappOpen] = useState(false);
-	const [editOpen, setEditOpen] = useState(false);
+	const [editDialogProposalId, setEditDialogProposalId] = useState<number | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
 	// Manual accept for deals closed outside the public link (phone, WhatsApp).
@@ -279,7 +279,7 @@ const ProposalView: React.FC = () => {
 		setNotice(null);
 		try {
 			const copy = await duplicateProposal(proposalId);
-			navigate(getToLink(`sales/proposals/${copy.id}/edit`));
+			setEditDialogProposalId(copy.id);
 		} catch (err: unknown) {
 			setNotice(err instanceof Error ? err.message : __('Duplicate failed.', 'doublescale'));
 		} finally {
@@ -537,7 +537,7 @@ const ProposalView: React.FC = () => {
 								variant="outline"
 								size="icon"
 								className="h-10 w-10 shrink-0 border-[#0D9DFC] bg-white text-[#0D9DFC] hover:bg-[#DBEAFE]"
-								onClick={() => setEditOpen(true)}
+								onClick={() => setEditDialogProposalId(proposal.id)}
 								aria-label={__('Edit', 'doublescale')}
 							>
 								<EditHeaderIcon
@@ -939,14 +939,18 @@ const ProposalView: React.FC = () => {
 				onConfirm={handleMarkAccepted}
 			/>
 
-			{proposal ? (
+			{editDialogProposalId !== null ? (
 				<ProposalFormDialog
-					open={editOpen}
-					onOpenChange={setEditOpen}
-					proposalId={proposal.id}
+					open={editDialogProposalId !== null}
+					onOpenChange={(open) => {
+						if (!open) {
+							setEditDialogProposalId(null);
+						}
+					}}
+					proposalId={editDialogProposalId}
 					onSaved={() => {
 						void refetch();
-						setEditOpen(false);
+						setEditDialogProposalId(null);
 					}}
 				/>
 			) : null}

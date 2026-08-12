@@ -178,11 +178,21 @@ class RestMcpSettingsController extends RestController {
 	public function get_status( $request ) {
 		unset( $request );
 
-		$abilities_enabled = ! get_option( AbilitiesBootstrap::DISABLE_OPTION, false );
+		// The Abilities API ships in WordPress 6.9. Test for the functions
+		// rather than the version number: a site can be on 6.9+ with the API
+		// removed by another plugin, or on an older build that provides it.
+		// The version is reported only so the admin knows why.
+		$api_available = function_exists( 'wp_register_ability' )
+			&& function_exists( 'wp_register_ability_category' );
+
+		$abilities_enabled = $api_available && ! get_option( AbilitiesBootstrap::DISABLE_OPTION, false );
 		$mcp_enabled       = McpServer::is_enabled();
 
 		return new WP_REST_Response(
 			array(
+				'abilities_api_available' => $api_available,
+				'wp_version'              => get_bloginfo( 'version' ),
+				'required_wp_version'     => '6.9',
 				'abilities_enabled'       => $abilities_enabled,
 				'mcp_enabled'             => $mcp_enabled,
 				'connected'               => $abilities_enabled && $mcp_enabled,

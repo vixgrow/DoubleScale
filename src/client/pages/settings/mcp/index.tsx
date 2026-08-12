@@ -36,6 +36,9 @@ interface McpApiKey {
 }
 
 interface McpStatus {
+	abilities_api_available: boolean;
+	wp_version: string;
+	required_wp_version: string;
 	abilities_enabled: boolean;
 	mcp_enabled: boolean;
 	connected: boolean;
@@ -466,12 +469,34 @@ const McpSettings: React.FC = () => {
 				</div>
 				<Switch
 					checked={status.mcp_enabled}
-					disabled={saving}
+					disabled={saving || !status.abilities_api_available}
 					onCheckedChange={handleToggle}
 				/>
 			</div>
 
-			{!status.abilities_enabled && (
+			{/*
+			 * Two different reasons produce no tools, and they need different
+			 * fixes: an old WordPress has no Abilities API to register against,
+			 * while the kill switch is a deliberate setting. Naming the wrong
+			 * one sends the admin hunting for an option that is already correct.
+			 */}
+			{!status.abilities_api_available && (
+				<div className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4">
+					<p className="text-sm text-amber-900">
+						{sprintf(
+							/* translators: 1: required WordPress version, 2: current WordPress version. */
+							__(
+								'MCP needs the WordPress Abilities API, added in WordPress %1$s. This site runs WordPress %2$s, so no tools are published. Update WordPress to use this feature.',
+								'doublescale'
+							),
+							status.required_wp_version,
+							status.wp_version
+						)}
+					</p>
+				</div>
+			)}
+
+			{status.abilities_api_available && !status.abilities_enabled && (
 				<div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4">
 					<p className="text-sm text-red-900">
 						{__(

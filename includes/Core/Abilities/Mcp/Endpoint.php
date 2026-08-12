@@ -156,8 +156,51 @@ final class Endpoint {
 				'name'    => 'DoubleScale CRM',
 				'version' => defined( 'DOUBLESCALE_VERSION' ) ? DOUBLESCALE_VERSION : '1.0.0',
 			),
-			'instructions'    => __( 'Read-only access to DoubleScale CRM. Call doublescale/get-context first: it reports which modules are active on this site and which tools you can actually use. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see.', 'doublescale' ),
+			'instructions'    => __( 'Read-only access to DoubleScale CRM. Call doublescale-get-context first: it reports which modules are active on this site and which tools you can actually use. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see.', 'doublescale' ),
 		);
+	}
+
+	/**
+	 * Convert a WordPress ability name into a legal MCP tool name.
+	 *
+	 * The two namespaces disagree: WP core REQUIRES exactly one forward slash
+	 * (`doublescale/get-context`), while MCP clients reject it — Claude Desktop
+	 * drops such tools with "unsupported names" and the connector silently
+	 * exposes nothing. Swapping the slash for a dash satisfies both.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $ability_name Fully-qualified ability name.
+	 * @return string
+	 */
+	public static function to_tool_name( string $ability_name ): string {
+		return str_replace( '/', '-', $ability_name );
+	}
+
+	/**
+	 * Reverse {@see to_tool_name()} — resolve a tool name back to its ability.
+	 *
+	 * Only the FIRST dash is restored, because it is the namespace separator;
+	 * every later dash belongs to the ability's own name.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $tool_name Tool name as sent by the client.
+	 * @return string
+	 */
+	public static function to_ability_name( string $tool_name ): string {
+		// Already a slash-qualified ability name — accept it as-is so a client
+		// that read the name from the WP REST API still works.
+		if ( false !== strpos( $tool_name, '/' ) ) {
+			return $tool_name;
+		}
+
+		$prefix = rtrim( AbilityRegistrar::NAMESPACE_PREFIX, '/' );
+		if ( 0 !== strpos( $tool_name, $prefix . '-' ) ) {
+			return $tool_name;
+		}
+
+		return $prefix . '/' . substr( $tool_name, strlen( $prefix ) + 1 );
 	}
 
 	/**
@@ -200,7 +243,8 @@ final class Endpoint {
 			}
 
 			$descriptor = array(
-				'name'        => $name,
+				// Dashed form — a slash here makes clients drop the tool.
+				'name'        => self::to_tool_name( $name ),
 				'description' => method_exists( $ability, 'get_description' ) ? $ability->get_description() : '',
 				'inputSchema' => $schema,
 			);
@@ -240,6 +284,10 @@ final class Endpoint {
 		if ( '' === $name ) {
 			return JsonRpc::error( $id, JsonRpc::INVALID_PARAMS, 'Missing tool name' );
 		}
+
+		// Clients call the dashed name we advertised; the registry is keyed by
+		// the slash-qualified ability name.
+		$name = self::to_ability_name( $name );
 
 		// Only our own abilities are callable here — this endpoint must not
 		// become a generic bridge to every ability on the site.

@@ -16,6 +16,7 @@ import Select from 'react-select';
  */
 import PaginatedSelect from '@doublescale/components/paginated-select';
 import {
+	reactSelectControl,
 	reactSelectMenuOverlay,
 	reactSelectMenuPortalProps,
 } from '@/components/react-select-shared-styles';
@@ -247,7 +248,7 @@ const SingleAPISelect = ({
 	});
 
 	return (
-		<div className="flex flex-col gap-2.5">
+		<div className="doublescale-paginated-select doublescale-react-select flex flex-col gap-2.5">
 			<div className="flex justify-between gap-2.5">
 				<div className="flex flex-col gap-2.5 flex-1">
 					<Select<SelectOption, false>
@@ -268,9 +269,26 @@ const SingleAPISelect = ({
 						filterOption={() => true}
 						isOptionDisabled={(option) => (option as any).isDisabled || false}
 						styles={{
-							control: (styles) => ({
-								...styles,
+							control: (base, state) => ({
+								...reactSelectControl(
+									base as Record<string, unknown>,
+									state
+								),
 								minWidth: 200,
+								backgroundColor: '#ffffff',
+								borderColor: '#D3D4D6',
+								borderRadius: '8px',
+								height: '48px',
+								paddingBlock: '0',
+							}),
+							input: (base) => ({
+								...base,
+								outline: 'none',
+								border: 'none',
+								boxShadow: 'none',
+								height: '40px',
+								paddingBlock: '0',
+								margin: 0,
 							}),
 							menuList: (styles) => ({
 								...styles,

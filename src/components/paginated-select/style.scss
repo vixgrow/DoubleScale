@@ -1,5 +1,8 @@
+/* Same focus kill for lists/tags (paginated) and Field/APISelect wrappers. */
 .doublescale-paginated-select input:focus,
-.doublescale-paginated-select input:hover {
+.doublescale-paginated-select input:hover,
+.doublescale-react-select input:focus,
+.doublescale-react-select input:hover {
 	outline: none !important;
 	box-shadow: none !important;
 	border: none !important;

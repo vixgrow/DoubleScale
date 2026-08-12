@@ -621,6 +621,23 @@ body {
 		outline: none !important;
 		box-shadow: none !important;
 	}
+
+	// react-select's inner search input — WP focus border paints as a blue bar.
+	.react-select-container input,
+	.react-select__input-container input,
+	.react-select__input {
+		border: none !important;
+		box-shadow: none !important;
+		outline: none !important;
+
+		&:hover,
+		&:focus,
+		&:focus-visible {
+			border: none !important;
+			box-shadow: none !important;
+			outline: none !important;
+		}
+	}
 }
 
 // Hide scrollbar utility

@@ -28,7 +28,19 @@
 	}
 }
 
-// Global styles for compact field layouts (these components can be nested anywhere)
+/*
+ * Same as .doublescale-paginated-select (lists/tags): WP admin paints a blue
+ * border/box-shadow on the inner search <input> on focus.
+ */
+.doublescale-react-select input:focus,
+.doublescale-react-select input:hover,
+.doublescale-field .react-select-container input:focus,
+.doublescale-field .react-select-container input:hover {
+	outline: none !important;
+	box-shadow: none !important;
+	border: none !important;
+}
+
 .doublescale-page-visited-row {
 	display: flex;
 	align-items: flex-start;

@@ -16,6 +16,7 @@ import { Copy, HelpCircle } from 'lucide-react';
  * Internal dependencies
  */
 import './style.scss';
+import '../paginated-select/style.scss';
 import {
 	ListField,
 	TagField,
@@ -56,6 +57,7 @@ import PageVisited from '@/components/page-visited';
 import LoggedInOut from '@/components/logged-in-out';
 import WasActiveInactive from '@/components/was-active-inactive';
 import {
+	reactSelectControl,
 	reactSelectMenuOverlay,
 	reactSelectMenuPortalProps,
 } from '@/components/react-select-shared-styles';
@@ -351,47 +353,64 @@ const Field: React.FC<FieldProps> = ({
 		case 'select':
 			const selectOptions = options || [];
 			fieldContent = (
-				<Select
-					className="react-select-container bg-card"
-					classNamePrefix="react-select"
-					{...reactSelectMenuPortalProps}
-					value={
-						value
-							? selectOptions.find(
-									(option) => option.value === value
-								)
-							: null
-					}
-					onChange={(value) => {
-						if (!isObject(value)) {
-							return;
+				<div className="doublescale-react-select doublescale-paginated-select w-full min-w-0">
+					<Select
+						className="react-select-container bg-card"
+						classNamePrefix="react-select"
+						{...reactSelectMenuPortalProps}
+						value={
+							value
+								? selectOptions.find(
+										(option) => option.value === value
+									)
+								: null
 						}
-						onChange(value.value);
-					}}
-					options={selectOptions}
-					placeholder={placeholder}
-					styles={{
-						control: (styles) => ({
-							...styles,
-							borderRadius: '8px',
-							height: '48px',
-							borderColor: '#D3D4D6',
-						}),
-						menuList: (base) => ({
-							...base,
-							maxHeight: 200,
-							overscrollBehavior: 'contain',
-						}),
-						menu: (base) => ({
-							...reactSelectMenuOverlay(base),
-							color: 'black',
-						}),
-						menuPortal: (base) => reactSelectMenuOverlay(base),
-					}}
-					components={{
-						MenuList: ScrollableMenuList,
-					}}
-				/>
+						onChange={(value) => {
+							if (!isObject(value)) {
+								return;
+							}
+							onChange(value.value);
+						}}
+						options={selectOptions}
+						placeholder={placeholder}
+						styles={{
+							control: (base, state) => ({
+								...reactSelectControl(
+									base as Record<string, unknown>,
+									state
+								),
+								minWidth: '100%',
+								backgroundColor: '#ffffff',
+								borderColor: '#D3D4D6',
+								borderRadius: '8px',
+								height: '48px',
+								paddingBlock: '0',
+							}),
+							input: (base) => ({
+								...base,
+								outline: 'none',
+								border: 'none',
+								boxShadow: 'none',
+								height: '40px',
+								paddingBlock: '0',
+								margin: 0,
+							}),
+							menuList: (base) => ({
+								...base,
+								maxHeight: 200,
+								overscrollBehavior: 'contain',
+							}),
+							menu: (base) => ({
+								...reactSelectMenuOverlay(base),
+								color: 'black',
+							}),
+							menuPortal: (base) => reactSelectMenuOverlay(base),
+						}}
+						components={{
+							MenuList: ScrollableMenuList,
+						}}
+					/>
+				</div>
 			);
 			break;
 		case 'infinite_scroll_multiselect': {
@@ -514,40 +533,60 @@ const Field: React.FC<FieldProps> = ({
 							.filter(Boolean)
 					: [];
 			fieldContent = (
-				<Select
-					onChange={(selectedOptions) => {
-						const values = selectedOptions
-							? selectedOptions.map((val) => val.value)
-							: [];
-						onChange(values);
-					}}
-					options={multiOptions}
-					value={multiOptions.filter((option) =>
-						selectedValues.includes(String(option.value))
-					)}
-					isMulti
-					placeholder={placeholder}
-					{...reactSelectMenuPortalProps}
-					styles={{
-						control: (styles) => ({
-							...styles,
-							borderRadius: '8px',
-						}),
-						menuList: (base) => ({
-							...base,
-							maxHeight: 200,
-							overscrollBehavior: 'contain',
-						}),
-						menu: (base) => ({
-							...reactSelectMenuOverlay(base),
-							color: 'black',
-						}),
-						menuPortal: (base) => reactSelectMenuOverlay(base),
-					}}
-					components={{
-						MenuList: ScrollableMenuList,
-					}}
-				/>
+				<div className="doublescale-react-select doublescale-paginated-select w-full min-w-0">
+					<Select
+						onChange={(selectedOptions) => {
+							const values = selectedOptions
+								? selectedOptions.map((val) => val.value)
+								: [];
+							onChange(values);
+						}}
+						options={multiOptions}
+						value={multiOptions.filter((option) =>
+							selectedValues.includes(String(option.value))
+						)}
+						isMulti
+						placeholder={placeholder}
+						className="react-select-container"
+						classNamePrefix="react-select"
+						{...reactSelectMenuPortalProps}
+						styles={{
+							control: (base, state) => ({
+								...reactSelectControl(
+									base as Record<string, unknown>,
+									state
+								),
+								minWidth: '100%',
+								backgroundColor: '#ffffff',
+								borderColor: '#D3D4D6',
+								borderRadius: '8px',
+								minHeight: '48px',
+								paddingBlock: '0',
+							}),
+							input: (base) => ({
+								...base,
+								outline: 'none',
+								border: 'none',
+								boxShadow: 'none',
+								margin: 0,
+								padding: 0,
+							}),
+							menuList: (base) => ({
+								...base,
+								maxHeight: 200,
+								overscrollBehavior: 'contain',
+							}),
+							menu: (base) => ({
+								...reactSelectMenuOverlay(base),
+								color: 'black',
+							}),
+							menuPortal: (base) => reactSelectMenuOverlay(base),
+						}}
+						components={{
+							MenuList: ScrollableMenuList,
+						}}
+					/>
+				</div>
 			);
 			break;
 		case 'discount_type_with_amount':

@@ -10,12 +10,31 @@
 	box-shadow: none !important;
 }
 
-/* Remove box-shadow and outline from all react-select inputs */
+/*
+ * WP admin styles `input:focus { border-color; box-shadow }` on the tiny search
+ * input inside react-select, which shows up as a thick blue bar on the left of
+ * the value (e.g. timeframe "At any time" in condition rules).
+ */
 .react-select__input,
+.react-select__input:hover,
 .react-select__input:focus,
-.react-select__input:active {
+.react-select__input:focus-visible,
+.react-select__input:active,
+.react-select__input-container,
+.react-select__input-container input,
+.react-select__input-container input:hover,
+.react-select__input-container input:focus,
+.react-select__input-container input:focus-visible,
+.react-select-container input,
+.react-select-container input:hover,
+.react-select-container input:focus,
+.react-select-container input:focus-visible {
+	border: none !important;
+	border-width: 0 !important;
+	border-color: transparent !important;
 	box-shadow: none !important;
 	outline: none !important;
+	background: transparent !important;
 }
 
 /* Ensure all react-select menus have black text */

@@ -15,6 +15,11 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import PaginatedSelect from '@doublescale/components/paginated-select';
+import {
+	reactSelectMenuOverlay,
+	reactSelectMenuPortalProps,
+} from '@/components/react-select-shared-styles';
+import { ScrollableMenuList } from '@/components/react-select-scrollable-menu-list';
 
 interface Props {
 	endpoint: string;
@@ -248,6 +253,7 @@ const SingleAPISelect = ({
 					<Select<SelectOption, false>
 						className="react-select-container"
 						classNamePrefix="react-select"
+						{...reactSelectMenuPortalProps}
 						options={optionsWithLoading}
 						value={selectedOption || null}
 						onChange={(val: SelectOption | null) => {
@@ -269,6 +275,7 @@ const SingleAPISelect = ({
 							menuList: (styles) => ({
 								...styles,
 								maxHeight: 200,
+								overscrollBehavior: 'contain',
 							}),
 							option: (styles, { isDisabled }) => ({
 								...styles,
@@ -279,12 +286,14 @@ const SingleAPISelect = ({
 									backgroundColor: 'transparent',
 								}),
 							}),
-							menu: (base: any) => ({
-								...base,
+							menu: (base) => ({
+								...reactSelectMenuOverlay(base),
 								color: 'black',
 							}),
+							menuPortal: (base) => reactSelectMenuOverlay(base),
 						}}
 						components={{
+							MenuList: ScrollableMenuList,
 							LoadingMessage: () => (
 								<div className="px-3 py-2 text-gray-500">
 									{__('Loading...', 'doublescale')}

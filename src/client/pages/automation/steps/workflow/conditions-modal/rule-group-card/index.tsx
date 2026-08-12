@@ -75,7 +75,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 
 	return (
 		<Card
-			className={`shadow-none bg-[#F7F8FA] border-border min-w-0 max-w-full overflow-x-auto overflow-y-hidden ${
+			className={`shadow-none bg-[#F7F8FA] border-border min-w-0 max-w-full overflow-visible ${
 				rules.length > 1
 					? 'ml-[2.2rem] w-[calc(100%-2.2rem)]'
 					: 'w-full'
@@ -132,7 +132,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											)}
 										/>
 									</SelectTrigger>
-									<SelectContent className="max-h-[200px] overflow-y-auto">
+									<SelectContent className="z-[180000] max-h-[200px] overflow-y-auto">
 										{map(rulesGroups, (group, key) => (
 											<SelectItem key={key} value={key}>
 												{group.name}
@@ -163,7 +163,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 												)}
 											/>
 										</SelectTrigger>
-										<SelectContent className="max-h-[200px] overflow-y-auto">
+										<SelectContent className="z-[180000] max-h-[200px] overflow-y-auto">
 											{rulesGroups[rule.selectedGroup]
 												.rules &&
 											Object.keys(

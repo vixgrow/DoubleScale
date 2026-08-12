@@ -55,6 +55,12 @@ import FormSubmission from '@/components/form-submission';
 import PageVisited from '@/components/page-visited';
 import LoggedInOut from '@/components/logged-in-out';
 import WasActiveInactive from '@/components/was-active-inactive';
+import {
+	reactSelectMenuOverlay,
+	reactSelectMenuPortalProps,
+} from '@/components/react-select-shared-styles';
+import { ScrollableMenuList } from '@/components/react-select-scrollable-menu-list';
+
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -348,6 +354,7 @@ const Field: React.FC<FieldProps> = ({
 				<Select
 					className="react-select-container bg-card"
 					classNamePrefix="react-select"
+					{...reactSelectMenuPortalProps}
 					value={
 						value
 							? selectOptions.find(
@@ -370,10 +377,19 @@ const Field: React.FC<FieldProps> = ({
 							height: '48px',
 							borderColor: '#D3D4D6',
 						}),
-						menu: (base: any) => ({
+						menuList: (base) => ({
 							...base,
+							maxHeight: 200,
+							overscrollBehavior: 'contain',
+						}),
+						menu: (base) => ({
+							...reactSelectMenuOverlay(base),
 							color: 'black',
 						}),
+						menuPortal: (base) => reactSelectMenuOverlay(base),
+					}}
+					components={{
+						MenuList: ScrollableMenuList,
 					}}
 				/>
 			);
@@ -511,15 +527,25 @@ const Field: React.FC<FieldProps> = ({
 					)}
 					isMulti
 					placeholder={placeholder}
+					{...reactSelectMenuPortalProps}
 					styles={{
 						control: (styles) => ({
 							...styles,
 							borderRadius: '8px',
 						}),
-						menu: (base: any) => ({
+						menuList: (base) => ({
 							...base,
+							maxHeight: 200,
+							overscrollBehavior: 'contain',
+						}),
+						menu: (base) => ({
+							...reactSelectMenuOverlay(base),
 							color: 'black',
 						}),
+						menuPortal: (base) => reactSelectMenuOverlay(base),
+					}}
+					components={{
+						MenuList: ScrollableMenuList,
 					}}
 				/>
 			);

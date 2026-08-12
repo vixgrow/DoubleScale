@@ -177,6 +177,13 @@ const McpSettings: React.FC = () => {
 	const [newKey, setNewKey] = useState('');
 	const [creatingKey, setCreatingKey] = useState(false);
 	const [copied, setCopied] = useState(false);
+	// Seeded from the browser, but overridable: an admin may be generating a
+	// snippet for a different machine than the one they are sitting at.
+	const [isWindows, setIsWindows] = useState<boolean>(() =>
+		typeof navigator !== 'undefined'
+			? /win/i.test(navigator.platform || navigator.userAgent || '')
+			: false
+	);
 	const [notice, setNotice] = useState<{
 		type: 'success' | 'error';
 		message: string;
@@ -274,28 +281,57 @@ const McpSettings: React.FC = () => {
 			);
 		}
 
+		// Windows launches the helper through cmd.exe, which breaks twice on the
+		// direct form: it splits "C:\Program Files\nodejs" at the space, and it
+		// splits the auth header at the space after "Authorization:". Routing
+		// through `cmd /c` fixes the first; passing the value via env fixes the
+		// second. Note the leading space inside the env value — it is the one
+		// that belongs after the colon.
+		const bearer = `Bearer ${newKey || '<your-api-key>'}`;
+
 		if (client === 'claude-desktop') {
-			return JSON.stringify(
-				{
-					mcpServers: {
-						doublescale: {
-							command: 'npx',
-							args: [
-								'-y',
-								'mcp-remote',
-								url,
-								'--header',
-								authHeader,
-							],
-						},
-					},
-				},
-				null,
-				2
-			);
+			const server = isWindows
+				? {
+						command: 'cmd',
+						args: [
+							'/c',
+							'npx',
+							'-y',
+							'mcp-remote',
+							url,
+							'--header',
+							'Authorization:${AUTH_HEADER}',
+						],
+						env: { AUTH_HEADER: ` ${bearer}` },
+					}
+				: {
+						command: 'npx',
+						args: ['-y', 'mcp-remote', url, '--header', authHeader],
+					};
+
+			return JSON.stringify({ mcpServers: { doublescale: server } }, null, 2);
 		}
 
 		if (client === 'codex') {
+			if (isWindows) {
+				return [
+					'[mcp_servers.doublescale]',
+					'command = "cmd"',
+					'args = [',
+					'  "/c",',
+					'  "npx",',
+					'  "-y",',
+					'  "mcp-remote",',
+					`  "${url}",`,
+					'  "--header",',
+					'  "Authorization:${AUTH_HEADER}"',
+					']',
+					'',
+					'[mcp_servers.doublescale.env]',
+					`AUTH_HEADER = " ${bearer}"`,
+				].join('\n');
+			}
+
 			return [
 				'[mcp_servers.doublescale]',
 				'command = "npx"',
@@ -617,6 +653,26 @@ const McpSettings: React.FC = () => {
 					</div>
 				)}
 
+				<div className="flex items-center gap-2 mb-3 text-sm">
+					<span className="text-gray-500">
+						{__('Client runs on:', 'doublescale')}
+					</span>
+					<Button
+						variant={isWindows ? 'default' : 'outline'}
+						size="sm"
+						onClick={() => setIsWindows(true)}
+					>
+						{__('Windows', 'doublescale')}
+					</Button>
+					<Button
+						variant={!isWindows ? 'default' : 'outline'}
+						size="sm"
+						onClick={() => setIsWindows(false)}
+					>
+						{__('macOS / Linux', 'doublescale')}
+					</Button>
+				</div>
+
 				<Tabs defaultValue="claude-code">
 					<TabsList>
 						{CLIENT_TABS.map((tab) => (
@@ -649,6 +705,15 @@ const McpSettings: React.FC = () => {
 								<p className="text-sm text-gray-500 mt-2">
 									{__(
 										'This client reaches the endpoint through a Node helper, so Node.js must be installed. Check with "node -v" — if that fails, install the LTS build from nodejs.org.',
+										'doublescale'
+									)}
+								</p>
+							)}
+
+							{tab.needsNode && isWindows && (
+								<p className="text-sm text-gray-500 mt-2">
+									{__(
+										'The Windows form runs the helper through cmd and passes the key as an environment variable. Both are needed: cmd.exe otherwise splits the Node path at the space in "Program Files", and splits the header at the space before "Bearer". Keep the leading space in AUTH_HEADER.',
 										'doublescale'
 									)}
 								</p>

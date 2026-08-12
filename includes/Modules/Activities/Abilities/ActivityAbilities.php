@@ -10,10 +10,12 @@ namespace DoubleScale\Modules\Activities\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
+use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**
  * "What happened with this customer" is the question the timeline answers, and
@@ -86,6 +88,209 @@ final class ActivityAbilities {
 				),
 				'execute_callback' => array( self::class, 'list_activity_types' ),
 			),
+
+			'doublescale/add-contact-note'     => array(
+				'module_slug'      => 'activities',
+				'label'            => __( 'Add a note to a contact', 'doublescale' ),
+				'description'      => __( 'Append a note to a contact\'s timeline. The note is attributed to you and cannot be edited or removed through this tool.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id' => array(
+							'type'        => 'integer',
+							'description' => 'Contact to attach the note to.',
+						),
+						'content'    => array(
+							'type'        => 'string',
+							'description' => 'The note text.',
+						),
+						'title'      => array(
+							'type'        => 'string',
+							'description' => 'Optional short heading for the note.',
+						),
+					),
+					'required'   => array( 'contact_id', 'content' ),
+				),
+				// Append-only: nothing is overwritten and no notification or
+				// automation trigger fires, which makes this the lowest-risk
+				// write in the product.
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'add_contact_note' ),
+			),
+
+			'doublescale/log-call'             => array(
+				'module_slug'      => 'activities',
+				'label'            => __( 'Log a call', 'doublescale' ),
+				'description'      => __( 'Record that a call happened with a contact, with optional duration, outcome, and notes. This only records history — it does not place a call.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id' => array(
+							'type'        => 'integer',
+							'description' => 'Contact the call was with.',
+						),
+						'notes'      => array(
+							'type'        => 'string',
+							'description' => 'What was discussed.',
+						),
+						'duration'   => array(
+							'type'        => 'integer',
+							'description' => 'Call length in minutes.',
+						),
+						'outcome'    => array(
+							'type'        => 'string',
+							'description' => 'Short result, e.g. "left voicemail" or "agreed to proposal".',
+						),
+					),
+					'required'   => array( 'contact_id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						// Records history only; places no outbound call.
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'log_call' ),
+			),
+		);
+	}
+
+	/**
+	 * Confirm a contact exists before writing anything against it.
+	 *
+	 * ActivityManager does NOT check this: passing an unknown contact_id creates
+	 * an orphan activity row pointing at nothing, which then shows up in no
+	 * timeline and cannot be found or removed through the UI. An agent that
+	 * mistypes an id would silently litter the table.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $contact_id Contact id.
+	 * @return \WP_Error|null Null when the contact exists.
+	 */
+	private static function assert_contact_exists( int $contact_id ): ?\WP_Error {
+		if ( ContactModel::query()->where( 'id', $contact_id )->count() > 0 ) {
+			return null;
+		}
+
+		return AbilityResult::not_found(
+			sprintf(
+				/* translators: %d: contact id */
+				__( 'No contact exists with id %d. Use list-contacts to find the right one.', 'doublescale' ),
+				$contact_id
+			)
+		);
+	}
+
+	/**
+	 * Append a note to a contact timeline.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function add_contact_note( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'contact_id', 'content' ) ),
+				AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$missing = self::assert_contact_exists( (int) $input['contact_id'] );
+		if ( $missing ) {
+			return $missing;
+		}
+
+		$activity = ActivityManager::instance()->add_note(
+			array(
+				'contact_id' => (int) $input['contact_id'],
+				'content'    => (string) $input['content'],
+				'title'      => isset( $input['title'] ) ? (string) $input['title'] : '',
+			)
+		);
+
+		// The service returns null for every failure — unknown contact, no
+		// access, empty body — so translate that into something an agent can
+		// act on rather than passing a bare null back as success.
+		if ( ! $activity ) {
+			return new \WP_Error(
+				'doublescale_note_not_created',
+				__( 'The note could not be added. Check that the contact id exists and that you have access to it.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return array(
+			'created'     => true,
+			'activity_id' => (int) $activity->id,
+			'contact_id'  => (int) $input['contact_id'],
+		);
+	}
+
+	/**
+	 * Record a call against a contact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function log_call( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'contact_id' ) ),
+				AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$missing = self::assert_contact_exists( (int) $input['contact_id'] );
+		if ( $missing ) {
+			return $missing;
+		}
+
+		$activity = ActivityManager::instance()->log_call(
+			array(
+				'contact_id' => (int) $input['contact_id'],
+				'notes'      => isset( $input['notes'] ) ? (string) $input['notes'] : '',
+				'outcome'    => isset( $input['outcome'] ) ? (string) $input['outcome'] : '',
+				'duration'   => isset( $input['duration'] ) ? (int) $input['duration'] : null,
+			)
+		);
+
+		if ( ! $activity ) {
+			return new \WP_Error(
+				'doublescale_call_not_logged',
+				__( 'The call could not be logged. Check that the contact id exists and that you have access to it.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return array(
+			'created'     => true,
+			'activity_id' => (int) $activity->id,
+			'contact_id'  => (int) $input['contact_id'],
 		);
 	}
 

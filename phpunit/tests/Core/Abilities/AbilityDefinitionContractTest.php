@@ -15,6 +15,7 @@ namespace DoubleScale\Tests\Core\Abilities;
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityContext;
 use DoubleScale\Core\Abilities\AbilityRegistrar;
+use DoubleScale\Modules\Activities\Abilities\ActivityAbilities;
 use DoubleScale\Modules\Contacts\Abilities\ContactAbilities;
 use DoubleScale\Modules\Documents\Abilities\DocumentAbilities;
 use DoubleScale\Modules\Support\Abilities\SupportAbilities;
@@ -30,11 +31,41 @@ final class AbilityDefinitionContractTest extends TestCase {
 	 * @return array<string, array<string, mixed>>
 	 */
 	private function all_definitions(): array {
-		return array_merge(
+		$definitions = array_merge(
 			AbilityContext::definitions(),
 			ContactAbilities::definitions(),
 			DocumentAbilities::definitions(),
-			SupportAbilities::definitions()
+			SupportAbilities::definitions(),
+			ActivityAbilities::definitions()
+		);
+
+		// Pro ability classes are discovered rather than imported: this suite
+		// runs without Pro loaded, and a hardcoded list silently stops covering
+		// new modules — which is exactly what happened when eight modules were
+		// added and this contract kept passing against four.
+		foreach ( self::pro_ability_classes() as $class ) {
+			if ( class_exists( $class ) && method_exists( $class, 'definitions' ) ) {
+				$definitions = array_merge( $definitions, $class::definitions() );
+			}
+		}
+
+		return $definitions;
+	}
+
+	/**
+	 * Fully-qualified Pro ability classes, if the Pro plugin is present.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function pro_ability_classes(): array {
+		return array(
+			'DoubleScale\Pro\Modules\Deals\Abilities\DealAbilities',
+			'DoubleScale\Pro\Modules\Tasks\Abilities\TaskAbilities',
+			'DoubleScale\Pro\Modules\Projects\Abilities\ProjectAbilities',
+			'DoubleScale\Pro\Modules\ProductCatalog\Abilities\ProductAbilities',
+			'DoubleScale\Pro\Modules\Contracts\Abilities\ContractAbilities',
+			'DoubleScale\Pro\Modules\CreditNotes\Abilities\CreditNoteAbilities',
+			'DoubleScale\Pro\Modules\Analytics\Abilities\ReportAbilities',
 		);
 	}
 
@@ -133,16 +164,60 @@ final class AbilityDefinitionContractTest extends TestCase {
 	}
 
 	/**
-	 * Phase 1 is read-only. This asserts the contract at the definition layer
-	 * so a later mutating ability cannot be added without a deliberate change
-	 * here — the annotation is what tells an agent a call is safe to retry.
+	 * Writes must declare themselves.
+	 *
+	 * The registrar defaults every ability to `readonly: true`, which is the
+	 * safe value for an author who forgets. That same default is dangerous on a
+	 * mutating ability: annotations are how an agent decides whether a call is
+	 * safe to make and safe to retry, so a write inheriting `readonly: true`
+	 * invites duplicate writes after a timeout.
+	 *
+	 * A definition therefore may not be silently read-only if it mutates: it
+	 * must set `readonly` explicitly, either way.
 	 */
-	public function test_no_definition_declares_a_destructive_annotation(): void {
+	public function test_mutating_abilities_declare_their_annotations(): void {
 		foreach ( $this->all_definitions() as $name => $definition ) {
 			$annotations = $definition['meta']['annotations'] ?? array();
+
+			// A definition that says nothing is treated as read-only, which is
+			// only correct if its callback does not mutate. Names are the
+			// cheapest reliable signal we have at the definition layer.
+			$looks_mutating = (bool) preg_match(
+				'#/(create|update|add|log|delete|remove|move|send|set)-#',
+				$name
+			);
+
+			if ( ! $looks_mutating ) {
+				continue;
+			}
+
+			$this->assertArrayHasKey(
+				'readonly',
+				$annotations,
+				$name . ' looks like a write but declares no readonly annotation; it would silently inherit readonly:true.'
+			);
+			$this->assertFalse(
+				$annotations['readonly'],
+				$name . ' looks like a write but is annotated readonly:true.'
+			);
+		}
+	}
+
+	/**
+	 * Anything that is NOT a write must still be genuinely read-only, so the
+	 * default can never be quietly widened for a read ability.
+	 */
+	public function test_read_abilities_are_never_destructive(): void {
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			$annotations = $definition['meta']['annotations'] ?? array();
+
+			if ( false === ( $annotations['readonly'] ?? true ) ) {
+				continue; // Declared write — covered by the test above.
+			}
+
 			$this->assertNotTrue(
 				$annotations['destructive'] ?? false,
-				$name . ' is destructive, but phase 1 ships read-only abilities only.'
+				$name . ' is annotated read-only but also destructive.'
 			);
 		}
 	}

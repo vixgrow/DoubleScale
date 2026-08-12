@@ -160,7 +160,30 @@ final class AbilityGuard {
 	public static function wrap_execute( string $name, callable $callback ): callable {
 		return static function ( $input = null ) use ( $name, $callback ) {
 			try {
-				return call_user_func( $callback, is_array( $input ) ? $input : array() );
+				$result = call_user_func( $callback, is_array( $input ) ? $input : array() );
+
+				if ( ! is_wp_error( $result ) && self::is_write( $name ) && self::changed_something( $result ) ) {
+					/**
+					 * Fires after a mutating ability succeeds.
+					 *
+					 * There is no undo and no revision history anywhere in the
+					 * product, so knowing WHAT an agent changed is the only
+					 * accountability available. A listener writes this to the
+					 * activity timeline, where agent writes then sit alongside
+					 * human ones instead of being indistinguishable after
+					 * the fact.
+					 *
+					 * @since 1.0.0
+					 *
+					 * @param string $name    Full ability name.
+					 * @param mixed  $input   Tool input parameters.
+					 * @param mixed  $result  What the ability returned.
+					 * @param int    $user_id User the write ran as.
+					 */
+					do_action( 'doublescale_ability_write', $name, $input, $result, get_current_user_id() );
+				}
+
+				return $result;
 			} catch ( \Throwable $e ) {
 				$error_id = substr( md5( uniqid( 'ds_ability_', true ) ), 0, 12 );
 
@@ -190,6 +213,61 @@ final class AbilityGuard {
 				);
 			}
 		};
+	}
+
+	/**
+	 * Whether a write ability actually changed anything.
+	 *
+	 * A write that finds the record already in the requested state is a
+	 * legitimate no-op, and auditing it would fill the timeline with entries
+	 * for changes that never happened. Write abilities report this by returning
+	 * `created` or `updated` as false.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $result What the ability returned.
+	 * @return bool
+	 */
+	private static function changed_something( $result ): bool {
+		if ( ! is_array( $result ) ) {
+			return true; // Nothing to go on; assume it wrote.
+		}
+
+		foreach ( array( 'created', 'updated', 'deleted' ) as $flag ) {
+			if ( array_key_exists( $flag, $result ) ) {
+				return (bool) $result[ $flag ];
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether an ability mutates, according to its own registered annotation.
+	 *
+	 * Read from the registry rather than inferred from the name: the annotation
+	 * is the authoritative declaration the agent also sees, so auditing keys off
+	 * exactly the same fact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $name Full ability name.
+	 * @return bool
+	 */
+	private static function is_write( string $name ): bool {
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			return false;
+		}
+
+		$ability = wp_get_ability( $name );
+		if ( ! is_object( $ability ) || ! method_exists( $ability, 'get_meta' ) ) {
+			return false;
+		}
+
+		$meta = (array) $ability->get_meta();
+
+		// Absent annotations mean the registrar's read-only default applied.
+		return false === ( $meta['annotations']['readonly'] ?? true );
 	}
 
 	/**

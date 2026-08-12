@@ -234,14 +234,18 @@ final class AbilityRegistrar {
 				$definition['permission'] ?? null
 			),
 			'meta'                => array(
-				// Phase 1 is read-only; no definition may opt out of the
-				// annotation, which is what tells an agent the call is safe.
+				// Read-only is the DEFAULT, not a ceiling: an author who omits
+				// annotations gets the safe value, and a write ability opts out
+				// deliberately. Order matters — the definition comes second so
+				// it wins. These annotations are what tell an agent whether a
+				// call is safe to make and safe to retry, so a mutating ability
+				// that inherited `readonly: true` would be actively dangerous.
 				'annotations'  => array_merge(
-					(array) ( $definition['meta']['annotations'] ?? array() ),
 					array(
 						'readonly'    => true,
 						'destructive' => false,
-					)
+					),
+					(array) ( $definition['meta']['annotations'] ?? array() )
 				),
 				// Required. WP 7.0.3 defaults show_in_rest to false
 				// (class-wp-ability.php:29) and has no `public` meta key, so

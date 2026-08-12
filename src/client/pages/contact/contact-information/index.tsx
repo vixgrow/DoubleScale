@@ -479,8 +479,10 @@ const ContactInformation: React.FC = () => {
 						</CardTitle>
 						<div className="flex w-full max-w-full flex-col gap-2">
 							{contact.email && (
-								<div className="mx-auto flex max-w-full items-start gap-2 rounded-xl bg-background/80 px-3 py-2 text-left text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
-									<Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70" />
+								<div className="mx-auto flex max-w-full items-center gap-2 rounded-xl bg-background/80 px-3 py-2 text-left text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
+									<span className="flex shrink-0 text-primary/70">
+										<ContactTotalEmailsIcon />
+									</span>
 									<span
 										className="min-w-0 text-sm leading-snug"
 										style={{
@@ -514,7 +516,7 @@ const ContactInformation: React.FC = () => {
 								disabled={isSendingOptIn || optInSent}
 								onClick={sendOptInEmail}
 							>
-								<Mail className="h-3.5 w-3.5" />
+								<ContactTotalEmailsIcon/>
 								{isSendingOptIn
 									? __('Sending...', 'doublescale')
 									: optInSent

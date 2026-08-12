@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { CustomDialogHeader, GradientLeadScoringLevelIcon } from '@doublescale/components';
 
 interface LevelDialogProps {
 	visible: boolean;
@@ -96,22 +97,28 @@ export const LevelDialog: React.FC<LevelDialogProps> = ({
 		<Dialog open={visible} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[525px]">
 				<DialogHeader>
-					<DialogTitle>
-						{isEditing
-							? __('Edit Lead Scoring Level', 'doublescale')
-							: __('Create Lead Scoring Level', 'doublescale')}
-					</DialogTitle>
-					<DialogDescription>
-						{isEditing
-							? __(
-									'Update the lead scoring level details below.',
-									'doublescale'
-								)
-							: __(
-									'Create a new lead scoring level to categorize your contacts based on their score.',
-									'doublescale'
-								)}
-					</DialogDescription>
+					<CustomDialogHeader
+						title={
+							isEditing
+								? __('Edit Lead Scoring Level', 'doublescale')
+								: __('Create Lead Scoring Level', 'doublescale')
+						}
+						subtitle={
+							isEditing
+								? __(
+										'Update the lead scoring level details below.',
+										'doublescale'
+									)
+								: __(
+										'Create a new lead scoring level to categorize your contacts based on their score.',
+										'doublescale'
+									)
+						}
+						icon={
+							<GradientLeadScoringLevelIcon
+							/>
+						}
+					/>
 				</DialogHeader>
 
 				<div className="grid gap-4 py-4">
@@ -146,6 +153,7 @@ export const LevelDialog: React.FC<LevelDialogProps> = ({
 							placeholder={__('Enter minimum points', 'doublescale')}
 							value={currentData.points}
 							onChange={handlePointsChange}
+							className="!rounded-lg !border-border"
 						/>
 						<p className="text-xs text-gray-500">
 							{__(
@@ -158,7 +166,7 @@ export const LevelDialog: React.FC<LevelDialogProps> = ({
 
 				<DialogFooter className='gap-4'>
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						onClick={onClose}
 						disabled={isSaving}
 					>

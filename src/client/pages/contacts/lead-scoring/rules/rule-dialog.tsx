@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import RulesBuilder, { RuleItem } from '@doublescale/components/rules-builder';
 import { getFilteredRulesGroups } from '@doublescale/utils';
+import { CustomDialogHeader, GradientLeadScoringLevelIcon } from '@doublescale/components';
 
 interface RuleDialogProps {
 	visible: boolean;
@@ -121,13 +122,9 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 		<Dialog open={visible} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
-					<DialogTitle>
-						{isEditing
+					<CustomDialogHeader title={isEditing
 							? __('Edit Lead Scoring Rule', 'doublescale')
-							: __('Create Lead Scoring Rule', 'doublescale')}
-					</DialogTitle>
-					<DialogDescription>
-						{isEditing
+							: __('Create Lead Scoring Rule', 'doublescale')} subtitle={isEditing
 							? __(
 									'Update the lead scoring rule details below.',
 									'doublescale'
@@ -135,8 +132,7 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 							: __(
 									'Create a new lead scoring rule to automatically score your contacts.',
 									'doublescale'
-								)}
-					</DialogDescription>
+								)} icon={<GradientLeadScoringLevelIcon />}/>
 				</DialogHeader>
 
 				<div className="grid gap-4 py-4">
@@ -176,6 +172,7 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 										parseInt(e.target.value) || 0
 									)
 								}
+								className="!rounded-lg !border-border"
 							/>
 						</div>
 
@@ -264,7 +261,7 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 
 				<DialogFooter className="gap-4">
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						onClick={onClose}
 						disabled={isSaving}
 					>

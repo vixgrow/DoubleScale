@@ -367,6 +367,17 @@ body {
 	}
 }
 
+/*
+ * Centered dialogs are positioned with a flex wrapper (see dialog.tsx).
+ * Many call sites still pass !translate-x-[-50%], which would shove the
+ * panel sideways — especially after rtlcss. Zero those Tailwind translate
+ * CSS variables (unlayered so they beat utility !important).
+ */
+[data-doublescale-dialog-center] {
+	--tw-translate-x: 0px !important;
+	--tw-translate-y: 0px !important;
+}
+
 // ─── Global design polish ───
 
 // Inter font import

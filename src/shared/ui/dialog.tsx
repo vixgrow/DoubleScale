@@ -28,6 +28,50 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+/** Fullscreen shells pin with left-0 / w-screen — keep those on `position: fixed`. */
+function isFullscreenDialogShell(className?: string) {
+	if (!className) {
+		return false;
+	}
+	return (
+		/\b(?:left-0|top-0|translate-x-0|w-screen|h-screen|h-\[100dvh\])\b/.test(
+			className
+		) || className.includes('doublescale-automation-editor-dialog')
+	);
+}
+
+function extractZIndexClasses(...classNames: Array<string | undefined>) {
+	const matches: string[] = [];
+	for (const value of classNames) {
+		if (!value) {
+			continue;
+		}
+		const found = value.match(/\bz-(?:\[[^\]]+\]|\d+)\b/g);
+		if (found) {
+			matches.push(...found);
+		}
+	}
+	return matches.length > 0 ? matches.join(' ') : 'z-50';
+}
+
+/**
+ * Old LTR centering used !translate-x/y-[-50%]. With the flex positioner those
+ * shifts move the dialog to the top-left (worse under RTL). Strip them.
+ */
+function stripLegacyCenterTranslate(className?: string) {
+	if (!className) {
+		return className;
+	}
+	return className
+		.replace(
+			/(?:max-sm:)?!?-?translate-[xy]-(?:\[-50%\]|1\/2|0)(?=\s|$)/g,
+			''
+		)
+		.replace(/(?:max-sm:)?!top-4(?=\s|$)/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
 const DialogContent = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Content>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
@@ -37,16 +81,36 @@ const DialogContent = React.forwardRef<
 		overlayClassName?: string;
 		overlayStyle?: React.CSSProperties;
 	}
->(({ className, children, removePortal, hideCloseButton, overlayClassName, overlayStyle, ...props }, ref) => {
-	const content = (
-		<>
-			<DialogOverlay className={overlayClassName} style={overlayStyle} />
+>(
+	(
+		{
+			className,
+			children,
+			removePortal,
+			hideCloseButton,
+			overlayClassName,
+			overlayStyle,
+			...props
+		},
+		ref
+	) => {
+		const fullscreen = isFullscreenDialogShell(className);
+		const positionerZ = extractZIndexClasses(className, overlayClassName);
+		const contentClassName = fullscreen
+			? className
+			: stripLegacyCenterTranslate(className);
+
+		const content = (
 			<DialogPrimitive.Content
 				ref={ref}
 				aria-describedby={undefined}
+				data-doublescale-dialog-center={fullscreen ? undefined : ''}
 				className={cn(
-					'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
-					className
+					fullscreen
+						? 'fixed z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg'
+						: // Flex-positioned: no left/translate — survives WP rtlcss flipping.
+							'pointer-events-auto relative z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg',
+					contentClassName
 				)}
 				onOpenAutoFocus={(e) => {
 					// Allow WordPress media modal to maintain focus
@@ -70,15 +134,36 @@ const DialogContent = React.forwardRef<
 					</DialogPrimitive.Close>
 				)}
 			</DialogPrimitive.Content>
-		</>
-	);
+		);
 
-	if (removePortal) {
-		return content;
+		const tree = (
+			<>
+				<DialogOverlay
+					className={overlayClassName}
+					style={overlayStyle}
+				/>
+				{fullscreen ? (
+					content
+				) : (
+					<div
+						className={cn(
+							'fixed inset-0 flex items-center justify-center p-4 pointer-events-none',
+							positionerZ
+						)}
+					>
+						{content}
+					</div>
+				)}
+			</>
+		);
+
+		if (removePortal) {
+			return tree;
+		}
+
+		return <DialogPortal>{tree}</DialogPortal>;
 	}
-
-	return <DialogPortal>{content}</DialogPortal>;
-});
+);
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({

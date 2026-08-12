@@ -24,7 +24,8 @@ const OverviewDialogShimmer: React.FC = () => {
     return (
         <Dialog open={true}>
             <DialogContent
-                className="z-[1800000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
+                overlayClassName="z-[1800000]"
+                className="left-0 top-0 z-[1800000] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-white p-0 shadow-none"
                 style={{
                     paddingTop: '10px',
                     paddingLeft: '0px',

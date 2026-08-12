@@ -277,14 +277,18 @@ final class ContactAbilities {
 	 */
 	private static function shape_terms( $terms ): array {
 		$out = array();
-		foreach ( (array) $terms as $term ) {
+
+		// NOT (array) — casting an Eloquent Collection yields its internal
+		// `items` property as one element, so every term is silently dropped
+		// and the agent is told the site has no tags at all.
+		foreach ( ( $terms ?? array() ) as $term ) {
 			if ( ! is_object( $term ) ) {
 				continue;
 			}
 			$out[] = array(
-				'id'    => (int) $term->id,
-				'title' => $term->title,
-				'slug'  => $term->slug ?? null,
+				'id'   => (int) $term->id,
+				'name' => $term->name,
+				'slug' => $term->slug ?? null,
 			);
 		}
 		return $out;

@@ -19,16 +19,22 @@ defined( 'ABSPATH' ) || exit;
  */
 final class AbilityCategories {
 
-	public const CORE     = 'doublescale-core';
-	public const CONTACTS = 'doublescale-contacts';
-	public const SALES    = 'doublescale-sales';
-	public const SUPPORT  = 'doublescale-support';
+	public const CORE      = 'doublescale-core';
+	public const CONTACTS  = 'doublescale-contacts';
+	public const SALES     = 'doublescale-sales';
+	public const SUPPORT   = 'doublescale-support';
+	public const DEALS     = 'doublescale-deals';
+	public const TASKS     = 'doublescale-tasks';
+	public const PROJECTS  = 'doublescale-projects';
+	public const ANALYTICS = 'doublescale-analytics';
 
 	/**
 	 * Module slug => category slug.
 	 *
-	 * Sales documents (invoices, proposals) live in the `documents` module but
-	 * belong in the user-facing Sales category.
+	 * Categories group tools the way a USER thinks about them, which is not the
+	 * same as the module tree: invoices, proposals, contracts, credit notes, and
+	 * products are five separate modules but one "Sales" idea, so they share a
+	 * category. Deals get their own because pipeline work is its own activity.
 	 *
 	 * @since 1.0.0
 	 *
@@ -36,10 +42,18 @@ final class AbilityCategories {
 	 */
 	public static function module_category_map(): array {
 		return array(
-			'core'      => self::CORE,
-			'contacts'  => self::CONTACTS,
-			'documents' => self::SALES,
-			'support'   => self::SUPPORT,
+			'core'            => self::CORE,
+			'contacts'        => self::CONTACTS,
+			'activities'      => self::CONTACTS,
+			'documents'       => self::SALES,
+			'contracts'       => self::SALES,
+			'credit_notes'    => self::SALES,
+			'product_catalog' => self::SALES,
+			'support'         => self::SUPPORT,
+			'deals'           => self::DEALS,
+			'tasks'           => self::TASKS,
+			'projects'        => self::PROJECTS,
+			'analytics'       => self::ANALYTICS,
 		);
 	}
 
@@ -65,21 +79,37 @@ final class AbilityCategories {
 	 */
 	public static function catalog(): array {
 		return array(
-			self::CORE     => array(
+			self::CORE      => array(
 				'label'       => __( 'DoubleScale: Core', 'doublescale' ),
 				'description' => __( 'Identity, active modules, and site context.', 'doublescale' ),
 			),
-			self::CONTACTS => array(
+			self::CONTACTS  => array(
 				'label'       => __( 'DoubleScale: Contacts', 'doublescale' ),
 				'description' => __( 'CRM contacts, tags, lists, and activity timelines.', 'doublescale' ),
 			),
-			self::SALES    => array(
+			self::SALES     => array(
 				'label'       => __( 'DoubleScale: Sales', 'doublescale' ),
-				'description' => __( 'Invoices, proposals, and sales summaries.', 'doublescale' ),
+				'description' => __( 'Invoices, proposals, contracts, credit notes, products, and sales summaries.', 'doublescale' ),
 			),
-			self::SUPPORT  => array(
+			self::SUPPORT   => array(
 				'label'       => __( 'DoubleScale: Support', 'doublescale' ),
 				'description' => __( 'Support tickets, threads, and workload summaries.', 'doublescale' ),
+			),
+			self::DEALS     => array(
+				'label'       => __( 'DoubleScale: Deals', 'doublescale' ),
+				'description' => __( 'Sales pipelines, deal stages, and pipeline value.', 'doublescale' ),
+			),
+			self::TASKS     => array(
+				'label'       => __( 'DoubleScale: Tasks', 'doublescale' ),
+				'description' => __( 'Tasks, statuses, due dates, and workload.', 'doublescale' ),
+			),
+			self::PROJECTS  => array(
+				'label'       => __( 'DoubleScale: Projects', 'doublescale' ),
+				'description' => __( 'Projects, statuses, and linked contacts and deals.', 'doublescale' ),
+			),
+			self::ANALYTICS => array(
+				'label'       => __( 'DoubleScale: Reports', 'doublescale' ),
+				'description' => __( 'Revenue, pipeline, and task reporting.', 'doublescale' ),
 			),
 		);
 	}

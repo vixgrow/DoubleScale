@@ -71,7 +71,7 @@ final class AbilityRegistrar {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string                              $name    Full ability name.
+	 * @param string                                  $name    Full ability name.
 	 * @param array<string, ProvidesAbilities|object> $modules Slug => module.
 	 * @return array{module_slug: string, module_label: string}|null
 	 */

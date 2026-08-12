@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityResult;
+use DoubleScale\Core\Abilities\AbilityScope;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
@@ -206,9 +207,7 @@ final class DocumentAbilities {
 
 		$query = InvoiceModel::query()->with( array( 'contact' ) );
 
-		if ( ! self::sees_all_sales() ) {
-			$query->where( 'sale_agent_user_id', get_current_user_id() );
-		}
+		AbilityScope::apply( $query, 'sale_agent_user_id', self::sees_all_sales() );
 
 		if ( ! empty( $input['status'] ) ) {
 			$query->where( 'status', (string) $input['status'] );
@@ -244,7 +243,7 @@ final class DocumentAbilities {
 			$total,
 			$limit,
 			$offset,
-			array( 'scope' => self::sees_all_sales() ? 'all' : 'own' )
+			array( 'scope' => AbilityScope::label( self::sees_all_sales() ) )
 		);
 	}
 
@@ -305,9 +304,7 @@ final class DocumentAbilities {
 
 		$query = ProposalModel::query()->with( array( 'contact' ) );
 
-		if ( ! self::sees_all_sales() ) {
-			$query->where( 'assigned_user_id', get_current_user_id() );
-		}
+		AbilityScope::apply( $query, 'assigned_user_id', self::sees_all_sales() );
 
 		if ( ! empty( $input['status'] ) ) {
 			$query->where( 'status', (string) $input['status'] );
@@ -343,7 +340,7 @@ final class DocumentAbilities {
 			$total,
 			$limit,
 			$offset,
-			array( 'scope' => self::sees_all_sales() ? 'all' : 'own' )
+			array( 'scope' => AbilityScope::label( self::sees_all_sales() ) )
 		);
 	}
 
@@ -404,9 +401,7 @@ final class DocumentAbilities {
 	public static function get_sales_summary( array $input ): array {
 		$query = InvoiceModel::query();
 
-		if ( ! self::sees_all_sales() ) {
-			$query->where( 'sale_agent_user_id', get_current_user_id() );
-		}
+		AbilityScope::apply( $query, 'sale_agent_user_id', self::sees_all_sales() );
 
 		if ( ! empty( $input['date_from'] ) ) {
 			$query->where( 'invoice_date', '>=', (string) $input['date_from'] );
@@ -448,7 +443,7 @@ final class DocumentAbilities {
 
 		return array(
 			'currencies'    => array_values( $by_currency ),
-			'scope'         => self::sees_all_sales() ? 'all' : 'own',
+			'scope'         => AbilityScope::label( self::sees_all_sales() ),
 			'currency_note' => __( 'Figures are grouped by currency and must not be added together across currencies.', 'doublescale' ),
 		);
 	}

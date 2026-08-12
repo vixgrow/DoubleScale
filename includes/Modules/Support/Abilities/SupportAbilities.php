@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityResult;
+use DoubleScale\Core\Abilities\AbilityScope;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
@@ -196,9 +197,7 @@ final class SupportAbilities {
 
 		// Applied LAST and unconditionally, so no caller-supplied filter can
 		// widen it. Mirrors RestTicketController's scope clause.
-		if ( ! self::sees_all_tickets() ) {
-			$query->where( 'agent_user_id', get_current_user_id() );
-		}
+		AbilityScope::apply( $query, 'agent_user_id', self::sees_all_tickets() );
 
 		$total = (int) $query->count();
 
@@ -217,7 +216,7 @@ final class SupportAbilities {
 			$total,
 			$limit,
 			$offset,
-			array( 'scope' => self::sees_all_tickets() ? 'all' : 'own' )
+			array( 'scope' => AbilityScope::label( self::sees_all_tickets() ) )
 		);
 	}
 
@@ -305,9 +304,7 @@ final class SupportAbilities {
 
 		$query = TicketModel::query();
 
-		if ( ! self::sees_all_tickets() ) {
-			$query->where( 'agent_user_id', get_current_user_id() );
-		}
+		AbilityScope::apply( $query, 'agent_user_id', self::sees_all_tickets() );
 
 		$counts = array();
 		$total  = 0;
@@ -325,7 +322,7 @@ final class SupportAbilities {
 			'group_by' => $group_by,
 			'total'    => $total,
 			'groups'   => $counts,
-			'scope'    => self::sees_all_tickets() ? 'all' : 'own',
+			'scope'    => AbilityScope::label( self::sees_all_tickets() ),
 		);
 	}
 
@@ -347,9 +344,14 @@ final class SupportAbilities {
 			return AbilityResult::not_found( __( 'No ticket found with that id.', 'doublescale' ) );
 		}
 
-		if ( ! self::sees_all_tickets()
-			&& (int) $ticket->agent_user_id !== (int) get_current_user_id() ) {
-			return AbilityResult::forbidden( __( 'This ticket is not assigned to you.', 'doublescale' ) );
+		$forbidden = AbilityScope::assert_owns(
+			$ticket,
+			'agent_user_id',
+			self::sees_all_tickets(),
+			__( 'This ticket is not assigned to you.', 'doublescale' )
+		);
+		if ( $forbidden ) {
+			return $forbidden;
 		}
 
 		return $ticket;

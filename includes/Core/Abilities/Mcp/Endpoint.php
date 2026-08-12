@@ -120,7 +120,19 @@ final class Endpoint {
 				return self::respond( JsonRpc::result( $id, new \stdClass() ) );
 
 			case 'tools/list':
-				return self::respond( JsonRpc::result( $id, array( 'tools' => self::tools() ) ) );
+				return self::respond(
+					JsonRpc::result(
+						$id,
+						array(
+							'tools' => self::tools(),
+							// Fingerprint of the published set. A client that
+							// keeps this can tell its cached list went stale by
+							// comparing against the header on any later
+							// response, without refetching to find out.
+							'_meta' => array( 'toolsVersion' => ToolListVersion::current() ),
+						)
+					)
+				);
 
 			case 'tools/call':
 				return self::respond( self::call_tool( $id, $params ) );
@@ -151,7 +163,9 @@ final class Endpoint {
 		return array(
 			'protocolVersion' => self::PROTOCOL_VERSION,
 			'capabilities'    => array(
-				'tools' => array( 'listChanged' => false ),
+				// The published set genuinely changes when a module is toggled,
+				// so a client must be prepared to refetch. See ToolListVersion.
+				'tools' => array( 'listChanged' => true ),
 			),
 			'serverInfo'      => array(
 				'name'    => 'DoubleScale CRM',
@@ -387,6 +401,10 @@ final class Endpoint {
 		$response = new WP_REST_Response( $payload, $status );
 		$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, private' );
 		$response->header( 'Pragma', 'no-cache' );
+
+		// Stamped on every response so a client can tell, without asking, that
+		// the tool set it cached at connect time is no longer current.
+		$response->header( ToolListVersion::RESPONSE_HEADER, ToolListVersion::current() );
 
 		return $response;
 	}

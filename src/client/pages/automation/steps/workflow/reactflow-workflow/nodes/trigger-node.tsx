@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { AlertTriangle, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { useState } from 'react';
 
 /**
@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/tooltip';
 import CreateAutomationModal from '../../../../../automations/create-automation-modal';
 import { useAutomationContext } from '../../../../state/context';
-import { TriggerIcon } from '@doublescale/components';
+import { AlertTriangleIcon, TriggerIcon } from '@doublescale/components';
 import {
 	getFreeformWhatsappSteps,
 	resetFreeformWhatsappSettings,
@@ -250,7 +250,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<AlertTriangle className="h-4 w-4 text-orange-500" />
+							<AlertTriangleIcon width={20} height={20} color="#F97316" />
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">

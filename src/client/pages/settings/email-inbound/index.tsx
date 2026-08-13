@@ -25,7 +25,6 @@ import {
 	Loader2,
 	Mail,
 	Server,
-	AlertTriangle,
 	Info,
 	Link,
 	Unlink,
@@ -44,7 +43,7 @@ import {
 	CardTitle,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon, ContactTotalEmailsIcon, EmailProviderSetupIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertIcon, ContactTotalEmailsIcon, EmailProviderSetupIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -900,7 +899,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 								return (
 									<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 										<AlertDescription className="flex items-center gap-2">
-											<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+											<AlertTriangleIcon width={20} height={20} />
 											{__('Set up Gmail or Outlook in the Email Provider Setup tab.', 'doublescale')}
 										</AlertDescription>
 									</Alert>
@@ -1253,7 +1252,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 										return (
 											<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 												<AlertDescription className="flex items-center gap-2">
-													<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+													<AlertTriangleIcon width={20} height={20} />
 													{sprintf(
 														__(
 															'%s is not configured. Please set up %s OAuth credentials in the Email Provider Setup section above.',
@@ -1331,7 +1330,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 											<div className="space-y-3">
 												<Alert className="border-yellow-200 bg-yellow-50">
 													<AlertDescription className="flex items-center gap-2 text-yellow-800">
-														<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+														<AlertTriangleIcon width={20} height={20} />
 														{__(
 															'Authorization has expired or was revoked. Please reconnect to resume email polling.',
 															'doublescale'

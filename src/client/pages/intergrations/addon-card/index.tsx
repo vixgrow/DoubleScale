@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ import { Card, CardContent } from '@doublescale/components/ui/card';
 import { Button } from '@doublescale/components/ui/button';
 import type { Addon } from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import { AlertTriangleIcon } from '@doublescale/components';
 
 interface AddonCardProps {
 	addon: Addon;
@@ -55,7 +56,7 @@ export const AddonCard: React.FC<AddonCardProps> = ({ addon, imageUrl }) => {
 				<div className="mt-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2 text-amber-600">
-							<AlertTriangle className="w-4 h-4" />
+							<AlertTriangleIcon width={20} height={20} />
 							<span className="text-sm font-medium">
 								{message}
 							</span>

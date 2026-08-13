@@ -18,7 +18,6 @@ import {
 	Loader2,
 	Mail,
 	Copy,
-	AlertTriangle,
 	ShieldCheck,
 } from 'lucide-react';
 
@@ -31,7 +30,7 @@ import {
 	CardTitle,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon, CopyIcon, EmailProviderSetupIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertIcon, CopyIcon, EmailProviderSetupIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -206,7 +205,7 @@ const EmailProviderSetup: React.FC = () => {
 								{notice.type === 'success' ? (
 									<CheckCircle className="w-4 h-4" />
 								) : notice.type === 'warning' ? (
-									<AlertTriangle className="w-4 h-4" />
+									<AlertTriangleIcon width={20} height={20} />
 								) : (
 									<XCircle className="w-4 h-4" />
 								)}
@@ -218,7 +217,7 @@ const EmailProviderSetup: React.FC = () => {
 					{!hassmtp ? (
 						<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 							<AlertDescription className="flex items-center gap-2">
-								<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+								<AlertTriangleIcon width={20} height={20} />
 								{__('smtp plugin is required for email provider setup. Please install and activate smtp.', 'doublescale')}
 							</AlertDescription>
 						</Alert>

@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
-import { X, CircleX, AlertTriangle } from 'lucide-react';
+import { X, CircleX } from 'lucide-react';
 import { NoticeMessage } from '@doublescale/client';
-import { CheckCircleIcon } from '@doublescale/components';
+import { AlertTriangleIcon, CheckCircleIcon } from '@doublescale/components';
 
 interface NoticeBannerProps {
 	notice: NoticeMessage;
@@ -43,7 +43,7 @@ const NoticeBanner = forwardRef<HTMLDivElement, NoticeBannerProps>(
 							<CheckCircleIcon />
 						</div>
 					) : isWarning ? (
-						<AlertTriangle className={`${textColor} w-5 h-5`} />
+						<AlertTriangleIcon width={24} height={24} color="#B45309" />
 					) : (
 						<CircleX className={`${textColor} w-5 h-5`} />
 					)}

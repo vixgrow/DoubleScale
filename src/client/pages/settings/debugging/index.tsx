@@ -35,9 +35,7 @@ import {
 	DialogTitle,
 	DialogDescription,
 } from '@/components/ui/dialog';
-import {
-	AlertTriangle,
-	RefreshCw,
+import { RefreshCw,
 	Trash2,
 	Download,
 	Info,
@@ -45,7 +43,7 @@ import {
 	XCircle,
 	Eye,
 } from 'lucide-react';
-import { DeleteIcon, ViewIcon } from '@doublescale/components';
+import { AlertTriangleIcon, DeleteIcon, ViewIcon } from '@doublescale/components';
 
 interface LogEntry {
 	id: number;
@@ -221,7 +219,7 @@ const DebuggingLogs: React.FC = () => {
 			case 'alert':
 				return <XCircle className="h-4 w-4" />;
 			case 'warning':
-				return <AlertTriangle className="h-4 w-4" />;
+				return <AlertTriangleIcon width={20} height={20} />;
 			case 'info':
 			case 'notice':
 				return <Info className="h-4 w-4" />;
@@ -241,7 +239,7 @@ const DebuggingLogs: React.FC = () => {
 			{/* Log Level Settings */}
 			<div className="mb-6">
 				<div className="flex items-center gap-2 mb-2">
-					<AlertTriangle className="h-5 w-5 text-primary" />
+					<AlertTriangleIcon width={24} height={24} color="hsl(var(--primary))" />
 					<h3 className="text-[#09090B] font-semibold text-lg">
 						{__('Log Level Settings', 'doublescale')}
 					</h3>
@@ -275,7 +273,7 @@ const DebuggingLogs: React.FC = () => {
 						</Select>
 					</div>
 					<Alert className="items-center">
-						<AlertTriangle className="h-4 w-4" />
+						<AlertTriangleIcon width={20} height={20} />
 						<AlertDescription className="text-sm pt-[5px]">
 							<strong>{__('Current Setting:', 'doublescale')}</strong>{' '}
 							{logLevel === 'error' && __(
@@ -344,7 +342,7 @@ const DebuggingLogs: React.FC = () => {
 			{/* Error Alert */}
 			{error && (
 				<Alert variant="destructive" className="mb-6">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>
 			)}

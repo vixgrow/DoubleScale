@@ -10,7 +10,6 @@ import { useDispatch } from '@wordpress/data';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -26,7 +25,7 @@ import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import SortableNodeContainer from '../components/sortable-node-container';
 import { duplicateStep } from '../utils/step-utils';
-import { GoalIcon, GoalsAutomationIcon } from '@doublescale/components';
+import { AlertTriangleIcon, GoalIcon, GoalsAutomationIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -73,7 +72,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<AlertTriangle className="h-4 w-4 text-orange-500" />
+							<AlertTriangleIcon width={20} height={20} color="#F97316" />
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">

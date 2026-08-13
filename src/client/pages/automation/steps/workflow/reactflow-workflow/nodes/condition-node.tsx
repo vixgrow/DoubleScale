@@ -8,7 +8,6 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -20,7 +19,7 @@ import SortableNodeContainer from '../components/sortable-node-container';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep, duplicateStep } from '../utils/step-utils';
-import { ConditionAutomationIcon, ConditionsIcon } from '@doublescale/components';
+import { AlertTriangleIcon, ConditionAutomationIcon, ConditionsIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -96,7 +95,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<AlertTriangle className="h-4 w-4 text-orange-500" />
+							<AlertTriangleIcon width={20} height={20} color="#F97316" />
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">

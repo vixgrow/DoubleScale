@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AlertTriangle, Plug } from 'lucide-react';
+import { Plug } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useJotformIntegrationStatus } from '@/hooks/use-jotform-integration-status';
 import { getToLink, useNavigate } from '@doublescale/navigation';
+import { AlertTriangleIcon } from '@doublescale/components';
 
 interface JotformIntegrationWarningProps {
 	className?: string;
@@ -37,7 +38,7 @@ export function JotformIntegrationWarning({
 		<Alert
 			className={`border-amber-200 bg-amber-50 text-amber-950 ${className}`.trim()}
 		>
-			<AlertTriangle className="h-4 w-4 text-amber-600" />
+			<AlertTriangleIcon width={20} height={20} color="#D97706" />
 			<AlertTitle className="text-amber-900">
 				{__('Jotform is not connected', 'doublescale')}
 			</AlertTitle>

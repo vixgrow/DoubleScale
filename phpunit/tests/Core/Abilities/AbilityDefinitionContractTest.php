@@ -31,42 +31,86 @@ final class AbilityDefinitionContractTest extends TestCase {
 	 * @return array<string, array<string, mixed>>
 	 */
 	private function all_definitions(): array {
-		$definitions = array_merge(
-			AbilityContext::definitions(),
-			ContactAbilities::definitions(),
-			DocumentAbilities::definitions(),
-			SupportAbilities::definitions(),
-			ActivityAbilities::definitions()
-		);
+		$definitions = AbilityContext::definitions();
 
-		// Pro ability classes are discovered rather than imported: this suite
-		// runs without Pro loaded, and a hardcoded list silently stops covering
-		// new modules — which is exactly what happened when eight modules were
-		// added and this contract kept passing against four.
-		foreach ( self::pro_ability_classes() as $class ) {
-			if ( class_exists( $class ) && method_exists( $class, 'definitions' ) ) {
-				$definitions = array_merge( $definitions, $class::definitions() );
-			}
+		foreach ( self::ability_classes() as $class ) {
+			$definitions = array_merge( $definitions, $class::definitions() );
 		}
 
 		return $definitions;
 	}
 
 	/**
-	 * Fully-qualified Pro ability classes, if the Pro plugin is present.
+	 * Every module ability class, free and Pro, found on disk.
 	 *
-	 * @return array<int, string>
+	 * Discovered rather than listed. A hardcoded list silently stops covering
+	 * new modules while still reporting green — this contract passed against
+	 * four free modules after eight were added, and again after four more,
+	 * because nobody remembered to extend the list. The filesystem is the only
+	 * source that cannot drift from what actually ships.
+	 *
+	 * @return array<int, class-string>
 	 */
-	private static function pro_ability_classes(): array {
-		return array(
-			'DoubleScale\Pro\Modules\Deals\Abilities\DealAbilities',
-			'DoubleScale\Pro\Modules\Tasks\Abilities\TaskAbilities',
-			'DoubleScale\Pro\Modules\Projects\Abilities\ProjectAbilities',
-			'DoubleScale\Pro\Modules\ProductCatalog\Abilities\ProductAbilities',
-			'DoubleScale\Pro\Modules\Contracts\Abilities\ContractAbilities',
-			'DoubleScale\Pro\Modules\CreditNotes\Abilities\CreditNoteAbilities',
-			'DoubleScale\Pro\Modules\Analytics\Abilities\ReportAbilities',
+	private static function ability_classes(): array {
+		$roots = array(
+			DOUBLESCALE_PLUGIN_DIR . 'includes/Modules',
+			dirname( DOUBLESCALE_PLUGIN_DIR ) . '/doublescale-pro/includes/Modules',
 		);
+
+		$classes = array();
+
+		foreach ( $roots as $root ) {
+			if ( ! is_dir( $root ) ) {
+				continue;
+			}
+
+			foreach ( glob( $root . '/*/Abilities/*.php' ) ?: array() as $file ) {
+				$source = (string) file_get_contents( $file );
+
+				if ( ! preg_match( '/^namespace\s+([^;]+);/m', $source, $ns ) ) {
+					continue;
+				}
+				if ( ! preg_match( '/^(?:final\s+)?class\s+(\w+)/m', $source, $cls ) ) {
+					continue;
+				}
+
+				$class = trim( $ns[1] ) . '\\' . $cls[1];
+
+				// Pro classes are absent when this suite runs without Pro.
+				if ( class_exists( $class ) && method_exists( $class, 'definitions' ) ) {
+					$classes[] = $class;
+				}
+			}
+		}
+
+		sort( $classes );
+
+		return $classes;
+	}
+
+	/**
+	 * Discovery must actually find the modules, or every contract below is
+	 * vacuously true.
+	 */
+	public function test_discovery_covers_every_ability_class(): void {
+		$found = self::ability_classes();
+
+		$this->assertGreaterThanOrEqual(
+			8,
+			count( $found ),
+			'Ability class discovery found too few classes — the contract tests below would pass vacuously.'
+		);
+
+		foreach ( array( 'ContactAbilities', 'DocumentAbilities', 'SupportAbilities', 'ActivityAbilities', 'CampaignAbilities', 'AutomationAbilities', 'BookingAbilities', 'FormAbilities', 'TrackingAbilities' ) as $expected ) {
+			$hit = false;
+			foreach ( $found as $class ) {
+				if ( str_ends_with( $class, '\\' . $expected ) ) {
+					$hit = true;
+					break;
+				}
+			}
+			$this->assertTrue( $hit, $expected . ' was not discovered.' );
+		}
 	}
 
 	/**
@@ -220,6 +264,71 @@ final class AbilityDefinitionContractTest extends TestCase {
 				$name . ' is annotated read-only but also destructive.'
 			);
 		}
+	}
+
+	/**
+	 * The inverse of the test above: a read-shaped name may not declare itself
+	 * a write.
+	 *
+	 * Both existing contracts skip this case — the write test only inspects
+	 * mutating-looking names, and the destructive test returns early for
+	 * anything declared `readonly:false`. So a `list-*` or `get-*` ability that
+	 * gained `readonly:false` would pass everything while telling agents it is
+	 * safe to mutate through it.
+	 *
+	 * This matters most for the four modules whose writes are deliberately
+	 * excluded — campaigns, automations, booking, forms. Sending a campaign or
+	 * editing a live workflow has no undo anywhere in this product, so those
+	 * modules must stay read-only by contract and not merely by intent.
+	 */
+	public function test_read_shaped_names_are_not_declared_writes(): void {
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			$annotations = $definition['meta']['annotations'] ?? array();
+
+			$looks_reading = (bool) preg_match( '#/(list|get)-#', $name );
+
+			if ( ! $looks_reading ) {
+				continue;
+			}
+
+			$this->assertNotFalse(
+				$annotations['readonly'] ?? true,
+				$name . ' reads like a query but declares readonly:false. Either it mutates — then rename it — or the annotation is wrong.'
+			);
+		}
+	}
+
+	/**
+	 * Campaigns, automations, booking, and forms expose reads only.
+	 *
+	 * Pinned by module rather than by name so that ADDING a write to one of
+	 * them fails here, which is the moment the decision should be revisited by
+	 * a human rather than discovered by an agent that sent something.
+	 */
+	public function test_excluded_modules_expose_no_writes(): void {
+		$read_only_modules = array( 'campaigns', 'automations', 'booking', 'forms', 'tracking' );
+		$checked           = 0;
+
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			$module = $definition['module_slug'] ?? '';
+
+			if ( ! in_array( $module, $read_only_modules, true ) ) {
+				continue;
+			}
+
+			++$checked;
+
+			$this->assertNotFalse(
+				$definition['meta']['annotations']['readonly'] ?? true,
+				$name . ' is a write in the "' . $module . '" module, which is read-only by design: sending or running there reaches customers and cannot be undone.'
+			);
+		}
+
+		$this->assertGreaterThan(
+			0,
+			$checked,
+			'No abilities found for the read-only modules — this contract is not actually checking anything.'
+		);
 	}
 
 	public function test_names_are_unique_across_modules(): void {

@@ -27,6 +27,8 @@ final class AbilityCategories {
 	public const TASKS     = 'doublescale-tasks';
 	public const PROJECTS  = 'doublescale-projects';
 	public const ANALYTICS = 'doublescale-analytics';
+	public const MARKETING = 'doublescale-marketing';
+	public const BOOKING   = 'doublescale-booking';
 
 	/**
 	 * Module slug => category slug.
@@ -54,6 +56,13 @@ final class AbilityCategories {
 			'tasks'           => self::TASKS,
 			'projects'        => self::PROJECTS,
 			'analytics'       => self::ANALYTICS,
+			// Campaigns and automations are two halves of one marketing idea.
+			'campaigns'       => self::MARKETING,
+			'automations'     => self::MARKETING,
+			// Form submissions are how contacts arrive, so they read as a
+			// contacts concern rather than a category of their own.
+			'forms'           => self::CONTACTS,
+			'booking'         => self::BOOKING,
 		);
 	}
 
@@ -110,6 +119,14 @@ final class AbilityCategories {
 			self::ANALYTICS => array(
 				'label'       => __( 'DoubleScale: Reports', 'doublescale' ),
 				'description' => __( 'Revenue, pipeline, and task reporting.', 'doublescale' ),
+			),
+			self::MARKETING => array(
+				'label'       => __( 'DoubleScale: Marketing', 'doublescale' ),
+				'description' => __( 'Campaigns and automation workflows, read-only — nothing here sends or runs.', 'doublescale' ),
+			),
+			self::BOOKING   => array(
+				'label'       => __( 'DoubleScale: Booking', 'doublescale' ),
+				'description' => __( 'Bookings, events, and calendars.', 'doublescale' ),
 			),
 		);
 	}

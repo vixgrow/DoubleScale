@@ -89,6 +89,51 @@ final class ActivityAbilities {
 				'execute_callback' => array( self::class, 'list_activity_types' ),
 			),
 
+			'doublescale/list-activities'      => array(
+				'module_slug'      => 'activities',
+				'label'            => __( 'List activities', 'doublescale' ),
+				'description'      => __( 'Recent activity across the whole CRM — notes, calls, emails, status changes, and system events — newest first. Use this for "what happened today" or "what changed recently". Audit rows that belong to a specific deal, task, or project are left out of this feed; read those from the record itself. For one contact\'s history use get-contact-timeline, which merges in sources this does not cover.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'activity_type' => array(
+							'type'        => 'string',
+							'description' => 'Filter by activity type. Call list-activity-types for the vocabulary; several types can be passed comma-separated.',
+						),
+						'contact_id'    => array(
+							'type'        => 'integer',
+							'description' => 'Only activities linked to this contact.',
+						),
+						'user_id'       => array(
+							'type'        => 'integer',
+							'description' => 'Only activities recorded by this WordPress user.',
+						),
+						'date_from'     => array(
+							'type'        => 'string',
+							'description' => 'Only activities on or after this date (YYYY-MM-DD).',
+						),
+						'date_to'       => array(
+							'type'        => 'string',
+							'description' => 'Only activities on or before this date (YYYY-MM-DD).',
+						),
+						'limit'         => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 100,
+							'default' => 20,
+						),
+						'offset'        => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'default' => 0,
+						),
+					),
+				),
+				'execute_callback' => array( self::class, 'list_activities' ),
+			),
+
 			'doublescale/add-contact-note'     => array(
 				'module_slug'      => 'activities',
 				'label'            => __( 'Add a note to a contact', 'doublescale' ),
@@ -364,18 +409,94 @@ final class ActivityAbilities {
 	}
 
 	/**
-	 * Shape one timeline entry.
-	 *
-	 * Rows arrive from a UNION query, so they are plain objects/arrays whose
-	 * shape differs between activities and tasks — read defensively.
+	 * Recent activity across the whole CRM.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param mixed $row Timeline row.
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function list_activities( $input ) {
+		$input  = (array) $input;
+		$limit  = AbilityResult::limit( $input );
+		$offset = AbilityResult::offset( $input );
+
+		$filters = array();
+
+		foreach ( array( 'activity_type', 'date_from', 'date_to' ) as $key ) {
+			if ( ! empty( $input[ $key ] ) ) {
+				$filters[ $key ] = sanitize_text_field( (string) $input[ $key ] );
+			}
+		}
+
+		foreach ( array( 'contact_id', 'user_id' ) as $key ) {
+			if ( ! empty( $input[ $key ] ) ) {
+				$filters[ $key ] = (int) $input[ $key ];
+			}
+		}
+
+		if ( isset( $filters['contact_id'] ) ) {
+			$error = self::assert_contact_exists( $filters['contact_id'] );
+			if ( $error ) {
+				return $error;
+			}
+		}
+
+		// get_activities() rather than get_unified_timeline(): the unified
+		// version is a UNION across sources that deliberately ignores
+		// activity_type (see its own comment), and this ability is built around
+		// filtering by type. It also eager-loads the morph rows, so shaping
+		// rows here does not fire a query each.
+		//
+		// The service applies deal and task permission checks internally, so a
+		// caller never sees an activity attached to a record they cannot open.
+		$page      = (int) floor( $offset / $limit ) + 1;
+		$paginator = ActivityManager::instance()->get_activities( $filters, $limit, $page );
+
+		$items = array();
+		foreach ( $paginator->items() as $row ) {
+			$items[] = self::shape_entry( $row );
+		}
+
+		return AbilityResult::collection(
+			$items,
+			(int) $paginator->total(),
+			$limit,
+			$offset
+		);
+	}
+
+	/**
+	 * Shape one timeline or activity row.
+	 *
+	 * Rows arrive either from a UNION query (get-contact-timeline) or from an
+	 * Eloquent paginator (list-activities), so their shape differs between
+	 * sources — read defensively.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $row Row.
 	 * @return array<string, mixed>
 	 */
 	private static function shape_entry( $row ): array {
-		$data = is_object( $row ) ? get_object_vars( $row ) : (array) $row;
+		// An Eloquent model keeps its attributes behind __get, so
+		// get_object_vars() returns an empty array for it — every field would
+		// come back null. toArray() is the only shape that works for both the
+		// UNION's plain objects and a model.
+		if ( is_object( $row ) && method_exists( $row, 'toArray' ) ) {
+			$data = (array) $row->toArray();
+
+			// formatted_message is a magic accessor, so toArray() omits it —
+			// without this every summary would be blank and the reader would
+			// get a row of nulls instead of "wo wo logged in".
+			if ( empty( $data['formatted_message'] ) ) {
+				$data['formatted_message'] = (string) $row->formatted_message;
+			}
+		} elseif ( is_object( $row ) ) {
+			$data = get_object_vars( $row );
+		} else {
+			$data = (array) $row;
+		}
 
 		// The service already renders a human sentence ("Someone linked invoice
 		// INV-000001 to this deal"). Prefer it over the raw payload: it is what

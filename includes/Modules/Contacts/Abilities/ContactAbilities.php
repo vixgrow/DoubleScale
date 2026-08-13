@@ -82,19 +82,30 @@ final class ContactAbilities {
 			'doublescale/get-contact'           => array(
 				'module_slug'      => 'contacts',
 				'label'            => __( 'Get contact', 'doublescale' ),
-				'description'      => __( 'Full record for one contact, including address, company, tags, and lists. Look up by id or by email address.', 'doublescale' ),
+				'description'      => __( 'Full record for one contact, including address, company, tags, and lists. Look up by id or by email address. Pass include=["relationships"] for counts of their invoices, deals, tickets, tasks, and bookings — one call instead of five, and it respects what you are allowed to see.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => $permission,
 				'input_schema'     => array(
 					'type'       => 'object',
 					'properties' => array(
-						'id'    => array(
+						'id'      => array(
 							'type'        => 'integer',
 							'description' => 'Contact id. Provide this or email.',
 						),
-						'email' => array(
+						'email'   => array(
 							'type'        => 'string',
 							'description' => 'Email address. Provide this or id.',
+						),
+						// Opt-in rather than always-on: each section costs
+						// queries, and the usual "who is this" question needs
+						// none of them.
+						'include' => array(
+							'type'        => 'array',
+							'description' => 'Optional extra sections. "relationships" adds counts across sales, deals, support, tasks, and bookings. "engagement" adds sent/opened/clicked totals.',
+							'items'       => array(
+								'type' => 'string',
+								'enum' => array( 'relationships', 'engagement' ),
+							),
 						),
 					),
 				),
@@ -449,7 +460,111 @@ final class ContactAbilities {
 		$data['tags']  = self::shape_terms( $contact->tags );
 		$data['lists'] = self::shape_terms( $contact->lists );
 
+		$include = array_map( 'strval', (array) ( $input['include'] ?? array() ) );
+
+		if ( in_array( 'relationships', $include, true ) ) {
+			$data['relationships'] = self::relationship_counts( (int) $contact->id );
+		}
+
+		if ( in_array( 'engagement', $include, true ) ) {
+			$data['engagement'] = self::engagement_counts( (int) $contact->id );
+		}
+
 		return $data;
+	}
+
+	/**
+	 * Counts of what this contact is linked to across the CRM.
+	 *
+	 * Deliberately routed through the other abilities rather than querying
+	 * their models directly. Each one applies its own module gate, capability
+	 * check, and owner scoping, so a sales rep asking about a contact sees
+	 * counts of THEIR invoices, not the company's. Querying the models here
+	 * would rebuild all three gates in a second place and drift from them.
+	 *
+	 * A module that is switched off, or that the caller cannot read, is absent
+	 * from the result rather than reported as zero — "none" and "not visible to
+	 * you" are different answers and an agent should not conflate them.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $contact_id Contact id.
+	 * @return array<string, int>
+	 */
+	private static function relationship_counts( int $contact_id ): array {
+		$sections = array(
+			'invoices'  => 'doublescale/list-invoices',
+			'proposals' => 'doublescale/list-proposals',
+			'deals'     => 'doublescale/list-deals',
+			'tickets'   => 'doublescale/list-tickets',
+			'tasks'     => 'doublescale/list-tasks',
+			'bookings'  => 'doublescale/list-bookings',
+		);
+
+		$counts = array();
+
+		foreach ( $sections as $key => $ability_name ) {
+			if ( ! function_exists( 'wp_get_ability' ) ) {
+				break;
+			}
+
+			$ability = wp_get_ability( $ability_name );
+			if ( ! $ability || true !== $ability->check_permissions() ) {
+				continue;
+			}
+
+			// limit=1 because only the total is wanted; the rows are discarded.
+			$result = $ability->execute(
+				array(
+					'contact_id' => $contact_id,
+					'limit'      => 1,
+				)
+			);
+
+			if ( is_wp_error( $result ) || ! isset( $result['total'] ) ) {
+				continue;
+			}
+
+			$counts[ $key ] = (int) $result['total'];
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * Sent, opened, and clicked totals for this contact.
+	 *
+	 * Routed through get-engagement-summary for the same reason as above, and
+	 * absent entirely when the tracking module is off.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $contact_id Contact id.
+	 * @return array<string, mixed>
+	 */
+	private static function engagement_counts( int $contact_id ): array {
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			return array();
+		}
+
+		$ability = wp_get_ability( 'doublescale/get-engagement-summary' );
+		if ( ! $ability || true !== $ability->check_permissions() ) {
+			return array();
+		}
+
+		$result = $ability->execute( array( 'contact_id' => $contact_id ) );
+
+		if ( is_wp_error( $result ) ) {
+			return array();
+		}
+
+		return array(
+			'sent'       => (int) ( $result['sent'] ?? 0 ),
+			'opened'     => (int) ( $result['opened'] ?? 0 ),
+			'clicked'    => (int) ( $result['clicked'] ?? 0 ),
+			'open_rate'  => $result['open_rate'] ?? null,
+			'click_rate' => $result['click_rate'] ?? null,
+		);
 	}
 
 	/**

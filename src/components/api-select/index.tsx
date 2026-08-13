@@ -15,6 +15,12 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import PaginatedSelect from '@doublescale/components/paginated-select';
+import {
+	reactSelectControl,
+	reactSelectMenuOverlay,
+	reactSelectMenuPortalProps,
+} from '@/components/react-select-shared-styles';
+import { ScrollableMenuList } from '@/components/react-select-scrollable-menu-list';
 
 interface Props {
 	endpoint: string;
@@ -242,12 +248,13 @@ const SingleAPISelect = ({
 	});
 
 	return (
-		<div className="flex flex-col gap-2.5">
+		<div className="doublescale-paginated-select doublescale-react-select flex flex-col gap-2.5">
 			<div className="flex justify-between gap-2.5">
 				<div className="flex flex-col gap-2.5 flex-1">
 					<Select<SelectOption, false>
 						className="react-select-container"
 						classNamePrefix="react-select"
+						{...reactSelectMenuPortalProps}
 						options={optionsWithLoading}
 						value={selectedOption || null}
 						onChange={(val: SelectOption | null) => {
@@ -262,13 +269,31 @@ const SingleAPISelect = ({
 						filterOption={() => true}
 						isOptionDisabled={(option) => (option as any).isDisabled || false}
 						styles={{
-							control: (styles) => ({
-								...styles,
+							control: (base, state) => ({
+								...reactSelectControl(
+									base as Record<string, unknown>,
+									state
+								),
 								minWidth: 200,
+								backgroundColor: '#ffffff',
+								borderColor: '#D3D4D6',
+								borderRadius: '8px',
+								height: '48px',
+								paddingBlock: '0',
+							}),
+							input: (base) => ({
+								...base,
+								outline: 'none',
+								border: 'none',
+								boxShadow: 'none',
+								height: '40px',
+								paddingBlock: '0',
+								margin: 0,
 							}),
 							menuList: (styles) => ({
 								...styles,
 								maxHeight: 200,
+								overscrollBehavior: 'contain',
 							}),
 							option: (styles, { isDisabled }) => ({
 								...styles,
@@ -279,12 +304,14 @@ const SingleAPISelect = ({
 									backgroundColor: 'transparent',
 								}),
 							}),
-							menu: (base: any) => ({
-								...base,
+							menu: (base) => ({
+								...reactSelectMenuOverlay(base),
 								color: 'black',
 							}),
+							menuPortal: (base) => reactSelectMenuOverlay(base),
 						}}
 						components={{
+							MenuList: ScrollableMenuList,
 							LoadingMessage: () => (
 								<div className="px-3 py-2 text-gray-500">
 									{__('Loading...', 'doublescale')}

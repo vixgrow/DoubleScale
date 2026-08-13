@@ -261,7 +261,7 @@ const AvailabilityDetails: React.FC = () => {
                     handleClose();
             }}><DialogContent
                 hideCloseButton
-                className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto'>
+                className='fixed inset-0 !bg-white max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto'>
                 <div className="border-b mb-4 px-4 py-2">
                     <div className='flex justify-between items-center'>
                         <div className='flex gap-2.5 items-center'>

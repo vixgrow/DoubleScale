@@ -3,6 +3,25 @@
  * Without this, react-select falls back to its default blue (#2684FF) on hover/focus.
  */
 
+/** Sit above fullscreen shells and nested dialogs (matches shared SelectContent). */
+export const REACT_SELECT_MENU_Z_INDEX = 170000;
+
+/** Render the menu on `document.body` so overflow on cards/dialogs cannot clip it. */
+export const reactSelectMenuPortalProps = {
+	menuPortalTarget:
+		typeof document !== 'undefined' ? document.body : (null as unknown as HTMLElement),
+	menuPosition: 'fixed' as const,
+};
+
+export function reactSelectMenuOverlay(
+	base: Record<string, unknown> = {}
+): Record<string, unknown> {
+	return {
+		...base,
+		zIndex: REACT_SELECT_MENU_Z_INDEX,
+	};
+}
+
 export function reactSelectControl(
 	base: Record<string, unknown>,
 	state: { isFocused: boolean }

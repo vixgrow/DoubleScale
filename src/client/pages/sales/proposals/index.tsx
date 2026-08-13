@@ -137,8 +137,9 @@ const ProposalsList: React.FC = () => {
 			proposal,
 			async () => {
 				const copy = await duplicateProposal(proposal.id);
-				// Land on the copy so the user can adjust it straight away.
-				navigate(getToLink(`sales/proposals/${copy.id}/edit`));
+				await refetch();
+				// Open the copy in the same edit dialog Edit uses.
+				setEditDialogProposalId(copy.id);
 			},
 			__('Duplicate failed.', 'doublescale')
 		);

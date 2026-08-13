@@ -2,23 +2,33 @@
  * Contact tab: proposals, invoices, and payments.
  */
 
-import React, { useState } from '@wordpress/element';
+import React, { useCallback, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Plus } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
 
 import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { summarizeProposals } from '@doublescale/shared/utils/proposal-summary';
 import { Button } from '@/components/ui/button';
-import { InvoiceFormDialog, InvoiceStatusPill, ProposalStatusPill } from '@/components/sales';
+import { DataTable } from '@/components/ui/data-table';
 import {
+	InvoiceFormDialog,
+	InvoiceStatusPill,
+	ProposalFormDialog,
+	ProposalStatusPill,
+} from '@/components/sales';
+import {
+	EmptyPaymentsIcon,
 	GradientProposalsIcon,
 	MessageStatsCard,
+	NoData,
 	NovicesIcon,
 	OutstandingInvoicesIcon,
 	PainInvoicesIcon,
+	PlusIcon,
 	ProposalsIcon,
+	ViewIcon,
 } from '@doublescale/components';
 import {
 	useContactSalesPayments,
@@ -26,6 +36,11 @@ import {
 	useProposals,
 } from '@/hooks/sales';
 import { PAYMENT_MODE_LABELS } from '@/constants/sales';
+import type {
+	ContactInvoicePayment,
+	Invoice,
+	Proposal,
+} from '@/types/sales';
 import { InvoicesProGate, PaymentsProGate } from '../../sales/pro-gates';
 
 interface ContactSalesProps {
@@ -54,13 +69,16 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 	const showInvoices = sections.includes('invoices');
 	const showPayments = sections.includes('payments');
 
-	const go = (path: string, queryParams?: Record<string, string | number | undefined>) => {
-		if (navigate) {
-			navigate(getToLink(path, queryParams));
-		}
-	};
+	const go = useCallback(
+		(path: string, queryParams?: Record<string, string | number | undefined>) => {
+			if (navigate) {
+				navigate(getToLink(path, queryParams));
+			}
+		},
+		[navigate]
+	);
 
-	const { data: proposalsData, loading: proposalsLoading } = useProposals({
+	const { data: proposalsData, loading: proposalsLoading, refetch: refetchProposals } = useProposals({
 		contact_id,
 		per_page: 100,
 		sort_by: 'created_at',
@@ -73,6 +91,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 		sort_order: 'desc',
 	});
 	const [paymentsPage] = useState(1);
+	const [proposalDialogOpen, setProposalDialogOpen] = useState(false);
 	const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
 	const { data: paymentsData, loading: paymentsLoading } = useContactSalesPayments(
 		contact_id,
@@ -88,226 +107,380 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 	const proposalSummary = summarizeProposals(proposals);
 	const proposalCurrency = proposals[0]?.currency || 'USD';
 
+	const handleViewProposal = useCallback(
+		(proposalId: number) => {
+			go(`sales/proposals/${proposalId}`);
+		},
+		[go]
+	);
+
+	const handleViewInvoice = useCallback(
+		(invoiceId: number) => {
+			go(`sales/invoices/${invoiceId}`);
+		},
+		[go]
+	);
+
+	const proposalColumns: ColumnDef<Proposal>[] = useMemo(
+		() => [
+			{
+				accessorKey: 'proposal_number',
+				header: __('Number', 'doublescale'),
+				cell: ({ row }) => (
+					<span className="font-medium">{row.original.proposal_number}</span>
+				),
+			},
+			{
+				accessorKey: 'subject',
+				header: __('Subject', 'doublescale'),
+				cell: ({ row }) => row.original.subject || '—',
+			},
+			{
+				accessorKey: 'total',
+				header: () => (
+					<div className="text-right">{__('Total', 'doublescale')}</div>
+				),
+				cell: ({ row }) => (
+					<div className="text-right">
+						{formatMoney(row.original.total, row.original.currency)}
+					</div>
+				),
+			},
+			{
+				accessorKey: 'status',
+				header: __('Status', 'doublescale'),
+				cell: ({ row }) => (
+					<ProposalStatusPill
+						status={row.original.status}
+						expired={row.original.is_expired}
+					/>
+				),
+			},
+			{
+				id: 'actions',
+				header: __('Actions', 'doublescale'),
+				cell: ({ row }) => (
+					<div className="flex items-center gap-2">
+						<Button
+							size="sm"
+							className="border-none bg-transparent p-0 text-primary shadow-none hover:bg-transparent hover:text-primary/80"
+							onClick={() => handleViewProposal(row.original.id)}
+						>
+							<ViewIcon />
+							{__('View', 'doublescale')}
+						</Button>
+					</div>
+				),
+			},
+		],
+		[handleViewProposal]
+	);
+
+	const invoiceColumns: ColumnDef<Invoice>[] = useMemo(
+		() => [
+			{
+				accessorKey: 'invoice_number',
+				header: __('Number', 'doublescale'),
+				cell: ({ row }) => (
+					<span className="font-medium">{row.original.invoice_number}</span>
+				),
+			},
+			{
+				accessorKey: 'total',
+				header: () => (
+					<div className="text-right">{__('Total', 'doublescale')}</div>
+				),
+				cell: ({ row }) => (
+					<div className="text-right">
+						{formatMoney(row.original.total, row.original.currency)}
+					</div>
+				),
+			},
+			{
+				accessorKey: 'amount_paid',
+				header: () => (
+					<div className="text-right">{__('Paid', 'doublescale')}</div>
+				),
+				cell: ({ row }) => (
+					<div className="text-right">
+						{formatMoney(row.original.amount_paid, row.original.currency)}
+					</div>
+				),
+			},
+			{
+				accessorKey: 'status',
+				header: __('Status', 'doublescale'),
+				cell: ({ row }) => (
+					<InvoiceStatusPill status={row.original.status} />
+				),
+			},
+			{
+				id: 'actions',
+				header: __('Actions', 'doublescale'),
+				cell: ({ row }) => (
+					<div className="flex items-center gap-2">
+						<Button
+							size="sm"
+							className="border-none bg-transparent p-0 text-primary shadow-none hover:bg-transparent hover:text-primary/80"
+							onClick={() => handleViewInvoice(row.original.id)}
+						>
+							<ViewIcon />
+							{__('View', 'doublescale')}
+						</Button>
+					</div>
+				),
+			},
+		],
+		[handleViewInvoice]
+	);
+
+	const paymentColumns: ColumnDef<ContactInvoicePayment>[] = useMemo(
+		() => [
+			{
+				accessorKey: 'payment_date',
+				header: __('Date', 'doublescale'),
+				cell: ({ row }) => row.original.payment_date || '—',
+			},
+			{
+				id: 'invoice',
+				header: __('Invoice', 'doublescale'),
+				cell: ({ row }) =>
+					row.original.invoice?.invoice_number ||
+					`#${row.original.invoice_id}`,
+			},
+			{
+				accessorKey: 'payment_mode',
+				header: __('Mode', 'doublescale'),
+				cell: ({ row }) => modeLabel(row.original.payment_mode),
+			},
+			{
+				accessorKey: 'amount',
+				header: () => (
+					<div className="text-right">{__('Amount', 'doublescale')}</div>
+				),
+				cell: ({ row }) => (
+					<div className="text-right">
+						{formatMoney(
+							row.original.amount,
+							row.original.invoice?.currency || 'USD'
+						)}
+					</div>
+				),
+			},
+			{
+				id: 'actions',
+				header: __('Actions', 'doublescale'),
+				cell: ({ row }) => (
+					<div className="flex items-center gap-2">
+						<Button
+							size="sm"
+							className="border-none bg-transparent p-0 text-primary shadow-none hover:bg-transparent hover:text-primary/80"
+							onClick={() => handleViewInvoice(row.original.invoice_id)}
+						>
+							<ViewIcon />
+							{__('View', 'doublescale')}
+						</Button>
+					</div>
+				),
+			},
+		],
+		[handleViewInvoice]
+	);
+
 	return (
 		<div className="space-y-8">
 			{showDocuments && showProposals ? (
-			<section className="space-y-3">
-				<div className="flex items-center justify-between gap-3">
-					<h3 className="flex items-center gap-2 text-base font-semibold">
-						<GradientProposalsIcon width={24} height={24} />
-						{__('Proposals', 'doublescale')}
-					</h3>
-					<Button
-						size="sm"
-						variant="outline"
-						onClick={() => go('sales/proposals/new', { contact_id })}
-					>
-						<Plus className="h-4 w-4 mr-1" />
-						{__('New Proposal', 'doublescale')}
-					</Button>
-				</div>
-				<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-					<MessageStatsCard
-						label={__('Total', 'doublescale')}
-						value={formatMoney(proposalSummary.total, proposalCurrency)}
-						icon={<ProposalsIcon width={36} height={36} color="#fff" />}
-						iconBgClass="bg-[#0D9DFC]"
-						iconColor="text-white"
-						className="border border-border bg-white"
-					/>
-					<MessageStatsCard
-						label={__('Accepted', 'doublescale')}
-						value={formatMoney(proposalSummary.accepted, proposalCurrency)}
-						icon={<PainInvoicesIcon width={36} height={36} />}
-						iconBgClass="bg-[#16A34A]"
-						iconColor="text-white"
-						className="border border-border bg-white"
-					/>
-					<MessageStatsCard
-						label={__('Open', 'doublescale')}
-						value={formatMoney(proposalSummary.open, proposalCurrency)}
-						icon={<OutstandingInvoicesIcon width={36} height={36} />}
-						iconBgClass="bg-[#F59E0B]"
-						iconColor="text-white"
-						className="border border-border bg-white"
-					/>
-				</div>
-				<div className="border rounded-lg overflow-hidden">
-					<table className="w-full text-sm">
-						<thead className="bg-slate-50 border-b">
-							<tr>
-								<th className="text-left px-4 py-2">{__('Number', 'doublescale')}</th>
-								<th className="text-left px-4 py-2">{__('Subject', 'doublescale')}</th>
-								<th className="text-right px-4 py-2">{__('Total', 'doublescale')}</th>
-								<th className="text-left px-4 py-2">{__('Status', 'doublescale')}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{proposalsLoading ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('Loading…', 'doublescale')}
-									</td>
-								</tr>
-							) : proposals.length === 0 ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('No proposals for this contact.', 'doublescale')}
-									</td>
-								</tr>
-							) : (
-								proposals.map((proposal) => (
-									<tr
-										key={proposal.id}
-										className="border-b hover:bg-slate-50 cursor-pointer"
-										onClick={() => go(`sales/proposals/${proposal.id}`)}
-									>
-										<td className="px-4 py-2 font-medium">{proposal.proposal_number}</td>
-										<td className="px-4 py-2">{proposal.subject}</td>
-										<td className="px-4 py-2 text-right">
-											{formatMoney(proposal.total, proposal.currency)}
-										</td>
-										<td className="px-4 py-2">
-											<ProposalStatusPill
-												status={proposal.status}
-												expired={proposal.is_expired}
-											/>
-										</td>
-									</tr>
-								))
+				<section className="flex flex-col gap-5">
+					<div className="flex items-center justify-between gap-3">
+						<h2 className="text-2xl font-semibold">
+							{__('Proposals', 'doublescale')}
+						</h2>
+						<Button
+							size="sm"
+							variant="secondaryDeepBlue"
+							onClick={() => setProposalDialogOpen(true)}
+						>
+							<PlusIcon />
+							{__('New Proposal', 'doublescale')}
+						</Button>
+					</div>
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+						<MessageStatsCard
+							label={__('Total', 'doublescale')}
+							value={formatMoney(
+								proposalSummary.total,
+								proposalCurrency
 							)}
-						</tbody>
-					</table>
-				</div>
-			</section>
+							icon={
+								<ProposalsIcon
+									width={36}
+									height={36}
+									color="#fff"
+								/>
+							}
+							iconBgClass="bg-[#0D9DFC]"
+							iconColor="text-white"
+							className="border border-border bg-white"
+						/>
+						<MessageStatsCard
+							label={__('Accepted', 'doublescale')}
+							value={formatMoney(
+								proposalSummary.accepted,
+								proposalCurrency
+							)}
+							icon={<PainInvoicesIcon width={36} height={36} />}
+							iconBgClass="bg-[#16A34A]"
+							iconColor="text-white"
+							className="border border-border bg-white"
+						/>
+						<MessageStatsCard
+							label={__('Open', 'doublescale')}
+							value={formatMoney(
+								proposalSummary.open,
+								proposalCurrency
+							)}
+							icon={
+								<OutstandingInvoicesIcon
+									width={36}
+									height={36}
+								/>
+							}
+							iconBgClass="bg-[#F59E0B]"
+							iconColor="text-white"
+							className="border border-border bg-white"
+						/>
+					</div>
+					<div>
+						{!proposalsLoading && proposals.length === 0 ? (
+							<NoData
+								icon={<GradientProposalsIcon />}
+								title={__(
+									'No proposals for this contact.',
+									'doublescale'
+								)}
+								subtitle={__(
+									'Create a proposal to send pricing and terms to this contact.',
+									'doublescale'
+								)}
+								buttonLabel={__('New Proposal', 'doublescale')}
+								onClick={() => setProposalDialogOpen(true)}
+							/>
+						) : (
+							<DataTable
+								columns={proposalColumns}
+								data={proposals}
+								loading={proposalsLoading}
+								showPagination={false}
+								initialPageSize={
+									proposals.length > 10 ? proposals.length : 10
+								}
+								showMainActions={false}
+								setPage={() => {}}
+								config={{}}
+							/>
+						)}
+					</div>
+				</section>
 			) : null}
 
 			{showDocuments && showInvoices ? (
-			isProActive ? (
-			<section className="space-y-3">
-				<div className="flex items-center justify-between gap-3">
-					<h3 className="flex items-center gap-2 text-base font-semibold">
-						<NovicesIcon width={24} height={24} />
-						{__('Invoices', 'doublescale')}
-					</h3>
-					<Button
-						size="sm"
-						variant="outline"
-						onClick={() => setInvoiceDialogOpen(true)}
-					>
-						<Plus className="h-4 w-4 mr-1" />
-						{__('New Invoice', 'doublescale')}
-					</Button>
-				</div>
-				<div className="border rounded-lg overflow-hidden">
-					<table className="w-full text-sm">
-						<thead className="bg-slate-50 border-b">
-							<tr>
-								<th className="text-left px-4 py-2">{__('Number', 'doublescale')}</th>
-								<th className="text-right px-4 py-2">{__('Total', 'doublescale')}</th>
-								<th className="text-right px-4 py-2">{__('Paid', 'doublescale')}</th>
-								<th className="text-left px-4 py-2">{__('Status', 'doublescale')}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{invoicesLoading ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('Loading…', 'doublescale')}
-									</td>
-								</tr>
-							) : invoices.length === 0 ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('No invoices for this contact.', 'doublescale')}
-									</td>
-								</tr>
+				isProActive ? (
+					<section className="flex flex-col gap-5">
+						<div className="flex items-center justify-between gap-3">
+							<h2 className="text-2xl font-semibold">
+								{__('Invoices', 'doublescale')}
+							</h2>
+							<Button
+								size="sm"
+								variant="secondaryDeepBlue"
+								onClick={() => setInvoiceDialogOpen(true)}
+							>
+								<PlusIcon />
+								{__('New Invoice', 'doublescale')}
+							</Button>
+						</div>
+						<div>
+							{!invoicesLoading && invoices.length === 0 ? (
+								<NoData
+									icon={<NovicesIcon />}
+									title={__(
+										'No invoices for this contact.',
+										'doublescale'
+									)}
+									subtitle={__(
+										'Create an invoice to bill this contact.',
+										'doublescale'
+									)}
+									buttonLabel={__('New Invoice', 'doublescale')}
+									onClick={() => setInvoiceDialogOpen(true)}
+								/>
 							) : (
-								invoices.map((invoice) => (
-									<tr
-										key={invoice.id}
-										className="border-b hover:bg-slate-50 cursor-pointer"
-										onClick={() => go(`sales/invoices/${invoice.id}`)}
-									>
-										<td className="px-4 py-2 font-medium">{invoice.invoice_number}</td>
-										<td className="px-4 py-2 text-right">
-											{formatMoney(invoice.total, invoice.currency)}
-										</td>
-										<td className="px-4 py-2 text-right">
-											{formatMoney(invoice.amount_paid, invoice.currency)}
-										</td>
-										<td className="px-4 py-2">
-											<InvoiceStatusPill status={invoice.status} />
-										</td>
-									</tr>
-								))
+								<DataTable
+									columns={invoiceColumns}
+									data={invoices}
+									loading={invoicesLoading}
+									showPagination={false}
+									initialPageSize={
+										invoices.length > 10 ? invoices.length : 10
+									}
+									showMainActions={false}
+									setPage={() => {}}
+									config={{}}
+								/>
 							)}
-						</tbody>
-					</table>
-				</div>
-			</section>
-			) : (
-				<InvoicesProGate />
-			)
+						</div>
+					</section>
+				) : (
+					<InvoicesProGate />
+				)
 			) : null}
 
 			{showDocuments && showPayments ? (
-			isProActive ? (
-			<section className="space-y-3">
-				<h3 className="text-base font-semibold">{__('Payments', 'doublescale')}</h3>
-				<div className="border rounded-lg overflow-hidden">
-					<table className="w-full text-sm">
-						<thead className="bg-slate-50 border-b">
-							<tr>
-								<th className="text-left px-4 py-2">{__('Date', 'doublescale')}</th>
-								<th className="text-left px-4 py-2">{__('Invoice', 'doublescale')}</th>
-								<th className="text-left px-4 py-2">{__('Mode', 'doublescale')}</th>
-								<th className="text-right px-4 py-2">{__('Amount', 'doublescale')}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{paymentsLoading ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('Loading…', 'doublescale')}
-									</td>
-								</tr>
-							) : payments.length === 0 ? (
-								<tr>
-									<td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-										{__('No payments recorded for this contact.', 'doublescale')}
-									</td>
-								</tr>
+				isProActive ? (
+					<section className="flex flex-col gap-5">
+						<h3 className="text-base font-semibold">
+							{__('Payments', 'doublescale')}
+						</h3>
+						<div>
+							{!paymentsLoading && payments.length === 0 ? (
+								<NoData
+									icon={<EmptyPaymentsIcon />}
+									title={__(
+										'No payments recorded for this contact.',
+										'doublescale'
+									)}
+									subtitle={__(
+										'Payments appear here when invoices for this contact are paid.',
+										'doublescale'
+									)}
+								/>
 							) : (
-								payments.map((payment) => (
-									<tr
-										key={payment.id}
-										className="border-b hover:bg-slate-50 cursor-pointer"
-										onClick={() => go(`sales/invoices/${payment.invoice_id}`)}
-									>
-										<td className="px-4 py-2">{payment.payment_date || '—'}</td>
-										<td className="px-4 py-2">
-											{payment.invoice?.invoice_number || `#${payment.invoice_id}`}
-										</td>
-										<td className="px-4 py-2">{modeLabel(payment.payment_mode)}</td>
-										<td className="px-4 py-2 text-right">
-											{formatMoney(
-												payment.amount,
-												payment.invoice?.currency || 'USD'
-											)}
-										</td>
-									</tr>
-								))
+								<DataTable
+									columns={paymentColumns}
+									data={payments}
+									loading={paymentsLoading}
+									showPagination={false}
+									initialPageSize={
+										payments.length > 10 ? payments.length : 10
+									}
+									showMainActions={false}
+									setPage={() => {}}
+									config={{}}
+								/>
 							)}
-						</tbody>
-					</table>
-				</div>
-			</section>
-			) : (
-				<PaymentsProGate />
-			)
+						</div>
+					</section>
+				) : (
+					<PaymentsProGate />
+				)
 			) : null}
 
+			<ProposalFormDialog
+				open={proposalDialogOpen}
+				onOpenChange={setProposalDialogOpen}
+				initialContactId={contact_id}
+				onSaved={() => void refetchProposals()}
+			/>
 			<InvoiceFormDialog
 				open={invoiceDialogOpen}
 				onOpenChange={setInvoiceDialogOpen}

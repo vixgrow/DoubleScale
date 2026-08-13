@@ -11,8 +11,8 @@ import React, { useEffect, useState } from 'react';
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { GradientAddContactIcon } from '@doublescale/components';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { CustomDialogHeader, GradientAddContactIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -72,45 +72,30 @@ export const CreateContactModal: React.FC = () => {
 	};
 
 	const inputClass =
-		'h-11 rounded-xl border-border/80 bg-background pr-11 text-base shadow-inner shadow-black/[0.02]';
+		'h-11 !rounded-xl !border-border !bg-white pr-11 text-base shadow-inner shadow-black/[0.02]';
 
 	return (
 		<Dialog open={createContactVisible} onOpenChange={handleClose}>
 			<DialogContent
 				className={cn(
-					'max-h-[min(90vh,760px)] max-w-[520px] gap-0 overflow-hidden rounded-2xl border-border/70 p-0 shadow-2xl',
+					'max-h-[min(90vh,760px)] !bg-white max-w-[520px] gap-0 overflow-hidden rounded-2xl border-border/70 shadow-2xl',
 					'sm:max-w-[520px]'
 				)}
 			>
-				<div className="border-b border-border/70 bg-gradient-to-br from-muted/30 via-background to-background sm:px-8 sm:pb-6 sm:pt-8 p-4">
-					<div className="flex gap-4 pr-8">
-						<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-sm">
-							<span className="text-primary [&>svg]:h-6 [&>svg]:w-6">
-								<GradientAddContactIcon />
-							</span>
-						</div>
-						<div className="min-w-0 flex-1 space-y-1.5">
-							<h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-								{__('Create contact', 'doublescale')}
-							</h2>
-							<p className="text-sm leading-relaxed text-muted-foreground">
-								{__(
-									'Add the essentials now. You can enrich the profile with lists, tags, and custom fields on the next screen.',
-									'doublescale'
-								)}
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div className="max-h-[min(52vh,420px)] space-y-6 overflow-y-auto sm:px-8 sm:py-7 p-4">
+				<DialogHeader>
+					<CustomDialogHeader title="Create contact" subtitle="Add the essentials now. You can enrich the profile with lists, tags, and custom fields on the next screen." icon={<GradientAddContactIcon />} />
+				</DialogHeader>
+				<div className="max-h-[min(52vh,420px)] py-4 space-y-6 overflow-y-auto">
 					<div>
 						<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
 							{__('Identity', 'doublescale')}
 						</p>
 						<div className="mt-4 grid gap-4 sm:grid-cols-2">
 							<div className="space-y-2">
-								<Label htmlFor="ds-create-contact-first" className="text-sm font-medium">
+								<Label
+									htmlFor="ds-create-contact-first"
+									className="text-sm font-medium"
+								>
 									{__('First name', 'doublescale')}
 								</Label>
 								<Input
@@ -128,7 +113,10 @@ export const CreateContactModal: React.FC = () => {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="ds-create-contact-last" className="text-sm font-medium">
+								<Label
+									htmlFor="ds-create-contact-last"
+									className="text-sm font-medium"
+								>
 									{__('Last name', 'doublescale')}
 								</Label>
 								<Input
@@ -149,7 +137,10 @@ export const CreateContactModal: React.FC = () => {
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="ds-create-contact-email" className="text-sm font-medium">
+						<Label
+							htmlFor="ds-create-contact-email"
+							className="text-sm font-medium"
+						>
 							{__('Email (optional)', 'doublescale')}
 						</Label>
 						<Input
@@ -173,7 +164,9 @@ export const CreateContactModal: React.FC = () => {
 							}}
 						/>
 						{fieldErrors.email && (
-							<p className="text-xs text-destructive">{fieldErrors.email}</p>
+							<p className="text-xs text-destructive">
+								{fieldErrors.email}
+							</p>
 						)}
 					</div>
 
@@ -183,7 +176,10 @@ export const CreateContactModal: React.FC = () => {
 						</p>
 						<div className="mt-4 space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="ds-create-contact-phone" className="text-sm font-medium">
+								<Label
+									htmlFor="ds-create-contact-phone"
+									className="text-sm font-medium"
+								>
 									{__('Phone', 'doublescale')}
 								</Label>
 								<Input
@@ -191,7 +187,10 @@ export const CreateContactModal: React.FC = () => {
 									type="tel"
 									className={inputClass}
 									autoComplete="tel"
-									placeholder={__('+1 555 010 2030', 'doublescale')}
+									placeholder={__(
+										'+1 555 010 2030',
+										'doublescale'
+									)}
 									value={contactForm.phone}
 									onChange={(e) => {
 										const v = e.target.value;
@@ -216,7 +215,10 @@ export const CreateContactModal: React.FC = () => {
 								)}
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="ds-create-contact-whatsapp" className="text-sm font-medium">
+								<Label
+									htmlFor="ds-create-contact-whatsapp"
+									className="text-sm font-medium"
+								>
 									{__('WhatsApp', 'doublescale')}
 								</Label>
 								<Input
@@ -224,7 +226,10 @@ export const CreateContactModal: React.FC = () => {
 									type="tel"
 									className={inputClass}
 									autoComplete="tel"
-									placeholder={__('Same or different as phone', 'doublescale')}
+									placeholder={__(
+										'Same or different as phone',
+										'doublescale'
+									)}
 									value={contactForm.whatsapp_phone}
 									onChange={(e) => {
 										const v = e.target.value;
@@ -258,11 +263,11 @@ export const CreateContactModal: React.FC = () => {
 					</div>
 				</div>
 
-				<div className="flex flex-col-reverse gap-3 border-t border-border/70 bg-muted/25 sm:px-8 sm:py-5 p-4 sm:flex-row sm:items-center sm:justify-end">
+				<div className="flex flex-col-reverse gap-3 border-t border-border sm:pt-5 pt-4 sm:flex-row sm:items-center sm:justify-end">
 					<Button
 						type="button"
-						variant="outline"
-						className="h-11 rounded-xl border-border/80 sm:min-w-[100px]"
+						variant="secondaryDeepBlue"
+						className="h-11 rounded-xl sm:min-w-[100px]"
 						onClick={closeModal}
 						disabled={isSaving}
 					>

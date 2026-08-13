@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.3
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,9 +270,35 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
-= 1.3.3 = 05 Aug 2026
+= 1.3.5 = 12 Aug 2026
+- Add company fields to contacts: Company Name, Company Registration Number, and Tax / VAT Number
+- Improve contact information and dialog UI consistency (shared icons and CustomDialogHeader)
+- Improve dialog layout and z-index stacking across automation, booking, and contact screens
+
+= 1.3.4 = 11 Aug 2026
+- Add email preview for automation steps so you can review builder content before sending
+- Add file attachments in the Email Builder (lead magnets) with clearer validation and error feedback
+- Improve merge-tag resolution reliability in outbound emails
+- Show the Link Trigger selector on Link Trigger Clicked automations
+- Add WooCommerce “Orders Purchased From Brands” automation rule
+- Add content sections and terms fields for invoices and proposals
+- Add invoice recurrence support (links to Pro Recurring Invoices)
+- Enhance WhatsApp automation messaging UX (free-form steps, trigger switch confirmations)
+- Fix dialog/alert centering and z-index stacking, including RTL-friendly layout
+- Fix Switch thumb travel in RTL layouts
+- UI polish: export modal checkboxes and admin content overflow handling
+
+= 1.3.3 = 09 Aug 2026
 - Fix Link Trigger tag/list updates on click for bulk and curl-multi campaign emails by injecting per-recipient track-id into tracked links
 - Ensure bulk/curl-multi recipient variables include hash_key, open-tracking pixel, and unsubscribe URL
+- Add Send Test Email for automation email actions so you can preview content before saving
+- Add Product Catalog module (Pro) for reusable products/services on invoices, proposals, and credit notes
+- Reorganize automation trigger/action categories (Email, Messaging, Booking, Projects) with clearer icons and grouping
+- Standardize SMS labeling and prune empty automation source categories for a cleaner picker
+- Revamp document Template Gallery and Style Editor layout, including a clearer color picker
+- Improve elevated invoice/proposal dialogs and nested select menus (z-index / overflow)
+- Show Advanced Filters in Free as a discoverable disabled control (Pro-gated)
+- UI polish: shared icons, DatePicker chrome, modal button styles, and support inbox empty states
 
 = 1.3.2 = 04 Aug 2026
 - Add Projects automation triggers and actions (create/update/complete projects, owner/status/custom field changes, comments, due/overdue, and deal conversion)

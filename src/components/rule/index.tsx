@@ -54,7 +54,7 @@ const Rule: React.FC<RuleProps> = ({
 							<SelectTrigger className="h-12 w-full min-w-0 !border-border !rounded-lg">
 								<SelectValue placeholder="Select operator" />
 							</SelectTrigger>
-							<SelectContent className="max-h-[200px] overflow-y-auto">
+							<SelectContent className="z-[180000] max-h-[200px] overflow-y-auto">
 								{map(
 									ruleSettings.operators,
 									(operator, key) => (

@@ -136,7 +136,9 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 }) => {
 	const navigate = useNavigate();
 	const proAddonActive = isProActive();
-	const activeFormPlugins = ConfigAPI.getActiveFormPlugins();
+	// Pro ships its own ConfigAPI, so a getter added on free may be absent there
+	// until Pro is rebuilt. Fall back instead of crashing the whole dialog.
+	const activeFormPlugins = ConfigAPI.getActiveFormPlugins?.() ?? [];
 	const { isConnected: isTypeformConnected, isLoading: isTypeformStatusLoading } =
 		useTypeformIntegrationStatus();
 	const { isConnected: isJotformConnected, isLoading: isJotformStatusLoading } =

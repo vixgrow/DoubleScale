@@ -51,11 +51,6 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 					)}
 				>
 					<div className="relative flex max-h-[min(90vh,940px)] min-h-[min(52vh,520px)] flex-col overflow-hidden rounded-[inherit] bg-card">
-						<div
-							className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-primary via-primary/90 to-primary/60"
-							aria-hidden
-						/>
-
 						<header className="relative shrink-0 border-b border-border/50 bg-card p-4 lg:px-8 lg:pb-6 lg:pt-7 pr-14 sm:pr-16">
 							<div className="min-w-0 space-y-1.5">
 								<DialogTitle className="text-left text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">

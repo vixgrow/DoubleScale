@@ -273,6 +273,7 @@ export { default as LocationIcon } from './location';
 export { default as CallActivityIcon } from './call-activity';
 export { default as EmailActivityIcon } from './email-activity';
 export { default as LeadScoringIcon } from './lead-scoring';
+export { default as GradientLeadScoringLevelIcon } from './gradient-lead-scoring-level';
 export { default as MyTemplatesSidebarIcon } from './my-templates-sidebar';
 export { default as ReadyToUseIcon } from './ready-to-use';
 export { default as GridIcon } from './grid';

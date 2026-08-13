@@ -250,7 +250,7 @@ const BookingDetails: React.FC = () => {
                     handleClose();
             }}><DialogContent
                 hideCloseButton
-                className='!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !h-screen !max-w-none !rounded-none !p-0 !gap-0 !border-0 z-[160000] grid-rows-[auto_1fr] overflow-hidden bg-white'>
+                className='!fixed !bg-white !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !h-screen !max-w-none !rounded-none !p-0 !gap-0 !border-0 z-[160000] grid-rows-[auto_1fr] overflow-hidden bg-white'>
                 {isLoading ? (
                     <div className='h-full overflow-y-auto'>
                         <ShimmerLoader />

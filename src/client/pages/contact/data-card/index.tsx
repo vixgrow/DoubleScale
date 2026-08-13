@@ -38,9 +38,10 @@ import {
 	DealActivityIcon,
 	CalendarIcon,
 	UpcomingActivitiesIcon,
-	WebsiteIcon,
 	AttachmentsIcon,
+	LeadScoringIcon,
 	ProFeatureNotice,
+	WebsiteTrackingIcon,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
 import { isSalesDocumentsReady } from '@doublescale/shared/lib/optional-marketing-modules';
@@ -53,7 +54,6 @@ import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
-import { Trophy } from 'lucide-react';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -175,7 +175,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		{
 			value: 'lead-score',
 			label: 'Lead Score',
-			icon: <Trophy width={24} height={24} />,
+			icon: <LeadScoringIcon width={24} height={24} />,
 		},
 		...(isTasksModuleEnabled
 			? [{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> }]
@@ -194,7 +194,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		{
 			value: 'website_tracking',
 			label: 'Website Tracking',
-			icon: <WebsiteIcon width={24} height={24} />,
+			icon: <WebsiteTrackingIcon width={24} height={24} />,
 		},
 		...(isCrmManager && isAutomationsModuleEnabled
 			? [

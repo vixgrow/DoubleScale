@@ -15,12 +15,7 @@ import { X } from 'lucide-react';
 import ActionsGroupRender from './actions-group-render';
 import ActionSelectorCard from './action-selector-card';
 import './style.scss';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogOverlay,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import ConfigAPI from '@doublescale/config';
 import type { ActionsGroup } from '@doublescale/config';
 import {
@@ -556,9 +551,9 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogOverlay className="z-[150200]" />
 			<DialogContent
-				className="left-0 top-0 z-[150200] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none border-0 bg-[#f7f8fa] p-0 shadow-none"
+				overlayClassName="z-[150459]"
+				className="left-0 top-0 z-[150460] flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-hidden gap-0 rounded-none border-0 bg-[#f7f8fa] p-0 shadow-none"
 				hideCloseButton
 			>
 				<DialogHeader className="shrink-0 space-y-0 border-b border-[#E8ECF0] bg-white px-4 py-4 lg:px-6">

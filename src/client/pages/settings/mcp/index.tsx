@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -192,6 +192,9 @@ const McpSettings: React.FC = () => {
 	const [newKeyOwner, setNewKeyOwner] = useState('');
 	const [newKeyId, setNewKeyId] = useState('');
 	const [activeClient, setActiveClient] = useState<ClientKey>('claude-code');
+	// Never sent anywhere: the header is assembled in the browser so the
+	// password does not travel to our server just to be base64'd.
+	const [appPassword, setAppPassword] = useState('');
 	const [emailingKey, setEmailingKey] = useState(false);
 	// Off by default: a key is a permanent password, and once it is in an inbox
 	// it stays there. The admin has to opt in per send.
@@ -264,15 +267,42 @@ const McpSettings: React.FC = () => {
 		}
 	};
 
+	/**
+	 * The Authorization value for a WordPress Application Password.
+	 *
+	 * Application passwords are HTTP Basic, not Bearer: the header carries
+	 * base64("username:password"), so pasting the password on its own — the
+	 * obvious thing to try — always fails with "Authentication required".
+	 * WordPress also displays the password in groups of four, and those spaces
+	 * are display only.
+	 */
+	const basicAuthHeader = useMemo((): string => {
+		const password = appPassword.replace(/\s+/g, '');
+		if (!status || !password) {
+			return '';
+		}
+		try {
+			// btoa is Latin-1 only; usernames can hold anything.
+			const bytes = new TextEncoder().encode(
+				`${status.current_user}:${password}`
+			);
+			return `Basic ${btoa(String.fromCharCode(...bytes))}`;
+		} catch {
+			return '';
+		}
+	}, [appPassword, status]);
+
 	const buildSnippet = (client: ClientKey): string => {
 		if (!status) {
 			return '';
 		}
 
 		const url = status.endpoint_url;
-		const authHeader = `Authorization: Bearer ${
-			newKey || '<your-api-key>'
-		}`;
+		// An entered application password wins: the admin is actively working
+		// on that path, and a snippet showing Bearer would be wrong for it.
+		const credential =
+			basicAuthHeader || `Bearer ${newKey || '<your-api-key>'}`;
+		const authHeader = `Authorization: ${credential}`;
 
 		if (client === 'claude-code') {
 			return [
@@ -308,7 +338,7 @@ const McpSettings: React.FC = () => {
 		// through `cmd /c` fixes the first; passing the value via env fixes the
 		// second. Note the leading space inside the env value — it is the one
 		// that belongs after the colon.
-		const bearer = `Bearer ${newKey || '<your-api-key>'}`;
+		const bearer = credential;
 
 		if (client === 'claude-desktop') {
 			const server = isWindows
@@ -663,6 +693,72 @@ const McpSettings: React.FC = () => {
 						</span>
 					)}
 				</p>
+
+				{/*
+				 * Application passwords are HTTP Basic, so the header is
+				 * base64("username:password") — not the password on its own.
+				 * Everyone tries the password alone first and gets a bare
+				 * "Authentication required", so do the encoding here rather
+				 * than describing it.
+				 */}
+				{status.app_passwords_available && (
+					<details className="mb-4 rounded-md border bg-gray-50 p-3">
+						<summary className="text-sm font-medium cursor-pointer">
+							{__(
+								'Using an Application Password instead of an API key?',
+								'doublescale'
+							)}
+						</summary>
+
+						<p className="text-sm text-gray-600 mt-3 mb-2">
+							{__(
+								'Paste it here and the snippets below switch to it. It is converted in your browser and never sent to the server.',
+								'doublescale'
+							)}
+						</p>
+
+						<Input
+							value={appPassword}
+							onChange={(event) => setAppPassword(event.target.value)}
+							placeholder={__(
+								'e.g. abcd efgh ijkl mnop qrst uvwx',
+								'doublescale'
+							)}
+							className="max-w-md font-mono"
+						/>
+
+						{basicAuthHeader ? (
+							<div className="mt-3">
+								<p className="text-sm text-gray-600 mb-1">
+									{sprintf(
+										/* translators: %s: WordPress username. */
+										__(
+											'Authorization header for %s:',
+											'doublescale'
+										),
+										status.current_user
+									)}
+								</p>
+								<code className="block bg-white border rounded px-3 py-2 text-xs font-mono break-all">
+									{basicAuthHeader}
+								</code>
+								<p className="text-xs text-gray-500 mt-2">
+									{__(
+										'Note it says Basic, not Bearer — Bearer is only for the API keys below, and an Application Password sent as Bearer is always rejected.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						) : (
+							<p className="text-xs text-gray-500 mt-2">
+								{__(
+									'The spaces WordPress shows are for readability — paste it with or without them.',
+									'doublescale'
+								)}
+							</p>
+						)}
+					</details>
+				)}
 
 				<p className="text-sm text-gray-500 mb-4">
 					{__(

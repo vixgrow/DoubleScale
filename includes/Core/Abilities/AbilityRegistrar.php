@@ -90,7 +90,7 @@ final class AbilityRegistrar {
 		}
 
 		foreach ( $modules as $slug => $module ) {
-			if ( ! $module instanceof ProvidesAbilities ) {
+			if ( ! self::provides_abilities( $module ) ) {
 				continue;
 			}
 
@@ -147,12 +147,35 @@ final class AbilityRegistrar {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
+	/**
+	 * Whether a module contributes abilities.
+	 *
+	 * Tests for the METHOD, not the interface. The Pro plugin ships separately
+	 * and can be updated first, so `implements ProvidesAbilities` in a Pro
+	 * module class would be a hard parse-time dependency on this file: on a
+	 * site running new Pro against old free, PHP fatals while loading the class
+	 * — before any version guard could run. Duck typing keeps that boundary
+	 * one-directional, which is the whole point of {@see ProvidesAbilities}
+	 * being opt-in.
+	 *
+	 * Implementing the interface still works and remains the documented way for
+	 * free modules; it simply is not required.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $module Module instance.
+	 * @return bool
+	 */
+	public static function provides_abilities( $module ): bool {
+		return is_object( $module ) && method_exists( $module, 'abilities' );
+	}
+
 	public static function collect(): array {
 		// Core's discovery ability has no owning feature module.
 		$definitions = AbilityContext::definitions();
 
 		foreach ( ModuleManager::all() as $slug => $module ) {
-			if ( ! $module instanceof ProvidesAbilities ) {
+			if ( ! self::provides_abilities( $module ) ) {
 				continue;
 			}
 

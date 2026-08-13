@@ -13,13 +13,11 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-	AlertTriangle,
-	ExternalLink,
+import { ExternalLink,
 	Terminal,
 	RefreshCw,
 } from 'lucide-react';
-import { CopyIcon, PlayIcon, TimerBlockIcon } from '@doublescale/components';
+import { AlertTriangleIcon, CopyIcon, PlayIcon, TimerBlockIcon } from '@doublescale/components';
 
 interface CronEvent {
 	hook: string;
@@ -147,7 +145,7 @@ const CronJobs: React.FC = () => {
 		return (
 			<div className="cron-jobs">
 				<Alert variant="destructive">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertTitle>{__('Error Loading Status', 'doublescale')}</AlertTitle>
 					<AlertDescription>
 						{error}
@@ -184,7 +182,7 @@ const CronJobs: React.FC = () => {
 		<div className="cron-jobs doublescale-fields">
 			{runError && (
 				<Alert variant="destructive" className="mb-6">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertTitle>{__('Task Execution Failed', 'doublescale')}</AlertTitle>
 					<AlertDescription>{runError}</AlertDescription>
 				</Alert>
@@ -192,7 +190,7 @@ const CronJobs: React.FC = () => {
 
 			{hasOverdue && (
 				<Alert variant="destructive" className="mb-6">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertTitle>{__('Attention Required', 'doublescale')}</AlertTitle>
 					<AlertDescription>
 						{__(
@@ -210,7 +208,7 @@ const CronJobs: React.FC = () => {
 
 			{!hasServerCron && (
 				<Alert className="mb-6">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertTitle>
 						{__('Server Side Cron Not Enabled', 'doublescale')}
 					</AlertTitle>

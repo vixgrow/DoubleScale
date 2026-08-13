@@ -8,12 +8,11 @@ import { useRef } from '@wordpress/element';
  * External dependencies
  */
 import { map } from 'lodash';
-import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
-import { Rule, PlusIcon } from '@doublescale/components';
+import { AlertTriangleIcon, Rule, PlusIcon } from '@doublescale/components';
 import { getRuleBySlug } from '@doublescale/utils';
 import LogicConnector from '@/components/logic-connector';
 import { useLogicBracketStyle } from '@/hooks/use-logic-bracket-style';
@@ -195,7 +194,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 									</Select>
 								) : rule.selectedGroup ? (
 									<div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
-										<AlertTriangle className="h-4 w-4 text-orange-500" />
+										<AlertTriangleIcon width={20} height={20} color="#F97316" />
 										<span className="text-sm text-orange-700">
 											{__(
 												'This rule requires an inactive plugin',

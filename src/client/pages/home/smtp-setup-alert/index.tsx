@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -16,6 +15,7 @@ import ConfigAPI from '@doublescale/config';
 import { getToLink } from '@doublescale/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { AlertTriangleIcon } from '@doublescale/components';
 
 export const SmtpSetupAlert: React.FC = () => {
 	const navigate = useNavigate();
@@ -38,7 +38,7 @@ export const SmtpSetupAlert: React.FC = () => {
 
 	return (
 		<Alert className="border-amber-200 mb-4 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
-			<AlertTriangle className="h-4 w-4 !text-amber-600" />
+			<AlertTriangleIcon width={20} height={20} color="#D97706" />
 			<AlertTitle className="text-amber-800 dark:text-amber-200">
 				{__('SMTP Not Configured', 'doublescale')}
 			</AlertTitle>

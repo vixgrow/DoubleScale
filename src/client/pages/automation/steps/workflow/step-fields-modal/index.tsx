@@ -8,7 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
+import { BarChart3, CheckCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { OrganizedStep } from '@doublescale/client';
-import { Fields } from '@doublescale/components';
+import { AlertTriangleIcon, Fields } from '@doublescale/components';
 import { getAction, getGoal } from '@doublescale/utils';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import ConfigAPI from '@doublescale/config';
@@ -313,7 +313,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					variant="destructive"
 					className="border-orange-500 bg-orange-50"
 				>
-					<AlertTriangle className="h-4 w-4 text-orange-600" />
+					<AlertTriangleIcon width={20} height={20} color="#EA580C" />
 					<AlertDescription className="text-sm text-orange-800">
 						{warningMessage}
 						<span className="block mt-1 font-medium">
@@ -394,7 +394,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						variant="destructive"
 						className="mb-4 border-orange-500 bg-orange-50"
 					>
-						<AlertTriangle className="h-4 w-4 text-orange-600" />
+						<AlertTriangleIcon width={20} height={20} color="#EA580C" />
 						<AlertDescription className="text-sm text-orange-800">
 							{__(
 								'Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received. Switch to a template or change the trigger.',

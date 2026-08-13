@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -33,7 +32,7 @@ import {
 } from '../utils/step-utils';
 import { updateStepCustomLabel } from '../utils/canvas-notes-utils';
 import { getActionLabel, getCatalogActionLabel, hasActionWarning } from '@doublescale/utils';
-import { ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
+import { AlertTriangleIcon, ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
 import { supportsAnalytics, getChannelType } from '../constants/action-types';
 import {
@@ -131,7 +130,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<AlertTriangle className="h-4 w-4 text-orange-500" />
+							<AlertTriangleIcon width={20} height={20} color="#F97316" />
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">

@@ -20,7 +20,8 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { HelpCircle, AlertTriangle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
+import { AlertTriangleIcon } from '@doublescale/components';
 
 interface TriggerContentProps {
 	automation: Automation;
@@ -81,7 +82,7 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 					variant="destructive"
 					className="border-orange-500 bg-orange-50"
 				>
-					<AlertTriangle className="h-4 w-4 text-orange-600" />
+					<AlertTriangleIcon width={20} height={20} color="#EA580C" />
 					<AlertDescription className="text-sm text-orange-800">
 						{triggerWarning.message}
 						{triggerWarning.plugin_label && (

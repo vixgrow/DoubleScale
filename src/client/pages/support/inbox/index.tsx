@@ -15,13 +15,13 @@ import React, {
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import type { DataTableConfig } from '@doublescale/client';
-import { GradientTicketsIcon, NoData, SearchIcon } from '@doublescale/components';
+import { AlertTriangleIcon, GradientTicketsIcon, NoData, SearchIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/data-table';
@@ -283,7 +283,7 @@ const SupportInbox: React.FC = () => {
 		<div className="doublescale-support-inbox min-w-0 ">
 			{!mailboxesLoading && hasNoMailboxes && (
 				<Alert className="mb-6 flex items-center gap-2 border-amber-200 bg-amber-50 text-amber-800 [&>svg]:static [&>svg]:left-auto [&>svg]:top-auto [&>svg]:shrink-0 [&>svg+div]:translate-y-0 [&>svg~*]:pl-0">
-					<AlertTriangle className="h-4 w-4" />
+					<AlertTriangleIcon width={20} height={20} />
 					<AlertDescription>
 						{__(
 							'No support mailbox is configured. New tickets can’t be opened until you add one.',

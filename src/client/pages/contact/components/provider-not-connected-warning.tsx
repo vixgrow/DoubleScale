@@ -1,7 +1,8 @@
 import React from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { AlertTriangle, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertTriangleIcon } from '@doublescale/components';
 
 interface ProviderNotConnectedWarningProps {
 	channel: 'sms' | 'whatsapp';
@@ -23,7 +24,7 @@ export function ProviderNotConnectedWarning({
 
 	return (
 		<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-			<AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+			<AlertTriangleIcon width={24} height={24} color="#CA8A04" />
 			<div className="flex-1">
 				<p className="text-sm text-yellow-800 mb-2">
 					{channel === 'sms'

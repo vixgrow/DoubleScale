@@ -166,6 +166,7 @@ export { default as CartIcon } from './cart';
 export { default as DoubleOptInIcon } from './double-opt-in';
 export { default as BusinessIcon } from './business';
 export { default as AlertIcon } from './alert';
+export { default as AlertTriangleIcon } from './alert-triangle';
 export { default as ReportsIcon } from './reports';
 export { default as TaskDoneIcon } from './task-done';
 export { default as ConditionsIcon } from './conditions';

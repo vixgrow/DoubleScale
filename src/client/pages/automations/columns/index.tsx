@@ -6,13 +6,14 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { AlertTriangle, ExternalLink, Download } from 'lucide-react';
+import { ExternalLink, Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 /**
  * internal dependencies
  */
 import type { Automation } from '@doublescale/client';
 import {
+	AlertTriangleIcon,
 	SortIcon,
 	TimeAgoCell,
 	SettingsOutlinedIcon,
@@ -135,7 +136,7 @@ const AutomationNameCell: React.FC<AutomationNameCellProps> = ({
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />
+							<AlertTriangleIcon width={20} height={20} color="#F97316" />
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<div className="space-y-2">

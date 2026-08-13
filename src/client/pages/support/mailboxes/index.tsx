@@ -40,7 +40,6 @@ import {
 	Info,
 	FolderCheck,
 	Bell,
-	AlertTriangle,
 	Lock,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -78,6 +77,7 @@ import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import type { VerifiedSender } from '@/shared/config/types/config-data';
 import AttachmentLimitsCard from './attachment-limits-card';
+import { AlertTriangleIcon } from '@doublescale/components';
 import {
 	CopyIcon,
 	DeleteIcon,
@@ -1308,7 +1308,7 @@ const SupportMailboxes: React.FC = () => {
 						{mailboxes.length === 0 ? (
 							<div className="p-8">
 								<Alert className="border-amber-200 bg-amber-50 text-amber-800">
-									<AlertTriangle className="h-4 w-4" />
+									<AlertTriangleIcon width={20} height={20} />
 									<AlertDescription>
 										{__(
 											'No mailbox is configured yet. Ticket creation is blocked until you add one — use “Add mailbox” above to set up a routing channel.',

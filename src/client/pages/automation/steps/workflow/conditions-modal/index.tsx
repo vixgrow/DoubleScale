@@ -17,7 +17,7 @@ import { useSelect } from '@wordpress/data';
 import './style.scss';
 import type { AutomationStep } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
-import { ConditionAutomationIcon, CustomDialogHeader } from '@doublescale/components';
+import { AlertTriangleIcon, ConditionAutomationIcon, CustomDialogHeader } from '@doublescale/components';
 import {
 	Dialog,
 	DialogContent,
@@ -33,7 +33,6 @@ import {
 } from '../automation-dialog-presets';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
 import RulesBuilder from '@/components/rules-builder';
 import { useAutomationContext } from '../../../state/context';
 
@@ -318,7 +317,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 								variant="destructive"
 								className="mb-5 border-orange-500/80 bg-orange-50/90"
 							>
-								<AlertTriangle className="h-4 w-4 text-orange-600" />
+								<AlertTriangleIcon width={20} height={20} color="#EA580C" />
 								<AlertDescription className="text-sm text-orange-800">
 									{conditionWarning?.message}
 									{conditionWarning?.plugin_labels &&

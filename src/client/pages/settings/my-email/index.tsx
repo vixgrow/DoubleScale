@@ -15,7 +15,6 @@ import {
 	CheckCircle,
 	XCircle,
 	Loader2,
-	AlertTriangle,
 	Link,
 	Unlink,
 } from 'lucide-react';
@@ -26,7 +25,7 @@ import {
 	CardContent,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -382,7 +381,7 @@ const MyEmailSettings: React.FC = () => {
 						{notice.type === 'success' ? (
 							<CheckCircle className="w-4 h-4" />
 						) : notice.type === 'warning' ? (
-							<AlertTriangle className="w-4 h-4" />
+							<AlertTriangleIcon width={20} height={20} />
 						) : (
 							<XCircle className="w-4 h-4" />
 						)}
@@ -400,7 +399,7 @@ const MyEmailSettings: React.FC = () => {
 								<>
 									<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 										<AlertDescription className="flex items-center gap-2">
-											<AlertTriangle className="w-4 h-4" />
+											<AlertTriangleIcon width={20} height={20} />
 											{sprintf(
 												__('Your %s authorization has expired. Please reconnect.', 'doublescale'),
 												connection.provider === 'gmail' ? 'Gmail' : 'Outlook'
@@ -450,7 +449,7 @@ const MyEmailSettings: React.FC = () => {
 									{account.smtp_health[connection.provider] === 'smtp_inactive' && (
 										<Alert className="border-red-200 bg-red-50 text-red-800">
 											<AlertDescription className="flex items-center gap-2">
-												<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+												<AlertTriangleIcon width={20} height={20} />
 												{__('smtp plugin is not active. Email sending, OAuth, and IMAP will not work. Please activate smtp.', 'doublescale')}
 											</AlertDescription>
 										</Alert>
@@ -459,7 +458,7 @@ const MyEmailSettings: React.FC = () => {
 										<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 											<AlertDescription className="flex items-center justify-between">
 												<div className="flex items-center gap-2">
-													<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+													<AlertTriangleIcon width={20} height={20} />
 													{__('Your email sending connection is missing. Click Reconnect to fix.', 'doublescale')}
 												</div>
 												<Button
@@ -514,7 +513,7 @@ const MyEmailSettings: React.FC = () => {
 					) : (
 						<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
 							<AlertDescription className="flex items-center gap-2">
-								<AlertTriangle className="w-4 h-4 flex-shrink-0" />
+								<AlertTriangleIcon width={20} height={20} />
 								{__(
 									'No email providers configured by your admin. Contact your CRM administrator to set up Gmail or Outlook in Settings > Mailbox > Email Provider Setup.',
 									'doublescale'

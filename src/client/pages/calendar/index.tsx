@@ -112,7 +112,7 @@ const AdminCalendar = () => {
 	return (
 		<div className="doublescale-calendar-page space-y-4 p-6">
 			<div className="flex items-center gap-2">
-				<CalendarIcon />
+				<CalendarIcon width={24} height={24}/>
 				<h1 className="text-xl font-bold text-foreground">
 					{ __( 'Calendar', 'doublescale' ) }
 				</h1>
@@ -125,7 +125,7 @@ const AdminCalendar = () => {
 							type="button"
 							onClick={ goPrev }
 							aria-label={ __( 'Previous month', 'doublescale' ) }
-							className="flex h-8 w-8 items-center justify-center rounded-l-lg text-muted-foreground hover:bg-accent"
+							className="flex h-10 w-8 items-center justify-center rounded-l-lg text-muted-foreground hover:bg-accent"
 						>
 							<ChevronLeft className="h-4 w-4" />
 						</button>
@@ -133,7 +133,7 @@ const AdminCalendar = () => {
 							type="button"
 							onClick={ goNext }
 							aria-label={ __( 'Next month', 'doublescale' ) }
-							className="flex h-8 w-8 items-center justify-center rounded-r-lg text-muted-foreground hover:bg-accent"
+							className="flex h-10 w-8 items-center justify-center rounded-r-lg text-muted-foreground hover:bg-accent"
 						>
 							<ChevronRight className="h-4 w-4" />
 						</button>
@@ -141,7 +141,7 @@ const AdminCalendar = () => {
 					<button
 						type="button"
 						onClick={ goToday }
-						className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
+						className="rounded-lg h-10 border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
 					>
 						{ __( 'Today', 'doublescale' ) }
 					</button>
@@ -177,23 +177,23 @@ const AdminCalendar = () => {
 						const tone = kindTone( kind );
 						return (
 							<button
-								key={ kind }
+								key={kind}
 								type="button"
-								onClick={ () => toggleKind( kind ) }
-								aria-pressed={ active }
-								className={ `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+								onClick={() => toggleKind(kind)}
+								aria-pressed={active}
+								className={`inline-flex items-center gap-1.5 rounded-lg h-10 border px-3 py-1 text-xs font-medium transition-colors ${
 									active
-										? 'border-primary bg-primary/10 text-primary'
+										? 'border-primary bg-[#EEEEFF] text-primary'
 										: 'border-border text-muted-foreground hover:bg-accent'
-								}` }
+								}`}
 							>
 								<span
-									className={ `h-2 w-2 shrink-0 rounded-full ${tone.dot} ${
+									className={`h-2 w-2 shrink-0 rounded-full ${tone.dot} ${
 										active ? '' : 'opacity-60'
-									}` }
+									}`}
 									aria-hidden="true"
 								/>
-								{ label }
+								{label}
 							</button>
 						);
 					} ) }

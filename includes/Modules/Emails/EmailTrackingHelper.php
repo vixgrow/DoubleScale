@@ -289,6 +289,80 @@ class EmailTrackingHelper {
 	}
 
 	/**
+	 * Wrap ordinary links in click tracking for bulk / curl-multi sends.
+	 *
+	 * Bulk campaigns render ONE HTML body for many recipients, so the concrete
+	 * hash_key cannot be baked in. We emit `hash_key={{tracking:hash_key}}` and let
+	 * each mailer's convert_merge_tags() rewrite it to that provider's
+	 * recipient-variable syntax (%recipient.hash_key%, {{hash_key}}, {hash_key}, …),
+	 * exactly like the open-tracking pixel already does.
+	 *
+	 * Mirrors the skip rules of add_click_tracking(): link triggers (handled by
+	 * inject_link_trigger_track_id_placeholder()), already-tracked URLs, unsubscribe
+	 * links, and unprocessed merge-tag hrefs are all left alone.
+	 *
+	 * The tracker URL is assembled by concatenation rather than add_query_arg(),
+	 * because add_query_arg() percent-encodes the placeholder braces to %7B%7B and
+	 * the mailers' merge-tag regex would then never match it.
+	 *
+	 * @since 1.3.4
+	 *
+	 * @param string             $html     Shared email HTML body.
+	 * @param TemplateModel|null $template Optional template, for UTM parameters.
+	 * @return string HTML with ordinary links wrapped in click tracking.
+	 */
+	public static function inject_bulk_click_tracking( $html, $template = null ) {
+		if ( ! is_string( $html ) || '' === $html || false === stripos( $html, '<a' ) ) {
+			return $html;
+		}
+
+		$base = home_url();
+
+		return preg_replace_callback(
+			'/<a\b[^>]*\bhref=([\'"])(?<href>[^\'"]*)\1[^>]*>/i',
+			static function ( $matches ) use ( $base, $template ) {
+				$href = html_entity_decode( $matches['href'], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+				// Link triggers get their own track-id placeholder elsewhere.
+				if ( false !== strpos( $href, 'doublescale-link-trigger' ) ) {
+					return $matches[0];
+				}
+
+				// Already tracked, unsubscribe, or an unexpanded merge tag.
+				if ( false !== strpos( $href, 'doublescale=' )
+					|| false !== strpos( $href, 'doublescale-unsubscribe' )
+					|| false !== strpos( $href, '{{' ) ) {
+					return $matches[0];
+				}
+
+				// Only http(s) destinations are trackable — skip mailto:, tel:, #anchors.
+				if ( ! preg_match( '#^https?://#i', $href ) ) {
+					return $matches[0];
+				}
+
+				$original_url = $href;
+				if ( $template && $template->get_setting( 'enable_utm', false ) ) {
+					$original_url = self::add_utm_parameters( $original_url, $template );
+				}
+
+				// Double-encode to match the non-bulk path: add_click_tracking() urlencodes
+				// the destination and add_query_arg() encodes the whole arg again. The
+				// click handler mirrors that (PHP decodes $_GET once, then it urldecodes
+				// once more), so a single encode here would corrupt destinations that
+				// contain literal percent-escapes (e.g. %20) or "+".
+				$separator = false === strpos( $base, '?' ) ? '?' : '&';
+				$click_url = $base . $separator
+					. 'doublescale=email_click'
+					. '&hash_key={{tracking:hash_key}}'
+					. '&original=' . urlencode( urlencode( $original_url ) );
+
+				return str_replace( $matches['href'], $click_url, $matches[0] );
+			},
+			$html
+		);
+	}
+
+	/**
 	 * Tracking vars every bulk/curl-multi recipient needs for open + link-trigger clicks.
 	 *
 	 * @since 1.3.3

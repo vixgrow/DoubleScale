@@ -29,13 +29,12 @@ import {
 	Loader2,
 	RotateCcw,
 	Check,
-	AlertCircle,
 	ArrowLeft,
 	Palette,
 	ChevronDown,
 } from 'lucide-react';
 import ConfigApi from '@doublescale/config';
-import { AlertTriangleIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertCircleIcon } from '@doublescale/components';
 
 const TONE_OPTIONS = [
 	{ value: 'professional', label: __('Professional', 'doublescale') },
@@ -490,7 +489,7 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 
 							{error && (
 								<div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-									<AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+									<AlertCircleIcon width={20} height={20} />
 									<span>{error}</span>
 								</div>
 							)}
@@ -572,7 +571,7 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 
 						{error && (
 							<div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex-shrink-0">
-								<AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+								<AlertCircleIcon width={20} height={20} />
 								<span>{error}</span>
 							</div>
 						)}

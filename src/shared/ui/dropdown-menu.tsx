@@ -3,6 +3,12 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useDialogLayerContainer } from '@/components/ui/dialog-layer-context';
+import {
+	FLOATING_LAYER_Z_INDEX,
+	liftRadixPopper,
+	mergeNodeRefs,
+} from '@/components/ui/lift-radix-popper';
 
 const DropdownMenu = (
 	props: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
@@ -64,12 +70,17 @@ const DropdownMenuContent = React.forwardRef<
 		removePortal?: boolean;
 	}
 >(({ className, sideOffset = 4, removePortal, ...props }, ref) => {
+	const dialogContainer = useDialogLayerContainer();
+	const contentRef = React.useCallback((node: HTMLElement | null) => {
+		liftRadixPopper(node, FLOATING_LAYER_Z_INDEX);
+	}, []);
+
 	const content = (
 		<DropdownMenuPrimitive.Content
-			ref={ref}
+			ref={mergeNodeRefs(ref, contentRef)}
 			sideOffset={sideOffset}
 			className={cn(
-				'z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[11rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+				'pointer-events-auto z-[2000000] max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[11rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
 				'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]',
 				className
 			)}
@@ -82,7 +93,9 @@ const DropdownMenuContent = React.forwardRef<
 	}
 
 	return (
-		<DropdownMenuPrimitive.Portal>{content}</DropdownMenuPrimitive.Portal>
+		<DropdownMenuPrimitive.Portal container={dialogContainer}>
+			{content}
+		</DropdownMenuPrimitive.Portal>
 	);
 });
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;

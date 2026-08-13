@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircleIcon } from '@doublescale/components';
 /**
  * internal dependencies
  */
@@ -23,7 +23,7 @@ export const UnknownRenderer: React.FC<UnknownRendererProps> = ({ props }) => {
 		<div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
 			<div className="text-center space-y-2">
 				<div className="flex justify-center text-gray-400">
-					<AlertCircle className="w-6 h-6" />
+					<AlertCircleIcon width={24} height={24} color="#9CA3AF" />
 				</div>
 				<div>
 					<p className="font-semibold text-gray-700">

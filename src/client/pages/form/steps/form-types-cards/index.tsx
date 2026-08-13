@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { ArrowRight, Info, Plug } from 'lucide-react';
+import { ArrowRight, Plug } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -25,6 +25,7 @@ import { useTypeformIntegrationStatus } from '@/hooks/use-typeform-integration-s
 import { useJotformIntegrationStatus } from '@/hooks/use-jotform-integration-status';
 import ConfigAPI from '@doublescale/config';
 import { getToLink, useNavigate } from '@doublescale/navigation';
+import { InfoIcon } from '@doublescale/components';
 //@ts-ignore
 import contact from '../../../../../../assets/images/form-types/contact.png';
 //@ts-ignore
@@ -337,7 +338,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 						</p>
 						{!isSaas && !isProLocked && !isEnabled && (
 							<p className="text-[10px] text-amber-600 flex items-center gap-1 mt-1">
-								<Info className="w-3 h-3" />
+								<InfoIcon width={16} height={16} color="#896900" />
 								{__('Plugin not installed or inactive', 'doublescale')}
 							</p>
 						)}

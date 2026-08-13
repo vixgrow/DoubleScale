@@ -25,10 +25,10 @@ const ExportActions: React.FC = () => {
 	return (
 		<div className="lg:mt-8 mt-4 flex justify-between items-center">
 			<Button
-				variant="outline"
+				variant="secondaryDeepBlue"
 				onClick={handleClose}
 				disabled={loading}
-				className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
+				className="flex items-center space-x-2"
 			>
 				<ArrowLeft className="w-4 h-4" />
 				{__('Cancel', 'doublescale')}

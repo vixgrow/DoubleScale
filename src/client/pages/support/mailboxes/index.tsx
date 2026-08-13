@@ -30,16 +30,10 @@ import {
 	CheckCircle,
 	XCircle,
 	Plus,
-	Trash2,
-	Pencil,
 	ArrowRight,
-	Copy,
 	Check,
-	Mail,
 	MoreVertical,
-	Info,
 	FolderCheck,
-	Bell,
 	Lock,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -83,6 +77,7 @@ import {
 	DeleteIcon,
 	EditHeaderIcon,
 	EmailActivityIcon,
+	InfoIcon,
 	NotificationIcon,
 	SettingsIcon,
 } from '@doublescale/shared/icons';
@@ -848,7 +843,7 @@ const SupportMailboxes: React.FC = () => {
 													'doublescale'
 												)}
 											>
-												<Info className="w-3.5 h-3.5" />
+												<InfoIcon width={16} height={16} color="#0D9DFC" />
 											</span>
 										</Label>
 										<Select

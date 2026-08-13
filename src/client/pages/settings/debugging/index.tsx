@@ -36,14 +36,11 @@ import {
 	DialogDescription,
 } from '@/components/ui/dialog';
 import { RefreshCw,
-	Trash2,
 	Download,
-	Info,
 	Bug,
 	XCircle,
-	Eye,
 } from 'lucide-react';
-import { AlertTriangleIcon, DeleteIcon, ViewIcon } from '@doublescale/components';
+import { AlertTriangleIcon, DeleteIcon, ViewIcon, InfoIcon } from '@doublescale/components';
 
 interface LogEntry {
 	id: number;
@@ -222,11 +219,11 @@ const DebuggingLogs: React.FC = () => {
 				return <AlertTriangleIcon width={20} height={20} />;
 			case 'info':
 			case 'notice':
-				return <Info className="h-4 w-4" />;
+				return <InfoIcon width={16} height={16} />;
 			case 'debug':
 				return <Bug className="h-4 w-4" />;
 			default:
-				return <Info className="h-4 w-4" />;
+				return <InfoIcon width={16} height={16} />;
 		}
 	};
 

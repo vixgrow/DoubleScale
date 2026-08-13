@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
  */
 import './style.scss';
 import config from '@doublescale/config';
-import { AlertCircle } from 'lucide-react';
-import { PremiumIcon, RocketIcon } from '@/components/icons';
+import { PremiumIcon, RocketIcon, AlertCircleIcon } from '@/components/icons';
 import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 interface ProFeatureNoticeProps {
@@ -61,7 +60,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							<ul>
 								{features.map((feature) => (
 									<li key={feature}>
-										<AlertCircle size={16} className="text-[#458DC7]" />
+										<AlertCircleIcon width={20} height={20} color="#458DC7" />
 										{feature}
 									</li>
 								))}

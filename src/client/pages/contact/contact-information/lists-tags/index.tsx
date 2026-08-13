@@ -155,7 +155,7 @@ const ListsTagsCards: React.FC = () => {
 					<div className="px-0 py-3">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
-								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary [&_svg]:block">
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center text-primary [&_svg]:block">
 									<ListsIcon width={20} height={20} />
 								</span>
 								{__('Lists', 'doublescale')}
@@ -242,7 +242,7 @@ const ListsTagsCards: React.FC = () => {
 					<div className="px-0 py-3">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
-								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-700 [&_svg]:block">
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center text-primary [&_svg]:block">
 									<TagsIcon width={20} height={20} />
 								</span>
 								{__('Tags', 'doublescale')}

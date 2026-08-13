@@ -384,33 +384,34 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			{loading || hasRecords ? (
-				<>
-					{/* Data Table */}
-					<DataTable
-						columns={columns}
-						data={lists}
-						activeTab={activeTab}
-						config={tableConfig}
-						showPagination={false}
-						initialPageSize={perPage}
-						setPage={setPage}
-						loading={loading}
+			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+				{loading || hasRecords ? (
+					<>
+						<DataTable
+							columns={columns}
+							data={lists}
+							activeTab={activeTab}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<DataTablePagination table={serverSideTable} />
+					</>
+				) : (
+					<NoData
+						icon={<GradientListIcon width={120} height={120} />}
+						title={__('No lists yet', 'doublescale')}
+						subtitle={__(
+							'Get started by creating your first list to organize your contacts',
+							'doublescale'
+						)}
+						buttonLabel={__('Create List', 'doublescale')}
+						onClick={handleOpenCreateModal}
 					/>
-					<DataTablePagination table={serverSideTable} />
-				</>
-			) : (
-				<NoData
-					icon={<GradientListIcon width={120} height={120} />}
-					title={__('No lists yet', 'doublescale')}
-					subtitle={__(
-						'Get started by creating your first list to organize your contacts',
-						'doublescale'
-					)}
-					buttonLabel={__('Create List', 'doublescale')}
-					onClick={handleOpenCreateModal}
-				/>
-			)}
+				)}
+			</div>
 
 			{/* Dialog */}
 			<ListDialog

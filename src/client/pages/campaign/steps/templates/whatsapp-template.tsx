@@ -16,6 +16,7 @@ import {
 	Stepper,
 	Field,
 	NoticeBanner,
+	AlertCircleIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -23,7 +24,7 @@ import type { Campaign, NoticeMessage } from '@doublescale/client';
 import type { ExtendedCampaign } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { getCampaignEndpoint } from '@doublescale/utils';
-import { AlertCircle, MessageCircle, FileText } from 'lucide-react';
+import { MessageCircle, FileText } from 'lucide-react';
 
 /**
  * WhatsApp Template interface
@@ -310,7 +311,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 						{/* WhatsApp Business Template Requirement Notice */}
 						<div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
 							<div className="flex gap-3">
-								<AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+								<AlertCircleIcon width={24} height={24} color="#D97706" />
 								<div>
 									<p className="text-sm font-medium text-amber-900 mb-1">
 									{__('WhatsApp Business Templates Required', 'doublescale')}
@@ -336,7 +337,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 								/* API Error - Failed to fetch templates */
 								<div className="bg-red-50 border border-red-200 rounded-lg p-4">
 									<div className="flex gap-3">
-										<AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+										<AlertCircleIcon width={24} height={24} color="#DC2626" />
 										<div>
 											<p className="text-sm font-medium text-red-900 mb-1">
 												{__('Failed to load templates', 'doublescale')}
@@ -358,7 +359,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 								/* No templates exist in provider account */
 								<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
 									<div className="flex gap-3">
-										<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+										<AlertCircleIcon width={24} height={24} color="#CA8A04" />
 										<div>
 											<p className="text-sm font-medium text-yellow-900 mb-1">
 												{__('No WhatsApp templates found', 'doublescale')}

@@ -19,7 +19,8 @@ import { Button } from '@/components/ui/button';
 import './style.scss';
 import {
 	CustomDialogHeader,
-	GradientListIcon,
+	GradientAddToListIcon,
+	GradientRemoveFromListIcon,
 	PaginatedSelect,
 } from '@doublescale/components';
 
@@ -120,7 +121,13 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 						<CustomDialogHeader
 							title={content.title}
 							subtitle={content.subtitle}
-							icon={<GradientListIcon />}
+							icon={
+								mode === 'remove' ? (
+									<GradientRemoveFromListIcon />
+								) : (
+									<GradientAddToListIcon />
+								)
+							}
 						/>
 					</DialogTitle>
 				</DialogHeader>

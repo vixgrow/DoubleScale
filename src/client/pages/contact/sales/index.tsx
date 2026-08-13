@@ -109,16 +109,20 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 
 	const handleViewProposal = useCallback(
 		(proposalId: number) => {
-			go(`sales/proposals/${proposalId}`);
+			go(`sales/proposals/${proposalId}`, {
+				from: `contacts/${contact_id}/proposals`,
+			});
 		},
-		[go]
+		[go, contact_id]
 	);
 
 	const handleViewInvoice = useCallback(
 		(invoiceId: number) => {
-			go(`sales/invoices/${invoiceId}`);
+			go(`sales/invoices/${invoiceId}`, {
+				from: `contacts/${contact_id}/invoices`,
+			});
 		},
-		[go]
+		[go, contact_id]
 	);
 
 	const proposalColumns: ColumnDef<Proposal>[] = useMemo(

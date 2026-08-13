@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  * External dependencies
  */
 import { format } from 'date-fns';
-import { User, ArrowRight, Eye, MousePointerClick, Globe, XCircle, RotateCw, Clock, Ban, Paperclip } from 'lucide-react';
+import { ArrowRight, XCircle, RotateCw, Ban, Paperclip } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -34,7 +34,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import './style.scss';
-import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon, SMSIcon, WhatsAppIcon } from '@doublescale/components';
+import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon, SMSIcon, WhatsAppIcon, ViewIcon, SentSMSIcon, WebsiteTrackingIcon, UserIcon, TimerBlockIcon, AttachmentsIcon } from '@doublescale/components';
 import { ActivityActionsDropdown, EmailActivityActionsDropdown } from './activity-action-dropdown';
 import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
 import NoteDialog from '../notes/note-dialog';
@@ -45,6 +45,10 @@ import type { CampaignEmail, Note } from '@doublescale/client';
 import { isManualEmailLog } from '@doublescale/utils/email-activity';
 import { fetchContactEmailByActivityId } from '@doublescale/utils/fetch-contact-email-by-activity';
 import ConfigAPI from '@doublescale/config';
+import EmailOpenIcon from '@doublescale/shared/icons/email-open';
+import EmailClickIcon from '@doublescale/shared/icons/email-click';
+import SendIcon from '@doublescale/components/icons/send';
+import SentIcon from '@doublescale/shared/icons/sent';
 
 // Pro plugin components - loaded via WordPress filters at runtime
 // Pro plugin registers these via addFilter('doublescale_pro_component', ...)
@@ -75,7 +79,7 @@ interface Activity {
 // TimelineItem is imported from activities-service (includes activity field)
 
 const activityTypeIcons: Record<string, React.ReactNode> = {
-    created: <UserActivityIcon color="hsl(var(--primary))" />,
+    created: <UserIcon color="hsl(var(--primary))" />,
     stage_changed: <ArrowRight className="h-4 w-4 text-primary" />,
     value_changed: <DealValueIcon color="#F97316" />,
     status_changed: <EditHeaderIcon />,
@@ -84,22 +88,22 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     email_received: <EmailActivityIcon />,
     call_logged: <CallActivityIcon width={16} height={16} />,
     meeting_scheduled: <MeetingActivityIcon color="#CB5301" />,
-    file_attached: <Paperclip className="h-4 w-4 text-primary" />,
-    file_removed: <Paperclip className="h-4 w-4 text-muted-foreground" />,
+    file_attached: <AttachmentsIcon width={16} height={16} color="#3a3a99" />,
+    file_removed: <AttachmentsIcon width={16} height={16} />,
     sms_sent: <SMSIcon />,
     sms_received: <SMSIcon />,
     whatsapp_sent: <WhatsAppIcon />,
     whatsapp_received: <WhatsAppIcon />,
     // Tracking types
-    email_opened: <Eye className="w-4 h-4" />,
-    email_clicked: <MousePointerClick className="w-4 h-4" />,
-    sms_clicked: <MousePointerClick className="w-4 h-4" />,
-    whatsapp_clicked: <MousePointerClick className="w-4 h-4" />,
-    page_visited: <Globe className="w-4 h-4" />,
+    email_opened: <EmailOpenIcon width={16} height={16} />,
+    email_clicked: <EmailClickIcon width={16} height={16} />,
+    sms_clicked: <SentSMSIcon width={16} height={16} />,
+    whatsapp_clicked: <SentIcon width={16} height={16} />,
+    page_visited: <WebsiteTrackingIcon width={16} height={16} />,
     // Booking lifecycle types
     booking_scheduled: <MeetingActivityIcon color="#CB5301" />,
     booking_confirmed: <CheckCircleIcon />,
-    booking_pending: <Clock className="w-4 h-4" />,
+    booking_pending: <TimerBlockIcon width={16} height={16} />,
     booking_rescheduled: <RotateCw className="w-4 h-4" />,
     booking_cancelled: <XCircle className="w-4 h-4" />,
     booking_completed: <CheckCircleIcon />,
@@ -462,7 +466,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         !isManualEmailLog(activity.data);
 
     const getActivityIcon = (activityType: string) => {
-        return activityTypeIcons[activityType] || <User className="w-4 h-4" />;
+        return activityTypeIcons[activityType] || <UserIcon width={16} height={16} />;
     };
 
     dayjs.extend(utc);
@@ -691,7 +695,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                 )}
                                 {activity.data.host_name && (
                                     <div className="flex gap-2 items-center text-muted-foreground">
-                                        <User className="w-4 h-4" />
+                                        <UserIcon width={16} height={16} />
                                         <span>{activity.data.host_name as string}</span>
                                     </div>
                                 )}
@@ -870,7 +874,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <UserActivityIcon />
+                                                        <UserIcon />
                                                         <p className="text-xs font-medium text-muted-foreground">
                                                             {item.user?.display_name ||
                                                                 __(

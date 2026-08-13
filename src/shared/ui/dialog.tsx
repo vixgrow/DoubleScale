@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { __ } from '@wordpress/i18n';
 
 import { cn } from '@/lib/utils';
+import { DialogLayerContext } from '@/components/ui/dialog-layer-context';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -144,17 +145,25 @@ const DialogContent = React.forwardRef<
 			style,
 			overlayStyle
 		);
+		const [layerEl, setLayerEl] = React.useState<HTMLDivElement | null>(
+			null
+		);
 
 		const tree = (
-			// The wrapper owns the layer, so the backdrop and the panel share a
-			// single stacking context and the panel can never end up behind it.
-			// `pointer-events-none` is required: with `removePortal` this stays
-			// mounted while closed, and a bare `fixed inset-0` would otherwise
-			// swallow every click on the page underneath.
-			<div
-				className="pointer-events-none fixed inset-0"
-				style={{ zIndex: layerZIndex }}
-			>
+			<DialogLayerContext.Provider value={layerEl}>
+				{/* The wrapper owns the layer, so the backdrop and the panel share a
+				    single stacking context and the panel can never end up behind it.
+				    `pointer-events-none` is required: with `removePortal` this stays
+				    mounted while closed, and a bare `fixed inset-0` would otherwise
+				    swallow every click on the page underneath.
+				    Select/Popover portal here (not into Content) so overflow-hidden
+				    on the panel cannot clip them, and they stack above this dialog. */}
+				<div
+					ref={setLayerEl}
+					className="pointer-events-none fixed inset-0"
+					style={{ zIndex: layerZIndex }}
+					data-doublescale-dialog-layer=""
+				>
 				{!hideOverlay && (
 					<DialogOverlay
 						className={cn(
@@ -209,7 +218,8 @@ const DialogContent = React.forwardRef<
 						)}
 					</DialogPrimitive.Content>
 				</div>
-			</div>
+				</div>
+			</DialogLayerContext.Provider>
 		);
 
 		if (removePortal) {

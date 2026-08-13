@@ -7,7 +7,12 @@ import { __ } from '@wordpress/i18n';
 import { Files, User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, useLocation, getToLink } from '@doublescale/navigation';
+import {
+	contactSalesBreadcrumb,
+	getSalesViewClosePath,
+	salesViewLink,
+} from '../contact-sales-return';
 import {
 	CalendarIcon,
 	ContactTotalEmailsIcon,
@@ -91,6 +96,7 @@ const cardClass = 'rounded-xl border border-border bg-background p-4';
 
 const ProposalView: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const params = useParams();
 	const proposalId = params?.id ? Number(params.id) : null;
 
@@ -147,12 +153,14 @@ const ProposalView: React.FC = () => {
 		};
 	}, [proposalId, proposal?.has_signature]);
 
-	const handleClose = () => navigate(getToLink('sales/proposals'));
+	const handleClose = () =>
+		navigate(getToLink(getSalesViewClosePath(location.search, 'sales/proposals')));
 
-	const breadcrumbItems = [
+	const breadcrumbItems = contactSalesBreadcrumb(
+		location.search,
 		{ label: __('Sales (Proposals)', 'doublescale'), href: 'sales/proposals' },
-		{ label: __('Proposal Details', 'doublescale') },
-	];
+		__('Proposal Details', 'doublescale')
+	);
 
 	const panelShell = (children: JSX.Element) => (
 		<PanelLayout
@@ -172,7 +180,7 @@ const ProposalView: React.FC = () => {
 		setBusy(true);
 		try {
 			await deleteProposal(proposalId);
-			navigate(getToLink('sales/proposals'));
+			navigate(getToLink(getSalesViewClosePath(location.search, 'sales/proposals')));
 		} finally {
 			setBusy(false);
 		}
@@ -255,7 +263,7 @@ const ProposalView: React.FC = () => {
 		setNotice(null);
 		try {
 			const result = await convertProposalToInvoice(proposalId);
-			navigate(getToLink(`sales/invoices/${result.invoice.id}`));
+			navigate(salesViewLink(`sales/invoices/${result.invoice.id}`, location.search));
 		} catch (err: unknown) {
 			setNotice(
 				formatSalesRestError(err, __('Convert to invoice failed.', 'doublescale'), {
@@ -446,8 +454,9 @@ const ProposalView: React.FC = () => {
 								variant="outline"
 								onClick={() =>
 									navigate(
-										getToLink(
-											`sales/invoices/${proposal.invoice_id}`
+										salesViewLink(
+											`sales/invoices/${proposal.invoice_id}`,
+											location.search
 										)
 									)
 								}

@@ -23,10 +23,11 @@ export interface LeadScoringRef {
 
 interface LeadScoringProps {
 	activeTab?: string;
+	onTabChange?: (tab: string) => void;
 }
 
 const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
-	(_props, ref) => {
+	({ onTabChange }, ref) => {
 		const [currentTab, setCurrentTab] = useState<string>('rules');
 		const rulesRef = useRef<RulesRef>(null);
 		const levelsRef = useRef<LevelsRef>(null);
@@ -41,12 +42,17 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 			},
 		}));
 
+		const handleTabChange = (value: string) => {
+			setCurrentTab(value);
+			onTabChange?.(value);
+		};
+
 		return (
-			<div className="doublescale-lead-scoring">
+			<div className="doublescale-lead-scoring rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
 				<PageTabs
 					defaultValue="rules"
 					value={currentTab}
-					onValueChange={(value) => setCurrentTab(value)}
+					onValueChange={handleTabChange}
 					tabsList={[
 						{
 							label: __('Rules', 'doublescale'),
@@ -76,7 +82,7 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 							),
 						},
 					]}
-					tabsListWrapperClassName="border px-5 py-3 rounded-lg"
+					tabsListWrapperClassName="border !border-border px-5 py-3 rounded-lg mb-4"
 					tabsListClassName="bg-transparent text-foreground gap-3"
 				/>
 			</div>

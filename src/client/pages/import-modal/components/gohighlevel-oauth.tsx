@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
  */
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { AlertCircle, CheckCircle2, Link2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Link2, Loader2 } from 'lucide-react';
 /**
  * internal dependencies
  */
@@ -32,6 +32,7 @@ import {
 	useGoHighLevelOAuth,
 	type GoHighLevelCredentials,
 } from '../hooks/use-gohighlevel-oauth';
+import { LinkTriggersIcon, AlertCircleIcon } from '@doublescale/components';
 
 interface GoHighLevelOAuthProps {
 	credentials: {
@@ -152,7 +153,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 			<div className="gohighlevel-oauth-setup">
 				<div className="setup-header mb-6">
 					<div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-						<AlertCircle className="mt-1 h-5 w-5 text-blue-600" />
+						<AlertCircleIcon width={24} height={24} color="#2563EB" />
 						<div className="flex-1">
 							<h4 className="mb-2 text-lg font-semibold text-gray-900">
 								{setup.label}
@@ -214,7 +215,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 
 						{goHighLevelOAuth.error && (
 							<Alert variant="destructive" className="flex items-start gap-2">
-								<AlertCircle className="mt-[2px] h-4 w-4" />
+								<AlertCircleIcon width={20} height={20} />
 								<div>
 									<AlertTitle>
 										{__('Connection error', 'doublescale')}
@@ -240,7 +241,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 									</>
 								) : (
 									<>
-										<Link2 className="h-4 w-4" />
+										<LinkTriggersIcon />
 										{__('Connect to GoHighLevel', 'doublescale')}
 									</>
 								)}

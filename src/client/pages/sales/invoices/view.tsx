@@ -8,7 +8,12 @@ import { __ } from '@wordpress/i18n';
 import { User } from 'lucide-react';
 import { useParams } from '@doublescale/navigation';
 
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useNavigate, useLocation, getToLink } from '@doublescale/navigation';
+import {
+	contactSalesBreadcrumb,
+	getSalesViewClosePath,
+	salesViewLink,
+} from '../contact-sales-return';
 import {
 	CalendarIcon,
 	ContactTotalEmailsIcon,
@@ -178,6 +183,7 @@ const TotalsSummaryCard: React.FC<{
 
 const InvoiceView: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const params = useParams();
 	const invoiceId = params?.id ? Number(params.id) : null;
 
@@ -237,12 +243,14 @@ const InvoiceView: React.FC = () => {
 		invoice.status !== 'paid' &&
 		payableGateways.length > 0;
 
-	const handleClose = () => navigate(getToLink('sales/invoices'));
+	const handleClose = () =>
+		navigate(getToLink(getSalesViewClosePath(location.search, 'sales/invoices')));
 
-	const breadcrumbItems = [
+	const breadcrumbItems = contactSalesBreadcrumb(
+		location.search,
 		{ label: __('Sales (Invoices)', 'doublescale'), href: 'sales/invoices' },
-		{ label: __('Invoice Details', 'doublescale') },
-	];
+		__('Invoice Details', 'doublescale')
+	);
 
 	const panelShell = (children: JSX.Element) => (
 		<PanelLayout
@@ -263,7 +271,7 @@ const InvoiceView: React.FC = () => {
 		setBusy(true);
 		try {
 			await deleteInvoice(invoiceId);
-			navigate(getToLink('sales/invoices'));
+			navigate(getToLink(getSalesViewClosePath(location.search, 'sales/invoices')));
 		} finally {
 			setBusy(false);
 		}
@@ -470,7 +478,12 @@ const InvoiceView: React.FC = () => {
 						type="button"
 						className="font-medium text-primary hover:underline"
 						onClick={() =>
-							navigate(getToLink(`sales/proposals/${invoice.proposal!.id}`))
+							navigate(
+								salesViewLink(
+									`sales/proposals/${invoice.proposal!.id}`,
+									location.search
+								)
+							)
 						}
 					>
 						{invoice.proposal.proposal_number} — {invoice.proposal.subject}

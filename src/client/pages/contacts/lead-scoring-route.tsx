@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useRef } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
@@ -17,6 +17,7 @@ import ModuleDisabledNotice from '@/components/module-disabled-notice';
 
 const ContactsLeadScoringRoute: React.FC = () => {
 	const leadScoringRef = useRef<LeadScoringRef>(null);
+	const [currentTab, setCurrentTab] = useState<string>('rules');
 	const isCrmManager = useCapabilities().isCrmManager();
 	const moduleOn = config.isModuleEnabled('leadscoring');
 	const isProActive = applyFilters(
@@ -28,7 +29,10 @@ const ContactsLeadScoringRoute: React.FC = () => {
 		isCrmManager && moduleOn && isProActive
 			? [
 					{
-						label: __('Add', 'doublescale'),
+						label:
+							currentTab === 'levels'
+								? __('Add Level', 'doublescale')
+								: __('Add Rule', 'doublescale'),
 						onClick: () => {
 							leadScoringRef.current?.openCreateModal();
 						},
@@ -45,7 +49,7 @@ const ContactsLeadScoringRoute: React.FC = () => {
 				actions={headerActions}
 			/>
 			{!isProActive ? (
-				<div className="bg-white rounded-3xl p-8 shadow-sm">
+				<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
 					<ProFeatureNotice
 						featureName={__('Lead Score', 'doublescale')}
 						description={__(
@@ -59,7 +63,11 @@ const ContactsLeadScoringRoute: React.FC = () => {
 					featureName={__('Lead Score', 'doublescale')}
 				/>
 			) : (
-				<LeadScoring ref={leadScoringRef} activeTab="lead_scoring" />
+				<LeadScoring
+					ref={leadScoringRef}
+					activeTab="lead_scoring"
+					onTabChange={setCurrentTab}
+				/>
 			)}
 		</div>
 	);

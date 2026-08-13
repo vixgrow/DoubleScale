@@ -1,6 +1,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { Check, Loader2, AlertCircle } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
+import { AlertCircleIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 
 interface SaveStatusIndicatorProps {
@@ -43,7 +44,7 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 	const getStatusContent = () => {
 		if (error) {
 			return {
-				icon: <AlertCircle className="h-4 w-4" />,
+				icon: <AlertCircleIcon width={20} height={20} />,
 				text: __('Save failed', 'doublescale'),
 				color: 'text-red-600',
 			};
@@ -59,7 +60,7 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 
 		if (hasUnsavedChanges) {
 			return {
-				icon: <AlertCircle className="h-4 w-4" />,
+				icon: <AlertCircleIcon width={20} height={20} />,
 				text: __('Unsaved changes', 'doublescale'),
 				color: 'text-orange-600',
 			};

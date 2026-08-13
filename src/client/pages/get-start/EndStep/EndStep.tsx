@@ -5,7 +5,8 @@ import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
 import type { ModuleInfo } from '@doublescale/config';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight, Loader2, AlertCircle, RotateCcw } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Loader2, RotateCcw } from 'lucide-react';
+import { AlertCircleIcon } from '@doublescale/components';
 import { pickToggleableModulePayload } from '@doublescale/shared/lib/optional-marketing-modules';
 
 function getDashboardUrl(): string {
@@ -108,7 +109,7 @@ export default function EndStep({ pendingModuleChanges }: EndStepProps) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-5 mx-auto min-h-[60vh] text-center max-w-lg px-4">
 				<div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 text-red-500 mb-2">
-					<AlertCircle size={32} />
+					<AlertCircleIcon width={32} height={32} color="#EF4444" />
 				</div>
 				<h3 className="text-foreground text-2xl font-semibold">
 					{__('Setup did not finish', 'doublescale')}

@@ -46,8 +46,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { InfoIcon } from '@doublescale/components';
 import {
 	defaultCredentialsForMailer,
 	getMailerCredentialFields,
@@ -1751,10 +1751,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 							</Select>
 							{field.help ? (
 								<div className="flex gap-2 text-xs text-muted-foreground">
-									<Info
-										className="mt-0.5 h-4 w-4 shrink-0 text-brandPrimary	"
-										aria-hidden
-									/>
+									<InfoIcon width={16} height={16} color="#3a3a99" />
 									<span>{field.help}</span>
 								</div>
 							) : null}
@@ -1790,10 +1787,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 						/>
 						{field.help ? (
 							<div className="flex gap-2 text-xs text-muted-foreground">
-								<Info
-									className="mt-0.5 h-4 w-4 shrink-0 text-brandPrimary	"
-									aria-hidden
-								/>
+								<InfoIcon width={16} height={16} color="#3a3a99" />
 								<span>{field.help}</span>
 							</div>
 						) : null}

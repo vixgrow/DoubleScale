@@ -386,7 +386,7 @@ export function DataTableActions<TData>({
 								onClick={handleApplyAdvancedFilters}
 								disabled={config.filters?.isApplying}
 								className="w-full"
-								variant="outline"
+								variant="secondaryDeepBlue"
 							>
 								{config.filters?.isApplying
 									? __('Applying...', 'doublescale')

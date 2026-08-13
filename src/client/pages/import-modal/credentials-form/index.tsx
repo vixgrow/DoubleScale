@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { map } from 'lodash';
-import { ArrowUpLeft, AlertCircle } from 'lucide-react';
+import { ArrowUpLeft } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Field } from '@doublescale/components';
+import { Field, AlertCircleIcon } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import { useImportActions } from '../use-importActions';
 import GoHighLevelOAuth from '../components/gohighlevel-oauth';
@@ -134,7 +134,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 	const getValidationIcon = useCallback(() => {
 		switch (validationStatus) {
 			case 'error':
-				return <AlertCircle className="w-4 h-4 text-red-500" />;
+				return <AlertCircleIcon width={20} height={20} color="#EF4444" />;
 			default:
 				return null;
 		}

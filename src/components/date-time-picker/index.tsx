@@ -1,12 +1,15 @@
-
 'use client';
 
 import * as React from 'react';
-import { OutlinedCalendarIcon } from '@doublescale/components';
+import { CalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover-dialog';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover-dialog';
 
 interface DateTimePickerProps {
 	value?: Date | null;
@@ -47,10 +50,11 @@ export function DateTimePicker({
 }: DateTimePickerProps) {
 	const [open, setOpen] = React.useState(false);
 	const initialDate = React.useMemo(() => parseDate(value), [value]);
-	const [date, setDate] = React.useState<Date | undefined>(initialDate || new Date());
+	const [date, setDate] = React.useState<Date | undefined>(
+		initialDate || new Date()
+	);
 	const [tempDate, setTempDate] = React.useState<Date | undefined>(date);
 
-	
 	const [hours, setHours] = React.useState(() => {
 		const d = initialDate || new Date();
 		let h = d.getHours();
@@ -87,7 +91,7 @@ export function DateTimePicker({
 		e?.stopPropagation();
 		if (!tempDate) return;
 		const updated = new Date(tempDate);
-		const h = hours % 12 + (ampm === 'PM' ? 12 : 0);
+		const h = (hours % 12) + (ampm === 'PM' ? 12 : 0);
 		updated.setHours(h, minutes);
 		setDate(updated);
 		onChange(updated);
@@ -101,17 +105,28 @@ export function DateTimePicker({
 	};
 
 	return (
-		<div className={cn('relative flex w-full min-w-0 flex-col gap-2', className)}>
-			<Popover open={open} onOpenChange={(val) => {
-				if (!val) return; 
-				setOpen(val);
-			}}>
+		<div
+			className={cn(
+				'relative flex w-full min-w-0 flex-col gap-2',
+				className
+			)}
+		>
+			<Popover open={open} onOpenChange={setOpen} modal={false}>
 				<PopoverTrigger asChild>
 					<Button
+						type="button"
 						variant="outline"
 						className="flex h-12 w-full min-w-0 flex-row-reverse items-center justify-between overflow-hidden border border-border/60 bg-white px-3 !shadow-none hover:bg-white text-foreground"
+						onPointerDown={(e) => {
+							// Nested in a Dialog, the trigger click is treated as an
+							// outside dismiss then a re-open. Close on this pointer down.
+							if (open) {
+								e.preventDefault();
+								setOpen(false);
+							}
+						}}
 					>
-						<OutlinedCalendarIcon className="shrink-0" />
+						<CalendarIcon width={20} height={20} />
 						<span className="min-w-0 flex-1 truncate text-left">
 							{date ? formatDateTime(date) : placeholder}
 						</span>
@@ -120,83 +135,95 @@ export function DateTimePicker({
 
 				<PopoverContent
 					onClick={(e) => e.stopPropagation()}
-					className="w-auto p-4 flex flex-col gap-3 shadow-lg border-none"
+					onPointerDownOutside={(e) => e.stopPropagation()}
+					onWheel={(e) => e.stopPropagation()}
+					side="top"
 					align="end"
 					sideOffset={10}
+					avoidCollisions
+					collisionPadding={24}
+					className="z-[170000] w-auto p-0 shadow-lg border-none overflow-hidden"
 				>
-					<Calendar
-						mode="single"
-						selected={tempDate}
-						onSelect={handleDateSelect}
-						month={tempDate}
-						onMonthChange={setTempDate}
-						disabled={disabled}
-						className=" [&_[data-selected-single=true]]:!bg-[#458DC7] [&_[data-selected-single=true]]:!text-white [&_[data-selected-single=true]]:rounded-full"
-					/>
+					<div
+						className="flex h-[360px] flex-col gap-3 overflow-y-auto overscroll-contain p-4"
+						onWheel={(e) => e.stopPropagation()}
+						onTouchMove={(e) => e.stopPropagation()}
+					>
+						<Calendar
+							mode="single"
+							selected={tempDate}
+							onSelect={handleDateSelect}
+							month={tempDate}
+							onMonthChange={setTempDate}
+							disabled={disabled}
+							className=" [&_[data-selected-single=true]]:!bg-[#458DC7] [&_[data-selected-single=true]]:!text-white [&_[data-selected-single=true]]:rounded-full"
+						/>
 
-					<div className="flex justify-center pt-3 border-t">
-						<div className="flex items-center gap-1 border h-10 border-border/60 border-x-0 rounded-l-[8px]">
-							<input
-								type="number"
-								value={hours.toString().padStart(2, '0')}
-								min={1}
-								max={12}
-								onChange={(e) => handleTimeChange('h', e.target.value)}
-								className="text-center text-sm text-foreground font-medium !rounded-l-[8px] !border !border-border/60 !border-r-0 !outline-none focus:!outline-none focus:border-0 w-16"
-							/>
-							<span className="text-sm">:</span>
-							<input
-								type="number"
-								value={minutes.toString().padStart(2, '0')}
-								min={0}
-								max={59}
-								onChange={(e) => handleTimeChange('m', e.target.value)}
-								className="w-16 text-center text-sm text-foreground font-medium !border !border-border/60 !border-x-0 !outline-none focus:!outline-none focus:border-0"
-							/>
+						<div className="flex justify-center pt-3 border-t">
+							<div className="flex items-center gap-1 border h-10 border-border/60 border-x-0 rounded-l-[8px]">
+								<input
+									type="number"
+									value={hours.toString().padStart(2, '0')}
+									min={1}
+									max={12}
+									onChange={(e) =>
+										handleTimeChange('h', e.target.value)
+									}
+									className="text-center text-sm text-foreground font-medium !rounded-l-[8px] !border !border-border/60 !border-r-0 !outline-none focus:!outline-none focus:border-0 w-16"
+								/>
+								<span className="text-sm">:</span>
+								<input
+									type="number"
+									value={minutes.toString().padStart(2, '0')}
+									min={0}
+									max={59}
+									onChange={(e) =>
+										handleTimeChange('m', e.target.value)
+									}
+									className="w-16 text-center text-sm text-foreground font-medium !border !border-border/60 !border-x-0 !outline-none focus:!outline-none focus:border-0"
+								/>
+							</div>
+
+							<div className="flex flex-col h-10 w-14 border border-border/60 rounded-r-[8px] overflow-hidden">
+								<button
+									type="button"
+									onClick={() => handleAmPmClick('AM')}
+									className={cn(
+										'w-full h-full text-xs font-medium',
+										ampm === 'AM'
+											? 'bg-[#458DC7] text-white'
+											: 'bg-white text-foreground'
+									)}
+								>
+									AM
+								</button>
+								<button
+									type="button"
+									onClick={() => handleAmPmClick('PM')}
+									className={cn(
+										'w-full h-full text-xs font-medium',
+										ampm === 'PM'
+											? 'bg-[#458DC7] text-white'
+											: 'bg-white text-foreground'
+									)}
+								>
+									PM
+								</button>
+							</div>
 						</div>
 
-						<div className="flex flex-col h-10 w-14 border border-border/60 rounded-r-[8px] overflow-hidden">
-							<button
+						<div className="flex justify-end gap-2 pt-3 border-t">
+							<Button
+								variant="outline"
+								onClick={handleCancel}
 								type="button"
-								onClick={() => handleAmPmClick('AM')}
-								className={cn(
-									'w-full h-full text-xs font-medium',
-									ampm === 'AM'
-										? 'bg-[#458DC7] text-white'
-										: 'bg-white text-foreground'
-								)}
 							>
-								AM
-							</button>
-							<button
-								type="button"
-								onClick={() => handleAmPmClick('PM')}
-								className={cn(
-									'w-full h-full text-xs font-medium',
-									ampm === 'PM'
-										? 'bg-[#458DC7] text-white'
-										: 'bg-white text-foreground'
-								)}
-							>
-								PM
-							</button>
+								Cancel
+							</Button>
+							<Button onClick={handleDone} type="button">
+								Done
+							</Button>
 						</div>
-					</div>
-
-					<div className="flex justify-end gap-2 pt-3 border-t">
-						<Button 
-							variant="outline" 
-							onClick={handleCancel}
-							type="button"
-						>
-							Cancel
-						</Button>
-						<Button 
-							onClick={handleDone}
-							type="button"
-						>
-							Done
-						</Button>
 					</div>
 				</PopoverContent>
 			</Popover>

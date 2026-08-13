@@ -98,7 +98,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 		return [
 			{
 				key: 'total-emails',
-				icon: <ContactTotalEmailsIcon width={40} height={40} />,
+				icon: <ContactTotalEmailsIcon width={32} height={32} />,
 				value: total,
 				label: __('Total Emails', 'doublescale'),
 				iconBgClass: 'bg-primary/10',
@@ -106,7 +106,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 			},
 			{
 				key: 'open-rate',
-				icon: <OpenRateIcon width={40} height={40} />,
+				icon: <OpenRateIcon width={32} height={32} />,
 				value: `${analytics.open_rate?.toFixed(2) || '0.00'}%`,
 				label: __('Open Rate', 'doublescale'),
 				iconBgClass: 'bg-emerald-50',
@@ -114,7 +114,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 			},
 			{
 				key: 'click-rate',
-				icon: <ClickRateIcon width={40} height={40} />,
+				icon: <ClickRateIcon width={32} height={32} />,
 				value: `${analytics.click_rate?.toFixed(2) || '0.00'}%`,
 				label: __('Click Rate', 'doublescale'),
 				iconBgClass: 'bg-violet-50',

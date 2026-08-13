@@ -3,6 +3,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { DialogLayerContext } from "@/components/ui/dialog-layer-context"
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -80,34 +81,42 @@ const AlertDialogContent = React.forwardRef<
     /** Merged into `AlertDialogOverlay` (e.g. `bg-black/45` for nested dialogs). */
     overlayClassName?: string
   }
->(({ className, overlayClassName, style, ...props }, ref) => (
-  <AlertDialogPortal>
-    {/* The wrapper owns the layer, so the backdrop and the panel share a single
-        stacking context and the panel can never end up behind it. */}
-    <div
-      className="pointer-events-none fixed inset-0"
-      style={{ zIndex: resolveLayerZIndex(className, overlayClassName, style) }}
-    >
-      <AlertDialogOverlay
-        className={cn(stripZIndexClasses(overlayClassName), "!absolute !inset-0")}
-        style={{ zIndex: 0 }}
-      />
-      <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center p-4 max-sm:p-2">
-        <AlertDialogPrimitive.Content
-          ref={ref}
-          data-doublescale-dialog-center=""
-          className={cn(
-            // Flex-centered: no left/translate, so WP rtlcss flipping is a no-op.
-            "pointer-events-auto relative z-[1] grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
-            stripLegacyCenterTranslate(className)
-          )}
-          style={style}
-          {...props}
-        />
-      </div>
-    </div>
-  </AlertDialogPortal>
-))
+>(({ className, overlayClassName, style, ...props }, ref) => {
+  const [layerEl, setLayerEl] = React.useState<HTMLDivElement | null>(null)
+
+  return (
+    <AlertDialogPortal>
+      <DialogLayerContext.Provider value={layerEl}>
+        {/* The wrapper owns the layer, so the backdrop and the panel share a single
+            stacking context and the panel can never end up behind it. */}
+        <div
+          ref={setLayerEl}
+          className="pointer-events-none fixed inset-0"
+          style={{ zIndex: resolveLayerZIndex(className, overlayClassName, style) }}
+          data-doublescale-dialog-layer=""
+        >
+          <AlertDialogOverlay
+            className={cn(stripZIndexClasses(overlayClassName), "!absolute !inset-0")}
+            style={{ zIndex: 0 }}
+          />
+          <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center p-4 max-sm:p-2">
+            <AlertDialogPrimitive.Content
+              ref={ref}
+              data-doublescale-dialog-center=""
+              className={cn(
+                // Flex-centered: no left/translate, so WP rtlcss flipping is a no-op.
+                "pointer-events-auto relative z-[1] grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+                stripLegacyCenterTranslate(className)
+              )}
+              style={style}
+              {...props}
+            />
+          </div>
+        </div>
+      </DialogLayerContext.Provider>
+    </AlertDialogPortal>
+  )
+})
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const AlertDialogHeader = ({

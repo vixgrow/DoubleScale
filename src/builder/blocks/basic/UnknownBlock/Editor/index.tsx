@@ -6,11 +6,8 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import { AlertCircle, Info } from 'lucide-react';
-/**
- * internal dependencies
- */
 import { UnknownBlockProps } from '../index';
+import { InfoIcon, AlertCircleIcon } from '@doublescale/components';
 
 export interface UnknownEditorProps {
 	props: UnknownBlockProps;
@@ -24,7 +21,7 @@ export const UnknownEditor: React.FC<UnknownEditorProps> = ({ props }) => {
 		<div className="space-y-4">
 			<div className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
 				<div className="flex-shrink-0 mt-1">
-					<AlertCircle className="w-8 h-8 text-gray-400" />
+					<AlertCircleIcon width={32} height={32} color="#9CA3AF" />
 				</div>
 				<div className="flex-1 space-y-2">
 					<h4 className="font-semibold text-gray-900">
@@ -41,7 +38,7 @@ export const UnknownEditor: React.FC<UnknownEditorProps> = ({ props }) => {
 
 			<div className="space-y-3">
 				<div className="flex items-center gap-2 text-sm text-gray-700">
-					<Info className="w-4 h-4" />
+					<InfoIcon width={16} height={16} color="currentColor" />
 					<span className="font-medium">
 						{__('Block Information', 'doublescale')}
 					</span>

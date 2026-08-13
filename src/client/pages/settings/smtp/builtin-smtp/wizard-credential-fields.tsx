@@ -2,7 +2,6 @@
  * Reusable credential input blocks used in both Wizard step-3 and the Edit Account modal.
  */
 import { __ } from '@wordpress/i18n';
-import { Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +20,7 @@ import {
 } from '../mailer-options';
 import type { SmtpConnection } from '../types';
 import { SMTP_CONNECTION_INPUT_CLASS, SMTP_CONNECTION_SELECT_TRIGGER_CLASS } from './form-utils';
+import { InfoIcon } from '@doublescale/components';
 
 // ---------------------------------------------------------------------------
 // OAuth credential fields  (Gmail / Outlook / Zoho step-3 left panel)
@@ -187,7 +187,7 @@ export function ApiCredentialFields({
 							</Select>
 							{field.help ? (
 								<div className="flex gap-2 text-xs text-muted-foreground">
-									<Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+									<InfoIcon width={16} height={16} color="#0D9DFC" />
 									<span>{field.help}</span>
 								</div>
 							) : null}
@@ -223,7 +223,7 @@ export function ApiCredentialFields({
 						/>
 						{field.help ? (
 							<div className="flex gap-2 text-xs text-muted-foreground">
-								<Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+								<InfoIcon width={16} height={16} color="#0D9DFC" />
 								<span>{field.help}</span>
 							</div>
 						) : null}

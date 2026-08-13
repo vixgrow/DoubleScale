@@ -8,7 +8,6 @@
 
 import React from '@wordpress/element';
 import {
-	AlertCircle,
 	CheckCircle2,
 	Circle,
 	CircleDot,
@@ -21,7 +20,7 @@ import { HelpdeskIcon } from '@doublescale/shared/icons';
 
 import type { TicketPriority, TicketStatus } from '@/constants/support';
 import { PRIORITY_LABELS, STATUS_LABELS } from '@/constants/support';
-import { AlertTriangleIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertCircleIcon } from '@doublescale/components';
 
 interface IconProps {
 	width?: number;
@@ -85,7 +84,9 @@ const PRIORITY_STYLES: Record<
 	high: {
 		// bg: 'bg-[#CB5301]',
 		fg: 'text-[#CB5301]',
-		Icon: (p) => <AlertCircle {...p} />,
+		Icon: ({ width, height }) => (
+			<AlertCircleIcon width={width} height={height} />
+		),
 	},
 	urgent: {
 

@@ -63,20 +63,22 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 		return (
 			<div className="doublescale-all-contacts w-full">
 				<NoticeSection />
-				{loading || hasRecords ? (
-					<ContactsTable activeTab={activeTab} />
-				) : (
-					<NoData
-						icon={<GradientContactsIcon width={120} height={120} />}
-						title={__('No contacts yet', 'doublescale')}
-						subtitle={__(
-							'Get started by creating your first contact or import contacts from a CSV file',
-							'doublescale'
-						)}
-						buttonLabel={__('Create Contact', 'doublescale')}
-						onClick={handleOpenCreateContactModal}
-					/>
-				)}
+				<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+					{loading || hasRecords ? (
+						<ContactsTable activeTab={activeTab} />
+					) : (
+						<NoData
+							icon={<GradientContactsIcon width={120} height={120} />}
+							title={__('No contacts yet', 'doublescale')}
+							subtitle={__(
+								'Get started by creating your first contact or import contacts from a CSV file',
+								'doublescale'
+							)}
+							buttonLabel={__('Create Contact', 'doublescale')}
+							onClick={handleOpenCreateContactModal}
+						/>
+					)}
+				</div>
 				<CreateContactModal />
 				<ContactsImportModal />
 				<ContactsExportModal />

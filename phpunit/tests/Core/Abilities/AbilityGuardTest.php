@@ -156,11 +156,18 @@ final class AbilityGuardTest extends TestCase {
 	}
 
 	/**
-	 * The AI gate runs before the module and capability gates, so a site with
-	 * no configured provider exposes nothing at all — even to an administrator
-	 * whose module and capability checks would otherwise pass.
+	 * An unconfigured AI provider must NOT close the abilities layer.
+	 *
+	 * This assertion used to be the opposite, and that was the bug: nothing in
+	 * the abilities layer calls an AI provider — an external agent connects in
+	 * and reads CRM data — so demanding an OpenAI key first published zero
+	 * tools on sites that never wanted the in-dashboard assistant. Every client
+	 * reported that as a failed connection rather than an unconfigured one.
+	 *
+	 * The provider check still guards the outbound features, which do call a
+	 * provider; see Permissions::has_ai_access().
 	 */
-	public function test_ai_gate_blocks_before_module_and_capability_gates(): void {
+	public function test_missing_ai_provider_does_not_block_abilities(): void {
 		$this->set_stored_modules( array( 'support' => true ) );
 		unset( $GLOBALS['__doublescale_phpunit_options']['doublescale_settings'] );
 
@@ -172,10 +179,10 @@ final class AbilityGuardTest extends TestCase {
 			}
 		);
 
-		$result = $callback();
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'ai_not_configured', $result->get_error_code() );
+		$this->assertTrue(
+			$callback(),
+			'An unconfigured AI provider must not close the abilities layer.'
+		);
 	}
 
 	public function test_wrap_execute_passes_through_a_successful_result(): void {

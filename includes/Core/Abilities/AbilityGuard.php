@@ -115,7 +115,12 @@ final class AbilityGuard {
 	 */
 	public static function compose_permission( string $name, string $module_slug, $module_permission ): callable {
 		return static function () use ( $name, $module_slug, $module_permission ) {
-			$ai_access = Permissions::has_ai_access();
+			// Role only — NOT has_ai_access(), which also demands a configured
+			// AI provider. Nothing here calls a provider: an external agent
+			// connects in and reads CRM data. Requiring an OpenAI key first
+			// published zero tools on sites that never intended to use the
+			// in-dashboard assistant, which read as "the connection failed".
+			$ai_access = Permissions::has_ai_role_access();
 			if ( is_wp_error( $ai_access ) ) {
 				return $ai_access;
 			}

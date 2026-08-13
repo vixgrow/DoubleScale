@@ -102,6 +102,15 @@ export const useCapabilities = () => {
     }, []);
 
     /**
+     * Settings → MCP: WordPress administrators only. CRM Manager can use the
+     * CRM but cannot enable the site-wide MCP endpoint or issue API keys.
+     */
+    const canManageMcp = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities();
+        return Boolean(caps.doublescale_manage_mcp);
+    }, []);
+
+    /**
      * Check if current user can see and manage every support ticket.
      * Granted to administrators, CRM Managers, and Support Managers (NOT Sales
      * roles). Used to hide reassign/delete UI from Support Agents (who only see
@@ -139,6 +148,7 @@ export const useCapabilities = () => {
         canManageAllDeals,
         isCrmManager,
         hasLimitedSettingsAccess,
+        canManageMcp,
         canManageAllTickets,
         hasProjectAccess,
         canManageAllProjects,

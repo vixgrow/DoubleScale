@@ -16,8 +16,10 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Abilities\AbilitiesBootstrap;
 use DoubleScale\Core\Abilities\AbilityRegistrar;
 use DoubleScale\Core\Abilities\Mcp\ApiKeyStore;
+use DoubleScale\Core\Abilities\Mcp\KeySubject;
 use DoubleScale\Core\Abilities\McpServer;
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -73,9 +75,14 @@ class RestMcpSettingsController extends RestController {
 					'callback'            => array( $this, 'create_key' ),
 					'permission_callback' => array( $this, 'admin_permissions_check' ),
 					'args'                => array(
-						'label' => array(
+						'label'   => array(
 							'required' => false,
 							'type'     => 'string',
+						),
+						// Omitted means "for me" — the original behaviour.
+						'user_id' => array(
+							'required' => false,
+							'type'     => 'integer',
 						),
 					),
 				),
@@ -96,29 +103,51 @@ class RestMcpSettingsController extends RestController {
 	}
 
 	/**
-	 * Issue a new API key for the current administrator.
+	 * Issue a new API key.
 	 *
-	 * The key acts as this user, so its reach is exactly their own — it cannot
-	 * be used to widen access beyond what they can already see.
+	 * The key acts as the user it is bound to, so its reach is exactly theirs.
+	 * Without `user_id` it binds to the caller, which is the common case. An
+	 * administrator may name another user instead — see KeySubject for which
+	 * users qualify and why. Binding the key to the person who will actually
+	 * use it is what keeps owner scoping meaningful: handing a sales rep the
+	 * administrator's key would silently show them everyone's records.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_key( $request ) {
-		$label = (string) $request->get_param( 'label' );
+		$label     = (string) $request->get_param( 'label' );
+		$requested = $request->get_param( 'user_id' );
 
-		$created = ApiKeyStore::create( $label, get_current_user_id() );
+		$subject = KeySubject::validate(
+			null === $requested ? get_current_user_id() : (int) $requested
+		);
+
+		if ( is_wp_error( $subject ) ) {
+			return $subject;
+		}
+
+		$created = ApiKeyStore::create( $label, $subject );
+		$owner   = get_userdata( $subject );
 
 		return new WP_REST_Response(
 			array(
 				// Returned exactly once — only the hash is stored.
-				'key'      => $created['key'],
-				'id'       => $created['id'],
-				'label'    => $created['label'],
-				'api_keys' => ApiKeyStore::list_for_display(),
-				'message'  => __( 'API key created. Copy it now — it will not be shown again.', 'doublescale' ),
+				'key'        => $created['key'],
+				'id'         => $created['id'],
+				'label'      => $created['label'],
+				'user_id'    => $subject,
+				'user_login' => $owner ? $owner->user_login : '',
+				'api_keys'   => ApiKeyStore::list_for_display(),
+				'message'    => get_current_user_id() === $subject
+					? __( 'API key created. Copy it now — it will not be shown again.', 'doublescale' )
+					: sprintf(
+						/* translators: %s: WordPress username the key acts as. */
+						__( 'API key created for %s. It carries their permissions. Copy it now — it will not be shown again.', 'doublescale' ),
+						$owner ? $owner->user_login : ''
+					),
 			),
 			201
 		);
@@ -156,7 +185,7 @@ class RestMcpSettingsController extends RestController {
 	public function admin_permissions_check( $request ) {
 		unset( $request );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Permissions::can_manage_mcp() ) {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'You do not have permission to manage MCP settings.', 'doublescale' ),
@@ -200,6 +229,9 @@ class RestMcpSettingsController extends RestController {
 				'tools'                   => $this->tool_summaries(),
 				'api_keys'                => ApiKeyStore::list_for_display(),
 				'current_user'            => wp_get_current_user()->user_login,
+				'current_user_id'         => get_current_user_id(),
+				// Users this administrator may issue a key on behalf of.
+				'eligible_key_users'      => KeySubject::eligible(),
 				'app_passwords_url'       => admin_url( 'profile.php#application-passwords-section' ),
 				// Application passwords need HTTPS. Without this the connect
 				// instructions would send an admin down a path that silently

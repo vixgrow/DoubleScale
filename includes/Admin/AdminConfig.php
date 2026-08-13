@@ -73,6 +73,8 @@ final class AdminConfig {
 			// CRM Manager + Sales Rep multi-role users never get locked to
 			// Mailbox/Notifications by composing membership flags in JS.
 			'doublescale_limited_settings'        => Permissions::has_limited_settings_access(),
+			// MCP settings page only — WordPress administrators, not CRM Manager.
+			'doublescale_manage_mcp'              => Permissions::can_manage_mcp(),
 			'doublescale_support_manager'         => Permissions::user_has_role( UserRoles::SUPPORT_MANAGER ),
 			'doublescale_support_agent'           => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
 			'doublescale_booking_manager'         => Permissions::user_has_role( UserRoles::BOOKING_MANAGER ),

@@ -35,6 +35,13 @@ interface McpApiKey {
 	last_used: string;
 }
 
+interface McpEligibleUser {
+	id: number;
+	user_login: string;
+	label: string;
+	role: string;
+}
+
 interface McpStatus {
 	abilities_api_available: boolean;
 	wp_version: string;
@@ -46,6 +53,8 @@ interface McpStatus {
 	tools: McpTool[];
 	api_keys: McpApiKey[];
 	current_user: string;
+	current_user_id: number;
+	eligible_key_users: McpEligibleUser[];
 	app_passwords_url: string;
 	app_passwords_available: boolean;
 }
@@ -177,7 +186,10 @@ const McpSettings: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [keyLabel, setKeyLabel] = useState('');
+	// Empty means "for me" — the common case, and the original behaviour.
+	const [keyUserId, setKeyUserId] = useState('');
 	const [newKey, setNewKey] = useState('');
+	const [newKeyOwner, setNewKeyOwner] = useState('');
 	const [creatingKey, setCreatingKey] = useState(false);
 	const [copied, setCopied] = useState(false);
 	// Seeded from the browser, but overridable: an admin may be generating a
@@ -360,24 +372,33 @@ const McpSettings: React.FC = () => {
 		try {
 			const response = await apiFetch<{
 				key: string;
+				user_login: string;
 				api_keys: McpApiKey[];
 			}>({
 				path: '/doublescale/v1/mcp/keys',
 				method: 'POST',
-				data: { label: keyLabel || undefined },
+				data: {
+					label: keyLabel || undefined,
+					// Omitted binds the key to the current user.
+					user_id: keyUserId ? Number(keyUserId) : undefined,
+				},
 			});
 			// Held in state only for this render: the server stores a hash and
 			// can never show it again.
 			setNewKey(response.key);
+			setNewKeyOwner(response.user_login);
 			setKeyLabel('');
+			setKeyUserId('');
 			setStatus((current) =>
 				current ? { ...current, api_keys: response.api_keys } : current
 			);
 		} catch (error) {
-			setNotice({
-				type: 'error',
-				message: __('Failed to create API key', 'doublescale'),
-			});
+			// The server explains *why* a subject was refused (administrator,
+			// no CRM role); a generic message would send the admin guessing.
+			const message =
+				(error as { message?: string })?.message ||
+				__('Failed to create API key', 'doublescale');
+			setNotice({ type: 'error', message });
 		} finally {
 			setCreatingKey(false);
 		}
@@ -603,8 +624,8 @@ const McpSettings: React.FC = () => {
 				</p>
 
 				{/* Create a key */}
-				<div className="flex items-end gap-3 mb-4">
-					<div className="flex-1 max-w-sm">
+				<div className="flex items-end gap-3 mb-2 flex-wrap">
+					<div className="flex-1 min-w-[200px] max-w-sm">
 						<Label className="text-sm">
 							{__('Key name', 'doublescale')}
 						</Label>
@@ -614,6 +635,39 @@ const McpSettings: React.FC = () => {
 							placeholder={__('e.g. Claude on my laptop', 'doublescale')}
 						/>
 					</div>
+
+					{/*
+					 * Binding a key to the teammate who will actually use it is
+					 * what keeps record ownership meaningful — a key always
+					 * carries its owner's permissions, so handing someone your
+					 * own key would show them everyone's records.
+					 */}
+					{status.eligible_key_users.length > 0 && (
+						<div className="flex-1 min-w-[200px] max-w-sm">
+							<Label className="text-sm">
+								{__('Acts as', 'doublescale')}
+							</Label>
+							<select
+								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								value={keyUserId}
+								onChange={(event) => setKeyUserId(event.target.value)}
+							>
+								<option value="">
+									{sprintf(
+										/* translators: %s: current user's WordPress username. */
+										__('Me (%s)', 'doublescale'),
+										status.current_user
+									)}
+								</option>
+								{status.eligible_key_users.map((user) => (
+									<option key={user.id} value={String(user.id)}>
+										{user.label} ({user.user_login})
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+
 					<Button
 						onClick={handleCreateKey}
 						disabled={creatingKey}
@@ -625,13 +679,34 @@ const McpSettings: React.FC = () => {
 					</Button>
 				</div>
 
+				<p className="text-sm text-gray-500 mb-4">
+					{status.eligible_key_users.length > 0
+						? __(
+								'A key always carries its owner’s permissions. To give a teammate access, create the key for them rather than sharing your own — otherwise they would see every record you can see.',
+								'doublescale'
+							)
+						: __(
+								'A key carries your permissions. Anyone holding it sees exactly what you can see.',
+								'doublescale'
+							)}
+				</p>
+
 				{newKey && (
 					<div className="mb-5 rounded-md border border-green-200 bg-green-50 p-4">
 						<p className="text-sm font-medium text-green-900 mb-2">
-							{__(
-								'Copy this key now — it will not be shown again.',
-								'doublescale'
-							)}
+							{newKeyOwner && newKeyOwner !== status.current_user
+								? sprintf(
+										/* translators: %s: WordPress username the key acts as. */
+										__(
+											'Copy this key now — it will not be shown again. It acts as %s and carries their permissions.',
+											'doublescale'
+										),
+										newKeyOwner
+									)
+								: __(
+										'Copy this key now — it will not be shown again.',
+										'doublescale'
+									)}
 						</p>
 						<code className="block bg-white border rounded px-3 py-2 text-xs font-mono break-all">
 							{newKey}

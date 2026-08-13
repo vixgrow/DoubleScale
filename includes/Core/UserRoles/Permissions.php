@@ -71,6 +71,26 @@ final class Permissions {
 	}
 
 	/**
+	 * Whether the user may see and change the MCP settings screen.
+	 *
+	 * CRM Manager is not enough: MCP publishes a site-wide HTTP endpoint and
+	 * issues keys that let an external AI client read CRM data. That is a
+	 * WordPress-administrator decision, not a CRM-role one. Connecting clients
+	 * still run as the user the key belongs to — this gate is only for the
+	 * Settings → MCP page.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_manage_mcp( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		return user_can( $user_id, 'manage_options' );
+	}
+
+	/**
 	 * Check if user is a Sales Manager
 	 *
 	 * @since 1.0.0

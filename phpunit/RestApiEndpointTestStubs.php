@@ -204,6 +204,27 @@ if ( ! function_exists( 'current_user_can' ) ) {
 	}
 }
 
+if ( ! function_exists( 'user_can' ) ) {
+	/**
+	 * Capability check for a specific user (not the current one).
+	 *
+	 * Tests populate
+	 * $GLOBALS['__doublescale_phpunit_user_caps'][ $user_id ] = array( 'manage_options' => true ).
+	 *
+	 * @param int|object $user       User id or user object.
+	 * @param string     $capability Capability.
+	 * @return bool
+	 */
+	function user_can( $user, $capability, ...$args ) {
+		unset( $args );
+
+		$user_id = is_object( $user ) ? (int) ( $user->ID ?? 0 ) : (int) $user;
+		$caps    = $GLOBALS['__doublescale_phpunit_user_caps'][ $user_id ] ?? array();
+
+		return ! empty( $caps[ $capability ] );
+	}
+}
+
 if ( ! function_exists( 'is_user_logged_in' ) ) {
 	function is_user_logged_in() {
 		return false;

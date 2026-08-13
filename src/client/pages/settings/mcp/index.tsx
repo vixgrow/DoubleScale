@@ -190,6 +190,12 @@ const McpSettings: React.FC = () => {
 	const [keyUserId, setKeyUserId] = useState('');
 	const [newKey, setNewKey] = useState('');
 	const [newKeyOwner, setNewKeyOwner] = useState('');
+	const [newKeyId, setNewKeyId] = useState('');
+	const [activeClient, setActiveClient] = useState<ClientKey>('claude-code');
+	const [emailingKey, setEmailingKey] = useState(false);
+	// Off by default: a key is a permanent password, and once it is in an inbox
+	// it stays there. The admin has to opt in per send.
+	const [emailIncludesKey, setEmailIncludesKey] = useState(false);
 	const [creatingKey, setCreatingKey] = useState(false);
 	const [copied, setCopied] = useState(false);
 	// Seeded from the browser, but overridable: an admin may be generating a
@@ -367,11 +373,51 @@ const McpSettings: React.FC = () => {
 		].join('\n');
 	};
 
+	/**
+	 * Mail the setup steps to whoever the key belongs to.
+	 *
+	 * The configuration is generated here and posted to the server rather than
+	 * rebuilt in PHP: the per-client, per-OS templates live in this file, and a
+	 * second copy would drift from this one without anyone noticing.
+	 */
+	const handleEmailSetup = async () => {
+		if (!newKeyId) {
+			return;
+		}
+		setEmailingKey(true);
+		try {
+			const tab = CLIENT_TABS.find((entry) => entry.key === activeClient);
+			const response = await apiFetch<{ message: string }>({
+				path: `/doublescale/v1/mcp/keys/${newKeyId}/email`,
+				method: 'POST',
+				data: {
+					client: tab?.label || activeClient,
+					os: isWindows ? 'Windows' : 'macOS / Linux',
+					config: buildSnippet(activeClient),
+					config_path: tab?.target || '',
+					// Only travels when the admin explicitly asked for it.
+					secret: emailIncludesKey ? newKey : '',
+				},
+			});
+			setNotice({ type: 'success', message: response.message });
+		} catch (error) {
+			setNotice({
+				type: 'error',
+				message:
+					(error as { message?: string })?.message ||
+					__('Could not send the email.', 'doublescale'),
+			});
+		} finally {
+			setEmailingKey(false);
+		}
+	};
+
 	const handleCreateKey = async () => {
 		setCreatingKey(true);
 		try {
 			const response = await apiFetch<{
 				key: string;
+				id: string;
 				user_login: string;
 				api_keys: McpApiKey[];
 			}>({
@@ -387,6 +433,8 @@ const McpSettings: React.FC = () => {
 			// can never show it again.
 			setNewKey(response.key);
 			setNewKeyOwner(response.user_login);
+			setNewKeyId(response.id);
+			setEmailIncludesKey(false);
 			setKeyLabel('');
 			setKeyUserId('');
 			setStatus((current) =>
@@ -711,6 +759,59 @@ const McpSettings: React.FC = () => {
 						<code className="block bg-white border rounded px-3 py-2 text-xs font-mono break-all">
 							{newKey}
 						</code>
+
+						{/* Emailing the steps is the useful half; emailing the
+						    credential is a separate, explicit decision. */}
+						<div className="mt-4 pt-4 border-t border-green-200">
+							<p className="text-sm text-green-900 mb-2">
+								{sprintf(
+									/* translators: 1: AI client name, 2: operating system. */
+									__(
+										'Email the setup steps for %1$s on %2$s to this key’s owner. Switch the tabs below first if that is not the right client.',
+										'doublescale'
+									),
+									CLIENT_TABS.find((t) => t.key === activeClient)?.label ||
+										activeClient,
+									isWindows
+										? __('Windows', 'doublescale')
+										: __('macOS / Linux', 'doublescale')
+								)}
+							</p>
+
+							<label className="flex items-start gap-2 text-sm text-green-900 mb-3">
+								<input
+									type="checkbox"
+									className="mt-1"
+									checked={emailIncludesKey}
+									onChange={(event) =>
+										setEmailIncludesKey(event.target.checked)
+									}
+								/>
+								<span>
+									{__(
+										'Include the key itself in the email',
+										'doublescale'
+									)}
+									<span className="block text-xs text-amber-800 mt-0.5">
+										{__(
+											'A key is a permanent password. Emailed, it stays in the inbox, the mail provider, and every backup — and keeps working. Prefer sending it over a channel you can clear.',
+											'doublescale'
+										)}
+									</span>
+								</span>
+							</label>
+
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleEmailSetup}
+								disabled={emailingKey}
+							>
+								{emailingKey
+									? __('Sending…', 'doublescale')
+									: __('Email setup instructions', 'doublescale')}
+							</Button>
+						</div>
 					</div>
 				)}
 
@@ -773,7 +874,12 @@ const McpSettings: React.FC = () => {
 					</Button>
 				</div>
 
-				<Tabs defaultValue="claude-code">
+				{/* Controlled rather than defaultValue: the email action needs to
+				    know which client the admin is looking at. */}
+				<Tabs
+					value={activeClient}
+					onValueChange={(value) => setActiveClient(value as ClientKey)}
+				>
 					<TabsList>
 						{CLIENT_TABS.map((tab) => (
 							<TabsTrigger key={tab.key} value={tab.key}>

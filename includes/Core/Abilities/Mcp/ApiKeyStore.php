@@ -73,6 +73,32 @@ final class ApiKeyStore {
 	 * @param string $id Key id.
 	 * @return bool
 	 */
+	/**
+	 * The user a stored key acts as.
+	 *
+	 * Looked up by key id, never by the secret: callers that already hold the
+	 * id (the settings screen) should not have to handle the plaintext to find
+	 * out who a key belongs to.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $id Key id.
+	 * @return int User id, or 0 when the key is unknown.
+	 */
+	public static function user_for( string $id ): int {
+		$keys = self::all();
+
+		return isset( $keys[ $id ] ) ? (int) ( $keys[ $id ]['user_id'] ?? 0 ) : 0;
+	}
+
+	/**
+	 * Delete a key by id.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $id Key id.
+	 * @return bool
+	 */
 	public static function delete( string $id ): bool {
 		$keys = self::all();
 		if ( ! isset( $keys[ $id ] ) ) {

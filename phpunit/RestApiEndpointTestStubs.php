@@ -204,6 +204,44 @@ if ( ! function_exists( 'current_user_can' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( $text ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_html__' ) ) {
+	function esc_html__( $text, $domain = 'default' ) {
+		unset( $domain );
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'wp_specialchars_decode' ) ) {
+	function wp_specialchars_decode( $text, $quote_style = ENT_NOQUOTES ) {
+		return htmlspecialchars_decode( (string) $text, $quote_style );
+	}
+}
+
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	/**
+	 * Tests set $GLOBALS['__doublescale_phpunit_bloginfo'][ $key ].
+	 *
+	 * @param string $show Field.
+	 * @return string
+	 */
+	function get_bloginfo( $show = '' ) {
+		return (string) ( $GLOBALS['__doublescale_phpunit_bloginfo'][ $show ] ?? '' );
+	}
+}
+
+if ( ! function_exists( 'get_rest_url' ) ) {
+	function get_rest_url( $blog_id = null, $path = '/', $scheme = 'rest' ) {
+		unset( $blog_id, $scheme );
+		return 'https://example.test/wp-json/' . ltrim( (string) $path, '/' );
+	}
+}
+
 if ( ! function_exists( 'user_can' ) ) {
 	/**
 	 * Capability check for a specific user (not the current one).

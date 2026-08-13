@@ -17,6 +17,7 @@ use DoubleScale\Core\Abilities\AbilitiesBootstrap;
 use DoubleScale\Core\Abilities\AbilityRegistrar;
 use DoubleScale\Core\Abilities\Mcp\ApiKeyStore;
 use DoubleScale\Core\Abilities\Mcp\KeySubject;
+use DoubleScale\Core\Abilities\Mcp\SetupMailer;
 use DoubleScale\Core\Abilities\McpServer;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\UserRoles\Permissions;
@@ -91,6 +92,47 @@ class RestMcpSettingsController extends RestController {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/keys/(?P<id>[a-f0-9]+)/email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'email_setup' ),
+					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'args'                => array(
+						'client'      => array(
+							'required' => true,
+							'type'     => 'string',
+						),
+						'os'          => array(
+							'required' => true,
+							'type'     => 'string',
+						),
+						// The browser builds the config and sends it back: the
+						// per-client/per-OS templates live in the settings page,
+						// and duplicating them in PHP would let the two drift
+						// apart silently.
+						'config'      => array(
+							'required' => true,
+							'type'     => 'string',
+						),
+						'config_path' => array(
+							'required' => false,
+							'type'     => 'string',
+						),
+						// The plaintext key exists only in the browser — the
+						// server stores a hash — so including it in the email
+						// requires the caller to hand it back.
+						'secret'      => array(
+							'required' => false,
+							'type'     => 'string',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/keys/(?P<id>[a-f0-9]+)',
 			array(
 				array(
@@ -150,6 +192,60 @@ class RestMcpSettingsController extends RestController {
 					),
 			),
 			201
+		);
+	}
+
+	/**
+	 * Email connection instructions to the user a key belongs to.
+	 *
+	 * The recipient is resolved from the key, never taken from the request: a
+	 * free-text address would let one typo mail a working credential to a
+	 * stranger, with no way to recall it.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function email_setup( $request ) {
+		$key_id  = (string) $request->get_param( 'id' );
+		$user_id = ApiKeyStore::user_for( $key_id );
+
+		if ( $user_id <= 0 ) {
+			return new WP_Error(
+				'doublescale_mcp_unknown_key',
+				__( 'That API key no longer exists.', 'doublescale' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$result = SetupMailer::send(
+			$user_id,
+			sanitize_text_field( (string) $request->get_param( 'client' ) ),
+			sanitize_text_field( (string) $request->get_param( 'os' ) ),
+			// Not sanitize_text_field: the configuration is multi-line JSON or
+			// TOML and would be flattened. SetupMailer escapes it for output.
+			(string) $request->get_param( 'config' ),
+			sanitize_text_field( (string) $request->get_param( 'config_path' ) ),
+			(string) $request->get_param( 'secret' )
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$user = get_userdata( $user_id );
+
+		return new WP_REST_Response(
+			array(
+				'sent'    => true,
+				'message' => sprintf(
+					/* translators: %s: recipient email address. */
+					__( 'Setup instructions sent to %s.', 'doublescale' ),
+					$user ? $user->user_email : ''
+				),
+			),
+			200
 		);
 	}
 

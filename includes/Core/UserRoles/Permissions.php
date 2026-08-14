@@ -71,6 +71,26 @@ final class Permissions {
 	}
 
 	/**
+	 * Whether the user may see and change the MCP settings screen.
+	 *
+	 * CRM Manager is not enough: MCP publishes a site-wide HTTP endpoint and
+	 * issues keys that let an external AI client read CRM data. That is a
+	 * WordPress-administrator decision, not a CRM-role one. Connecting clients
+	 * still run as the user the key belongs to — this gate is only for the
+	 * Settings → MCP page.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_manage_mcp( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		return user_can( $user_id, 'manage_options' );
+	}
+
+	/**
 	 * Check if user is a Sales Manager
 	 *
 	 * @since 1.0.0
@@ -782,12 +802,41 @@ final class Permissions {
 	 */
 	public static function has_ai_access( $user_id = null ) {
 		$ai_settings = Settings::get( 'ai', array() );
-		$access      = $ai_settings['access'] ?? self::default_ai_access();
 
-		// Provider must be configured (hard requirement for everyone).
+		// Provider must be configured for features that CALL a provider.
+		// Deliberately not part of has_ai_role_access(): see that method.
 		if ( empty( $ai_settings['provider'] ) ) {
 			return new \WP_Error( 'ai_not_configured', __( 'AI provider not configured.', 'doublescale' ), array( 'status' => 400 ) );
 		}
+
+		return self::has_ai_role_access( $user_id );
+	}
+
+	/**
+	 * Whether this user's ROLE may use AI-facing features.
+	 *
+	 * The role half of {@see has_ai_access()}, without the provider check.
+	 *
+	 * Those are two unrelated questions, and merging them broke MCP. Outbound
+	 * features (writing an email, summarising a ticket) genuinely need a
+	 * configured provider — DoubleScale is the one making the API call. MCP is
+	 * the opposite direction: an external agent connects IN and reads CRM data
+	 * through the abilities layer, and nothing on this site calls a provider at
+	 * all. Requiring an OpenAI key before Claude may read an invoice is a
+	 * condition with no mechanism behind it.
+	 *
+	 * The role gate still applies to both, because "who may reach CRM data
+	 * through an AI tool" is a real question the administrator answers in
+	 * Settings → AI.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return true|\WP_Error
+	 */
+	public static function has_ai_role_access( $user_id = null ) {
+		$ai_settings = Settings::get( 'ai', array() );
+		$access      = $ai_settings['access'] ?? self::default_ai_access();
 
 		$user_role = self::get_user_role( $user_id );
 

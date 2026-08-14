@@ -48,6 +48,7 @@
     "RestListPreferencesController",
     "RestLogController",
     "RestMailboxController",
+    "RestMcpSettingsController",
     "RestMessagingController",
     "RestMetaWhatsappTemplatesController",
     "RestModulesController",

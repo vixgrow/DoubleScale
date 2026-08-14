@@ -498,6 +498,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		$body = EmailTrackingHelper::inject_link_trigger_track_id_placeholder( $body );
+		$body = EmailTrackingHelper::inject_bulk_click_tracking( $body, $template );
 
 		// Prepare batch data
 		$batch_data = array(
@@ -801,6 +802,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		$rendered_body = EmailTrackingHelper::inject_link_trigger_track_id_placeholder( $rendered_body );
+		$rendered_body = EmailTrackingHelper::inject_bulk_click_tracking( $rendered_body, $template );
 
 		// Prepare batch data
 		$batch_data = array(
@@ -1286,6 +1288,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		$rendered_body  = EmailTrackingHelper::inject_link_trigger_track_id_placeholder( $rendered_body );
+		$rendered_body  = EmailTrackingHelper::inject_bulk_click_tracking( $rendered_body, $template );
 		$tracking_pixel = '<img src="{{tracking:tracking_pixel}}" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $rendered_body, '</body>' ) !== false ) {
 			$rendered_body = str_replace( '</body>', $tracking_pixel . '</body>', $rendered_body );
@@ -1459,8 +1462,9 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			$body .= $footer;
 		}
 
-		// Link-trigger track-id + open pixel use {{tracking:*}} placeholders (converted below).
+		// Link-trigger track-id + click tracking + open pixel use {{tracking:*}} placeholders (converted below).
 		$body = EmailTrackingHelper::inject_link_trigger_track_id_placeholder( $body );
+		$body = EmailTrackingHelper::inject_bulk_click_tracking( $body, $template );
 		$tracking_pixel = '<img src="{{tracking:tracking_pixel}}" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $body, '</body>' ) !== false ) {
 			$body = str_replace( '</body>', $tracking_pixel . '</body>', $body );

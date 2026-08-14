@@ -49,6 +49,7 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import MailboxSettings from './mailbox';
+import McpSettings from './mcp';
 import { BounceHandler } from '@/components/bounce-handler';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -87,6 +88,8 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
 	'link_triggers',
 	'system',
+	// MCP saves through its own endpoint the moment the switch is flipped.
+	'mcp',
 	'license',
 	'whatsapp',
 	'debugging',
@@ -135,8 +138,10 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const { hasLimitedSettingsAccess: checkLimitedSettingsAccess } =
-		useCapabilities();
+	const {
+		hasLimitedSettingsAccess: checkLimitedSettingsAccess,
+		canManageMcp: checkCanManageMcp,
+	} = useCapabilities();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
 		() => new Set(applyFilters('doublescale_settings_tabs_without_save', TABS_WITHOUT_SAVE_BUTTON_LIST) as string[]),
@@ -147,6 +152,7 @@ const SettingsPage: React.FC = () => {
 	// multi-role users keep full Settings access (Mailbox/Notifications only
 	// for pure Sales Rep / Sales Manager).
 	const hasLimitedSettingsAccess = checkLimitedSettingsAccess();
+	const canManageMcp = checkCanManageMcp();
 	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
@@ -166,6 +172,10 @@ const SettingsPage: React.FC = () => {
 				navigate(getToLink('settings/notifications'), { replace: true });
 				return;
 			}
+			if (urlTab === 'mcp' && !canManageMcp) {
+				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
+				return;
+			}
 			setActiveTab(urlTab);
 		} else if (!urlTab || urlTab === 'tab?') {
 			// If no valid tab in URL, redirect to default tab
@@ -175,6 +185,7 @@ const SettingsPage: React.FC = () => {
 		urlTab,
 		navigate,
 		hasLimitedSettingsAccess,
+		canManageMcp,
 		defaultTab,
 	]);
 
@@ -402,6 +413,8 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'system':
 				return <SystemSettings />;
+			case 'mcp':
+				return <McpSettings />;
 			case 'currencies':
 				return (
 					<CurrenciesSettings
@@ -597,6 +610,11 @@ const SettingsPage: React.FC = () => {
 			icon: <AiIcon width={24} height={24} />,
 		},
 		{
+			value: 'mcp',
+			label: __('MCP for AI Agents', 'doublescale'),
+			icon: <AiIcon width={24} height={24} />,
+		},
+		{
 			value: 'notifications',
 			label: __('Notifications', 'doublescale'),
 			icon: <NotificationIcon width={24} height={24} />,
@@ -618,8 +636,11 @@ const SettingsPage: React.FC = () => {
 		if (hasLimitedSettingsAccess) {
 			tabs = tabs.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value));
 		}
+		if (!canManageMcp) {
+			tabs = tabs.filter((tab) => tab.value !== 'mcp');
+		}
 		return tabs;
-	}, [filteredTabsList, hasLimitedSettingsAccess]);
+	}, [filteredTabsList, hasLimitedSettingsAccess, canManageMcp]);
 
 	const tabsContent = tabsList.map(({ value }) => {
 		if (activeTab !== value) {

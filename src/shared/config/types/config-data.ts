@@ -192,6 +192,8 @@ export type UserCapabilities = {
 	doublescale_sales_rep: boolean;
 	/** Server-computed: Sales-only users limited to Mailbox + Notifications. */
 	doublescale_limited_settings?: boolean;
+	/** WordPress administrators only — Settings → MCP page. */
+	doublescale_manage_mcp?: boolean;
 	doublescale_support_manager?: boolean;
 	doublescale_support_agent?: boolean;
 	doublescale_booking_manager?: boolean;

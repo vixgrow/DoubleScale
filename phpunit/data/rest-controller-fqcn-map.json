@@ -48,6 +48,7 @@
     "RestListPreferencesController": "DoubleScale\\Core\\Rest\\Controllers\\RestListPreferencesController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
     "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
+    "RestMcpSettingsController": "DoubleScale\\Core\\Rest\\Controllers\\RestMcpSettingsController",
     "RestMessagingController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestMessagingController",
     "RestMetaWhatsappTemplatesController": "DoubleScale\\Pro\\Modules\\Inbox\\Rest\\Controllers\\RestMetaWhatsappTemplatesController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",

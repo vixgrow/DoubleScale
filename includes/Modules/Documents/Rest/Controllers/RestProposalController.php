@@ -24,6 +24,7 @@ use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\ConvertProposalToInvoice;
 use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
 use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
+use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DuplicateProposal;
 use DoubleScale\Modules\Documents\Services\ProposalNotifications;

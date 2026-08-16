@@ -16,6 +16,7 @@ use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
+use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
 use DoubleScale\Core\UserRoles\Permissions;

@@ -737,7 +737,8 @@ final class PvInvPdfHtml {
 		<?php if ( ! empty( $section['title'] ) ) : ?>
 			<h4 class="pv-inv-section-title"><?php echo esc_html( (string) $section['title'] ); ?></h4>
 		<?php endif; ?>
-		<div class="pv-inv-section-content"><p><?php echo esc_html( (string) ( $section['body'] ?? '' ) ); ?></p></div>
+		<?php // Bodies are rich text sanitized with wp_kses_post() on save. ?>
+		<div class="pv-inv-section-content"><?php echo wp_kses_post( (string) ( $section['body'] ?? '' ) ); ?></div>
 	</div>
 		<?php endforeach; ?>
 </div>

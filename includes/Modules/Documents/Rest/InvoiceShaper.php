@@ -101,6 +101,37 @@ class InvoiceShaper {
 
 		return apply_filters( 'doublescale_sales_invoice_admin_shape', $data, $invoice );
 	}
+
+	/**
+	 * Admin shape with merge tags resolved, for rendering (PDF, print).
+	 *
+	 * shape() deliberately returns the raw stored text because it also feeds
+	 * the edit form, where resolving tags would save the resolved value back
+	 * and destroy them. Rendering paths must use this instead.
+	 *
+	 * @param InvoiceModel $invoice Invoice.
+	 * @return array
+	 */
+	public static function shape_for_render( InvoiceModel $invoice ): array {
+		$data          = self::shape( $invoice, true );
+		$merge_context = SalesEmailMergeTags::for_invoice( $invoice );
+
+		$data['sections']    = SalesEmailMergeTags::resolve_sections(
+			is_array( $invoice->sections ) ? $invoice->sections : array(),
+			$merge_context
+		);
+		$data['client_note'] = SalesEmailMergeTags::resolve_rich_text(
+			$invoice->client_note ? (string) $invoice->client_note : null,
+			$merge_context
+		);
+		$data['terms']       = SalesEmailMergeTags::resolve_rich_text(
+			$invoice->terms ? (string) $invoice->terms : null,
+			$merge_context
+		);
+
+		return $data;
+	}
+
 	public static function shape_public( InvoiceModel $invoice ): array {
 		SalesEmailMergeTags::ensure_document_contact_loaded( $invoice );
 		$contact = $invoice->relationLoaded( 'contact' ) ? $invoice->contact : null;

@@ -760,7 +760,7 @@ class RestInvoiceController extends RestController {
 			return $forbidden;
 		}
 
-		return $this->stream_pdf_response( InvoiceShaper::shape( $invoice, true ), 'invoice', (string) $invoice->invoice_number );
+		return $this->stream_pdf_response( InvoiceShaper::shape_for_render( $invoice ), 'invoice', (string) $invoice->invoice_number );
 	}
 
 	/**

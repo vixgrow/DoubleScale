@@ -683,7 +683,7 @@ class RestProposalController extends RestController {
 			return $forbidden;
 		}
 
-		$shaped = ProposalShaper::shape_admin( $proposal, true );
+		$shaped = ProposalShaper::shape_for_render( $proposal );
 
 		return DocumentPdf::rest_response( $shaped, 'proposal', (string) $proposal->proposal_number );
 	}

@@ -37,7 +37,11 @@ coverage/
 .phpunit.result.cache
 *.yml
 
-# Compiled / locale catalogs — regenerate with npm run make-i18n (see languages/doublescale.pot).
+# Compiled locale catalogs — regenerate with npm run make-i18n.
+# Ship the pt-BR pack so Loco and production installs have translations.
 languages/*.mo
 languages/*.po
 languages/*.json
+!languages/doublescale-pt_BR.po
+!languages/doublescale-pt_BR.mo
+!languages/doublescale-pt_BR-*.json

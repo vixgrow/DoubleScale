@@ -47,6 +47,16 @@ export interface DocumentRowActionsProps {
 	onDelete?: () => void;
 }
 
+/** Run after the menu finishes closing so a newly opened dialog is not dismissed by leftover pointer/focus events. */
+const afterMenuCloses = (handler?: () => void) => {
+	if (!handler) {
+		return undefined;
+	}
+	return () => {
+		window.setTimeout(handler, 0);
+	};
+};
+
 export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 	busy = false,
 	onView,
@@ -75,63 +85,66 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 					<ThreeDotsIcon />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
-				<DropdownMenuItem onClick={onView} disabled={busy}>
+			<DropdownMenuContent
+				align="end"
+				onCloseAutoFocus={(event) => event.preventDefault()}
+			>
+				<DropdownMenuItem onClick={afterMenuCloses(onView)} disabled={busy}>
 					<ViewIcon />
 					{__('View', 'doublescale')}
 				</DropdownMenuItem>
 
 				{onEdit ? (
-					<DropdownMenuItem onClick={onEdit} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onEdit)} disabled={busy}>
 						<EditHeaderIcon color="currentColor" width={20} height={20} />
 						{__('Edit', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onDuplicate ? (
-					<DropdownMenuItem onClick={onDuplicate} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onDuplicate)} disabled={busy}>
 						<CopyIcon width={20} height={20} />
 						{__('Duplicate', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onViewInvoice ? (
-					<DropdownMenuItem onClick={onViewInvoice} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onViewInvoice)} disabled={busy}>
 						<PurchaseHistoryIcon />
 						{__('View Invoice', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onConvert ? (
-					<DropdownMenuItem onClick={onConvert} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onConvert)} disabled={busy}>
 						<PurchaseHistoryIcon />
 						{__('Convert to Invoice', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onMarkAccepted ? (
-					<DropdownMenuItem onClick={onMarkAccepted} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onMarkAccepted)} disabled={busy}>
 						<CheckMark />
 						{__('Mark as Accepted', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onSend ? (
-					<DropdownMenuItem onClick={onSend} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onSend)} disabled={busy}>
 						<SendTestEmailIcon width={20} height={20} />
 						{__('Send to Customer', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onSendWhatsApp ? (
-					<DropdownMenuItem onClick={onSendWhatsApp} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onSendWhatsApp)} disabled={busy}>
 						<WhatsAppIcon width={20} height={20} />
 						{__('Send via WhatsApp', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 
 				{onDownloadPdf ? (
-					<DropdownMenuItem onClick={onDownloadPdf} disabled={busy}>
+					<DropdownMenuItem onClick={afterMenuCloses(onDownloadPdf)} disabled={busy}>
 						<DownloadIcon />
 						{__('Download PDF', 'doublescale')}
 					</DropdownMenuItem>
@@ -141,7 +154,7 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 					<>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
-							onClick={onDelete}
+							onClick={afterMenuCloses(onDelete)}
 							disabled={busy}
 							className="text-destructive hover:text-destructive focus:text-destructive"
 						>

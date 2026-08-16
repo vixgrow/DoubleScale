@@ -2,7 +2,10 @@
  * Shared react-select styles for field-mapping grids (import + form integration).
  */
 import type { GroupBase, StylesConfig } from 'react-select';
-import { reactSelectControl } from '../react-select-shared-styles';
+import {
+	REACT_SELECT_MENU_Z_INDEX,
+	reactSelectControl,
+} from '../react-select-shared-styles';
 
 export function getMappingSelectStyles(): StylesConfig<
 	unknown,
@@ -62,17 +65,19 @@ export function getMappingSelectStyles(): StylesConfig<
 			border: '1px solid #ECEEF2',
 			boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.08)',
 			overflow: 'visible',
-			zIndex: 160010,
+			zIndex: REACT_SELECT_MENU_Z_INDEX,
 		}),
 		menuPortal: (base) => ({
 			...base,
-			zIndex: 160010,
+			zIndex: REACT_SELECT_MENU_Z_INDEX,
+			pointerEvents: 'auto',
 		}),
 		menuList: (base) => ({
 			...base,
 			paddingTop: 4,
 			paddingBottom: 4,
 			maxHeight: 280,
+			overscrollBehavior: 'contain',
 		}),
 		option: (base, state) => ({
 			...base,

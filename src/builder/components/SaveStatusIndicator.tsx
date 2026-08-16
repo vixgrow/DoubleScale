@@ -1,5 +1,5 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Check, Loader2 } from 'lucide-react';
 import { AlertCircleIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
@@ -30,14 +30,16 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 			return __('a few seconds ago', 'doublescale');
 		} else if (seconds < 3600) {
 			const minutes = Math.floor(seconds / 60);
-			return minutes === 1
-				? __('1 minute ago', 'doublescale')
-				: `${minutes} ${__('minutes ago', 'doublescale')}`;
+			return sprintf(
+				_n('%d minute ago', '%d minutes ago', minutes, 'doublescale'),
+				minutes
+			);
 		} else {
 			const hours = Math.floor(seconds / 3600);
-			return hours === 1
-				? __('1 hour ago', 'doublescale')
-				: `${hours} ${__('hours ago', 'doublescale')}`;
+			return sprintf(
+				_n('%d hour ago', '%d hours ago', hours, 'doublescale'),
+				hours
+			);
 		}
 	};
 

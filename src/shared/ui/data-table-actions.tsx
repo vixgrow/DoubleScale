@@ -179,8 +179,13 @@ export function DataTableActions<TData>({
 		setIsAdvancedFiltersOpen(false);
 	};
 
+	// Reset temp rules to a single default condition
+	const handleClearTempAdvancedFilters = () => {
+		setTempRules([[getInitialRule(rulesGroups)]]);
+	};
+
 	const actionButtonClassName =
-		'group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
+		'group h-10 gap-2.5 rounded-lg border-input bg-white ps-2 pe-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
 
 	return (
 		<div className="flex items-center justify-center gap-4 sm:gap-1 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
@@ -194,7 +199,7 @@ export function DataTableActions<TData>({
 						}
 					}}
 					placeholder={config.dateRange?.placeholder}
-					className="ml-2 max-sm:ml-0 max-sm:w-full sm:w-auto lg:ml-0"
+					className="ms-2 max-sm:ms-0 max-sm:w-full sm:w-auto lg:ms-0"
 				/>
 			)}
 			{config.selectFilters?.map((filter) => (
@@ -381,11 +386,20 @@ export function DataTableActions<TData>({
 								rulesGroups={rulesGroups}
 							/>
 						)}
-						<DialogFooter>
+						<DialogFooter className="mt-4 flex flex-row flex-wrap items-center justify-between gap-3 sm:space-x-0">
 							<Button
+								type="button"
+								variant="outline"
+								onClick={handleClearTempAdvancedFilters}
+								className="h-10 rounded-lg border-destructive text-destructive shadow-none hover:bg-destructive/10 hover:text-destructive"
+							>
+								<DeleteIcon width={16} height={16} />
+								{__('Clear Filters', 'doublescale')}
+							</Button>
+							<Button
+								type="button"
 								onClick={handleApplyAdvancedFilters}
 								disabled={config.filters?.isApplying}
-								className="w-full"
 								variant="secondaryDeepBlue"
 							>
 								{config.filters?.isApplying

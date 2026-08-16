@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -350,14 +350,33 @@ const AutomatedRunsView: React.FC = () => {
 		const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-		if (diffMins < 60) return `${diffMins} ${__('minutes ago', 'doublescale')}`;
-		if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? __('hour ago', 'doublescale') : __('hours ago', 'doublescale')}`;
+		if (diffMins < 1) return __('Just now', 'doublescale');
+		if (diffMins < 60) {
+			return sprintf(
+				_n('%d minute ago', '%d minutes ago', diffMins, 'doublescale'),
+				diffMins
+			);
+		}
+		if (diffHours < 24) {
+			return sprintf(
+				_n('%d hour ago', '%d hours ago', diffHours, 'doublescale'),
+				diffHours
+			);
+		}
 		if (diffDays === 0) return __('Today', 'doublescale');
 		if (diffDays === 1) return __('Yesterday', 'doublescale');
-		if (diffDays < 7) return `${diffDays} ${__('days ago', 'doublescale')}`;
+		if (diffDays < 7) {
+			return sprintf(
+				_n('%d day ago', '%d days ago', diffDays, 'doublescale'),
+				diffDays
+			);
+		}
 		if (diffDays < 30) {
 			const weeks = Math.floor(diffDays / 7);
-			return `${weeks} ${weeks === 1 ? __('week ago', 'doublescale') : __('weeks ago', 'doublescale')}`;
+			return sprintf(
+				_n('%d week ago', '%d weeks ago', weeks, 'doublescale'),
+				weeks
+			);
 		}
 		return formatRunDateTime(batchStr);
 	};

@@ -212,6 +212,26 @@ const ImportModalInner: React.FC<Props> = ({
 					paddingRight: 0,
 					paddingBottom: 0,
 				}}
+				onPointerDownOutside={(event) => {
+					const target = event.target as HTMLElement | null;
+					if (
+						target?.closest(
+							'.react-select__menu, .react-select__menu-portal, [class*="react-select__menu"]'
+						)
+					) {
+						event.preventDefault();
+					}
+				}}
+				onInteractOutside={(event) => {
+					const target = event.target as HTMLElement | null;
+					if (
+						target?.closest(
+							'.react-select__menu, .react-select__menu-portal, [class*="react-select__menu"]'
+						)
+					) {
+						event.preventDefault();
+					}
+				}}
 			>
 				<ImportModalContent
 					onDismiss={handleDismiss}

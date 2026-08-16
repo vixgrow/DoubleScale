@@ -47,7 +47,7 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 				<div className="hidden sm:block">
 					<img
 						src={EmptyCampaignListImage}
-						alt="Empty Campaign List"
+						alt={__('Empty Campaign List', 'doublescale')}
 					/>
 				</div>
 				<div className="w-full max-w-lg rounded-md p-4 max-sm:max-w-full max-sm:p-3 sm:max-w-xl sm:p-0">

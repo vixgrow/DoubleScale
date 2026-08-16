@@ -18,7 +18,9 @@ import ConfigAPI from '@doublescale/config';
 import { isObject, map } from 'lodash';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { mappingSelectComponents } from './mapping-select-components';
 import { getMappingSelectStyles } from './mapping-select-styles';
+import { reactSelectMenuPortalProps } from '../react-select-shared-styles';
 
 interface ContactMappedFieldsCsvProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -122,13 +124,11 @@ const ContactMappedFieldsCsv: React.FC<ContactMappedFieldsCsvProps> = ({
 							value={values ? getAllValue(values[key]) : null}
 							options={options}
 							styles={mappingSelectStyles}
+							components={mappingSelectComponents}
 							isSearchable={false}
-							menuPortalTarget={
-								typeof document !== 'undefined'
-									? document.body
-									: null
-							}
-							menuPosition="fixed"
+							menuShouldBlockScroll
+							blurInputOnSelect={false}
+							{...reactSelectMenuPortalProps}
 						/>
 					</div>
 				))}

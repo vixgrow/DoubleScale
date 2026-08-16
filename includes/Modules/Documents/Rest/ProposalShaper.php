@@ -98,6 +98,31 @@ final class ProposalShaper {
 	}
 
 	/**
+	 * Admin shape with merge tags resolved, for rendering (PDF, print).
+	 *
+	 * shape_admin() deliberately returns the raw stored text because it also
+	 * feeds the edit form, where resolving tags would save the resolved value
+	 * back and destroy them. Rendering paths must use this instead.
+	 *
+	 * @param ProposalModel $proposal Proposal.
+	 * @return array
+	 */
+	public static function shape_for_render( ProposalModel $proposal ): array {
+		$data          = self::shape_admin( $proposal, true );
+		$merge_context = SalesEmailMergeTags::for_proposal( $proposal );
+
+		$data['sections'] = SalesEmailMergeTags::resolve_sections(
+			is_array( $proposal->sections ) ? $proposal->sections : array(),
+			$merge_context
+		);
+		$data['terms']    = $proposal->terms
+			? SalesEmailMergeTags::resolve_rich_text( (string) $proposal->terms, $merge_context )
+			: null;
+
+		return $data;
+	}
+
+	/**
 	 * @param ProposalModel $proposal Proposal.
 	 * @return array
 	 */

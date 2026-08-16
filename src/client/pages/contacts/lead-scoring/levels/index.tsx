@@ -302,10 +302,12 @@ const Levels = forwardRef<LevelsRef, LevelsProps>(({ activeTab }, ref) => {
 	};
 
 	return (
-		<div className="doublescale-lead-scoring-levels-list">
+		<div className="doublescale-lead-scoring-levels-list min-w-0 w-full">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				<div className="mb-4">
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				</div>
 			)}
 
 			{loading || hasRecords ? (

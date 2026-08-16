@@ -70,7 +70,7 @@ export function DataTable<TData>({
 	};
 
 	return (
-		<div className="w-full ">
+		<div className="w-full min-w-0">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
 				<div
@@ -101,7 +101,7 @@ export function DataTable<TData>({
 				</div>
 			)}
 
-			<div className="rounded-t-lg border border-[#DEE1E6] overflow-hidden bg-white w-full">
+			<div className="rounded-t-lg border border-[#DEE1E6] overflow-hidden bg-white w-full min-w-0">
 				<Table>
 					<TableHeader className="bg-[#F8F8F8] ">
 						{table.getHeaderGroups().map((headerGroup) => (

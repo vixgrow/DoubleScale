@@ -1,7 +1,6 @@
 .doublescale-lead-scoring {
 	width: 100%;
-	display: flex;
-	flex-direction: column;
+	min-width: 0;
 	
 	.hide-scrollbar {
 		scrollbar-width: none; /* Firefox */

@@ -14,6 +14,7 @@ import { ListItemNode, ListNode } from '@lexical/list';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 import { TextNode } from 'lexical';
+import { __ } from '@wordpress/i18n';
 
 /**
  *  Internal dependencies
@@ -116,7 +117,7 @@ export default function Editor({ message, onChange, type }: EditorProps) {
 							}
 							placeholder={
 								<div className="editor-placeholder">
-									Enter content here...
+									{__('Enter content here...', 'doublescale')}
 								</div>
 							}
 							ErrorBoundary={() => (

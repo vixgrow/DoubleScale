@@ -25,6 +25,7 @@ import { ListItemNode, ListNode } from '@lexical/list';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 import { TextNode } from 'lexical';
+import { __ } from '@wordpress/i18n';
 
 /**
  *  Internal dependencies
@@ -118,7 +119,7 @@ export default function EditorShell({
 	message,
 	onChange,
 	toolbar,
-	placeholder = 'Enter content here...',
+	placeholder = __('Enter content here...', 'doublescale'),
 }: EditorShellProps) {
 	const [, setEditorActive] = useState(false);
 	const [wordCount, setWordCount] = useState(0);

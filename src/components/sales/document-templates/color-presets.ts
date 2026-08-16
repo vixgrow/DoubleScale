@@ -2,6 +2,8 @@
  * Propovoice-aligned accent color presets for document templates.
  */
 
+import { __ } from '@wordpress/i18n';
+
 export const TEMPLATE_COLOR_NONE = null;
 
 export interface TemplateColorPreset {
@@ -11,11 +13,11 @@ export interface TemplateColorPreset {
 }
 
 export const TEMPLATE_COLOR_PRESETS: TemplateColorPreset[] = [
-	{ id: 'none', label: 'Default', value: TEMPLATE_COLOR_NONE },
-	{ id: 'red', label: 'Red', value: '#f16063' },
-	{ id: 'orange', label: 'Orange', value: '#f68a0b' },
-	{ id: 'blue', label: 'Blue', value: '#4c6fff' },
-	{ id: 'green', label: 'Green', value: '#0ba24b' },
+	{ id: 'none', label: __('Default', 'doublescale'), value: TEMPLATE_COLOR_NONE },
+	{ id: 'red', label: __('Red', 'doublescale'), value: '#f16063' },
+	{ id: 'orange', label: __('Orange', 'doublescale'), value: '#f68a0b' },
+	{ id: 'blue', label: __('Blue', 'doublescale'), value: '#4c6fff' },
+	{ id: 'green', label: __('Green', 'doublescale'), value: '#0ba24b' },
 ];
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;

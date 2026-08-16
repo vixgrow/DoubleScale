@@ -1,3 +1,5 @@
+import { __ } from '@wordpress/i18n';
+
 export type ManagerRole =
 	| 'doublescale_crm_manager'
 	| 'doublescale_sales_manager'
@@ -11,29 +13,29 @@ export type ManagerRole =
 
 /** Display labels; includes legacy keys for rows not yet migrated. */
 export const ManagerRoleLabels: Record<string, string> = {
-	doublescale_crm_manager: 'CRM Manager',
-	doublescale_sales_manager: 'Sales Manager',
-	doublescale_sales_rep: 'Sales Rep',
-	doublescale_support_manager: 'Support Manager',
-	doublescale_support_agent: 'Support Agent',
-	doublescale_booking_manager: 'Booking Manager',
-	doublescale_booking_agent: 'Booking Agent',
-	doublescale_project_manager: 'Project Manager',
-	doublescale_project_member: 'Project Member',
-	ds_crm_manager: 'CRM Manager',
-	ds_sales_manager: 'Sales Manager',
-	ds_sales_rep: 'Sales Rep',
+	doublescale_crm_manager: __('CRM Manager', 'doublescale'),
+	doublescale_sales_manager: __('Sales Manager', 'doublescale'),
+	doublescale_sales_rep: __('Sales Rep', 'doublescale'),
+	doublescale_support_manager: __('Support Manager', 'doublescale'),
+	doublescale_support_agent: __('Support Agent', 'doublescale'),
+	doublescale_booking_manager: __('Booking Manager', 'doublescale'),
+	doublescale_booking_agent: __('Booking Agent', 'doublescale'),
+	doublescale_project_manager: __('Project Manager', 'doublescale'),
+	doublescale_project_member: __('Project Member', 'doublescale'),
+	ds_crm_manager: __('CRM Manager', 'doublescale'),
+	ds_sales_manager: __('Sales Manager', 'doublescale'),
+	ds_sales_rep: __('Sales Rep', 'doublescale'),
 };
 export const ManagerRoleValues = {
-	doublescale_crm_manager: 'CRM Manager',
-	doublescale_sales_manager: 'Sales Manager',
-	doublescale_sales_rep: 'Sales Rep',
-	doublescale_support_manager: 'Support Manager',
-	doublescale_support_agent: 'Support Agent',
-	doublescale_booking_manager: 'Booking Manager',
-	doublescale_booking_agent: 'Booking Agent',
-	doublescale_project_manager: 'Project Manager',
-	doublescale_project_member: 'Project Member',
+	doublescale_crm_manager: __('CRM Manager', 'doublescale'),
+	doublescale_sales_manager: __('Sales Manager', 'doublescale'),
+	doublescale_sales_rep: __('Sales Rep', 'doublescale'),
+	doublescale_support_manager: __('Support Manager', 'doublescale'),
+	doublescale_support_agent: __('Support Agent', 'doublescale'),
+	doublescale_booking_manager: __('Booking Manager', 'doublescale'),
+	doublescale_booking_agent: __('Booking Agent', 'doublescale'),
+	doublescale_project_manager: __('Project Manager', 'doublescale'),
+	doublescale_project_member: __('Project Member', 'doublescale'),
 };
 /** Module slug required before the role can be newly assigned (Settings → Modules). */
 export const ManagerRoleModuleRequirements: Partial<
@@ -60,36 +62,54 @@ export const ManagerRoleProRequirements: ManagerRole[] = [
 
 /** Short capability summary shown under each role in Add/Edit Manager. */
 export const ManagerRoleDescriptions: Record<ManagerRole, string> = {
-	doublescale_crm_manager:
+	doublescale_crm_manager: __(
 		'Full CRM admin: all contacts, deals, pipelines, team, settings, reports, import/export, proposals, invoices, and support inbox.',
-	doublescale_sales_manager:
+		'doublescale'
+	),
+	doublescale_sales_manager: __(
 		'Manage all contacts and deals, import/export data, and manage every proposal and invoice.',
-	doublescale_sales_rep:
+		'doublescale'
+	),
+	doublescale_sales_rep: __(
 		'Work on own contacts and deals, create new records, and manage own proposals and invoices.',
-	doublescale_support_manager:
+		'doublescale'
+	),
+	doublescale_support_manager: __(
 		'View and manage every support ticket; assign agents and reply on any thread.',
-	doublescale_support_agent:
+		'doublescale'
+	),
+	doublescale_support_agent: __(
 		'View the support inbox and reply on tickets assigned to you.',
-	doublescale_booking_manager:
+		'doublescale'
+	),
+	doublescale_booking_manager: __(
 		'Read and manage all team calendars, bookings, and availability schedules.',
-	doublescale_booking_agent:
+		'doublescale'
+	),
+	doublescale_booking_agent: __(
 		'Manage only your own calendars, bookings, and availability.',
-	doublescale_project_manager:
+		'doublescale'
+	),
+	doublescale_project_manager: __(
 		'Create and manage all projects, kanban statuses, and assignments.',
-	doublescale_project_member:
+		'doublescale'
+	),
+	doublescale_project_member: __(
 		'View and update projects assigned to you; join discussions and track progress.',
+		'doublescale'
+	),
 };
 
 export const ManagerRoleOptions = [
-	{ id: 'doublescale_crm_manager' as ManagerRole, label: 'CRM Manager' },
-	{ id: 'doublescale_sales_manager' as ManagerRole, label: 'Sales Manager' },
-	{ id: 'doublescale_sales_rep' as ManagerRole, label: 'Sales Rep' },
-	{ id: 'doublescale_support_manager' as ManagerRole, label: 'Support Manager' },
-	{ id: 'doublescale_support_agent' as ManagerRole, label: 'Support Agent' },
-	{ id: 'doublescale_booking_manager' as ManagerRole, label: 'Booking Manager' },
-	{ id: 'doublescale_booking_agent' as ManagerRole, label: 'Booking Agent' },
-	{ id: 'doublescale_project_manager' as ManagerRole, label: 'Project Manager' },
-	{ id: 'doublescale_project_member' as ManagerRole, label: 'Project Member' },
+	{ id: 'doublescale_crm_manager' as ManagerRole, label: __('CRM Manager', 'doublescale') },
+	{ id: 'doublescale_sales_manager' as ManagerRole, label: __('Sales Manager', 'doublescale') },
+	{ id: 'doublescale_sales_rep' as ManagerRole, label: __('Sales Rep', 'doublescale') },
+	{ id: 'doublescale_support_manager' as ManagerRole, label: __('Support Manager', 'doublescale') },
+	{ id: 'doublescale_support_agent' as ManagerRole, label: __('Support Agent', 'doublescale') },
+	{ id: 'doublescale_booking_manager' as ManagerRole, label: __('Booking Manager', 'doublescale') },
+	{ id: 'doublescale_booking_agent' as ManagerRole, label: __('Booking Agent', 'doublescale') },
+	{ id: 'doublescale_project_manager' as ManagerRole, label: __('Project Manager', 'doublescale') },
+	{ id: 'doublescale_project_member' as ManagerRole, label: __('Project Member', 'doublescale') },
 ];
 export type ManagerRoleLabel = keyof typeof ManagerRoleLabels;
 export type ManagerRoleValue = keyof typeof ManagerRoleValues;

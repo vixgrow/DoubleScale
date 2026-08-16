@@ -88,7 +88,7 @@ class Store {
 			// 'plan'        => 'basic',
 			// ),
 			'white-label'   => array(
-				'name'        => 'White Labeling',
+				'name'        => __( 'White Labeling', 'doublescale' ),
 				'slug'        => 'white-label',
 				'description' => __( 'Remove Plugin branding and replace with your own plugin name, logo, menu icon, and brand colors.', 'doublescale' ),
 				'plugin_file' => self::resolve_white_label_plugin_file( $plugins_dir ),
@@ -96,7 +96,7 @@ class Store {
 				'plan'        => 'enterprise',
 			),
 			'ai-assistant'  => array(
-				'name'        => 'AI Assistant',
+				'name'        => __( 'AI Assistant', 'doublescale' ),
 				'slug'        => 'ai-assistant',
 				'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
 				'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
@@ -104,7 +104,7 @@ class Store {
 				'plan'        => 'plus',
 			),
 			'subscriptions' => array(
-				'name'        => 'Subscriptions',
+				'name'        => __( 'Subscriptions', 'doublescale' ),
 				'slug'        => 'subscriptions',
 				'description' => __( 'Recurring Stripe billing — subscribe customers to a plan, auto-charge each cycle, and record a child invoice per charge.', 'doublescale' ),
 				'plugin_file' => self::resolve_subscriptions_plugin_file( $plugins_dir ),

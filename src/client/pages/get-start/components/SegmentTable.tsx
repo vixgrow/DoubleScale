@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { PlusIcon } from '@doublescale/components';
 import TrashIcon from '@doublescale/shared/icons/trash';
 import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
@@ -281,9 +281,12 @@ export function SegmentTable({
 				<div className="flex flex-col gap-3 border-t border-[#E5E7EB] bg-[#FAFBFC] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex justify-center items-center gap-4">
 						<p className="text-sm text-muted-foreground">
-							{__('Showing', 'doublescale')} {startRecord}{' '}
-							{__('to', 'doublescale')} {endRecord} {__('of', 'doublescale')}{' '}
-							{totalRecords} {__('results', 'doublescale')}
+							{sprintf(
+								__('Showing %1$s to %2$s of %3$s results', 'doublescale'),
+								startRecord,
+								endRecord,
+								totalRecords
+							)}
 						</p>
 						<div
 							className="flex items-center gap-4 bg-card rounded-lg py-2 px-3"

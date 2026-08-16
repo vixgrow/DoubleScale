@@ -26,6 +26,8 @@ import TrashIcon from '@doublescale/shared/icons/trash';
 import Select from 'react-select';
 import { cn } from '@/lib/utils';
 import { getMappingSelectStyles } from './mapping-select-styles';
+import { mappingSelectComponents } from './mapping-select-components';
+import { reactSelectMenuPortalProps } from '../react-select-shared-styles';
 import { MerageTagsIcon, PlusIcon } from '@/components/icons';
 
 interface ContactMappedFieldsFormProps {
@@ -463,13 +465,11 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 											}
 											options={emailOptions}
 											styles={mappingSelectStyles}
+											components={mappingSelectComponents}
 											isSearchable={false}
-											menuPortalTarget={
-												typeof document !== 'undefined'
-													? document.body
-													: null
-											}
-											menuPosition="fixed"
+											menuShouldBlockScroll
+											blurInputOnSelect={false}
+											{...reactSelectMenuPortalProps}
 										/>
 									) : (
 										<div className="min-w-0">
@@ -560,17 +560,15 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 											field.fieldLabel
 										)}
 										styles={mappingSelectStyles}
+										components={mappingSelectComponents}
 										placeholder={__(
 											'Select contact field',
 											'doublescale'
 										)}
 										isSearchable={true}
-										menuPortalTarget={
-											typeof document !== 'undefined'
-												? document.body
-												: null
-										}
-										menuPosition="fixed"
+										menuShouldBlockScroll
+										blurInputOnSelect={false}
+										{...reactSelectMenuPortalProps}
 									/>
 								</div>
 

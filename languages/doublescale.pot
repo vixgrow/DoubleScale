@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.3\n"
+"Project-Id-Version: DoubleScale 1.3.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,6 +12,12 @@ msgstr ""
 "X-Domain: doublescale\n"
 
 msgid "\"%1$s\" exceeds the maximum upload size of %2$s."
+msgstr ""
+
+msgid "\"%s\" is not a valid email address."
+msgstr ""
+
+msgid "\"server failed to start\" (Claude Desktop / Codex)"
 msgstr ""
 
 msgid "#4C6FFF"
@@ -50,6 +56,15 @@ msgstr ""
 msgid "%1$s: %2$s"
 msgstr ""
 
+msgid "%1$s and %2$d more"
+msgstr ""
+
+msgid "%1$s at %2$s"
+msgstr ""
+
+msgid "%1$s canu2019t be attached. Only %2$s files are allowed."
+msgstr ""
+
 msgid "%1$s changed deal status to %2$s"
 msgstr ""
 
@@ -69,6 +84,9 @@ msgid "%1$s exceeds the maximum file size of %2$s."
 msgstr ""
 
 msgid "%1$s has been marked as bounced. Reason: %2$s"
+msgstr ""
+
+msgid "%1$s is too large. Each file must be under %2$s."
 msgstr ""
 
 msgid "%1$s joined the waiting list at position #%2$d"
@@ -101,6 +119,9 @@ msgstr ""
 msgid "%1$s must be at most %2$s"
 msgstr ""
 
+msgid "%1$s must be one of: %2$s"
+msgstr ""
+
 msgid "%1$s scheduled for %2$s."
 msgstr ""
 
@@ -119,10 +140,25 @@ msgstr ""
 msgid "%d %s sent"
 msgstr ""
 
+msgid "%d day ago"
+msgstr ""
+
+msgid "%d file attached."
+msgstr ""
+
+msgid "%d hour ago"
+msgstr ""
+
 msgid "%d message(s) failed."
 msgstr ""
 
 msgid "%d minute"
+msgstr ""
+
+msgid "%d minute ago"
+msgstr ""
+
+msgid "%d month ago"
 msgstr ""
 
 msgid "%d notifications marked as read."
@@ -144,6 +180,12 @@ msgid "%d tickets"
 msgstr ""
 
 msgid "%d ticket will be moved."
+msgstr ""
+
+msgid "%d week ago"
+msgstr ""
+
+msgid "%d word"
 msgstr ""
 
 msgid "%d workflow(s) found"
@@ -245,6 +287,9 @@ msgstr ""
 msgid "%s IDs."
 msgstr ""
 
+msgid "%s is already attached."
+msgstr ""
+
 msgid "%s is invalid email"
 msgstr ""
 
@@ -303,6 +348,12 @@ msgid "%s message failed after memory limit retries"
 msgstr ""
 
 msgid "%s message failed with debug info"
+msgstr ""
+
+msgid "%s must be a positive record id."
+msgstr ""
+
+msgid "%s must be a real date in YYYY-MM-DD format."
 msgstr ""
 
 msgid "%s must be in E.164 format (e.g., +12025551234)"
@@ -368,6 +419,9 @@ msgstr ""
 msgid "(Applies only to subscribers with location data)"
 msgstr ""
 
+msgid "(deleted user)"
+msgstr ""
+
 msgid " (Duration: %d minutes)"
 msgstr ""
 
@@ -407,16 +461,10 @@ msgstr ""
 msgid "+ Add New Event"
 msgstr ""
 
-msgid "1 hour ago"
-msgstr ""
-
 msgid "1 membership selected"
 msgstr ""
 
 msgid "1 minute"
-msgstr ""
-
-msgid "1 minute ago"
 msgstr ""
 
 msgid "1 ticket"
@@ -596,6 +644,9 @@ msgstr ""
 msgid "a contact"
 msgstr ""
 
+msgid "A contact with the address %1$s already exists (id %2$d). Use update-contact to change it."
+msgstr ""
+
 msgid "A contact with this email address already exists."
 msgstr ""
 
@@ -653,7 +704,7 @@ msgstr ""
 msgid "Action Settings"
 msgstr ""
 
-msgid "Actions from CRM, Sales, Booking, Helpdesk, Tasks & Projects"
+msgid "Actions from Contacts, Helpdesk, Sales, Tasks, Projects, Email & Messaging"
 msgstr ""
 
 msgid "Activate"
@@ -749,6 +800,12 @@ msgstr ""
 msgid "Activity timeline, notes, and interaction history across contacts and deals."
 msgstr ""
 
+msgid "Acts as"
+msgstr ""
+
+msgid "Acts as %1$s · created %2$s"
+msgstr ""
+
 msgid "A customer"
 msgstr ""
 
@@ -770,10 +827,16 @@ msgstr ""
 msgid "Add an automatic closing note or reply"
 msgstr ""
 
+msgid "Add a new contact. Email must be unique — if someone already has that address, use update-contact instead. Creating a contact does not email them."
+msgstr ""
+
 msgid "Add a new note to the contact"
 msgstr ""
 
 msgid "Add a note about this branch, logic, or reminder..."
+msgstr ""
+
+msgid "Add a note to a contact"
 msgstr ""
 
 msgid "Add another Questions feature is available in Pro Version"
@@ -789,6 +852,9 @@ msgid "Add a reply"
 msgstr ""
 
 msgid "Add a support mailbox before opening tickets."
+msgstr ""
+
+msgid "Add attachment"
 msgstr ""
 
 msgid "Add Availability Per Users"
@@ -849,6 +915,9 @@ msgid "Add contract type"
 msgstr ""
 
 msgid "Add Cron Job to Server"
+msgstr ""
+
+msgid "Add custom content blocks with a title and rich text body."
 msgstr ""
 
 msgid "Add Custom Field"
@@ -1100,6 +1169,12 @@ msgstr ""
 msgid "Add Time Slot"
 msgstr ""
 
+msgid "Add to claude_desktop_config.json — macOS: ~/Library/Application Support/Claude/ · Windows: %APPDATA%\\Claude\\"
+msgstr ""
+
+msgid "Add to Cursor’s mcp.json (Settings → Tools & MCP)."
+msgstr ""
+
 msgid "Add to List"
 msgstr ""
 
@@ -1110,6 +1185,9 @@ msgid "Add to Lists"
 msgstr ""
 
 msgid "Add to wp-config.php"
+msgstr ""
+
+msgid "Add to ~/.codex/config.toml"
 msgstr ""
 
 msgid "Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met."
@@ -1229,6 +1307,9 @@ msgstr ""
 msgid "AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more."
 msgstr ""
 
+msgid "AI Assistant"
+msgstr ""
+
 msgid "AI Email Builder"
 msgstr ""
 
@@ -1257,6 +1338,15 @@ msgid "AJAX continuation attempt failed for campaign %s, using Action Scheduler 
 msgstr ""
 
 msgid "AJAX continuation error for campaign %s"
+msgstr ""
+
+msgid "A key always carries its owner’s permissions. To give a teammate access, create the key for them rather than sharing your own — otherwise they would see every record you can see."
+msgstr ""
+
+msgid "A key carries your permissions. Anyone holding it sees exactly what you can see."
+msgstr ""
+
+msgid "A key is a permanent password. Emailed, it stays in the inbox, the mail provider, and every backup — and keeps working. Prefer sending it over a channel you can clear."
 msgstr ""
 
 msgid "Alerts"
@@ -1299,6 +1389,9 @@ msgid "All Contact on Selected list Segment"
 msgstr ""
 
 msgid "All contacts have been processed. You will be redirected shortly."
+msgstr ""
+
+msgid "All contact tags and lists with their ids. Call this to resolve a tag or list name to an id before filtering contacts by it."
 msgstr ""
 
 msgid "All custom fields have been added"
@@ -1529,6 +1622,9 @@ msgstr ""
 msgid "Any matches exactly"
 msgstr ""
 
+msgid "Any MCP-compatible client that can send an HTTP header."
+msgstr ""
+
 msgid "Any Owner"
 msgstr ""
 
@@ -1559,16 +1655,22 @@ msgstr ""
 msgid "Api Key"
 msgstr ""
 
-msgid "API Key"
+msgid "API key"
 msgstr ""
 
-msgid "API key"
+msgid "API Key"
 msgstr ""
 
 msgid "API Key (optional for Ollama/local)"
 msgstr ""
 
 msgid "Api Key and Api URL are required."
+msgstr ""
+
+msgid "API key created. Copy it now — it will not be shown again."
+msgstr ""
+
+msgid "API key created for %s. It carries their permissions. Copy it now — it will not be shown again."
 msgstr ""
 
 msgid "API key is invalid."
@@ -1578,6 +1680,9 @@ msgid "API key is missing."
 msgstr ""
 
 msgid "Api Key is required."
+msgstr ""
+
+msgid "API key revoked"
 msgstr ""
 
 msgid "Api Token"
@@ -1593,6 +1698,9 @@ msgid "Api URL"
 msgstr ""
 
 msgid "API URL should be in format: https://yoursubdomain.api-us1.com"
+msgstr ""
+
+msgid "Append a note to a contact's timeline. The note is attributed to you and cannot be edited or removed through this tool."
 msgstr ""
 
 msgid "Append replies when title and sender email match"
@@ -1614,6 +1722,12 @@ msgid "Apple Calendar settings saved."
 msgstr ""
 
 msgid "Application password is not available. Please contact support."
+msgstr ""
+
+msgid "Application Passwords"
+msgstr ""
+
+msgid "Application Passwords are unavailable on this site because it is not served over HTTPS. Use an API key instead."
 msgstr ""
 
 msgid "Applied"
@@ -1856,6 +1970,12 @@ msgstr ""
 msgid "At most"
 msgstr ""
 
+msgid "A tool returns \"not allowed\" or empty results"
+msgstr ""
+
+msgid "Attach"
+msgstr ""
+
 msgid "Attach .ics calendar invite to booking confirmation emails"
 msgstr ""
 
@@ -1863,6 +1983,12 @@ msgid "Attach calendar invite (.ics)"
 msgstr ""
 
 msgid "Attach file"
+msgstr ""
+
+msgid "Attach files"
+msgstr ""
+
+msgid "Attachment"
 msgstr ""
 
 msgid "Attachment limit reached."
@@ -1878,6 +2004,12 @@ msgid "Attachment not found."
 msgstr ""
 
 msgid "Attachments"
+msgstr ""
+
+msgid "Attachments could not load. Hard-refresh the page and try again."
+msgstr ""
+
+msgid "Attach up to %1$d files (max %2$s each), sent with the email. Allowed types: %3$s."
 msgstr ""
 
 msgid "Attended: %s"
@@ -1929,6 +2061,9 @@ msgid "Authorization failed."
 msgstr ""
 
 msgid "Authorization has expired or was revoked. Please reconnect to resume email polling."
+msgstr ""
+
+msgid "Authorization header for %s:"
 msgstr ""
 
 msgid "Authorize and select a provider account first."
@@ -2019,6 +2154,9 @@ msgid "Automatically create new contacts when receiving emails from unknown send
 msgstr ""
 
 msgid "Automatically create Zoom meetings at the time an event is scheduled"
+msgstr ""
+
+msgid "Automatically email each new invoice to the customer"
 msgstr ""
 
 msgid "Automatically sent to attendees when their booking is confirmed. Includes booking details, location, and cancellation options."
@@ -2387,6 +2525,9 @@ msgstr ""
 msgid "Block Type:"
 msgstr ""
 
+msgid "Blue"
+msgstr ""
+
 msgid "Body"
 msgstr ""
 
@@ -2475,6 +2616,9 @@ msgid "Booking confirmed by Host"
 msgstr ""
 
 msgid "Booking confirmed by Organizer"
+msgstr ""
+
+msgid "Booking counts by status, plus how many are upcoming. Scoped the same way as list-bookings: if your scope is \"own\", these are the bookings you host only."
 msgstr ""
 
 msgid "Booking created"
@@ -2613,6 +2757,9 @@ msgid "Booking Rescheduled by Organizer to Attendee"
 msgstr ""
 
 msgid "Bookings"
+msgstr ""
+
+msgid "Bookings, events, and calendars."
 msgstr ""
 
 msgid "Booking Scheduled"
@@ -2754,6 +2901,9 @@ msgid "Build your email from the ground up using our drag-and-drop builder with 
 msgstr ""
 
 msgid "Built-in"
+msgstr ""
+
+msgid "Built into DoubleScale — no adapter or companion plugin required."
 msgstr ""
 
 msgid "Bulk action"
@@ -3014,6 +3164,9 @@ msgstr ""
 msgid "Campaign channel (email, sms, whatsapp)."
 msgstr ""
 
+msgid "Campaign counts grouped by status and by channel. For open and click rates use get-engagement-summary, which reads the delivery record rather than the campaign list."
+msgstr ""
+
 msgid "Campaign deactivated successfully."
 msgstr ""
 
@@ -3053,6 +3206,9 @@ msgstr ""
 msgid "Campaign not found"
 msgstr ""
 
+msgid "Campaign not found."
+msgstr ""
+
 msgid "Campaign not loaded"
 msgstr ""
 
@@ -3063,6 +3219,9 @@ msgid "Campaign Performance (Analytics)"
 msgstr ""
 
 msgid "Campaigns"
+msgstr ""
+
+msgid "Campaigns and automation workflows, read-only — nothing here sends or runs."
 msgstr ""
 
 msgid "Campaign Scheduled"
@@ -3150,6 +3309,9 @@ msgid "Cannot connect to account api"
 msgstr ""
 
 msgid "Cannot continue"
+msgstr ""
+
+msgid "Cannot create a key for an administrator. Ask them to create their own from this screen."
 msgstr ""
 
 msgid "Cannot find account data for account \"%1$s\" (mailer: %2$s). Re-authorize this provider in SMTP settings or pick a valid account on the connection."
@@ -3302,6 +3464,15 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
+msgid "Change a contact's name, phone, or company. Email and subscription status are deliberately not editable here — changing those affects deliverability and consent."
+msgstr ""
+
+msgid "Change an invoice's due date, client note, or terms. Line items, discounts, and totals cannot be changed here — editing those alters what the customer owes, so it stays a human decision in the invoice editor. This tool never sends anything."
+msgstr ""
+
+msgid "Change a proposal's subject, expiry date, or terms. Line items, discounts, and totals cannot be changed here — editing those alters what is being quoted. This tool never sends anything."
+msgstr ""
+
 msgid "Change condition"
 msgstr ""
 
@@ -3330,6 +3501,9 @@ msgid "Changing the availability here will affect the original availability sett
 msgstr ""
 
 msgid "Changing the slug of your form within the builder will result in a corresponding alteration of the QR code."
+msgstr ""
+
+msgid "Changing the trigger will disable the free-form text option in existing WhatsApp actions and reset them to unconfigured. You will need to select a template for those steps."
 msgstr ""
 
 msgid "Channel \"%1$s\" not found. Available channels: %2$s"
@@ -3473,6 +3647,9 @@ msgstr ""
 msgid "Choose your Merge tags type and Select one of them to insert into your link URL."
 msgstr ""
 
+msgid "Chronological replies, internal notes, and events on one ticket. Long message bodies are truncated — check the truncated flag before quoting one as complete."
+msgstr ""
+
 msgid "City"
 msgstr ""
 
@@ -3483,6 +3660,18 @@ msgid "Claimed from waiting list"
 msgstr ""
 
 msgid "Classic"
+msgstr ""
+
+msgid "Claude Code"
+msgstr ""
+
+msgid "Claude Desktop"
+msgstr ""
+
+msgid "Claude Desktop lost all its MCP servers"
+msgstr ""
+
+msgid "claude_desktop_config.json must stay valid JSON — a missing or extra comma stops every server from loading, not just this one."
 msgstr ""
 
 msgid "Clear"
@@ -3594,6 +3783,9 @@ msgid "Client portal for invoices, contracts & credit notes"
 msgstr ""
 
 msgid "Client portal visibility for projects"
+msgstr ""
+
+msgid "Client runs on:"
 msgstr ""
 
 msgid "Client Secret"
@@ -3722,10 +3914,10 @@ msgstr ""
 msgid "Company or Policy & Terms Updates"
 msgstr ""
 
-msgid "Company registration number"
+msgid "Company Registration Number"
 msgstr ""
 
-msgid "Company Registration Number"
+msgid "Company registration number"
 msgstr ""
 
 msgid "Company registration number."
@@ -3789,6 +3981,9 @@ msgid "Condition Step"
 msgstr ""
 
 msgid "Conferencing"
+msgstr ""
+
+msgid "Configuration"
 msgstr ""
 
 msgid "Configuration for the account."
@@ -3953,10 +4148,16 @@ msgstr ""
 msgid "Connect %s"
 msgstr ""
 
+msgid "Connect %s to your CRM"
+msgstr ""
+
 msgid "Connect & fetch data"
 msgstr ""
 
 msgid "Connect account"
+msgstr ""
+
+msgid "Connect a client"
 msgstr ""
 
 msgid "Connect calendar and conferencing integrations"
@@ -4307,6 +4508,9 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
+msgid "Content Sections"
+msgstr ""
+
 msgid "Context"
 msgstr ""
 
@@ -4490,6 +4694,9 @@ msgstr ""
 msgid "Copyright © {{general:business_name}}"
 msgstr ""
 
+msgid "Copy snippet"
+msgstr ""
+
 msgid "Copy the Access Token from the Auth tab"
 msgstr ""
 
@@ -4506,6 +4713,12 @@ msgid "Copy the shortcode and paste it into your post or page."
 msgstr ""
 
 msgid "Copy the shortcode below and insert it in your WordPress page or post."
+msgstr ""
+
+msgid "Copy this key now — it will not be shown again."
+msgstr ""
+
+msgid "Copy this key now — it will not be shown again. It acts as %s and carries their permissions."
 msgstr ""
 
 msgid "Copy your API URL and Key from the API Access section"
@@ -4533,6 +4746,9 @@ msgid "Could not calculate related records for these contacts. Please try again.
 msgstr ""
 
 msgid "Could not clear the email log."
+msgstr ""
+
+msgid "Could not copy to clipboard"
 msgstr ""
 
 msgid "Could not create email template for this campaign."
@@ -4616,6 +4832,9 @@ msgstr ""
 msgid "Could not restore this version."
 msgstr ""
 
+msgid "Could not save attachment. Hard-refresh the page and try again."
+msgstr ""
+
 msgid "Could not save connection"
 msgstr ""
 
@@ -4647,6 +4866,9 @@ msgid "Could not send email."
 msgstr ""
 
 msgid "Could not send test email."
+msgstr ""
+
+msgid "Could not send the email."
 msgstr ""
 
 msgid "Could not send the WhatsApp message."
@@ -4703,10 +4925,16 @@ msgstr ""
 msgid "Create a Condition"
 msgstr ""
 
+msgid "Create a contact"
+msgstr ""
+
 msgid "Create a contract type to get started"
 msgstr ""
 
 msgid "Create a draft invoice from this proposal?"
+msgstr ""
+
+msgid "Create a key above to get a ready-to-paste snippet."
 msgstr ""
 
 msgid "Create a Loops API key and the transactional ID from your Loops workspace, then save as a new provider account."
@@ -4721,6 +4949,9 @@ msgstr ""
 msgid "Create an account"
 msgstr ""
 
+msgid "Create an API key below. The key connects as you, so it sees exactly what you can see — no more. You can also use a WordPress Application Password (Basic auth), which requires the site to be served over HTTPS."
+msgstr ""
+
 msgid "Create an API key in SendGrid with mail-send permission, then add it here as a new provider account or reuse one you already stored."
 msgstr ""
 
@@ -4731,6 +4962,9 @@ msgid "Create an API key with full access to read forms and manage webhooks."
 msgstr ""
 
 msgid "Create and approve templates in your Meta Business Suite, then import them via Settings > WhatsApp Templates."
+msgstr ""
+
+msgid "Create and manage all projects, kanban statuses, and assignments."
 msgstr ""
 
 msgid "Create and manage credit notes with DoubleScale Pro."
@@ -4767,6 +5001,15 @@ msgid "Create a new Private App or select an existing one"
 msgstr ""
 
 msgid "Create a new proposal to get started"
+msgstr ""
+
+msgid "Create an invoice to bill this contact."
+msgstr ""
+
+msgid "Create API key"
+msgstr ""
+
+msgid "Create a proposal to send pricing and terms to this contact."
 msgstr ""
 
 msgid "Create a tag with a unique name, for example trigger_run_welcome_sequence."
@@ -5018,6 +5261,9 @@ msgstr ""
 msgid "CRM contacts"
 msgstr ""
 
+msgid "CRM contacts, tags, lists, and activity timelines."
+msgstr ""
+
 msgid "CRM link"
 msgstr ""
 
@@ -5082,6 +5328,9 @@ msgid "Current Setting:"
 msgstr ""
 
 msgid "Current usage:"
+msgstr ""
+
+msgid "Cursor"
 msgstr ""
 
 msgid "custom"
@@ -5294,6 +5543,9 @@ msgstr ""
 msgid "day"
 msgstr ""
 
+msgid "Day(s)"
+msgstr ""
+
 msgid "Day of"
 msgstr ""
 
@@ -5307,9 +5559,6 @@ msgid "Days"
 msgstr ""
 
 msgid "days"
-msgstr ""
-
-msgid "days ago"
 msgstr ""
 
 msgid "Days Before"
@@ -5735,6 +5984,9 @@ msgstr ""
 msgid "Design:"
 msgstr ""
 
+msgid "Desktop"
+msgstr ""
+
 msgid "Desktop notifications are enabled. Test them or learn how they work."
 msgstr ""
 
@@ -5966,6 +6218,36 @@ msgstr ""
 msgid "DoubleScale"
 msgstr ""
 
+msgid "DoubleScale: Booking"
+msgstr ""
+
+msgid "DoubleScale: Contacts"
+msgstr ""
+
+msgid "DoubleScale: Core"
+msgstr ""
+
+msgid "DoubleScale: Deals"
+msgstr ""
+
+msgid "DoubleScale: Marketing"
+msgstr ""
+
+msgid "DoubleScale: Projects"
+msgstr ""
+
+msgid "DoubleScale: Reports"
+msgstr ""
+
+msgid "DoubleScale: Sales"
+msgstr ""
+
+msgid "DoubleScale: Support"
+msgstr ""
+
+msgid "DoubleScale: Tasks"
+msgstr ""
+
 msgid "DoubleScale contact"
 msgstr ""
 
@@ -5973,9 +6255,6 @@ msgid "DoubleScale database migration pending:"
 msgstr ""
 
 msgid "DoubleScale Mobile App"
-msgstr ""
-
-msgid "DoubleScale Modules"
 msgstr ""
 
 msgid "Double Scale Pro"
@@ -6200,6 +6479,12 @@ msgstr ""
 msgid "E.g., Write a welcome paragraph for new subscribers…"
 msgstr ""
 
+msgid "e.g. abcd efgh ijkl mnop qrst uvwx"
+msgstr ""
+
+msgid "e.g. Claude on my laptop"
+msgstr ""
+
 msgid "e.g. Sales"
 msgstr ""
 
@@ -6231,6 +6516,9 @@ msgid "Edit"
 msgstr ""
 
 msgid "Edit %s"
+msgstr ""
+
+msgid "Editable types are authored by people; system types are generated automatically by the CRM and are not written by hand."
 msgstr ""
 
 msgid "Edit account"
@@ -6470,6 +6758,9 @@ msgstr ""
 msgid "Email body: builder JSON or raw HTML"
 msgstr ""
 
+msgid "Email body is empty. Add content in the builder before previewing."
+msgstr ""
+
 msgid "Email body is empty. Add content in the builder before sending a test."
 msgstr ""
 
@@ -6590,6 +6881,9 @@ msgstr ""
 msgid "Email Preview"
 msgstr ""
 
+msgid "Email preview"
+msgstr ""
+
 msgid "Email Provider Setup"
 msgstr ""
 
@@ -6639,6 +6933,9 @@ msgid "Email Sequence"
 msgstr ""
 
 msgid "Email Sequences"
+msgstr ""
+
+msgid "Email setup instructions"
 msgstr ""
 
 msgid "Emails from these domains will be ignored. Enter one domain per line (e.g. newsletter.example.com)."
@@ -6692,6 +6989,9 @@ msgstr ""
 msgid "Email the customer when their ticket is marked resolved or closed."
 msgstr ""
 
+msgid "Email the setup steps for %1$s on %2$s to this key’s owner. Switch the tabs below first if that is not the right client."
+msgstr ""
+
 msgid "Email Tracking"
 msgstr ""
 
@@ -6708,6 +7008,9 @@ msgid "empty"
 msgstr ""
 
 msgid "Empty attachment."
+msgstr ""
+
+msgid "Empty Campaign List"
 msgstr ""
 
 msgid "Empty response."
@@ -6774,6 +7077,9 @@ msgid "Enable Inbox"
 msgstr ""
 
 msgid "Enable Landing Page Features for this calendar"
+msgstr ""
+
+msgid "Enable MCP for AI Agents"
 msgstr ""
 
 msgid "Enable Microsoft Teams (Requires work/school account)"
@@ -6854,6 +7160,12 @@ msgstr ""
 msgid "End date must be after the created date"
 msgstr ""
 
+msgid "Endpoint"
+msgstr ""
+
+msgid "Endpoint URL"
+msgstr ""
+
 msgid "Ends"
 msgstr ""
 
@@ -6891,6 +7203,9 @@ msgid "Enter client secret"
 msgstr ""
 
 msgid "Enter contact name"
+msgstr ""
+
+msgid "Enter content here..."
 msgstr ""
 
 msgid "Enter default value"
@@ -7343,6 +7658,12 @@ msgstr ""
 msgid "Event visibility."
 msgstr ""
 
+msgid "Every"
+msgstr ""
+
+msgid "Every %d month"
+msgstr ""
+
 msgid "Every 5 minutes (DoubleScale)"
 msgstr ""
 
@@ -7359,6 +7680,9 @@ msgid "Every Sunday"
 msgstr ""
 
 msgid "Everything below is already built into DoubleScale — deal pipelines, invoicing, the email builder, automations, shared mailbox, reporting, and more. Activate Pro to unlock it all in the platform you already run."
+msgstr ""
+
+msgid "Everything that has happened with one contact in chronological order — notes, calls, emails, meetings, and tasks. This is the fastest way to answer \"what is going on with this customer\"."
 msgstr ""
 
 msgid "Every Thursday"
@@ -7554,6 +7878,9 @@ msgid "Failed to connect to message provider for %s campaign."
 msgstr ""
 
 msgid "Failed to create %s. Please try again or contact support."
+msgstr ""
+
+msgid "Failed to create API key"
 msgstr ""
 
 msgid "Failed to create automation."
@@ -7853,7 +8180,13 @@ msgstr ""
 msgid "Failed to load mailboxes."
 msgstr ""
 
+msgid "Failed to load MCP status"
+msgstr ""
+
 msgid "Failed to load payment gateway settings"
+msgstr ""
+
+msgid "Failed to load preview."
 msgstr ""
 
 msgid "Failed to load saved blocks"
@@ -7934,6 +8267,9 @@ msgstr ""
 msgid "Failed to render template"
 msgstr ""
 
+msgid "Failed to render the preview."
+msgstr ""
+
 msgid "Failed to reorder step"
 msgstr ""
 
@@ -7941,6 +8277,9 @@ msgid "Failed to resend campaign email"
 msgstr ""
 
 msgid "Failed to resend email"
+msgstr ""
+
+msgid "Failed to revoke API key"
 msgstr ""
 
 msgid "Failed to run task: %s"
@@ -8138,6 +8477,9 @@ msgstr ""
 msgid "Failed to update manager role. Please try again."
 msgstr ""
 
+msgid "Failed to update MCP settings"
+msgstr ""
+
 msgid "Failed to update notification preferences."
 msgstr ""
 
@@ -8226,6 +8568,9 @@ msgid "Fields to update."
 msgstr ""
 
 msgid "Field type \"%s\" does not exist"
+msgstr ""
+
+msgid "Figures are grouped by currency and must not be added together across currencies."
 msgstr ""
 
 msgid "File Attached"
@@ -8537,6 +8882,12 @@ msgstr ""
 msgid "Free"
 msgstr ""
 
+msgid "Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received."
+msgstr ""
+
+msgid "Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received. Switch to a template or change the trigger."
+msgstr ""
+
 msgid "Frequency"
 msgstr ""
 
@@ -8609,6 +8960,12 @@ msgstr ""
 msgid "Full"
 msgstr ""
 
+msgid "Full CRM admin: all contacts, deals, pipelines, team, settings, reports, import/export, proposals, invoices, and support inbox."
+msgstr ""
+
+msgid "Full record for one contact, including address, company, tags, and lists. Look up by id or by email address. Pass include=[\"relationships\"] for counts of their invoices, deals, tickets, tasks, and bookings — one call instead of five, and it respects what you are allowed to see."
+msgstr ""
+
 msgid "Gallery"
 msgstr ""
 
@@ -8669,16 +9026,52 @@ msgstr ""
 msgid "Generic SMTP — use your host’s server, port, and login."
 msgstr ""
 
+msgid "Get automation"
+msgstr ""
+
+msgid "Get booking"
+msgstr ""
+
+msgid "Get booking summary"
+msgstr ""
+
+msgid "Get campaign"
+msgstr ""
+
+msgid "Get campaign summary"
+msgstr ""
+
+msgid "Get contact"
+msgstr ""
+
+msgid "Get contact timeline"
+msgstr ""
+
 msgid "Get Credentials"
+msgstr ""
+
+msgid "Get CRM context"
+msgstr ""
+
+msgid "Get engagement summary"
 msgstr ""
 
 msgid "Get in-app bell alerts and desktop notifications with DoubleScale Pro. Email notifications are included free."
 msgstr ""
 
+msgid "Get invoice"
+msgstr ""
+
 msgid "Get it on Google Play"
 msgstr ""
 
+msgid "Get proposal"
+msgstr ""
+
 msgid "GetResponse"
+msgstr ""
+
+msgid "Get sales summary"
 msgstr ""
 
 msgid "Get Started"
@@ -8699,6 +9092,15 @@ msgstr ""
 msgid "Get started by creating your first tag to organize your contacts"
 msgstr ""
 
+msgid "Get support summary"
+msgstr ""
+
+msgid "Get support ticket"
+msgstr ""
+
+msgid "Get ticket thread"
+msgstr ""
+
 msgid "Getting Started"
 msgstr ""
 
@@ -8712,6 +9114,9 @@ msgid "Give DoubleScale Full Access to manage Calendar and Conferencing."
 msgstr ""
 
 msgid "Give DoubleScale Full Access to manage Zoom meetings."
+msgstr ""
+
+msgid "Give each client its own key — one for Claude Code, one for Cursor, and so on. Then you can revoke a single client without breaking the others."
 msgstr ""
 
 msgid "Give this action a custom name to make complex workflows easier to follow."
@@ -8984,6 +9389,9 @@ msgstr ""
 msgid "Helper Text"
 msgstr ""
 
+msgid "Here is how to connect %1$s on %2$s to the CRM. Anything it does will run as your account and show only what you are allowed to see."
+msgstr ""
+
 msgid "Hero"
 msgstr ""
 
@@ -8997,6 +9405,9 @@ msgid "Hi"
 msgstr ""
 
 msgid "Hi %1$s %2$s,"
+msgstr ""
+
+msgid "Hi %s,"
 msgstr ""
 
 msgid "Hide CC →"
@@ -9062,16 +9473,10 @@ msgstr ""
 msgid "hour"
 msgstr ""
 
-msgid "hour ago"
-msgstr ""
-
 msgid "Hours"
 msgstr ""
 
 msgid "hours"
-msgstr ""
-
-msgid "hours ago"
 msgstr ""
 
 msgid "Hours Before"
@@ -9170,6 +9575,9 @@ msgstr ""
 msgid "Identity %s deleted."
 msgstr ""
 
+msgid "Identity, active modules, and site context."
+msgstr ""
+
 msgid "Identity type"
 msgstr ""
 
@@ -9216,6 +9624,9 @@ msgid "If you want to restart the automation for the same contact"
 msgstr ""
 
 msgid "Ignore Availability"
+msgstr ""
+
+msgid "I have read and agree to the Terms & Conditions."
 msgstr ""
 
 msgid "Image"
@@ -9375,6 +9786,9 @@ msgid "includes none of (match all)"
 msgstr ""
 
 msgid "Includes none of (match all)"
+msgstr ""
+
+msgid "Include the key itself in the email"
 msgstr ""
 
 msgid "Incoming Webhook"
@@ -9893,6 +10307,9 @@ msgstr ""
 msgid "Invoice Amount"
 msgstr ""
 
+msgid "Invoice counts and totals grouped by status, broken down per currency. Respects your sales scope: if it is \"own\", these are your figures only, not the whole site."
+msgstr ""
+
 msgid "Invoice created from proposal"
 msgstr ""
 
@@ -9945,6 +10362,9 @@ msgid "Invoices, payments & subscriptions"
 msgstr ""
 
 msgid "Invoices, proposals, contracts, credit notes, and projects in one tabbed report hub."
+msgstr ""
+
+msgid "Invoices, proposals, contracts, credit notes, products, and sales summaries."
 msgstr ""
 
 msgid "Invoices and payments are unavailable"
@@ -10034,6 +10454,9 @@ msgstr ""
 msgid "Issue credit notes, apply credit to unpaid invoices, and track open customer balances with DoubleScale Pro."
 msgstr ""
 
+msgid "It does not expire. Anyone who reads this email can use it to read your CRM data, so set it up and then delete this message. If you think it has been seen by someone else, ask an administrator to revoke it — a replacement takes seconds."
+msgstr ""
+
 msgid "Item"
 msgstr ""
 
@@ -10103,6 +10526,9 @@ msgstr ""
 msgid "June"
 msgstr ""
 
+msgid "Just now"
+msgstr ""
+
 msgid "just now"
 msgstr ""
 
@@ -10125,6 +10551,9 @@ msgid "Key"
 msgstr ""
 
 msgid "Key-Value Pair"
+msgstr ""
+
+msgid "Key name"
 msgstr ""
 
 msgid "Key reached its activation limit"
@@ -10439,6 +10868,33 @@ msgstr ""
 msgid "list"
 msgstr ""
 
+msgid "List activities"
+msgstr ""
+
+msgid "List activity types"
+msgstr ""
+
+msgid "List automations"
+msgstr ""
+
+msgid "List automation workflows with their trigger, status, and enrolled contact count. Read-only: this never creates, edits, or runs a workflow."
+msgstr ""
+
+msgid "List bookings"
+msgstr ""
+
+msgid "List bookings with their time, status, event, and the contact who booked. Unless you can manage all bookings you see only bookings you host — check get-context first. Read-only: this never books, reschedules, or cancels anything."
+msgstr ""
+
+msgid "List campaigns"
+msgstr ""
+
+msgid "List connected forms with their source plugin, status, and submission count. Read-only: this never changes a form or its connection."
+msgstr ""
+
+msgid "List contacts"
+msgstr ""
+
 msgid "List created successfully"
 msgstr ""
 
@@ -10448,13 +10904,37 @@ msgstr ""
 msgid "List Description"
 msgstr ""
 
+msgid "List email, SMS, and WhatsApp campaigns with status, channel, and recipient count. Read-only: this never sends or schedules anything."
+msgstr ""
+
 msgid "Listening for webhook data..."
+msgstr ""
+
+msgid "List forms"
+msgstr ""
+
+msgid "List form submissions"
+msgstr ""
+
+msgid "List form submissions with the form and the contact created or matched. Use this to answer how many people submitted a form in a period."
+msgstr ""
+
+msgid "List invoices"
+msgstr ""
+
+msgid "List invoices with number, status, contact, total, and due date. Amounts are returned with their currency code. If your sales scope is \"own\" you see only invoices assigned to you — check get-context first."
 msgstr ""
 
 msgid "List Name"
 msgstr ""
 
 msgid "List name is required"
+msgstr ""
+
+msgid "List proposals"
+msgstr ""
+
+msgid "List proposals with number, subject, status, contact, and total. If your sales scope is \"own\" you see only proposals assigned to you."
 msgstr ""
 
 msgid "Lists"
@@ -10467,6 +10947,9 @@ msgid "Lists: %1$d subscribed / %2$d assigned"
 msgstr ""
 
 msgid "Lists and Tags"
+msgstr ""
+
+msgid "List sent messages"
 msgstr ""
 
 msgid "Lists Mapping"
@@ -10482,6 +10965,15 @@ msgid "Lists to remove."
 msgstr ""
 
 msgid "List Subscribed"
+msgstr ""
+
+msgid "List support tickets"
+msgstr ""
+
+msgid "List support tickets with title, status, priority, contact, and assigned agent. Unless you can manage all tickets you see only tickets assigned to you — check get-context first."
+msgstr ""
+
+msgid "List tags and lists"
 msgstr ""
 
 msgid "List Unsubscribed"
@@ -10553,6 +11045,9 @@ msgstr ""
 msgid "Loading log…"
 msgstr ""
 
+msgid "Loading MCP settings…"
+msgstr ""
+
 msgid "Loading Merge Tags..."
 msgstr ""
 
@@ -10575,6 +11070,9 @@ msgid "Loading PayPal…"
 msgstr ""
 
 msgid "Loading preview..."
+msgstr ""
+
+msgid "Loading preview…"
 msgstr ""
 
 msgid "Loading proposal…"
@@ -10644,6 +11142,9 @@ msgid "Lock pricing while a document is pending review"
 msgstr ""
 
 msgid "Lock time zone on booking page"
+msgstr ""
+
+msgid "Log a call"
 msgstr ""
 
 msgid "Log a new call for this contact"
@@ -10761,6 +11262,9 @@ msgid "LTR"
 msgstr ""
 
 msgid "M"
+msgstr ""
+
+msgid "macOS / Linux"
 msgstr ""
 
 msgid "Mailbox"
@@ -10886,6 +11390,9 @@ msgstr ""
 msgid "Manage all calendars created by all users"
 msgstr ""
 
+msgid "Manage all contacts and deals, import/export data, and manage every proposal and invoice."
+msgstr ""
+
 msgid "Manage Columns"
 msgstr ""
 
@@ -10917,6 +11424,9 @@ msgid "Manage only the user's own bookings"
 msgstr ""
 
 msgid "Manage only the user's own calendars"
+msgstr ""
+
+msgid "Manage only your own calendars, bookings, and availability."
 msgstr ""
 
 msgid "Manage preferences"
@@ -11201,6 +11711,33 @@ msgstr ""
 msgid "May"
 msgstr ""
 
+msgid "MCP clients connect to this URL."
+msgstr ""
+
+msgid "MCP endpoint disabled"
+msgstr ""
+
+msgid "MCP endpoint disabled."
+msgstr ""
+
+msgid "MCP endpoint enabled"
+msgstr ""
+
+msgid "MCP endpoint enabled."
+msgstr ""
+
+msgid "MCP for AI Agents"
+msgstr ""
+
+msgid "MCP needs the WordPress Abilities API, added in WordPress %1$s. This site runs WordPress %2$s, so no tools are published. Update WordPress to use this feature."
+msgstr ""
+
+msgid "Me (%s)"
+msgstr ""
+
+msgid "Media Library is unavailable. Reload the page and try again."
+msgstr ""
+
 msgid "Medium"
 msgstr ""
 
@@ -11297,6 +11834,9 @@ msgstr ""
 msgid "Merge tag copied to clipboard. You can now paste it in any field."
 msgstr ""
 
+msgid "Merge tag failed to resolve"
+msgstr ""
+
 msgid "Merge Tags"
 msgstr ""
 
@@ -11315,6 +11855,9 @@ msgstr ""
 msgid "Message body (HTML for email, plain text for SMS, ignored for WhatsApp templates)."
 msgstr ""
 
+msgid "Message body is required."
+msgstr ""
+
 msgid "Message channel: email, sms, or whatsapp."
 msgstr ""
 
@@ -11331,6 +11874,9 @@ msgid "Message Details"
 msgstr ""
 
 msgid "Message does not belong to this campaign"
+msgstr ""
+
+msgid "Message history across email, SMS, and WhatsApp, with delivery status and whether each was opened or clicked. Use this to answer whether a contact is engaging. Read-only: this reports on messages already sent and never sends anything."
 msgstr ""
 
 msgid "Message not found"
@@ -11423,9 +11969,6 @@ msgstr ""
 msgid "minutes"
 msgstr ""
 
-msgid "minutes ago"
-msgstr ""
-
 msgid "Minutes Before"
 msgstr ""
 
@@ -11442,6 +11985,12 @@ msgid "Missing refresh token from Google. Try revoking app access in your Google
 msgstr ""
 
 msgid "Missing required email data (subject, body, or recipient)"
+msgstr ""
+
+msgid "Missing required input: %s"
+msgstr ""
+
+msgid "Mobile"
 msgstr ""
 
 msgid "Mobile app"
@@ -11471,6 +12020,9 @@ msgstr ""
 msgid "Modules"
 msgstr ""
 
+msgid "Modules not listed here are switched off on this site. If asked about one, say the feature is not enabled — do not report its data as empty or zero."
+msgstr ""
+
 msgid "Mon"
 msgstr ""
 
@@ -11484,6 +12036,9 @@ msgid "Monitor IP addresses for each visit"
 msgstr ""
 
 msgid "Month"
+msgstr ""
+
+msgid "Month(s)"
 msgstr ""
 
 msgid "Month and year in format \"March 2025\"."
@@ -11670,6 +12225,9 @@ msgid "Never Expire"
 msgstr ""
 
 msgid "Nevermind"
+msgstr ""
+
+msgid "never used"
 msgstr ""
 
 msgid "New"
@@ -11861,6 +12419,15 @@ msgstr ""
 msgid "No connection to clear"
 msgstr ""
 
+msgid "No contact exists with id %d. Use list-contacts to find the right one."
+msgstr ""
+
+msgid "No contact found for that identifier."
+msgstr ""
+
+msgid "No contact found with that id."
+msgstr ""
+
 msgid "No contact ID provided"
 msgstr ""
 
@@ -11981,6 +12548,9 @@ msgstr ""
 msgid "No fields found for the selected form."
 msgstr ""
 
+msgid "No file was selected."
+msgstr ""
+
 msgid "No file was uploaded."
 msgstr ""
 
@@ -12006,6 +12576,9 @@ msgid "No ids provided"
 msgstr ""
 
 msgid "No IDs provided."
+msgstr ""
+
+msgid "No invoice found with that id."
 msgstr ""
 
 msgid "No invoices for this contact."
@@ -12167,6 +12740,9 @@ msgstr ""
 msgid "No projects yet"
 msgstr ""
 
+msgid "No proposal found with that id."
+msgstr ""
+
 msgid "No proposals for this contact."
 msgstr ""
 
@@ -12293,6 +12869,9 @@ msgstr ""
 msgid "Not Configured"
 msgstr ""
 
+msgid "Not connected"
+msgstr ""
+
 msgid "Not Connected"
 msgstr ""
 
@@ -12327,6 +12906,9 @@ msgid "Note deleted successfully"
 msgstr ""
 
 msgid "Note is required"
+msgstr ""
+
+msgid "Note it says Basic, not Bearer — Bearer is only for the API keys below, and an Application Password sent as Bearer is always rejected."
 msgstr ""
 
 msgid "No template content available."
@@ -12386,6 +12968,12 @@ msgstr ""
 msgid "Nothing scheduled in this range."
 msgstr ""
 
+msgid "Nothing to change — supply a field this tool can edit."
+msgstr ""
+
+msgid "Nothing to change — the contact already has those values."
+msgstr ""
+
 msgid "Nothing to configure here yet."
 msgstr ""
 
@@ -12399,6 +12987,9 @@ msgid "Nothing to undo."
 msgstr ""
 
 msgid "Notice"
+msgstr ""
+
+msgid "No ticket found with that id."
 msgstr ""
 
 msgid "No ticket selected."
@@ -12617,6 +13208,9 @@ msgstr ""
 msgid "Notifies you when an attendee reschedules. Shows both original and new booking times for easy reference."
 msgstr ""
 
+msgid "Not included here on purpose — a key is a permanent password and email is not a safe place to keep one. An administrator will send it to you separately. Paste it where the configuration below says to."
+msgstr ""
+
 msgid "not includes"
 msgstr ""
 
@@ -12627,6 +13221,9 @@ msgid "Not Installed"
 msgstr ""
 
 msgid "Not Interested"
+msgstr ""
+
+msgid "No tools appear in the client"
 msgstr ""
 
 msgid "Not Paid Yet"
@@ -12785,10 +13382,28 @@ msgstr ""
 msgid "Once you have sent it in WhatsApp, mark the document as sent below."
 msgstr ""
 
+msgid "One automation workflow with its trigger and ordered steps. Step configuration — including email bodies — is omitted unless include_step_settings is true, so the default answers \"what does this workflow do\" without dumping its contents."
+msgstr ""
+
+msgid "One booking with its time, status, event, hosts, and the contact who booked."
+msgstr ""
+
+msgid "One campaign with its channel, status, schedule, and engagement counts (sent, opened, clicked). The message body is omitted unless include_body is true, because campaign bodies are large."
+msgstr ""
+
 msgid "One Invitee"
 msgstr ""
 
+msgid "One invoice with line items, totals, amount paid, and balance due."
+msgstr ""
+
+msgid "One proposal with line items and totals."
+msgstr ""
+
 msgid "One rotating host"
+msgstr ""
+
+msgid "One support ticket with its status, priority, contact, agent, and reply count."
 msgstr ""
 
 msgid "One to One"
@@ -12812,6 +13427,9 @@ msgstr ""
 msgid "Only action steps can be enabled or disabled."
 msgstr ""
 
+msgid "Only clicks on the selected link trigger(s) will start this automation."
+msgstr ""
+
 msgid "Only close tickets waiting on the customer"
 msgstr ""
 
@@ -12819,6 +13437,9 @@ msgid "Only error, critical, alert, and emergency logs will be stored"
 msgstr ""
 
 msgid "Only error-level logs and above (error, critical, alert, emergency) are being stored in the system."
+msgstr ""
+
+msgid "Only generate the next invoice once this one is paid"
 msgstr ""
 
 msgid "Only installs from the WordPress.org plugins directory are allowed."
@@ -12852,6 +13473,9 @@ msgid "Oops!"
 msgstr ""
 
 msgid "Open"
+msgstr ""
+
+msgid "OpenAI Codex"
 msgstr ""
 
 msgid "Open a new ticket"
@@ -12954,6 +13578,9 @@ msgid "OR"
 msgstr ""
 
 msgid "Or adding New Customer"
+msgstr ""
+
+msgid "Orange"
 msgstr ""
 
 msgid "or click to browse"
@@ -13067,6 +13694,9 @@ msgstr ""
 msgid "Page number."
 msgstr ""
 
+msgid "Page Size"
+msgstr ""
+
 msgid "page visit"
 msgstr ""
 
@@ -13112,6 +13742,9 @@ msgstr ""
 msgid "Paragraph"
 msgstr ""
 
+msgid "Paragraph Text"
+msgstr ""
+
 msgid "Partially Applied"
 msgstr ""
 
@@ -13128,6 +13761,9 @@ msgid "Past"
 msgstr ""
 
 msgid "Past bookings cannot be cancelled."
+msgstr ""
+
+msgid "Paste it here and the snippets below switch to it. It is converted in your browser and never sent to the server."
 msgstr ""
 
 msgid "Paste them in the form above"
@@ -13239,6 +13875,9 @@ msgid "Payment recorded successfully."
 msgstr ""
 
 msgid "Payments"
+msgstr ""
+
+msgid "Payments appear here when invoices for this contact are paid."
 msgstr ""
 
 msgid "Payment saved."
@@ -13499,7 +14138,13 @@ msgstr ""
 msgid "Please add at least one webhook URL for each enabled alert channel."
 msgstr ""
 
+msgid "Please agree to the Terms & Conditions before accepting."
+msgstr ""
+
 msgid "Please choose a remote calendar from the list before closing."
+msgstr ""
+
+msgid "Please choose the date the recurring invoice should stop on."
 msgstr ""
 
 msgid "Please complete all required OAuth app fields."
@@ -13949,9 +14594,6 @@ msgstr ""
 msgid "Presto Player"
 msgstr ""
 
-msgid "Presto Player plugin is not installed or activated. Install Presto Player to use these actions."
-msgstr ""
-
 msgid "Presto Player plugin is not installed or activated. Install Presto Player to use these triggers."
 msgstr ""
 
@@ -13973,7 +14615,16 @@ msgstr ""
 msgid "Preview could not be loaded. Use Edit template to open the builder, then save again."
 msgstr ""
 
+msgid "Preview device"
+msgstr ""
+
+msgid "Preview email"
+msgstr ""
+
 msgid "Preview not available"
+msgstr ""
+
+msgid "Preview on desktop, tablet and mobile"
 msgstr ""
 
 msgid "Preview template"
@@ -14144,6 +14795,9 @@ msgstr ""
 msgid "Projects & Tasks"
 msgstr ""
 
+msgid "Projects, statuses, and linked contacts and deals."
+msgstr ""
+
 msgid "Project Status Changed"
 msgstr ""
 
@@ -14273,7 +14927,22 @@ msgstr ""
 msgid "Provide an email and/or phone number to create the contact."
 msgstr ""
 
+msgid "Provide a valid contact id."
+msgstr ""
+
+msgid "Provide a valid invoice id."
+msgstr ""
+
+msgid "Provide a valid proposal id."
+msgstr ""
+
+msgid "Provide a valid ticket id."
+msgstr ""
+
 msgid "Provided email address will set as CC to this email notification."
+msgstr ""
+
+msgid "Provide either a contact id or an email address."
 msgstr ""
 
 msgid "Provider"
@@ -14309,6 +14978,9 @@ msgstr ""
 msgid "Published"
 msgstr ""
 
+msgid "Published tools (%d)"
+msgstr ""
+
 msgid "Purple"
 msgstr ""
 
@@ -14340,6 +15012,9 @@ msgid "Push notifications are working! This is a test from your Plugin settings.
 msgstr ""
 
 msgid "Push notifications require DoubleScale Pro."
+msgstr ""
+
+msgid "Put this in %s:"
 msgstr ""
 
 msgid "QR Code"
@@ -14411,6 +15086,9 @@ msgstr ""
 msgid "Read"
 msgstr ""
 
+msgid "Read-only access to DoubleScale CRM. Call doublescale-get-context first: it reports which modules are active on this site and which tools you can actually use. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see."
+msgstr ""
+
 msgid "Read access to all availability schedules across users"
 msgstr ""
 
@@ -14418,6 +15096,9 @@ msgid "Read access to all bookings"
 msgstr ""
 
 msgid "Read access to all calendars across users"
+msgstr ""
+
+msgid "Read and manage all team calendars, bookings, and availability schedules."
 msgstr ""
 
 msgid "Read more about server side cron"
@@ -14492,6 +15173,9 @@ msgstr ""
 msgid "Recent activity"
 msgstr ""
 
+msgid "Recent activity across the whole CRM — notes, calls, emails, status changes, and system events — newest first. Use this for \"what happened today\" or \"what changed recently\". Audit rows that belong to a specific deal, task, or project are left out of this feed; read those from the record itself. For one contact's history use get-contact-timeline, which merges in sources this does not cover."
+msgstr ""
+
 msgid "Recent Automations"
 msgstr ""
 
@@ -14544,6 +15228,12 @@ msgid "Record offline and online payments"
 msgstr ""
 
 msgid "Record Payment"
+msgstr ""
+
+msgid "Record that a call happened with a contact, with optional duration, outcome, and notes. This only records history — it does not place a call."
+msgstr ""
+
+msgid "Recurring Invoice?"
 msgstr ""
 
 msgid "Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge."
@@ -14718,6 +15408,9 @@ msgid "Remove photo"
 msgstr ""
 
 msgid "Remove Plugin branding and replace with your own plugin name, logo, menu icon, and brand colors."
+msgstr ""
+
+msgid "Remove section"
 msgstr ""
 
 msgid "Remove Tag"
@@ -14942,13 +15635,16 @@ msgstr ""
 msgid "REST API and automation actions to enroll contacts from workflows"
 msgstr ""
 
+msgid "Restart the client after saving, then ask it something about your CRM to check the connection."
+msgstr ""
+
+msgid "Restart the client completely — closing the window is not enough; quit from the menu bar or system tray. If tools are still missing, confirm the toggle above is on."
+msgstr ""
+
 msgid "REST error code: %s"
 msgstr ""
 
 msgid "REST field errors:"
-msgstr ""
-
-msgid "results"
 msgstr ""
 
 msgid "Retry"
@@ -14969,6 +15665,9 @@ msgstr ""
 msgid "Reusing OAuth credentials from smtp for IMAP access. No additional setup needed."
 msgstr ""
 
+msgid "Revenue, pipeline, and task reporting."
+msgstr ""
+
 msgid "Review"
 msgstr ""
 
@@ -14982,6 +15681,9 @@ msgid "Review your automated campaign settings and activate it."
 msgstr ""
 
 msgid "Review your campaign configuration and scheduled delivery details."
+msgstr ""
+
+msgid "Revoke"
 msgstr ""
 
 msgid "Right"
@@ -15071,6 +15773,9 @@ msgstr ""
 msgid "Runs when triggered by a WordPress content event or recurring schedule, not manual one-time send."
 msgstr ""
 
+msgid "Run this in your terminal."
+msgstr ""
+
 msgid "run_batch parameter is required"
 msgstr ""
 
@@ -15117,6 +15822,9 @@ msgid "Sales Manager"
 msgstr ""
 
 msgid "Sales Pipeline"
+msgstr ""
+
+msgid "Sales pipelines, deal stages, and pipeline value."
 msgstr ""
 
 msgid "Sales Rep"
@@ -15398,6 +16106,9 @@ msgstr ""
 msgid "Search and add…"
 msgstr ""
 
+msgid "Search and page through CRM contacts. Returns id, name, email, phone, company, and status for each match. Use get-contact for the full record."
+msgstr ""
+
 msgid "Search and select…"
 msgstr ""
 
@@ -15510,6 +16221,12 @@ msgid "Secret key"
 msgstr ""
 
 msgid "Secret key is missing."
+msgstr ""
+
+msgid "Section Content"
+msgstr ""
+
+msgid "Section Title"
 msgstr ""
 
 msgid "Security Alert"
@@ -15779,6 +16496,9 @@ msgstr ""
 msgid "Select line height"
 msgstr ""
 
+msgid "Select link trigger(s)"
+msgstr ""
+
 msgid "Select list"
 msgstr ""
 
@@ -15933,6 +16653,9 @@ msgid "Select Your Timezone"
 msgstr ""
 
 msgid "Select…"
+msgstr ""
+
+msgid "Self-hosted"
 msgstr ""
 
 msgid "Send"
@@ -16190,6 +16913,9 @@ msgstr ""
 msgid "Sent %1$d of %2$d emails successfully."
 msgstr ""
 
+msgid "Sent, opened, and clicked counts with open and click rates. Pass contact_id for one contact’s engagement, or omit it for the whole site. Rates are null when nothing was sent, never zero, so an empty period is not mistaken for poor performance."
+msgstr ""
+
 msgid "Sent by"
 msgstr ""
 
@@ -16236,6 +16962,9 @@ msgid "Sequential contract numbering (CON-000001)"
 msgstr ""
 
 msgid "Sequential invoice numbering (INV-000001)"
+msgstr ""
+
+msgid "Server"
 msgstr ""
 
 msgid "Server API token"
@@ -16367,6 +17096,9 @@ msgstr ""
 msgid "Setup Instructions:"
 msgstr ""
 
+msgid "Setup instructions sent to %s."
+msgstr ""
+
 msgid "Setup Location"
 msgstr ""
 
@@ -16448,7 +17180,10 @@ msgstr ""
 msgid "Show desktop notifications when DoubleScale tab is not focused."
 msgstr ""
 
-msgid "Showing"
+msgid "Showing %1$s of %2$s results"
+msgstr ""
+
+msgid "Showing %1$s to %2$s of %3$s results"
 msgstr ""
 
 msgid "Show less"
@@ -16778,6 +17513,9 @@ msgstr ""
 msgid "Something went wrong. Please try again."
 msgstr ""
 
+msgid "Some tools are missing, but others work"
+msgstr ""
+
 msgid "Sorry, This booking is not available"
 msgstr ""
 
@@ -16950,6 +17688,9 @@ msgid "Start from"
 msgstr ""
 
 msgid "Start From Scratch"
+msgstr ""
+
+msgid "Start here. Returns who you are, which DoubleScale modules are active on this site, which tools you can actually call, and the site currency and timezone. Modules that are switched off are absent from the list — their data is unavailable, not empty."
 msgstr ""
 
 msgid "Start managing your CRM on the go!"
@@ -17267,6 +18008,9 @@ msgstr ""
 msgid "Support tickets"
 msgstr ""
 
+msgid "Support tickets, threads, and workload summaries."
+msgstr ""
+
 msgid "SureCart"
 msgstr ""
 
@@ -17325,6 +18069,9 @@ msgid "T&C"
 msgstr ""
 
 msgid "Table"
+msgstr ""
+
+msgid "Tablet"
 msgstr ""
 
 msgid "Table view"
@@ -17483,6 +18230,9 @@ msgstr ""
 msgid "Tasks"
 msgstr ""
 
+msgid "Tasks, statuses, due dates, and workload."
+msgstr ""
+
 msgid "Tasks on projects"
 msgstr ""
 
@@ -17501,10 +18251,10 @@ msgstr ""
 msgid "Tax/VAT: %s"
 msgstr ""
 
-msgid "Tax / VAT number"
+msgid "Tax / VAT Number"
 msgstr ""
 
-msgid "Tax / VAT Number"
+msgid "Tax / VAT number"
 msgstr ""
 
 msgid "Taxes"
@@ -17639,6 +18389,12 @@ msgstr ""
 msgid "terms of use"
 msgstr ""
 
+msgid "Terms the client must agree to before accepting."
+msgstr ""
+
+msgid "Terms the client must agree to before paying."
+msgstr ""
+
 msgid "Tertiary"
 msgstr ""
 
@@ -17717,7 +18473,25 @@ msgstr ""
 msgid "Thank you for your business."
 msgstr ""
 
+msgid "That API key no longer exists."
+msgstr ""
+
+msgid "That is expected. Tools are hidden when their module is switched off under Settings → Modules, and when the user the key belongs to lacks permission for them. A key sees exactly what that user sees."
+msgstr ""
+
+msgid "That user does not exist."
+msgstr ""
+
+msgid "That user has no DoubleScale role, so a key for them would expose no tools. Give them a role first."
+msgstr ""
+
+msgid "That user has no valid email address on file."
+msgstr ""
+
 msgid "The \"%s\" module is disabled."
+msgstr ""
+
+msgid "The \"%s\" module is switched off on this site. Enable it in DoubleScale settings to use this tool, or call doublescale/get-context for the tools that are currently available."
 msgstr ""
 
 msgid "The \"component\" property must be a valid function!"
@@ -17735,6 +18509,9 @@ msgstr ""
 msgid "The %s module is disabled. Enable it under Settings → Modules. No request was sent."
 msgstr ""
 
+msgid "The abilities layer is switched off (doublescale_disable_abilities), so no tools are published even with MCP enabled."
+msgstr ""
+
 msgid "The above credentials will be encrypted and stored securely."
 msgstr ""
 
@@ -17745,6 +18522,12 @@ msgid "The account is added successfully. If this window isn't closed automatica
 msgstr ""
 
 msgid "The action of the step."
+msgstr ""
+
+msgid "The activity type vocabulary, split into types a person can author (notes, calls, meetings) and types the system generates automatically."
+msgstr ""
+
+msgid "The amount is unchanged, as expected — this tool cannot edit line items or totals."
 msgstr ""
 
 msgid "the auth code expired (>10 min) or was already used. Restart authorization."
@@ -17780,6 +18563,9 @@ msgstr ""
 msgid "The Calendar settings have been updated successfully."
 msgstr ""
 
+msgid "The call could not be logged. Check that the contact id exists and that you have access to it."
+msgstr ""
+
 msgid "The Campaigns module is disabled."
 msgstr ""
 
@@ -17790,6 +18576,9 @@ msgid "The client portal is only accessible by customers."
 msgstr ""
 
 msgid "The Client Portal is only accessible by customers. Looks like you are a staff member."
+msgstr ""
+
+msgid "The client reports 401 / unauthorized"
 msgstr ""
 
 msgid "The columns \"%1$s\" and \"%2$s\" are both mapped to \"%3$s\". Each contact field can only be mapped once."
@@ -17805,6 +18594,9 @@ msgid "The connection name is used to identify the connection in the connection 
 msgstr ""
 
 msgid "The connection will be established automatically"
+msgstr ""
+
+msgid "The contact could not be created."
 msgstr ""
 
 msgid "The contact ID to run the automation for."
@@ -17844,6 +18636,15 @@ msgid "The Documents area is unavailable."
 msgstr ""
 
 msgid "The email builder is available on desktop only. Please open it on a larger screen (1024px or wider) to start designing."
+msgstr ""
+
+msgid "The email could not be sent. Check the site’s email settings."
+msgstr ""
+
+msgid "The email could not be sent: %s"
+msgstr ""
+
+msgid "The endpoint URL must be reachable from wherever the client runs, with a matching scheme. A localhost URL only works on this computer."
 msgstr ""
 
 msgid "The Event has been cloned successfully."
@@ -17915,6 +18716,15 @@ msgstr ""
 msgid "The importer is not active"
 msgstr ""
 
+msgid "The invoice was saved, but the recurring schedule could not be stored."
+msgstr ""
+
+msgid "The key acts as a specific user. If that user only sees their own invoices or tickets, so does the agent. Issue the key from an account with wider access if you need a wider view."
+msgstr ""
+
+msgid "The key is wrong, was revoked, or the Authorization header did not reach the server. Create a fresh key and re-copy the snippet. Keys are shown once and cannot be recovered."
+msgstr ""
+
 msgid "The keyword to search for."
 msgstr ""
 
@@ -17931,6 +18741,12 @@ msgid "Theme settings"
 msgstr ""
 
 msgid "The name of the automation."
+msgstr ""
+
+msgid "The next invoice is scheduled from this invoice’s date, so the billing day never drifts."
+msgstr ""
+
+msgid "The note could not be added. Check that the contact id exists and that you have access to it."
 msgstr ""
 
 msgid "then paste the API key in the form on the right."
@@ -17958,6 +18774,9 @@ msgid "The Pipelines & Deals module is turned off. Enable it under Settings → 
 msgstr ""
 
 msgid "The portal page could not be created."
+msgstr ""
+
+msgid "The Projects module is turned off. Enable it under Settings → Modules to use these actions."
 msgstr ""
 
 msgid "The provided handler %1$s does not implement %2$s."
@@ -17996,6 +18815,9 @@ msgstr ""
 msgid "The SMTP module is turned off. Enable it from Control Modules in the header to use saved mail connections and the sender account picker."
 msgstr ""
 
+msgid "The spaces WordPress shows are for readability — paste it with or without them."
+msgstr ""
+
 msgid "The spot was claimed before you. You are still on the waiting list and will be notified when another spot becomes available."
 msgstr ""
 
@@ -18014,6 +18836,9 @@ msgstr ""
 msgid "The time the automation should be executed."
 msgstr ""
 
+msgid "The tool failed with an internal error. Quote the error_id to the site administrator so they can look it up in the logs."
+msgstr ""
+
 msgid "The trigger of the automation."
 msgstr ""
 
@@ -18030,6 +18855,9 @@ msgid "The webhook URL is registered automatically when you activate a form. You
 msgstr ""
 
 msgid "The webhook URL is shown as read-only on the right. You can also verify it in Typeform under"
+msgstr ""
+
+msgid "The Windows form runs the helper through cmd and passes the key as an environment variable. Both are needed: cmd.exe otherwise splits the Node path at the space in \"Program Files\", and splits the header at the space before \"Bearer\". Keep the leading space in AUTH_HEADER."
 msgstr ""
 
 msgid "The workflow file is missing its trigger and cannot be imported."
@@ -18099,6 +18927,9 @@ msgid "This booking is no longer on the waiting list."
 msgstr ""
 
 msgid "This booking link is no longer available."
+msgstr ""
+
+msgid "This client reaches the endpoint through a Node helper, so Node.js must be installed. Check with \"node -v\" — if that fails, install the LTS build from nodejs.org."
 msgstr ""
 
 msgid "This condition uses %1$d rules that require plugins (%2$s) to be installed and activated."
@@ -18224,6 +19055,9 @@ msgstr ""
 msgid "This is used to identify the account in the connection list."
 msgstr ""
 
+msgid "This key is a password."
+msgstr ""
+
 msgid "This link is missing the booking identifier, so we can't look it up."
 msgstr ""
 
@@ -18296,6 +19130,9 @@ msgstr ""
 msgid "This section has conditional rendering"
 msgstr ""
 
+msgid "This snippet contains your API key. Treat it like a password — do not commit it to a repository, paste it into a shared chat, or include it in a screenshot."
+msgstr ""
+
 msgid "This step cannot be duplicated."
 msgstr ""
 
@@ -18306,6 +19143,9 @@ msgid "This template has no content to export."
 msgstr ""
 
 msgid "This ticket is closed. Sending a reply will re-open it."
+msgstr ""
+
+msgid "This ticket is not assigned to you."
 msgstr ""
 
 msgid "This time slot has just been booked. Please choose another."
@@ -18362,6 +19202,9 @@ msgstr ""
 msgid "This year"
 msgstr ""
 
+msgid "Those clients launch a Node helper. Run \"node -v\" in a terminal; if it is not found, install the LTS build from nodejs.org and restart the client."
+msgstr ""
+
 msgid "Three Columns"
 msgstr ""
 
@@ -18396,6 +19239,9 @@ msgid "Ticket assigned to you"
 msgstr ""
 
 msgid "Ticket automation triggers & actions (replies, status, priority, agent assignment)"
+msgstr ""
+
+msgid "Ticket counts grouped by status and priority, scoped to what you can see. If your support scope is \"own\", these are your tickets only."
 msgstr ""
 
 msgid "Ticket created"
@@ -18566,6 +19412,12 @@ msgstr ""
 msgid "Tools"
 msgstr ""
 
+msgid "Tools available"
+msgstr ""
+
+msgid "Tools from modules you have switched off are not published."
+msgstr ""
+
 msgid "Too many failed login attempts. Please try again later."
 msgstr ""
 
@@ -18579,6 +19431,9 @@ msgid "Top"
 msgstr ""
 
 msgid "to pick a time to meet with"
+msgstr ""
+
+msgid "To pick up a draggable item, press the space bar. While dragging, use the arrow keys to move the item. Press space again to drop the item in its new position, or press escape to cancel."
 msgstr ""
 
 msgid "Top Left"
@@ -18831,6 +19686,9 @@ msgid "Trigger saved successfully"
 msgstr ""
 
 msgid "Trigger Settings"
+msgstr ""
+
+msgid "Troubleshooting"
 msgstr ""
 
 msgid "Try a Free demo"
@@ -19139,6 +19997,9 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
+msgid "Update a contact"
+msgstr ""
+
 msgid "Update an existing template"
 msgstr ""
 
@@ -19169,6 +20030,9 @@ msgstr ""
 msgid "Update Field"
 msgstr ""
 
+msgid "Update invoice details"
+msgstr ""
+
 msgid "Update Level"
 msgstr ""
 
@@ -19185,6 +20049,9 @@ msgid "Update Note"
 msgstr ""
 
 msgid "Update payment details"
+msgstr ""
+
+msgid "Update proposal details"
 msgstr ""
 
 msgid "Update Role"
@@ -19346,10 +20213,49 @@ msgstr ""
 msgid "User added successfully"
 msgstr ""
 
+msgid "User Billing Address 1"
+msgstr ""
+
+msgid "User Billing Address 2"
+msgstr ""
+
+msgid "User Billing City"
+msgstr ""
+
+msgid "User Billing Country"
+msgstr ""
+
+msgid "User Billing Email"
+msgstr ""
+
+msgid "User Billing First Name"
+msgstr ""
+
+msgid "User Billing Last Name"
+msgstr ""
+
+msgid "User Billing Phone"
+msgstr ""
+
+msgid "User Billing Postcode"
+msgstr ""
+
+msgid "User Billing State"
+msgstr ""
+
 msgid "User cannot be changed"
 msgstr ""
 
 msgid "User CRM access removed successfully"
+msgstr ""
+
+msgid "User Display Name"
+msgstr ""
+
+msgid "User Email"
+msgstr ""
+
+msgid "User First Name"
 msgstr ""
 
 msgid "User has blocked this business."
@@ -19373,10 +20279,19 @@ msgstr ""
 msgid "User ID to filter revenue by."
 msgstr ""
 
+msgid "User Last Name"
+msgstr ""
+
+msgid "User Login"
+msgstr ""
+
 msgid "Username"
 msgstr ""
 
 msgid "Username or Email Address"
+msgstr ""
+
+msgid "User Nickname"
 msgstr ""
 
 msgid "User not logged in."
@@ -19410,6 +20325,9 @@ msgid "Use WhatsApp in automation workflows"
 msgstr ""
 
 msgid "Use your Mandrill API key from Mailchimp Transactional. One stored account per key is typical."
+msgstr ""
+
+msgid "Using an Application Password instead of an API key?"
 msgstr ""
 
 msgid "Using curl (alternative):"
@@ -19452,6 +20370,9 @@ msgid "Valid until"
 msgstr ""
 
 msgid "Value"
+msgstr ""
+
+msgid "Value / Merge Tag"
 msgstr ""
 
 msgid "Value Changed"
@@ -19511,7 +20432,13 @@ msgstr ""
 msgid "View and manage debugging logs"
 msgstr ""
 
+msgid "View and manage every support ticket; assign agents and reply on any thread."
+msgstr ""
+
 msgid "View and manage project details with DoubleScale Pro."
+msgstr ""
+
+msgid "View and update projects assigned to you; join discussions and track progress."
 msgstr ""
 
 msgid "View booking"
@@ -19586,6 +20513,9 @@ msgstr ""
 msgid "View the details of the WhatsApp message"
 msgstr ""
 
+msgid "View the support inbox and reply on tickets assigned to you."
+msgstr ""
+
 msgid "View Ticket"
 msgstr ""
 
@@ -19653,6 +20583,9 @@ msgid "Warning: No SMTP backend is loaded. Enable the DoubleScale SMTP module or
 msgstr ""
 
 msgid "Warning: No SMTP connection configured for: %s. Add a matching connection in CRM SMTP settings."
+msgstr ""
+
+msgid "WARNING: the total changed unexpectedly. Report this."
 msgstr ""
 
 msgid "Watch Tutorial"
@@ -19727,7 +20660,7 @@ msgstr ""
 msgid "Week"
 msgstr ""
 
-msgid "week ago"
+msgid "Week(s)"
 msgstr ""
 
 msgid "Weekly"
@@ -19740,9 +20673,6 @@ msgid "Weekly hours."
 msgstr ""
 
 msgid "Weekly hours are not set"
-msgstr ""
-
-msgid "weeks ago"
 msgstr ""
 
 msgid "Week starts on"
@@ -19886,6 +20816,9 @@ msgstr ""
 msgid "WhatsApp Template Field requires DoubleScale Pro."
 msgstr ""
 
+msgid "WhatsApp template is required."
+msgstr ""
+
 msgid "WhatsApp test messages use approved templates from your Twilio account. The recipient must have a valid WhatsApp account."
 msgstr ""
 
@@ -19914,6 +20847,9 @@ msgid "When customers submit through the portal or email, their tickets will app
 msgstr ""
 
 msgid "When enabled, CRM events will trigger push notifications to mobile devices."
+msgstr ""
+
+msgid "When enabled, DoubleScale publishes its read-only abilities over MCP so AI agents can read your CRM data. Every request still enforces the connecting user’s module access, role, and record ownership."
 msgstr ""
 
 msgid "When enabled, emails you send from your email client (e.g. Gmail, Outlook) will appear in the CRM contact timeline. This provides a complete conversation view without requiring you to send emails through the CRM."
@@ -19949,6 +20885,9 @@ msgstr ""
 msgid "When you continue, we save the app credentials to the server, then open that window. After you finish, the account list here can refresh automatically."
 msgstr ""
 
+msgid "Where scope is \"own\", results are limited to records assigned to you. Totals and counts reflect only your own records, not the whole site."
+msgstr ""
+
 msgid "Whether the contacts filter panel is open."
 msgstr ""
 
@@ -19979,6 +20918,9 @@ msgstr ""
 msgid "White-label branding for agencies"
 msgstr ""
 
+msgid "White Labeling"
+msgstr ""
+
 msgid "Who do you want to test your email with?"
 msgstr ""
 
@@ -20001,6 +20943,9 @@ msgid "Will be shown on landing page social share meta or profile block."
 msgstr ""
 
 msgid "Will be shown on your calendar landing page / team block UI"
+msgstr ""
+
+msgid "Windows"
 msgstr ""
 
 msgid "Wishlist"
@@ -20099,6 +21044,12 @@ msgstr ""
 msgid "Working hours"
 msgstr ""
 
+msgid "Work on own contacts and deals, create new records, and manage own proposals and invoices."
+msgstr ""
+
+msgid "Works locally but not from another machine"
+msgstr ""
+
 msgid "Works on invoices, proposals, and credit notes"
 msgstr ""
 
@@ -20117,6 +21068,9 @@ msgstr ""
 msgid "Write a reply visible to the customer"
 msgstr ""
 
+msgid "Write section content…"
+msgstr ""
+
 msgid "Write the email introduction…"
 msgstr ""
 
@@ -20124,6 +21078,9 @@ msgid "Write your reply here…"
 msgstr ""
 
 msgid "wrong client_id / client_secret, or the OAuth client type is \"Desktop\" / \"Installed\" instead of \"Web application\"."
+msgstr ""
+
+msgid "Year(s)"
 msgstr ""
 
 msgid "Year to get revenue for."
@@ -20189,6 +21146,9 @@ msgstr ""
 msgid "You are not currently logged in."
 msgstr ""
 
+msgid "You are receiving this because an API key was issued for your account on this site."
+msgstr ""
+
 msgid "You can also Book Events Manually."
 msgstr ""
 
@@ -20202,6 +21162,9 @@ msgid "You can attach at most %d file to this contact."
 msgstr ""
 
 msgid "You can attach at most %d file to this contract."
+msgstr ""
+
+msgid "You can attach up to %d files. Remove one to add more."
 msgstr ""
 
 msgid "You can bring at most %d additional people when joining the waiting list"
@@ -20238,6 +21201,9 @@ msgid "You can only access tickets assigned to you."
 msgstr ""
 
 msgid "You can only assign tickets to yourself."
+msgstr ""
+
+msgid "You can only view bookings you host."
 msgstr ""
 
 msgid "You can only view your own invoice analytics."
@@ -20300,6 +21266,9 @@ msgstr ""
 msgid "You do not have permission to delete this availability."
 msgstr ""
 
+msgid "You do not have permission to manage MCP settings."
+msgstr ""
+
 msgid "You do not have permission to manage modules."
 msgstr ""
 
@@ -20315,10 +21284,16 @@ msgstr ""
 msgid "You do not have permission to update this availability."
 msgstr ""
 
+msgid "You do not have permission to use this tool."
+msgstr ""
+
 msgid "You do not have permission to view revenue data"
 msgstr ""
 
 msgid "You do not have permission to view this page."
+msgstr ""
+
+msgid "You do not have permission to view this timeline."
 msgstr ""
 
 msgid "You have already unsubscribed from %s."
@@ -20354,7 +21329,16 @@ msgstr ""
 msgid "You have unsaved module changes. Save to apply them."
 msgstr ""
 
+msgid "You may only create API keys for yourself."
+msgstr ""
+
 msgid "You must add event to a calendar."
+msgstr ""
+
+msgid "You must agree to the Terms & Conditions before paying."
+msgstr ""
+
+msgid "You must agree to the Terms & Conditions to accept."
 msgstr ""
 
 msgid "You must be logged in to access notification preferences."
@@ -20382,6 +21366,9 @@ msgid "Your Address"
 msgstr ""
 
 msgid "Your all-in-one solution for managing email marketing campaigns, automations, and customer relationships — all from your WordPress dashboard. This quick setup wizard will help you configure the essentials in under two minutes"
+msgstr ""
+
+msgid "Your API key"
 msgstr ""
 
 msgid "Your API URL format should be: https://yoursubdomain.api-us1.com"
@@ -20592,6 +21579,12 @@ msgid "Zoom is not connected. Please connect it first."
 msgstr ""
 
 msgid "Zoom Video"
+msgstr ""
+
+msgid "[%1$s] Connect %2$s to your CRM"
+msgstr ""
+
+msgid " · last used %s"
 msgstr ""
 
 msgid "— None —"

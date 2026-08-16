@@ -15,16 +15,26 @@ const LogicConnector = ({ label, style, variant }: LogicConnectorProps) => {
 
 	return (
 		<div
-			className={isOr ? 'absolute left-[10px]' : 'absolute'}
-			style={
-				isOr
-					? { top: style.top, height: style.height }
-					: { left: 8, top: style.top, height: style.height }
-			}
+			className="absolute"
+			style={{
+				insetInlineStart: isOr ? 10 : 8,
+				top: style.top,
+				height: style.height,
+			}}
 		>
-			<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl" />
+			<div
+				className="h-full w-6 border border-dashed border-primary"
+				style={{
+					borderInlineEndWidth: 0,
+					borderStartStartRadius: '1rem',
+					borderEndStartRadius: '1rem',
+				}}
+			/>
 			<span
-				className={`absolute top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full ${isOr ? '-left-5' : '-left-6'}`}
+				className="absolute top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full"
+				style={{
+					insetInlineStart: isOr ? '-1.25rem' : '-1.5rem',
+				}}
 			>
 				{label}
 			</span>

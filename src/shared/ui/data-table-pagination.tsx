@@ -1,6 +1,7 @@
 /**
  * wordpress depnedencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * external dependencies
@@ -107,16 +108,19 @@ export default function DataTablePagination<TData>({
 	const visiblePages = getVisiblePages();
 	return (
 		<div className="flex max-sm:flex-col max-sm:gap-3 items-center justify-between border-t border-[#DEE1E6] px-4 pt-3">
-			{/* Left side - Results info */}
-			<div className="flex items-center text-sm text-gray-700 space-x-2">
+			{/* Start side - Results info */}
+			<div className="flex items-center text-sm text-gray-700 gap-2">
 				<span className="text-[#3F3F46]">
-					Showing {Math.min(currentPage * pageSize, totalResults)} of{' '}
-					{totalResults} results
+					{sprintf(
+						__('Showing %1$s of %2$s results', 'doublescale'),
+						String(Math.min(currentPage * pageSize, totalResults)),
+						String(totalResults)
+					)}
 				</span>
 				{/* Per page selector */}
-				<div className="flex items-center mr-6 border rounded-lg">
-					<span className="text-sm text-[#71717A] border-r py-2 px-3">
-						Per page
+				<div className="flex items-center me-6 border rounded-lg">
+					<span className="text-sm text-[#71717A] border-e py-2 px-3">
+						{__('Per page', 'doublescale')}
 					</span>
 					<Select
 						value={String(pageSize)}
@@ -124,8 +128,8 @@ export default function DataTablePagination<TData>({
 							table.setPageSize(Number(value))
 						}
 					>
-						<SelectTrigger className="w-20 !bg-transparent outline-none border-none ml-0 pr-4">
-							<SelectValue placeholder="Page Size" />
+						<SelectTrigger className="w-20 !bg-transparent outline-none border-none ms-0 pe-4">
+							<SelectValue placeholder={__('Page Size', 'doublescale')} />
 						</SelectTrigger>
 						<SelectContent>
 							{[10, 20, 30, 40, 50].map((size) => (
@@ -138,7 +142,7 @@ export default function DataTablePagination<TData>({
 				</div>
 			</div>
 
-			{/* Right side - Pagination controls */}
+			{/* End side - Pagination controls */}
 			<div className="flex items-center border rounded-lg">
 				{/* Previous button */}
 				<Button

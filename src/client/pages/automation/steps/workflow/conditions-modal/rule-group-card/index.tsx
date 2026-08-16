@@ -89,7 +89,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 					/>
 					<div
 						ref={containerRef}
-						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'pl-8' : ''}`}
+						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'ps-8' : ''}`}
 					>
 						{map(ruleGroup, (rule, ruleIndex) => (
 							<div

@@ -11,9 +11,10 @@ import type { Action, Goal, Rule, Trigger } from '@doublescale/config';
 import ConfigAPI from '@doublescale/config';
 import {
 	__experimentalGetSettings as experimentalGetDateSettings,
+	dateI18n,
 	getSettings as getDateSettings,
 } from '@wordpress/date';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
@@ -203,10 +204,13 @@ export const convertDate = (date: string, addTime: boolean = false) => {
 
 	const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	if (addTime) {
-		return dayjs
-			.utc(date)
-			.tz(userTimeZone)
-			.format('MMMM D, YYYY [on] h:mm A');
+		const localized = dayjs.utc(date).tz(userTimeZone);
+		return sprintf(
+			/* translators: 1: date, 2: time */
+			__('%1$s at %2$s', 'doublescale'),
+			dateI18n('F j, Y', localized.toISOString()),
+			dateI18n('g:i a', localized.toISOString())
+		);
 	}
 
 	// return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
@@ -292,7 +296,7 @@ export function getTimeAgo(dateString: string): string {
 	const diffInMinutes = now.diff(targetDate, 'minute');
 
 	if (diffInMinutes < 1) {
-		return 'Just now';
+		return __('Just now', 'doublescale');
 	}
 
 	const diffInHours = now.diff(targetDate, 'hour');
@@ -301,26 +305,41 @@ export function getTimeAgo(dateString: string): string {
 	const diffInMonths = now.diff(targetDate, 'month');
 
 	if (diffInMinutes < 60) {
-		return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+		return sprintf(
+			_n('%d minute ago', '%d minutes ago', diffInMinutes, 'doublescale'),
+			diffInMinutes
+		);
 	}
 
 	if (diffInHours < 24) {
-		return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+		return sprintf(
+			_n('%d hour ago', '%d hours ago', diffInHours, 'doublescale'),
+			diffInHours
+		);
 	}
 
 	if (diffInDays < 7) {
-		return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+		return sprintf(
+			_n('%d day ago', '%d days ago', diffInDays, 'doublescale'),
+			diffInDays
+		);
 	}
 
 	if (diffInWeeks < 4) {
-		return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
+		return sprintf(
+			_n('%d week ago', '%d weeks ago', diffInWeeks, 'doublescale'),
+			diffInWeeks
+		);
 	}
 
 	if (diffInMonths <= 2) {
-		return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+		return sprintf(
+			_n('%d month ago', '%d months ago', diffInMonths, 'doublescale'),
+			diffInMonths
+		);
 	}
 
-	return targetDate.format('MMM D, YYYY h:mm A');
+	return dateI18n('M j, Y g:i a', targetDate.toISOString());
 }
 
 export const formatDateForAPI = (date: Date | null): string | undefined => {

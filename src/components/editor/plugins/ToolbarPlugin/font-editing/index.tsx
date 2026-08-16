@@ -73,11 +73,11 @@ export default function FontEditing({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="paragraph">Paragraph Text</SelectItem>
-							<SelectItem value="heading-1">Heading 1</SelectItem>
-							<SelectItem value="heading-2">Heading 2</SelectItem>
-							<SelectItem value="heading-3">Heading 3</SelectItem>
-							<SelectItem value="quote">Quote</SelectItem>
+							<SelectItem value="paragraph">{__('Paragraph Text', 'doublescale')}</SelectItem>
+							<SelectItem value="heading-1">{__('Heading 1', 'doublescale')}</SelectItem>
+							<SelectItem value="heading-2">{__('Heading 2', 'doublescale')}</SelectItem>
+							<SelectItem value="heading-3">{__('Heading 3', 'doublescale')}</SelectItem>
+							<SelectItem value="quote">{__('Quote', 'doublescale')}</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>

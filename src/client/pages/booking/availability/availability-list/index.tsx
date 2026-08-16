@@ -116,7 +116,11 @@ const AvailabilityList: React.FC<AvailabilityListProps> = ({
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="m-0">{availability.name}</h3>
+                                        <h3 className="m-0">
+											{availability.name === 'Default'
+												? __('Default', 'doublescale')
+												: availability.name}
+										</h3>
                                         {availability.is_default && (
                                             <TagComponent
                                                 label={__('Default', 'doublescale')}

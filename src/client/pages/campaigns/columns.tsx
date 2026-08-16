@@ -14,6 +14,21 @@ import { ColumnDef } from '@tanstack/react-table';
 import { CAMPAIGN_STATUS, Campaign, CampaignStatus } from '../../types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CAMPAIGN_STATUS_COLORS } from './constants';
+
+const campaignStatusLabel = (status: CampaignStatus): string => {
+	const labels: Record<string, string> = {
+		[CAMPAIGN_STATUS.DRAFT]: __('Draft', 'doublescale'),
+		[CAMPAIGN_STATUS.INACTIVE]: __('Inactive', 'doublescale'),
+		[CAMPAIGN_STATUS.ACTIVE]: __('Active', 'doublescale'),
+		[CAMPAIGN_STATUS.SCHEDULED]: __('Scheduled', 'doublescale'),
+		[CAMPAIGN_STATUS.PROCESSING]: __('Processing', 'doublescale'),
+		[CAMPAIGN_STATUS.COMPLETED]: __('Completed', 'doublescale'),
+		[CAMPAIGN_STATUS.RESENDING]: __('Resending', 'doublescale'),
+		[CAMPAIGN_STATUS.PAUSED]: __('Paused', 'doublescale'),
+		[CAMPAIGN_STATUS.CANCELLED]: __('Cancelled', 'doublescale'),
+	};
+	return labels[status] ?? status;
+};
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -131,7 +146,7 @@ export const getCommonColumns = ({
 				<span
 					className={`${colorClasses} inline-flex items-center text-xs font-medium rounded-lg w-fit text-center px-2 py-1`}
 				>
-					{status.charAt(0).toUpperCase() + status.slice(1)}
+					{campaignStatusLabel(status)}
 				</span>
 			);
 		},

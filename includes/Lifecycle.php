@@ -178,6 +178,7 @@ final class Lifecycle {
 		// Priority 4 guarantees the path is set before that first call.
 		add_action( 'plugins_loaded', array( __CLASS__, 'load_textdomain' ), 4 );
 		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ), 5 );
+		add_action( 'loco_file_written', array( \DoubleScale\I18n\LocoJsonSync::class, 'on_file_written' ) );
 
 		// Suppress WP 6.7+'s "translation loaded too early" notice for the
 		// `doublescale` domain. This codebase's modular boot fires

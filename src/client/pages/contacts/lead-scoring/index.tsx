@@ -47,9 +47,20 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 			onTabChange?.(value);
 		};
 
+		const dir =
+			typeof document !== 'undefined'
+				? document.documentElement.getAttribute('dir') || undefined
+				: undefined;
+
 		return (
-			<div className="doublescale-lead-scoring rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+			<div
+				className="doublescale-lead-scoring min-w-0 w-full rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]"
+				dir={dir}
+			>
 				<PageTabs
+					className="min-w-0 w-full"
+					tabsContentClassName="min-w-0 w-full"
+					tabsListClassName="flex w-full justify-start bg-transparent text-foreground gap-3"
 					defaultValue="rules"
 					value={currentTab}
 					onValueChange={handleTabChange}
@@ -83,7 +94,6 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 						},
 					]}
 					tabsListWrapperClassName="border !border-border px-5 py-3 rounded-lg mb-4"
-					tabsListClassName="bg-transparent text-foreground gap-3"
 				/>
 			</div>
 		);

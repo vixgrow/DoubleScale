@@ -199,7 +199,7 @@ export function DateRangePicker({
 					variant="outline"
 					className={cn(
 						// Base layout — fixed width so selection does not resize the trigger
-						'group relative h-10 w-[220px] max-w-[220px] shrink-0 justify-start gap-2.5 overflow-hidden rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150 max-sm:w-full max-sm:max-w-full lg:w-[10.5rem] lg:max-w-[10.5rem] lg:gap-1.5 lg:px-2 xl:w-[220px] xl:max-w-[220px] xl:gap-2.5 xl:px-3',
+						'group relative h-10 w-[220px] max-w-[220px] shrink-0 justify-start gap-2.5 overflow-hidden rounded-lg ps-2 pe-3 text-sm font-medium transition-all duration-150 max-sm:w-full max-sm:max-w-full lg:w-[10.5rem] lg:max-w-[10.5rem] lg:gap-1.5 lg:px-2 xl:w-[220px] xl:max-w-[220px] xl:gap-2.5 xl:px-3',
 						// Empty state
 						!hasSelection &&
 							'border-input bg-white text-muted-foreground shadow-sm hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.02]',

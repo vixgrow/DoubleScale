@@ -185,7 +185,7 @@ export function DataTableActions<TData>({
 	};
 
 	const actionButtonClassName =
-		'group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
+		'group h-10 gap-2.5 rounded-lg border-input bg-white ps-2 pe-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] max-sm:w-full';
 
 	return (
 		<div className="flex items-center justify-center gap-4 sm:gap-1 max-sm:w-full max-sm:flex-col max-sm:items-stretch">
@@ -199,7 +199,7 @@ export function DataTableActions<TData>({
 						}
 					}}
 					placeholder={config.dateRange?.placeholder}
-					className="ml-2 max-sm:ml-0 max-sm:w-full sm:w-auto lg:ml-0"
+					className="ms-2 max-sm:ms-0 max-sm:w-full sm:w-auto lg:ms-0"
 				/>
 			)}
 			{config.selectFilters?.map((filter) => (

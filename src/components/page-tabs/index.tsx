@@ -125,11 +125,17 @@ const PageTabs: React.FC<PageTabsProps> = ({
 		});
 	};
 
+	const dir =
+		typeof document !== 'undefined'
+			? document.documentElement.getAttribute('dir') || undefined
+			: undefined;
+
 	return (
 		<Tabs
 			defaultValue={defaultValue}
 			value={value}
 			className={className}
+			dir={dir}
 			onValueChange={onValueChange}
 		>
 			<div

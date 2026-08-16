@@ -500,6 +500,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 			? createPortal(
 					<div
 						ref={dropdownRef}
+						data-infinite-scroll-select-menu=""
 						style={activeMenuStyle}
 						onScroll={handleScroll}
 						onMouseDown={(event) => {

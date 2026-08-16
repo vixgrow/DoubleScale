@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,15 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.6 = 15 Aug 2026
+- Add built-in MCP server so AI clients (Claude, Cursor, and compatible tools) can operate DoubleScale via API keys
+- Add MCP settings: enable/disable endpoint, issue keys for eligible users, Application Password auth, Windows setup, and emailable connection instructions
+- Expand WordPress Abilities API tools across contacts, documents, marketing, booking, and forms, with module/role gates and input validation on writes
+- Improve inactive-module tool errors and MCP tool-name mapping for external clients
+- Add bulk email click tracking and fix click-redirect URL sanitization (preserve percent-encoded destinations)
+- Open duplicated invoices/proposals in the edit dialog instead of navigating away
+- UI polish: select menu overlays/z-index, react-select focus styles, calendar button spacing, and shared alert icons
+
 = 1.3.5 = 12 Aug 2026
 - Add company fields to contacts: Company Name, Company Registration Number, and Tax / VAT Number
 - Improve contact information and dialog UI consistency (shared icons and CustomDialogHeader)

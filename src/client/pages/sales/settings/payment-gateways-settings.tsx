@@ -96,6 +96,18 @@ const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
 		enabled_for_sales: false,
 		ready: false,
 	},
+	mollie: {
+		slug: 'mollie',
+		name: 'Mollie',
+		description: __(
+			'Mollie hosted checkout (iDEAL, Bancontact, SEPA, cards) — credentials in Integrations → Mollie.',
+			'doublescale'
+		),
+		available: false,
+		configured: false,
+		enabled_for_sales: false,
+		ready: false,
+	},
 };
 
 interface SettingsSectionCardProps {

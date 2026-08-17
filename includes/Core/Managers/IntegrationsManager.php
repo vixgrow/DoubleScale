@@ -95,6 +95,11 @@ final class IntegrationsManager {
 				'description' => __( 'Accept Square payments for invoices. Configure sandbox or production access token and location.', 'doublescale' ),
 				'icon'        => 'assets/images/square/square.svg',
 			),
+			'mollie'        => array(
+				'label'       => __( 'Mollie', 'doublescale' ),
+				'description' => __( 'Accept iDEAL, Bancontact, SEPA and card payments for invoices via Mollie.', 'doublescale' ),
+				'icon'        => 'assets/images/mollie/mollie.svg',
+			),
 			'typeform'      => array(
 				'label'       => __( 'Typeform', 'doublescale' ),
 				'description' => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),

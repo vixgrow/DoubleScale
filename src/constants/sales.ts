@@ -101,6 +101,7 @@ export const ONLINE_PAYMENT_GATEWAYS = [
 	'paypal',
 	'woocommerce',
 	'square',
+	'mollie',
 ] as const;
 
 export type OnlinePaymentGatewaySlug = (typeof ONLINE_PAYMENT_GATEWAYS)[number];
@@ -131,6 +132,7 @@ export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, str
 	paypal: 'PayPal (online)',
 	woocommerce: 'WooCommerce Checkout (online)',
 	square: 'Square (online)',
+	mollie: 'Mollie (online)',
 };
 
 export const PAYMENT_MODE_LABELS: Record<

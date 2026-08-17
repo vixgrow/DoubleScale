@@ -100,6 +100,11 @@ final class IntegrationsManager {
 				'description' => __( 'Accept iDEAL, Bancontact, SEPA and card payments for invoices via Mollie.', 'doublescale' ),
 				'icon'        => 'assets/images/mollie/mollie.svg',
 			),
+			'razorpay'      => array(
+				'label'       => __( 'Razorpay', 'doublescale' ),
+				'description' => __( 'Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay.', 'doublescale' ),
+				'icon'        => 'assets/images/razorpay/razorpay.svg',
+			),
 			'typeform'      => array(
 				'label'       => __( 'Typeform', 'doublescale' ),
 				'description' => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),

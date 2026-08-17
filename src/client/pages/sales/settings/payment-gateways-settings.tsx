@@ -108,6 +108,18 @@ const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
 		enabled_for_sales: false,
 		ready: false,
 	},
+	razorpay: {
+		slug: 'razorpay',
+		name: 'Razorpay',
+		description: __(
+			'Razorpay hosted checkout (UPI, cards, netbanking, wallets) — credentials in Integrations → Razorpay.',
+			'doublescale'
+		),
+		available: false,
+		configured: false,
+		enabled_for_sales: false,
+		ready: false,
+	},
 };
 
 interface SettingsSectionCardProps {

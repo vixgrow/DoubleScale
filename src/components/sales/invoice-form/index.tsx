@@ -5,6 +5,7 @@
 import React, {
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 } from '@wordpress/element';
@@ -415,6 +416,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				: [...prev, mode]
 		);
 	};
+
+	const selectableOnlineGateways = useMemo(() => {
+		const enabled = salesSettings?.enabled_online_gateways ?? [];
+		const selectedOnline = allowedPaymentModes.filter((mode) =>
+			(ONLINE_PAYMENT_GATEWAYS as readonly string[]).includes(mode)
+		);
+		return Array.from(new Set([...enabled, ...selectedOnline]));
+	}, [salesSettings?.enabled_online_gateways, allowedPaymentModes]);
 
 	const [sendOpen, setSendOpen] = useState(false);
 	/**
@@ -1401,7 +1410,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 								</p>
 							</div>
 							<div className="flex flex-wrap gap-2">
-								{ONLINE_PAYMENT_GATEWAYS.map((mode) => (
+								{selectableOnlineGateways.map((mode) => (
 									<button
 										key={mode}
 										type="button"
@@ -1410,7 +1419,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 										)}`}
 										onClick={() => togglePaymentMode(mode)}
 									>
-										{ONLINE_PAYMENT_GATEWAY_LABELS[mode]}
+										{ONLINE_PAYMENT_GATEWAY_LABELS[
+											mode as keyof typeof ONLINE_PAYMENT_GATEWAY_LABELS
+										] ?? mode}
 									</button>
 								))}
 							</div>

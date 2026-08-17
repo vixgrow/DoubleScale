@@ -84,6 +84,18 @@ const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
 			'doublescale'
 		),
 	},
+	square: {
+		slug: 'square',
+		name: 'Square',
+		description: __(
+			'Square hosted checkout — credentials in Integrations → Square.',
+			'doublescale'
+		),
+		available: false,
+		configured: false,
+		enabled_for_sales: false,
+		ready: false,
+	},
 };
 
 interface SettingsSectionCardProps {

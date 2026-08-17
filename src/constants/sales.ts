@@ -96,7 +96,12 @@ export const OFFLINE_PAYMENT_MODES = [
 export type OfflinePaymentMode = (typeof OFFLINE_PAYMENT_MODES)[number];
 
 /** Online gateway slugs — implementations register via Pro/modules. */
-export const ONLINE_PAYMENT_GATEWAYS = ['stripe', 'paypal', 'woocommerce'] as const;
+export const ONLINE_PAYMENT_GATEWAYS = [
+	'stripe',
+	'paypal',
+	'woocommerce',
+	'square',
+] as const;
 
 export type OnlinePaymentGatewaySlug = (typeof ONLINE_PAYMENT_GATEWAYS)[number];
 
@@ -125,6 +130,7 @@ export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, str
 	stripe: 'Stripe (online)',
 	paypal: 'PayPal (online)',
 	woocommerce: 'WooCommerce Checkout (online)',
+	square: 'Square (online)',
 };
 
 export const PAYMENT_MODE_LABELS: Record<

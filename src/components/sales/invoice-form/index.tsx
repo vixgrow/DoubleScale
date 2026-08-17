@@ -389,9 +389,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		if (allowedPaymentModes.length > 0) {
 			return;
 		}
+		const onlineDefaults =
+			(salesSettings.default_online_payment_gateways ?? []).length > 0
+				? salesSettings.default_online_payment_gateways
+				: (salesSettings.enabled_online_gateways ?? []);
 		const defaults = [
 			...(salesSettings.default_offline_payment_modes ?? []),
-			...(salesSettings.default_online_payment_gateways ?? []),
+			...onlineDefaults,
 		];
 		if (defaults.length > 0) {
 			setAllowedPaymentModes(defaults);

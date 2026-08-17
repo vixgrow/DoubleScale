@@ -90,6 +90,11 @@ final class IntegrationsManager {
 				'description' => __( 'Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.', 'doublescale' ),
 				'icon'        => 'assets/images/paypal/paypal.png',
 			),
+			'square'        => array(
+				'label'       => __( 'Square', 'doublescale' ),
+				'description' => __( 'Accept Square payments for invoices. Configure sandbox or production access token and location.', 'doublescale' ),
+				'icon'        => 'assets/images/square/square.svg',
+			),
 			'typeform'      => array(
 				'label'       => __( 'Typeform', 'doublescale' ),
 				'description' => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),

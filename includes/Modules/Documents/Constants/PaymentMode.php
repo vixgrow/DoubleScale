@@ -25,6 +25,10 @@ class PaymentMode {
 	const STRIPE        = 'stripe';
 	const PAYPAL        = 'paypal';
 	const WOOCOMMERCE   = 'woocommerce';
+	const SQUARE        = 'square';
+	const MOLLIE        = 'mollie';
+	const RAZORPAY      = 'razorpay';
+	const AUTHORIZE_NET = 'authorize_net';
 	const OTHER         = 'other';
 
 	/**

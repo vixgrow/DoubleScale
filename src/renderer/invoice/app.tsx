@@ -27,9 +27,10 @@ import {
 	getStripeRedirectStatus,
 } from '@doublescale/utils/stripe-payment';
 import {
-	clearWooCheckoutReturnParams,
-	isWooCheckoutReturn,
-} from '@doublescale/utils/woo-checkout-payment';
+	clearRedirectReturnParams,
+	isRedirectGateway,
+	isRedirectReturn,
+} from '@doublescale/utils/redirect-payment';
 
 interface Props {
 	hash: string;
@@ -98,10 +99,14 @@ const PublicOnlinePayment: React.FC<{
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 	const [paypalBusy, setPaypalBusy] = useState(false);
-	const [wooBusy, setWooBusy] = useState(false);
+	const [redirectBusy, setRedirectBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
+
+	// Non-empty for hosted-checkout gateways that redirect off-site.
+	const returnArg = gateway.return_query_arg;
+	const isRedirect = isRedirectGateway(returnArg);
 
 	useEffect(() => {
 		onPaidRef.current = onPaid;
@@ -114,7 +119,7 @@ const PublicOnlinePayment: React.FC<{
 
 	// After redirect-based methods (Cash App, etc.) Stripe sends the user back here.
 	useEffect(() => {
-		if (gateway.slug === 'woocommerce') {
+		if (gateway.slug !== 'stripe') {
 			return;
 		}
 		const redirectStatus = getStripeRedirectStatus();
@@ -160,9 +165,9 @@ const PublicOnlinePayment: React.FC<{
 		};
 	}, [hash, gateway.slug]);
 
-	// Return from WooCommerce checkout — confirm server-side (order status is authority).
+	// Return from a hosted checkout — confirm server-side (provider status is authority).
 	useEffect(() => {
-		if (gateway.slug !== 'woocommerce' || !isWooCheckoutReturn()) {
+		if (!isRedirectReturn(returnArg)) {
 			return;
 		}
 
@@ -174,7 +179,7 @@ const PublicOnlinePayment: React.FC<{
 				if (cancelled) {
 					return;
 				}
-				clearWooCheckoutReturnParams();
+				clearRedirectReturnParams(returnArg);
 				onPaidRef.current();
 			})
 			.catch((err: unknown) => {
@@ -182,7 +187,7 @@ const PublicOnlinePayment: React.FC<{
 					setError(
 						err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale')
 					);
-					clearWooCheckoutReturnParams();
+					clearRedirectReturnParams(returnArg);
 				}
 			})
 			.finally(() => {
@@ -194,12 +199,12 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug]);
+	}, [hash, gateway.slug, returnArg]);
 
 	useEffect(() => {
-		if (gateway.slug === 'woocommerce') {
-			// WooCommerce: order is created on button click, not on mount.
-			if (!isWooCheckoutReturn()) {
+		if (isRedirect) {
+			// Hosted checkout: the session is created on button click, not on mount.
+			if (!isRedirectReturn(returnArg)) {
 				setLoading(false);
 			}
 			return;
@@ -243,7 +248,7 @@ const PublicOnlinePayment: React.FC<{
 		return () => {
 			cancelled = true;
 		};
-	}, [hash, gateway.slug, agreedTerms]);
+	}, [hash, gateway.slug, agreedTerms, isRedirect, returnArg]);
 
 	const handlePayPalApprove = useCallback(async () => {
 		setPaypalBusy(true);
@@ -273,9 +278,10 @@ const PublicOnlinePayment: React.FC<{
 		return response.order_id;
 	}, [hash, gateway.slug, agreedTerms]);
 
-	const handleWooCheckout = useCallback(async () => {
-		setWooBusy(true);
+	const handleRedirectCheckout = useCallback(async () => {
+		setRedirectBusy(true);
 		setError(null);
+		const failure = __('Could not start checkout.', 'doublescale');
 		try {
 			const response = await initPublicInvoicePayment(hash, gateway.slug, {
 				agreed_terms: agreedTerms,
@@ -285,14 +291,12 @@ const PublicOnlinePayment: React.FC<{
 				return;
 			}
 			if (!response.redirect_url) {
-				throw new Error(__('Could not start WooCommerce checkout.', 'doublescale'));
+				throw new Error(failure);
 			}
 			window.location.href = response.redirect_url;
 		} catch (err: unknown) {
-			setError(
-				err instanceof Error ? err.message : __('Could not start WooCommerce checkout.', 'doublescale')
-			);
-			setWooBusy(false);
+			setError(err instanceof Error ? err.message : failure);
+			setRedirectBusy(false);
 		}
 	}, [hash, gateway.slug, agreedTerms]);
 
@@ -313,7 +317,7 @@ const PublicOnlinePayment: React.FC<{
 		);
 	}
 
-	if (gateway.slug === 'woocommerce') {
+	if (isRedirect) {
 		return (
 			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
 				<div>
@@ -323,8 +327,8 @@ const PublicOnlinePayment: React.FC<{
 						{formatMoney(invoice.balance, invoice.currency)}
 					</p>
 				</div>
-				<Button onClick={() => void handleWooCheckout()} disabled={wooBusy}>
-					{wooBusy
+				<Button onClick={() => void handleRedirectCheckout()} disabled={redirectBusy}>
+					{redirectBusy
 						? __('Redirecting…', 'doublescale')
 						: __('Pay via checkout', 'doublescale')}
 				</Button>

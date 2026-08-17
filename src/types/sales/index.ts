@@ -255,6 +255,11 @@ export interface OnlinePaymentGatewayStatus {
 	integration_url?: string;
 	/** Shown when available but not configured (e.g. WooCommerce with no payment methods). */
 	configuration_hint?: string;
+	/**
+	 * Marker query arg this gateway appends to the invoice return URL.
+	 * Non-empty means the gateway pays via a hosted-checkout redirect.
+	 */
+	return_query_arg?: string;
 	can_pay?: boolean;
 }
 

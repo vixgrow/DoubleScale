@@ -1,5 +1,11 @@
 /**
- * Helpers for WooCommerce Checkout return-from-payment redirects on the public invoice page.
+ * WooCommerce Checkout return-redirect helpers.
+ *
+ * Woo predates the generic redirect helper and uses `ds_woo_return` rather than
+ * the `ds_{slug}_return` convention, so its arg is pinned here. New redirect
+ * gateways should use `redirect-payment.ts` directly.
+ *
+ * @see WooCommerceGateway::RETURN_QUERY_ARG
  */
 
 export const WOO_RETURN_QUERY_ARG = 'ds_woo_return';

@@ -150,6 +150,7 @@ final class GatewayManager {
 				'description'         => (string) $gateway->description,
 				'available'           => $gateway->is_available(),
 				'configured'          => $gateway->is_configured(),
+				'return_query_arg'    => $gateway->return_query_arg(),
 				'enabled_for_sales'   => $enabled_for_sales,
 				'ready'               => $enabled_for_sales
 					&& $gateway->is_available()
@@ -175,11 +176,12 @@ final class GatewayManager {
 				continue;
 			}
 			$list[] = array(
-				'slug'       => (string) $gateway->slug,
-				'name'       => (string) $gateway->name,
-				'available'  => $gateway->is_available(),
-				'configured' => $gateway->is_configured(),
-				'can_pay'    => $gateway->is_available()
+				'slug'             => (string) $gateway->slug,
+				'name'             => (string) $gateway->name,
+				'available'        => $gateway->is_available(),
+				'configured'       => $gateway->is_configured(),
+				'return_query_arg' => $gateway->return_query_arg(),
+				'can_pay'          => $gateway->is_available()
 					&& $gateway->is_configured()
 					&& true === InvoicePayable::guard( $invoice, $gateway->slug ),
 			);
@@ -391,13 +393,27 @@ final class GatewayManager {
 			return '';
 		}
 
+		$hint = '';
 		if ( 'woocommerce' === $gateway->slug ) {
-			return __(
+			$hint = __(
 				'Enable at least one payment method in WooCommerce → Settings → Payments (e.g. Cash on Delivery).',
 				'doublescale'
 			);
 		}
 
-		return '';
+		/**
+		 * Human-readable reason a gateway is available but not yet configured.
+		 *
+		 * Lets gateways registered outside core supply a hint without editing
+		 * this method.
+		 *
+		 * @param string $hint Default hint ('' when none).
+		 * @param string $slug Gateway slug.
+		 */
+		return (string) apply_filters(
+			'doublescale_sales_payment_gateway_configuration_hint',
+			$hint,
+			(string) $gateway->slug
+		);
 	}
 }

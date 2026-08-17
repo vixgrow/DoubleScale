@@ -19,6 +19,11 @@ import {
 	getStripePaymentReturnUrl,
 	getStripeRedirectStatus,
 } from '@doublescale/utils/stripe-payment';
+import {
+	clearRedirectReturnParams,
+	isRedirectGateway,
+	isRedirectReturn,
+} from '@doublescale/utils/redirect-payment';
 
 interface InvoiceOnlinePaymentProps {
 	invoice: Invoice;
@@ -88,10 +93,14 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	const [publishableKey, setPublishableKey] = useState<string | null>(null);
 	const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 	const [paypalBusy, setPaypalBusy] = useState(false);
-	const [wooBusy, setWooBusy] = useState(false);
+	const [redirectBusy, setRedirectBusy] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const onPaidRef = useRef(onPaid);
+
+	// Non-empty for hosted-checkout gateways that redirect off-site.
+	const returnArg = gateway.return_query_arg;
+	const isRedirect = isRedirectGateway(returnArg);
 
 	useEffect(() => {
 		onPaidRef.current = onPaid;
@@ -103,7 +112,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 	);
 
 	useEffect(() => {
-		if (gateway.slug === 'woocommerce') {
+		if (gateway.slug !== 'stripe') {
 			return;
 		}
 		const redirectStatus = getStripeRedirectStatus();
@@ -151,9 +160,50 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		};
 	}, [invoice.id, gateway.slug]);
 
+	// Return from a hosted checkout — confirm server-side (provider status is authority).
 	useEffect(() => {
-		if (gateway.slug === 'woocommerce') {
-			setLoading(false);
+		if (!isRedirectReturn(returnArg)) {
+			return;
+		}
+
+		let cancelled = false;
+		setLoading(true);
+		setError(null);
+		void confirmInvoiceOnlinePayment(invoice.id, gateway.slug)
+			.then((result) => {
+				if (cancelled) {
+					return;
+				}
+				clearRedirectReturnParams(returnArg);
+				if (result.invoice) {
+					onPaidRef.current(result.invoice);
+				}
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) {
+					setError(
+						err instanceof Error ? err.message : __('Payment confirmation failed.', 'doublescale')
+					);
+					clearRedirectReturnParams(returnArg);
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [invoice.id, gateway.slug, returnArg]);
+
+	useEffect(() => {
+		if (isRedirect) {
+			// Hosted checkout: the session is created on button click, not on mount.
+			if (!isRedirectReturn(returnArg)) {
+				setLoading(false);
+			}
 			return;
 		}
 		if (getStripeRedirectStatus()) {
@@ -193,7 +243,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [invoice.id, gateway.slug]);
+	}, [invoice.id, gateway.slug, isRedirect, returnArg]);
 
 	const handlePayPalApprove = useCallback(async () => {
 		setPaypalBusy(true);
@@ -223,9 +273,10 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return response.order_id;
 	}, [invoice.id, gateway.slug]);
 
-	const handleWooCheckout = useCallback(async () => {
-		setWooBusy(true);
+	const handleRedirectCheckout = useCallback(async () => {
+		setRedirectBusy(true);
 		setError(null);
+		const failure = __('Could not start checkout.', 'doublescale');
 		try {
 			const response = await initInvoiceOnlinePayment(invoice.id, gateway.slug);
 			if (response.already_paid && response.invoice) {
@@ -233,14 +284,12 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 				return;
 			}
 			if (!response.redirect_url) {
-				throw new Error(__('Could not start WooCommerce checkout.', 'doublescale'));
+				throw new Error(failure);
 			}
 			window.location.href = response.redirect_url;
 		} catch (err: unknown) {
-			setError(
-				err instanceof Error ? err.message : __('Could not start WooCommerce checkout.', 'doublescale')
-			);
-			setWooBusy(false);
+			setError(err instanceof Error ? err.message : failure);
+			setRedirectBusy(false);
 		}
 	}, [invoice.id, gateway.slug]);
 
@@ -254,7 +303,7 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 		return <div className="text-sm text-red-600">{error}</div>;
 	}
 
-	if (gateway.slug === 'woocommerce') {
+	if (isRedirect) {
 		return (
 			<div className="space-y-3 rounded-lg border bg-slate-50 p-4">
 				<div>
@@ -266,8 +315,8 @@ export const InvoiceOnlinePayment: React.FC<InvoiceOnlinePaymentProps> = ({
 						{formatMoney(balanceDue, invoice.currency)}
 					</p>
 				</div>
-				<Button onClick={() => void handleWooCheckout()} disabled={wooBusy}>
-					{wooBusy
+				<Button onClick={() => void handleRedirectCheckout()} disabled={redirectBusy}>
+					{redirectBusy
 						? __('Redirecting…', 'doublescale')
 						: __('Pay via checkout', 'doublescale')}
 				</Button>

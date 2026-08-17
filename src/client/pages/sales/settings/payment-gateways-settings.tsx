@@ -235,9 +235,19 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 	const navigate = useNavigate();
 	const { data: gateways, loading } = useSalesOnlinePaymentGateways();
 
-	const displayGateways = ONLINE_PAYMENT_GATEWAYS.map(
-		(slug) => gateways.find((gateway) => gateway.slug === slug) ?? GATEWAY_PLACEHOLDERS[slug]
-	);
+	// Known slugs first (curated order), then any gateway the backend registered
+	// that we have no placeholder for — otherwise it would never render.
+	const displayGateways = [
+		...ONLINE_PAYMENT_GATEWAYS.map(
+			(slug) => gateways.find((gateway) => gateway.slug === slug) ?? GATEWAY_PLACEHOLDERS[slug]
+		),
+		...gateways.filter(
+			(gateway) =>
+				!ONLINE_PAYMENT_GATEWAYS.includes(
+					gateway.slug as (typeof ONLINE_PAYMENT_GATEWAYS)[number]
+				)
+		),
+	];
 	const enabledSlugs = form.enabled_online_gateways ?? [];
 
 	const toggleGatewayEnabled = (slug: string, enabled: boolean) => {

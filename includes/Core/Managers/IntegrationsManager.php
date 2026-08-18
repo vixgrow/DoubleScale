@@ -105,6 +105,11 @@ final class IntegrationsManager {
 				'description' => __( 'Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay.', 'doublescale' ),
 				'icon'        => 'assets/images/razorpay/razorpay.svg',
 			),
+			'authorize_net' => array(
+				'label'       => __( 'Authorize.Net', 'doublescale' ),
+				'description' => __( 'Accept card payments for invoices via Authorize.Net Accept Hosted.', 'doublescale' ),
+				'icon'        => 'assets/images/authorize-net/authorize-net.svg',
+			),
 			'typeform'      => array(
 				'label'       => __( 'Typeform', 'doublescale' ),
 				'description' => __( 'Connect your Typeform account with a personal access token.', 'doublescale' ),

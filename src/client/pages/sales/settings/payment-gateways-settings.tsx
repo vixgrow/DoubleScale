@@ -120,6 +120,18 @@ const GATEWAY_PLACEHOLDERS: Record<string, OnlinePaymentGatewayStatus> = {
 		enabled_for_sales: false,
 		ready: false,
 	},
+	authorize_net: {
+		slug: 'authorize_net',
+		name: 'Authorize.Net',
+		description: __(
+			'Authorize.Net Accept Hosted card checkout — credentials in Integrations → Authorize.Net.',
+			'doublescale'
+		),
+		available: false,
+		configured: false,
+		enabled_for_sales: false,
+		ready: false,
+	},
 };
 
 interface SettingsSectionCardProps {

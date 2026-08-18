@@ -103,6 +103,7 @@ export const ONLINE_PAYMENT_GATEWAYS = [
 	'square',
 	'mollie',
 	'razorpay',
+	'authorize_net',
 ] as const;
 
 export type OnlinePaymentGatewaySlug = (typeof ONLINE_PAYMENT_GATEWAYS)[number];
@@ -135,6 +136,7 @@ export const ONLINE_PAYMENT_GATEWAY_LABELS: Record<OnlinePaymentGatewaySlug, str
 	square: 'Square (online)',
 	mollie: 'Mollie (online)',
 	razorpay: 'Razorpay (online)',
+	authorize_net: 'Authorize.Net (online)',
 };
 
 export const PAYMENT_MODE_LABELS: Record<

@@ -99,7 +99,7 @@ const catalogTabMeta: Record<
 	{ label: string; icon: JSX.Element }
 > = {
 	payment: {
-		label: __('Payments', 'doublescale'),
+		label: __('Payment Gateway', 'doublescale'),
 		icon: <CreditCard className="h-4 w-4" />,
 	},
 	messaging: {

@@ -30,12 +30,16 @@ final class BookingAccessPermissionsTest extends IntegrationTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		// WP_UnitTestCase rolls each test back in a transaction, which leaves the
+		// in-memory $wp_roles holding capabilities from a rolled-back state.
+		// Rebuild it from the DB before syncing, or the sync writes onto a stale
+		// role object and the agent silently ends up with no booking caps.
+		$this->refresh_roles();
+		Capabilities::sync_capabilities_for_user_roles();
+		$this->refresh_roles();
+
 		$this->host_id  = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->agent_id = self::factory()->user->create( array( 'role' => UserRoles::BOOKING_AGENT ) );
-
-		Capabilities::sync_capabilities_for_user_roles();
-		$user = new \WP_User( $this->agent_id );
-		$user->get_role_caps();
 
 		global $wpdb;
 		$wpdb->insert(
@@ -98,6 +102,17 @@ final class BookingAccessPermissionsTest extends IntegrationTestCase {
 			)
 		);
 		$this->booking_id = (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Drop the cached $wp_roles so it is rebuilt from the database.
+	 *
+	 * @return void
+	 */
+	private function refresh_roles(): void {
+		global $wp_roles;
+		$wp_roles = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wp_roles();
 	}
 
 	public function test_host_owner_can_read_own_booking_despite_string_user_ids(): void {

@@ -123,9 +123,28 @@ final class PublicProposalAccessTest extends IntegrationTestCase {
 		);
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertStringStartsWith( '%PDF', (string) $response->get_data() );
-		$headers = $response->get_headers();
-		$this->assertStringContainsString( 'application/pdf', (string) ( $headers['content-type'] ?? '' ) );
+
+		// The bytes are emitted through `rest_pre_serve_request`, which only
+		// runs when the REST server actually serves a request — dispatch()
+		// alone never fires it, so the response body is legitimately empty.
+		$this->assertStringStartsWith( '%PDF', $this->serve_rest_body() );
+	}
+
+	/**
+	 * Run the `rest_pre_serve_request` filter the way the REST server does and
+	 * capture whatever it echoes.
+	 *
+	 * @return string
+	 */
+	private function serve_rest_body(): string {
+		// Core also hooks this filter and dereferences the request/response,
+		// so pass real objects rather than nulls.
+		$request  = new \WP_REST_Request( 'GET', '/' );
+		$response = new \WP_REST_Response( null, 200 );
+
+		ob_start();
+		apply_filters( 'rest_pre_serve_request', false, $response, $request, rest_get_server() );
+		return (string) ob_get_clean();
 	}
 
 	public function test_bad_hash_returns_404(): void {

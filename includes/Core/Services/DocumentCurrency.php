@@ -68,12 +68,16 @@ final class DocumentCurrency {
 	 * Same-value writes are allowed so an edit that re-submits the current
 	 * currency does not 400.
 	 *
-	 * @param object     $model          Document model.
-	 * @param mixed      $new_currency   Incoming stored value (null = inherit).
-	 * @param bool       $lock_when_paid Also lock when amount_paid > 0.
+	 * Settled value locks the currency too, not just sending. Invoices track it
+	 * in `amount_paid`; credit notes use `amount_applied`. Both are checked, so
+	 * a caller cannot silently miss the lock by passing the wrong model type.
+	 *
+	 * @param object     $model             Document model.
+	 * @param mixed      $new_currency      Incoming stored value (null = inherit).
+	 * @param bool       $lock_when_settled Also lock once money/credit has moved.
 	 * @return WP_Error|null
 	 */
-	public static function reject_if_locked( $model, $new_currency, bool $lock_when_paid = false ) {
+	public static function reject_if_locked( $model, $new_currency, bool $lock_when_settled = false ) {
 		if ( ! is_object( $model ) ) {
 			return null;
 		}
@@ -85,8 +89,13 @@ final class DocumentCurrency {
 		}
 
 		$locked = ! empty( $model->sent_at );
-		if ( $lock_when_paid && isset( $model->amount_paid ) && (float) $model->amount_paid > 0 ) {
-			$locked = true;
+		if ( $lock_when_settled ) {
+			foreach ( array( 'amount_paid', 'amount_applied' ) as $settled_column ) {
+				if ( isset( $model->{$settled_column} ) && (float) $model->{$settled_column} > 0 ) {
+					$locked = true;
+					break;
+				}
+			}
 		}
 
 		if ( ! $locked ) {

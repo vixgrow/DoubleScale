@@ -10,6 +10,7 @@ import {
 	parseDiscountInput,
 } from './sales-discount-utils';
 import { getCurrencySymbol } from './sales-currency-utils';
+import { formatMoney } from '@/constants/currencies';
 import { Plus } from 'lucide-react';
 
 import { DeleteIcon, GradientProposalItemsIcon } from '@doublescale/components';
@@ -55,21 +56,8 @@ const emptyItem = (): LineItem => ({
 	optional: false,
 });
 
-export const formatSalesAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD'
-			? 'US$'
-			: currency === 'EUR'
-				? 'EUR'
-				: currency === 'GBP'
-					? 'GBP'
-					: currency;
-	return `${amount} ${suffix}`;
-};
+export const formatSalesAmount = (value: number, currency = 'USD') =>
+	formatMoney(value, currency);
 
 export const computeAmount = (item: LineItem): number => {
 	const qty = Number(item.qty) || 0;

@@ -9,7 +9,9 @@ namespace DoubleScale\Tests\Integration\Sales;
 
 use DoubleScale\Core\ModuleManager;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
+use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
+use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 
@@ -76,6 +78,83 @@ final class DuplicateInvoiceTest extends IntegrationTestCase {
 		$this->assertSame( InvoiceStatus::DRAFT, (string) $copy->status );
 		$this->assertEmpty( $copy->external_payment_ref );
 		$this->assertEmpty( $copy->sent_at );
+	}
+
+	public function test_duplicate_copies_explicit_currency_and_preserves_null_inherit(): void {
+		$admin = $this->make_admin_user();
+
+		$explicit = $this->make_invoice( array( 'currency' => 'EUR' ) );
+		$inherit  = $this->make_invoice( array( 'currency' => null ) );
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->prefix . 'doublescale_sales_invoices',
+			array( 'currency' => null ),
+			array( 'id' => (int) $inherit->id )
+		);
+		$inherit->refresh();
+
+		$explicit_copy = InvoiceModel::find(
+			(int) $this->dispatch_rest(
+				'POST',
+				$this->duplicate_route( (int) $explicit->id ),
+				array(),
+				$admin
+			)->get_data()['id']
+		);
+		$inherit_copy  = InvoiceModel::find(
+			(int) $this->dispatch_rest(
+				'POST',
+				$this->duplicate_route( (int) $inherit->id ),
+				array(),
+				$admin
+			)->get_data()['id']
+		);
+
+		$this->assertSame( 'EUR', (string) $explicit_copy->currency );
+		$this->assertTrue( null === $inherit_copy->currency || '' === $inherit_copy->currency );
+	}
+
+	public function test_proposal_duplicate_and_convert_preserve_raw_currency(): void {
+		$admin = $this->make_admin_user();
+
+		$explicit = $this->make_proposal( array( 'currency' => 'EUR' ) );
+		$inherit  = $this->make_proposal( array( 'currency' => null ) );
+
+		$explicit_copy = $this->dispatch_rest(
+			'POST',
+			'/doublescale/v1/sales/proposals/' . (int) $explicit->id . '/duplicate',
+			array(),
+			$admin
+		);
+		$inherit_copy  = $this->dispatch_rest(
+			'POST',
+			'/doublescale/v1/sales/proposals/' . (int) $inherit->id . '/duplicate',
+			array(),
+			$admin
+		);
+
+		$this->assertSame( 201, $explicit_copy->get_status() );
+		$this->assertSame( 201, $inherit_copy->get_status() );
+		$this->assertSame( 'EUR', $explicit_copy->get_data()['currency_stored'] );
+		$this->assertNull( $inherit_copy->get_data()['currency_stored'] );
+
+		$converted_explicit = $this->dispatch_rest(
+			'POST',
+			'/doublescale/v1/sales/proposals/' . (int) $explicit->id . '/convert-to-invoice',
+			array(),
+			$admin
+		);
+		$converted_inherit  = $this->dispatch_rest(
+			'POST',
+			'/doublescale/v1/sales/proposals/' . (int) $inherit->id . '/convert-to-invoice',
+			array(),
+			$admin
+		);
+
+		$this->assertSame( 201, $converted_explicit->get_status() );
+		$this->assertSame( 201, $converted_inherit->get_status() );
+		$this->assertSame( 'EUR', $converted_explicit->get_data()['invoice']['currency_stored'] );
+		$this->assertNull( $converted_inherit->get_data()['invoice']['currency_stored'] );
 	}
 
 	public function test_duplicate_does_not_inherit_the_proposal_link(): void {
@@ -184,6 +263,46 @@ final class DuplicateInvoiceTest extends IntegrationTestCase {
 		$invoice->save();
 
 		return $invoice->fresh();
+	}
+
+	/**
+	 * @param array<string, mixed> $overrides Proposal attributes.
+	 * @return ProposalModel
+	 */
+	private function make_proposal( array $overrides = array() ): ProposalModel {
+		$defaults = array(
+			'contact_id'     => $this->make_contact(),
+			'subject'        => 'Currency copy proposal',
+			'status'         => ProposalStatus::DRAFT,
+			'currency'       => 'USD',
+			'discount_type'  => 'none',
+			'discount_value' => 0,
+			'line_items'     => array(
+				array(
+					'description' => 'Service',
+					'qty'         => 1,
+					'rate'        => 100,
+					'amount'      => 100,
+				),
+			),
+			'date'           => current_time( 'Y-m-d' ),
+			'open_till'      => gmdate( 'Y-m-d', strtotime( '+30 days' ) ),
+		);
+
+		$proposal = new ProposalModel();
+		$proposal->fill( array_merge( $defaults, $overrides ) );
+		$proposal->save();
+
+		if ( array_key_exists( 'currency', $overrides ) && null === $overrides['currency'] ) {
+			global $wpdb;
+			$wpdb->update(
+				$wpdb->prefix . 'doublescale_sales_proposals',
+				array( 'currency' => null ),
+				array( 'id' => (int) $proposal->id )
+			);
+		}
+
+		return $proposal->fresh();
 	}
 
 	private function ensure_sales_module(): void {

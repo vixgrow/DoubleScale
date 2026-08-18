@@ -165,5 +165,56 @@ tests_add_filter( 'muplugins_loaded', '_doublescale_tests_manually_load_plugin' 
 // Start the WordPress test environment. This brings in WP_UnitTestCase and friends.
 require $_tests_dir . '/includes/bootstrap.php';
 
+/**
+ * Run every module's migrations once, here, before any test transaction exists.
+ *
+ * WP_UnitTestCase isolates tests by wrapping each one in a DB transaction it
+ * rolls back afterwards. That contract breaks on DDL: CREATE/ALTER TABLE cause
+ * an implicit COMMIT in MySQL, which ends the transaction early and makes
+ * everything written up to that point permanent.
+ *
+ * Tests reach DDL through the common `ensure_sales_module()` helper, which calls
+ * ModuleManager::activateModule() → MigrationRunner. The runner is idempotent
+ * via a tracking table — but those tracking rows are themselves written inside
+ * the test transaction, so the rollback erases them and the NEXT test re-runs
+ * every migration, committing again. Observed directly: the tracking table went
+ * 71 rows → 23 → 0 across two tests, and ~126 invoice and ~24 contact rows
+ * survived rollback into later tests.
+ *
+ * Running the migrations here leaves the tracking table populated and committed
+ * for the whole suite, so per-test activateModule() calls find every migration
+ * already recorded and perform no DDL at all. The transaction contract then
+ * holds and tests stop leaking rows into each other.
+ *
+ * @return void
+ */
+function _doublescale_tests_run_all_migrations() {
+	if ( ! class_exists( '\DoubleScale\Core\ModuleManager' ) ) {
+		return;
+	}
+
+	foreach ( array_keys( (array) get_option( 'doublescale_enabled_modules', array() ) ) as $slug ) {
+		\DoubleScale\Core\ModuleManager::activateModule( (string) $slug );
+	}
+}
+
+_doublescale_tests_run_all_migrations();
+
+/*
+ * Capture the pristine plugin settings before any test runs.
+ *
+ * Tests that perform DDL break the transaction contract (see above), so an
+ * option written by such a test survives into every later test. Restoring it in
+ * tearDown needs a baseline captured HERE — a per-test snapshot would be taken
+ * after an earlier test had already committed its value, and would just put the
+ * corruption back. Stored as JSON so the constant holds a flat scalar and the
+ * `false` (option absent) case stays distinguishable from an empty array.
+ */
+$_doublescale_pristine_settings = get_option( 'doublescale_settings' );
+define(
+	'DOUBLESCALE_TESTS_PRISTINE_SETTINGS',
+	false === $_doublescale_pristine_settings ? 'null' : (string) wp_json_encode( $_doublescale_pristine_settings )
+);
+
 // Make sure the IntegrationTestCase base class is autoloadable.
 require_once __DIR__ . '/IntegrationTestCase.php';

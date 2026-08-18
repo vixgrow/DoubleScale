@@ -9,17 +9,10 @@ import { getToLink } from '@doublescale/navigation';
 import { DeleteIcon, EditHeaderIcon, FallbackCell, ViewIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { ContractStatusPill } from '@/components/sales';
+import { formatMoney } from '@/constants/currencies';
 import type { Contract } from '@/types/sales';
 
-const formatTableAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD' ? 'US$' : currency === 'EUR' ? 'EUR' : currency === 'GBP' ? 'GBP' : currency;
-	return `${amount}${suffix}`;
-};
+const formatTableAmount = formatMoney;
 
 const formatDisplayDate = (value: string | null): string => {
 	if (!value) {

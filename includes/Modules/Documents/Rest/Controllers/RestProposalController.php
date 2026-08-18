@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Documents\Rest\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\Services\DocumentCurrency;
 use DoubleScale\Modules\Sales\Capabilities;
 use DoubleScale\Modules\Documents\Constants\DiscountType;
 use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
@@ -469,6 +470,7 @@ class RestProposalController extends RestController {
 		}
 		DocumentCustomerDetails::snapshot_proposal_party_from_contact( $proposal );
 		DocumentIssuerSnapshot::freeze_if_needed( $proposal );
+		DocumentCurrency::freeze_on_send( $proposal );
 		$proposal->sent_at = current_time( 'mysql' );
 		$proposal->save();
 
@@ -552,6 +554,13 @@ class RestProposalController extends RestController {
 		$payload = $this->sanitize_payload( $request, false );
 		if ( is_wp_error( $payload ) ) {
 			return $payload;
+		}
+
+		if ( array_key_exists( 'currency', $payload ) ) {
+			$locked = DocumentCurrency::reject_if_locked( $proposal, $payload['currency'] );
+			if ( is_wp_error( $locked ) ) {
+				return $locked;
+			}
 		}
 
 		$discount_check = DiscountType::validate_payload( $payload, $proposal );
@@ -941,7 +950,6 @@ class RestProposalController extends RestController {
 		$string_fields = array(
 			'subject',
 			'status',
-			'currency',
 			'discount_type',
 			'to_name',
 			'address',
@@ -959,6 +967,14 @@ class RestProposalController extends RestController {
 			if ( array_key_exists( $field, $params ) ) {
 				$payload[ $field ] = sanitize_text_field( (string) $params[ $field ] );
 			}
+		}
+
+		if ( array_key_exists( 'currency', $params ) ) {
+			$currency = DocumentCurrency::sanitize_input( $params['currency'] );
+			if ( is_wp_error( $currency ) ) {
+				return $currency;
+			}
+			$payload['currency'] = $currency;
 		}
 
 		if ( array_key_exists( 'contact_id', $params ) ) {

@@ -1,0 +1,102 @@
+<?php
+/**
+ * Write-path helpers for per-document currency.
+ *
+ * Resolution (read path) lives on Settings::document_currency(). Freeze and
+ * lock belong here so a draft's NULL inherit is honoured until send, then
+ * written atomically with sent_at.
+ *
+ * @package DoubleScale\Core\Services
+ */
+
+namespace DoubleScale\Core\Services;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\Constants\Currencies;
+use DoubleScale\Core\Settings\Settings;
+use WP_Error;
+
+/**
+ * DocumentCurrency class.
+ */
+final class DocumentCurrency {
+
+	/**
+	 * Sanitize a REST currency input.
+	 *
+	 * null / '' → null (inherit global). Lowercase codes are normalised.
+	 * Junk codes are rejected.
+	 *
+	 * @param mixed $raw Raw request value.
+	 * @return string|null|WP_Error
+	 */
+	public static function sanitize_input( $raw ) {
+		$code = Currencies::normalize( $raw );
+		if ( null === $code ) {
+			return null;
+		}
+		if ( ! Currencies::is_valid( $code ) ) {
+			return new WP_Error(
+				'invalid_currency',
+				__( 'Please choose a valid currency.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+		return $code;
+	}
+
+	/**
+	 * If the stored column is still inherit (NULL/empty), write the resolved
+	 * global. Call this immediately before setting sent_at.
+	 *
+	 * @param object $model Document model with a `currency` attribute.
+	 * @return void
+	 */
+	public static function freeze_on_send( $model ): void {
+		if ( ! is_object( $model ) ) {
+			return;
+		}
+		if ( empty( $model->currency ) ) {
+			$model->currency = Settings::get_currency();
+		}
+	}
+
+	/**
+	 * Reject a currency change on a sent (or paid) document.
+	 *
+	 * Same-value writes are allowed so an edit that re-submits the current
+	 * currency does not 400.
+	 *
+	 * @param object     $model          Document model.
+	 * @param mixed      $new_currency   Incoming stored value (null = inherit).
+	 * @param bool       $lock_when_paid Also lock when amount_paid > 0.
+	 * @return WP_Error|null
+	 */
+	public static function reject_if_locked( $model, $new_currency, bool $lock_when_paid = false ) {
+		if ( ! is_object( $model ) ) {
+			return null;
+		}
+
+		$incoming = Currencies::stored_or_null( $new_currency );
+		$current  = Currencies::stored_or_null( $model->currency ?? null );
+		if ( $incoming === $current ) {
+			return null;
+		}
+
+		$locked = ! empty( $model->sent_at );
+		if ( $lock_when_paid && isset( $model->amount_paid ) && (float) $model->amount_paid > 0 ) {
+			$locked = true;
+		}
+
+		if ( ! $locked ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'currency_locked',
+			__( 'Currency is locked once a document is sent or a payment has been recorded.', 'doublescale' ),
+			array( 'status' => 400 )
+		);
+	}
+}

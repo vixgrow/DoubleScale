@@ -4,6 +4,9 @@ import { isToday, isTomorrow } from 'date-fns';
 import { format, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 import type { Booking, DateOverrides, Location } from '@/types/booking';
+import { getCurrencySymbol } from '@/constants/currencies';
+
+export { getCurrencySymbol };
 
 export const getCurrentTimeInTimezone = (timezone: string, timeFormat: string = '12'): string => {
 	const options: Intl.DateTimeFormatOptions = {
@@ -273,23 +276,6 @@ export const generateDurationOptions = (
 	}
 
 	return options;
-};
-
-export const getCurrencySymbol = (currencyCode: string) => {
-	const symbols: { [key: string]: string } = {
-		USD: '$',
-		EUR: '€',
-		GBP: '£',
-		JPY: '¥',
-		AUD: 'A$',
-		CAD: 'C$',
-		CHF: 'CHF',
-		CNY: '¥',
-		INR: '₹',
-		BRL: 'R$',
-		// Add more currencies as needed
-	};
-	return symbols[currencyCode] || currencyCode;
 };
 
 /**

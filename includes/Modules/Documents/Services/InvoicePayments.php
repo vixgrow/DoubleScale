@@ -28,6 +28,8 @@ class InvoicePayments {
 		$amount_paid = (float) PaymentModel::query()
 			->where( 'invoice_id', (int) $invoice->id )
 			->sum( 'amount' );
+		// Payments have no currency column — they inherit the parent invoice's.
+		// Summing here is safe because every row belongs to this one invoice.
 
 		$invoice->amount_paid = round( $amount_paid, 2 );
 		$previous_status      = (string) $invoice->status;

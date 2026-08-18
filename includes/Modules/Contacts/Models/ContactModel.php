@@ -23,6 +23,7 @@ use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
+use DoubleScale\Core\Services\CurrencyResolver;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Validators\PhoneValidator;
 use DoubleScale\Core\Constants\EddOrderStatus;
@@ -496,7 +497,22 @@ class ContactModel extends Model {
 		if ( ! $deals ) {
 			return 0;
 		}
-		return $deals->where( 'status', 'won' )->sum( 'value' );
+		$map    = CurrencyResolver::sum_by_currency( $deals->where( 'status', 'won' )->get(), 'value' );
+		$global = CurrencyResolver::global_currency();
+		return $map[ $global ] ?? 0;
+	}
+
+	/**
+	 * Won deal value grouped by resolved currency.
+	 *
+	 * @return array<string, float>
+	 */
+	public function getTotalDealValueByCurrencyAttribute() {
+		$deals = $this->deals();
+		if ( ! $deals ) {
+			return array();
+		}
+		return CurrencyResolver::sum_by_currency( $deals->where( 'status', 'won' )->get(), 'value' );
 	}
 
 	/**

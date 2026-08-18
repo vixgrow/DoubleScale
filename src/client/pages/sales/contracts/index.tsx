@@ -57,9 +57,25 @@ import {
 } from '@/hooks/sales';
 import type { Contract } from '@/types/sales';
 import { getContractColumns } from './columns';
+import { formatMoney } from '@/constants/currencies';
 
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
+const formatSummaryTotal = (
+	fallbackTotal: number,
+	byCurrency?: Record<string, number>
+): string => {
+	const entries = Object.entries(byCurrency || {}).filter(
+		([, amount]) => amount !== 0
+	);
+	if (entries.length === 0) {
+		return formatMoney(fallbackTotal);
+	}
+	if (entries.length === 1) {
+		return formatMoney(entries[0][1], entries[0][0]);
+	}
+	return entries
+		.map(([currency, amount]) => formatMoney(amount, currency))
+		.join(' · ');
+};
 
 const ActiveContractIcon: React.FC<IconProps> = ({
 	width = 29,
@@ -300,8 +316,9 @@ const ContractsList: React.FC = () => {
 							<MessageStatsCard
 								label={__('Active', 'doublescale')}
 								layout="centered"
-								value={formatMoney(
-									summary.by_status?.active?.amount ?? 0
+								value={formatSummaryTotal(
+									summary.by_status?.active?.amount ?? 0,
+									summary.by_status?.active?.amount_by_currency
 								)}
 								icon={
 									<ActiveContractIcon
@@ -316,8 +333,9 @@ const ContractsList: React.FC = () => {
 							<MessageStatsCard
 								label={__('Expired', 'doublescale')}
 								layout="centered"
-								value={formatMoney(
-									summary.by_status?.expired?.amount ?? 0
+								value={formatSummaryTotal(
+									summary.by_status?.expired?.amount ?? 0,
+									summary.by_status?.expired?.amount_by_currency
 								)}
 								icon={
 									<ContractExpiredIcon

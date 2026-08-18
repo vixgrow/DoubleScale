@@ -109,11 +109,16 @@ final class Module extends AbstractSalesChildModule implements ProvidesAbilities
 			$this->sales_migration_path( 'SalesInvoiceTableContentColumns.php' ),
 			$this->sales_migration_path( 'SalesInvoiceTableRecurrenceColumn.php' ),
 			$this->sales_migration_path( 'SalesProposalTableIssuerSnapshotColumn.php' ),
+			$this->sales_migration_path( 'SalesInvoiceTableCurrencyNullable.php' ),
+			$this->sales_migration_path( 'SalesProposalTableCurrencyNullable.php' ),
 		);
 	}
 
 	protected function boot_child( Container $container ): void {
 		unset( $container );
+
+		Migrations\SalesInvoiceTableCurrencyNullable::ensure();
+		Migrations\SalesProposalTableCurrencyNullable::ensure();
 
 		require_once dirname( __DIR__ ) . '/Sales/MergeTags/AbstractSalesMergeTag.php';
 		$this->loadModuleMergeTagFiles();

@@ -99,6 +99,26 @@ final class RazorpayInvoicePaymentTest extends RedirectGatewayTestCase {
 		$this->assertNull( $invoice->stripe_payment_intent_id );
 	}
 
+	public function test_init_refuses_an_existing_link_in_a_different_currency(): void {
+		$invoice = $this->make_invoice(
+			array(
+				'currency'             => 'EUR',
+				'external_payment_ref' => 'plink_abc',
+			)
+		);
+
+		$this->queue_http(
+			array(
+				array( 'body' => $this->link_body() ),
+			)
+		);
+
+		$result = $this->gateway()->init( new InvoicePayableSubject( $invoice ) );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'currency_mismatch', $result->get_error_code() );
+	}
+
 	/**
 	 * The link is not the charge: the recorded transaction must be the
 	 * underlying payment id, not the payment-link id.

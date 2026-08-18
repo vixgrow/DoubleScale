@@ -14,6 +14,7 @@ import {
 	initInvoiceOnlinePayment,
 } from '@/hooks/sales';
 import type { Invoice, OnlinePaymentGatewayStatus } from '@/types/sales';
+import { formatMoney } from '@/constants/currencies';
 import {
 	clearStripeRedirectParams,
 	getStripePaymentReturnUrl,
@@ -30,9 +31,6 @@ interface InvoiceOnlinePaymentProps {
 	gateway: OnlinePaymentGatewayStatus;
 	onPaid: (invoice: Invoice) => void;
 }
-
-const formatMoney = (value: number, currency: string) =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 const StripePayForm: React.FC<{
 	invoiceId: number;

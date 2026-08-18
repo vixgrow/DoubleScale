@@ -81,6 +81,15 @@ final class SettingsTest extends IntegrationTestCase {
 		$this->assertSame( 'GBP', Settings::get_currency() );
 	}
 
+	public function test_document_currency_null_inherits_global_regardless_of_sent_at(): void {
+		Settings::update( 'currency', array( 'currency' => 'EUR' ) );
+
+		$this->assertSame( 'EUR', Settings::document_currency( null, null ) );
+		$this->assertSame( 'EUR', Settings::document_currency( '', '2026-01-01 00:00:00' ) );
+		$this->assertSame( 'USD', Settings::document_currency( 'USD', null ) );
+		$this->assertSame( 'GBP', Settings::document_currency( 'GBP', '2026-01-01 00:00:00' ) );
+	}
+
 	public function test_get_default_email_footer_contains_unsubscribe_merge_tag(): void {
 		$this->assertStringContainsString( '{{contact:unsubscribe_link}}', Settings::get_default_email_footer() );
 	}

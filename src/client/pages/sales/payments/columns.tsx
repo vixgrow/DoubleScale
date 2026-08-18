@@ -9,23 +9,10 @@ import { getToLink } from '@doublescale/navigation';
 import { DeleteIcon, FallbackCell, ViewIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { PAYMENT_MODE_LABELS } from '@/constants/sales';
+import { formatMoney } from '@/constants/currencies';
 import type { PaymentListItem } from '@/types/sales';
 
-const formatTableAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD'
-			? '$'
-			: currency === 'EUR'
-				? '€'
-				: currency === 'GBP'
-					? '£'
-					: ` ${currency}`;
-	return `${amount}${suffix}`;
-};
+const formatTableAmount = formatMoney;
 
 const modeLabel = (mode: string | null): string => {
 	if (!mode) {

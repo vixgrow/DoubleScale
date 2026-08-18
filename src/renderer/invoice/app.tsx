@@ -13,6 +13,7 @@ import { PayPalPayButtons } from '@/components/sales/paypal-pay-buttons';
 import { Button } from '@/components/ui/button';
 import type { Invoice } from '@/types/sales';
 import type { OnlinePaymentGatewayStatus } from '@/types/sales';
+import { formatMoney } from '@/constants/currencies';
 
 import {
 	confirmPublicInvoicePayment,
@@ -35,9 +36,6 @@ import {
 interface Props {
 	hash: string;
 }
-
-const formatMoney = (value: number, currency: string) =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 const StripePayForm: React.FC<{
 	hash: string;

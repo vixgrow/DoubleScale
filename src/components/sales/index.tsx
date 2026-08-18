@@ -6,6 +6,8 @@ export {
 } from './line-items-editor';
 export type { LineItemProductPickerContext } from './line-items-editor';
 export { getGlobalCurrency } from './sales-currency-utils';
+export { DocumentCurrencySelect } from './document-currency-select';
+export type { DocumentCurrencySelectProps } from './document-currency-select';
 export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';

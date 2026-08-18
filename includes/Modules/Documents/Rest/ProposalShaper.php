@@ -17,6 +17,7 @@ use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Services\ProposalUrl;
 use DoubleScale\Modules\Sales\Services\SalesEmailMergeTags;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
+use DoubleScale\Core\Constants\Currencies;
 use DoubleScale\Core\Settings\Settings;
 
 /**
@@ -43,6 +44,7 @@ final class ProposalShaper {
 			'date'             => $proposal->date,
 			'open_till'        => $proposal->open_till,
 			'currency'         => Settings::document_currency( $proposal->currency, $proposal->sent_at ),
+			'currency_stored'  => Currencies::stored_or_null( $proposal->currency ),
 			'discount_type'    => (string) $proposal->discount_type,
 			'discount_value'   => (float) $proposal->discount_value,
 			'line_items'       => is_array( $proposal->line_items ) ? $proposal->line_items : array(),
@@ -144,6 +146,7 @@ final class ProposalShaper {
 			'date'            => $proposal->date,
 			'open_till'       => $proposal->open_till,
 			'currency'        => Settings::document_currency( $proposal->currency, $proposal->sent_at ),
+			'currency_stored' => Currencies::stored_or_null( $proposal->currency ),
 			'discount_type'   => (string) $proposal->discount_type,
 			'discount_value'  => (float) $proposal->discount_value,
 			'line_items'      => is_array( $proposal->line_items ) ? $proposal->line_items : array(),

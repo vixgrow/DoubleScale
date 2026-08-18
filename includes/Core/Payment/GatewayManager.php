@@ -196,6 +196,16 @@ final class GatewayManager {
 	 * @return array|WP_Error
 	 */
 	public function init( string $context, string $slug, PayableSubject $subject ) {
+		// The legacy filter is the back-compat hook for a Stripe implementation
+		// supplied outside this registry, so it has to be consulted before the
+		// "is a gateway registered?" checks — otherwise it can never fire.
+		if ( self::CONTEXT_INVOICE === $context ) {
+			$legacy = $this->apply_legacy_filter( 'init', $slug, null, $subject );
+			if ( null !== $legacy ) {
+				return $legacy;
+			}
+		}
+
 		$gateway = $this->get( $context, $slug );
 		if ( ! $gateway ) {
 			return new WP_Error(
@@ -229,13 +239,6 @@ final class GatewayManager {
 			);
 		}
 
-		if ( self::CONTEXT_INVOICE === $context ) {
-			$legacy = $this->apply_legacy_filter( 'init', $slug, null, $subject );
-			if ( null !== $legacy ) {
-				return $legacy;
-			}
-		}
-
 		return $gateway->init( $subject );
 	}
 
@@ -246,6 +249,14 @@ final class GatewayManager {
 	 * @return array|WP_Error
 	 */
 	public function confirm( string $context, string $slug, PayableSubject $subject ) {
+		// Mirrors init(): the legacy hook must win before registration checks.
+		if ( self::CONTEXT_INVOICE === $context ) {
+			$legacy = $this->apply_legacy_filter( 'confirm', $slug, null, $subject );
+			if ( null !== $legacy ) {
+				return $legacy;
+			}
+		}
+
 		$gateway = $this->get( $context, $slug );
 		if ( ! $gateway ) {
 			return new WP_Error(
@@ -263,13 +274,6 @@ final class GatewayManager {
 			);
 		}
 
-		if ( self::CONTEXT_INVOICE === $context ) {
-			$legacy = $this->apply_legacy_filter( 'confirm', $slug, null, $subject );
-			if ( null !== $legacy ) {
-				return $legacy;
-			}
-		}
-
 		return $gateway->confirm( $subject );
 	}
 
@@ -284,6 +288,14 @@ final class GatewayManager {
 		$guard = InvoicePayable::guard( $invoice, $slug );
 		if ( is_wp_error( $guard ) ) {
 			return $guard;
+		}
+
+		// The legacy hook works off the invoice, not a PayableSubject, so it can
+		// serve a Stripe implementation supplied without Pro — check it before
+		// requiring a subject that only Pro provides.
+		$legacy = $this->apply_invoice_legacy_filter( 'init', $slug, $invoice );
+		if ( null !== $legacy ) {
+			return $legacy;
 		}
 
 		/**
@@ -314,6 +326,12 @@ final class GatewayManager {
 	 * @return array|WP_Error
 	 */
 	public function confirm_payment( string $slug, InvoiceModel $invoice ) {
+		// Mirrors init_payment(): the legacy hook precedes the Pro-only subject.
+		$legacy = $this->apply_invoice_legacy_filter( 'confirm', $slug, $invoice );
+		if ( null !== $legacy ) {
+			return $legacy;
+		}
+
 		/**
 		 * @param PayableSubject|null $subject Default null.
 		 * @param InvoiceModel        $invoice Invoice.
@@ -340,17 +358,35 @@ final class GatewayManager {
 	 * @return mixed
 	 */
 	private function apply_legacy_filter( string $action, string $slug, $default, PayableSubject $subject ) {
-		if ( 'stripe' !== $slug ) {
-			return $default;
-		}
-		$hook = 'init' === $action
-			? 'doublescale_sales_invoice_stripe_init'
-			: 'doublescale_sales_invoice_stripe_confirm';
-
 		$invoice = null;
 		if ( is_callable( array( $subject, 'get_invoice' ) ) ) {
 			$invoice = $subject->get_invoice();
 		}
+
+		return $this->apply_invoice_legacy_filter( $action, $slug, $invoice, $default );
+	}
+
+	/**
+	 * Backward compatibility for the stripe-specific filters, keyed off the
+	 * invoice rather than a PayableSubject.
+	 *
+	 * Returning null means "no legacy handler took this", so callers fall
+	 * through to the registered gateway.
+	 *
+	 * @param string            $action  init|confirm.
+	 * @param string            $slug    Gateway slug.
+	 * @param InvoiceModel|null $invoice Invoice.
+	 * @param mixed             $default Default value.
+	 * @return mixed
+	 */
+	private function apply_invoice_legacy_filter( string $action, string $slug, $invoice, $default = null ) {
+		if ( 'stripe' !== $slug ) {
+			return $default;
+		}
+
+		$hook = 'init' === $action
+			? 'doublescale_sales_invoice_stripe_init'
+			: 'doublescale_sales_invoice_stripe_confirm';
 
 		return apply_filters( $hook, $default, $invoice );
 	}

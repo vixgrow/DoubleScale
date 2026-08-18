@@ -42,7 +42,7 @@ export const CustomColorPicker: React.FC<ColorPickerProps> = ({
           className={` w-full h-12 py-[5px] px-4 flex items-center !shadow-none text-[#09090B] justify-start gap-2 rounded-md border border-[#DEE1E6] hover:bg-white bg-white `}
 
         >
-          <span className="text-sm">{selectedColor?.hex || "Select color"}</span>
+          <span className="text-sm" dir="ltr">{selectedColor?.hex || "Select color"}</span>
           <span
             className="w-6 h-6 rounded-[8px] px-2 border border-[#DEE1E6]"
             style={{ backgroundColor: selectedColor?.hex || "transparent" }}
@@ -64,7 +64,7 @@ export const CustomColorPicker: React.FC<ColorPickerProps> = ({
             className="flex gap-2 justify-between items-center cursor-pointer"
             onClick={() => onSelect(color.hex)}
           >
-            <span className="text-sm">{color.hex}</span>
+            <span className="text-sm" dir="ltr">{color.hex}</span>
             <div
               className="w-6 h-6 rounded-sm border"
               style={{ backgroundColor: color.hex }}

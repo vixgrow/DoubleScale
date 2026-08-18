@@ -463,6 +463,8 @@ export type Integration = {
 	is_pro?: boolean;
 	/** When true, Integrations page shows a card (set from PHP Integration::$show_in_catalog). */
 	show_in_catalog?: boolean;
+	/** Catalog tab: payment, messaging, forms, automation, other. */
+	catalog_category?: string;
 	/** Absolute image URL from PHP Integration::get_icon_url(). */
 	icon_url?: string;
 	required_plan?: string | null;

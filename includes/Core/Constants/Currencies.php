@@ -62,6 +62,7 @@ final class Currencies {
 		'SAR',
 		'MYR',
 		'RON',
+		'EGP',
 	);
 
 	/**
@@ -172,6 +173,7 @@ final class Currencies {
 		'SAR' => 'SAR - Saudi Riyal',
 		'MYR' => 'MYR - Malaysian Ringgit',
 		'RON' => 'RON - Romanian Leu',
+		'EGP' => 'EGP - Egyptian Pound',
 	);
 
 	/**

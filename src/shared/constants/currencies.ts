@@ -45,6 +45,7 @@ export const CURRENCY_CODES = [
 	'SAR',
 	'MYR',
 	'RON',
+	'EGP',
 ] as const;
 
 export type CurrencyCode = (typeof CURRENCY_CODES)[number];
@@ -124,6 +125,7 @@ export const CURRENCY_LABELS: Record<string, string> = {
 	SAR: 'SAR - Saudi Riyal',
 	MYR: 'MYR - Malaysian Ringgit',
 	RON: 'RON - Romanian Leu',
+	EGP: 'EGP - Egyptian Pound',
 };
 
 export const CURRENCY_OPTIONS = CURRENCY_CODES.map((value) => ({

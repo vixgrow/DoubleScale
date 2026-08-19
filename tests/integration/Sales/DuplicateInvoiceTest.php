@@ -155,6 +155,16 @@ final class DuplicateInvoiceTest extends IntegrationTestCase {
 		$this->assertSame( 201, $converted_inherit->get_status() );
 		$this->assertSame( 'EUR', $converted_explicit->get_data()['invoice']['currency_stored'] );
 		$this->assertNull( $converted_inherit->get_data()['invoice']['currency_stored'] );
+
+		$invoice_id = (int) $converted_explicit->get_data()['invoice']['id'];
+		$locked     = $this->dispatch_rest(
+			'PATCH',
+			'/doublescale/v1/sales/invoices/' . $invoice_id,
+			array( 'currency' => 'USD' ),
+			$admin
+		);
+		$this->assertSame( 400, $locked->get_status() );
+		$this->assertSame( 'currency_locked', $locked->as_error()->get_error_code() );
 	}
 
 	public function test_duplicate_does_not_inherit_the_proposal_link(): void {

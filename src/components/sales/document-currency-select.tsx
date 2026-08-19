@@ -21,6 +21,8 @@ export interface DocumentCurrencySelectProps {
 	value: string | null;
 	onChange: (code: string | null) => void;
 	locked?: boolean;
+	/** Overrides the default lock tooltip. */
+	lockTitle?: string;
 	className?: string;
 	triggerClassName?: string;
 }
@@ -29,13 +31,15 @@ export const DocumentCurrencySelect: React.FC<DocumentCurrencySelectProps> = ({
 	value,
 	onChange,
 	locked = false,
+	lockTitle,
 	className = '!mb-0',
 	triggerClassName = 'h-10 w-full rounded-lg border-[#D0D0D0] bg-white',
 }) => {
 	const global = getGlobalCurrency();
 	const selectValue = value || INHERIT_VALUE;
-	const lockTitle = locked
-		? __(
+	const title = locked
+		? lockTitle ||
+			__(
 				'Currency is locked once a document is sent or a payment has been recorded.',
 				'doublescale'
 			)
@@ -43,7 +47,7 @@ export const DocumentCurrencySelect: React.FC<DocumentCurrencySelectProps> = ({
 
 	return (
 		<FormField label={__('Currency', 'doublescale')} className={className}>
-			<div title={lockTitle}>
+			<div title={title}>
 				<Select
 					value={selectValue}
 					onValueChange={(next) =>

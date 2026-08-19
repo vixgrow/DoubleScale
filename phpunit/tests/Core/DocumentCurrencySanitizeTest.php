@@ -33,4 +33,27 @@ final class DocumentCurrencySanitizeTest extends TestCase {
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertSame( 'invalid_currency', $result->get_error_code() );
 	}
+
+	public function test_proposal_link_locks_currency_change(): void {
+		$model = (object) array(
+			'currency'    => 'EUR',
+			'sent_at'     => null,
+			'proposal_id' => 42,
+		);
+
+		$result = DocumentCurrency::reject_if_locked( $model, 'USD' );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'currency_locked', $result->get_error_code() );
+	}
+
+	public function test_same_currency_on_proposal_invoice_is_allowed(): void {
+		$model = (object) array(
+			'currency'    => 'EUR',
+			'sent_at'     => null,
+			'proposal_id' => 42,
+		);
+
+		$this->assertNull( DocumentCurrency::reject_if_locked( $model, 'EUR' ) );
+	}
 }

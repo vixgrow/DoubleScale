@@ -473,8 +473,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	);
 
 	const displayCurrency = currency ?? getGlobalCurrency();
+	const fromProposal = Number(existing?.proposal_id) > 0;
 	const currencyLocked =
-		Boolean(existing?.sent_at) || Number(existing?.amount_paid) > 0;
+		Boolean(existing?.sent_at) ||
+		Number(existing?.amount_paid) > 0 ||
+		fromProposal;
+	const currencyLockTitle = fromProposal
+		? __(
+				'Currency comes from the linked proposal and cannot be changed.',
+				'doublescale'
+			)
+		: undefined;
 
 	const buildPayload = () => ({
 		status,
@@ -1061,6 +1070,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 							value={currency}
 							onChange={setCurrency}
 							locked={currencyLocked}
+							lockTitle={currencyLockTitle}
 							triggerClassName={selectTriggerClass}
 						/>
 					</div>

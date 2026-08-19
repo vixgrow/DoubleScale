@@ -63,14 +63,14 @@ final class DocumentCurrency {
 	}
 
 	/**
-	 * Reject a currency change on a sent (or paid) document.
+	 * Reject a currency change on a sent, paid, or proposal-linked invoice.
 	 *
 	 * Same-value writes are allowed so an edit that re-submits the current
 	 * currency does not 400.
 	 *
 	 * Settled value locks the currency too, not just sending. Invoices track it
-	 * in `amount_paid`; credit notes use `amount_applied`. Both are checked, so
-	 * a caller cannot silently miss the lock by passing the wrong model type.
+	 * in `amount_paid`; credit notes use `amount_applied`. An invoice converted
+	 * from a proposal is locked because the proposal already chose the currency.
 	 *
 	 * @param object     $model             Document model.
 	 * @param mixed      $new_currency      Incoming stored value (null = inherit).
@@ -89,6 +89,9 @@ final class DocumentCurrency {
 		}
 
 		$locked = ! empty( $model->sent_at );
+		if ( isset( $model->proposal_id ) && (int) $model->proposal_id > 0 ) {
+			$locked = true;
+		}
 		if ( $lock_when_settled ) {
 			foreach ( array( 'amount_paid', 'amount_applied' ) as $settled_column ) {
 				if ( isset( $model->{$settled_column} ) && (float) $model->{$settled_column} > 0 ) {
@@ -104,7 +107,7 @@ final class DocumentCurrency {
 
 		return new WP_Error(
 			'currency_locked',
-			__( 'Currency is locked once a document is sent or a payment has been recorded.', 'doublescale' ),
+			__( 'Currency is locked once a document is sent, a payment has been recorded, or this invoice was converted from a proposal.', 'doublescale' ),
 			array( 'status' => 400 )
 		);
 	}

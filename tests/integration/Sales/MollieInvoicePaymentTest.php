@@ -103,6 +103,26 @@ final class MollieInvoicePaymentTest extends RedirectGatewayTestCase {
 		$this->assertNull( $invoice->stripe_payment_intent_id );
 	}
 
+	public function test_init_refuses_an_existing_payment_in_a_different_currency(): void {
+		$invoice = $this->make_invoice(
+			array(
+				'currency'             => 'EUR',
+				'external_payment_ref' => 'tr_abc123',
+			)
+		);
+
+		$this->queue_http(
+			array(
+				array( 'body' => $this->payment_body( 'open' ) ),
+			)
+		);
+
+		$result = $this->gateway()->init( new InvoicePayableSubject( $invoice ) );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'currency_mismatch', $result->get_error_code() );
+	}
+
 	public function test_confirm_records_a_paid_payment(): void {
 		$invoice = $this->make_invoice( array( 'external_payment_ref' => 'tr_abc123' ) );
 

@@ -8,23 +8,10 @@ import { ColumnDef } from '@tanstack/react-table';
 import { getToLink } from '@doublescale/navigation';
 import { FallbackCell } from '@doublescale/components';
 import { DocumentRowActions, InvoiceStatusPill } from '@/components/sales';
+import { formatMoney } from '@/constants/currencies';
 import type { Invoice } from '@/types/sales';
 
-const formatTableAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD'
-			? 'US$'
-			: currency === 'EUR'
-				? 'EUR'
-				: currency === 'GBP'
-					? 'GBP'
-					: currency;
-	return `${amount} ${suffix}`;
-};
+const formatTableAmount = formatMoney;
 
 const contactName = (invoice: Invoice): string => {
 	const c = invoice.contact;

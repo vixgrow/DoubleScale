@@ -34,6 +34,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentCurrencySelect } from '../document-currency-select';
 import { DocumentSectionsEditor } from '../document-sections-editor';
 import {
 	mergeDocumentSections,
@@ -76,6 +77,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
+import { getGlobalCurrency } from '@/constants/currencies';
 import type {
 	ContactSummary,
 	DocumentSection,
@@ -187,8 +189,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [invoiceDate, setInvoiceDate] = useState(today());
 	const [dueDate, setDueDate] = useState(monthFromToday());
-	const [currency, setCurrency] = useState(
-		initialCurrency ?? config.getCurrency() ?? 'USD'
+	const [currency, setCurrency] = useState<string | null>(
+		initialCurrency ?? null
 	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
@@ -245,7 +247,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		setContact(existing.contact || null);
 		setInvoiceDate(existing.invoice_date || today());
 		setDueDate(existing.due_date || monthFromToday());
-		setCurrency(existing.currency || 'USD');
+		setCurrency(existing.currency_stored ?? null);
 		setDiscountType(existing.discount_type || 'none');
 		setDiscountValue(existing.discount_value || 0);
 		setAdjustment(existing.adjustment || 0);
@@ -469,6 +471,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		status === 'paid',
 		existing ?? undefined
 	);
+
+	const displayCurrency = currency ?? getGlobalCurrency();
+	const fromProposal = Number(existing?.proposal_id) > 0;
+	const currencyLocked =
+		Boolean(existing?.sent_at) ||
+		Number(existing?.amount_paid) > 0 ||
+		fromProposal;
+	const currencyLockTitle = fromProposal
+		? __(
+				'Currency comes from the linked proposal and cannot be changed.',
+				'doublescale'
+			)
+		: undefined;
 
 	const buildPayload = () => ({
 		status,
@@ -814,7 +829,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 			sale_agent_user_id: saleAgentUserId,
 			invoice_date: invoiceDate,
 			due_date: dueDate,
-			currency,
+			currency: displayCurrency,
 			allowed_payment_modes: allowedPaymentModes,
 			discount_type: discountType,
 			discount_value: discountValue,
@@ -1051,6 +1066,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 								/>
 							</FormField>
 						</div>
+						<DocumentCurrencySelect
+							value={currency}
+							onChange={setCurrency}
+							locked={currencyLocked}
+							lockTitle={currencyLockTitle}
+							triggerClassName={selectTriggerClass}
+						/>
 					</div>
 
 					<div className="space-y-4">
@@ -1447,7 +1469,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 				<LineItemsEditor
 					items={lineItems}
 					onChange={setLineItems}
-					currency={currency}
+					currency={displayCurrency}
 					discountType={discountType}
 					discountValue={discountValue}
 					adjustment={adjustment}

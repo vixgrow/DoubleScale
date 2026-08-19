@@ -10,24 +10,12 @@ import {
 	CardHeader,
 	GeneralSettingsPaymentIcon,
 } from '@/components/booking';
+import { CURRENCY_OPTIONS } from '@/constants/currencies';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PaymentSettings = ({ settings, updateSettings }) => {
-	// Currency options
-	const currencyOptions = [
-		{ value: 'USD', label: 'USD - US Dollar' },
-		{ value: 'EUR', label: 'EUR - Euro' },
-		{ value: 'GBP', label: 'GBP - British Pound' },
-		{ value: 'JPY', label: 'JPY - Japanese Yen' },
-		{ value: 'AUD', label: 'AUD - Australian Dollar' },
-		{ value: 'CAD', label: 'CAD - Canadian Dollar' },
-		{ value: 'CHF', label: 'CHF - Swiss Franc' },
-		{ value: 'CNY', label: 'CNY - Chinese Yuan' },
-		{ value: 'INR', label: 'INR - Indian Rupee' },
-		{ value: 'BRL', label: 'BRL - Brazilian Real' },
-	];
 
 	return (
         <Card><CardContent>
@@ -60,7 +48,7 @@ const PaymentSettings = ({ settings, updateSettings }) => {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {currencyOptions.map((opt) => (
+                                {CURRENCY_OPTIONS.map((opt) => (
                                     <SelectItem
                                         key={opt.value}
                                         value={opt.value}

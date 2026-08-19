@@ -55,10 +55,8 @@ import {
 	UnpaidIcon,
 } from '@doublescale/components';
 import config, { type IconProps } from '@doublescale/config';
+import { formatMoney } from '@/constants/currencies';
 import { getInvoiceColumns } from './columns';
-
-const formatMoney = (value: number, currency = config.getCurrency() || 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 // Currency is a single global setting, but older documents may keep a different
 // (frozen) currency. Show one figure when everything is one currency; otherwise

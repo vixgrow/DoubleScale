@@ -20,6 +20,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { LineItemsEditor, computeLineItemsTotals } from '../line-items-editor';
+import { DocumentCurrencySelect } from '../document-currency-select';
 import { DocumentSectionsEditor } from '../document-sections-editor';
 import {
 	mergeDocumentSections,
@@ -61,6 +62,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
+import { getGlobalCurrency } from '@/constants/currencies';
 import type { ContactSummary, DocumentSection, LineItem, Proposal } from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
@@ -153,8 +155,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [date, setDate] = useState(today());
 	const [openTill, setOpenTill] = useState(weekFromToday());
-	const [currency, setCurrency] = useState(
-		initialCurrency ?? config.getCurrency() ?? 'USD'
+	const [currency, setCurrency] = useState<string | null>(
+		initialCurrency ?? null
 	);
 	const [discountType, setDiscountType] = useState('none');
 	const [discountValue, setDiscountValue] = useState(0);
@@ -278,7 +280,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		setContact(existing.contact || null);
 		setDate(existing.date || today());
 		setOpenTill(existing.open_till || weekFromToday());
-		setCurrency(existing.currency || 'USD');
+		setCurrency(existing.currency_stored ?? null);
 		setDiscountType(existing.discount_type || 'none');
 		setDiscountValue(existing.discount_value || 0);
 		setAdjustment(existing.adjustment || 0);
@@ -312,6 +314,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			)
 		);
 	}, [isNew, templatePicked, salesSettings]);
+
+	const displayCurrency = currency ?? getGlobalCurrency();
+	const currencyLocked = Boolean(existing?.sent_at);
 
 	const buildPayload = () => ({
 		subject: subject.trim(),
@@ -615,7 +620,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			assigned_user_id: assignedUserId,
 			date,
 			open_till: openTill,
-			currency,
+			currency: displayCurrency,
 			discount_type: discountType,
 			discount_value: discountValue,
 			line_items: lineItems,
@@ -766,6 +771,12 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 						</FormField>
 					</div>
 
+					<DocumentCurrencySelect
+						value={currency}
+						onChange={setCurrency}
+						locked={currencyLocked}
+					/>
+
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<FormField label={__('Discount Type', 'doublescale')} className="!mb-0">
 							<select
@@ -909,7 +920,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 			<LineItemsEditor
 				items={lineItems}
 				onChange={setLineItems}
-				currency={currency}
+				currency={displayCurrency}
 				discountType={discountType}
 				discountValue={discountValue}
 				adjustment={adjustment}

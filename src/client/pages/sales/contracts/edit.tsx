@@ -36,7 +36,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { SendDocumentDialog, ContractAttachmentsPanel, ApprovalStatusBanner } from '@/components/sales';
+import { SendDocumentDialog, ContractAttachmentsPanel, ApprovalStatusBanner, DocumentCurrencySelect } from '@/components/sales';
 import PageTabs from '@/components/page-tabs';
 import { normalizeSalesContact } from '@/components/sales/contact-sales-fields';
 import {
@@ -60,7 +60,7 @@ import {
 } from '@/hooks/sales';
 import type { ContactSummary } from '@/types/sales';
 import config from '@doublescale/config';
-import { getCurrencySymbol } from '@/components/sales/sales-currency-utils';
+import { getGlobalCurrency, getCurrencySymbol } from '@/constants/currencies';
 import {
 	CONTRACT_STATUSES,
 	CONTRACT_STATUS_LABELS,
@@ -102,7 +102,7 @@ const ContractEdit: React.FC = () => {
 	const [contact, setContact] = useState<ContactSummary | null>(null);
 	const [contractTypeId, setContractTypeId] = useState<number | null>(null);
 	const [contractValue, setContractValue] = useState(0);
-	const [currency, setCurrency] = useState(config.getCurrency() ?? 'USD');
+	const [currency, setCurrency] = useState<string | null>(null);
 	const [startDate, setStartDate] = useState(today());
 	const [endDate, setEndDate] = useState(yearFromToday());
 	const [description, setDescription] = useState('');
@@ -165,7 +165,7 @@ const ContractEdit: React.FC = () => {
 		setContact(existing.contact || null);
 		setContractTypeId(existing.contract_type_id ?? null);
 		setContractValue(existing.contract_value || 0);
-		setCurrency(existing.currency || 'USD');
+		setCurrency(existing.currency_stored ?? null);
 		setStartDate(existing.start_date || today());
 		setEndDate(existing.end_date || yearFromToday());
 		setDescription(existing.description || '');
@@ -173,6 +173,9 @@ const ContractEdit: React.FC = () => {
 		setIsTrash(existing.is_trash);
 		setAssignedUserId(existing.assigned_user_id ?? null);
 	}, [existing]);
+
+	const displayCurrency = currency ?? getGlobalCurrency();
+	const currencyLocked = Boolean(existing?.sent_at);
 
 	const buildPayload = () => ({
 		subject: subject.trim(),
@@ -445,11 +448,17 @@ const ContractEdit: React.FC = () => {
 									className="!rounded-lg !border-border"
 								/>
 								<div className="flex h-10 min-w-[72px] items-center justify-center gap-1 rounded-lg border border-border bg-muted px-3 text-sm font-medium">
-									<span>{getCurrencySymbol(currency)}</span>
-									<span className="text-muted-foreground">{currency}</span>
+									<span>{getCurrencySymbol(displayCurrency)}</span>
+									<span className="text-muted-foreground">{displayCurrency}</span>
 								</div>
 							</div>
 						</FormField>
+						<DocumentCurrencySelect
+							value={currency}
+							onChange={setCurrency}
+							locked={currencyLocked}
+							triggerClassName="h-10 w-full rounded-lg border-border bg-white"
+						/>
 					</div>
 
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

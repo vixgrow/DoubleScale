@@ -8,9 +8,9 @@ import { __ } from '@wordpress/i18n';
 import { computeAmount, computeLineItemsTotals } from '../../line-items-editor';
 import type { LineItem } from '@/types/sales';
 import type { DocumentDesignDateRow, DocumentDesignParty } from './types';
+import { formatMoney } from '@/constants/currencies';
 
-export const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
+export { formatMoney };
 
 export const LineItemsTable: React.FC<{
 	items: LineItem[];

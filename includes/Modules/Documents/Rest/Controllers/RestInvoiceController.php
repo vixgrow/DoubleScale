@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Documents\Rest\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\Services\DocumentCurrency;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Sales\Capabilities;
@@ -271,12 +272,13 @@ class RestInvoiceController extends RestController {
 		$by_status   = array();
 
 		foreach ( $statuses as $status ) {
-			$count = (int) ( clone $query )->where( 'status', $status )->count();
-			$sum   = (float) ( clone $query )->where( 'status', $status )->sum( 'total' );
+			$count  = (int) ( clone $query )->where( 'status', $status )->count();
+			$totals = $this->sum_by_currency( clone $query, array( $status ) );
 			$by_status[ $status ] = array(
-				'count'  => $count,
-				'amount' => round( $sum, 2 ),
-				'percent' => $total_count > 0 ? round( ( $count / $total_count ) * 100, 2 ) : 0,
+				'count'              => $count,
+				'amount'             => $totals['total'],
+				'amount_by_currency' => $totals['by_currency'],
+				'percent'            => $total_count > 0 ? round( ( $count / $total_count ) * 100, 2 ) : 0,
 			);
 		}
 
@@ -310,7 +312,6 @@ class RestInvoiceController extends RestController {
 	 * @return array{total: float, by_currency: array<string, float>}
 	 */
 	private function sum_by_currency( $query, array $statuses ): array {
-		$total       = 0.0;
 		$by_currency = array();
 
 		foreach ( $query->whereIn( 'status', $statuses )->get() as $invoice ) {
@@ -319,7 +320,6 @@ class RestInvoiceController extends RestController {
 				continue;
 			}
 			$currency = \DoubleScale\Core\Settings\Settings::document_currency( $invoice->currency, $invoice->sent_at );
-			$total   += $amount;
 			if ( ! isset( $by_currency[ $currency ] ) ) {
 				$by_currency[ $currency ] = 0.0;
 			}
@@ -330,8 +330,11 @@ class RestInvoiceController extends RestController {
 			$by_currency[ $code ] = round( (float) $value, 2 );
 		}
 
+		$global = \DoubleScale\Core\Services\CurrencyResolver::global_currency();
+
 		return array(
-			'total'       => round( $total, 2 ),
+			// Scalar is the global bucket only — never add EUR to USD.
+			'total'       => $by_currency[ $global ] ?? 0.0,
 			'by_currency' => $by_currency,
 		);
 	}
@@ -424,6 +427,13 @@ class RestInvoiceController extends RestController {
 		$payload = $this->sanitize_payload( $request, false );
 		if ( is_wp_error( $payload ) ) {
 			return $payload;
+		}
+
+		if ( array_key_exists( 'currency', $payload ) ) {
+			$locked = DocumentCurrency::reject_if_locked( $invoice, $payload['currency'], true );
+			if ( is_wp_error( $locked ) ) {
+				return $locked;
+			}
 		}
 
 		$discount_check = DiscountType::validate_payload( $payload, $invoice );
@@ -724,6 +734,7 @@ class RestInvoiceController extends RestController {
 		}
 		DocumentCustomerDetails::snapshot_billing_from_contact( $invoice );
 		DocumentIssuerSnapshot::freeze_if_needed( $invoice );
+		DocumentCurrency::freeze_on_send( $invoice );
 		$invoice->sent_at = current_time( 'mysql' );
 		$invoice->save();
 
@@ -882,7 +893,6 @@ class RestInvoiceController extends RestController {
 
 		$string_fields = array(
 			'status',
-			'currency',
 			'discount_type',
 			'invoice_date',
 			'due_date',
@@ -902,6 +912,14 @@ class RestInvoiceController extends RestController {
 					$payload[ $field ] = sanitize_text_field( (string) $params[ $field ] );
 				}
 			}
+		}
+
+		if ( array_key_exists( 'currency', $params ) ) {
+			$currency = DocumentCurrency::sanitize_input( $params['currency'] );
+			if ( is_wp_error( $currency ) ) {
+				return $currency;
+			}
+			$payload['currency'] = $currency;
 		}
 
 		if ( array_key_exists( 'contact_id', $params ) ) {

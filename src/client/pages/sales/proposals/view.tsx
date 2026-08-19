@@ -78,9 +78,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { ProposalSignature } from '@/types/sales';
-
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
+import { formatMoney } from '@/constants/currencies';
 
 const InfoItem: React.FC<{
 	icon: React.ReactNode;

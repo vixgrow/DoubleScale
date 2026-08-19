@@ -21,39 +21,11 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { PAYMENT_MODE_LABELS } from '@/constants/sales';
+import { formatMoney } from '@/constants/currencies';
 import type { PaymentDetail } from '@/types/sales';
 
-const formatDetailAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD'
-			? 'US$'
-			: currency === 'EUR'
-				? 'EUR'
-				: currency === 'GBP'
-					? 'GBP'
-					: currency;
-	return `${amount} ${suffix}`;
-};
-
-const formatTableAmount = (value: number, currency = 'USD') => {
-	const amount = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	const suffix =
-		currency === 'USD'
-			? '$'
-			: currency === 'EUR'
-				? '€'
-				: currency === 'GBP'
-					? '£'
-					: ` ${currency}`;
-	return `${amount}${suffix}`;
-};
+const formatDetailAmount = formatMoney;
+const formatTableAmount = formatMoney;
 
 const modeLabel = (mode: string | null): string => {
 	if (!mode) {

@@ -8,10 +8,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { getToLink } from '@doublescale/navigation';
 import { FallbackCell } from '@doublescale/components';
 import { DocumentRowActions, ProposalStatusPill } from '@/components/sales';
+import { formatMoney } from '@/constants/currencies';
 import type { Proposal } from '@/types/sales';
-
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 const contactName = (proposal: Proposal): string => {
 	if (proposal.to_name) {

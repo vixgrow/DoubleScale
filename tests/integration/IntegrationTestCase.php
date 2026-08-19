@@ -22,6 +22,46 @@ use WP_UnitTestCase;
 abstract class IntegrationTestCase extends WP_UnitTestCase {
 
 	/**
+	 * Restore the plugin settings option to its pristine state.
+	 *
+	 * The transaction rollback normally handles this, but a test that runs DDL
+	 * (ALTER/CREATE TABLE) triggers an implicit COMMIT in MySQL, ending the
+	 * transaction early — anything written before that point, including this
+	 * option, becomes permanent and leaks into every later test. That is how a
+	 * migration test's EUR ended up failing an Authorize.Net USD fixture.
+	 *
+	 * The baseline comes from the bootstrap (DOUBLESCALE_TESTS_PRISTINE_SETTINGS),
+	 * captured before any test ran. A per-test snapshot would be too late: by
+	 * then an earlier test may already have committed its own value, and the
+	 * restore would faithfully put the corruption back.
+	 */
+	protected function tearDown(): void {
+		// Roll back first, then repair. For an ordinary test the rollback has
+		// already undone the option and this is a no-op; for a DDL test the
+		// rollback is gone (implicit COMMIT) and this is the only thing that
+		// puts the option back.
+		parent::tearDown();
+
+		if ( ! defined( 'DOUBLESCALE_TESTS_PRISTINE_SETTINGS' ) ) {
+			return;
+		}
+
+		$pristine = json_decode( DOUBLESCALE_TESTS_PRISTINE_SETTINGS, true );
+
+		// Drop the cached copy first: update_option() short-circuits when the
+		// cached value already equals what is being written, which would leave
+		// a committed row untouched.
+		wp_cache_delete( 'doublescale_settings', 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
+
+		if ( null === $pristine ) {
+			delete_option( 'doublescale_settings' );
+		} else {
+			update_option( 'doublescale_settings', $pristine );
+		}
+	}
+
+	/**
 	 * Dispatch a REST request against the running WordPress REST server.
 	 *
 	 * @param string                $method HTTP method (GET/POST/PUT/PATCH/DELETE).

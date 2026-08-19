@@ -42,6 +42,7 @@ import type {
 	Proposal,
 } from '@/types/sales';
 import { InvoicesProGate, PaymentsProGate } from '../../sales/pro-gates';
+import { formatMoney } from '@/constants/currencies';
 
 interface ContactSalesProps {
 	contact_id: number;
@@ -49,9 +50,6 @@ interface ContactSalesProps {
 	/** Which document sections to render. Defaults to all. */
 	sections?: Array<'proposals' | 'invoices' | 'payments'>;
 }
-
-const formatMoney = (value: number, currency = 'USD') =>
-	new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value);
 
 const modeLabel = (mode: string | null): string => {
 	if (!mode) {

@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
@@ -22,6 +22,7 @@ import {
 } from '@doublescale/components';
 import type { DashboardData } from '@doublescale/client';
 import config from '@doublescale/config';
+import { getGlobalCurrency } from '@/constants/currencies';
 
 interface DashboardCardsProps {
 	data: DashboardData;
@@ -29,13 +30,33 @@ interface DashboardCardsProps {
 
 const formatStatCount = (n: number) => n.toLocaleString();
 
-const formatDealsWonValue = (n: number) =>
+const formatDealsWonValue = (n: number, currency = 'USD') =>
 	new Intl.NumberFormat(undefined, {
 		style: 'currency',
-		currency: 'USD',
+		currency,
 		notation: 'compact',
 		maximumFractionDigits: 1,
 	}).format(n);
+
+const formatDealsWonBreakdown = (
+	byCurrency: Record<string, number> | undefined,
+	fallback: number
+): string => {
+	const entries = Object.entries(byCurrency ?? {}).filter(([, amount]) => amount !== 0);
+	if (entries.length === 0) {
+		return formatDealsWonValue(fallback, getGlobalCurrency());
+	}
+	entries.sort((a, b) => b[1] - a[1]);
+	const [topCode, topAmount] = entries[0];
+	const extra = entries.length - 1;
+	if (extra <= 0) {
+		return formatDealsWonValue(topAmount, topCode);
+	}
+	return `${formatDealsWonValue(topAmount, topCode)} ${sprintf(
+		_n('+%d more currency', '+%d more currencies', extra, 'doublescale'),
+		extra
+	)}`;
+};
 
 export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
@@ -128,7 +149,10 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						layout="centered"
 						className="bg-[#F7F8FA]"
 						label={__('Deals Won Value', 'doublescale')}
-						value={formatDealsWonValue(data.deals_won_value || 0)}
+						value={formatDealsWonBreakdown(
+							data.deals_won_value_by_currency,
+							data.deals_won_value || 0
+						)}
 						icon={<DealsWonValueIcon width={29} height={29} />}
 						iconBgClass="bg-[#16A34A]"
 						iconColor="text-white"

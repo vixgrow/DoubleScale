@@ -714,7 +714,9 @@ export type DashboardData = {
 	total_email_templates: number;
 	deals: number;
 	deals_closed_won: number;
+	/** @deprecated Global-currency bucket only. Prefer deals_won_value_by_currency. */
 	deals_won_value: number;
+	deals_won_value_by_currency?: Record<string, number>;
 	projects: number;
 	total_orders: number;
 	total_revenue: string;

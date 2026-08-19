@@ -135,6 +135,7 @@ export interface Proposal {
 	date: string | null;
 	open_till: string | null;
 	currency: string;
+	currency_stored?: string | null;
 	discount_type: string;
 	discount_value: number;
 	line_items: LineItem[];
@@ -184,6 +185,7 @@ export interface Contract {
 	contract_type_id: number | null;
 	contract_value: number;
 	currency: string;
+	currency_stored?: string | null;
 	start_date: string | null;
 	end_date: string | null;
 	description: string;
@@ -338,6 +340,7 @@ export interface Invoice {
 	invoice_date: string | null;
 	due_date: string | null;
 	currency: string;
+	currency_stored?: string | null;
 	allowed_payment_modes: string[];
 	discount_type: string;
 	discount_value: number;
@@ -464,6 +467,7 @@ export interface ContractSummaryByType {
 	name: string;
 	count: number;
 	value_total: number;
+	value_by_currency?: Record<string, number>;
 }
 
 export interface ContractSummary {
@@ -475,7 +479,12 @@ export interface ContractSummary {
 	total_count: number;
 	by_status: Record<
 		string,
-		{ count: number; amount: number; percent: number }
+		{
+			count: number;
+			amount: number;
+			percent: number;
+			amount_by_currency?: Record<string, number>;
+		}
 	>;
 	by_type: ContractSummaryByType[];
 }
@@ -491,7 +500,12 @@ export interface InvoiceSummary {
 	total_count: number;
 	by_status: Record<
 		string,
-		{ count: number; amount: number; percent: number }
+		{
+			count: number;
+			amount: number;
+			percent: number;
+			amount_by_currency?: Record<string, number>;
+		}
 	>;
 }
 

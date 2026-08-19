@@ -437,6 +437,17 @@ final class AbilityDefinitionContractTest extends TestCase {
 					$prop['items'] ?? array(),
 					$name . ' property "' . $prop_name . '" items must not declare properties.'
 				);
+
+				$is_id_list = substr( (string) $prop_name, -4 ) === '_ids';
+				if ( $is_id_list ) {
+					$this->assertArrayNotHasKey(
+						'maxItems',
+						$prop,
+						$name . ' property "' . $prop_name . '" must not declare maxItems so dry_run can report the real match count.'
+					);
+					continue;
+				}
+
 				$this->assertSame(
 					\DoubleScale\Core\Abilities\AbilityBulk::max_items( $name ),
 					$prop['maxItems'] ?? null,
@@ -449,6 +460,40 @@ final class AbilityDefinitionContractTest extends TestCase {
 			0,
 			$checked,
 			'No bulk array properties found — this contract is not actually checking anything.'
+		);
+	}
+
+	/**
+	 * dry_run is how an agent previews a filter match without writing. Every
+	 * bulk ability must advertise it so the client does not have to guess.
+	 */
+	public function test_bulk_abilities_declare_dry_run(): void {
+		$checked = 0;
+
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			if ( substr( $name, -5 ) !== '-bulk' ) {
+				continue;
+			}
+
+			++$checked;
+
+			$properties = $definition['input_schema']['properties'] ?? array();
+			$this->assertArrayHasKey(
+				'dry_run',
+				$properties,
+				$name . ' is missing the dry_run input.'
+			);
+			$this->assertSame(
+				'boolean',
+				$properties['dry_run']['type'] ?? null,
+				$name . ' dry_run must be a boolean.'
+			);
+		}
+
+		$this->assertGreaterThan(
+			0,
+			$checked,
+			'No bulk abilities found — this contract is not actually checking anything.'
 		);
 	}
 

@@ -16,6 +16,7 @@ use DoubleScale\Core\Abilities\AbilityResult;
 use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
+use DoubleScale\Modules\Contacts\Abilities\ContactAbilities;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**
@@ -216,25 +217,39 @@ final class ActivityAbilities {
 			'doublescale/add-contact-notes-bulk' => array(
 				'module_slug'      => 'activities',
 				'label'            => __( 'Add notes to contacts in bulk', 'doublescale' ),
-				'description'      => __( 'Append a note to each of many contacts in one call — the note text is per row, so each contact can get a different note. Notes are attributed to you and cannot be edited or removed through this tool. Nothing is emailed. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'description'      => __( 'Append a note to each of many contacts in one call. Provide exactly one of: notes (per-row objects, each with its own text), contact_ids, or filter. With contact_ids or filter, the same content is written to every match. Set dry_run to preview without writing. Notes are attributed to you and cannot be edited or removed through this tool. Nothing is emailed. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
 				'input_schema'     => array(
 					'type'       => 'object',
 					'properties' => array(
-						'notes' => array(
+						'notes'       => array(
 							'type'        => 'array',
 							'minItems'    => 1,
 							'maxItems'    => AbilityBulk::max_items( 'doublescale/add-contact-notes-bulk' ),
 							'description' => 'One object per note. Each accepts: contact_id (required), '
-								. 'content (required), title. Rows are validated individually — an '
-								. 'invalid row is reported in "errors" with its index while valid '
-								. 'rows still save.',
+								. 'content (required), title. Mutually exclusive with contact_ids and filter.',
 							// NO 'items' key — WP validates items before the callback
 							// runs, so one bad row would reject the whole batch.
 						),
+						'contact_ids' => AbilityBulk::ids_property(
+							'doublescale/add-contact-notes-bulk',
+							'Contact ids to receive the same note. Mutually exclusive with notes and filter.'
+						),
+						'filter'      => AbilityBulk::filter_property(
+							'Same criteria as list-contacts. Mutually exclusive with notes and contact_ids. An empty filter is refused.',
+							ContactAbilities::filter_schema_properties()
+						),
+						'content'     => array(
+							'type'        => 'string',
+							'description' => 'Note body applied to every matched contact (contact_ids or filter).',
+						),
+						'title'       => array(
+							'type'        => 'string',
+							'description' => 'Optional note title applied to every matched contact (contact_ids or filter).',
+						),
+						'dry_run'     => AbilityBulk::dry_run_property(),
 					),
-					'required'   => array( 'notes' ),
 				),
 				'meta'             => array(
 					'annotations' => array(
@@ -252,23 +267,41 @@ final class ActivityAbilities {
 			'doublescale/log-calls-bulk'       => array(
 				'module_slug'      => 'activities',
 				'label'            => __( 'Log calls in bulk', 'doublescale' ),
-				'description'      => __( 'Record many calls in one call to this tool — useful after working through a call list. This only records history; it places no outbound calls and emails nobody. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'description'      => __( 'Record many calls in one call to this tool — useful after working through a call list. Provide exactly one of: calls (per-row objects), contact_ids, or filter. With contact_ids or filter, the same notes/duration/outcome apply to every match. Set dry_run to preview without writing. This only records history; it places no outbound calls and emails nobody. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
 				'input_schema'     => array(
 					'type'       => 'object',
 					'properties' => array(
-						'calls' => array(
+						'calls'       => array(
 							'type'        => 'array',
 							'minItems'    => 1,
 							'maxItems'    => AbilityBulk::max_items( 'doublescale/log-calls-bulk' ),
 							'description' => 'One object per call. Each accepts: contact_id (required), '
-								. 'notes, duration (minutes), outcome. Rows are validated individually '
-								. '— an invalid row is reported in "errors" with its index while valid '
-								. 'rows still save.',
+								. 'notes, duration (minutes), outcome. Mutually exclusive with contact_ids and filter.',
 						),
+						'contact_ids' => AbilityBulk::ids_property(
+							'doublescale/log-calls-bulk',
+							'Contact ids to log the same call against. Mutually exclusive with calls and filter.'
+						),
+						'filter'      => AbilityBulk::filter_property(
+							'Same criteria as list-contacts. Mutually exclusive with calls and contact_ids. An empty filter is refused.',
+							ContactAbilities::filter_schema_properties()
+						),
+						'notes'       => array(
+							'type'        => 'string',
+							'description' => 'Call notes applied to every matched contact (contact_ids or filter).',
+						),
+						'duration'    => array(
+							'type'        => 'integer',
+							'description' => 'Call length in minutes, applied to every matched contact (contact_ids or filter).',
+						),
+						'outcome'     => array(
+							'type'        => 'string',
+							'description' => 'Call outcome applied to every matched contact (contact_ids or filter).',
+						),
+						'dry_run'     => AbilityBulk::dry_run_property(),
 					),
-					'required'   => array( 'calls' ),
 				),
 				'meta'             => array(
 					'annotations' => array(
@@ -335,6 +368,14 @@ final class ActivityAbilities {
 			return $missing;
 		}
 
+		if ( AbilityBulk::is_preview( $input ) ) {
+			return array(
+				'created'      => false,
+				'would_create' => true,
+				'contact_id'   => (int) $input['contact_id'],
+			);
+		}
+
 		$activity = ActivityManager::instance()->add_note(
 			array(
 				'contact_id' => (int) $input['contact_id'],
@@ -385,6 +426,14 @@ final class ActivityAbilities {
 			return $missing;
 		}
 
+		if ( AbilityBulk::is_preview( $input ) ) {
+			return array(
+				'created'      => false,
+				'would_create' => true,
+				'contact_id'   => (int) $input['contact_id'],
+			);
+		}
+
 		$activity = ActivityManager::instance()->log_call(
 			array(
 				'contact_id' => (int) $input['contact_id'],
@@ -423,20 +472,33 @@ final class ActivityAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function add_contact_notes_bulk( array $input ) {
-		$invalid = AbilityBulk::validate_batch( $input, 'notes', 'doublescale/add-contact-notes-bulk' );
-		if ( $invalid ) {
-			return $invalid;
+		if ( ! array_key_exists( 'notes', $input ) ) {
+			$missing = AbilityInput::required( $input, array( 'content' ) );
+			if ( $missing ) {
+				return $missing;
+			}
 		}
 
-		$processed = AbilityBulk::process(
-			(array) $input['notes'],
+		return AbilityBulk::run_targeted(
+			$input,
+			'doublescale/add-contact-notes-bulk',
 			static function ( array $row ) {
 				return self::add_contact_note( $row );
 			},
-			array( 'ability_name' => 'doublescale/add-contact-notes-bulk' )
+			'created',
+			array(
+				'rows_key'       => 'notes',
+				'ids_key'        => 'contact_ids',
+				'id_field'       => 'contact_id',
+				'patch_keys'     => array( 'content', 'title' ),
+				'patch_required' => true,
+				'querier'        => array( ContactAbilities::class, 'query_for_filter' ),
+			),
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
 		);
-
-		return AbilityBulk::envelope( $processed, 'created' );
 	}
 
 	/**
@@ -450,20 +512,25 @@ final class ActivityAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function log_calls_bulk( array $input ) {
-		$invalid = AbilityBulk::validate_batch( $input, 'calls', 'doublescale/log-calls-bulk' );
-		if ( $invalid ) {
-			return $invalid;
-		}
-
-		$processed = AbilityBulk::process(
-			(array) $input['calls'],
+		return AbilityBulk::run_targeted(
+			$input,
+			'doublescale/log-calls-bulk',
 			static function ( array $row ) {
 				return self::log_call( $row );
 			},
-			array( 'ability_name' => 'doublescale/log-calls-bulk' )
+			'created',
+			array(
+				'rows_key'   => 'calls',
+				'ids_key'    => 'contact_ids',
+				'id_field'   => 'contact_id',
+				'patch_keys' => array( 'notes', 'duration', 'outcome' ),
+				'querier'    => array( ContactAbilities::class, 'query_for_filter' ),
+			),
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
 		);
-
-		return AbilityBulk::envelope( $processed, 'created' );
 	}
 
 	/**

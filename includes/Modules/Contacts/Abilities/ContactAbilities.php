@@ -59,18 +59,26 @@ final class ContactAbilities {
 							'type'        => 'string',
 							'description' => 'Free-text match on first name, last name, email, company, or phone.',
 						),
-						'status' => array(
+						'status'  => array(
 							'type'        => 'string',
 							'description' => 'Email subscription status.',
 							'enum'        => self::EMAIL_STATUSES,
 						),
-						'limit'  => array(
+						'tag_id'  => array(
+							'type'        => 'integer',
+							'description' => 'Only contacts that have this tag.',
+						),
+						'list_id' => array(
+							'type'        => 'integer',
+							'description' => 'Only contacts on this list.',
+						),
+						'limit'   => array(
 							'type'    => 'integer',
 							'minimum' => 1,
 							'maximum' => 100,
 							'default' => 20,
 						),
-						'offset' => array(
+						'offset'  => array(
 							'type'    => 'integer',
 							'minimum' => 0,
 							'default' => 0,
@@ -222,7 +230,7 @@ final class ContactAbilities {
 			'doublescale/create-contacts-bulk' => array(
 				'module_slug'      => 'contacts',
 				'label'            => __( 'Create contacts in bulk', 'doublescale' ),
-				'description'      => __( 'Add many contacts in one call. Email must be unique per contact. Creating contacts does not email them. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'description'      => __( 'Add many contacts in one call. Email must be unique per contact. Creating contacts does not email them. Set dry_run to preview without writing. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => array( self::class, 'can_write_contacts' ),
 				'input_schema'     => array(
@@ -239,6 +247,7 @@ final class ContactAbilities {
 							// NO 'items' key at all — WP schema validation of items would
 							// reject the whole batch before the callback runs.
 						),
+						'dry_run'  => AbilityBulk::dry_run_property(),
 					),
 					'required'   => array( 'contacts' ),
 				),
@@ -257,23 +266,46 @@ final class ContactAbilities {
 			'doublescale/update-contacts-bulk' => array(
 				'module_slug'      => 'contacts',
 				'label'            => __( 'Update contacts in bulk', 'doublescale' ),
-				'description'      => __( 'Change name, phone, or company on many contacts in one call. Email and subscription status are not editable here. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'description'      => __( 'Change name, phone, or company on many contacts in one call. Email and subscription status are not editable here. Provide exactly one of: contacts (per-row objects), contact_ids, or filter. With contact_ids or filter, the patch fields apply to every match. Set dry_run to preview the match count without writing. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => array( self::class, 'can_write_contacts' ),
 				'input_schema'     => array(
 					'type'       => 'object',
 					'properties' => array(
-						'contacts' => array(
+						'contacts'     => array(
 							'type'        => 'array',
 							'minItems'    => 1,
 							'maxItems'    => AbilityBulk::max_items( 'doublescale/update-contacts-bulk' ),
 							'description' => 'One object per contact. Each accepts: id (required), '
-								. 'first_name, last_name, phone, company_name. Rows are validated '
-								. 'individually — an invalid row is reported in "errors" with its '
-								. 'index while valid rows still save.',
+								. 'first_name, last_name, phone, company_name. Mutually exclusive with '
+								. 'contact_ids and filter.',
 						),
+						'contact_ids'  => AbilityBulk::ids_property(
+							'doublescale/update-contacts-bulk',
+							'Contact ids to apply the same patch to. Mutually exclusive with contacts and filter.'
+						),
+						'filter'       => AbilityBulk::filter_property(
+							'Same criteria as list-contacts. Mutually exclusive with contacts and contact_ids. An empty filter is refused.',
+							self::filter_schema_properties()
+						),
+						'first_name'   => array(
+							'type'        => 'string',
+							'description' => 'Patch: new first name for every matched contact (contact_ids or filter).',
+						),
+						'last_name'    => array(
+							'type'        => 'string',
+							'description' => 'Patch: new last name for every matched contact (contact_ids or filter).',
+						),
+						'phone'        => array(
+							'type'        => 'string',
+							'description' => 'Patch: new phone for every matched contact (contact_ids or filter).',
+						),
+						'company_name' => array(
+							'type'        => 'string',
+							'description' => 'Patch: new company name for every matched contact (contact_ids or filter).',
+						),
+						'dry_run'      => AbilityBulk::dry_run_property(),
 					),
-					'required'   => array( 'contacts' ),
 				),
 				'meta'             => array(
 					'annotations' => array(
@@ -352,6 +384,14 @@ final class ContactAbilities {
 			);
 		}
 
+		if ( AbilityBulk::is_preview( $input ) ) {
+			return array(
+				'created'      => false,
+				'would_create' => true,
+				'email'        => $email,
+			);
+		}
+
 		$contact = ContactModel::create(
 			array(
 				'email'        => $email,
@@ -422,6 +462,15 @@ final class ContactAbilities {
 			);
 		}
 
+		if ( AbilityBulk::is_preview( $input ) ) {
+			return array(
+				'updated'      => false,
+				'would_update' => true,
+				'contact_id'   => (int) $contact->id,
+				'changed'      => $changed,
+			);
+		}
+
 		$contact->save();
 
 		return array(
@@ -444,11 +493,6 @@ final class ContactAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function create_contacts_bulk( array $input ) {
-		$invalid = AbilityBulk::validate_batch( $input, 'contacts', 'doublescale/create-contacts-bulk' );
-		if ( $invalid ) {
-			return $invalid;
-		}
-
 		// Keyed on strtolower(trim($email)), matching MySQL's case-insensitive
 		// UNIQUE index. Deliberately NOT ContactModel::normalize_email() — that
 		// only trims, so A@x.com / a@x.com would slip past the seen-set and
@@ -456,8 +500,10 @@ final class ContactAbilities {
 		// it sits on every save path and would rewrite stored casing.
 		$seen = array();
 
-		$processed = AbilityBulk::process(
-			(array) $input['contacts'],
+		return AbilityBulk::run(
+			$input,
+			'contacts',
+			'doublescale/create-contacts-bulk',
 			static function ( array $row, int $index ) use ( &$seen ) {
 				$email_key = self::batch_email_key( $row['email'] ?? '' );
 
@@ -482,10 +528,12 @@ final class ContactAbilities {
 
 				return self::create_contact( $row );
 			},
-			array( 'ability_name' => 'doublescale/create-contacts-bulk' )
+			'created',
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
 		);
-
-		return AbilityBulk::envelope( $processed, 'created' );
 	}
 
 	/**
@@ -499,20 +547,109 @@ final class ContactAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function update_contacts_bulk( array $input ) {
-		$invalid = AbilityBulk::validate_batch( $input, 'contacts', 'doublescale/update-contacts-bulk' );
-		if ( $invalid ) {
-			return $invalid;
-		}
-
-		$processed = AbilityBulk::process(
-			(array) $input['contacts'],
+		return AbilityBulk::run_targeted(
+			$input,
+			'doublescale/update-contacts-bulk',
 			static function ( array $row ) {
 				return self::update_contact( $row );
 			},
-			array( 'ability_name' => 'doublescale/update-contacts-bulk' )
+			'updated',
+			array(
+				'rows_key'       => 'contacts',
+				'ids_key'        => 'contact_ids',
+				'id_field'       => 'id',
+				'patch_keys'     => array( 'first_name', 'last_name', 'phone', 'company_name' ),
+				'patch_required' => true,
+				'querier'        => array( self::class, 'query_for_filter' ),
+			),
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
 		);
+	}
 
-		return AbilityBulk::envelope( $processed, 'updated' );
+	/**
+	 * Filter fields shared by list-contacts and bulk targeting.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public static function filter_schema_properties(): array {
+		return array(
+			'search'  => array(
+				'type'        => 'string',
+				'description' => 'Free-text match on first name, last name, email, company, or phone.',
+			),
+			'status'  => array(
+				'type'        => 'string',
+				'description' => 'Email subscription status.',
+				'enum'        => self::EMAIL_STATUSES,
+			),
+			'tag_id'  => array(
+				'type'        => 'integer',
+				'description' => 'Only contacts that have this tag.',
+			),
+			'list_id' => array(
+				'type'        => 'integer',
+				'description' => 'Only contacts on this list.',
+			),
+		);
+	}
+
+	/**
+	 * Contact query for list-contacts and bulk filter targeting.
+	 *
+	 * Contacts are team-wide — there is no Gate 3 owner column to apply.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $filter Filter criteria.
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public static function query_for_filter( array $filter ) {
+		$query = ContactModel::query();
+
+		$search = isset( $filter['search'] ) ? trim( (string) $filter['search'] ) : '';
+		if ( '' !== $search ) {
+			$like = '%' . $search . '%';
+			$query->where(
+				static function ( $sub ) use ( $like ) {
+					$sub->where( 'first_name', 'LIKE', $like )
+						->orWhere( 'last_name', 'LIKE', $like )
+						->orWhere( 'email', 'LIKE', $like )
+						->orWhere( 'company_name', 'LIKE', $like )
+						->orWhere( 'phone', 'LIKE', $like );
+				}
+			);
+		}
+
+		if ( ! empty( $filter['status'] ) ) {
+			$query->where( 'email_status', (string) $filter['status'] );
+		}
+
+		$tag_id = isset( $filter['tag_id'] ) ? (int) $filter['tag_id'] : 0;
+		if ( $tag_id > 0 ) {
+			$query->whereHas(
+				'tags',
+				static function ( $q ) use ( $tag_id ) {
+					$q->where( $q->getModel()->getTable() . '.id', $tag_id );
+				}
+			);
+		}
+
+		$list_id = isset( $filter['list_id'] ) ? (int) $filter['list_id'] : 0;
+		if ( $list_id > 0 ) {
+			$query->whereHas(
+				'lists',
+				static function ( $q ) use ( $list_id ) {
+					$q->where( $q->getModel()->getTable() . '.id', $list_id );
+				}
+			);
+		}
+
+		return $query;
 	}
 
 	/**
@@ -543,25 +680,7 @@ final class ContactAbilities {
 		$limit  = AbilityResult::limit( $input );
 		$offset = AbilityResult::offset( $input );
 
-		$query = ContactModel::query();
-
-		$search = isset( $input['search'] ) ? trim( (string) $input['search'] ) : '';
-		if ( '' !== $search ) {
-			$like = '%' . $search . '%';
-			$query->where(
-				static function ( $sub ) use ( $like ) {
-					$sub->where( 'first_name', 'LIKE', $like )
-						->orWhere( 'last_name', 'LIKE', $like )
-						->orWhere( 'email', 'LIKE', $like )
-						->orWhere( 'company_name', 'LIKE', $like )
-						->orWhere( 'phone', 'LIKE', $like );
-				}
-			);
-		}
-
-		if ( ! empty( $input['status'] ) ) {
-			$query->where( 'email_status', (string) $input['status'] );
-		}
+		$query = self::query_for_filter( $input );
 
 		$total = (int) $query->count();
 

@@ -275,6 +275,240 @@ final class AbilityBulkTest extends TestCase {
 		$this->assertSame( 'doublescale/create-contacts-bulk', $fires[0]['ability'] );
 	}
 
+	public function test_validate_batch_skip_cap_accepts_over_max(): void {
+		$max = AbilityBulk::max_items( 'doublescale/create-contacts-bulk' );
+
+		$error = AbilityBulk::validate_batch(
+			array( 'contacts' => $this->n_rows( $max + 1 ) ),
+			'contacts',
+			'doublescale/create-contacts-bulk',
+			array( 'skip_cap' => true )
+		);
+
+		$this->assertNull( $error );
+	}
+
+	public function test_process_dry_run_skips_the_per_row_hook(): void {
+		$fires = 0;
+
+		add_action(
+			'doublescale_ability_bulk_item',
+			static function () use ( &$fires ) {
+				++$fires;
+			}
+		);
+
+		AbilityBulk::process(
+			array( array( 'email' => 'ok@example.test' ) ),
+			static function ( array $row ) {
+				return array( 'created' => false, 'would_create' => true, 'email' => $row['email'] );
+			},
+			array(
+				'ability_name' => 'doublescale/create-contacts-bulk',
+				'dry_run'      => true,
+			)
+		);
+
+		$this->assertSame( 0, $fires );
+	}
+
+	public function test_process_injects_preview_flag(): void {
+		$saw = false;
+
+		AbilityBulk::process(
+			array( array( 'email' => 'ok@example.test' ) ),
+			static function ( array $row ) use ( &$saw ) {
+				$saw = AbilityBulk::is_preview( $row );
+				return array( 'created' => false, 'would_create' => true );
+			},
+			array( 'dry_run' => true )
+		);
+
+		$this->assertTrue( $saw );
+	}
+
+	public function test_finish_zeros_created_and_applied_ids_on_dry_run(): void {
+		$processed = array(
+			'items'    => array(
+				array( 'created' => false, 'would_create' => true, 'contact_id' => 7 ),
+			),
+			'errors'   => array(),
+			'batch_id' => 'preview000001',
+		);
+
+		$envelope = AbilityBulk::finish(
+			$processed,
+			'created',
+			array( 'dry_run' => true ),
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
+		);
+
+		$this->assertSame( 0, $envelope['created'] );
+		$this->assertSame( 1, $envelope['would_create'] );
+		$this->assertTrue( $envelope['dry_run'] );
+		$this->assertSame( array(), $envelope['applied_ids'] );
+		$this->assertSame( array(), $envelope['applied_contact_ids'] );
+	}
+
+	public function test_envelope_applied_ids_skip_preview_and_noop_rows(): void {
+		$envelope = AbilityBulk::envelope(
+			array(
+				'items'    => array(
+					array( 'created' => true, 'contact_id' => 1 ),
+					array( 'created' => false, 'would_create' => true, 'contact_id' => 2 ),
+					array( 'updated' => false, 'contact_id' => 3 ),
+					array( 'updated' => true, 'contact_id' => 1 ),
+				),
+				'errors'   => array(),
+				'batch_id' => 'applied000001',
+			),
+			'created',
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
+		);
+
+		$this->assertSame( array( 1 ), $envelope['applied_ids'] );
+		$this->assertSame( array( 1 ), $envelope['applied_contact_ids'] );
+	}
+
+	public function test_expand_refuses_combining_modes(): void {
+		$error = AbilityBulk::expand(
+			array(
+				'contacts'    => array( array( 'id' => 1 ) ),
+				'contact_ids' => array( 1 ),
+			),
+			'doublescale/update-contacts-bulk',
+			array(
+				'rows_key' => 'contacts',
+				'ids_key'  => 'contact_ids',
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $error );
+		$this->assertSame( 'doublescale_invalid_target', $error->get_error_code() );
+	}
+
+	public function test_expand_refuses_an_empty_filter(): void {
+		$error = AbilityBulk::expand(
+			array( 'filter' => array() ),
+			'doublescale/update-contacts-bulk',
+			array(
+				'rows_key' => 'contacts',
+				'ids_key'  => 'contact_ids',
+				'querier'  => static function () {
+					return null;
+				},
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $error );
+		$this->assertSame( 'doublescale_empty_filter', $error->get_error_code() );
+	}
+
+	public function test_expand_filter_over_cap_dry_run_is_count_only(): void {
+		$max = AbilityBulk::max_items( 'doublescale/update-contacts-bulk' );
+		$ids = range( 1, $max + 3 );
+
+		$expanded = AbilityBulk::expand(
+			array(
+				'dry_run' => true,
+				'filter'  => array( 'status' => 'subscribed' ),
+			),
+			'doublescale/update-contacts-bulk',
+			array(
+				'rows_key' => 'contacts',
+				'ids_key'  => 'contact_ids',
+				'id_field' => 'id',
+				'querier'  => function () use ( $ids ) {
+					return $this->fake_query( $ids );
+				},
+			)
+		);
+
+		$this->assertIsArray( $expanded );
+		$this->assertTrue( $expanded['count_only'] );
+		$this->assertTrue( $expanded['over_cap'] );
+		$this->assertSame( $max + 3, $expanded['matched'] );
+		$this->assertSame( array(), $expanded['rows'] );
+	}
+
+	public function test_preview_over_cap_keeps_write_counts_at_zero(): void {
+		$max      = AbilityBulk::max_items( 'doublescale/update-contacts-bulk' );
+		$envelope = AbilityBulk::preview_over_cap(
+			$max + 10,
+			'doublescale/update-contacts-bulk',
+			'updated',
+			array( 'applied_key' => 'applied_contact_ids' )
+		);
+
+		$this->assertSame( 0, $envelope['updated'] );
+		$this->assertSame( $max + 10, $envelope['would_update'] );
+		$this->assertTrue( $envelope['dry_run'] );
+		$this->assertTrue( $envelope['over_cap'] );
+		$this->assertSame( array(), $envelope['applied_contact_ids'] );
+	}
+
+	public function test_filter_is_empty_treats_blank_criteria_as_empty(): void {
+		$this->assertTrue( AbilityBulk::filter_is_empty( array() ) );
+		$this->assertTrue( AbilityBulk::filter_is_empty( array( 'search' => '  ', 'tag_id' => 0 ) ) );
+		$this->assertFalse( AbilityBulk::filter_is_empty( array( 'status' => 'subscribed' ) ) );
+		$this->assertFalse( AbilityBulk::filter_is_empty( array( 'overdue_only' => true ) ) );
+	}
+
+	public function test_normalize_id_list_rejects_non_positive_ids(): void {
+		$error = AbilityBulk::normalize_id_list( array( 1, 0, 2 ), 'contact_ids' );
+
+		$this->assertInstanceOf( \WP_Error::class, $error );
+		$this->assertSame( 'doublescale_invalid_id', $error->get_error_code() );
+	}
+
+	/**
+	 * @param array<int, int> $ids Record ids.
+	 * @return object Query double with count()/orderBy()/pluck().
+	 */
+	private function fake_query( array $ids ) {
+		return new class( $ids ) {
+			/**
+			 * @var array<int, int>
+			 */
+			private $ids;
+
+			/**
+			 * @param array<int, int> $ids Record ids.
+			 */
+			public function __construct( array $ids ) {
+				$this->ids = $ids;
+			}
+
+			public function count(): int {
+				return count( $this->ids );
+			}
+
+			/**
+			 * @param string $column Column.
+			 * @return self
+			 */
+			public function orderBy( $column ) {
+				unset( $column );
+				return $this;
+			}
+
+			/**
+			 * @param string $column Column.
+			 * @return array<int, int>
+			 */
+			public function pluck( $column ) {
+				unset( $column );
+				return $this->ids;
+			}
+		};
+	}
+
 	/**
 	 * @param int $n Row count.
 	 * @return array<int, array<string, string>>

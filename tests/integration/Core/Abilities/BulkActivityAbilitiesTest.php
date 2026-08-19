@@ -24,6 +24,7 @@ use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\UserRoles\UserRoles;
 use DoubleScale\Modules\Activities\Abilities\ActivityAbilities;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Contacts\Abilities\ContactAbilities;
 use DoubleScale\Tests\Integration\IntegrationTestCase;
 
 final class BulkActivityAbilitiesTest extends IntegrationTestCase {
@@ -541,5 +542,83 @@ final class BulkActivityAbilitiesTest extends IntegrationTestCase {
 
 		$this->assertTrue( is_wp_error( $result ) );
 		$this->assertSame( 'doublescale_empty_batch', $result->get_error_code() );
+	}
+
+	public function test_dry_run_notes_write_nothing_and_skip_hooks(): void {
+		$contact_id = $this->make_contact();
+
+		$result = $this->run_bulk(
+			'doublescale/add-contact-notes-bulk',
+			'add_contact_notes_bulk',
+			array(
+				'dry_run' => true,
+				'notes'   => array(
+					array(
+						'contact_id' => $contact_id,
+						'content'    => 'Should not persist.',
+					),
+				),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertTrue( $result['dry_run'] );
+		$this->assertSame( 0, $result['created'] );
+		$this->assertSame( 1, $result['would_create'] );
+		$this->assertSame( 0, $this->count_activities( $contact_id, ActivityTypes::NOTE ) );
+		$this->assertSame( array(), self::$write_fires );
+		$this->assertSame( array(), self::$item_fires );
+	}
+
+	public function test_notes_via_contact_ids_share_the_same_content(): void {
+		$first  = $this->make_contact();
+		$second = $this->make_contact();
+
+		$result = $this->run_bulk(
+			'doublescale/add-contact-notes-bulk',
+			'add_contact_notes_bulk',
+			array(
+				'contact_ids' => array( $first, $second ),
+				'content'     => 'Shared bulk note.',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 2, $result['created'] );
+		$this->assertSame( array( $first, $second ), $result['applied_contact_ids'] );
+		$this->assertSame( 1, $this->count_activities( $first, ActivityTypes::NOTE ) );
+		$this->assertSame( 1, $this->count_activities( $second, ActivityTypes::NOTE ) );
+	}
+
+	public function test_notes_via_filter_target_matching_contacts(): void {
+		$suffix  = wp_generate_password( 8, false, false );
+		$company = 'NoteCo-' . $suffix;
+
+		$matched = ContactAbilities::create_contact(
+			array(
+				'email'        => 'note-a+' . $suffix . '@example.test',
+				'company_name' => $company,
+			)
+		);
+		$other = ContactAbilities::create_contact(
+			array(
+				'email'        => 'note-b+' . $suffix . '@example.test',
+				'company_name' => 'Other-' . $suffix,
+			)
+		);
+
+		$result = $this->run_bulk(
+			'doublescale/add-contact-notes-bulk',
+			'add_contact_notes_bulk',
+			array(
+				'filter'  => array( 'search' => $company ),
+				'content' => 'Filter note.',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $result['created'] );
+		$this->assertSame( 1, $this->count_activities( (int) $matched['contact_id'], ActivityTypes::NOTE ) );
+		$this->assertSame( 0, $this->count_activities( (int) $other['contact_id'], ActivityTypes::NOTE ) );
 	}
 }

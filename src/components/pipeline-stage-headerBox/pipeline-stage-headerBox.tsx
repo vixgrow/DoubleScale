@@ -1,16 +1,15 @@
 import React from 'react';
 
-
 interface PipelineStageBoxProps {
 	stage: {
 		color: string;
 	};
 	index: number;
 	totalStages: number;
-	children?: React.ReactNode; 
-    triangleWidth?: number;          
-    triangleHeight?: number;         
-    boxHeight?: number;   
+	children?: React.ReactNode;
+	triangleWidth?: number;
+	triangleHeight?: number;
+	boxHeight?: number;
 }
 
 export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
@@ -19,61 +18,44 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	totalStages,
 	children,
 }) => {
-	// const { backgroundColor } = (stage.color, index, totalStages);
-	const backgroundColor = stage.color || '#E4EEFD'
+	const backgroundColor = stage.color || '#E4EEFD';
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 
 	return (
-		<div className="flex flex-col p-0 m-0 relative">
-			{/*upp */}
+		<div className="relative m-0 flex flex-col p-0">
 			<div
-				className="h-14 flex items-center justify-center relative rounded-t-[8px] px-4"
-				style={{ background: backgroundColor }}
+				className="relative flex h-14 items-center justify-center px-4"
+				style={{
+					background: backgroundColor,
+					zIndex: totalStages - index,
+					borderStartStartRadius: isFirst ? 8 : undefined,
+					borderStartEndRadius: isLast ? 8 : undefined,
+				}}
 			>
-				
 				{children}
 
-				{/* Triangles */}
-				{isFirst && (
+				{!isFirst && (
 					<div
-						className="absolute top-[1px] right-[-11px] w-0 h-0"
+						className="absolute top-0 h-0 w-0"
 						style={{
+							insetInlineStart: -3,
 							borderTop: '28px solid transparent',
 							borderBottom: '28px solid transparent',
-							borderLeft: `14px solid ${backgroundColor}`,
+							borderInlineStart: '14px solid white',
 						}}
 					/>
 				)}
-				{isLast && (
+				{!isLast && (
 					<div
-						className="absolute top-0 left-[-3px] w-0 h-0"
+						className="absolute top-[1px] z-20 h-0 w-0"
 						style={{
+							insetInlineEnd: -11,
 							borderTop: '28px solid transparent',
 							borderBottom: '28px solid transparent',
-							borderLeft: `14px solid white`,
+							borderInlineStart: `14px solid ${backgroundColor}`,
 						}}
 					/>
-				)}
-				{!isFirst && !isLast && (
-					<>
-						<div
-							className="absolute top-0 left-[-3px] w-0 h-0"
-							style={{
-								borderTop: '28px solid transparent',
-								borderBottom: '28px solid transparent',
-								borderLeft: `14px solid white`,
-							}}
-						/>
-						<div
-							className="absolute top-[1px] right-[-11px] w-0 h-0"
-							style={{
-								borderTop: '28px solid transparent',
-								borderBottom: '28px solid transparent',
-								borderLeft: `14px solid ${backgroundColor}`,
-							}}
-						/>
-					</>
 				)}
 			</div>
 		</div>

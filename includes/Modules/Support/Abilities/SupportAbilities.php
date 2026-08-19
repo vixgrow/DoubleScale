@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only support ticket abilities.
+ * Support ticket abilities.
  *
  * @package DoubleScale\Modules\Support
  */
@@ -10,6 +10,7 @@ namespace DoubleScale\Modules\Support\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
+use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
 use DoubleScale\Core\Abilities\AbilityScope;
 use DoubleScale\Core\Constants\ActivityTypes;
@@ -18,6 +19,8 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Support\Constants\TicketPriority;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\ContactResolver;
+use DoubleScale\Modules\Support\Services\TicketService;
 
 /**
  * Support scoping is keyed on `agent_user_id`.
@@ -151,6 +154,152 @@ final class SupportAbilities {
 					),
 				),
 				'execute_callback' => array( self::class, 'get_support_summary' ),
+			),
+
+			'doublescale/add-ticket-note'     => array(
+				'module_slug'      => 'support',
+				'label'            => __( 'Add an internal note to a ticket', 'doublescale' ),
+				'description'      => __( 'Append an internal note to a ticket. Notes are staff-only — the customer never sees them and no email is sent. Use this to record context; use reply-to-ticket to actually answer the customer.', 'doublescale' ),
+				'category'         => AbilityCategories::SUPPORT,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'ticket_id' => array(
+							'type'        => 'integer',
+							'description' => 'Ticket to note against.',
+						),
+						'content'   => array(
+							'type'        => 'string',
+							'description' => 'The note text.',
+						),
+					),
+					'required'   => array( 'ticket_id', 'content' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						// Calling twice appends two notes.
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'add_ticket_note' ),
+			),
+
+			'doublescale/reply-to-ticket'     => array(
+				'module_slug'      => 'support',
+				'label'            => __( 'Reply to a support ticket', 'doublescale' ),
+				'description'      => __( 'Send a reply to the customer on a support ticket. THIS EMAILS THE CUSTOMER IMMEDIATELY and the reply cannot be edited or recalled, so only call it when the user has asked you to send a specific reply — never to draft, test, or check formatting. For staff-only context use add-ticket-note instead.', 'doublescale' ),
+				'category'         => AbilityCategories::SUPPORT,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'ticket_id' => array(
+							'type'        => 'integer',
+							'description' => 'Ticket to reply on.',
+						),
+						'content'   => array(
+							'type'        => 'string',
+							'description' => 'The reply the customer will receive.',
+						),
+					),
+					'required'   => array( 'ticket_id', 'content' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						// Nothing is overwritten or removed, but the message
+						// leaves the building and cannot be taken back.
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'reply_to_ticket' ),
+			),
+
+			'doublescale/update-ticket'       => array(
+				'module_slug'      => 'support',
+				'label'            => __( 'Update a support ticket', 'doublescale' ),
+				'description'      => __( 'Change a ticket\'s status, priority, or assigned agent. Reassigning notifies the new agent. The ticket title and the customer it belongs to are deliberately not editable here.', 'doublescale' ),
+				'category'         => AbilityCategories::SUPPORT,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'ticket_id'     => array(
+							'type'        => 'integer',
+							'description' => 'Ticket id.',
+						),
+						'status'        => array(
+							'type'        => 'string',
+							'description' => 'New status.',
+							'enum'        => TicketStatus::all(),
+						),
+						'priority'      => array(
+							'type'        => 'string',
+							'description' => 'New priority.',
+							'enum'        => TicketPriority::all(),
+						),
+						'agent_user_id' => array(
+							'type'        => 'integer',
+							'description' => 'WordPress user id of the agent to assign. Requires permission to manage all tickets.',
+						),
+					),
+					'required'   => array( 'ticket_id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'update_ticket' ),
+			),
+
+			'doublescale/create-ticket'       => array(
+				'module_slug'      => 'support',
+				'label'            => __( 'Create a support ticket', 'doublescale' ),
+				'description'      => __( 'Open a new support ticket for an existing contact. Requires title, content, and contact_id. The default mailbox is used — this tool does not accept a mailbox, recipient, CC, or email address. May email the customer a confirmation if that notification is enabled on this site. The ticket is assigned to you.', 'doublescale' ),
+				'category'         => AbilityCategories::SUPPORT,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id' => array(
+							'type'        => 'integer',
+							'description' => 'Existing contact the ticket belongs to.',
+						),
+						'title'      => array(
+							'type'        => 'string',
+							'description' => 'Ticket title.',
+						),
+						'content'    => array(
+							'type'        => 'string',
+							'description' => 'Opening message recorded on the ticket.',
+						),
+						'priority'   => array(
+							'type'        => 'string',
+							'description' => 'Priority. Defaults to normal.',
+							'enum'        => TicketPriority::all(),
+						),
+					),
+					'required'   => array( 'contact_id', 'title', 'content' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_ticket' ),
 			),
 		);
 	}
@@ -324,6 +473,211 @@ final class SupportAbilities {
 			'groups'   => $counts,
 			'scope'    => AbilityScope::label( self::sees_all_tickets() ),
 		);
+	}
+
+	/**
+	 * Add a staff-only note.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function add_ticket_note( array $input ) {
+		return self::append_to_thread( $input, 'note' );
+	}
+
+	/**
+	 * Send a customer-visible reply.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function reply_to_ticket( array $input ) {
+		return self::append_to_thread( $input, 'reply' );
+	}
+
+	/**
+	 * Shared path for note and reply — identical except for which service
+	 * method runs, and whether the customer gets an email.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @param string               $kind  'note' or 'reply'.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private static function append_to_thread( array $input, string $kind ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'ticket_id', 'content' ) ),
+				AbilityInput::id( $input['ticket_id'] ?? null, 'ticket_id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$ticket = self::resolve_ticket( (int) $input['ticket_id'] );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		$service = self::ticket_service();
+		$payload = array(
+			'content' => (string) $input['content'],
+			'source'  => 'web',
+		);
+
+		// The service sanitises content, records the activity, and fires the
+		// hook EmailNotifications listens on. Going through it rather than
+		// writing the activity directly is what makes an agent reply behave
+		// exactly like an agent reply typed in the dashboard.
+		$activity = 'reply' === $kind
+			? $service->add_reply( $ticket, $payload )
+			: $service->add_note( $ticket, $payload );
+
+		if ( is_wp_error( $activity ) ) {
+			return $activity;
+		}
+
+		return array(
+			'created'     => true,
+			'ticket_id'   => (int) $ticket->id,
+			'activity_id' => (int) $activity->id,
+			'kind'        => $kind,
+			// Stated explicitly so the agent can tell the user whether the
+			// customer has been contacted.
+			'emailed_customer' => 'reply' === $kind,
+		);
+	}
+
+	/**
+	 * Update status, priority, or assignee.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function update_ticket( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'ticket_id' ) ),
+				AbilityInput::id( $input['ticket_id'] ?? null, 'ticket_id' ),
+				AbilityInput::id( $input['agent_user_id'] ?? null, 'agent_user_id' ),
+				AbilityInput::enum( $input['status'] ?? null, TicketStatus::all(), 'status' ),
+				AbilityInput::enum( $input['priority'] ?? null, TicketPriority::all(), 'priority' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$ticket = self::resolve_ticket( (int) $input['ticket_id'] );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		$updates = array();
+		foreach ( array( 'status', 'priority' ) as $field ) {
+			if ( isset( $input[ $field ] ) && '' !== $input[ $field ] ) {
+				$updates[ $field ] = (string) $input[ $field ];
+			}
+		}
+
+		if ( ! empty( $input['agent_user_id'] ) ) {
+			// Handing a ticket to someone else is a management action, distinct
+			// from working the tickets you already hold.
+			if ( ! Permissions::can_manage_all_tickets() ) {
+				return AbilityResult::forbidden(
+					__( 'You do not have permission to reassign tickets.', 'doublescale' )
+				);
+			}
+			$updates['agent_user_id'] = (int) $input['agent_user_id'];
+		}
+
+		if ( array() === $updates ) {
+			return new \WP_Error(
+				'doublescale_nothing_to_update',
+				__( 'Provide at least one of status, priority, or agent_user_id.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$result = self::ticket_service()->update_ticket( $ticket, $updates );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return array(
+			'updated'   => true,
+			'ticket_id' => (int) $ticket->id,
+			'changed'   => array_keys( $updates ),
+		);
+	}
+
+	/**
+	 * Open a ticket for an existing contact.
+	 *
+	 * Delegates to {@see TicketService::create_ticket()} so mailbox resolution,
+	 * the opening message, and the created hook match the dashboard.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_ticket( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'contact_id', 'title', 'content' ) ),
+				AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' ),
+				AbilityInput::enum( $input['priority'] ?? null, TicketPriority::all(), 'priority' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$result = self::ticket_service()->create_ticket(
+			array(
+				'contact_id'    => (int) $input['contact_id'],
+				'title'         => (string) $input['title'],
+				'content'       => (string) $input['content'],
+				'priority'      => isset( $input['priority'] ) ? (string) $input['priority'] : TicketPriority::NORMAL,
+				'agent_user_id' => get_current_user_id(),
+				'source'        => 'web',
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$shaped = self::shape_ticket( $result );
+		$shaped['created'] = true;
+
+		return $shaped;
+	}
+
+	/**
+	 * Build the ticket service, honouring the same override filter the REST
+	 * controller respects so tests can inject a double.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return TicketService
+	 */
+	private static function ticket_service(): TicketService {
+		$override = apply_filters( 'doublescale_support_ticket_service_instance', null );
+		if ( $override instanceof TicketService ) {
+			return $override;
+		}
+
+		return new TicketService( new ContactResolver() );
 	}
 
 	/**

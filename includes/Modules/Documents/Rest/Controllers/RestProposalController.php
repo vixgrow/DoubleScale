@@ -23,13 +23,10 @@ use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Rest\ProposalShaper;
 use DoubleScale\Modules\Documents\Services\ConvertProposalToInvoice;
-use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
-use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
 use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DuplicateProposal;
-use DoubleScale\Modules\Documents\Services\ProposalNotifications;
-use DoubleScale\Modules\Documents\Services\ProposalUrl;
+use DoubleScale\Modules\Documents\Services\SendProposal;
 use DoubleScale\Modules\Sales\Rest\SendsDocumentViaWhatsapp;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesRepNotifications;
@@ -360,23 +357,6 @@ class RestProposalController extends RestController {
 			return $forbidden;
 		}
 
-		if ( ProposalStatus::DECLINED === (string) $proposal->status ) {
-			return new WP_Error( 'invalid_status', __( 'Declined proposals cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		if ( '' === ProposalUrl::get_page_url() ) {
-			return new WP_Error(
-				'no_proposal_page',
-				__( 'Create a WordPress page with the [doublescale_proposal] shortcode before sending proposals.', 'doublescale' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'proposal', $proposal );
-		if ( is_wp_error( $gate ) ) {
-			return $gate;
-		}
-
 		$params = $request->get_json_params();
 		if ( ! is_array( $params ) ) {
 			$params = $request->get_params();
@@ -385,20 +365,18 @@ class RestProposalController extends RestController {
 
 		$channel = isset( $params['channel'] ) ? sanitize_key( (string) $params['channel'] ) : 'email';
 
-		// WhatsApp shares are delivered by the client opening wa.me; this call
-		// only records that the send happened.
-		if ( 'whatsapp' !== $channel ) {
-			$notifier = new ProposalNotifications();
-			if ( ! $notifier->send_proposal( $proposal, $message ) ) {
-				return new WP_Error(
-					'email_failed',
-					__( 'Failed to send the proposal email. Check the customer email and SMTP settings.', 'doublescale' ),
-					array( 'status' => 500 )
-				);
-			}
+		$sent = SendProposal::send( $proposal, $message, $channel );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
 		}
 
-		return $this->finish_proposal_send( $proposal, $message, $channel );
+		return new WP_REST_Response(
+			array(
+				'sent'     => true,
+				'proposal' => ProposalShaper::shape_admin( $sent->fresh( array( 'contact', 'assigned_user' ) ), true ),
+			),
+			200
+		);
 	}
 
 	/**
@@ -423,22 +401,9 @@ class RestProposalController extends RestController {
 			return $forbidden;
 		}
 
-		if ( ProposalStatus::DECLINED === (string) $proposal->status ) {
-			return new WP_Error( 'invalid_status', __( 'Declined proposals cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		$no_page = $this->require_public_page(
-			'proposal',
-			'no_proposal_page',
-			__( 'Create a WordPress page with the [doublescale_proposal] shortcode before sending proposals.', 'doublescale' )
-		);
-		if ( $no_page ) {
-			return $no_page;
-		}
-
-		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'proposal', $proposal );
-		if ( is_wp_error( $gate ) ) {
-			return $gate;
+		$blocked = SendProposal::check_preconditions( $proposal );
+		if ( $blocked ) {
+			return $blocked;
 		}
 
 		$params  = $this->read_whatsapp_params( $request );
@@ -465,25 +430,12 @@ class RestProposalController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	private function finish_proposal_send( ProposalModel $proposal, string $message, string $channel ): WP_REST_Response {
-		if ( ProposalStatus::DRAFT === (string) $proposal->status ) {
-			$proposal->status = ProposalStatus::SENT;
-		}
-		DocumentCustomerDetails::snapshot_proposal_party_from_contact( $proposal );
-		DocumentIssuerSnapshot::freeze_if_needed( $proposal );
-		DocumentCurrency::freeze_on_send( $proposal );
-		$proposal->sent_at = current_time( 'mysql' );
-		$proposal->save();
-
-		$this->log_proposal_sent( $proposal, $message, $channel );
-
-		do_action( 'doublescale_sales_proposal_sent', $proposal, $message, $channel );
-
-		( new SalesRepNotifications() )->notify_proposal_event( $proposal, 'sent' );
+		$sent = SendProposal::record( $proposal, $message, $channel );
 
 		return new WP_REST_Response(
 			array(
 				'sent'     => true,
-				'proposal' => ProposalShaper::shape_admin( $proposal->fresh( array( 'contact', 'assigned_user' ) ), true ),
+				'proposal' => ProposalShaper::shape_admin( $sent->fresh( array( 'contact', 'assigned_user' ) ), true ),
 			),
 			200
 		);
@@ -842,50 +794,6 @@ class RestProposalController extends RestController {
 				'user_id'       => get_current_user_id() ?: null,
 			)
 		);
-	}
-
-	/**
-	 * @param ProposalModel $proposal Proposal.
-	 * @param string        $message Optional custom message.
-	 * @param string        $channel Delivery channel (email|whatsapp).
-	 * @return void
-	 */
-	private function log_proposal_sent( ProposalModel $proposal, string $message = '', string $channel = 'email' ): void {
-		if ( ! class_exists( ActivityModel::class ) ) {
-			return;
-		}
-
-		$note = 'whatsapp' === $channel
-			? sprintf(
-				/* translators: 1: proposal number, 2: proposal subject */
-				__( 'Proposal %1$s sent via WhatsApp: %2$s', 'doublescale' ),
-				(string) $proposal->proposal_number,
-				(string) $proposal->subject
-			)
-			: sprintf(
-				/* translators: 1: proposal number, 2: proposal subject */
-				__( 'Proposal %1$s sent: %2$s', 'doublescale' ),
-				(string) $proposal->proposal_number,
-				(string) $proposal->subject
-			);
-		if ( '' !== trim( $message ) ) {
-			$note .= ' — ' . $message;
-		}
-
-		ActivityModel::create(
-			array(
-				'contact_id'    => (int) $proposal->contact_id,
-				'activity_type' => ActivityTypes::EMAIL_SENT,
-				'data'          => array(
-					'title'       => __( 'Proposal sent', 'doublescale' ),
-					'type'        => 'system',
-					'note'        => $note,
-					'proposal_id' => (int) $proposal->id,
-				),
-				'user_id'       => get_current_user_id() ?: null,
-			)
-		);
-		// TODO(morph): wire proposal/invoice associations (ENTITY_TYPE_PROPOSAL).
 	}
 
 	/**

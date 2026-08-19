@@ -25,10 +25,12 @@ defined( 'ABSPATH' ) || exit;
 final class DocumentWriteSafetyTest extends TestCase {
 
 	/**
-	 * Fields that move money or reach a customer.
+	 * Fields that move money or lock a document after send.
+	 *
+	 * Create may take `line_items` and `contact_id` because the document is
+	 * still a draft and has not been sent. Update and send may not.
 	 */
-	private const FORBIDDEN = array(
-		'line_items',
+	private const FORBIDDEN_ALWAYS = array(
 		'subtotal',
 		'total',
 		'total_tax',
@@ -37,9 +39,18 @@ final class DocumentWriteSafetyTest extends TestCase {
 		'adjustment',
 		'amount_paid',
 		'status',
-		'contact_id',
 		'currency',
 		'sent_at',
+	);
+
+	private const FORBIDDEN_ON_UPDATE = array(
+		'line_items',
+		'contact_id',
+	);
+
+	private const CREATE_ABILITIES = array(
+		'doublescale/create-invoice',
+		'doublescale/create-proposal',
 	);
 
 	/**
@@ -73,11 +84,29 @@ final class DocumentWriteSafetyTest extends TestCase {
 
 		$properties = array_keys( $definition['input_schema']['properties'] ?? array() );
 
-		foreach ( self::FORBIDDEN as $field ) {
+		$forbidden = self::FORBIDDEN_ALWAYS;
+		if ( ! in_array( $name, self::CREATE_ABILITIES, true ) ) {
+			$forbidden = array_merge( $forbidden, self::FORBIDDEN_ON_UPDATE );
+		}
+
+		foreach ( $forbidden as $field ) {
 			$this->assertNotContains(
 				$field,
 				$properties,
 				$name . ' exposes "' . $field . '", which changes money or reaches the customer.'
+			);
+		}
+
+		if ( in_array( $name, self::CREATE_ABILITIES, true ) ) {
+			$this->assertContains(
+				'line_items',
+				$properties,
+				$name . ' is a draft create and must accept line_items — the document has not been sent yet.'
+			);
+			$this->assertContains(
+				'contact_id',
+				$properties,
+				$name . ' must require a contact to attach the draft to.'
 			);
 		}
 	}
@@ -92,6 +121,7 @@ final class DocumentWriteSafetyTest extends TestCase {
 	 */
 	private const MAY_SEND = array(
 		'doublescale/send-invoice',
+		'doublescale/send-proposal',
 	);
 
 	/**

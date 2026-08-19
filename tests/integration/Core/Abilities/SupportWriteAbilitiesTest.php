@@ -513,4 +513,37 @@ final class SupportWriteAbilitiesTest extends IntegrationTestCase {
 		$fresh = TicketModel::query()->where( 'id', (int) $ticket->id )->first();
 		$this->assertSame( 'open', (string) $fresh->status, 'A rejected status must not be written.' );
 	}
+
+	public function test_create_ticket_opens_for_an_existing_contact(): void {
+		$manager = self::factory()->user->create( array( 'role' => UserRoles::SUPPORT_MANAGER ) );
+		wp_set_current_user( $manager );
+
+		$this->make_ticket( $manager );
+
+		$result = SupportAbilities::create_ticket(
+			array(
+				'contact_id' => $this->make_contact(),
+				'title'      => 'New printer also on fire',
+				'content'    => 'Opened from MCP.',
+				'priority'   => 'high',
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertTrue( $result['created'] );
+		$this->assertSame( 'high', $result['priority'] );
+		$this->assertSame( $manager, (int) ( $result['agent']['id'] ?? 0 ) );
+
+		$ticket = TicketModel::query()->where( 'id', (int) $result['id'] )->first();
+		$this->assertNotNull( $ticket );
+		$this->assertSame( 'New printer also on fire', (string) $ticket->title );
+	}
+
+	public function test_create_ticket_does_not_accept_an_email_recipient(): void {
+		$definitions = SupportAbilities::definitions();
+		$properties  = array_keys( $definitions['doublescale/create-ticket']['input_schema']['properties'] ?? array() );
+
+		$this->assertNotContains( 'email', $properties );
+		$this->assertNotContains( 'mailbox_id', $properties );
+	}
 }

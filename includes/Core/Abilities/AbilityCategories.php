@@ -71,6 +71,7 @@ final class AbilityCategories {
 			// Page-visit history is engagement data, same idea as messages.
 			'websitetracking'    => self::CONTACTS,
 			'notifications'      => self::CORE,
+			'custom-fields'      => self::CONTACTS,
 		);
 	}
 

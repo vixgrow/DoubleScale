@@ -32,12 +32,10 @@ defined( 'ABSPATH' ) || exit;
 final class SupportWriteSafetyTest extends TestCase {
 
 	/**
-	 * Input fields no support write may ever accept.
-	 *
-	 * Every one of these either redirects where a message goes or rewrites who
-	 * a ticket belongs to.
+	 * Address fields no support write may ever accept. Reply addressing is
+	 * derived from the ticket; a mailbox id would let an agent pick a From.
 	 */
-	private const FORBIDDEN_INPUTS = array(
+	private const FORBIDDEN_ADDRESS_INPUTS = array(
 		'to',
 		'cc',
 		'bcc',
@@ -45,9 +43,16 @@ final class SupportWriteSafetyTest extends TestCase {
 		'recipient',
 		'reply_to',
 		'from',
+		'mailbox_id',
+	);
+
+	/**
+	 * Identity fields that rewrite who an EXISTING ticket belongs to.
+	 * create-ticket is allowed contact_id and title; everything else is not.
+	 */
+	private const FORBIDDEN_IDENTITY_ON_EXISTING = array(
 		'contact_id',
 		'title',
-		'mailbox_id',
 	);
 
 	/**
@@ -75,7 +80,7 @@ final class SupportWriteSafetyTest extends TestCase {
 
 		$this->assertNotEmpty( $writes, 'No support write abilities found.' );
 
-		foreach ( array( 'doublescale/reply-to-ticket', 'doublescale/add-ticket-note', 'doublescale/update-ticket' ) as $expected ) {
+		foreach ( array( 'doublescale/reply-to-ticket', 'doublescale/add-ticket-note', 'doublescale/update-ticket', 'doublescale/create-ticket' ) as $expected ) {
 			$this->assertArrayHasKey(
 				$expected,
 				$writes,
@@ -85,22 +90,47 @@ final class SupportWriteSafetyTest extends TestCase {
 	}
 
 	/**
-	 * No support write may accept an address, a recipient, or a reassignment of
-	 * the ticket's owner-facing identity.
+	 * No support write may accept an address or a mailbox. create-ticket may
+	 * take contact_id and title; the others may not rewrite who a ticket is.
 	 */
 	public function test_no_write_accepts_a_recipient_or_identity_field(): void {
 		foreach ( $this->write_definitions() as $name => $definition ) {
 			$properties = array_keys( $definition['input_schema']['properties'] ?? array() );
 
-			foreach ( self::FORBIDDEN_INPUTS as $forbidden ) {
-				// update-ticket legitimately reassigns the AGENT; that is a
-				// staff-side field and is permission-checked separately.
+			foreach ( self::FORBIDDEN_ADDRESS_INPUTS as $forbidden ) {
 				$this->assertNotContains(
 					$forbidden,
 					$properties,
 					sprintf( '%s must not accept "%s".', $name, $forbidden )
 				);
 			}
+
+			if ( 'doublescale/create-ticket' === $name ) {
+				continue;
+			}
+
+			foreach ( self::FORBIDDEN_IDENTITY_ON_EXISTING as $forbidden ) {
+				$this->assertNotContains(
+					$forbidden,
+					$properties,
+					sprintf( '%s must not accept "%s".', $name, $forbidden )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Opening a ticket needs a contact and a title — those are the identity
+	 * of the new record, not a rewrite of an existing one.
+	 */
+	public function test_create_ticket_requires_contact_title_and_content(): void {
+		$definition = SupportAbilities::definitions()['doublescale/create-ticket'];
+		$properties = $definition['input_schema']['properties'] ?? array();
+		$required   = $definition['input_schema']['required'] ?? array();
+
+		foreach ( array( 'contact_id', 'title', 'content' ) as $field ) {
+			$this->assertArrayHasKey( $field, $properties, 'create-ticket must accept ' . $field . '.' );
+			$this->assertContains( $field, $required, 'create-ticket must require ' . $field . '.' );
 		}
 	}
 

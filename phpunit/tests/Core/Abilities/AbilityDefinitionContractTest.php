@@ -227,7 +227,7 @@ final class AbilityDefinitionContractTest extends TestCase {
 			// only correct if its callback does not mutate. Names are the
 			// cheapest reliable signal we have at the definition layer.
 			$looks_mutating = (bool) preg_match(
-				'#/(create|update|add|log|delete|remove|move|send|set)-|-bulk$#',
+				'#/(create|update|add|log|delete|remove|move|send|set|mark)-|-bulk$#',
 				$name
 			) || false !== strpos( $name, 'bulk' );
 
@@ -332,12 +332,7 @@ final class AbilityDefinitionContractTest extends TestCase {
 	}
 
 	public function test_names_are_unique_across_modules(): void {
-		$names = array_merge(
-			array_keys( AbilityContext::definitions() ),
-			array_keys( ContactAbilities::definitions() ),
-			array_keys( DocumentAbilities::definitions() ),
-			array_keys( SupportAbilities::definitions() )
-		);
+		$names = array_keys( $this->all_definitions() );
 
 		$this->assertSame(
 			count( $names ),

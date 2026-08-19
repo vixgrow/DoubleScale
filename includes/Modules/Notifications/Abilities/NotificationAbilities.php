@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only notification abilities.
+ * Notification abilities.
  *
  * @package DoubleScale\Modules\Notifications
  */
@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityResult;
+use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Modules\Notifications\Models\NotificationModel;
 use DoubleScale\Modules\Notifications\Services\NotificationPreferences;
 
@@ -44,7 +45,7 @@ final class NotificationAbilities {
 			'doublescale/list-my-notifications' => array(
 				'module_slug'      => 'notifications',
 				'label'            => __( 'List my notifications', 'doublescale' ),
-				'description'      => __( 'Your own notifications, newest first, with whether each has been read. Always scoped to you — there is no way to read another user\'s notifications, and no user id to pass. Only notifications for categories you have the bell enabled on appear, matching the dashboard exactly. Read-only: this never marks anything read or dismisses it.', 'doublescale' ),
+				'description'      => __( 'Your own notifications, newest first, with whether each has been read. Always scoped to you — there is no way to read another user\'s notifications, and no user id to pass. Only notifications for categories you have the bell enabled on appear, matching the dashboard exactly. Use mark-notifications-read to clear unread ones.', 'doublescale' ),
 				'category'         => AbilityCategories::CORE,
 				'permission'       => $permission,
 				'input_schema'     => array(
@@ -78,6 +79,32 @@ final class NotificationAbilities {
 				'category'         => AbilityCategories::CORE,
 				'permission'       => $permission,
 				'execute_callback' => array( self::class, 'get_notification_summary' ),
+			),
+
+			'doublescale/mark-notifications-read' => array(
+				'module_slug'      => 'notifications',
+				'label'            => __( 'Mark notifications as read', 'doublescale' ),
+				'description'      => __( 'Mark your own notifications as read. Pass id to mark one; omit id to mark all of yours. There is no user id — this can never mark another user\'s notifications.', 'doublescale' ),
+				'category'         => AbilityCategories::CORE,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'id' => array(
+							'type'        => 'integer',
+							'description' => 'One notification id. Omit to mark all of yours as read.',
+						),
+					),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'mark_notifications_read' ),
 			),
 		);
 	}
@@ -191,6 +218,46 @@ final class NotificationAbilities {
 		return array(
 			'unread_total' => $total,
 			'by_category'  => $by_category,
+		);
+	}
+
+	/**
+	 * Mark the caller's notifications as read.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function mark_notifications_read( array $input ) {
+		$invalid = AbilityInput::id( $input['id'] ?? null, 'id' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$user_id = get_current_user_id();
+
+		if ( ! empty( $input['id'] ) ) {
+			$notification = NotificationModel::query()->forUser( $user_id )->find( (int) $input['id'] );
+			if ( ! $notification ) {
+				return AbilityResult::not_found( __( 'No notification found with that id.', 'doublescale' ) );
+			}
+
+			$was_unread = ! $notification->is_read;
+			$notification->markAsRead();
+
+			return array(
+				'updated'          => (bool) $was_unread,
+				'notification_id'  => (int) $notification->id,
+				'marked_read'      => 1,
+			);
+		}
+
+		$count = NotificationModel::markAllAsRead( $user_id );
+
+		return array(
+			'updated'     => $count > 0,
+			'marked_read' => (int) $count,
 		);
 	}
 

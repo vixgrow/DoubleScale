@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only invoice and proposal abilities.
+ * Invoice and proposal abilities.
  *
  * @package DoubleScale\Modules\Documents
  */
@@ -13,12 +13,17 @@ use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
 use DoubleScale\Core\Abilities\AbilityScope;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Documents\Constants\DocumentTemplate;
 use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
 use DoubleScale\Modules\Documents\Services\SendInvoice;
+use DoubleScale\Modules\Documents\Services\SendProposal;
 use DoubleScale\Modules\Sales\Capabilities;
+use DoubleScale\Modules\Sales\Services\SalesNumbering;
+use DoubleScale\Modules\Sales\Services\SalesSettings;
 
 /**
  * Gate 3 lives here.
@@ -282,6 +287,127 @@ final class DocumentAbilities {
 				),
 				'execute_callback' => array( self::class, 'send_invoice' ),
 			),
+
+			'doublescale/create-invoice'    => array(
+				'module_slug'      => 'documents',
+				'label'            => __( 'Create a draft invoice', 'doublescale' ),
+				'description'      => __( 'Create a draft invoice for an existing contact. Line items are allowed here because the document has not been sent yet. This tool never emails the customer — use send-invoice after the user has confirmed the draft. Status is always draft. The assigned sales agent is the connecting user.', 'doublescale' ),
+				'category'         => AbilityCategories::SALES,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id'  => array(
+							'type'        => 'integer',
+							'description' => 'Contact this invoice belongs to.',
+						),
+						'line_items'  => array(
+							'type'        => 'array',
+							'description' => 'Line items. Each accepts: description, qty (or quantity), rate. Amount is qty × rate. Totals are computed on save.',
+						),
+						'invoice_date' => array(
+							'type'        => 'string',
+							'description' => 'Invoice date as YYYY-MM-DD. Defaults to today.',
+						),
+						'due_date'    => array(
+							'type'        => 'string',
+							'description' => 'Due date as YYYY-MM-DD.',
+						),
+						'client_note' => array(
+							'type'        => 'string',
+							'description' => 'Note shown to the customer on the invoice.',
+						),
+						'terms'       => array(
+							'type'        => 'string',
+							'description' => 'Payment terms text.',
+						),
+					),
+					'required'   => array( 'contact_id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_invoice' ),
+			),
+
+			'doublescale/create-proposal'   => array(
+				'module_slug'      => 'documents',
+				'label'            => __( 'Create a draft proposal', 'doublescale' ),
+				'description'      => __( 'Create a draft proposal for an existing contact. Line items are allowed here because the document has not been sent yet. This tool never emails the customer — use send-proposal after the user has confirmed the draft. Status is always draft. The assigned user is the connecting user.', 'doublescale' ),
+				'category'         => AbilityCategories::SALES,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id' => array(
+							'type'        => 'integer',
+							'description' => 'Contact this proposal belongs to.',
+						),
+						'subject'    => array(
+							'type'        => 'string',
+							'description' => 'Proposal subject line.',
+						),
+						'line_items' => array(
+							'type'        => 'array',
+							'description' => 'Line items. Each accepts: description, qty (or quantity), rate. Amount is qty × rate.',
+						),
+						'open_till'  => array(
+							'type'        => 'string',
+							'description' => 'Expiry date as YYYY-MM-DD.',
+						),
+						'terms'      => array(
+							'type'        => 'string',
+							'description' => 'Terms text.',
+						),
+					),
+					'required'   => array( 'contact_id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_proposal' ),
+			),
+
+			'doublescale/send-proposal'     => array(
+				'module_slug'      => 'documents',
+				'label'            => __( 'Send a proposal to the customer', 'doublescale' ),
+				'description'      => __( 'Email a proposal to the customer it belongs to. THIS EMAILS THE CUSTOMER IMMEDIATELY and cannot be recalled, so only call it when the user has explicitly asked to send this proposal. Sending also moves a draft to sent, stamps the sent date, and locks the currency and party details to what they are now. Declined proposals cannot be sent. The recipient is always the proposal\'s own contact and cannot be overridden.', 'doublescale' ),
+				'category'         => AbilityCategories::SALES,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'id'      => array(
+							'type'        => 'integer',
+							'description' => 'Proposal id to send.',
+						),
+						'message' => array(
+							'type'        => 'string',
+							'description' => 'Optional covering note included in the email.',
+						),
+					),
+					'required'   => array( 'id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'send_proposal' ),
+			),
 		);
 	}
 
@@ -457,6 +583,249 @@ final class DocumentAbilities {
 			// rather than implying it chose the recipient.
 			'emailed_to'     => $email,
 		);
+	}
+
+	/**
+	 * Create a draft invoice. Never sends.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_invoice( array $input ) {
+		$prepared = self::prepare_document_create( $input, 'invoice' );
+		if ( is_wp_error( $prepared ) ) {
+			return $prepared;
+		}
+
+		$invoice = new InvoiceModel();
+		$invoice->fill( $prepared );
+		SalesNumbering::save_with_retry( $invoice );
+
+		$fresh = $invoice->fresh();
+
+		return array(
+			'created'        => true,
+			'invoice_id'     => (int) $fresh->id,
+			'invoice_number' => (string) $fresh->invoice_number,
+			'status'         => (string) $fresh->status,
+			'total'          => (float) $fresh->total,
+			'sent'           => false,
+		);
+	}
+
+	/**
+	 * Create a draft proposal. Never sends.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_proposal( array $input ) {
+		$prepared = self::prepare_document_create( $input, 'proposal' );
+		if ( is_wp_error( $prepared ) ) {
+			return $prepared;
+		}
+
+		$proposal = new ProposalModel();
+		$proposal->fill( $prepared );
+		SalesNumbering::save_with_retry( $proposal );
+
+		$fresh = $proposal->fresh();
+
+		return array(
+			'created'         => true,
+			'proposal_id'     => (int) $fresh->id,
+			'proposal_number' => (string) $fresh->proposal_number,
+			'status'          => (string) $fresh->status,
+			'total'           => (float) $fresh->total,
+			'sent'            => false,
+		);
+	}
+
+	/**
+	 * Email a proposal to its customer.
+	 *
+	 * Delegates the entire send to {@see SendProposal}, which the REST endpoint
+	 * also uses.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function send_proposal( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'id' ) ),
+				AbilityInput::id( $input['id'] ?? null, 'id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$proposal = ProposalModel::query()
+			->with( array( 'contact', 'assigned_user' ) )
+			->where( 'id', (int) $input['id'] )
+			->first();
+
+		if ( ! $proposal ) {
+			return AbilityResult::not_found( __( 'No proposal found with that id.', 'doublescale' ) );
+		}
+
+		$forbidden = AbilityScope::assert_owns(
+			$proposal,
+			'assigned_user_id',
+			self::sees_all_sales(),
+			__( 'You do not have permission to access this proposal.', 'doublescale' )
+		);
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		$contact = $proposal->contact ?? null;
+		$email   = is_object( $contact ) ? (string) ( $contact->email ?? '' ) : '';
+		if ( '' === $email ) {
+			return new \WP_Error(
+				'doublescale_no_recipient',
+				__( 'This proposal\'s contact has no email address, so there is nobody to send it to.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$message = isset( $input['message'] ) ? sanitize_textarea_field( (string) $input['message'] ) : '';
+
+		$sent = SendProposal::send( $proposal, $message, 'email' );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
+		}
+
+		return array(
+			'sent'            => true,
+			'proposal_id'     => (int) $sent->id,
+			'proposal_number' => (string) $sent->proposal_number,
+			'status'          => (string) $sent->status,
+			'sent_at'         => (string) $sent->sent_at,
+			'emailed_to'      => $email,
+		);
+	}
+
+	/**
+	 * Shared create payload for invoices and proposals.
+	 *
+	 * Always draft, always assigned to the connecting user, never sent.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @param string               $type  'invoice' or 'proposal'.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private static function prepare_document_create( array $input, string $type ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'contact_id' ) ),
+				AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' ),
+				AbilityInput::date( $input['invoice_date'] ?? null, 'invoice_date' ),
+				AbilityInput::date( $input['due_date'] ?? null, 'due_date' ),
+				AbilityInput::date( $input['open_till'] ?? null, 'open_till' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$contact = ContactModel::query()->where( 'id', (int) $input['contact_id'] )->first();
+		if ( ! $contact ) {
+			return AbilityResult::not_found( __( 'No contact found with that id.', 'doublescale' ) );
+		}
+
+		$line_items = array();
+		if ( isset( $input['line_items'] ) ) {
+			$line_items = self::sanitize_line_items_input( $input['line_items'] );
+			if ( is_wp_error( $line_items ) ) {
+				return $line_items;
+			}
+		}
+
+		$today = current_time( 'Y-m-d' );
+
+		if ( 'invoice' === $type ) {
+			return array(
+				'contact_id'         => (int) $contact->id,
+				'status'             => InvoiceStatus::DRAFT,
+				'sale_agent_user_id' => get_current_user_id(),
+				'template'           => DocumentTemplate::normalize(
+					SalesSettings::get( 'default_invoice_template', DocumentTemplate::DEFAULT )
+				),
+				'discount_type'      => 'none',
+				'discount_value'     => 0,
+				'line_items'         => $line_items,
+				'invoice_date'       => isset( $input['invoice_date'] ) ? (string) $input['invoice_date'] : $today,
+				'due_date'           => isset( $input['due_date'] ) ? (string) $input['due_date'] : null,
+				'client_note'        => isset( $input['client_note'] ) ? sanitize_textarea_field( (string) $input['client_note'] ) : '',
+				'terms'              => isset( $input['terms'] ) ? sanitize_textarea_field( (string) $input['terms'] ) : '',
+			);
+		}
+
+		return array(
+			'contact_id'       => (int) $contact->id,
+			'status'           => ProposalStatus::DRAFT,
+			'assigned_user_id' => get_current_user_id(),
+			'template'         => DocumentTemplate::normalize(
+				SalesSettings::get( 'default_proposal_template', DocumentTemplate::DEFAULT )
+			),
+			'discount_type'    => 'none',
+			'discount_value'   => 0,
+			'line_items'       => $line_items,
+			'subject'          => isset( $input['subject'] ) ? sanitize_text_field( (string) $input['subject'] ) : '',
+			'date'             => $today,
+			'open_till'        => isset( $input['open_till'] ) ? (string) $input['open_till'] : null,
+			'terms'            => isset( $input['terms'] ) ? sanitize_textarea_field( (string) $input['terms'] ) : '',
+		);
+	}
+
+	/**
+	 * Sanitize agent-supplied line items into the qty/rate/amount shape the model stores.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $raw Raw line_items input.
+	 * @return array<int, array<string, mixed>>|\WP_Error
+	 */
+	private static function sanitize_line_items_input( $raw ) {
+		if ( ! is_array( $raw ) ) {
+			return new \WP_Error(
+				'doublescale_invalid_batch',
+				__( 'line_items must be a list of objects.', 'doublescale' ),
+				array(
+					'status' => 400,
+					'field'  => 'line_items',
+				)
+			);
+		}
+
+		$out = array();
+		foreach ( $raw as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			$qty  = isset( $item['qty'] ) ? (float) $item['qty'] : ( isset( $item['quantity'] ) ? (float) $item['quantity'] : 1.0 );
+			$rate = isset( $item['rate'] ) ? (float) $item['rate'] : 0.0;
+
+			$out[] = array(
+				'description' => sanitize_text_field( (string) ( $item['description'] ?? ( $item['name'] ?? '' ) ) ),
+				'qty'         => $qty,
+				'rate'        => $rate,
+				'amount'      => $qty * $rate,
+			);
+		}
+
+		return $out;
 	}
 
 	/**

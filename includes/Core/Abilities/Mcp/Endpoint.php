@@ -79,10 +79,14 @@ final class Endpoint {
 	 * @return WP_REST_Response
 	 */
 	public static function handle( WP_REST_Request $request ): WP_REST_Response {
+		$reply = static function ( ?array $payload, int $status = 200 ) use ( $request ) {
+			return self::respond( $payload, $status, $request );
+		};
+
 		$body = json_decode( (string) $request->get_body(), true );
 
 		if ( ! is_array( $body ) ) {
-			return self::respond( JsonRpc::error( null, JsonRpc::PARSE_ERROR, 'Parse error' ), 400 );
+			return $reply( JsonRpc::error( null, JsonRpc::PARSE_ERROR, 'Parse error' ), 400 );
 		}
 
 		$id     = $body['id'] ?? null;
@@ -90,7 +94,7 @@ final class Endpoint {
 		$params = isset( $body['params'] ) && is_array( $body['params'] ) ? $body['params'] : array();
 
 		if ( '' === $method ) {
-			return self::respond( JsonRpc::error( $id, JsonRpc::INVALID_REQUEST, 'Missing method' ), 400 );
+			return $reply( JsonRpc::error( $id, JsonRpc::INVALID_REQUEST, 'Missing method' ), 400 );
 		}
 
 		// Notifications carry no id and expect no response body.
@@ -98,7 +102,7 @@ final class Endpoint {
 
 		$user_id = Authenticator::resolve( $request );
 		if ( $user_id <= 0 ) {
-			return self::respond(
+			return $reply(
 				JsonRpc::error( $id, JsonRpc::INVALID_REQUEST, 'Authentication required. Send an Authorization header with a DoubleScale MCP API key or a WordPress application password.' ),
 				401
 			);
@@ -109,18 +113,18 @@ final class Endpoint {
 		wp_set_current_user( $user_id );
 
 		if ( 0 === strpos( $method, 'notifications/' ) || $is_notification ) {
-			return self::respond( null, 202 );
+			return $reply( null, 202 );
 		}
 
 		switch ( $method ) {
 			case 'initialize':
-				return self::respond( JsonRpc::result( $id, self::initialize() ) );
+				return $reply( JsonRpc::result( $id, self::initialize() ) );
 
 			case 'ping':
-				return self::respond( JsonRpc::result( $id, new \stdClass() ) );
+				return $reply( JsonRpc::result( $id, new \stdClass() ) );
 
 			case 'tools/list':
-				return self::respond(
+				return $reply(
 					JsonRpc::result(
 						$id,
 						array(
@@ -135,17 +139,17 @@ final class Endpoint {
 				);
 
 			case 'tools/call':
-				return self::respond( self::call_tool( $id, $params ) );
+				return $reply( self::call_tool( $id, $params ) );
 
 			// Declared in capabilities as absent, but a client may still ask.
 			case 'resources/list':
-				return self::respond( JsonRpc::result( $id, array( 'resources' => array() ) ) );
+				return $reply( JsonRpc::result( $id, array( 'resources' => array() ) ) );
 
 			case 'prompts/list':
-				return self::respond( JsonRpc::result( $id, array( 'prompts' => array() ) ) );
+				return $reply( JsonRpc::result( $id, array( 'prompts' => array() ) ) );
 
 			default:
-				return self::respond(
+				return $reply(
 					JsonRpc::error( $id, JsonRpc::METHOD_NOT_FOUND, sprintf( 'Method not found: %s', $method ) ),
 					404
 				);
@@ -171,7 +175,7 @@ final class Endpoint {
 				'name'    => 'DoubleScale CRM',
 				'version' => defined( 'DOUBLESCALE_VERSION' ) ? DOUBLESCALE_VERSION : '1.0.0',
 			),
-			'instructions'    => __( 'Read-only access to DoubleScale CRM. Call doublescale-get-context first: it reports which modules are active on this site and which tools you can actually use. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see.', 'doublescale' ),
+			'instructions'    => __( 'DoubleScale CRM tools for this site, including reads and writes. Call doublescale-get-context first: it reports which modules are active and which tools you can actually use. Some tools change records or email customers — read each tool\'s description and annotations before calling it. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see. This HTTP transport cannot push a tools/list refresh; send header X-DoubleScale-Tools-Version (the value from the last response) so a stale cache is flagged in _meta.toolsStale, then call tools/list again.', 'doublescale' ),
 		);
 	}
 
@@ -266,15 +270,17 @@ final class Endpoint {
 
 			$meta = method_exists( $ability, 'get_meta' ) ? (array) $ability->get_meta() : array();
 			if ( ! empty( $meta['annotations'] ) && is_array( $meta['annotations'] ) ) {
-				$annotations = $meta['annotations'];
-
-				$descriptor['annotations'] = array(
-					'title'           => method_exists( $ability, 'get_label' ) ? $ability->get_label() : $name,
-					// MCP spells these readOnlyHint / destructiveHint; our own
-					// definitions use the shorter internal keys.
-					'readOnlyHint'    => (bool) ( $annotations['readonly'] ?? false ),
-					'destructiveHint' => (bool) ( $annotations['destructive'] ?? false ),
+				$descriptor['annotations'] = self::annotations_for_mcp(
+					$meta['annotations'],
+					method_exists( $ability, 'get_label' ) ? (string) $ability->get_label() : $name
 				);
+			}
+
+			if ( method_exists( $ability, 'get_output_schema' ) ) {
+				$output = $ability->get_output_schema();
+				if ( is_array( $output ) && array() !== $output ) {
+					$descriptor['outputSchema'] = $output;
+				}
 			}
 
 			$tools[] = $descriptor;
@@ -386,6 +392,72 @@ final class Endpoint {
 	}
 
 	/**
+	 * MCP annotation block from a WordPress ability's internal keys.
+	 *
+	 * `readonly` defaults to true here the same way the registrar does, so a
+	 * missing key cannot be published as a write. Optional hints are omitted
+	 * when the definition never set them — MCP treats absence as unknown.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $annotations Definition annotations.
+	 * @param string               $title       Human label.
+	 * @return array<string, mixed>
+	 */
+	public static function annotations_for_mcp( array $annotations, string $title ): array {
+		$out = array(
+			'title'           => $title,
+			'readOnlyHint'    => (bool) ( $annotations['readonly'] ?? true ),
+			'destructiveHint' => (bool) ( $annotations['destructive'] ?? false ),
+		);
+
+		if ( array_key_exists( 'idempotent', $annotations ) ) {
+			$out['idempotentHint'] = (bool) $annotations['idempotent'];
+		}
+
+		if ( array_key_exists( 'openWorldHint', $annotations ) ) {
+			$out['openWorldHint'] = (bool) $annotations['openWorldHint'];
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Stamp tool-list freshness onto a JSON-RPC result.
+	 *
+	 * HTTP cannot push `notifications/tools/list_changed`. The client sends
+	 * the version it last saw; we tell it whether that view is still current.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $result  JSON-RPC result object.
+	 * @param WP_REST_Request      $request Incoming request.
+	 * @return array<string, mixed>
+	 */
+	public static function stamp_tools_meta( array $result, WP_REST_Request $request ): array {
+		$presented = trim( (string) $request->get_header( ToolListVersion::REQUEST_HEADER ) );
+		if ( '' === $presented ) {
+			$presented = trim( (string) $request->get_header( ToolListVersion::RESPONSE_HEADER ) );
+		}
+
+		$meta = isset( $result['_meta'] ) && is_array( $result['_meta'] )
+			? $result['_meta']
+			: array();
+
+		$stale = ToolListVersion::is_stale( $presented );
+
+		$meta['toolsVersion'] = ToolListVersion::current();
+		$meta['toolsStale']   = $stale;
+		if ( $stale ) {
+			$meta['toolsRefresh'] = 'Call tools/list; the published tool set has changed since the version you sent.';
+		}
+
+		$result['_meta'] = $meta;
+
+		return $result;
+	}
+
+	/**
 	 * Wrap a payload in a REST response with no-store headers.
 	 *
 	 * MCP responses are per-user and must never be served from an edge cache
@@ -395,9 +467,14 @@ final class Endpoint {
 	 *
 	 * @param array<string, mixed>|null $payload Response body.
 	 * @param int                       $status  HTTP status.
+	 * @param WP_REST_Request|null      $request Incoming request, for staleness.
 	 * @return WP_REST_Response
 	 */
-	private static function respond( ?array $payload, int $status = 200 ): WP_REST_Response {
+	private static function respond( ?array $payload, int $status = 200, ?WP_REST_Request $request = null ): WP_REST_Response {
+		if ( is_array( $payload ) && isset( $payload['result'] ) && is_array( $payload['result'] ) && $request instanceof WP_REST_Request ) {
+			$payload['result'] = self::stamp_tools_meta( $payload['result'], $request );
+		}
+
 		$response = new WP_REST_Response( $payload, $status );
 		$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, private' );
 		$response->header( 'Pragma', 'no-cache' );
@@ -405,6 +482,16 @@ final class Endpoint {
 		// Stamped on every response so a client can tell, without asking, that
 		// the tool set it cached at connect time is no longer current.
 		$response->header( ToolListVersion::RESPONSE_HEADER, ToolListVersion::current() );
+
+		if ( $request instanceof WP_REST_Request ) {
+			$presented = trim( (string) $request->get_header( ToolListVersion::REQUEST_HEADER ) );
+			if ( '' === $presented ) {
+				$presented = trim( (string) $request->get_header( ToolListVersion::RESPONSE_HEADER ) );
+			}
+			if ( ToolListVersion::is_stale( $presented ) ) {
+				$response->header( 'X-DoubleScale-Tools-Stale', '1' );
+			}
+		}
 
 		return $response;
 	}

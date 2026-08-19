@@ -381,4 +381,44 @@ final class NotificationAbilitiesTest extends IntegrationTestCase {
 
 		$this->assertSame( 0, $result['unread_total'] );
 	}
+
+	public function test_mark_one_notification_read_does_not_touch_another_user(): void {
+		$mine   = $this->make_crm_user();
+		$theirs = $this->make_crm_user();
+
+		$my_id    = $this->make_notification( $mine, NotificationCategories::SUPPORT_TICKET_ASSIGNED, 'Mine' );
+		$their_id = $this->make_notification( $theirs, NotificationCategories::SUPPORT_TICKET_ASSIGNED, 'Theirs' );
+
+		wp_set_current_user( $mine );
+
+		$result = NotificationAbilities::mark_notifications_read( array( 'id' => $my_id ) );
+
+		$this->assertIsArray( $result );
+		$this->assertTrue( $result['updated'] );
+
+		$stolen = NotificationAbilities::mark_notifications_read( array( 'id' => $their_id ) );
+		$this->assertTrue( is_wp_error( $stolen ) );
+
+		$theirs_row = NotificationModel::query()->find( $their_id );
+		$this->assertFalse( (bool) $theirs_row->is_read, 'Marking mine read must not mark theirs.' );
+	}
+
+	public function test_mark_all_reads_only_the_current_users_notifications(): void {
+		$mine   = $this->make_crm_user();
+		$theirs = $this->make_crm_user();
+
+		$this->make_notification( $mine, NotificationCategories::SUPPORT_TICKET_ASSIGNED, 'Mine 1' );
+		$this->make_notification( $mine, NotificationCategories::SUPPORT_TICKET_ASSIGNED, 'Mine 2' );
+		$their_id = $this->make_notification( $theirs, NotificationCategories::SUPPORT_TICKET_ASSIGNED, 'Theirs' );
+
+		wp_set_current_user( $mine );
+
+		$result = NotificationAbilities::mark_notifications_read( array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 2, $result['marked_read'] );
+
+		$theirs_row = NotificationModel::query()->find( $their_id );
+		$this->assertFalse( (bool) $theirs_row->is_read );
+	}
 }

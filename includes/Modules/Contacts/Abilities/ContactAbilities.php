@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only contact abilities.
+ * Contact abilities.
  *
  * @package DoubleScale\Modules\Contacts
  */
@@ -124,7 +124,7 @@ final class ContactAbilities {
 			'doublescale/list-contact-segments' => array(
 				'module_slug'      => 'contacts',
 				'label'            => __( 'List tags and lists', 'doublescale' ),
-				'description'      => __( 'All contact tags and lists with their ids. Call this to resolve a tag or list name to an id before filtering contacts by it.', 'doublescale' ),
+				'description'      => __( 'All contact tags and lists with their ids. Call this to resolve a tag or list name to an id before filtering contacts by it, or before add-contact-tags / add-contact-lists.', 'doublescale' ),
 				'category'         => AbilityCategories::CONTACTS,
 				'permission'       => $permission,
 				'input_schema'     => array(
@@ -317,6 +317,106 @@ final class ContactAbilities {
 					),
 				),
 				'execute_callback' => array( self::class, 'update_contacts_bulk' ),
+			),
+
+			'doublescale/add-contact-tags'     => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Add tags to contacts', 'doublescale' ),
+				'description'      => __( 'Attach existing tags to contacts. Does not create tags — call list-contact-segments to resolve names to ids. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview the match count without writing. Tags already on a contact are left as-is.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => self::membership_schema_properties(
+						'tag_ids',
+						'Tag ids to attach. Must already exist — this tool never creates a tag.'
+					),
+					'required'   => array( 'tag_ids' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'add_contact_tags' ),
+			),
+
+			'doublescale/remove-contact-tags'  => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Remove tags from contacts', 'doublescale' ),
+				'description'      => __( 'Detach tags from contacts. The tag itself is not deleted. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => self::membership_schema_properties(
+						'tag_ids',
+						'Tag ids to detach. The tags themselves are not deleted.'
+					),
+					'required'   => array( 'tag_ids' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'remove_contact_tags' ),
+			),
+
+			'doublescale/add-contact-lists'    => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Add contacts to lists', 'doublescale' ),
+				'description'      => __( 'Put contacts on existing lists. Does not create lists — call list-contact-segments to resolve names to ids. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing. Contacts already on a list are left as-is.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => self::membership_schema_properties(
+						'list_ids',
+						'List ids to attach. Must already exist — this tool never creates a list.'
+					),
+					'required'   => array( 'list_ids' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'add_contact_lists' ),
+			),
+
+			'doublescale/remove-contact-lists' => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Remove contacts from lists', 'doublescale' ),
+				'description'      => __( 'Take contacts off lists. The list itself is not deleted. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => self::membership_schema_properties(
+						'list_ids',
+						'List ids to detach. The lists themselves are not deleted.'
+					),
+					'required'   => array( 'list_ids' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+					),
+				),
+				'execute_callback' => array( self::class, 'remove_contact_lists' ),
 			),
 		);
 	}
@@ -566,6 +666,326 @@ final class ContactAbilities {
 				'id_key'      => 'contact_id',
 				'applied_key' => 'applied_contact_ids',
 			)
+		);
+	}
+
+	/**
+	 * Attach tags to contacts.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function add_contact_tags( array $input ) {
+		return self::mutate_membership( $input, 'doublescale/add-contact-tags', 'tag', true );
+	}
+
+	/**
+	 * Detach tags from contacts.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function remove_contact_tags( array $input ) {
+		return self::mutate_membership( $input, 'doublescale/remove-contact-tags', 'tag', false );
+	}
+
+	/**
+	 * Put contacts on lists.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function add_contact_lists( array $input ) {
+		return self::mutate_membership( $input, 'doublescale/add-contact-lists', 'list', true );
+	}
+
+	/**
+	 * Take contacts off lists.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function remove_contact_lists( array $input ) {
+		return self::mutate_membership( $input, 'doublescale/remove-contact-lists', 'list', false );
+	}
+
+	/**
+	 * Shared schema for tag/list membership tools.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $ids_key         tag_ids or list_ids.
+	 * @param string $ids_description Field description.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function membership_schema_properties( string $ids_key, string $ids_description ): array {
+		return array(
+			'contact_id'  => array(
+				'type'        => 'integer',
+				'description' => 'One contact. Mutually exclusive with contact_ids and filter.',
+			),
+			'contact_ids' => AbilityBulk::ids_property(
+				'doublescale/add-contact-tags',
+				'Contact ids. Mutually exclusive with contact_id and filter.'
+			),
+			'filter'      => AbilityBulk::filter_property(
+				'Same criteria as list-contacts. Mutually exclusive with contact_id and contact_ids. An empty filter is refused.',
+				self::filter_schema_properties()
+			),
+			$ids_key      => array(
+				'type'        => 'array',
+				'minItems'    => 1,
+				'description' => $ids_description,
+			),
+			'dry_run'     => AbilityBulk::dry_run_property(),
+		);
+	}
+
+	/**
+	 * Add or remove tags/lists on contacts targeted like bulk updates.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input        Ability input.
+	 * @param string               $ability_name Full ability name.
+	 * @param string               $kind         'tag' or 'list'.
+	 * @param bool                 $attach       True to add, false to detach.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private static function mutate_membership( array $input, string $ability_name, string $kind, bool $attach ) {
+		$ids_key = 'tag' === $kind ? 'tag_ids' : 'list_ids';
+
+		$targeted = self::normalize_membership_target( $input );
+		if ( is_wp_error( $targeted ) ) {
+			return $targeted;
+		}
+
+		$term_ids = self::normalize_term_ids( $targeted[ $ids_key ] ?? null, $ids_key );
+		if ( is_wp_error( $term_ids ) ) {
+			return $term_ids;
+		}
+
+		$existing = self::existing_term_ids( $kind, $term_ids );
+		$missing  = array_values( array_diff( $term_ids, $existing ) );
+		if ( array() !== $missing ) {
+			return new \WP_Error(
+				'doublescale_unknown_ids',
+				sprintf(
+					/* translators: 1: tag or list, 2: comma-separated ids */
+					__( 'Unknown %1$s ids: %2$s. Call list-contact-segments for ids that exist.', 'doublescale' ),
+					$kind,
+					implode( ', ', $missing )
+				),
+				array(
+					'status' => 400,
+					'field'  => $ids_key,
+					'ids'    => $missing,
+				)
+			);
+		}
+
+		return AbilityBulk::run_targeted(
+			$targeted,
+			$ability_name,
+			static function ( array $row ) use ( $kind, $attach, $ids_key, $term_ids ) {
+				$row[ $ids_key ] = $term_ids;
+				return self::apply_membership_to_contact( $row, $kind, $attach );
+			},
+			'updated',
+			array(
+				'ids_key'        => 'contact_ids',
+				'id_field'       => 'id',
+				'patch_keys'     => array( $ids_key ),
+				'patch_required' => true,
+				'querier'        => array( self::class, 'query_for_filter' ),
+			),
+			array(
+				'id_key'      => 'contact_id',
+				'applied_key' => 'applied_contact_ids',
+			)
+		);
+	}
+
+	/**
+	 * Turn a single contact_id into contact_ids so expand sees one targeting mode.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private static function normalize_membership_target( array $input ) {
+		$has_single = array_key_exists( 'contact_id', $input );
+		$has_ids    = array_key_exists( 'contact_ids', $input );
+		$has_filter = array_key_exists( 'filter', $input );
+
+		if ( (int) $has_single + (int) $has_ids + (int) $has_filter !== 1 ) {
+			return new \WP_Error(
+				'doublescale_invalid_target',
+				__( 'Provide exactly one of: contact_id, contact_ids, filter. Combining them is refused so a filter cannot silently widen a row list.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( $has_single ) {
+			$invalid = AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' );
+			if ( $invalid ) {
+				return $invalid;
+			}
+			$input['contact_ids'] = array( (int) $input['contact_id'] );
+			unset( $input['contact_id'] );
+		}
+
+		return $input;
+	}
+
+	/**
+	 * Positive integer ids from a membership array.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed  $raw   Caller value.
+	 * @param string $field Field name for errors.
+	 * @return array<int, int>|\WP_Error
+	 */
+	private static function normalize_term_ids( $raw, string $field ) {
+		if ( ! is_array( $raw ) || array() === $raw ) {
+			return new \WP_Error(
+				'doublescale_missing_field',
+				sprintf(
+					/* translators: %s: field name */
+					__( 'Provide at least one id in %s.', 'doublescale' ),
+					$field
+				),
+				array(
+					'status' => 400,
+					'field'  => $field,
+				)
+			);
+		}
+
+		$ids = array();
+		foreach ( $raw as $value ) {
+			$id = (int) $value;
+			if ( $id < 1 ) {
+				return new \WP_Error(
+					'doublescale_invalid_id',
+					sprintf(
+						/* translators: %s: field name */
+						__( '%s must contain positive integer ids.', 'doublescale' ),
+						$field
+					),
+					array(
+						'status' => 400,
+						'field'  => $field,
+					)
+				);
+			}
+			$ids[] = $id;
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Term ids that exist for the given kind.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string     $kind 'tag' or 'list'.
+	 * @param array<int> $ids  Requested ids.
+	 * @return array<int, int>
+	 */
+	private static function existing_term_ids( string $kind, array $ids ): array {
+		$class = 'tag' === $kind ? TagModel::class : ListModel::class;
+		$found = array();
+
+		foreach ( $class::query()->whereIn( 'id', $ids )->pluck( 'id' ) as $id ) {
+			$found[] = (int) $id;
+		}
+
+		return $found;
+	}
+
+	/**
+	 * Add or remove terms on one contact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input  Row with id plus tag_ids or list_ids.
+	 * @param string               $kind   'tag' or 'list'.
+	 * @param bool                 $attach True to add, false to detach.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private static function apply_membership_to_contact( array $input, string $kind, bool $attach ) {
+		$invalid = AbilityInput::id( $input['id'] ?? null, 'id' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$contact = ContactModel::query()->with( array( 'tags', 'lists' ) )->where( 'id', (int) $input['id'] )->first();
+		if ( ! $contact ) {
+			return AbilityResult::not_found( __( 'No contact found with that id.', 'doublescale' ) );
+		}
+
+		$ids_key  = 'tag' === $kind ? 'tag_ids' : 'list_ids';
+		$relation = 'tag' === $kind ? 'tags' : 'lists';
+		$wanted   = array_map( 'intval', (array) ( $input[ $ids_key ] ?? array() ) );
+		$current  = array();
+		foreach ( $contact->{$relation} as $term ) {
+			$current[] = (int) $term->id;
+		}
+
+		$changed = $attach
+			? array_values( array_diff( $wanted, $current ) )
+			: array_values( array_intersect( $wanted, $current ) );
+
+		if ( array() === $changed ) {
+			return array(
+				'updated'    => false,
+				'contact_id' => (int) $contact->id,
+				$ids_key     => array(),
+				'message'    => $attach
+					? __( 'Nothing to change — those terms are already attached.', 'doublescale' )
+					: __( 'Nothing to change — those terms are not attached.', 'doublescale' ),
+			);
+		}
+
+		if ( AbilityBulk::is_preview( $input ) ) {
+			return array(
+				'updated'      => false,
+				'would_update' => true,
+				'contact_id'   => (int) $contact->id,
+				$ids_key       => $changed,
+			);
+		}
+
+		if ( $attach ) {
+			if ( 'tag' === $kind ) {
+				$contact->add_tags( $changed );
+			} else {
+				$contact->add_lists( $changed );
+			}
+		} elseif ( 'tag' === $kind ) {
+			$contact->tags()->detach( $changed );
+			do_action( 'doublescale_contact_tag_remove', $contact, $changed );
+		} else {
+			$contact->lists()->detach( $changed );
+			do_action( 'doublescale_contact_list_remove', $contact, $changed );
+		}
+
+		return array(
+			'updated'    => true,
+			'contact_id' => (int) $contact->id,
+			$ids_key     => $changed,
 		);
 	}
 

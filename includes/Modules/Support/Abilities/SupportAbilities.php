@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only support ticket abilities.
+ * Support ticket abilities.
  *
  * @package DoubleScale\Modules\Support
  */
@@ -260,6 +260,46 @@ final class SupportAbilities {
 					),
 				),
 				'execute_callback' => array( self::class, 'update_ticket' ),
+			),
+
+			'doublescale/create-ticket'       => array(
+				'module_slug'      => 'support',
+				'label'            => __( 'Create a support ticket', 'doublescale' ),
+				'description'      => __( 'Open a new support ticket for an existing contact. Requires title, content, and contact_id. The default mailbox is used — this tool does not accept a mailbox, recipient, CC, or email address. May email the customer a confirmation if that notification is enabled on this site. The ticket is assigned to you.', 'doublescale' ),
+				'category'         => AbilityCategories::SUPPORT,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contact_id' => array(
+							'type'        => 'integer',
+							'description' => 'Existing contact the ticket belongs to.',
+						),
+						'title'      => array(
+							'type'        => 'string',
+							'description' => 'Ticket title.',
+						),
+						'content'    => array(
+							'type'        => 'string',
+							'description' => 'Opening message recorded on the ticket.',
+						),
+						'priority'   => array(
+							'type'        => 'string',
+							'description' => 'Priority. Defaults to normal.',
+							'enum'        => TicketPriority::all(),
+						),
+					),
+					'required'   => array( 'contact_id', 'title', 'content' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_ticket' ),
 			),
 		);
 	}
@@ -577,6 +617,50 @@ final class SupportAbilities {
 			'ticket_id' => (int) $ticket->id,
 			'changed'   => array_keys( $updates ),
 		);
+	}
+
+	/**
+	 * Open a ticket for an existing contact.
+	 *
+	 * Delegates to {@see TicketService::create_ticket()} so mailbox resolution,
+	 * the opening message, and the created hook match the dashboard.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_ticket( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'contact_id', 'title', 'content' ) ),
+				AbilityInput::id( $input['contact_id'] ?? null, 'contact_id' ),
+				AbilityInput::enum( $input['priority'] ?? null, TicketPriority::all(), 'priority' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$result = self::ticket_service()->create_ticket(
+			array(
+				'contact_id'    => (int) $input['contact_id'],
+				'title'         => (string) $input['title'],
+				'content'       => (string) $input['content'],
+				'priority'      => isset( $input['priority'] ) ? (string) $input['priority'] : TicketPriority::NORMAL,
+				'agent_user_id' => get_current_user_id(),
+				'source'        => 'web',
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$shaped = self::shape_ticket( $result );
+		$shaped['created'] = true;
+
+		return $shaped;
 	}
 
 	/**

@@ -44,7 +44,7 @@ class RestMcpSettingsController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_status' ),
-					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'permission_callback' => array( $this, 'key_permissions_check' ),
 				),
 			)
 		);
@@ -74,7 +74,7 @@ class RestMcpSettingsController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_key' ),
-					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'permission_callback' => array( $this, 'key_permissions_check' ),
 					'args'                => array(
 						'label'   => array(
 							'required' => false,
@@ -97,7 +97,7 @@ class RestMcpSettingsController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'email_setup' ),
-					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'permission_callback' => array( $this, 'key_permissions_check' ),
 					'args'                => array(
 						'client'      => array(
 							'required' => true,
@@ -138,7 +138,7 @@ class RestMcpSettingsController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_key' ),
-					'permission_callback' => array( $this, 'admin_permissions_check' ),
+					'permission_callback' => array( $this, 'key_permissions_check' ),
 				),
 			)
 		);
@@ -182,7 +182,12 @@ class RestMcpSettingsController extends RestController {
 				'label'      => $created['label'],
 				'user_id'    => $subject,
 				'user_login' => $owner ? $owner->user_login : '',
-				'api_keys'   => ApiKeyStore::list_for_display(),
+				// Scoped exactly as the status route is. Returning the site-wide
+				// list here would hand a non-administrator every key on the site
+				// as a side effect of creating their own.
+				'api_keys'   => Permissions::can_manage_mcp()
+					? ApiKeyStore::list_for_display()
+					: ApiKeyStore::list_for_user( get_current_user_id() ),
 				'message'    => get_current_user_id() === $subject
 					? __( 'API key created. Copy it now — it will not be shown again.', 'doublescale' )
 					: sprintf(
@@ -212,6 +217,18 @@ class RestMcpSettingsController extends RestController {
 		$user_id = ApiKeyStore::user_for( $key_id );
 
 		if ( $user_id <= 0 ) {
+			return new WP_Error(
+				'doublescale_mcp_unknown_key',
+				__( 'That API key no longer exists.', 'doublescale' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// This mails a live credential, so a non-administrator may only trigger
+		// it for their own key. Reported as "no longer exists" rather than
+		// "forbidden": confirming that someone else's key id is real is itself
+		// the leak worth avoiding here.
+		if ( $user_id !== get_current_user_id() && ! Permissions::can_manage_mcp() ) {
 			return new WP_Error(
 				'doublescale_mcp_unknown_key',
 				__( 'That API key no longer exists.', 'doublescale' ),
@@ -258,12 +275,24 @@ class RestMcpSettingsController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function delete_key( $request ) {
-		$deleted = ApiKeyStore::delete( (string) $request->get_param( 'id' ) );
+		$key_id = (string) $request->get_param( 'id' );
+
+		// An administrator revokes any key; everyone else only their own.
+		// Without the owner check the weaker route gate would let one sales rep
+		// revoke another's key by guessing an id.
+		if ( Permissions::can_manage_mcp() ) {
+			$deleted = ApiKeyStore::delete( $key_id );
+			$keys    = ApiKeyStore::list_for_display();
+		} else {
+			$user_id = get_current_user_id();
+			$deleted = ApiKeyStore::delete_own( $key_id, $user_id );
+			$keys    = ApiKeyStore::list_for_user( $user_id );
+		}
 
 		return new WP_REST_Response(
 			array(
 				'deleted'  => $deleted,
-				'api_keys' => ApiKeyStore::list_for_display(),
+				'api_keys' => $keys,
 			),
 			200
 		);
@@ -293,6 +322,35 @@ class RestMcpSettingsController extends RestController {
 	}
 
 	/**
+	 * Gate for the self-service key routes.
+	 *
+	 * Weaker than {@see admin_permissions_check()} on purpose: any user holding
+	 * a DoubleScale role may read the MCP status and manage their OWN keys, but
+	 * the handlers behind this gate must scope every read and write to the
+	 * caller unless they are an administrator. A key grants its owner exactly
+	 * the access they already have, because every ability re-checks role and
+	 * owner scope on each call.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return true|WP_Error
+	 */
+	public function key_permissions_check( $request ) {
+		unset( $request );
+
+		if ( ! Permissions::can_manage_own_mcp_key() ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'You need a DoubleScale role to create an MCP API key.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Everything the settings screen needs to explain the current state.
 	 *
 	 * @since 1.0.0
@@ -313,6 +371,11 @@ class RestMcpSettingsController extends RestController {
 		$abilities_enabled = $api_available && ! get_option( AbilitiesBootstrap::DISABLE_OPTION, false );
 		$mcp_enabled       = McpServer::is_enabled();
 
+		// An administrator manages the whole surface; everyone else sees only
+		// their own keys and cannot toggle the endpoint. `can_manage_mcp` is
+		// what the UI keys its admin-only controls off.
+		$is_admin = Permissions::can_manage_mcp();
+
 		return new WP_REST_Response(
 			array(
 				'abilities_api_available' => $api_available,
@@ -323,10 +386,14 @@ class RestMcpSettingsController extends RestController {
 				'connected'               => $abilities_enabled && $mcp_enabled,
 				'endpoint_url'            => McpServer::endpoint_url(),
 				'tools'                   => $this->tool_summaries(),
-				'api_keys'                => ApiKeyStore::list_for_display(),
+				'api_keys'                => $is_admin
+					? ApiKeyStore::list_for_display()
+					: ApiKeyStore::list_for_user( get_current_user_id() ),
+				'can_manage_mcp'          => $is_admin,
 				'current_user'            => wp_get_current_user()->user_login,
 				'current_user_id'         => get_current_user_id(),
-				// Users this administrator may issue a key on behalf of.
+				// Users this administrator may issue a key on behalf of. Empty
+				// for a non-administrator, who may only issue for themselves.
 				'eligible_key_users'      => KeySubject::eligible(),
 				'app_passwords_url'       => admin_url( 'profile.php#application-passwords-section' ),
 				// Application passwords need HTTPS. Without this the connect

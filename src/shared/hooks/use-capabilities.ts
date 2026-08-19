@@ -102,12 +102,24 @@ export const useCapabilities = () => {
     }, []);
 
     /**
-     * Settings → MCP: WordPress administrators only. CRM Manager can use the
-     * CRM but cannot enable the site-wide MCP endpoint or issue API keys.
+     * The MCP surface: WordPress administrators only. Governs enabling the
+     * site-wide endpoint and seeing or revoking every key on the site.
      */
     const canManageMcp = useCallback((): boolean => {
         const caps = Config.getUserCapabilities();
         return Boolean(caps.doublescale_manage_mcp);
+    }, []);
+
+    /**
+     * Whether the MCP tab should be reachable at all. Weaker than
+     * canManageMcp: any DoubleScale role may open it to issue and revoke their
+     * OWN key, because a user with callable abilities and no way to obtain a
+     * key cannot use the feature. Administrators additionally get the endpoint
+     * toggle and the site-wide key list.
+     */
+    const canManageOwnMcpKey = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities();
+        return Boolean(caps.doublescale_manage_own_mcp_key || caps.doublescale_manage_mcp);
     }, []);
 
     /**
@@ -149,6 +161,7 @@ export const useCapabilities = () => {
         isCrmManager,
         hasLimitedSettingsAccess,
         canManageMcp,
+        canManageOwnMcpKey,
         canManageAllTickets,
         hasProjectAccess,
         canManageAllProjects,

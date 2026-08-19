@@ -140,7 +140,7 @@ const SettingsPage: React.FC = () => {
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const {
 		hasLimitedSettingsAccess: checkLimitedSettingsAccess,
-		canManageMcp: checkCanManageMcp,
+		canManageOwnMcpKey: checkCanReachMcpTab,
 	} = useCapabilities();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
@@ -152,7 +152,9 @@ const SettingsPage: React.FC = () => {
 	// multi-role users keep full Settings access (Mailbox/Notifications only
 	// for pure Sales Rep / Sales Manager).
 	const hasLimitedSettingsAccess = checkLimitedSettingsAccess();
-	const canManageMcp = checkCanManageMcp();
+	// Any DoubleScale role may open the MCP tab to manage their own key; the
+	// admin-only controls inside it gate separately on doublescale_manage_mcp.
+	const canReachMcpTab = checkCanReachMcpTab();
 	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
@@ -172,7 +174,7 @@ const SettingsPage: React.FC = () => {
 				navigate(getToLink('settings/notifications'), { replace: true });
 				return;
 			}
-			if (urlTab === 'mcp' && !canManageMcp) {
+			if (urlTab === 'mcp' && !canReachMcpTab) {
 				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 				return;
 			}
@@ -185,7 +187,7 @@ const SettingsPage: React.FC = () => {
 		urlTab,
 		navigate,
 		hasLimitedSettingsAccess,
-		canManageMcp,
+		canReachMcpTab,
 		defaultTab,
 	]);
 
@@ -636,11 +638,11 @@ const SettingsPage: React.FC = () => {
 		if (hasLimitedSettingsAccess) {
 			tabs = tabs.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value));
 		}
-		if (!canManageMcp) {
+		if (!canReachMcpTab) {
 			tabs = tabs.filter((tab) => tab.value !== 'mcp');
 		}
 		return tabs;
-	}, [filteredTabsList, hasLimitedSettingsAccess, canManageMcp]);
+	}, [filteredTabsList, hasLimitedSettingsAccess, canReachMcpTab]);
 
 	const tabsContent = tabsList.map(({ value }) => {
 		if (activeTab !== value) {

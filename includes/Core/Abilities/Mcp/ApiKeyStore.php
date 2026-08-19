@@ -112,6 +112,28 @@ final class ApiKeyStore {
 	}
 
 	/**
+	 * Delete a key only if it belongs to the given user.
+	 *
+	 * Returns false both when the key is missing and when it belongs to someone
+	 * else, deliberately: distinguishing the two would confirm to a caller that
+	 * a key id exists on the site, which is the one fact they should not learn
+	 * from a failed revoke.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $id      Key id.
+	 * @param int    $user_id Required owner.
+	 * @return bool
+	 */
+	public static function delete_own( string $id, int $user_id ): bool {
+		if ( self::user_for( $id ) !== $user_id || $user_id <= 0 ) {
+			return false;
+		}
+
+		return self::delete( $id );
+	}
+
+	/**
 	 * Resolve a presented key to its user id.
 	 *
 	 * @since 1.0.0
@@ -151,9 +173,41 @@ final class ApiKeyStore {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function list_for_display(): array {
+		return self::build_display_list( null );
+	}
+
+	/**
+	 * Only the keys belonging to one user.
+	 *
+	 * A non-administrator managing their own key must never be handed the whole
+	 * site's key inventory — the labels and usernames alone map out who has
+	 * agent access, and the list is what the revoke button acts on.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id Owner to filter by.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function list_for_user( int $user_id ): array {
+		return self::build_display_list( $user_id );
+	}
+
+	/**
+	 * Shared display shaper.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|null $only_user Owner filter, or null for every key.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function build_display_list( ?int $only_user ): array {
 		$out = array();
 
 		foreach ( self::all() as $record ) {
+			if ( null !== $only_user && (int) ( $record['user_id'] ?? 0 ) !== $only_user ) {
+				continue;
+			}
+
 			$user = get_userdata( (int) ( $record['user_id'] ?? 0 ) );
 
 			// A key can outlive the user it was issued for; the settings screen

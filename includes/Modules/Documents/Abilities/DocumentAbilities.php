@@ -17,6 +17,7 @@ use DoubleScale\Modules\Documents\Constants\InvoiceStatus;
 use DoubleScale\Modules\Documents\Constants\ProposalStatus;
 use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Models\ProposalModel;
+use DoubleScale\Modules\Documents\Services\SendInvoice;
 use DoubleScale\Modules\Sales\Capabilities;
 
 /**
@@ -247,6 +248,40 @@ final class DocumentAbilities {
 				),
 				'execute_callback' => array( self::class, 'update_proposal' ),
 			),
+
+			'doublescale/send-invoice'      => array(
+				'module_slug'      => 'documents',
+				'label'            => __( 'Send an invoice to the customer', 'doublescale' ),
+				'description'      => __( 'Email an invoice to the customer it belongs to. THIS EMAILS THE CUSTOMER IMMEDIATELY and cannot be recalled, so only call it when the user has explicitly asked to send this invoice. Sending also moves a draft to unpaid, stamps the sent date, and locks the currency and the billing and issuer details to what they are now — so send only once the invoice is final. Paid invoices cannot be sent. The recipient is always the invoice\'s own contact and cannot be overridden.', 'doublescale' ),
+				'category'         => AbilityCategories::SALES,
+				'permission'       => $permission,
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'id'      => array(
+							'type'        => 'integer',
+							'description' => 'Invoice id to send.',
+						),
+						'message' => array(
+							'type'        => 'string',
+							'description' => 'Optional covering note included in the email.',
+						),
+					),
+					'required'   => array( 'id' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						// The record survives, but the send freezes snapshots
+						// and cannot be undone.
+						'destructive'   => false,
+						// Calling twice sends a second email.
+						'idempotent'    => false,
+						'openWorldHint' => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'send_invoice' ),
+			),
 		);
 	}
 
@@ -347,6 +382,81 @@ final class DocumentAbilities {
 		}
 
 		return self::apply_document_update( $proposal, 'proposal', $input, 'proposal_id' );
+	}
+
+	/**
+	 * Email an invoice to its customer.
+	 *
+	 * Delegates the entire send to {@see SendInvoice}, which the REST endpoint
+	 * also uses. That shared path is the point: sending advances status and
+	 * freezes the currency, billing, and issuer snapshots, and a second
+	 * implementation that missed one of those would corrupt a customer-facing
+	 * financial document.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function send_invoice( array $input ) {
+		$invalid = AbilityInput::first_error(
+			array(
+				AbilityInput::required( $input, array( 'id' ) ),
+				AbilityInput::id( $input['id'] ?? null, 'id' ),
+			)
+		);
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$invoice = InvoiceModel::query()
+			->with( array( 'contact', 'sale_agent', 'proposal' ) )
+			->where( 'id', (int) $input['id'] )
+			->first();
+
+		if ( ! $invoice ) {
+			return AbilityResult::not_found( __( 'No invoice found with that id.', 'doublescale' ) );
+		}
+
+		$forbidden = AbilityScope::assert_owns(
+			$invoice,
+			'sale_agent_user_id',
+			self::sees_all_sales(),
+			__( 'You do not have permission to access this invoice.', 'doublescale' )
+		);
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
+		// A customer with no email address would otherwise surface as an opaque
+		// SMTP failure after the status had already advanced.
+		$contact = $invoice->contact ?? null;
+		$email   = is_object( $contact ) ? (string) ( $contact->email ?? '' ) : '';
+		if ( '' === $email ) {
+			return new \WP_Error(
+				'doublescale_no_recipient',
+				__( 'This invoice\'s contact has no email address, so there is nobody to send it to.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$message = isset( $input['message'] ) ? sanitize_textarea_field( (string) $input['message'] ) : '';
+
+		$sent = SendInvoice::send( $invoice, $message, 'email' );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
+		}
+
+		return array(
+			'sent'           => true,
+			'invoice_id'     => (int) $sent->id,
+			'invoice_number' => (string) $sent->invoice_number,
+			'status'         => (string) $sent->status,
+			'sent_at'        => (string) $sent->sent_at,
+			// Named explicitly so the agent can tell the user who was emailed
+			// rather than implying it chose the recipient.
+			'emailed_to'     => $email,
+		);
 	}
 
 	/**

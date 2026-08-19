@@ -696,20 +696,24 @@ class ContactModel extends Model {
 	}
 
 	/**
-	 * Whether the contact has at least one usable identifier (email or phone).
+	 * Whether the contact has at least one required identifier (email or phone).
+	 *
+	 * WhatsApp is optional and cannot stand in for email/phone. The third
+	 * argument is kept so existing call sites keep compiling.
 	 *
 	 * @param string|null $email
 	 * @param string      $phone
-	 * @param string      $whatsapp_phone
+	 * @param string      $whatsapp_phone Unused. Kept for call-site compatibility.
 	 * @return bool
 	 */
 	public static function has_identifier( $email, $phone = '', $whatsapp_phone = '' ) {
+		unset( $whatsapp_phone );
+
 		if ( null !== self::normalize_email( $email ) ) {
 			return true;
 		}
 
-		return '' !== self::normalize_phone_field( $phone )
-			|| '' !== self::normalize_whatsapp_field( $whatsapp_phone );
+		return '' !== self::normalize_phone_field( $phone );
 	}
 
 	/**
@@ -1284,22 +1288,14 @@ class ContactModel extends Model {
 		}
 
 		if ( array_key_exists( 'phone', $data ) ) {
-			$phone = self::normalize_phone_field( $data['phone'] );
-			if ( '' === $phone ) {
-				unset( $data['phone'] );
-			} else {
-				$data['phone'] = $phone;
-			}
+			$phone         = self::normalize_phone_field( $data['phone'] );
+			$data['phone'] = '' === $phone ? null : $phone;
 		}
 
 		if ( array_key_exists( 'whatsapp_phone', $data ) ) {
-			$country_hint = isset( $data['country'] ) ? (string) $data['country'] : '';
-			$whatsapp     = self::normalize_whatsapp_field( $data['whatsapp_phone'], $country_hint );
-			if ( '' === $whatsapp ) {
-				unset( $data['whatsapp_phone'] );
-			} else {
-				$data['whatsapp_phone'] = $whatsapp;
-			}
+			$country_hint           = isset( $data['country'] ) ? (string) $data['country'] : '';
+			$whatsapp               = self::normalize_whatsapp_field( $data['whatsapp_phone'], $country_hint );
+			$data['whatsapp_phone'] = '' === $whatsapp ? null : $whatsapp;
 		}
 
 		if ( array_key_exists( 'avatar_id', $data ) ) {

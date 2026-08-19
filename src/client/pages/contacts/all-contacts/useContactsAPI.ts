@@ -111,7 +111,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 				: '';
 
 		const hasEmail = email !== '' && isEmail(email);
-		const hasPhone = phone !== '' || whatsappPhone !== '';
+		const hasPhone = phone !== '';
 
 		if (!hasEmail && !hasPhone) {
 			const message = __(

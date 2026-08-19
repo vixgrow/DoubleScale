@@ -102,6 +102,30 @@ const InfoCard: React.FC = () => {
 
 	const handleSave = async () => {
 		if (editingField && contact && !isSaving) {
+			if (
+				editingField === 'email' ||
+				editingField === 'phone' ||
+				editingField === 'whatsapp_phone'
+			) {
+				const nextEmail =
+					editingField === 'email'
+						? editValue
+						: contact.email || '';
+				const nextPhone =
+					editingField === 'phone'
+						? editValue
+						: contact.phone || '';
+				if (nextEmail.trim() === '' && nextPhone.trim() === '') {
+					setFieldErrors({
+						[editingField]: __(
+							'Contact must have an email address or phone number.',
+							'doublescale'
+						),
+					});
+					return;
+				}
+			}
+
 			setIsSaving(true);
 			try {
 				const result = await updateContact({

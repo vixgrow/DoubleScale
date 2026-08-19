@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Activities\Abilities;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Abilities\AbilityBulk;
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
@@ -211,6 +212,75 @@ final class ActivityAbilities {
 				),
 				'execute_callback' => array( self::class, 'log_call' ),
 			),
+
+			'doublescale/add-contact-notes-bulk' => array(
+				'module_slug'      => 'activities',
+				'label'            => __( 'Add notes to contacts in bulk', 'doublescale' ),
+				'description'      => __( 'Append a note to each of many contacts in one call — the note text is per row, so each contact can get a different note. Notes are attributed to you and cannot be edited or removed through this tool. Nothing is emailed. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'notes' => array(
+							'type'        => 'array',
+							'minItems'    => 1,
+							'maxItems'    => AbilityBulk::max_items( 'doublescale/add-contact-notes-bulk' ),
+							'description' => 'One object per note. Each accepts: contact_id (required), '
+								. 'content (required), title. Rows are validated individually — an '
+								. 'invalid row is reported in "errors" with its index while valid '
+								. 'rows still save.',
+							// NO 'items' key — WP validates items before the callback
+							// runs, so one bad row would reject the whole batch.
+						),
+					),
+					'required'   => array( 'notes' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						// Each call appends fresh rows.
+						'idempotent'    => false,
+						'openWorldHint' => false,
+						'bulk'          => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'add_contact_notes_bulk' ),
+			),
+
+			'doublescale/log-calls-bulk'       => array(
+				'module_slug'      => 'activities',
+				'label'            => __( 'Log calls in bulk', 'doublescale' ),
+				'description'      => __( 'Record many calls in one call to this tool — useful after working through a call list. This only records history; it places no outbound calls and emails nobody. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( Permissions::class, 'can_send_contact_message' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'calls' => array(
+							'type'        => 'array',
+							'minItems'    => 1,
+							'maxItems'    => AbilityBulk::max_items( 'doublescale/log-calls-bulk' ),
+							'description' => 'One object per call. Each accepts: contact_id (required), '
+								. 'notes, duration (minutes), outcome. Rows are validated individually '
+								. '— an invalid row is reported in "errors" with its index while valid '
+								. 'rows still save.',
+						),
+					),
+					'required'   => array( 'calls' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => false,
+						'bulk'          => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'log_calls_bulk' ),
+			),
 		);
 	}
 
@@ -337,6 +407,63 @@ final class ActivityAbilities {
 			'activity_id' => (int) $activity->id,
 			'contact_id'  => (int) $input['contact_id'],
 		);
+	}
+
+	/**
+	 * Add a note to each of many contacts.
+	 *
+	 * Loops {@see add_contact_note()} per row, so the contact-exists check and
+	 * the service's own access check stay in one place. No dedup pass here:
+	 * unlike contacts, two notes on the same contact are a legitimate request,
+	 * not a mistake to catch.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function add_contact_notes_bulk( array $input ) {
+		$invalid = AbilityBulk::validate_batch( $input, 'notes', 'doublescale/add-contact-notes-bulk' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$processed = AbilityBulk::process(
+			(array) $input['notes'],
+			static function ( array $row ) {
+				return self::add_contact_note( $row );
+			},
+			array( 'ability_name' => 'doublescale/add-contact-notes-bulk' )
+		);
+
+		return AbilityBulk::envelope( $processed, 'created' );
+	}
+
+	/**
+	 * Record many calls.
+	 *
+	 * Loops {@see log_call()} per row.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function log_calls_bulk( array $input ) {
+		$invalid = AbilityBulk::validate_batch( $input, 'calls', 'doublescale/log-calls-bulk' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$processed = AbilityBulk::process(
+			(array) $input['calls'],
+			static function ( array $row ) {
+				return self::log_call( $row );
+			},
+			array( 'ability_name' => 'doublescale/log-calls-bulk' )
+		);
+
+		return AbilityBulk::envelope( $processed, 'created' );
 	}
 
 	/**

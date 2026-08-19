@@ -9,6 +9,7 @@ namespace DoubleScale\Modules\Contacts\Abilities;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Abilities\AbilityBulk;
 use DoubleScale\Core\Abilities\AbilityCategories;
 use DoubleScale\Core\Abilities\AbilityInput;
 use DoubleScale\Core\Abilities\AbilityResult;
@@ -217,6 +218,74 @@ final class ContactAbilities {
 				),
 				'execute_callback' => array( self::class, 'update_contact' ),
 			),
+
+			'doublescale/create-contacts-bulk' => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Create contacts in bulk', 'doublescale' ),
+				'description'      => __( 'Add many contacts in one call. Email must be unique per contact. Creating contacts does not email them. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contacts' => array(
+							'type'        => 'array',
+							'minItems'    => 1,
+							'maxItems'    => AbilityBulk::max_items( 'doublescale/create-contacts-bulk' ),
+							'description' => 'One object per contact. Each accepts: email (required, unique), '
+								. 'first_name, last_name, phone, company_name. Rows are validated '
+								. 'individually — an invalid row is reported in "errors" with its '
+								. 'index while valid rows still save.',
+							// NO 'items' key at all — WP schema validation of items would
+							// reject the whole batch before the callback runs.
+						),
+					),
+					'required'   => array( 'contacts' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => false,
+						'openWorldHint' => false,
+						'bulk'          => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'create_contacts_bulk' ),
+			),
+
+			'doublescale/update-contacts-bulk' => array(
+				'module_slug'      => 'contacts',
+				'label'            => __( 'Update contacts in bulk', 'doublescale' ),
+				'description'      => __( 'Change name, phone, or company on many contacts in one call. Email and subscription status are not editable here. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.', 'doublescale' ),
+				'category'         => AbilityCategories::CONTACTS,
+				'permission'       => array( self::class, 'can_write_contacts' ),
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'contacts' => array(
+							'type'        => 'array',
+							'minItems'    => 1,
+							'maxItems'    => AbilityBulk::max_items( 'doublescale/update-contacts-bulk' ),
+							'description' => 'One object per contact. Each accepts: id (required), '
+								. 'first_name, last_name, phone, company_name. Rows are validated '
+								. 'individually — an invalid row is reported in "errors" with its '
+								. 'index while valid rows still save.',
+						),
+					),
+					'required'   => array( 'contacts' ),
+				),
+				'meta'             => array(
+					'annotations' => array(
+						'readonly'      => false,
+						'destructive'   => false,
+						'idempotent'    => true,
+						'openWorldHint' => false,
+						'bulk'          => true,
+					),
+				),
+				'execute_callback' => array( self::class, 'update_contacts_bulk' ),
+			),
 		);
 	}
 
@@ -360,6 +429,106 @@ final class ContactAbilities {
 			'contact_id' => (int) $contact->id,
 			'changed'    => $changed,
 		);
+	}
+
+	/**
+	 * Create many contacts.
+	 *
+	 * Loops {@see create_contact()} per row so every per-row permission check
+	 * and validation stays in one place. The only extra logic is intra-batch
+	 * email dedup — a single-record callback cannot see sibling rows.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function create_contacts_bulk( array $input ) {
+		$invalid = AbilityBulk::validate_batch( $input, 'contacts', 'doublescale/create-contacts-bulk' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		// Keyed on strtolower(trim($email)), matching MySQL's case-insensitive
+		// UNIQUE index. Deliberately NOT ContactModel::normalize_email() — that
+		// only trims, so A@x.com / a@x.com would slip past the seen-set and
+		// collide in the DB. Do not lowercase normalize_email() as a "fix";
+		// it sits on every save path and would rewrite stored casing.
+		$seen = array();
+
+		$processed = AbilityBulk::process(
+			(array) $input['contacts'],
+			static function ( array $row, int $index ) use ( &$seen ) {
+				$email_key = self::batch_email_key( $row['email'] ?? '' );
+
+				if ( '' !== $email_key ) {
+					if ( isset( $seen[ $email_key ] ) ) {
+						return new \WP_Error(
+							'doublescale_duplicate_in_batch',
+							sprintf(
+								/* translators: 1: email address, 2: index of the first occurrence */
+								__( 'Email %1$s appears more than once in this batch (first at index %2$d).', 'doublescale' ),
+								$email_key,
+								$seen[ $email_key ]
+							),
+							array(
+								'status'             => 409,
+								'duplicate_of_index' => $seen[ $email_key ],
+							)
+						);
+					}
+					$seen[ $email_key ] = $index;
+				}
+
+				return self::create_contact( $row );
+			},
+			array( 'ability_name' => 'doublescale/create-contacts-bulk' )
+		);
+
+		return AbilityBulk::envelope( $processed, 'created' );
+	}
+
+	/**
+	 * Update many contacts.
+	 *
+	 * Loops {@see update_contact()} per row.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array<string, mixed> $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public static function update_contacts_bulk( array $input ) {
+		$invalid = AbilityBulk::validate_batch( $input, 'contacts', 'doublescale/update-contacts-bulk' );
+		if ( $invalid ) {
+			return $invalid;
+		}
+
+		$processed = AbilityBulk::process(
+			(array) $input['contacts'],
+			static function ( array $row ) {
+				return self::update_contact( $row );
+			},
+			array( 'ability_name' => 'doublescale/update-contacts-bulk' )
+		);
+
+		return AbilityBulk::envelope( $processed, 'updated' );
+	}
+
+	/**
+	 * Batch-local email key.
+	 *
+	 * See {@see create_contacts_bulk()} for why this is not normalize_email().
+	 *
+	 * @param mixed $email Raw email from a row.
+	 * @return string Empty when the row has no usable email.
+	 */
+	private static function batch_email_key( $email ): string {
+		if ( ! is_scalar( $email ) ) {
+			return '';
+		}
+
+		return strtolower( trim( (string) $email ) );
 	}
 
 	/**

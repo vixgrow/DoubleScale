@@ -227,9 +227,9 @@ final class AbilityDefinitionContractTest extends TestCase {
 			// only correct if its callback does not mutate. Names are the
 			// cheapest reliable signal we have at the definition layer.
 			$looks_mutating = (bool) preg_match(
-				'#/(create|update|add|log|delete|remove|move|send|set)-#',
+				'#/(create|update|add|log|delete|remove|move|send|set)-|-bulk$#',
 				$name
-			);
+			) || false !== strpos( $name, 'bulk' );
 
 			if ( ! $looks_mutating ) {
 				continue;
@@ -356,5 +356,133 @@ final class AbilityDefinitionContractTest extends TestCase {
 
 		$this->assertSame( ContactAbilities::EMAIL_STATUSES, $enum );
 		$this->assertContains( 'unverified', $enum, 'The contacts table stores "unverified".' );
+	}
+
+	/**
+	 * A name containing `bulk` that inherited readonly:true would invite an
+	 * agent to retry a write. The `-bulk` suffix matches the write regex; a
+	 * `bulk-` prefix would not — so this is asserted on the substring, not
+	 * only on the verb.
+	 */
+	public function test_bulk_abilities_declare_readonly_false(): void {
+		$checked = 0;
+
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			if ( false === strpos( $name, 'bulk' ) ) {
+				continue;
+			}
+
+			++$checked;
+
+			$this->assertFalse(
+				$definition['meta']['annotations']['readonly'] ?? true,
+				$name . ' contains "bulk" but is annotated readonly:true.'
+			);
+			$this->assertStringEndsWith(
+				'-bulk',
+				$name,
+				$name . ' contains "bulk" but does not use the -bulk suffix, so the write-contract regex would miss it.'
+			);
+		}
+
+		$this->assertGreaterThan(
+			0,
+			$checked,
+			'No bulk abilities found — this contract is not actually checking anything.'
+		);
+	}
+
+	/**
+	 * Declaring `items` with a type/required/properties schema makes WP reject
+	 * the whole batch before the callback runs. Row shape lives in the
+	 * description; invalid rows are reported in `errors`.
+	 */
+	public function test_bulk_array_properties_have_no_items_schema(): void {
+		$checked = 0;
+
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			if ( substr( $name, -5 ) !== '-bulk' ) {
+				continue;
+			}
+
+			$properties = $definition['input_schema']['properties'] ?? array();
+			if ( ! is_array( $properties ) ) {
+				continue;
+			}
+
+			foreach ( $properties as $prop_name => $prop ) {
+				if ( ! is_array( $prop ) || ( $prop['type'] ?? '' ) !== 'array' ) {
+					continue;
+				}
+
+				++$checked;
+
+				$this->assertArrayNotHasKey(
+					'items',
+					$prop,
+					$name . ' property "' . $prop_name . '" declares items schema, which would reject the whole batch on one bad row.'
+				);
+				$this->assertArrayNotHasKey(
+					'type',
+					$prop['items'] ?? array(),
+					$name . ' property "' . $prop_name . '" items must not declare type.'
+				);
+				$this->assertArrayNotHasKey(
+					'required',
+					$prop['items'] ?? array(),
+					$name . ' property "' . $prop_name . '" items must not declare required.'
+				);
+				$this->assertArrayNotHasKey(
+					'properties',
+					$prop['items'] ?? array(),
+					$name . ' property "' . $prop_name . '" items must not declare properties.'
+				);
+				$this->assertSame(
+					\DoubleScale\Core\Abilities\AbilityBulk::max_items( $name ),
+					$prop['maxItems'] ?? null,
+					$name . ' property "' . $prop_name . '" maxItems must match AbilityBulk::max_items().'
+				);
+			}
+		}
+
+		$this->assertGreaterThan(
+			0,
+			$checked,
+			'No bulk array properties found — this contract is not actually checking anything.'
+		);
+	}
+
+	/**
+	 * A mass-mailer with an LLM on the trigger. Support replies and campaign
+	 * sends have no recall and no revision history.
+	 */
+	public function test_support_and_campaigns_expose_no_bulk_abilities(): void {
+		$checked = 0;
+
+		foreach ( $this->all_definitions() as $name => $definition ) {
+			$module = $definition['module_slug'] ?? '';
+
+			if ( ! in_array( $module, array( 'support', 'campaigns' ), true ) ) {
+				continue;
+			}
+
+			++$checked;
+
+			$this->assertStringNotContainsString(
+				'-bulk',
+				$name,
+				$name . ' is a bulk write in the "' . $module . '" module, which must never expose one.'
+			);
+			$this->assertFalse(
+				false !== strpos( $name, 'bulk' ),
+				$name . ' contains "bulk" in the "' . $module . '" module, which must never expose a bulk write.'
+			);
+		}
+
+		$this->assertGreaterThan(
+			0,
+			$checked,
+			'No support/campaigns abilities found — this contract is not actually checking anything.'
+		);
 	}
 }

@@ -73,8 +73,13 @@ final class AdminConfig {
 			// CRM Manager + Sales Rep multi-role users never get locked to
 			// Mailbox/Notifications by composing membership flags in JS.
 			'doublescale_limited_settings'        => Permissions::has_limited_settings_access(),
-			// MCP settings page only — WordPress administrators, not CRM Manager.
+			// The MCP surface — enabling the endpoint, and seeing or revoking
+			// every key on the site. WordPress administrators, not CRM Manager.
 			'doublescale_manage_mcp'              => Permissions::can_manage_mcp(),
+			// Weaker: may open the MCP tab to issue and revoke their OWN key.
+			// Any DoubleScale role, because a rep with callable abilities and no
+			// way to get a key cannot use the feature at all.
+			'doublescale_manage_own_mcp_key'      => Permissions::can_manage_own_mcp_key(),
 			'doublescale_support_manager'         => Permissions::user_has_role( UserRoles::SUPPORT_MANAGER ),
 			'doublescale_support_agent'           => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
 			'doublescale_booking_manager'         => Permissions::user_has_role( UserRoles::BOOKING_MANAGER ),

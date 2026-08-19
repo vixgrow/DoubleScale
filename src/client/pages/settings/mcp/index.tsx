@@ -51,7 +51,14 @@ interface McpStatus {
 	connected: boolean;
 	endpoint_url: string;
 	tools: McpTool[];
+	/** Every key for an administrator; only the caller's own otherwise. */
 	api_keys: McpApiKey[];
+	/**
+	 * Whether the caller governs the whole MCP surface. False for a CRM user who
+	 * may still manage their own key, so the endpoint toggle and the site-wide
+	 * key list are hidden from them.
+	 */
+	can_manage_mcp: boolean;
 	current_user: string;
 	current_user_id: number;
 	eligible_key_users: McpEligibleUser[];
@@ -553,25 +560,48 @@ const McpSettings: React.FC = () => {
 				</div>
 			)}
 
-			{/* Enable toggle */}
-			<div className="flex items-center justify-between pb-5 border-b mb-6">
-				<div className="flex-1 pr-6">
+			{/*
+			 * Enable toggle — administrators only. A CRM user reaches this page
+			 * to manage their own key; showing them a switch that 403s on click
+			 * would read as a broken page rather than a permission boundary.
+			 */}
+			{status.can_manage_mcp ? (
+				<div className="flex items-center justify-between pb-5 border-b mb-6">
+					<div className="flex-1 pr-6">
+						<Label className="text-[#09090B] font-medium text-base">
+							{__('Enable MCP for AI Agents', 'doublescale')}
+						</Label>
+						<p className="text-sm text-gray-500 mt-1">
+							{__(
+								'When enabled, DoubleScale publishes its read-only abilities over MCP so AI agents can read your CRM data. Every request still enforces the connecting user’s module access, role, and record ownership.',
+								'doublescale'
+							)}
+						</p>
+					</div>
+					<Switch
+						checked={status.mcp_enabled}
+						disabled={saving || !status.abilities_api_available}
+						onCheckedChange={handleToggle}
+					/>
+				</div>
+			) : (
+				<div className="pb-5 border-b mb-6">
 					<Label className="text-[#09090B] font-medium text-base">
-						{__('Enable MCP for AI Agents', 'doublescale')}
+						{__('Your MCP API keys', 'doublescale')}
 					</Label>
 					<p className="text-sm text-gray-500 mt-1">
-						{__(
-							'When enabled, DoubleScale publishes its read-only abilities over MCP so AI agents can read your CRM data. Every request still enforces the connecting user’s module access, role, and record ownership.',
-							'doublescale'
-						)}
+						{status.mcp_enabled
+							? __(
+									'Create a key below to connect an AI agent to DoubleScale as you. It carries your own permissions — an agent using it sees exactly the records you can see, and nothing more.',
+									'doublescale'
+								)
+							: __(
+									'MCP is switched off for this site, so a key you create here will not connect yet. Ask an administrator to enable it.',
+									'doublescale'
+								)}
 					</p>
 				</div>
-				<Switch
-					checked={status.mcp_enabled}
-					disabled={saving || !status.abilities_api_available}
-					onCheckedChange={handleToggle}
-				/>
-			</div>
+			)}
 
 			{/*
 			 * Two different reasons produce no tools, and they need different

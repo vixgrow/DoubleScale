@@ -91,6 +91,38 @@ final class Permissions {
 	}
 
 	/**
+	 * Whether the user may issue and revoke MCP keys for THEMSELVES.
+	 *
+	 * Distinct from {@see can_manage_mcp()}, which governs the MCP surface as a
+	 * whole — enabling the endpoint, and seeing or revoking everyone's keys.
+	 * That stays an administrator decision.
+	 *
+	 * This weaker gate exists because the previous admin-only rule made the
+	 * feature unusable for the people it was built for: a sales rep has dozens
+	 * of callable abilities and no way to obtain a key, so every key had to be
+	 * minted by an administrator on their behalf. A self-issued key grants its
+	 * owner nothing they do not already have — every ability re-checks the role
+	 * and the owner scope at call time, so a rep's key sees a rep's records.
+	 *
+	 * Requires a DoubleScale role: a key for a user with none authenticates and
+	 * then exposes zero tools, which reads as a broken connection.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_manage_own_mcp_key( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if ( self::can_manage_mcp( $user_id ) ) {
+			return true;
+		}
+
+		return UserRoles::NONE !== self::get_user_role( $user_id );
+	}
+
+	/**
 	 * Check if user is a Sales Manager
 	 *
 	 * @since 1.0.0

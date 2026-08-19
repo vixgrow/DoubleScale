@@ -14,9 +14,6 @@ namespace DoubleScale\Tests\Core\Abilities;
 
 use DoubleScale\Core\Abilities\AbilityContext;
 use DoubleScale\Core\Abilities\Mcp\Endpoint;
-use DoubleScale\Modules\Contacts\Abilities\ContactAbilities;
-use DoubleScale\Modules\Documents\Abilities\DocumentAbilities;
-use DoubleScale\Modules\Support\Abilities\SupportAbilities;
 use PHPUnit\Framework\TestCase;
 
 defined( 'ABSPATH' ) || exit;
@@ -32,15 +29,37 @@ final class McpToolNameTest extends TestCase {
 	 * @return array<string, array{0: string}>
 	 */
 	public function ability_name_provider(): array {
-		$names = array_merge(
-			array_keys( AbilityContext::definitions() ),
-			array_keys( ContactAbilities::definitions() ),
-			array_keys( DocumentAbilities::definitions() ),
-			array_keys( SupportAbilities::definitions() )
+		$names = array_keys( AbilityContext::definitions() );
+
+		$roots = array(
+			DOUBLESCALE_PLUGIN_DIR . 'includes/Modules',
+			dirname( DOUBLESCALE_PLUGIN_DIR ) . '/doublescale-pro/includes/Modules',
 		);
 
+		foreach ( $roots as $root ) {
+			if ( ! is_dir( $root ) ) {
+				continue;
+			}
+
+			foreach ( glob( $root . '/*/Abilities/*.php' ) ?: array() as $file ) {
+				$source = (string) file_get_contents( $file );
+
+				if ( ! preg_match( '/^namespace\s+([^;]+);/m', $source, $ns ) ) {
+					continue;
+				}
+				if ( ! preg_match( '/^(?:final\s+)?class\s+(\w+)/m', $source, $cls ) ) {
+					continue;
+				}
+
+				$class = trim( $ns[1] ) . '\\' . $cls[1];
+				if ( class_exists( $class ) && method_exists( $class, 'definitions' ) ) {
+					$names = array_merge( $names, array_keys( $class::definitions() ) );
+				}
+			}
+		}
+
 		$out = array();
-		foreach ( $names as $name ) {
+		foreach ( array_unique( $names ) as $name ) {
 			$out[ $name ] = array( (string) $name );
 		}
 		return $out;

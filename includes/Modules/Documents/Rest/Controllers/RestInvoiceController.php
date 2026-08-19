@@ -23,11 +23,8 @@ use DoubleScale\Modules\Documents\Models\InvoiceModel;
 use DoubleScale\Modules\Documents\Rest\InvoiceShaper;
 use DoubleScale\Modules\Documents\Services\DocumentSectionsSanitizer;
 use DoubleScale\Modules\Documents\Services\DocumentPdf;
-use DoubleScale\Modules\Documents\Services\DocumentCustomerDetails;
-use DoubleScale\Modules\Documents\Services\DocumentIssuerSnapshot;
 use DoubleScale\Modules\Documents\Services\DuplicateInvoice;
-use DoubleScale\Modules\Documents\Services\InvoiceNotifications;
-use DoubleScale\Modules\Documents\Services\InvoiceUrl;
+use DoubleScale\Modules\Documents\Services\SendInvoice;
 use DoubleScale\Modules\Sales\Rest\SendsDocumentViaWhatsapp;
 use DoubleScale\Modules\Sales\Services\SalesNumbering;
 use DoubleScale\Modules\Sales\Services\SalesSettings;
@@ -624,23 +621,6 @@ class RestInvoiceController extends RestController {
 			return $forbidden;
 		}
 
-		if ( InvoiceStatus::PAID === (string) $invoice->status ) {
-			return new WP_Error( 'invalid_status', __( 'Paid invoices cannot be sent.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		if ( '' === InvoiceUrl::get_page_url() ) {
-			return new WP_Error(
-				'no_invoice_page',
-				__( 'Create a WordPress page with the [doublescale_invoice] shortcode before sending invoices.', 'doublescale' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$gate = apply_filters( 'doublescale_sales_send_gate', null, 'invoice', $invoice );
-		if ( is_wp_error( $gate ) ) {
-			return $gate;
-		}
-
 		$params = $request->get_json_params();
 		if ( ! is_array( $params ) ) {
 			$params = $request->get_params();
@@ -649,20 +629,21 @@ class RestInvoiceController extends RestController {
 
 		$channel = isset( $params['channel'] ) ? sanitize_key( (string) $params['channel'] ) : 'email';
 
-		// WhatsApp shares are delivered by the client opening wa.me; this call
-		// only records that the send happened.
-		if ( 'whatsapp' !== $channel ) {
-			$notifier = new InvoiceNotifications();
-			if ( ! $notifier->send_invoice( $invoice, $message ) ) {
-				return new WP_Error(
-					'email_failed',
-					__( 'Failed to send the invoice email. Check the customer email and SMTP settings.', 'doublescale' ),
-					array( 'status' => 500 )
-				);
-			}
+		// Preconditions, delivery, status advance, snapshot freezes, activity
+		// row, and hook all live in SendInvoice so the MCP ability performs an
+		// identical send. See SendInvoice for why this is not just "send mail".
+		$sent = SendInvoice::send( $invoice, $message, $channel );
+		if ( is_wp_error( $sent ) ) {
+			return $sent;
 		}
 
-		return $this->finish_invoice_send( $invoice, $message, $channel );
+		return new WP_REST_Response(
+			array(
+				'sent'    => true,
+				'invoice' => InvoiceShaper::shape( $sent->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ),
+			),
+			200
+		);
 	}
 
 	/**
@@ -717,35 +698,17 @@ class RestInvoiceController extends RestController {
 			return $sent;
 		}
 
-		return $this->finish_invoice_send( $invoice, $params['message'], 'whatsapp' );
-	}
-
-	/**
-	 * Advance status and record the send, once a channel has delivered.
-	 *
-	 * @param InvoiceModel $invoice Invoice.
-	 * @param string       $message Custom message.
-	 * @param string       $channel Delivery channel.
-	 * @return WP_REST_Response
-	 */
-	private function finish_invoice_send( InvoiceModel $invoice, string $message, string $channel ): WP_REST_Response {
-		if ( InvoiceStatus::DRAFT === (string) $invoice->status ) {
-			$invoice->status = InvoiceStatus::UNPAID;
+		// The message is already delivered by this point; the 'whatsapp' channel
+		// tells SendInvoice to record the send without dispatching mail.
+		$recorded = SendInvoice::send( $invoice, $params['message'], 'whatsapp' );
+		if ( is_wp_error( $recorded ) ) {
+			return $recorded;
 		}
-		DocumentCustomerDetails::snapshot_billing_from_contact( $invoice );
-		DocumentIssuerSnapshot::freeze_if_needed( $invoice );
-		DocumentCurrency::freeze_on_send( $invoice );
-		$invoice->sent_at = current_time( 'mysql' );
-		$invoice->save();
-
-		$this->log_invoice_sent( $invoice, $message, $channel );
-
-		do_action( 'doublescale_sales_invoice_sent', $invoice, $message, $channel );
 
 		return new WP_REST_Response(
 			array(
 				'sent'    => true,
-				'invoice' => InvoiceShaper::shape( $invoice->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ),
+				'invoice' => InvoiceShaper::shape( $recorded->fresh( array( 'contact', 'sale_agent', 'proposal' ) ), true ),
 			),
 			200
 		);
@@ -782,48 +745,6 @@ class RestInvoiceController extends RestController {
 	 */
 	private function stream_pdf_response( array $shaped, string $type, string $filename ) {
 		return DocumentPdf::rest_response( $shaped, $type, $filename );
-	}
-
-	/**
-	 * @param InvoiceModel $invoice Invoice.
-	 * @param string       $message Optional custom message.
-	 * @param string       $channel Delivery channel (email|whatsapp).
-	 * @return void
-	 */
-	private function log_invoice_sent( InvoiceModel $invoice, string $message = '', string $channel = 'email' ): void {
-		if ( ! class_exists( ActivityModel::class ) ) {
-			return;
-		}
-
-		$note = 'whatsapp' === $channel
-			? sprintf(
-				/* translators: %s: invoice number */
-				__( 'Invoice %s sent to customer via WhatsApp.', 'doublescale' ),
-				(string) $invoice->invoice_number
-			)
-			: sprintf(
-				/* translators: %s: invoice number */
-				__( 'Invoice %s sent to customer.', 'doublescale' ),
-				(string) $invoice->invoice_number
-			);
-		if ( '' !== trim( $message ) ) {
-			$note .= ' — ' . $message;
-		}
-
-		ActivityModel::create(
-			array(
-				'contact_id'    => (int) $invoice->contact_id,
-				'activity_type' => ActivityTypes::EMAIL_SENT,
-				'data'          => array(
-					'title'      => __( 'Invoice sent', 'doublescale' ),
-					'type'       => 'system',
-					'note'       => $note,
-					'invoice_id' => (int) $invoice->id,
-				),
-				'user_id'       => get_current_user_id() ?: null,
-			)
-		);
-		// TODO(morph): wire proposal/invoice associations (ENTITY_TYPE_INVOICE).
 	}
 
 	/**

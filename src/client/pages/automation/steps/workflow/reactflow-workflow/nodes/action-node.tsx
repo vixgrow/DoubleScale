@@ -50,6 +50,7 @@ interface ActionNodeData {
 	viewMode?: boolean;
 	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
+	onClearStep?: () => void;
 	onDeleteStep?: (stepId: string) => void;
 }
 
@@ -58,6 +59,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const {
 		step,
 		onStepClick,
+		onClearStep,
 		selectedStepId,
 		viewMode = false,
 		analytics,
@@ -164,8 +166,13 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	const handleDelete = async () => {
 		if (!viewMode) {
+			onClearStep?.();
 			await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 		}
+	};
+
+	const handleDeletePrepare = () => {
+		onClearStep?.();
 	};
 
 	const handleToggleEnabled = async () => {
@@ -246,6 +253,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			<NodeContextMenu
 				onEdit={viewMode ? undefined : handleEdit}
 				onDelete={viewMode ? undefined : handleDelete}
+				onDeletePrepare={viewMode ? undefined : handleDeletePrepare}
 				disabled={viewMode}
 			>
 				<SortableNodeContainer
@@ -266,8 +274,12 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 						subtitle={subtitle}
 						onEdit={handleEdit}
 						onDelete={handleDelete}
+						onDeletePrepare={handleDeletePrepare}
 						onDuplicate={handleDuplicate}
-						onRename={() => setIsRenameOpen(true)}
+						onRename={() => {
+							onClearStep?.();
+							setIsRenameOpen(true);
+						}}
 						onToggleEnabled={handleToggleEnabled}
 						editLabel={__('Edit Action', 'doublescale')}
 						deleteLabel={__('Delete Action', 'doublescale')}

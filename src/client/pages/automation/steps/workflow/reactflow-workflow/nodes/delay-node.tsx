@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -20,13 +21,21 @@ import type {
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import SortableNodeContainer from '../components/sortable-node-container';
+import RenameActionDialog from '../components/rename-action-dialog';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
-import { deleteStep, duplicateStep } from '../utils/step-utils';
+import {
+	deleteStep,
+	duplicateStep,
+	isStepDisabled,
+	toggleStepEnabled,
+} from '../utils/step-utils';
+import { updateStepCustomLabel } from '../utils/canvas-notes-utils';
 import { AlertTriangleIcon, TimerBlockIcon } from '@doublescale/components';
 import {
 	getAction,
 	getActionLabel,
+	getCatalogActionLabel,
 	getActionWarningMessage,
 	hasActionWarning,
 } from '@doublescale/utils';
@@ -44,6 +53,7 @@ interface DelayNodeData {
 	viewMode?: boolean;
 	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
+	onClearStep?: () => void;
 	onDeleteStep?: (stepId: string) => void;
 }
 
@@ -52,22 +62,26 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 	const {
 		step,
 		onStepClick,
+		onClearStep,
 		selectedStepId,
 		viewMode = false,
 		analytics,
 	} = data as unknown as DelayNodeData;
 
-	const { steps, setSteps } = useAutomationContext();
+	const { steps, setSteps, updateStep } = useAutomationContext();
 	const { createNotice } = useDispatch('doublescale/core');
+	const [isRenameOpen, setIsRenameOpen] = useState(false);
 
-	// Check if a delay action has been selected
 	const hasActionSelected = !!step.action;
 	const actionKey = step.action || 'delay';
 	const actionConfig = getAction(actionKey);
+	const isDisabled = isStepDisabled(step);
 
-	// Get delay label and warning status from backend
 	const actionLabel =
 		getActionLabel(step) || actionConfig?.label || __('Delay', 'doublescale');
+	const catalogActionLabel =
+		getCatalogActionLabel(step) || actionConfig?.label || __('Delay', 'doublescale');
+	const hasCustomLabel = Boolean(step.settings?.custom_label?.trim());
 	const hasWarning = hasActionWarning(step);
 	const warningMessage = getActionWarningMessage(step);
 	const isDelayUntil = actionKey === 'delay-until-datetime';
@@ -84,7 +98,6 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		return date.toLocaleString();
 	};
 
-	// Check if configured: must have action selected AND appropriate settings
 	const isConfigured =
 		hasActionSelected &&
 		(isDelayUntil
@@ -103,9 +116,16 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 
 	const delayText = hasWarning ? '...' : getDelayText();
 
+	const disabledBadge = isDisabled ? (
+		<span className="doublescale-reactflow-node__disabled-badge">
+			{__('Disabled', 'doublescale')}
+		</span>
+	) : null;
+
 	const subtitle =
 		isConfigured && delayText ? (
-			<div className="flex items-center gap-2">
+			<div className="doublescale-reactflow-node__subtitle-inner flex items-center gap-2">
+				{disabledBadge}
 				<span
 					className="doublescale-reactflow-delay__configured"
 					style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
@@ -144,19 +164,41 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 			</span>
 		);
 
+	const titleContent = hasCustomLabel ? (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<span>{actionLabel}</span>
+				</TooltipTrigger>
+				<TooltipContent side="right" className="max-w-xs">
+					<p className="text-xs">
+						{__('Default:', 'doublescale')} {catalogActionLabel}
+					</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	) : (
+		actionLabel
+	);
+
 	const handleEdit = () => {
 		if (!viewMode && onStepClick) {
 			onStepClick({
 				...step,
-				children: [], // Will be populated if needed by the consuming component
+				children: [],
 			});
 		}
 	};
 
 	const handleDelete = async () => {
 		if (!viewMode) {
+			onClearStep?.();
 			await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 		}
+	};
+
+	const handleDeletePrepare = () => {
+		onClearStep?.();
 	};
 
 	const handleDuplicate = async () => {
@@ -171,73 +213,125 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		}
 	};
 
-	// Check if this node is selected
+	const handleToggleEnabled = async () => {
+		if (!viewMode) {
+			await toggleStepEnabled(
+				step,
+				isDisabled,
+				steps,
+				setSteps,
+				createNotice
+			);
+		}
+	};
+
+	const handleRenameSave = async (label: string) => {
+		await updateStepCustomLabel(
+			step,
+			label,
+			steps,
+			setSteps,
+			updateStep,
+			createNotice
+		);
+	};
+
 	const isSelected = selectedStepId === step.id.toString();
 
 	return (
-		<NodeContextMenu
-			onEdit={viewMode ? undefined : handleEdit}
-			onDelete={viewMode ? undefined : handleDelete}
-			disabled={viewMode}
-		>
-			<SortableNodeContainer
-				step={step}
-				viewMode={viewMode}
-				className={`doublescale-reactflow-node doublescale-reactflow-node--delay doublescale-reactflow-node--card-layout ${
-					isSelected ? 'doublescale-reactflow-node--selected' : ''
-				} ${
-					viewMode && analytics
-						? 'doublescale-reactflow-node--action-with-analytics'
-						: ''
-				}`}
-				onClick={viewMode ? undefined : handleEdit}
+		<>
+			<NodeContextMenu
+				onEdit={viewMode ? undefined : handleEdit}
+				onDelete={viewMode ? undefined : handleDelete}
+				onDeletePrepare={viewMode ? undefined : handleDeletePrepare}
+				disabled={viewMode}
 			>
-				<Handle
-					type="target"
-					position={Position.Top}
-					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
-				/>
-
-				<NodeLayout
-					variant="delay"
-					icon={<TimerBlockIcon width={22} height={22} />}
-					title={actionLabel}
-					subtitle={subtitle}
-					onEdit={handleEdit}
-					onDelete={handleDelete}
-					onDuplicate={handleDuplicate}
-					editLabel={sprintf(__('Edit %s', 'doublescale'), actionLabel)}
-					deleteLabel={sprintf(
-						__('Delete %s', 'doublescale'),
-						actionLabel
-					)}
-					duplicateLabel={sprintf(
-						__('Duplicate %s', 'doublescale'),
-						actionLabel
-					)}
-					showDuplicate={isConfigured}
-					deleteTitle={sprintf(
-						__('Delete this %s?', 'doublescale'),
-						actionLabel
-					)}
-					deleteDescription={sprintf(
-						__(
-							'This will remove the %s from your workflow.',
-							'doublescale'
-						),
-						actionLabel
-					)}
+				<SortableNodeContainer
+					step={step}
 					viewMode={viewMode}
-					analytics={analytics}
-				/>
+					className={`doublescale-reactflow-node doublescale-reactflow-node--delay doublescale-reactflow-node--card-layout ${
+						isSelected ? 'doublescale-reactflow-node--selected' : ''
+					} ${isDisabled ? 'doublescale-reactflow-node--step-disabled' : ''} ${
+						viewMode && analytics
+							? 'doublescale-reactflow-node--action-with-analytics'
+							: ''
+					}`}
+					onClick={viewMode ? undefined : handleEdit}
+				>
+					<Handle
+						type="target"
+						position={Position.Top}
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
+					/>
 
-				<Handle
-					type="source"
-					position={Position.Bottom}
-					className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
-				/>
-			</SortableNodeContainer>
-		</NodeContextMenu>
+					<NodeLayout
+						variant="delay"
+						icon={<TimerBlockIcon width={22} height={22} />}
+						title={titleContent}
+						subtitle={subtitle}
+						onEdit={handleEdit}
+						onDelete={handleDelete}
+						onDeletePrepare={handleDeletePrepare}
+						onDuplicate={handleDuplicate}
+						onRename={() => {
+							onClearStep?.();
+							setIsRenameOpen(true);
+						}}
+						onToggleEnabled={handleToggleEnabled}
+						editLabel={sprintf(__('Edit %s', 'doublescale'), actionLabel)}
+						deleteLabel={sprintf(
+							__('Delete %s', 'doublescale'),
+							actionLabel
+						)}
+						duplicateLabel={sprintf(
+							__('Duplicate %s', 'doublescale'),
+							actionLabel
+						)}
+						renameLabel={sprintf(__('Rename %s', 'doublescale'), actionLabel)}
+						toggleEnabledLabel={
+							isDisabled
+								? sprintf(__('Enable %s', 'doublescale'), actionLabel)
+								: sprintf(__('Disable %s', 'doublescale'), actionLabel)
+						}
+						showDuplicate={isConfigured}
+						showRename={isConfigured}
+						showToggleEnabled={isConfigured}
+						deleteTitle={sprintf(
+							__('Delete this %s?', 'doublescale'),
+							actionLabel
+						)}
+						deleteDescription={sprintf(
+							__(
+								'This will remove the %s from your workflow.',
+								'doublescale'
+							),
+							actionLabel
+						)}
+						viewMode={viewMode}
+						analytics={analytics}
+					/>
+
+					<Handle
+						type="source"
+						position={Position.Bottom}
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
+					/>
+				</SortableNodeContainer>
+			</NodeContextMenu>
+
+			<RenameActionDialog
+				open={isRenameOpen}
+				onOpenChange={setIsRenameOpen}
+				currentLabel={step.settings?.custom_label || ''}
+				catalogLabel={catalogActionLabel}
+				onSave={handleRenameSave}
+				title={sprintf(__('Rename %s', 'doublescale'), catalogActionLabel)}
+				description={__(
+					'Give this delay a custom name to make complex workflows easier to follow.',
+					'doublescale'
+				)}
+			/>
+		</>
 	);
 };
 

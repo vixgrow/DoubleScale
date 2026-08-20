@@ -21,6 +21,7 @@ use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Core\PluginKernel;
 use DoubleScale\Modules\Automations\Conditions\Process as Process_Conditions;
+use DoubleScale\Modules\Automations\Support\ConditionSettings;
 
 /**
  * Process Automation
@@ -359,7 +360,7 @@ class ProcessAutomation {
 	public function process_condition( $step, $automation_contact_id ) {
 		try {
 			$automation_contact = AutomationContactModel::findOrFail( $automation_contact_id );
-			$conditions         = $step->settings;
+			$conditions         = ConditionSettings::get_rule_groups( $step->settings );
 			$result             = new Process_Conditions( $automation_contact, $conditions );
 			$check              = $result->check();
 

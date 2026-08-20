@@ -1,13 +1,31 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import type { Automation, CanvasNote } from '@doublescale/client';
+import type { Automation, AutomationStep, CanvasNote } from '@doublescale/client';
+import {
+	buildConditionSettings,
+	getConditionCustomLabel,
+	setConditionCustomLabel,
+} from '@doublescale/utils';
+
+const getStepTypeLabel = (type: string): string => {
+	switch (type) {
+		case 'goal':
+			return __('Goal', 'doublescale');
+		case 'condition':
+			return __('Condition', 'doublescale');
+		case 'delay':
+			return __('Delay', 'doublescale');
+		default:
+			return __('Action', 'doublescale');
+	}
+};
 
 export const getCanvasNotes = (automation?: Automation | null): CanvasNote[] => {
 	const notes = automation?.settings?.canvas_notes;
@@ -49,23 +67,26 @@ export const saveCanvasNotes = async (
 };
 
 export const updateStepCustomLabel = async (
-	step: import('@doublescale/client').AutomationStep,
+	step: AutomationStep,
 	customLabel: string,
-	steps: import('@doublescale/client').AutomationStep[],
-	setSteps: (steps: import('@doublescale/client').AutomationStep[]) => void,
-	updateStep: (
-		stepId: number,
-		payload: Partial<import('@doublescale/client').AutomationStep>
-	) => void,
+	steps: AutomationStep[],
+	setSteps: (steps: AutomationStep[]) => void,
+	updateStep: (stepId: number, payload: Partial<AutomationStep>) => void,
 	createNotice: (notice: { type: string; message: string }) => void
 ): Promise<void> => {
-	const settings = { ...(step.settings || {}) };
 	const trimmed = customLabel.trim();
+	const stepLabel = getStepTypeLabel(step.type);
+	let settings: AutomationStep['settings'];
 
-	if (trimmed) {
-		settings.custom_label = trimmed;
+	if (step.type === 'condition') {
+		settings = setConditionCustomLabel(step.settings, customLabel);
 	} else {
-		delete settings.custom_label;
+		settings = { ...(step.settings || {}) };
+		if (trimmed) {
+			settings.custom_label = trimmed;
+		} else {
+			delete settings.custom_label;
+		}
 	}
 
 	try {
@@ -75,9 +96,9 @@ export const updateStepCustomLabel = async (
 			data: {
 				...step,
 				settings,
-				status: 'active',
+				status: step.status,
 			},
-		})) as import('@doublescale/client').AutomationStep;
+		})) as AutomationStep;
 
 		updateStep(response.id, response);
 		setSteps(steps.map((item) => (item.id === response.id ? response : item)));
@@ -85,15 +106,18 @@ export const updateStepCustomLabel = async (
 		createNotice({
 			type: 'success',
 			message: trimmed
-				? __('Action renamed', 'doublescale')
-				: __('Action name reset', 'doublescale'),
+				? sprintf(__('%s renamed', 'doublescale'), stepLabel)
+				: sprintf(__('%s name reset', 'doublescale'), stepLabel),
 		});
 	} catch (error: any) {
 		createNotice({
 			type: 'error',
 			message:
-				error?.message || __('Failed to rename action', 'doublescale'),
+				error?.message ||
+				sprintf(__('Failed to rename %s', 'doublescale'), stepLabel.toLowerCase()),
 		});
 		throw error;
 	}
 };
+
+export { buildConditionSettings, getConditionCustomLabel };

@@ -29,6 +29,7 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Automations\Services\WorkflowPortabilityManager;
+use DoubleScale\Modules\Automations\Support\ConditionSettings;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
@@ -1838,9 +1839,11 @@ class RestAutomationController extends RestController {
 						$settings['_action_warning_message'] = $warning_message;
 						$step->settings                      = $settings;
 					}
-				} elseif ( $step->type === 'condition' && ! empty( $step->settings ) ) {
+				} elseif ( $step->type === 'condition' && ConditionSettings::has_rules( $step->settings ) ) {
 					// Check condition/rule dependencies
-					$condition_check = $this->check_condition_plugin_dependencies( $step->settings );
+					$condition_check = $this->check_condition_plugin_dependencies(
+						ConditionSettings::get_rule_groups( $step->settings )
+					);
 
 					if ( $condition_check['has_warnings'] ) {
 						$has_warnings = true;
@@ -2726,7 +2729,8 @@ class RestAutomationController extends RestController {
 		$count = 0;
 
 		foreach ( $conditions as $condition ) {
-			$condition_settings = $condition->settings;
+			$condition_settings = ConditionSettings::get_rule_groups( $condition->settings );
+			$custom_label       = ConditionSettings::get_custom_label( $condition->settings );
 			foreach ( $condition_settings as $group_index => $rule_group ) {
 				if ( is_array( $rule_group ) ) {
 					foreach ( $rule_group as $rule_index => $rule ) {
@@ -2751,7 +2755,14 @@ class RestAutomationController extends RestController {
 							if ( $is_delete ) {
 								// delete this rule from condition settings
 								unset( $condition_settings[ $group_index ][ $rule_index ] );
-								$condition->settings = $condition_settings;
+								if ( $custom_label ) {
+									$condition->settings = array(
+										'groups'       => $condition_settings,
+										'custom_label' => $custom_label,
+									);
+								} else {
+									$condition->settings = $condition_settings;
+								}
 								$condition->save();
 							}
 						}

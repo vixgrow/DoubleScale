@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect } from '@wordpress/element';
+import { useState, useMemo, useEffect, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -59,8 +59,30 @@ const Workflow: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const useReactFlow = true;
+	const suppressStepClickUntilRef = useRef(0);
 	const { createNotice, setCurrentTrigger, setFormContext } =
 		useDispatch('doublescale/core');
+
+	const suppressWorkflowStepClick = useCallback(() => {
+		suppressStepClickUntilRef.current = Date.now() + 800;
+	}, []);
+
+	const handleWorkflowStepClick = useCallback(
+		(step: OrganizedStep) => {
+			if (Date.now() < suppressStepClickUntilRef.current) {
+				return;
+			}
+			setVisible(false);
+			setCurrentStep(step);
+		},
+		[]
+	);
+
+	const handleClearWorkflowStep = useCallback(() => {
+		suppressWorkflowStepClick();
+		setVisible(false);
+		setCurrentStep(null);
+	}, [suppressWorkflowStepClick]);
 
 	useEffect(() => {
 		if (automation) {
@@ -395,10 +417,8 @@ const Workflow: React.FC = () => {
 												currentStep.type === 'goal' ||
 												currentStep.type === 'delay'))
 									}
-									onStepClick={(step) => {
-										setVisible(false); // Close trigger sidebar if open
-										setCurrentStep(step);
-									}}
+									onStepClick={handleWorkflowStepClick}
+									onClearStep={handleClearWorkflowStep}
 									onTriggerClick={() => {
 										setCurrentStep(null); // Close step sidebar if open
 										setVisible(true);

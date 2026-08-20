@@ -26,6 +26,7 @@ interface ReactFlowWorkflowProps {
 	viewMode?: boolean;
 	analyticsData?: any[];
 	onStepClick?: (step: OrganizedStep) => void;
+	onClearStep?: () => void;
 	onTriggerClick?: () => void;
 }
 
@@ -36,6 +37,7 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 	viewMode = false,
 	analyticsData = [],
 	onStepClick,
+	onClearStep,
 	onTriggerClick,
 }) => {
 	const { automation, steps, isLoading } = useAutomationContext();
@@ -70,6 +72,7 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 					viewMode={viewMode}
 					analyticsData={analyticsData}
 					onStepClick={handleStepClick}
+					onClearStep={onClearStep}
 					onTriggerClick={handleTriggerClick}
 				/>
 			</ReactFlowProvider>

@@ -17,6 +17,11 @@ import { useSelect } from '@wordpress/data';
 import './style.scss';
 import type { AutomationStep } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
+import {
+	buildConditionSettings,
+	getConditionCustomLabel,
+	getConditionRuleGroups,
+} from '@doublescale/utils';
 import { AlertTriangleIcon, ConditionAutomationIcon, CustomDialogHeader } from '@doublescale/components';
 import {
 	Dialog,
@@ -160,26 +165,16 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			}>
 		>
 	>(() => {
-		const stepRules =
-			step.settings &&
-				Array.isArray(step.settings) &&
-				step.settings.length > 0
-				? step.settings
-				: [[getInitialRule()]];
-		return stepRules;
+		const stepRules = getConditionRuleGroups(step.settings);
+		return stepRules.length > 0 ? stepRules : [[getInitialRule()]];
 	});
 	const [isSaving, setIsSaving] = useState(false);
 
 	// Sync rules state with step.settings when modal opens
 	useEffect(() => {
 		if (visible) {
-			const stepRules =
-				step.settings &&
-					Array.isArray(step.settings) &&
-					step.settings.length > 0
-					? step.settings
-					: [[getInitialRule()]];
-			setRules(stepRules);
+			const stepRules = getConditionRuleGroups(step.settings);
+			setRules(stepRules.length > 0 ? stepRules : [[getInitialRule()]]);
 			// Reset handled in RulesBuilder
 		}
 	}, [visible, step.settings]);
@@ -381,7 +376,14 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						variant="default"
 						className="rounded-lg px-5 shadow-none"
 						disabled={isSaving}
-						onClick={() => save({ settings: rules })}
+						onClick={() =>
+							save({
+								settings: buildConditionSettings(
+									rules,
+									getConditionCustomLabel(step.settings)
+								),
+							})
+						}
 					>
 						{isSaving
 							? __('Saving...', 'doublescale')

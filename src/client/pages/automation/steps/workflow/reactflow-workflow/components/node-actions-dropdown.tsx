@@ -20,7 +20,6 @@ import {
 import { Button } from '@/components/ui/button';
 import {
 	AlertDialog,
-	AlertDialogAction,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -40,6 +39,7 @@ import { Pencil } from 'lucide-react';
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onDeletePrepare?: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
 	onRename?: () => void;
@@ -64,6 +64,7 @@ interface NodeActionsDropdownProps {
 const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
+	onDeletePrepare,
 	onDuplicate,
 	onChangeTrigger,
 	onRename,
@@ -102,15 +103,25 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	const handleDelete = async () => {
 		if (!onDelete) return;
 
+		onDeletePrepare?.();
 		setIsDeleting(true);
 		try {
 			await onDelete();
+			// Let pointer events settle so the closing overlay cannot click the node beneath.
+			await new Promise((resolve) => setTimeout(resolve, 50));
 			setIsDialogOpen(false);
 		} catch (error) {
 			console.error('Delete failed:', error);
 		} finally {
 			setIsDeleting(false);
 		}
+	};
+
+	const handleDialogOpenChange = (open: boolean) => {
+		if (!open && isDeleting) {
+			return;
+		}
+		setIsDialogOpen(open);
 	};
 
 	return (
@@ -158,7 +169,10 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					>
 						{showEdit && onEdit && (
 							<DropdownMenuItem
-								onClick={onEdit}
+								onSelect={(event) => {
+									event.preventDefault();
+									onEdit();
+								}}
 								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 							>
 								<EditHeaderIcon />
@@ -167,7 +181,10 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 						)}
 						{showRename && onRename && (
 							<DropdownMenuItem
-								onClick={onRename}
+								onSelect={(event) => {
+									event.preventDefault();
+									onRename();
+								}}
 								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 							>
 								<Pencil className="h-4 w-4" />
@@ -210,6 +227,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 								className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
 								onSelect={(e) => {
 									e.preventDefault();
+									onDeletePrepare?.();
 									setIsDialogOpen(true);
 								}}
 							>
@@ -224,11 +242,12 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 			{showDelete && onDelete && (
 				<AlertDialog
 					open={isDialogOpen}
-					onOpenChange={setIsDialogOpen}
+					onOpenChange={handleDialogOpenChange}
 				>
 					<AlertDialogContent
 						overlayClassName={automationModalOverlayClassName}
 						className={cn(automationAlertDialogContentClassName)}
+						onPointerDownOutside={(event) => event.preventDefault()}
 					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>{deleteTitle}</AlertDialogTitle>
@@ -240,17 +259,24 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							<AlertDialogCancel disabled={isDeleting}>
 								{__('Cancel', 'doublescale')}
 							</AlertDialogCancel>
-							<AlertDialogAction
-								onClick={(e) => {
-									e.preventDefault();
-									handleDelete();
-								}}
+							<Button
+								type="button"
+								variant="destructive"
 								disabled={isDeleting}
+								onPointerDown={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+								}}
+								onClick={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+									void handleDelete();
+								}}
 							>
 								{isDeleting
 									? __('Deleting...', 'doublescale')
 									: __('Delete', 'doublescale')}
-							</AlertDialogAction>
+							</Button>
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>

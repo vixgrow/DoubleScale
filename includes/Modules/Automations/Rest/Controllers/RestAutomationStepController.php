@@ -517,8 +517,7 @@ class RestAutomationStepController extends RestController {
 	 *
 	 * A disabled step stays in the workflow and keeps its settings, but the
 	 * engine skips it, so contacts flow straight through to the next active
-	 * step. Only action steps may be toggled: disabling a condition, goal or
-	 * end_automation step has no well-defined meaning for the branch it owns.
+	 * step. Trigger and end_automation steps cannot be toggled.
 	 *
 	 * @since 1.0.0
 	 *
@@ -534,10 +533,10 @@ class RestAutomationStepController extends RestController {
 				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
-			if ( 'action' !== $automation_step->type ) {
+			if ( in_array( $automation_step->type, array( 'trigger', 'end_automation' ), true ) ) {
 				return new WP_Error(
 					'rest_automation_step_not_toggleable',
-					__( 'Only action steps can be enabled or disabled.', 'doublescale' ),
+					__( 'This step cannot be enabled or disabled.', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}

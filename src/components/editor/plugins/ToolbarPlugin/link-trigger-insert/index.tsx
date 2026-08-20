@@ -38,12 +38,14 @@ export default function LinkTriggerInsertButton({
 	const isPro = useIsProActive();
 	const [open, setOpen] = useState(false);
 	const storedSelectionRef = useRef<StoredSelection | null>(null);
+	const skipLinkTextStepRef = useRef(false);
 
 	const openPicker = useCallback(() => {
 		activeEditor.focus();
 		activeEditor.update(() => {
 			const selection = $getSelection();
 			if ($isRangeSelection(selection)) {
+				skipLinkTextStepRef.current = !selection.isCollapsed();
 				storedSelectionRef.current = {
 					anchor: {
 						key: selection.anchor.key,
@@ -57,6 +59,7 @@ export default function LinkTriggerInsertButton({
 					},
 				};
 			} else {
+				skipLinkTextStepRef.current = false;
 				storedSelectionRef.current = null;
 			}
 		});
@@ -115,7 +118,7 @@ export default function LinkTriggerInsertButton({
 					rel: 'noopener noreferrer',
 					target: '_blank',
 				});
-				linkNode.append($createTextNode(trigger.name));
+				linkNode.append($createTextNode(trigger.linkText));
 				selection.insertNodes([linkNode]);
 			});
 		},
@@ -139,6 +142,7 @@ export default function LinkTriggerInsertButton({
 				open={open}
 				onOpenChange={setOpen}
 				onPick={insertTrigger}
+				skipLinkTextStep={skipLinkTextStepRef.current}
 			/>
 		</>
 	);

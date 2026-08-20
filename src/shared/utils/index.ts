@@ -585,14 +585,21 @@ export const getActionWarningMessage = (step: any): string => {
  * @param step - The automation step object
  * @returns The goal label
  */
-export const getGoalLabel = (step: any): string => {
-	// Use backend-provided label (works even when plugin is deactivated)
+export const getCatalogGoalLabel = (step: any): string => {
 	if (step?.settings?._goal_label) {
 		return step.settings._goal_label;
 	}
 
-	// Fallback to action slug
 	return step?.action || __('Unknown Goal', 'doublescale');
+};
+
+export const getGoalLabel = (step: any): string => {
+	const customLabel = step?.settings?.custom_label?.trim();
+	if (customLabel) {
+		return customLabel;
+	}
+
+	return getCatalogGoalLabel(step);
 };
 
 /**
@@ -620,6 +627,75 @@ export const getGoalWarningMessage = (step: any): string => {
 		'This goal requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
 		'doublescale'
 	);
+};
+
+/**
+ * Extract rule groups from condition step settings.
+ * Supports legacy array form and { groups, custom_label } wrapper.
+ */
+export const getConditionRuleGroups = (settings: any): any[][] => {
+	if (!settings) {
+		return [];
+	}
+
+	if (Array.isArray(settings)) {
+		return settings;
+	}
+
+	if (settings.groups && Array.isArray(settings.groups)) {
+		return settings.groups;
+	}
+
+	return [];
+};
+
+/**
+ * Read custom display label from condition step settings.
+ */
+export const getConditionCustomLabel = (settings: any): string => {
+	if (settings && !Array.isArray(settings) && settings.custom_label) {
+		return String(settings.custom_label).trim();
+	}
+
+	return '';
+};
+
+/**
+ * Whether a condition step has at least one rule group configured.
+ */
+export const hasConditionRules = (settings: any): boolean =>
+	getConditionRuleGroups(settings).length > 0;
+
+/**
+ * Build condition settings for save, preserving custom_label when set.
+ */
+export const buildConditionSettings = (
+	groups: any[][],
+	customLabel?: string
+): any => {
+	const trimmed = customLabel?.trim();
+	if (trimmed) {
+		return { groups, custom_label: trimmed };
+	}
+
+	return groups;
+};
+
+/**
+ * Apply or clear a custom label on condition settings.
+ */
+export const setConditionCustomLabel = (
+	settings: any,
+	customLabel: string
+): any => {
+	const groups = getConditionRuleGroups(settings);
+	const trimmed = customLabel.trim();
+
+	if (trimmed) {
+		return { groups, custom_label: trimmed };
+	}
+
+	return groups;
 };
 
 

@@ -37,6 +37,7 @@ interface WorkflowVisualizationProps {
 	viewMode?: boolean;
 	analyticsData?: any[];
 	onStepClick?: (step: OrganizedStep) => void;
+	onClearStep?: () => void;
 	onTriggerClick?: () => void;
 }
 

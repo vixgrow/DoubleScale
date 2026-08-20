@@ -65,7 +65,7 @@ const SlackInstructions: React.FC = () => {
 				)}
 			</p>
 
-			<ol className="list-decimal list-inside space-y-3 text-lg text-gray-500">
+			<ol className="list-decimal list-inside space-y-3 text-gray-500">
 				<li>
 					{__('Login to the', 'doublescale')}{' '}
 					<a

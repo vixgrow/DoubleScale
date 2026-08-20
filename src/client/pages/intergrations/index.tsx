@@ -19,7 +19,7 @@ import type { NoticeMessage } from '@doublescale/client';
 import { getToLink, useNavigate, useParams } from '@doublescale/navigation';
 import ConfigAPI from '@doublescale/config';
 import Integration from '../integration';
-import { PageHeader, NoticeBanner, PageTabs } from '@doublescale/components';
+import { PageHeader, NoticeBanner, PageTabs, TotalCreditedIcon, SMSIcon, FormsIcon, AutomationsIcon, CategoryIcon, TotalSMSIcon } from '@doublescale/components';
 import { Card, CardContent } from '@doublescale/components/ui/card';
 import { IntegrationCard } from './integration-card';
 import { AddonCard } from './addon-card';
@@ -100,23 +100,23 @@ const catalogTabMeta: Record<
 > = {
 	payment: {
 		label: __('Payment Gateway', 'doublescale'),
-		icon: <CreditCard className="h-4 w-4" />,
+		icon: <TotalCreditedIcon width={24} height={24} color='currentColor'/>,
 	},
 	messaging: {
 		label: __('Messaging', 'doublescale'),
-		icon: <MessageSquare className="h-4 w-4" />,
+		icon: <TotalSMSIcon width={20} height={20} />,
 	},
 	forms: {
 		label: __('Forms', 'doublescale'),
-		icon: <ClipboardList className="h-4 w-4" />,
+		icon: <FormsIcon width={24} height={24} />,
 	},
 	automation: {
 		label: __('Automation', 'doublescale'),
-		icon: <Workflow className="h-4 w-4" />,
+		icon: <AutomationsIcon width={24} height={24} />,
 	},
 	other: {
 		label: __('Other', 'doublescale'),
-		icon: <Blocks className="h-4 w-4" />,
+		icon: <CategoryIcon width={24} height={24} />,
 	},
 };
 

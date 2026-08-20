@@ -141,6 +141,7 @@ export { default as MailboxIcon } from './mailbox';
 export { default as EmailProviderSetupIcon } from './email-provider-setup';
 export { default as SnapchatIcon } from './snapchat';
 export { default as DiscordIcon } from './discord';
+export { default as SocialWhatsappIcon } from './social-whatsapp';
 export { default as SoundCloudIcon } from './soundcloud';
 export { default as MediumIcon } from './medium';
 export { default as TeamIcon } from './team';

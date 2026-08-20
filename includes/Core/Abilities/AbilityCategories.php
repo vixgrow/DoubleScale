@@ -44,25 +44,34 @@ final class AbilityCategories {
 	 */
 	public static function module_category_map(): array {
 		return array(
-			'core'            => self::CORE,
-			'contacts'        => self::CONTACTS,
-			'activities'      => self::CONTACTS,
-			'documents'       => self::SALES,
-			'contracts'       => self::SALES,
-			'credit_notes'    => self::SALES,
-			'product_catalog' => self::SALES,
-			'support'         => self::SUPPORT,
-			'deals'           => self::DEALS,
-			'tasks'           => self::TASKS,
-			'projects'        => self::PROJECTS,
-			'analytics'       => self::ANALYTICS,
+			'core'               => self::CORE,
+			'contacts'           => self::CONTACTS,
+			'activities'         => self::CONTACTS,
+			'documents'          => self::SALES,
+			'contracts'          => self::SALES,
+			'credit_notes'       => self::SALES,
+			'product_catalog'    => self::SALES,
+			// Billing schedules are a property of invoices, so they read as a
+			// Sales concern rather than an automation one.
+			'recurring_invoices' => self::SALES,
+			'support'            => self::SUPPORT,
+			'deals'              => self::DEALS,
+			'tasks'              => self::TASKS,
+			'projects'           => self::PROJECTS,
+			'analytics'          => self::ANALYTICS,
 			// Campaigns and automations are two halves of one marketing idea.
-			'campaigns'       => self::MARKETING,
-			'automations'     => self::MARKETING,
+			'campaigns'          => self::MARKETING,
+			'automations'        => self::MARKETING,
 			// Form submissions are how contacts arrive, so they read as a
 			// contacts concern rather than a category of their own.
-			'forms'           => self::CONTACTS,
-			'booking'         => self::BOOKING,
+			'forms'              => self::CONTACTS,
+			'booking'            => self::BOOKING,
+			// Lead scoring ranks contacts, so it belongs with Contacts.
+			'leadscoring'        => self::CONTACTS,
+			// Page-visit history is engagement data, same idea as messages.
+			'websitetracking'    => self::CONTACTS,
+			'notifications'      => self::CORE,
+			'custom-fields'      => self::CONTACTS,
 		);
 	}
 

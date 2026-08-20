@@ -43,7 +43,7 @@ final class AbilityContext {
 			'doublescale/get-context' => array(
 				'module_slug'      => 'core',
 				'label'            => __( 'Get CRM context', 'doublescale' ),
-				'description'      => __( 'Start here. Returns who you are, which DoubleScale modules are active on this site, which tools you can actually call, and the site currency and timezone. Modules that are switched off are absent from the list — their data is unavailable, not empty.', 'doublescale' ),
+				'description'      => __( 'Start here. Returns who you are, which DoubleScale modules are active on this site, which tools you can actually call, and the site currency and timezone. Modules that are switched off are absent from the list — their data is unavailable, not empty. Some tools write records or email customers; this call only describes what is available.', 'doublescale' ),
 				'category'         => AbilityCategories::CORE,
 				'permission'       => null,
 				'input_schema'     => array(
@@ -58,6 +58,11 @@ final class AbilityContext {
 							),
 						),
 					),
+				),
+				'output_schema'    => array(
+					'type'                 => 'object',
+					'description'          => 'Site identity, active modules, and optional enums. Shape depends on the include argument.',
+					'additionalProperties' => true,
 				),
 				'execute_callback' => array( self::class, 'execute' ),
 			),

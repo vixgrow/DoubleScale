@@ -140,7 +140,7 @@ const SettingsPage: React.FC = () => {
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const {
 		hasLimitedSettingsAccess: checkLimitedSettingsAccess,
-		canManageMcp: checkCanManageMcp,
+		canManageOwnMcpKey: checkCanReachMcpTab,
 	} = useCapabilities();
 
 	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
@@ -152,7 +152,9 @@ const SettingsPage: React.FC = () => {
 	// multi-role users keep full Settings access (Mailbox/Notifications only
 	// for pure Sales Rep / Sales Manager).
 	const hasLimitedSettingsAccess = checkLimitedSettingsAccess();
-	const canManageMcp = checkCanManageMcp();
+	// Any DoubleScale role may open the MCP tab to manage their own key; the
+	// admin-only controls inside it gate separately on doublescale_manage_mcp.
+	const canReachMcpTab = checkCanReachMcpTab();
 	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
@@ -172,7 +174,7 @@ const SettingsPage: React.FC = () => {
 				navigate(getToLink('settings/notifications'), { replace: true });
 				return;
 			}
-			if (urlTab === 'mcp' && !canManageMcp) {
+			if (urlTab === 'mcp' && !canReachMcpTab) {
 				navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 				return;
 			}
@@ -185,7 +187,7 @@ const SettingsPage: React.FC = () => {
 		urlTab,
 		navigate,
 		hasLimitedSettingsAccess,
-		canManageMcp,
+		canReachMcpTab,
 		defaultTab,
 	]);
 
@@ -636,11 +638,11 @@ const SettingsPage: React.FC = () => {
 		if (hasLimitedSettingsAccess) {
 			tabs = tabs.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value));
 		}
-		if (!canManageMcp) {
+		if (!canReachMcpTab) {
 			tabs = tabs.filter((tab) => tab.value !== 'mcp');
 		}
 		return tabs;
-	}, [filteredTabsList, hasLimitedSettingsAccess, canManageMcp]);
+	}, [filteredTabsList, hasLimitedSettingsAccess, canReachMcpTab]);
 
 	const tabsContent = tabsList.map(({ value }) => {
 		if (activeTab !== value) {
@@ -658,41 +660,31 @@ const SettingsPage: React.FC = () => {
 		return {
 			value,
 			children: (
-				<Card
-					className={`flex shadow-none flex-col mt-4 ${
-						value === 'license'
-							? 'bg-muted/50'
-							: TABS_WITHOUT_SAVE_BUTTON.has(value)
-								? 'bg-white'
-								: 'bg-muted/50'
+		<Card className="flex flex-col mt-4 bg-white border-0 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+				<CardContent
+					className={`flex-1 ${
+						value === 'custom_fields'
+							? 'px-6 py-0 pb-6'
+							: 'p-6'
 					}`}
 				>
-					<CardContent
-						className={`flex-1 ${
-							value === 'custom_fields'
-								? 'px-6 py-0 pb-6'
-								: TABS_WITHOUT_SAVE_BUTTON.has(value)
-									? 'px-6 py-6'
-									: 'p-6'
-						}`}
-					>
-						{content}
-					</CardContent>
-					{!TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
-						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
-							<Button
-								onClick={updateSettings}
-								disabled={isUpdating || !hasChanges}
-								className="min-w-[120px] rounded-lg px-0"
-								variant="gradient"
-							>
-								{isUpdating
-									? __('Saving...', 'doublescale')
-									: __('Save Settings', 'doublescale')}
-							</Button>
-						</CardFooter>
-					) : null}
-				</Card>
+					{content}
+				</CardContent>
+				{!TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
+					<CardFooter className="bg-white rounded-b-xl p-4 mt-auto justify-end">
+						<Button
+							onClick={updateSettings}
+							disabled={isUpdating || !hasChanges}
+							className="min-w-[120px] rounded-lg px-0"
+							variant="gradient"
+						>
+							{isUpdating
+								? __('Saving...', 'doublescale')
+								: __('Save Settings', 'doublescale')}
+						</Button>
+					</CardFooter>
+				) : null}
+			</Card>
 			),
 		};
 	});
@@ -719,7 +711,7 @@ const SettingsPage: React.FC = () => {
 				onValueChange={handleTabChange}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
-				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"
+				tabsListWrapperClassName="py-3 px-2.5 rounded-lg bg-white shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]"
 				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
 			/>
 		</div>

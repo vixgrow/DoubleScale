@@ -178,6 +178,13 @@ final class AbilityGuard {
 					 * human ones instead of being indistinguishable after
 					 * the fact.
 					 *
+					 * A batch write puts every id and error on `$result`
+					 * (`items`, `errors`, `batch_id`). Listeners that need
+					 * per-row accountability should iterate those arrays —
+					 * this action fires once for the whole batch, not once
+					 * per row. A zero `created`/`updated`/`deleted` count
+					 * means nothing changed and this action does not fire.
+					 *
 					 * @since 1.0.0
 					 *
 					 * @param string $name    Full ability name.

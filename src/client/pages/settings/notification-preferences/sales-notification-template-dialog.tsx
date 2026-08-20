@@ -124,7 +124,7 @@ export const SalesNotificationTemplateDialog: React.FC<SalesNotificationTemplate
 				</div>
 
 				<DialogFooter>
-					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+					<Button variant="secondaryDeepBlue" onClick={() => onOpenChange(false)} disabled={saving}>
 						{__('Cancel', 'doublescale')}
 					</Button>
 					<Button onClick={() => void handleSave()} disabled={saving}>

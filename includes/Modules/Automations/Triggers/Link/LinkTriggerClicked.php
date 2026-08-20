@@ -39,7 +39,7 @@ class LinkTriggerClicked extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger fires when a selected link trigger is clicked.';
+	public $description = 'This trigger fires when a link trigger URL is clicked.';
 
 	/**
 	 * Trigger Attributes
@@ -75,9 +75,9 @@ class LinkTriggerClicked extends TriggerPro {
 				'endpoint'    => 'doublescale/v1/link-triggers',
 				'placeholder' => __( 'Select link trigger(s)', 'doublescale' ),
 				'multiple'    => true,
-				'required'    => true,
+				'required'    => false,
 				'helperText'  => __(
-					'Only clicks on the selected link trigger(s) will start this automation.',
+					'Leave empty to run for every link trigger. Select specific links to limit this automation to those clicks.',
 					'doublescale'
 				),
 			),
@@ -98,7 +98,7 @@ class LinkTriggerClicked extends TriggerPro {
 					'items'    => array(
 						'type' => 'integer',
 					),
-					'required' => true,
+					'required' => false,
 				),
 			),
 		);

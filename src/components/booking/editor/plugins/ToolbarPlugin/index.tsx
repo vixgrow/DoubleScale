@@ -30,6 +30,7 @@ import FontEditing from './font-editing';
 import AlignmentStyles from './alignment-styles';
 import Attachments from './attachments';
 import AddingShortCode from './adding-shortcode';
+import LinkTriggerInsertButton from '../../../../editor/plugins/ToolbarPlugin/link-trigger-insert';
 
 interface ToolbarProps {
 	type: string;
@@ -183,6 +184,7 @@ export const ToolbarPlugin = ({ type }: ToolbarProps) => {
 
 						{/* Link and Image */}
 						<Attachments activeEditor={activeEditor} />
+						<LinkTriggerInsertButton activeEditor={activeEditor} />
 					</>
 				)}
 			</div>

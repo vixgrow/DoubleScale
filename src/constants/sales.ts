@@ -36,6 +36,16 @@ export const INVOICE_STATUSES = [
 
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
+/**
+ * Statuses an admin can set directly. Paid / partially paid are derived from
+ * recorded payments (`amount_paid`), so they are not in this list.
+ */
+export const MANUAL_INVOICE_STATUSES: readonly InvoiceStatus[] = [
+	'draft',
+	'unpaid',
+	'overdue',
+];
+
 export const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, string> = {
 	draft: __('Draft', 'doublescale'),
 	sent: __('Sent', 'doublescale'),

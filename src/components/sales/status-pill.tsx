@@ -4,6 +4,7 @@
 
 import React from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { ChevronDown } from 'lucide-react';
 
 import {
 	INVOICE_STATUS_LABELS,
@@ -41,12 +42,17 @@ const contractClasses: Record<ContractStatus, string> = {
 export const ProposalStatusPill: React.FC<{
 	status: ProposalStatus;
 	expired?: boolean;
-}> = ({ status, expired = false }) => (
+	/** Chevron that signals the pill opens a status menu. */
+	interactive?: boolean;
+}> = ({ status, expired = false, interactive = false }) => (
 	<span className="inline-flex items-center gap-1.5">
 		<span
-			className={`inline-flex items-center rounded-lg px-2 py-1 text-sm font-medium ${proposalClasses[status] || proposalClasses.draft}`}
+			className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium ${proposalClasses[status] || proposalClasses.draft}`}
 		>
 			{PROPOSAL_STATUS_LABELS[status] || status}
+			{interactive ? (
+				<ChevronDown className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
+			) : null}
 		</span>
 		{expired ? (
 			<span className="inline-flex items-center rounded-lg px-2 py-1 text-sm font-medium bg-amber-100 text-amber-800">
@@ -80,12 +86,17 @@ export const ContractStatusPill: React.FC<{
 	</span>
 );
 
-export const InvoiceStatusPill: React.FC<{ status: InvoiceStatus }> = ({
-	status,
-}) => (
+export const InvoiceStatusPill: React.FC<{
+	status: InvoiceStatus;
+	/** Chevron that signals the pill opens a status menu. */
+	interactive?: boolean;
+}> = ({ status, interactive = false }) => (
 	<span
-		className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${invoiceClasses[status] || invoiceClasses.draft}`}
+		className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${invoiceClasses[status] || invoiceClasses.draft}`}
 	>
 		{INVOICE_STATUS_LABELS[status] || status}
+		{interactive ? (
+			<ChevronDown className="h-3 w-3 opacity-70" aria-hidden="true" />
+		) : null}
 	</span>
 );

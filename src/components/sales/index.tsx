@@ -9,6 +9,12 @@ export { getGlobalCurrency } from './sales-currency-utils';
 export { DocumentCurrencySelect } from './document-currency-select';
 export type { DocumentCurrencySelectProps } from './document-currency-select';
 export { ProposalStatusPill, ContractStatusPill, InvoiceStatusPill } from './status-pill';
+export {
+	InvoiceStatusSelect,
+	ProposalStatusSelect,
+	getInvoiceBalanceDue,
+	invoiceCanMarkPaid,
+} from './document-status-select';
 export { ConfirmDialog } from './confirm-dialog';
 export { SendDocumentDialog } from './send-document-dialog';
 export { SendWhatsappDialog } from './send-whatsapp-dialog';

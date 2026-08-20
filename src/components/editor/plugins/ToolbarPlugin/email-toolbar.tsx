@@ -20,6 +20,7 @@ import ListStyles from './list-styles';
 import AlignmentStyles from './alignment-styles';
 import AddingShortCode from './adding-shortcode';
 import LinkMergeTagsTrigger from './attachments/link-merge-tags-trigger';
+import LinkTriggerInsertButton from './link-trigger-insert';
 import { useToolbarState } from './use-toolbar-state';
 import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
 
@@ -54,6 +55,7 @@ export default function EmailToolbar({
 						/>
 					)}
 				/>
+				<LinkTriggerInsertButton activeEditor={activeEditor} />
 			</div>
 
 			<div className="flex gap-4 items-center">

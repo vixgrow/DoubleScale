@@ -32,6 +32,12 @@ import { LinkDialog, LinkData } from './LinkDialog';
 import { MerageTagsIcon } from '@doublescale/components';
 import MergeTagsSelector from '@/components/merge-tags';
 import { stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
+import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
+import {
+	LinkTriggerPickerDialog,
+	LinkTriggerToolbarButton,
+	type PickedLinkTrigger,
+} from '../link-trigger-picker';
 
 interface RichTextEditorProps {
 	content: string;
@@ -72,6 +78,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	mergeTagTriggerId,
 	salesEmailDocumentType,
 }) => {
+	const isPro = useIsProActive();
 	const isBuilderDark = theme === 'builderDark';
 	const isCanvasFormat = formattingTarget === 'canvas';
 	const bodyColor = (defaultBodyColor ?? '#333').trim() || '#333';
@@ -102,6 +109,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
 	);
 	const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+	const [isLinkTriggerPickerOpen, setIsLinkTriggerPickerOpen] = useState(false);
 	const [currentLinkData, setCurrentLinkData] = useState<{
 		url: string;
 	}>({ url: '' });
@@ -562,63 +570,71 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	// Enhanced link handling
-	const handleLinkClick = () => {
+	const saveEditorSelection = () => {
 		const selection = window.getSelection();
-		let existingUrl = '';
-
-		// Save the current selection before opening the dialog
 		if (selection && selection.rangeCount > 0) {
 			const range = selection.getRangeAt(0);
-
-			// Save selection details
 			savedSelectionRef.current = {
 				startContainer: range.startContainer,
 				startOffset: range.startOffset,
 				endContainer: range.endContainer,
 				endOffset: range.endOffset,
 			};
-
-			const parentElement =
-				range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-					? range.commonAncestorContainer.parentElement
-					: (range.commonAncestorContainer as Element);
-
-			const existingLink = parentElement?.closest(
-				'a'
-			) as HTMLAnchorElement;
-			if (existingLink) {
-				// Use getAttribute to get raw href (preserves merge tags like {{contact:unsubscribe_link}})
-				// .href would resolve to absolute URL and corrupt merge tags
-				existingUrl = existingLink.getAttribute('href') || '';
-			}
+			return range;
 		}
-
-		// Set the current link data and open dialog
-		setCurrentLinkData({ url: existingUrl });
-		setIsLinkDialogOpen(true);
+		savedSelectionRef.current = null;
+		return null;
 	};
 
-	const handleLinkConfirm = (linkData: LinkData) => {
-		// Restore the saved selection
+	const restoreEditorSelection = (): Range | null => {
 		const selection = window.getSelection();
-		if (!selection || !savedSelectionRef.current) return;
+		if (!selection || !savedSelectionRef.current) {
+			return null;
+		}
 
-		// Focus the editor first
 		getEditorEl()?.focus();
 
-		// Restore the selection from saved details
 		const range = document.createRange();
 		try {
-			range.setStart(savedSelectionRef.current.startContainer, savedSelectionRef.current.startOffset);
-			range.setEnd(savedSelectionRef.current.endContainer, savedSelectionRef.current.endOffset);
-		} catch (e) {
-			// If restoring fails, return early
+			range.setStart(
+				savedSelectionRef.current.startContainer,
+				savedSelectionRef.current.startOffset
+			);
+			range.setEnd(
+				savedSelectionRef.current.endContainer,
+				savedSelectionRef.current.endOffset
+			);
+		} catch {
 			savedSelectionRef.current = null;
-			return;
+			return null;
 		}
 
 		selection.removeAllRanges();
 		selection.addRange(range);
+		return range;
+	};
+
+	const applyLinkToSelection = (url: string, fallbackText: string) => {
+		const range = restoreEditorSelection();
+		const selection = window.getSelection();
+		if (!range || !selection) {
+			const root = getEditorEl();
+			if (!root) {
+				return;
+			}
+			root.focus();
+			const linkElement = document.createElement('a');
+			linkElement.href = url;
+			linkElement.target = '_blank';
+			linkElement.rel = 'noopener noreferrer';
+			linkElement.style.textDecoration = 'underline';
+			linkElement.textContent = fallbackText;
+			root.appendChild(linkElement);
+			processLinks();
+			emitContent(root.innerHTML);
+			savedSelectionRef.current = null;
+			return;
+		}
 
 		const parentElement =
 			range.commonAncestorContainer.nodeType === Node.TEXT_NODE
@@ -628,44 +644,77 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		const existingLink = parentElement?.closest('a') as HTMLAnchorElement;
 
 		if (existingLink) {
-			// Update existing link
-			existingLink.href = linkData.url;
+			existingLink.href = url;
 			existingLink.target = '_blank';
 			existingLink.rel = 'noopener noreferrer';
 			existingLink.style.textDecoration = 'underline';
 		} else {
-			// Create new link
 			const linkElement = document.createElement('a');
-			linkElement.href = linkData.url;
+			linkElement.href = url;
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
 			linkElement.style.textDecoration = 'underline';
 			linkElement.style.color = selectedColor;
 
-			try {
-				range.surroundContents(linkElement);
-			} catch (e) {
-				// Fallback for complex selections
-				const selectedText = range.toString();
-				range.deleteContents();
-				linkElement.textContent = selectedText;
+			const selectedText = range.toString();
+			if (selectedText) {
+				try {
+					range.surroundContents(linkElement);
+				} catch {
+					range.deleteContents();
+					linkElement.textContent = selectedText;
+					range.insertNode(linkElement);
+				}
+			} else {
+				linkElement.textContent = fallbackText;
 				range.insertNode(linkElement);
 			}
 		}
 
 		if (getEditorEl()) {
-			// Process links to ensure all styling is applied
 			processLinks();
 			emitContent(getEditorEl()!.innerHTML);
-
-			// Update active formats to show link button as selected
 			setTimeout(() => {
 				updateActiveFormats();
 			}, 50);
 		}
 
-		// Clear the saved selection
 		savedSelectionRef.current = null;
+	};
+
+	const handleLinkClick = () => {
+		const range = saveEditorSelection();
+		let existingUrl = '';
+
+		if (range) {
+			const parentElement =
+				range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+					? range.commonAncestorContainer.parentElement
+					: (range.commonAncestorContainer as Element);
+
+			const existingLink = parentElement?.closest(
+				'a'
+			) as HTMLAnchorElement;
+			if (existingLink) {
+				existingUrl = existingLink.getAttribute('href') || '';
+			}
+		}
+
+		setCurrentLinkData({ url: existingUrl });
+		setIsLinkDialogOpen(true);
+	};
+
+	const handleLinkConfirm = (linkData: LinkData) => {
+		applyLinkToSelection(linkData.url, linkData.url);
+	};
+
+	const handleLinkTriggerPick = (trigger: PickedLinkTrigger) => {
+		applyLinkToSelection(trigger.url, trigger.name);
+	};
+
+	const handleOpenLinkTriggerPicker = () => {
+		saveEditorSelection();
+		setIsLinkTriggerPickerOpen(true);
 	};
 
 	const handleInsertMergeTag = async (tagValue: string) => {
@@ -983,6 +1032,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 								<Link className="h-4 w-4" />
 							</Button>
 
+							{isPro ? (
+								<LinkTriggerToolbarButton
+									className={toolbarIconBtn(false)}
+									onMouseDown={(e) => e.preventDefault()}
+									onClick={handleOpenLinkTriggerPicker}
+								/>
+							) : null}
+
 							<div className={toolbarSep} />
 
 							<Button
@@ -1014,6 +1071,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						>
 							<Link className="h-4 w-4" />
 						</Button>
+						{isPro ? (
+							<LinkTriggerToolbarButton
+								className={toolbarIconBtn(false)}
+								onMouseDown={(e) => e.preventDefault()}
+								onClick={handleOpenLinkTriggerPicker}
+							/>
+						) : null}
 						<div
 							className="mx-1.5 w-px shrink-0 self-stretch bg-white/40"
 							aria-hidden
@@ -1085,6 +1149,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				}}
 				onConfirm={handleLinkConfirm}
 				initialUrl={currentLinkData.url}
+			/>
+
+			<LinkTriggerPickerDialog
+				open={isLinkTriggerPickerOpen}
+				onOpenChange={setIsLinkTriggerPickerOpen}
+				onPick={handleLinkTriggerPick}
 			/>
 
 			{/* Merge Tags Modal */}

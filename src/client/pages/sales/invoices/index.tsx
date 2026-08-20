@@ -15,6 +15,7 @@ import DataTablePagination from '@/components/ui/data-table-pagination';
 import {
 	ConfirmDialog,
 	InvoiceFormDialog,
+	RecordPaymentDialog,
 	SendDocumentDialog,
 	SendWhatsappDialog,
 } from '@/components/sales';
@@ -27,9 +28,11 @@ import {
 } from '@/components/sales/sales-approval-utils';
 import {
 	confirmWhatsappSent,
+	changeInvoiceStatus,
 	deleteInvoice,
 	downloadInvoicePdf,
 	duplicateInvoice,
+	recordInvoicePayment,
 	sendInvoice,
 	sendInvoiceWhatsapp,
 	useInvoices,
@@ -137,6 +140,7 @@ const InvoicesList: React.FC = () => {
 	const [busyId, setBusyId] = useState<number | null>(null);
 	const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
 	const [whatsappTarget, setWhatsappTarget] = useState<Invoice | null>(null);
+	const [paymentTarget, setPaymentTarget] = useState<Invoice | null>(null);
 	const closeNotice = () => setNotice(null);
 
 	const { data, loading, error, refetch } = useInvoices({
@@ -229,6 +233,38 @@ const InvoicesList: React.FC = () => {
 			__('PDF download failed.', 'doublescale')
 		);
 
+	const handleStatusChange = (invoice: Invoice, nextStatus: InvoiceStatus) =>
+		void runRowAction(
+			invoice,
+			async () => {
+				await changeInvoiceStatus(invoice.id, nextStatus);
+				refreshAll();
+				setNotice({
+					type: 'success',
+					message: __('Invoice status updated.', 'doublescale'),
+				});
+			},
+			__('Failed to update the invoice status.', 'doublescale')
+		);
+
+	const handleRecordPayment = (
+		invoice: Invoice,
+		payload: Parameters<typeof recordInvoicePayment>[1]
+	) =>
+		void runRowAction(
+			invoice,
+			async () => {
+				await recordInvoicePayment(invoice.id, payload);
+				refreshAll();
+				setPaymentTarget(null);
+				setNotice({
+					type: 'success',
+					message: __('Payment recorded successfully.', 'doublescale'),
+				});
+			},
+			__('Failed to record payment.', 'doublescale')
+		);
+
 	const confirmSend = (message: string) => {
 		if (!sendTarget) {
 			return;
@@ -278,6 +314,8 @@ const InvoicesList: React.FC = () => {
 				onDownloadPdf: handleDownloadPdf,
 				busyId,
 				canSend,
+				onStatusChange: handleStatusChange,
+				onMarkPaid: setPaymentTarget,
 			}),
 		[navigate, salesSettings, busyId]
 	);
@@ -538,6 +576,20 @@ const InvoicesList: React.FC = () => {
 				}}
 				autoSendAvailable={whatsappAutoAvailable}
 			/>
+
+			{paymentTarget ? (
+				<RecordPaymentDialog
+					open
+					onOpenChange={(open) => {
+						if (!open) {
+							setPaymentTarget(null);
+						}
+					}}
+					invoice={paymentTarget}
+					busy={busyId === paymentTarget.id}
+					onSubmit={(payload) => handleRecordPayment(paymentTarget, payload)}
+				/>
+			) : null}
 		</div>
 	);
 };

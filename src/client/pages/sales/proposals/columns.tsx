@@ -7,8 +7,10 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { getToLink } from '@doublescale/navigation';
 import { FallbackCell } from '@doublescale/components';
-import { DocumentRowActions, ProposalStatusPill } from '@/components/sales';
+import { DocumentRowActions } from '@/components/sales';
+import { ProposalStatusSelect } from '@/components/sales/document-status-select';
 import { formatMoney } from '@/constants/currencies';
+import type { ProposalStatus } from '@/constants/sales';
 import type { Proposal } from '@/types/sales';
 
 const contactName = (proposal: Proposal): string => {
@@ -38,6 +40,7 @@ export interface ProposalColumnProps {
 	busyId: number | null;
 	/** Whether the direct send action is available for this document. */
 	canSend: (proposal: Proposal) => boolean;
+	onStatusChange: (proposal: Proposal, status: ProposalStatus) => void;
 }
 
 export const getProposalColumns = ({
@@ -53,6 +56,7 @@ export const getProposalColumns = ({
 	onDownloadPdf,
 	busyId,
 	canSend,
+	onStatusChange,
 }: ProposalColumnProps): ColumnDef<Proposal>[] => [
 	{
 		accessorKey: 'proposal_number',
@@ -80,12 +84,19 @@ export const getProposalColumns = ({
 	{
 		accessorKey: 'status',
 		header: () => __('Status', 'doublescale'),
-		cell: ({ row }) => (
-			<ProposalStatusPill
-				status={row.original.status}
-				expired={row.original.is_expired}
-			/>
-		),
+		cell: ({ row }) => {
+			const proposal = row.original;
+
+			return (
+				<ProposalStatusSelect
+					status={proposal.status}
+					expired={proposal.is_expired}
+					disabled={!canEdit(proposal)}
+					busy={busyId === proposal.id}
+					onChange={(status) => onStatusChange(proposal, status)}
+				/>
+			);
+		},
 	},
 	{
 		accessorKey: 'total',

@@ -45,8 +45,9 @@ import {
 	ConfirmDialog,
 	InvoiceFormDialog,
 	InvoiceOnlinePayment,
-	InvoiceStatusPill,
+	InvoiceStatusSelect,
 	InvoiceDocumentPreview,
+	invoiceCanMarkPaid,
 	PaymentsList,
 	RecordPaymentDialog,
 	SendDocumentDialog,
@@ -69,6 +70,7 @@ import {
 } from '@/components/sales/sales-approval-utils';
 import {
 	confirmWhatsappSent,
+	changeInvoiceStatus,
 	deleteInvoice,
 	deleteInvoicePayment,
 	downloadInvoicePdf,
@@ -84,6 +86,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { ContactSummary, Invoice, LineItem } from '@/types/sales';
+import type { InvoiceStatus } from '@/constants/sales';
 
 const cardClass = 'rounded-2xl border border-border bg-[#F7F8FA] p-4';
 
@@ -397,6 +400,26 @@ const InvoiceView: React.FC = () => {
 		}
 	};
 
+	const handleStatusChange = async (nextStatus: InvoiceStatus) => {
+		if (!invoiceId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			const updated = await changeInvoiceStatus(invoiceId, nextStatus);
+			setInvoice(updated);
+			showNotice('success', __('Invoice status updated.', 'doublescale'));
+		} catch (err: unknown) {
+			showNotice(
+				'error',
+				formatSalesRestError(err, __('Failed to update the invoice status.', 'doublescale'))
+			);
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const handleDeletePayment = async (paymentId: number) => {
 		if (!invoiceId) {
 			return;
@@ -498,7 +521,14 @@ const InvoiceView: React.FC = () => {
 							{invoice.invoice_number}
 						</h1>
 						<div className="flex flex-wrap items-center gap-3">
-							<InvoiceStatusPill status={invoice.status} />
+							<InvoiceStatusSelect
+								status={invoice.status}
+								disabled={!canEdit}
+								busy={busy}
+								canMarkPaid={invoiceCanMarkPaid(invoice)}
+								onChange={(status) => void handleStatusChange(status)}
+								onMarkPaid={() => setPaymentOpen(true)}
+							/>
 							{customerName ? (
 								<span className="inline-flex items-center gap-1.5 border-l border-border px-3 text-sm font-medium text-muted-foreground">
 									<span className="rounded-full border border-border bg-background p-1">

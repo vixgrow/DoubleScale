@@ -345,14 +345,14 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					overflow: hidden !important;
 				}
 
-				/* Increase z-index for all Radix UI portals when used in builder */
-				body:has(#doublescale-email-builder) [data-radix-portal] {
+				/* DialogPortal uses Portal asChild, so there is no [data-radix-portal]
+				   wrapper. Elevate our dialog layer above the fullscreen builder shell
+				   (z-index 160000) or the panel stays behind it while only an in-tree
+				   overlay is visible. */
+				body:has(#doublescale-email-builder) [data-doublescale-dialog-layer] {
 					z-index: 160020 !important;
 				}
-				
-				/* Specific overrides for dialog/popover content */
-				body:has(#doublescale-email-builder) [role="dialog"],
-				body:has(#doublescale-email-builder) [role="alertdialog"],
+
 				body:has(#doublescale-email-builder) [data-radix-popper-content-wrapper] {
 					z-index: 160021 !important;
 				}

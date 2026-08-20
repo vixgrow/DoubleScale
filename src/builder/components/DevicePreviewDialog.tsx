@@ -16,7 +16,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -75,7 +74,6 @@ export const DevicePreviewDialog: React.FC<DevicePreviewDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogOverlay />
 			<DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col">
 				<DialogHeader>
 					<DialogTitle className="text-center">

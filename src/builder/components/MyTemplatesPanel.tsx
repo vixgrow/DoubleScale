@@ -17,7 +17,6 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -267,7 +266,6 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 				open={!!previewTemplate}
 				onOpenChange={() => setPreviewTemplate(null)}
 			>
-				<DialogOverlay />
 				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
 						<DialogTitle className="text-center">
@@ -309,7 +307,6 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 				open={!!confirmTemplate}
 				onOpenChange={() => setConfirmTemplate(null)}
 			>
-				<DialogOverlay />
 				<DialogContent className="max-w-[41rem] p-8">
 					<DialogHeader>
 						<div className="flex flex-col items-center justify-center gap-6">

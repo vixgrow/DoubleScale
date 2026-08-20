@@ -3,8 +3,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogOverlay,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
@@ -36,7 +34,9 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 				}
 			}}
 		>
-			<DialogOverlay />
+			{/* DialogContent already renders the backdrop; an extra DialogOverlay
+			    here mounts inside the builder shell and only dims the UI while the
+			    portaled panel can sit behind it. */}
 			<DialogContent className="max-w-[640px] gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:max-w-[640px]">
 				<DialogHeader className="">
 					<CustomDialogHeader

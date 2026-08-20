@@ -15,7 +15,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogFooter,
-	DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -110,7 +109,6 @@ export const SaveAsBlockDialog: React.FC<SaveAsBlockDialogProps> = ({
 				}
 			}}
 		>
-			<DialogOverlay />
 			<DialogContent className="bg-white">
 				<CustomDialogHeader
 					title={__('Save as Block', 'doublescale')}

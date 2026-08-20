@@ -34,6 +34,7 @@ use DoubleScale\Modules\Campaigns\Campaign\EmailProcessing;
 // use DoubleScale\Modules\Campaigns\Campaign\WhatsappProcessing; // Moved to Pro
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\EmailTrackingHelper;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 
@@ -598,11 +599,14 @@ class RestCampaignController extends AbstractCampaignController {
 				$attachment_paths = EmailAttachmentResolver::resolve_paths( $attachment_paths );
 			}
 
-			$contact = ContactModel::get_by_email( $email ) ?? null;
-			$result  = $emails->send(
+			$contact      = ContactModel::get_by_email( $email ) ?? null;
+			$body_content = $this->process_merge_tags( $for_testing_body, $contact );
+			$body_content = EmailTrackingHelper::prepare_test_email_body( $body_content, $email, $contact );
+
+			$result = $emails->send(
 				$email,
 				$subject,
-				$this->process_merge_tags( $for_testing_body, $contact ),
+				$body_content,
 				$attachment_paths
 			);
 
@@ -722,6 +726,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 				// Process subject with merge tags
 				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
+				$body_content      = EmailTrackingHelper::prepare_test_email_body( $body_content, $recipient_email, $contact );
 
 				$attachment_paths = EmailAttachmentResolver::resolve_template_paths( $template );
 

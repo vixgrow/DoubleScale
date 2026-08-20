@@ -31,6 +31,7 @@ const processStepHierarchy = (
 	initialEdges: Edge[],
 	automation: Automation,
 	onStepClick: ((stepData: OrganizedStep) => void) | undefined,
+	onClearStep: (() => void) | undefined,
 	onDeleteStep: (stepId: string) => Promise<void>,
 	getNodePositionLocal: (
 		nodeId: string,
@@ -101,6 +102,7 @@ const processStepHierarchy = (
 						onStepClick(stepData);
 					}
 				},
+				onClearStep,
 				onDeleteStep, // Pass the delete function to nodes
 			},
 		});
@@ -349,6 +351,7 @@ const processStepHierarchy = (
 				initialEdges,
 				automation,
 				onStepClick,
+				onClearStep,
 				onDeleteStep,
 				getNodePositionLocal,
 				startX,
@@ -372,6 +375,7 @@ const processStepHierarchy = (
 				initialEdges,
 				automation,
 				onStepClick,
+				onClearStep,
 				onDeleteStep,
 				getNodePositionLocal,
 				startX,

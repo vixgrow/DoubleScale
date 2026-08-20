@@ -39,6 +39,7 @@ import EditHeaderIcon from '@/components/icons/edit-header';
 interface NodeContextMenuProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onDeletePrepare?: () => void;
 	children: React.ReactNode;
 	disabled?: boolean;
 	showDelete?: boolean;
@@ -47,6 +48,7 @@ interface NodeContextMenuProps {
 const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 	onEdit,
 	onDelete,
+	onDeletePrepare,
 	children,
 	disabled = false,
 	showDelete = true,
@@ -62,6 +64,7 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
 	const handleDeleteClick = (e: Event) => {
 		e.stopPropagation();
+		onDeletePrepare?.();
 		setShowDeleteAlert(true);
 	};
 

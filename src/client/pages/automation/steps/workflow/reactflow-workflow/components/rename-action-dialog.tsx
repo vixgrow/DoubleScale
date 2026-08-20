@@ -32,6 +32,8 @@ interface RenameActionDialogProps {
 	currentLabel: string;
 	catalogLabel: string;
 	onSave: (label: string) => Promise<void>;
+	title?: string;
+	description?: string;
 }
 
 const RenameActionDialog: React.FC<RenameActionDialogProps> = ({
@@ -40,6 +42,11 @@ const RenameActionDialog: React.FC<RenameActionDialogProps> = ({
 	currentLabel,
 	catalogLabel,
 	onSave,
+	title = __('Rename Action', 'doublescale'),
+	description = __(
+		'Give this action a custom name to make complex workflows easier to follow.',
+		'doublescale'
+	),
 }) => {
 	const [label, setLabel] = useState(currentLabel);
 	const [isSaving, setIsSaving] = useState(false);
@@ -73,8 +80,14 @@ const RenameActionDialog: React.FC<RenameActionDialogProps> = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
-				overlayClassName={automationModalOverlayClassName}
-				className={cn(automationDialogSurfaceMedium, 'gap-0 p-0')}
+				overlayClassName={cn(
+					automationModalOverlayClassName,
+					'z-[150469]'
+				)}
+				className={cn(
+					automationDialogSurfaceMedium,
+					'z-[150470] gap-0 p-0'
+				)}
 			>
 				<DialogHeader
 					className={cn(
@@ -82,13 +95,8 @@ const RenameActionDialog: React.FC<RenameActionDialogProps> = ({
 						'border-b border-border px-6 py-4'
 					)}
 				>
-					<DialogTitle>{__('Rename Action', 'doublescale')}</DialogTitle>
-					<DialogDescription>
-						{__(
-							'Give this action a custom name to make complex workflows easier to follow.',
-							'doublescale'
-						)}
-					</DialogDescription>
+					<DialogTitle>{title}</DialogTitle>
+					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 
 				<div className={cn(automationDialogBodyClassName, 'px-6 py-4')}>

@@ -40,6 +40,7 @@ import { Pencil } from 'lucide-react';
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onDeletePrepare?: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
 	onRename?: () => void;
@@ -64,6 +65,7 @@ interface NodeActionsDropdownProps {
 const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
+	onDeletePrepare,
 	onDuplicate,
 	onChangeTrigger,
 	onRename,
@@ -158,7 +160,10 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					>
 						{showEdit && onEdit && (
 							<DropdownMenuItem
-								onClick={onEdit}
+								onSelect={(event) => {
+									event.preventDefault();
+									onEdit();
+								}}
 								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 							>
 								<EditHeaderIcon />
@@ -167,7 +172,10 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 						)}
 						{showRename && onRename && (
 							<DropdownMenuItem
-								onClick={onRename}
+								onSelect={(event) => {
+									event.preventDefault();
+									onRename();
+								}}
 								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 							>
 								<Pencil className="h-4 w-4" />
@@ -210,6 +218,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 								className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
 								onSelect={(e) => {
 									e.preventDefault();
+									onDeletePrepare?.();
 									setIsDialogOpen(true);
 								}}
 							>

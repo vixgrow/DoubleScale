@@ -100,6 +100,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	viewMode = false,
 	analyticsData = [],
 	onStepClick,
+	onClearStep,
 	onTriggerClick,
 }) => {
 	// ========== CONTEXT AND STATE ==========
@@ -514,6 +515,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			initialEdges,
 			automation!,
 			onStepClick,
+			onClearStep,
 			onDeleteStep,
 			getNodePositionLocal as (
 				nodeId: string,
@@ -601,6 +603,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		canvasNotesLayoutKey,
 		steps,
 		onStepClick,
+		onClearStep,
 		onDeleteStep,
 		currentStep?.id,
 		isTriggerVisible,

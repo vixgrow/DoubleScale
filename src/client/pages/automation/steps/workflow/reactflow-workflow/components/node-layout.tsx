@@ -27,10 +27,11 @@ export type NodeLayoutVariant =
 interface NodeLayoutProps {
 	variant: NodeLayoutVariant;
 	icon: React.ReactNode;
-	title: string;
+	title: React.ReactNode;
 	subtitle: React.ReactNode;
 	onEdit: () => void;
 	onDelete: () => void;
+	onDeletePrepare?: () => void;
 	onDuplicate?: () => void | Promise<void>;
 	onChangeTrigger?: () => void;
 	onRename?: () => void;
@@ -60,6 +61,7 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 	subtitle,
 	onEdit,
 	onDelete,
+	onDeletePrepare,
 	onDuplicate,
 	onChangeTrigger,
 	onRename,
@@ -104,6 +106,7 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 					<NodeActionsDropdown
 						onEdit={onEdit}
 						onDelete={onDelete}
+						onDeletePrepare={onDeletePrepare}
 						onDuplicate={onDuplicate}
 						onChangeTrigger={onChangeTrigger}
 						onRename={onRename}

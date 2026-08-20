@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -125,12 +125,24 @@ export const deleteStep = async (
 export const isStepDisabled = (step: AutomationStep): boolean =>
     step.status === 'disabled';
 
+const getStepTypeLabel = (type: string): string => {
+    switch (type) {
+        case 'goal':
+            return __('Goal', 'doublescale');
+        case 'condition':
+            return __('Condition', 'doublescale');
+        case 'delay':
+            return __('Delay', 'doublescale');
+        default:
+            return __('Action', 'doublescale');
+    }
+};
+
 /**
  * Enable or disable a step without removing it from the workflow.
  *
  * A disabled step keeps its settings and position but is skipped by the
  * automation engine, so contacts flow straight to the next enabled step.
- * Only action steps can be toggled.
  *
  * @param step The step to toggle
  * @param enabled Whether the step should run
@@ -148,6 +160,7 @@ export const toggleStepEnabled = async (
 ): Promise<boolean> => {
     const nextStatus = enabled ? 'active' : 'disabled';
     const previousStatus = step.status;
+    const stepLabel = getStepTypeLabel(step.type);
 
     // Optimistically flip the node so the canvas responds immediately.
     setSteps(
@@ -166,8 +179,8 @@ export const toggleStepEnabled = async (
         createNotice({
             type: 'success',
             message: enabled
-                ? __('Action enabled', 'doublescale')
-                : __('Action disabled', 'doublescale'),
+                ? sprintf(__('%s enabled', 'doublescale'), stepLabel)
+                : sprintf(__('%s disabled', 'doublescale'), stepLabel),
         });
 
         return true;
@@ -184,8 +197,8 @@ export const toggleStepEnabled = async (
             message:
                 error.message ||
                 (enabled
-                    ? __('Failed to enable action', 'doublescale')
-                    : __('Failed to disable action', 'doublescale')),
+                    ? sprintf(__('Failed to enable %s', 'doublescale'), stepLabel.toLowerCase())
+                    : sprintf(__('Failed to disable %s', 'doublescale'), stepLabel.toLowerCase())),
         });
 
         return false;

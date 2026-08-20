@@ -399,6 +399,10 @@ const Workflow: React.FC = () => {
 										setVisible(false); // Close trigger sidebar if open
 										setCurrentStep(step);
 									}}
+									onClearStep={() => {
+										setVisible(false);
+										setCurrentStep(null);
+									}}
 									onTriggerClick={() => {
 										setCurrentStep(null); // Close step sidebar if open
 										setVisible(true);

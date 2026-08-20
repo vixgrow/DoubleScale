@@ -119,6 +119,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		endContainer: Node;
 		endOffset: number;
 	} | null>(null);
+	const skipLinkTextStepRef = useRef(false);
 	const [activeFormats, setActiveFormats] = useState({
 		bold: false,
 		italic: false,
@@ -709,11 +710,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	const handleLinkTriggerPick = (trigger: PickedLinkTrigger) => {
-		applyLinkToSelection(trigger.url, trigger.name);
+		applyLinkToSelection(trigger.url, trigger.linkText);
 	};
 
 	const handleOpenLinkTriggerPicker = () => {
-		saveEditorSelection();
+		const range = saveEditorSelection();
+		skipLinkTextStepRef.current = Boolean(range?.toString().trim());
 		setIsLinkTriggerPickerOpen(true);
 	};
 
@@ -1155,6 +1157,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				open={isLinkTriggerPickerOpen}
 				onOpenChange={setIsLinkTriggerPickerOpen}
 				onPick={handleLinkTriggerPick}
+				skipLinkTextStep={skipLinkTextStepRef.current}
 			/>
 
 			{/* Merge Tags Modal */}

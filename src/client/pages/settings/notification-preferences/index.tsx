@@ -265,7 +265,7 @@ function ChannelHeaderIcons({
 	hasBrowser: boolean;
 }) {
 	return (
-		<div className="flex items-center shrink-0">
+		<div className="flex gap-5 items-center shrink-0">
 			{showBell && (
 				<div className="w-16 flex flex-col items-center gap-1">
 					<IconInApp size={32} />
@@ -320,7 +320,7 @@ function ChannelSwitchRow({
 	browserPermission: NotificationPermission;
 }) {
 	return (
-		<div className="flex items-center shrink-0">
+		<div className="flex gap-5 items-center shrink-0">
 			{showBell && (
 				<div className="w-16 flex justify-center">
 					<Switch

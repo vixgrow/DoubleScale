@@ -40,6 +40,8 @@ export interface DocumentRowActionsProps {
 	onViewInvoice?: () => void;
 	/** Proposals only: manual accept for deals closed outside the public link. */
 	onMarkAccepted?: () => void;
+	/** Invoices only: opens the record-payment flow for the remaining balance. */
+	onMarkPaid?: () => void;
 	onSend?: () => void;
 	/** Opens the WhatsApp share dialog for this document. */
 	onSendWhatsApp?: () => void;
@@ -65,6 +67,7 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 	onConvert,
 	onViewInvoice,
 	onMarkAccepted,
+	onMarkPaid,
 	onSend,
 	onSendWhatsApp,
 	onDownloadPdf,
@@ -126,6 +129,13 @@ export const DocumentRowActions: React.FC<DocumentRowActionsProps> = ({
 					<DropdownMenuItem onClick={afterMenuCloses(onMarkAccepted)} disabled={busy}>
 						<CheckMark />
 						{__('Mark as Accepted', 'doublescale')}
+					</DropdownMenuItem>
+				) : null}
+
+				{onMarkPaid ? (
+					<DropdownMenuItem onClick={afterMenuCloses(onMarkPaid)} disabled={busy}>
+						<CheckMark />
+						{__('Mark as Paid', 'doublescale')}
 					</DropdownMenuItem>
 				) : null}
 

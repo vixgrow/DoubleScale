@@ -7,8 +7,13 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { getToLink } from '@doublescale/navigation';
 import { FallbackCell } from '@doublescale/components';
-import { DocumentRowActions, InvoiceStatusPill } from '@/components/sales';
+import { DocumentRowActions } from '@/components/sales';
+import {
+	InvoiceStatusSelect,
+	invoiceCanMarkPaid,
+} from '@/components/sales/document-status-select';
 import { formatMoney } from '@/constants/currencies';
+import type { InvoiceStatus } from '@/constants/sales';
 import type { Invoice } from '@/types/sales';
 
 const formatTableAmount = formatMoney;
@@ -35,6 +40,8 @@ export interface InvoiceColumnProps {
 	busyId: number | null;
 	/** Whether the direct send action is available for this document. */
 	canSend: (invoice: Invoice) => boolean;
+	onStatusChange: (invoice: Invoice, status: InvoiceStatus) => void;
+	onMarkPaid: (invoice: Invoice) => void;
 }
 
 export const getInvoiceColumns = ({
@@ -48,6 +55,8 @@ export const getInvoiceColumns = ({
 	onDownloadPdf,
 	busyId,
 	canSend,
+	onStatusChange,
+	onMarkPaid,
 }: InvoiceColumnProps): ColumnDef<Invoice>[] => [
 	{
 		accessorKey: 'invoice_number',
@@ -78,7 +87,20 @@ export const getInvoiceColumns = ({
 	{
 		accessorKey: 'status',
 		header: () => __('Status', 'doublescale'),
-		cell: ({ row }) => <InvoiceStatusPill status={row.original.status} />,
+		cell: ({ row }) => {
+			const invoice = row.original;
+
+			return (
+				<InvoiceStatusSelect
+					status={invoice.status}
+					disabled={!canEdit(invoice)}
+					busy={busyId === invoice.id}
+					canMarkPaid={invoiceCanMarkPaid(invoice)}
+					onChange={(status) => onStatusChange(invoice, status)}
+					onMarkPaid={() => onMarkPaid(invoice)}
+				/>
+			);
+		},
 	},
 	{
 		accessorKey: 'invoice_date',
@@ -113,6 +135,11 @@ export const getInvoiceColumns = ({
 					onSend={canSend(invoice) ? () => onSend(invoice) : undefined}
 					onSendWhatsApp={
 						canSend(invoice) ? () => onSendWhatsApp(invoice) : undefined
+					}
+					onMarkPaid={
+						invoiceCanMarkPaid(invoice)
+							? () => onMarkPaid(invoice)
+							: undefined
 					}
 					onDownloadPdf={() => onDownloadPdf(invoice)}
 					onDelete={() => onDelete(invoice.id)}

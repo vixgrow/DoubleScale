@@ -46,7 +46,7 @@ import {
 	SendWhatsappDialog,
 	ConvertToInvoiceDialog,
 	ApprovalStatusBanner,
-	ProposalStatusPill,
+	ProposalStatusSelect,
 	ProposalDocumentPreview,
 	ProposalFormDialog,
 } from '@/components/sales';
@@ -78,6 +78,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import type { ProposalSignature } from '@/types/sales';
+import type { ProposalStatus } from '@/constants/sales';
 import { formatMoney } from '@/constants/currencies';
 
 const InfoItem: React.FC<{
@@ -335,6 +336,32 @@ const ProposalView: React.FC = () => {
 		}
 	};
 
+	const handleStatusChange = async (nextStatus: ProposalStatus) => {
+		if (nextStatus === 'accepted') {
+			setMarkAcceptedOpen(true);
+			return;
+		}
+		if (!proposalId) {
+			return;
+		}
+		setBusy(true);
+		setNotice(null);
+		try {
+			await changeProposalStatus(proposalId, nextStatus);
+			await refetch();
+			setNotice(__('Proposal status updated.', 'doublescale'));
+		} catch (err: unknown) {
+			setNotice(
+				formatSalesRestError(
+					err,
+					__('Failed to update the proposal status.', 'doublescale')
+				)
+			);
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const handleDownloadPdf = async () => {
 		if (!proposalId || !proposal) {
 			return;
@@ -411,9 +438,12 @@ const ProposalView: React.FC = () => {
 							{proposal.proposal_number}
 						</h1>
 						<div className="flex flex-wrap items-center gap-3">
-							<ProposalStatusPill
+							<ProposalStatusSelect
 								status={proposal.status}
 								expired={proposal.is_expired}
+								disabled={!canEdit}
+								busy={busy}
+								onChange={(status) => void handleStatusChange(status)}
 							/>
 							{proposal.subject ? (
 								<span className="inline-flex items-center gap-1.5 border-l border-border px-3 text-sm font-medium text-[#475569]">

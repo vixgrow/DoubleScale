@@ -89,8 +89,8 @@ import type {
 } from '@/types/sales';
 import {
 	DISCOUNT_TYPES,
-	INVOICE_STATUSES,
 	INVOICE_STATUS_LABELS,
+	MANUAL_INVOICE_STATUSES,
 	MONTHLY_RECURRENCE_CHOICES,
 	OFFLINE_PAYMENT_MODES,
 	OFFLINE_PAYMENT_MODE_LABELS,
@@ -1099,7 +1099,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									{INVOICE_STATUSES.map((s) => (
+									{[
+										...MANUAL_INVOICE_STATUSES,
+										...(status === 'paid' || status === 'partially_paid'
+											? [status as 'paid' | 'partially_paid']
+											: []),
+									].map((s) => (
 										<SelectItem key={s} value={s}>
 											{INVOICE_STATUS_LABELS[s]}
 										</SelectItem>

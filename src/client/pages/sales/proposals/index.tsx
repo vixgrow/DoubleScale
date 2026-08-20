@@ -27,7 +27,7 @@ import {
 	isWhatsappAutoSendAvailable,
 	showDirectSendAction,
 } from '@/components/sales/sales-approval-utils';
-import { PROPOSAL_STATUSES, PROPOSAL_STATUS_LABELS } from '@/constants/sales';
+import { PROPOSAL_STATUSES, PROPOSAL_STATUS_LABELS, type ProposalStatus } from '@/constants/sales';
 import {
 	changeProposalStatus,
 	confirmWhatsappSent,
@@ -188,6 +188,23 @@ const ProposalsList: React.FC = () => {
 		).then(() => setAcceptTarget(null));
 	};
 
+	const handleStatusChange = (proposal: Proposal, nextStatus: ProposalStatus) => {
+		if (nextStatus === 'accepted') {
+			setAcceptTarget(proposal);
+			return;
+		}
+
+		void runRowAction(
+			proposal,
+			async () => {
+				await changeProposalStatus(proposal.id, nextStatus);
+				await refetch();
+				setNotice(__('Proposal status updated.', 'doublescale'));
+			},
+			__('Failed to update the proposal status.', 'doublescale')
+		);
+	};
+
 	const confirmSend = (message: string) => {
 		if (!sendTarget) {
 			return;
@@ -236,6 +253,7 @@ const ProposalsList: React.FC = () => {
 				onDownloadPdf: handleDownloadPdf,
 				busyId,
 				canSend,
+				onStatusChange: handleStatusChange,
 			}),
 		[navigate, salesSettings, busyId]
 	);

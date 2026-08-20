@@ -38,6 +38,7 @@ import {
 	ButtonType,
 	EmailAttachment,
 } from './types/common';
+import { DialogLayerContext } from '@/components/ui/dialog-layer-context';
 
 export interface BuilderData {
 	sections: EmailSection[];
@@ -100,6 +101,8 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
 	const [templatesRefreshTrigger, setTemplatesRefreshTrigger] = useState(0);
+	const [overlayLayerEl, setOverlayLayerEl] =
+		useState<HTMLDivElement | null>(null);
 	const hasLoadedTemplateRef = useRef(false);
 	const isBelowDesktop = useIsBelowDesktop();
 
@@ -345,76 +348,109 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					overflow: hidden !important;
 				}
 
-				/* DialogPortal uses Portal asChild, so there is no [data-radix-portal]
-				   wrapper. Elevate our dialog layer above the fullscreen builder shell
-				   (z-index 160000) or the panel stays behind it while only an in-tree
-				   overlay is visible. */
-				body:has(#doublescale-email-builder) [data-doublescale-dialog-layer] {
-					z-index: 160020 !important;
+				/*
+				 * The builder shell is z-index 160030 (campaign tab and automation
+				 * portal alike). Dialogs, popovers, and wp.media portal to <body> at
+				 * the default layer (~51 / 160000) and would render behind it.
+				 * Raise those overlays whenever the builder is open. Keep the
+				 * automation editor below the canvas so it cannot cover the builder.
+				 */
+				body:has(#doublescale-email-builder) [data-doublescale-dialog-layer]:not(:has(#doublescale-automation-editor-dialog)) {
+					z-index: 160050 !important;
 				}
 
 				body:has(#doublescale-email-builder) [data-radix-popper-content-wrapper] {
-					z-index: 160021 !important;
+					z-index: 160051 !important;
+				}
+
+				body:has(#doublescale-email-builder) .media-modal-backdrop {
+					z-index: 160080 !important;
+					pointer-events: auto !important;
+				}
+
+				body:has(#doublescale-email-builder) .media-modal {
+					z-index: 160090 !important;
+					pointer-events: auto !important;
 				}
 			`}</style>
-			<div
-				id="doublescale-email-builder"
-				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
-				style={{
-					zIndex: 160000,
-					width: '100vw',
-					height: '100vh',
-				}}
-			>
-				<Header
-					onSave={onSave}
-					onClose={onClose}
-					autoSaveEnabled={autoSaveConfig.enabled}
-					autoSaveInterval={autoSaveConfig.interval}
-					onTemplatesSaved={() =>
-						setTemplatesRefreshTrigger((prev) => prev + 1)
-					}
-					handleNavigate={handleNavigate}
-					getTestEmailContext={getTestEmailContext}
-				/>
-				{isBelowDesktop ? (
+			<DialogLayerContext.Provider value={overlayLayerEl}>
+				<div
+					ref={setOverlayLayerEl}
+					id="doublescale-email-builder-layer"
+					style={{
+						position: 'fixed',
+						inset: 0,
+						zIndex: 160030,
+						width: '100vw',
+						height: '100vh',
+						pointerEvents: 'auto',
+					}}
+				>
 					<div
-						className="flex flex-1 items-center justify-center overflow-auto p-6"
-						style={{ backgroundColor: '#e6eff7' }}
+						id="doublescale-email-builder"
+						className="flex h-full flex-col bg-primary-foreground overflow-hidden"
 					>
-						<p className="max-w-md text-center text-base font-medium text-foreground">
-							{__(
-								'The email builder is available on desktop only. Please open it on a larger screen (1024px or wider) to start designing.',
-								'doublescale'
-							)}
-						</p>
-					</div>
-				) : (
-					<div
-						className="flex flex-1 overflow-hidden"
-						style={{ backgroundColor: '#e6eff7' }}
-					>
-						<DndContext
-							sensors={sensors}
-							collisionDetection={customCollisionDetection}
-							onDragStart={handleDragStart}
-							onDragEnd={handleDragEnd}
-							modifiers={[snapCenterToCursor]}
-						>
-							<Sidebar
-								sidebarCloseTrigger={sidebarCloseTrigger}
-								openGlobalSettings={handleOpenGlobalSettings}
-								openTemplatesOnMount={openTemplates}
-							/>
-							<Canvas />
+						<Header
+							onSave={onSave}
+							onClose={onClose}
+							autoSaveEnabled={autoSaveConfig.enabled}
+							autoSaveInterval={autoSaveConfig.interval}
+							onTemplatesSaved={() =>
+								setTemplatesRefreshTrigger((prev) => prev + 1)
+							}
+							handleNavigate={handleNavigate}
+							getTestEmailContext={getTestEmailContext}
+						/>
+						{isBelowDesktop ? (
+							<div
+								className="flex flex-1 items-center justify-center overflow-auto p-6"
+								style={{ backgroundColor: '#e6eff7' }}
+							>
+								<p className="max-w-md text-center text-base font-medium text-foreground">
+									{__(
+										'The email builder is available on desktop only. Please open it on a larger screen (1024px or wider) to start designing.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						) : (
+							<div
+								className="flex flex-1 overflow-hidden"
+								style={{ backgroundColor: '#e6eff7' }}
+							>
+								<DndContext
+									sensors={sensors}
+									collisionDetection={
+										customCollisionDetection
+									}
+									onDragStart={handleDragStart}
+									onDragEnd={handleDragEnd}
+									modifiers={[snapCenterToCursor]}
+								>
+									<Sidebar
+										sidebarCloseTrigger={
+											sidebarCloseTrigger
+										}
+										openGlobalSettings={
+											handleOpenGlobalSettings
+										}
+										openTemplatesOnMount={openTemplates}
+									/>
+									<Canvas />
 
-							<DragOverlay dropAnimation={dropAnimation}>
-								<DragOverlayRenderer activeItem={activeItem} />
-							</DragOverlay>
-						</DndContext>
+									<DragOverlay
+										dropAnimation={dropAnimation}
+									>
+										<DragOverlayRenderer
+											activeItem={activeItem}
+										/>
+									</DragOverlay>
+								</DndContext>
+							</div>
+						)}
 					</div>
-				)}
-			</div>
+				</div>
+			</DialogLayerContext.Provider>
 		</>
 	);
 };

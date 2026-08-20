@@ -11,8 +11,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { DialogLayerContext } from '@/components/ui/dialog-layer-context';
 import { EnvelopeIcon, RepeatIcon } from '@doublescale/components';
 import { Sparkles } from 'lucide-react';
+import type { BuilderData } from '@/builder/index';
+import EmailTemplatesPicker from '@/components/email-templates-picker';
 
 export interface OpenBuilderProps {
 	initialEmailBody?: string | object;
@@ -40,7 +43,13 @@ export interface OpenBuilderProps {
 	};
 }
 
-type BuilderMode = 'scratch' | 'templates' | null;
+type BuilderMode = 'scratch' | null;
+
+const emptyBuilderData = (): BuilderData => ({
+	sections: [],
+	globalSettings: {},
+	buttonSettings: {},
+});
 
 const OpenBuilder: React.FC<OpenBuilderProps> = ({
 	initialEmailBody,
@@ -53,8 +62,13 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 }) => {
 	const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 	const [showSelection, setShowSelection] = useState(false);
+	const [showEmailTemplatesStep, setShowEmailTemplatesStep] = useState(false);
 	const [showAiBuilder, setShowAiBuilder] = useState(false);
 	const [builderMode, setBuilderMode] = useState<BuilderMode>(null);
+	const [builderInitialData, setBuilderInitialData] =
+		useState<BuilderData | null>(null);
+	const [templatesPortalEl, setTemplatesPortalEl] =
+		useState<HTMLDivElement | null>(null);
 
 	const hasExistingContent = (() => {
 		if (!initialEmailBody) return false;
@@ -64,8 +78,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 					? JSON.parse(initialEmailBody)
 					: initialEmailBody;
 			return (
-				data?.type === 'builder' &&
-				data?.value?.sections?.length > 0
+				data?.type === 'builder' && data?.value?.sections?.length > 0
 			);
 		} catch {
 			return false;
@@ -74,6 +87,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 
 	const handleOpenBuilder = () => {
 		if (hasExistingContent) {
+			setBuilderInitialData(null);
 			setBuilderMode('scratch');
 			setIsBuilderOpen(true);
 		} else {
@@ -81,16 +95,35 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		}
 	};
 
-	const handleSelectScratch = () => {
-		setShowSelection(false);
+	const openBuilderWithData = (data: BuilderData) => {
+		setBuilderInitialData(data);
 		setBuilderMode('scratch');
 		setIsBuilderOpen(true);
 	};
 
+	const handleSelectScratch = () => {
+		setShowSelection(false);
+		openBuilderWithData(emptyBuilderData());
+	};
+
 	const handleSelectTemplates = () => {
 		setShowSelection(false);
-		setBuilderMode('templates');
-		setIsBuilderOpen(true);
+		setShowEmailTemplatesStep(true);
+	};
+
+	const handleTemplatesStartFromScratch = () => {
+		setShowEmailTemplatesStep(false);
+		openBuilderWithData(emptyBuilderData());
+	};
+
+	const handleTemplatesApply = (data: BuilderData) => {
+		setShowEmailTemplatesStep(false);
+		openBuilderWithData(data);
+	};
+
+	const handleTemplatesGenerateWithAi = () => {
+		setShowEmailTemplatesStep(false);
+		setShowAiBuilder(true);
 	};
 
 	const handleSelectAi = () => {
@@ -104,14 +137,21 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 
 		const preparedDataEmailBody = {
 			type: 'builder',
-			value: { sections: sections || [], globalSettings: globalSettings || {}, buttonSettings: buttonSettings || {} },
+			value: {
+				sections: sections || [],
+				globalSettings: globalSettings || {},
+				buttonSettings: buttonSettings || {},
+			},
 		};
 		const emailBodyJson = JSON.stringify(preparedDataEmailBody);
 		onSave(emailBodyJson);
 
 		setShowAiBuilder(false);
-		setBuilderMode('scratch');
-		setIsBuilderOpen(true);
+		openBuilderWithData({
+			sections: sections || [],
+			globalSettings: globalSettings || {},
+			buttonSettings: buttonSettings || {},
+		});
 	};
 
 	const handleBuilderSave = (builderData: any) => {
@@ -123,12 +163,14 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		onSave(emailBodyJson);
 		setIsBuilderOpen(false);
 		setBuilderMode(null);
+		setBuilderInitialData(null);
 		return Promise.resolve();
 	};
 
 	const handleBuilderClose = () => {
 		setIsBuilderOpen(false);
 		setBuilderMode(null);
+		setBuilderInitialData(null);
 	};
 
 	useEffect(() => {
@@ -139,23 +181,23 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		const inertElements: HTMLElement[] = [];
 
 		const timeoutId = setTimeout(() => {
-			const dialogContents = document.querySelectorAll('[role="dialog"]');
+			// Only freeze the automation editor itself. Marking every
+			// [role="dialog"] also traps later builder dialogs (and WP media)
+			// if they happen to already be in the tree.
+			const automationDialog = document.getElementById(
+				'doublescale-automation-editor-dialog'
+			);
+			if (
+				automationDialog &&
+				!automationDialog.hasAttribute('inert')
+			) {
+				automationDialog.setAttribute('inert', '');
+				inertElements.push(automationDialog);
+			}
 
-			dialogContents.forEach((dialog) => {
-				const dialogElement = dialog as HTMLElement;
-				if (
-					!dialogElement.querySelector('#doublescale-email-builder') &&
-					!dialogElement.closest('#doublescale-email-builder')
-				) {
-					const wasInert = dialogElement.hasAttribute('inert');
-					if (!wasInert) {
-						dialogElement.setAttribute('inert', '');
-						inertElements.push(dialogElement);
-					}
-				}
-			});
-
-			const sidebar = document.querySelector('.doublescale-workflow-sidebar');
+			const sidebar = document.querySelector(
+				'.doublescale-workflow-sidebar'
+			);
 			if (sidebar && !sidebar.closest('#doublescale-email-builder')) {
 				const sidebarElement = sidebar as HTMLElement;
 				sidebarElement.setAttribute('inert', '');
@@ -178,14 +220,22 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		};
 	}, [isBuilderOpen]);
 
+	// The automation editor is a modal Radix dialog, so react-remove-scroll
+	// cancels wheel events raised outside its own content — including both of
+	// our body-level portals. Claim the event during capture so the native
+	// scroll still happens before that listener sees it.
 	useEffect(() => {
-		if (!isBuilderOpen) {
+		if (!isBuilderOpen && !showEmailTemplatesStep) {
 			return;
 		}
 
 		const handleWheel = (e: WheelEvent) => {
 			const target = e.target as HTMLElement;
-			if (!target.closest('#builder-portal-wrapper')) {
+			if (
+				!target.closest(
+					'#builder-portal-wrapper, #email-templates-portal-wrapper'
+				)
+			) {
 				return;
 			}
 
@@ -221,16 +271,15 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 				capture: true,
 			});
 		};
-	}, [isBuilderOpen]);
+	}, [isBuilderOpen, showEmailTemplatesStep]);
 
 	const getBuilderInitialData = () => {
+		if (builderInitialData) {
+			return builderInitialData;
+		}
+
 		if (!initialEmailBody) {
-			const empty: any = {
-				sections: [],
-				globalSettings: {},
-				buttonSettings: {},
-			};
-			return empty;
+			return emptyBuilderData();
 		}
 
 		try {
@@ -264,11 +313,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 			);
 		} catch (error) {
 			console.error('Failed to parse email body:', error);
-			return {
-				sections: [],
-				globalSettings: {},
-				buttonSettings: {},
-			};
+			return emptyBuilderData();
 		}
 	};
 
@@ -337,7 +382,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 					<DialogHeader className="mt-4 text-center sm:mt-0 sm:text-center">
 						<DialogTitle className="mb-1 text-xl font-bold sm:text-2xl">
 							{__(
-								'Choose how you\'d like to build your Email',
+								"Choose how you'd like to build your Email",
 								'doublescale'
 							)}
 						</DialogTitle>
@@ -384,6 +429,38 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 				stackAboveFullscreenShell
 			/>
 
+			{showEmailTemplatesStep &&
+				createPortal(
+					<DialogLayerContext.Provider value={templatesPortalEl}>
+						<div
+							ref={setTemplatesPortalEl}
+							id="email-templates-portal-wrapper"
+							role="dialog"
+							aria-modal="true"
+							aria-label={__('Email templates', 'doublescale')}
+							className="fixed inset-0 z-[160025] overflow-y-auto bg-[#F7F8FA]"
+						>
+							<div className="mx-auto min-h-full w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+								<EmailTemplatesPicker
+									requireProForTemplates={false}
+									showBackButton
+									onBack={() =>
+										setShowEmailTemplatesStep(false)
+									}
+									onApplyBuilderData={handleTemplatesApply}
+									onStartFromScratch={
+										handleTemplatesStartFromScratch
+									}
+									onGenerateWithAi={
+										handleTemplatesGenerateWithAi
+									}
+								/>
+							</div>
+						</div>
+					</DialogLayerContext.Provider>,
+					document.body
+				)}
+
 			{isBuilderOpen && (
 				<>
 					{createPortal(
@@ -399,17 +476,16 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 							style={{
 								position: 'fixed',
 								inset: 0,
-								zIndex: 160000,
+								zIndex: 160030,
 								pointerEvents: 'auto',
 							}}
 						>
 							<Builder
-								key={`${builderKey}-${initialEmailBody || 'new-email'}-${builderMode}`}
+								key={`${builderKey}-${builderInitialData ? 'picked' : initialEmailBody || 'new-email'}-${builderMode}`}
 								initialData={getBuilderInitialData()}
 								onSave={handleBuilderSave}
 								onClose={handleBuilderClose}
 								autoSave={false}
-								openTemplates={builderMode === 'templates'}
 								getTestEmailContext={getTestEmailContext}
 							/>
 						</div>,

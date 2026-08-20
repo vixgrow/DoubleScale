@@ -21,6 +21,10 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import {
+	automationAlertDialogContentClassName,
+	automationModalOverlayClassName,
+} from '../steps/workflow/automation-dialog-presets';
+import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
 } from '@doublescale/services/module-fetch';
@@ -255,7 +259,10 @@ const TestRunDialog: React.FC<Props> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogContent className="max-w-md">
+			<DialogContent
+				className={automationAlertDialogContentClassName}
+				overlayClassName={automationModalOverlayClassName}
+			>
 				<DialogHeader>
 					<DialogTitle>
 						{__('Run manually', 'doublescale')}
@@ -309,7 +316,7 @@ const TestRunDialog: React.FC<Props> = ({
 							/>
 							<Input
 								type="text"
-								className="h-10 w-full pl-10"
+								className="h-10 w-full !border-border !rounded-lg !pl-10"
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
 								placeholder={__(

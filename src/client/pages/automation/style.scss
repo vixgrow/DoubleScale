@@ -1,14 +1,10 @@
-// The email builder (OpenBuilder, e.g. the "open_builder" action field) renders
-// a full-screen portal at z-index 160000. The builder injects a global rule
-// (`body:has(#doublescale-email-builder) [role="dialog"] { z-index: 160021 }`)
-// to lift its own Radix popovers/dialogs above the canvas — but that selector
-// also matches THIS automation editor dialog (a full-screen Radix dialog),
-// pushing it on top of the builder so the builder "flashes then vanishes".
-//
-// Keep the automation editor below the builder while the builder is open. The
-// id-based selector out-specifies the builder's `[role="dialog"]` !important
-// rule (and the builder injects its <style> at runtime, so we need to win on
-// specificity rather than source order).
-body:has(#doublescale-email-builder) #doublescale-automation-editor-dialog {
+// OpenBuilder portals the email builder at z-index 160030 (above the automation
+// sidebar and the "start from scratch" picker at ~160012). Keep the automation
+// editor dialog layer below the builder while the canvas is open — the layer
+// wrapper owns stacking, not the inner #doublescale-automation-editor-dialog node.
+body:has(#doublescale-email-builder)
+	[data-doublescale-dialog-layer]:has(#doublescale-automation-editor-dialog),
+body:has(#email-templates-portal-wrapper)
+	[data-doublescale-dialog-layer]:has(#doublescale-automation-editor-dialog) {
 	z-index: 159990 !important;
 }

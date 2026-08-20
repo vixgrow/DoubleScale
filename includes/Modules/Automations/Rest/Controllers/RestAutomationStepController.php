@@ -27,6 +27,7 @@ use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Emails\EmailAttachmentResolver;
 use DoubleScale\Modules\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\EmailTrackingHelper;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 
@@ -1152,6 +1153,7 @@ class RestAutomationStepController extends RestController {
 				}
 
 				$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact );
+				$body_content      = EmailTrackingHelper::prepare_test_email_body( $body_content, $recipient_email, $contact );
 
 				if ( $email_sender->send( $recipient_email, $processed_subject, $body_content, $attachment_paths ) ) {
 					++$sent_count;

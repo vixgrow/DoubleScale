@@ -11,6 +11,10 @@ namespace DoubleScale\Modules\Emails;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Constants\MessageDirection;
+use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
@@ -382,5 +386,103 @@ class EmailTrackingHelper {
 				home_url()
 			),
 		);
+	}
+
+	/**
+	 * Apply per-recipient open/click tracking to a test email body.
+	 *
+	 * Test sends previously shipped link triggers without a track-id, so clicks
+	 * fell back to the logged-in WP user instead of the intended recipient.
+	 *
+	 * @since 1.3.5
+	 *
+	 * @param string           $body            Rendered HTML body.
+	 * @param string           $recipient_email Test recipient address.
+	 * @param ContactModel|null $contact        Optional known contact for merge-tag context.
+	 * @return string Body with tracking pixel and tracked links when applicable.
+	 */
+	public static function prepare_test_email_body( $body, $recipient_email, $contact = null ) {
+		if ( ! is_string( $body ) || '' === $body ) {
+			return $body;
+		}
+
+		$has_trackable_links = false !== stripos( $body, '<a' );
+		if ( ! $has_trackable_links ) {
+			return $body;
+		}
+
+		if ( ! $contact instanceof ContactModel ) {
+			$contact = ContactModel::get_by_email( $recipient_email );
+		}
+
+		if ( ! $contact && false !== strpos( $body, 'doublescale-link-trigger' ) ) {
+			$contact = self::resolve_test_recipient_contact( $recipient_email );
+		}
+
+		if ( ! $contact ) {
+			return $body;
+		}
+
+		$tracking_entry = CommunicationTrackingModel::create(
+			array(
+				'contact_id'  => $contact->id,
+				'template_id' => null,
+				'hash_key'    => Utils::generate_hash_key(),
+				'mode'        => CommunicationTrackingModel::MODE_EMAIL,
+				'direction'   => MessageDirection::OUTBOUND,
+				'source_type' => MessageSourceTypes::INDIVIDUAL,
+				'source_id'   => null,
+				'author_id'   => get_current_user_id(),
+				'recipient'   => $recipient_email,
+				'status'      => TrackingStatus::PENDING,
+			)
+		);
+
+		$body = self::add_tracking_pixel( $body, $tracking_entry );
+		$body = self::add_click_tracking( $body, $tracking_entry->hash_key, $contact );
+
+		$tracking_entry->update(
+			array(
+				'status'  => TrackingStatus::SENT,
+				'sent_at' => current_time( 'mysql', true ),
+			)
+		);
+
+		return $body;
+	}
+
+	/**
+	 * Ensure a CRM contact exists for a test-email recipient.
+	 *
+	 * @param string $recipient_email Recipient email address.
+	 * @return ContactModel|null
+	 */
+	protected static function resolve_test_recipient_contact( $recipient_email ) {
+		$email = strtolower( trim( (string) $recipient_email ) );
+		if ( '' === $email || ! is_email( $email ) ) {
+			return null;
+		}
+
+		$existing = ContactModel::get_by_email( $email );
+		if ( $existing ) {
+			return $existing;
+		}
+
+		$wp_user    = get_user_by( 'email', $email );
+		$first_name = ( $wp_user && ! empty( $wp_user->first_name ) ) ? $wp_user->first_name : null;
+		$last_name  = ( $wp_user && ! empty( $wp_user->last_name ) ) ? $wp_user->last_name : null;
+
+		try {
+			return ContactModel::create(
+				array(
+					'email'      => $email,
+					'first_name' => $first_name,
+					'last_name'  => $last_name,
+					'source'     => 'test_email',
+				)
+			);
+		} catch ( \Illuminate\Database\QueryException $e ) {
+			return ContactModel::get_by_email( $email );
+		}
 	}
 }

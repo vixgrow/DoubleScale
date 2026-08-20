@@ -908,7 +908,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 	// Handle node clicks
 	const onNodeClick: NodeMouseHandler = useCallback(
-		(_event, node) => {
+		(event, node) => {
+			const target = event.target as HTMLElement | null;
+			if (target?.closest('[data-doublescale-dialog-layer]')) {
+				return;
+			}
+
 			if (node.id === 'trigger' && onTriggerClick) {
 				onTriggerClick();
 			} else if (

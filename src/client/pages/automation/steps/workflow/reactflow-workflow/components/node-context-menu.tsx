@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
 	AlertDialog,
-	AlertDialogAction,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -28,6 +27,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
 	automationAlertDialogContentClassName,
@@ -54,6 +54,7 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 	showDelete = true,
 }) => {
 	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleEdit = (e: Event) => {
 		e.stopPropagation();
@@ -68,11 +69,27 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 		setShowDeleteAlert(true);
 	};
 
-	const handleDeleteConfirm = () => {
-		if (onDelete) {
-			onDelete();
+	const handleDeleteConfirm = async () => {
+		if (!onDelete) {
+			return;
 		}
-		setShowDeleteAlert(false);
+
+		onDeletePrepare?.();
+		setIsDeleting(true);
+		try {
+			await onDelete();
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			setShowDeleteAlert(false);
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	const handleDeleteDialogOpenChange = (open: boolean) => {
+		if (!open && isDeleting) {
+			return;
+		}
+		setShowDeleteAlert(open);
 	};
 
 	if (disabled) {
@@ -85,11 +102,12 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
 			<AlertDialog
 				open={showDeleteAlert}
-				onOpenChange={setShowDeleteAlert}
+				onOpenChange={handleDeleteDialogOpenChange}
 			>
 				<AlertDialogContent
 					overlayClassName={automationModalOverlayClassName}
 					className={cn(automationAlertDialogContentClassName)}
+					onPointerDownOutside={(event) => event.preventDefault()}
 				>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
@@ -100,15 +118,27 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>
+						<AlertDialogCancel disabled={isDeleting}>
 							{__('No', 'doublescale')}
 						</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={handleDeleteConfirm}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						<Button
+							type="button"
+							variant="destructive"
+							disabled={isDeleting}
+							onPointerDown={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+							}}
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								void handleDeleteConfirm();
+							}}
 						>
-							{__('Yes', 'doublescale')}
-						</AlertDialogAction>
+							{isDeleting
+								? __('Deleting...', 'doublescale')
+								: __('Yes', 'doublescale')}
+						</Button>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>

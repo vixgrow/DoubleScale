@@ -7,57 +7,60 @@
  * @package DoubleScale
  */
 
-import { useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Clock, Bug } from 'lucide-react';
+import { PageTabs, DebuggingIcon, TimerBlockIcon } from '@doublescale/components';
 import CronJobs from './cron-jobs';
 import DebuggingLogs from '../debugging';
-import { TimerBlockIcon } from '@doublescale/components';
 
 const SystemSettings: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<string>('cron');
 
-	const tabsList = [
-		{
-			value: 'cron',
-			label: __('Cron Jobs', 'doublescale'),
-			icon: <TimerBlockIcon width={24} height={24} />,
-		},
-		{
-			value: 'debugging',
-			label: __('Debugging', 'doublescale'),
-			icon: <Bug className="h-4 w-4" />,
-		},
-	];
+	const tabsList = useMemo(
+		() => [
+			{
+				value: 'cron',
+				label: __('Cron Jobs', 'doublescale'),
+				icon: <TimerBlockIcon width={24} height={24} />,
+			},
+			{
+				value: 'debugging',
+				label: __('Debugging', 'doublescale'),
+				icon: <DebuggingIcon width={24} height={24} />,
+			},
+		],
+		[]
+	);
+
+	const tabsContent = useMemo(
+		() => [
+			{
+				value: 'cron',
+				children: <CronJobs />,
+			},
+			{
+				value: 'debugging',
+				children: <DebuggingLogs />,
+			},
+		],
+		[]
+	);
 
 	return (
 		<div className="system-settings">
-			<div className="text-[#09090B] font-semibold text-2xl mb-6">
+			<div className="text-[#09090B] font-semibold text-2xl mb-6 text-start">
 				{__('System', 'doublescale')}
 			</div>
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-				<div className="border px-5 py-3 rounded-lg mb-6">
-					<TabsList className="bg-transparent text-foreground gap-3">
-						{tabsList.map((tab) => (
-							<TabsTrigger
-								key={tab.value}
-								value={tab.value}
-								className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-							>
-								{tab.icon}
-								{tab.label}
-							</TabsTrigger>
-						))}
-					</TabsList>
-				</div>
-				<TabsContent value="cron" className="mt-0">
-					<CronJobs />
-				</TabsContent>
-				<TabsContent value="debugging" className="mt-0">
-					<DebuggingLogs />
-				</TabsContent>
-			</Tabs>
+			<PageTabs
+				defaultValue={activeTab}
+				value={activeTab}
+				onValueChange={setActiveTab}
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-6"
+				tabsListClassName="bg-transparent text-foreground gap-3 justify-start"
+				tabsContentClassName="mt-0"
+			/>
 		</div>
 	);
 };

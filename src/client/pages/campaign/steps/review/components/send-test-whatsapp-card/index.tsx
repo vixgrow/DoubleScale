@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertIcon, SendTestEmailIcon } from '@doublescale/components/icons';
+import { InfoIcon, SendTestEmailIcon } from '@doublescale/components/icons';
 import { cn } from '@/lib/utils';
 import { MessageCircle } from 'lucide-react';
 
@@ -210,7 +210,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
 					<div className="flex gap-3">
 						<div className="text-amber-600">
-							<AlertIcon width={24} height={24} />
+							<InfoIcon width={20} height={20}/>
 						</div>
 						<p className="text-base text-amber-800">
 							{__(

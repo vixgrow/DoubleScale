@@ -40,6 +40,7 @@ import {
 	UnsubscribesIcon,
 	CampaignsIcon,
 	FormattedDateCell,
+	InfoIcon,
 } from '@doublescale/components';
 import {
 	AlertDialog,
@@ -555,7 +556,7 @@ const AutomatedRunsView: React.FC = () => {
 			{run.failed > 0 && (
 				<div className="flex justify-between items-center py-2.5 px-4 bg-[#FAEADF] border-b border-[#CB5301]">
 					<div className="flex items-center gap-2">
-						<AlertIcon />
+						<InfoIcon width={20} height={20}/>
 						<span className="text-sm text-[#CB5301] font-medium">
 							{run.failed} {__('failed email(s) in this run', 'doublescale')}
 						</span>

@@ -42,7 +42,13 @@ export default function HtmlSerializer({ onChange, onWordCountChange }: HtmlSeri
             }
             
             if (htmlString !== lastHtmlRef.current) {
+              const isInitialSerialize = lastHtmlRef.current === '';
               lastHtmlRef.current = htmlString;
+              // Lexical emits an update while hydrating initial content. That is
+              // not a user edit — skipping it keeps parent "dirty" flags accurate.
+              if (isInitialSerialize) {
+                return;
+              }
               onChange(htmlString);
             }
           } catch (error) {

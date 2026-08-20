@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@doublescale/client';
-import { Field, AlertIcon, CartIcon } from '@doublescale/components';
+import { Field, CartIcon, InfoIcon } from '@doublescale/components';
 import { Switch } from '@doublescale/components/ui/switch';
 import { Label } from '@doublescale/components/ui/label';
 
@@ -141,7 +141,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="textarea"
 								/>
 								<div className="text-primary flex items-center gap-2">
-									<AlertIcon />
+									<InfoIcon width={20} height={20}/>
 									{__(
 										'Use smartcode {{opt_out label="No Thanks"}} to let users opt out of cart tracking.',
 										'doublescale'
@@ -183,7 +183,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						</div>
 						{!create_contacts_in_crm && (
 							<div className="text-primary flex items-center gap-2">
-								<AlertIcon />
+								<InfoIcon width={20} height={20}/>
 								{__(
 									'Enable CRM contacts above to apply these lists and tags when a cart is abandoned.',
 									'doublescale'
@@ -218,7 +218,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						</div>
 						{!create_contacts_in_crm && (
 							<div className="text-primary flex items-center gap-2">
-								<AlertIcon />
+								<InfoIcon width={20} height={20}/>
 								{__(
 									'Enable CRM contacts above to apply these lists and tags when a cart is marked lost.',
 									'doublescale'

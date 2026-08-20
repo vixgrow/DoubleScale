@@ -11,8 +11,9 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Check, Copy, ExternalLink, Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 
+import { CopyIcon, EditHeaderIcon, ExternalLinkIcon } from '@doublescale/components';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -116,7 +117,10 @@ const ClientPortalSettings = () => {
 									<Check className="h-4 w-4" />
 								</span>
 								<span className="font-medium text-gray-900">
-									{__('Your portal page is live.', 'doublescale')}
+									{__(
+										'Your portal page is live.',
+										'doublescale'
+									)}
 								</span>
 							</div>
 							<p className="text-sm text-gray-500">
@@ -132,15 +136,26 @@ const ClientPortalSettings = () => {
 										target="_blank"
 										rel="noreferrer"
 									>
-										<Button variant="outline" className="rounded-lg">
-											<ExternalLink className="mr-1 h-4 w-4" />
+										<Button
+											variant="secondaryDeepBlue"
+											className="rounded-lg [&_svg]:w-6 [&_svg]:h-6"
+										>
+											<ExternalLinkIcon
+												width={24}
+												height={24}
+												className="w-6 h-6 mr-1"
+											/>
 											{__('View page', 'doublescale')}
 										</Button>
 									</a>
 								)}
 								{status.edit_url && (
 									<a href={status.edit_url}>
-										<Button variant="outline" className="rounded-lg">
+										<Button
+											variant="outline"
+											className="rounded-lg border-[#0D9DFC] text-[#0D9DFC] bg-white"
+										>
+											<EditHeaderIcon color="#0D9DFC" />
 											{__('Edit page', 'doublescale')}
 										</Button>
 									</a>
@@ -186,7 +201,11 @@ const ClientPortalSettings = () => {
 					<code className="flex-1 rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-gray-800">
 						{shortcode}
 					</code>
-					<Button variant="outline" className="rounded-lg" onClick={copy}>
+					<Button
+						variant="outline"
+						className="rounded-lg"
+						onClick={copy}
+					>
 						{copied ? (
 							<>
 								<Check className="mr-1 h-4 w-4" />
@@ -194,7 +213,7 @@ const ClientPortalSettings = () => {
 							</>
 						) : (
 							<>
-								<Copy className="mr-1 h-4 w-4" />
+								<CopyIcon />
 								{__('Copy', 'doublescale')}
 							</>
 						)}

@@ -13,11 +13,11 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ExternalLink,
+import {
 	Terminal,
 	RefreshCw,
 } from 'lucide-react';
-import { AlertTriangleIcon, CopyIcon, PlayIcon, TimerBlockIcon } from '@doublescale/components';
+import { AlertTriangleIcon, CopyIcon, PlayIcon, TimerBlockIcon, ExternalLinkIcon } from '@doublescale/components';
 
 interface CronEvent {
 	hook: string;
@@ -151,7 +151,7 @@ const CronJobs: React.FC = () => {
 						{error}
 						<div className="mt-4">
 							<Button onClick={fetchCronStatus} variant="outline" size="sm">
-								<RefreshCw className="h-3 w-3 mr-1" />
+								<RefreshCw className="h-3 w-3 me-1" />
 								{__('Try Again', 'doublescale')}
 							</Button>
 						</div>
@@ -224,7 +224,7 @@ const CronJobs: React.FC = () => {
 							className="inline-flex items-center gap-1 underline hover:no-underline"
 						>
 							{__('Read more about server side cron', 'doublescale')}
-							<ExternalLink className="h-3 w-3" />
+							<ExternalLinkIcon width={24} height={24} className="w-6 h-6" />
 						</a>
 					</AlertDescription>
 				</Alert>
@@ -246,7 +246,7 @@ const CronJobs: React.FC = () => {
 							onClick={() => setAutoRefresh(!autoRefresh)}
 						>
 							<RefreshCw
-								className={`h-3 w-3 mr-1 ${
+								className={`h-3 w-3 me-1 ${
 									isLoading && autoRefresh ? 'animate-spin' : ''
 								}`}
 							/>
@@ -260,7 +260,7 @@ const CronJobs: React.FC = () => {
 							onClick={fetchCronStatus}
 							disabled={isLoading}
 						>
-							<RefreshCw className={`h-3 w-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+							<RefreshCw className={`h-3 w-3 me-1 ${isLoading ? 'animate-spin' : ''}`} />
 							{__('Refresh Now', 'doublescale')}
 						</Button>
 					</div>
@@ -305,7 +305,7 @@ const CronJobs: React.FC = () => {
 								variant="outline"
 								onClick={() => runCron(event.hook)}
 								disabled={runningHook === event.hook}
-								className="ml-4"
+								className="ms-4"
 							>
 								<PlayIcon width={24} height={24} />
 								{runningHook === event.hook
@@ -358,14 +358,14 @@ const CronJobs: React.FC = () => {
 									'doublescale'
 								)}
 							</p>
-							<div className="relative">
-								<pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
+							<div className="relative rounded-lg bg-muted" dir="ltr">
+								<pre className="p-4 pe-24 text-sm overflow-x-auto text-start">
 									<code>{wpConfigCode}</code>
 								</pre>
 								<Button
 									size="sm"
 									variant="ghost"
-									className="absolute top-2 right-2"
+									className="absolute top-2 end-2"
 									onClick={() =>
 										copyToClipboard(wpConfigCode, 'wp-config')
 									}
@@ -396,14 +396,14 @@ const CronJobs: React.FC = () => {
 								<p className="text-xs font-medium text-muted-foreground mb-2">
 									{__('Using wget (recommended):', 'doublescale')}
 								</p>
-								<div className="relative">
-									<pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+								<div className="relative rounded-lg bg-muted" dir="ltr">
+									<pre className="p-4 pe-24 text-xs overflow-x-auto text-start">
 										<code>{cronCommand}</code>
 									</pre>
 									<Button
 										size="sm"
 										variant="ghost"
-										className="absolute top-2 right-2"
+										className="absolute top-2 end-2"
 										onClick={() => copyToClipboard(cronCommand, 'wget')}
 									>
 										<CopyIcon width={24} height={24} />
@@ -418,14 +418,14 @@ const CronJobs: React.FC = () => {
 								<p className="text-xs font-medium text-muted-foreground mb-2">
 									{__('Using curl (alternative):', 'doublescale')}
 								</p>
-								<div className="relative">
-									<pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+								<div className="relative rounded-lg bg-muted" dir="ltr">
+									<pre className="p-4 pe-24 text-xs overflow-x-auto text-start">
 										<code>{cronCommandCurl}</code>
 									</pre>
 									<Button
 										size="sm"
 										variant="ghost"
-										className="absolute top-2 right-2"
+										className="absolute top-2 end-2"
 										onClick={() =>
 											copyToClipboard(cronCommandCurl, 'curl')
 										}
@@ -467,7 +467,7 @@ const CronJobs: React.FC = () => {
 								onClick={fetchCronStatus}
 								className="w-full"
 							>
-								<RefreshCw className="h-4 w-4 mr-2" />
+								<RefreshCw className="h-4 w-4 me-2" />
 								{__('Refresh Status', 'doublescale')}
 							</Button>
 						</div>
@@ -488,7 +488,7 @@ const CronJobs: React.FC = () => {
 										className="flex items-center gap-1"
 									>
 										{__('Learn More', 'doublescale')}
-										<ExternalLink className="h-3 w-3" />
+										<ExternalLinkIcon width={24} height={24} className="w-6 h-6" />
 									</a>
 								</Button>
 							</AlertDescription>

@@ -8,12 +8,12 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { Check, ExternalLink } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
-import { CopyIcon, NoticeBanner } from '@doublescale/components';
+import { CopyIcon, NoticeBanner, ExternalLinkIcon } from '@doublescale/components';
 import type { NoticeMessage } from '@doublescale/client';
 import {
 	Select,
@@ -200,7 +200,7 @@ export const BounceHandler: React.FC = () => {
 										rel="noopener noreferrer"
 										className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
 									>
-										<ExternalLink className="h-4 w-4" />
+										<ExternalLinkIcon width={24} height={24} className="w-6 h-6" />
 										{__('View Provider Documentation', 'doublescale')}
 									</a>
 								</div>

@@ -37,10 +37,16 @@ import {
 } from '@/components/ui/dialog';
 import { RefreshCw,
 	Download,
-	Bug,
 	XCircle,
+	X,
 } from 'lucide-react';
-import { AlertTriangleIcon, DeleteIcon, ViewIcon, InfoIcon } from '@doublescale/components';
+import {
+	AlertTriangleIcon,
+	DebuggingIcon,
+	DeleteIcon,
+	ViewIcon,
+	InfoIcon,
+} from '@doublescale/components';
 
 interface LogEntry {
 	id: number;
@@ -214,14 +220,14 @@ const DebuggingLogs: React.FC = () => {
 			case 'critical':
 			case 'emergency':
 			case 'alert':
-				return <XCircle className="h-4 w-4" />;
+				return <X className="h-4 w-4" />;
 			case 'warning':
 				return <AlertTriangleIcon width={20} height={20} />;
 			case 'info':
 			case 'notice':
 				return <InfoIcon width={16} height={16} />;
 			case 'debug':
-				return <Bug className="h-4 w-4" />;
+				return <DebuggingIcon width={24} height={24} />;
 			default:
 				return <InfoIcon width={16} height={16} />;
 		}
@@ -271,7 +277,7 @@ const DebuggingLogs: React.FC = () => {
 					</div>
 					<Alert className="items-center">
 						<AlertTriangleIcon width={20} height={20} />
-						<AlertDescription className="text-sm pt-[5px]">
+						<AlertDescription className="text-sm pt-2">
 							<strong>{__('Current Setting:', 'doublescale')}</strong>{' '}
 							{logLevel === 'error' && __(
 								'Only error-level logs and above (error, critical, alert, emergency) are being stored in the system.',
@@ -304,7 +310,7 @@ const DebuggingLogs: React.FC = () => {
 							disabled={isLoading}
 						>
 							<RefreshCw
-								className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+								className={`h-4 w-4 me-2 ${isLoading ? 'animate-spin' : ''}`}
 							/>
 							{__('Refresh', 'doublescale')}
 						</Button>
@@ -314,7 +320,7 @@ const DebuggingLogs: React.FC = () => {
 							onClick={exportLogs}
 							disabled={logs.length === 0}
 						>
-							<Download className="h-4 w-4 mr-2" />
+							<Download className="h-4 w-4 me-2" />
 							{__('Export', 'doublescale')}
 						</Button>
 						<Button
@@ -550,7 +556,10 @@ const DebuggingLogs: React.FC = () => {
 											{__('Context / Additional Data', 'doublescale')}
 										</label>
 										<div className="mt-1 p-3 bg-muted rounded-md">
-											<pre className="text-xs overflow-x-auto whitespace-pre-wrap">
+											<pre
+												dir="ltr"
+												className="text-xs overflow-x-auto whitespace-pre-wrap text-start"
+											>
 												{JSON.stringify(selectedLog.context, null, 2)}
 											</pre>
 										</div>

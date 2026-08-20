@@ -92,7 +92,7 @@ export const QuickLinks: FC = () => {
 							<div className="flex text-brandPrimary h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-white">
 								{icon}
 							</div>
-							<ExternalLinkIcon/>
+							<ExternalLinkIcon width={24} height={24} className="w-6 h-6"/>
 						</div>
 						<span className=" text-sm font-medium text-primaryText">
 							{label}

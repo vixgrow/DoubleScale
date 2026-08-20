@@ -37,7 +37,7 @@ import {
 	NoticeBanner,
 	BadConnectionIcon,
 	SendEmailsIcon,
-	AlertIcon,
+	InfoIcon,
 } from '@doublescale/components';
 import {
 	AlertDialog,
@@ -342,7 +342,7 @@ const EmailsTab: React.FC = () => {
 				{hasFailedEmails && !isLoading && (
 					<div className="flex sm:flex-row flex-col gap-3 sm:gap-0 justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
 						<div className="flex items-center gap-2">
-							<AlertIcon />
+							<InfoIcon width={20} height={20}/>
 							<div className="text-base text-[#CB5301]">
 								<div className="font-semibold">
 									{__('Warning:', 'doublescale')}

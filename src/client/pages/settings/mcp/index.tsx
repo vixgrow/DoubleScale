@@ -13,13 +13,6 @@ import { Button } from '@doublescale/components/ui/button';
 import { Input } from '@doublescale/components/ui/input';
 import { Label } from '@doublescale/components/ui/label';
 import { Switch } from '@doublescale/components/ui/switch';
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '@doublescale/components/ui/tabs';
-
 interface McpTool {
 	name: string;
 	label: string;
@@ -541,7 +534,7 @@ const McpSettings: React.FC = () => {
 				<div className="text-[#09090B] font-semibold text-2xl">
 					{__('MCP for AI Agents', 'doublescale')}
 				</div>
-				<Badge variant={status.connected ? 'default' : 'secondary'}>
+				<Badge className='shadow-none' variant={status.connected ? 'default' : 'secondary'}>
 					{status.connected
 						? __('Connected', 'doublescale')
 						: __('Not connected', 'doublescale')}
@@ -655,7 +648,7 @@ const McpSettings: React.FC = () => {
 								)}
 							</div>
 						</div>
-						<Badge variant="default">
+						<Badge className='shadow-none' variant="default">
 							{__('Self-hosted', 'doublescale')}
 						</Badge>
 					</div>
@@ -822,7 +815,7 @@ const McpSettings: React.FC = () => {
 								{__('Acts as', 'doublescale')}
 							</Label>
 							<select
-								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								className="flex !h-10 w-full !rounded-lg border !border-border bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 								value={keyUserId}
 								onChange={(event) => setKeyUserId(event.target.value)}
 							>
@@ -846,6 +839,7 @@ const McpSettings: React.FC = () => {
 						onClick={handleCreateKey}
 						disabled={creatingKey}
 						size="sm"
+						className="h-10"
 					>
 						{creatingKey
 							? __('Creating…', 'doublescale')
@@ -980,42 +974,66 @@ const McpSettings: React.FC = () => {
 					</div>
 				)}
 
-				<div className="flex items-center gap-2 mb-3 text-sm">
+				<div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
 					<span className="text-gray-500">
 						{__('Client runs on:', 'doublescale')}
 					</span>
-					<Button
-						variant={isWindows ? 'default' : 'outline'}
-						size="sm"
-						onClick={() => setIsWindows(true)}
-					>
-						{__('Windows', 'doublescale')}
-					</Button>
-					<Button
-						variant={!isWindows ? 'default' : 'outline'}
-						size="sm"
-						onClick={() => setIsWindows(false)}
-					>
-						{__('macOS / Linux', 'doublescale')}
-					</Button>
+					{[
+						{
+							value: true,
+							label: __('Windows', 'doublescale'),
+						},
+						{
+							value: false,
+							label: __('macOS / Linux', 'doublescale'),
+						},
+					].map((osTab) => {
+						const isActive = isWindows === osTab.value;
+						return (
+							<button
+								key={String(osTab.value)}
+								type="button"
+								onClick={() => setIsWindows(osTab.value)}
+								className={`flex items-center gap-1.5 rounded-lg border p-2 text-sm transition-colors ${
+									isActive
+										? 'bg-[#EEEEFF] text-primary font-medium'
+										: 'border-border bg-white text-accent-foreground font-normal'
+								}`}
+							>
+								{osTab.label}
+							</button>
+						);
+					})}
 				</div>
 
-				{/* Controlled rather than defaultValue: the email action needs to
-				    know which client the admin is looking at. */}
-				<Tabs
-					value={activeClient}
-					onValueChange={(value) => setActiveClient(value as ClientKey)}
-				>
-					<TabsList>
-						{CLIENT_TABS.map((tab) => (
-							<TabsTrigger key={tab.key} value={tab.key}>
+				{/* Controlled rather than Tabs: the email action needs to know
+				    which client the admin is looking at. */}
+				<div className="flex flex-wrap items-center gap-2 mb-4">
+					{CLIENT_TABS.map((tab) => {
+						const isActive = activeClient === tab.key;
+						return (
+							<button
+								key={tab.key}
+								type="button"
+								onClick={() => setActiveClient(tab.key)}
+								className={`flex items-center gap-1.5 rounded-lg border p-2 text-sm transition-colors ${
+									isActive
+										? 'bg-[#EEEEFF] text-primary font-medium'
+										: 'border-border bg-white text-accent-foreground font-normal'
+								}`}
+							>
 								{tab.label}
-							</TabsTrigger>
-						))}
-					</TabsList>
+							</button>
+						);
+					})}
+				</div>
 
-					{CLIENT_TABS.map((tab) => (
-						<TabsContent key={tab.key} value={tab.key}>
+				{CLIENT_TABS.map((tab) => {
+					if (tab.key !== activeClient) {
+						return null;
+					}
+					return (
+						<div key={tab.key}>
 							<p className="text-sm text-gray-500 mb-2">
 								{tab.target}
 							</p>
@@ -1070,9 +1088,9 @@ const McpSettings: React.FC = () => {
 									</span>
 								)}
 							</div>
-						</TabsContent>
-					))}
-				</Tabs>
+						</div>
+					);
+				})}
 			</div>
 
 			{/* Published tools */}

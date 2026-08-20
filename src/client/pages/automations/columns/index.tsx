@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { ExternalLink, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 /**
  * internal dependencies

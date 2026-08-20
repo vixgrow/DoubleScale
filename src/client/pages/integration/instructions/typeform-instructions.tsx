@@ -6,11 +6,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { ExternalLinkIcon } from '@doublescale/components';
 
 /**
  * External dependencies
  */
-import { ExternalLink } from 'lucide-react';
+
 
 /**
  * Internal dependencies
@@ -38,7 +39,7 @@ const ExternalHref: React.FC<{ href: string; children: React.ReactNode }> = ({
 		className={linkClass}
 	>
 		{children}
-		<ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden />
+		<ExternalLinkIcon width={24} height={24} className="w-6 h-6 shrink-0" aria-hidden />
 	</a>
 );
 
@@ -82,7 +83,7 @@ const TypeformInstructions: React.FC = () => {
 						className={linkClass}
 					>
 						{__('See Typeform’s token guide', 'doublescale')}
-						<ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden />
+						<ExternalLinkIcon width={24} height={24} className="w-6 h-6 shrink-0" aria-hidden />
 					</a>
 					{', '}
 					{__(

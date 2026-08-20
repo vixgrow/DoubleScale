@@ -30,7 +30,7 @@ import {
 	CardTitle,
 } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangleIcon, AlertIcon, CopyIcon, EmailProviderSetupIcon } from '@doublescale/components';
+import { AlertTriangleIcon, AlertIcon, CopyIcon, EmailProviderSetupIcon, InfoIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -167,7 +167,7 @@ const EmailProviderSetup: React.FC = () => {
 			{/* Info Banner */}
 			<Alert className="border-primary bg-primary/10 text-primary flex items-center gap-2">
 				<div className="text-primary">
-					<AlertIcon width={16} height={16} />
+					<InfoIcon width={20} height={20} />
 				</div>
 				<AlertDescription className="text-base text-primary">
 					{__(

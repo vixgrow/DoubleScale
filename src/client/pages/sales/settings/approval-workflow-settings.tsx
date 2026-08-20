@@ -4,7 +4,7 @@
 
 import React from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { ExternalLink, ListChecks } from 'lucide-react';
+import { ListChecks } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { canApproveSalesDocuments } from '@/components/sales/sales-approval-utils';
@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useApprovalQueue } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
-import { SettingsApprovalsIcon } from '@doublescale/components';
+import { SettingsApprovalsIcon, ExternalLinkIcon } from '@doublescale/components';
 
 interface ApprovalWorkflowSettingsProps {
 	form: SalesSettings;
@@ -119,7 +119,7 @@ export const ApprovalWorkflowSettings: React.FC<ApprovalWorkflowSettingsProps> =
 						>
 							<ListChecks className="h-4 w-4 mr-1" />
 							{__('Open Approvals Center', 'doublescale')}
-							<ExternalLink className="h-3 w-3 ml-1 opacity-60" />
+							<ExternalLinkIcon width={24} height={24} className="w-6 h-6 ml-1 opacity-60" />
 						</Button>
 					) : null}
 				</div>

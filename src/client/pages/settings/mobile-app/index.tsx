@@ -6,8 +6,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Smartphone, Apple, QrCode, ExternalLink } from 'lucide-react';
+import { Smartphone, Apple, QrCode } from 'lucide-react';
 
+import { ExternalLinkIcon } from '@doublescale/components';
 /**
  * Internal dependencies
  */
@@ -63,7 +64,7 @@ const DownloadCard: React.FC<{
 					variant={isIOS ? 'default' : 'outline'}
 					className="w-full gap-2"
 				>
-					<ExternalLink size={14} />
+					<ExternalLinkIcon width={24} height={24} className="w-6 h-6" />
 					{isIOS ? __('Download on App Store', 'doublescale') : __('Get it on Google Play', 'doublescale')}
 				</Button>
 			</a>

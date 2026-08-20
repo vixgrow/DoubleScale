@@ -3,7 +3,7 @@
  * Also contains the tightly-coupled Edit Account modal and Save Feedback dialog.
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { CheckCheck, ExternalLink } from 'lucide-react';
+import { CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +36,7 @@ import { mailerUsesFetchedFromEmails, type MailerFromEmailOption } from '../smtp
 import type { SmtpConnection } from '../types';
 import AwsIdentitiesPanel from '../aws-identities-panel';
 import TrashIcon from '@doublescale/shared/icons/trash';
-import { EditIcon, PlusIcon } from '@doublescale/components';
+import { EditIcon, PlusIcon, ExternalLinkIcon } from '@doublescale/components';
 import AccordingRightIcon from '@doublescale/shared/icons/according-right';
 import NoSearchIcon from '@doublescale/shared/icons/no-search';
 import {
@@ -459,8 +459,8 @@ export function ConnectionWizardDialog({
 																	rel="noopener noreferrer"
 																	className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
 																>
-																	<ExternalLink
-																		className="h-3.5 w-3.5 shrink-0"
+																	<ExternalLinkIcon width={24} height={24}
+																		className="w-6 h-6 shrink-0"
 																		aria-hidden
 																	/>
 																	{step3MailerMeta.docLabel ||

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import {
 	MyTemplatesIcon,
 	BadConnectionIcon,
-	AlertIcon,
-} from '@/components/icons';
+	InfoIcon,
+} from '@doublescale/components';
 import { getUserTemplates, renderTemplate } from '../api/templates';
 import { setSkipButtonSettingsReload } from '../hooks/useButtonSettings';
 import { useDispatch } from '@wordpress/data';
@@ -316,7 +316,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 							{/* Alert Banner */}
 							<div className="w-full flex items-center gap-3 p-4 bg-[#F8F8F8] rounded-lg border border-[#DEE1E6]">
 								<div className="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-destructive">
-									<AlertIcon width={20} height={20} />
+									<InfoIcon width={20} height={20} />
 								</div>
 								<p className="text-base text-destructive leading-relaxed">
 									{__(

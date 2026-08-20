@@ -6,6 +6,7 @@ import {
 	useEffect,
 	useRef as useWordPressRef,
 	useMemo,
+	useCallback,
 } from '@wordpress/element';
 import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
@@ -38,9 +39,9 @@ import {
 	MailboxIcon,
 	NotificationIcon,
 	WhatsAppIcon,
-	WebsiteIcon,
 	WebsiteTrackingIcon,
 	AiIcon,
+	ClientPortalIcon,
 	FailedEmailsIcon,
 } from '@doublescale/components';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
@@ -303,7 +304,7 @@ const SettingsPage: React.FC = () => {
 		}
 	}, [notice]);
 
-	// Check if settings have changed
+	// Check if settings have changed from the last saved snapshot.
 	const hasChanges = useMemo(() => {
 		if (!settings || !originalSettingsRef.current) {
 			return false;
@@ -313,6 +314,18 @@ const SettingsPage: React.FC = () => {
 			JSON.stringify(originalSettingsRef.current)
 		);
 	}, [settings, saveCounter]);
+
+	const handleSettingsChange = useCallback((nextSettings: Settings) => {
+		setSettings((prev) => {
+			if (
+				prev &&
+				JSON.stringify(prev) === JSON.stringify(nextSettings)
+			) {
+				return prev;
+			}
+			return nextSettings;
+		});
+	}, []);
 
 	useEffect(() => {
 		// Sales Reps and Sales Managers only see tabs that don't require main settings (e.g., notifications)
@@ -331,7 +344,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<BusinessSettings
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'email':
@@ -345,7 +358,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<EmailComponent
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'mailbox':
@@ -367,7 +380,7 @@ const SettingsPage: React.FC = () => {
 					onChange: (settings: Settings) => void;
 				}>;
 				return (
-					<SMSComponent settings={settings!} onChange={setSettings} />
+					<SMSComponent settings={settings!} onChange={handleSettingsChange} />
 				);
 			case 'whatsapp':
 				const WhatsAppComponent = applyFilters(
@@ -388,7 +401,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<WhatsAppComponent
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'cart':
@@ -410,7 +423,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<CartComponent
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'system':
@@ -421,7 +434,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<CurrenciesSettings
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'website_tracking':
@@ -444,7 +457,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<WebsiteTrackingComponent
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 			case 'bounce_handler': {
@@ -507,7 +520,7 @@ const SettingsPage: React.FC = () => {
 				return (
 					<AIComponent
 						settings={settings!}
-						onChange={setSettings}
+						onChange={handleSettingsChange}
 					/>
 				);
 	case 'notifications':
@@ -579,7 +592,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'client_portal',
 			label: __('Client Portal', 'doublescale'),
-			icon: <WebsiteIcon width={24} height={24} />,
+			icon: <ClientPortalIcon width={24} height={24} />,
 		},
 		{
 			value: 'bounce_handler',

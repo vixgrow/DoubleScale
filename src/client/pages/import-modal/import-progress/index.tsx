@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import { CheckCircle2, XCircle, MinusCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle2, XCircle, MinusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 /**
  * internal dependencies
@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ImportProgressIcon, LoadingSpinner } from '@doublescale/components';
+import { ImportProgressIcon, LoadingSpinner, ExternalLinkIcon } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 //@ts-ignore
@@ -192,7 +192,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 											size="sm"
 											className="text-xs"
 										>
-											<ExternalLink className="w-3 h-3 mr-1" />
+											<ExternalLinkIcon width={24} height={24} className="w-6 h-6 mr-1" />
 											{__('View Log Management', 'doublescale')}
 										</Button>
 									</Link>

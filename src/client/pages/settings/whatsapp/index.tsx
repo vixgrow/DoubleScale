@@ -17,7 +17,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { CheckCircle, XCircle, Loader2, Settings, ExternalLink, Phone } from 'lucide-react';
+import { CheckCheck, X, Loader2 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -26,7 +26,7 @@ import type { Settings as SettingsType } from '@doublescale/client';
 import { Button } from '@doublescale/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertIcon } from '@doublescale/components';
+import { InfoIcon, PhoneIcon, SettingsIcon, ExternalLinkIcon } from '@doublescale/components';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import WhatsappIcon from '@doublescale/shared/icons/whatsapp-icon';
 
@@ -145,7 +145,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 			{/* Info Banner */}
 			<Alert className="border-primary bg-primary/10 text-primary flex items-center gap-2">
 				<div className="text-primary">
-					<AlertIcon width={16} height={16} />
+					<InfoIcon width={20} height={20} />
 				</div>
 				<AlertDescription className="text-base text-primary">
 					{__(
@@ -158,7 +158,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 			<Card className="shadow-sm border-blue-200 bg-blue-50/40">
 				<CardHeader className="pb-3">
 					<CardTitle className="text-base flex items-center gap-2">
-						<AlertIcon width={16} height={16} />
+						<InfoIcon width={20} height={20} />
 						{__('How WhatsApp unsubscribe works', 'doublescale')}
 					</CardTitle>
 					<CardDescription>
@@ -213,14 +213,14 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 						</div>
 					) : error ? (
 						<div className="flex items-center gap-3 py-4">
-							<XCircle className="w-5 h-5 text-red-500" />
+							<X className="w-5 h-5 text-red-500" />
 							<span className="text-red-600">{error}</span>
 						</div>
 					) : status?.connected ? (
 						<div className="space-y-4">
 							{/* Connected Status */}
 							<div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-								<CheckCircle className="w-6 h-6 text-green-600" />
+								<CheckCheck className="w-6 h-6 text-green-600" />
 								<div className="flex-1">
 									<p className="font-medium text-green-800">
 										{__('Connected', 'doublescale')}
@@ -234,7 +234,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 							{/* Phone Number Details */}
 							{status.phone_number && (
 								<div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-									<Phone className="w-5 h-5 text-gray-600" />
+									<PhoneIcon width={20} height={20} />
 									<div className="flex-1">
 										<p className="font-medium text-gray-800">
 											{status.phone_number}
@@ -255,7 +255,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 									onClick={handleConfigure}
 									className="flex items-center gap-2"
 								>
-									<Settings className="w-4 h-4" />
+									<SettingsIcon width={20} height={20} />
 									{__('Manage Connection', 'doublescale')}
 								</Button>
 								<Button
@@ -268,7 +268,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 										target="_blank"
 										rel="noopener noreferrer"
 									>
-										<ExternalLink className="w-4 h-4" />
+										<ExternalLinkIcon width={24} height={24} className="w-6 h-6" />
 										{__('Manage Templates', 'doublescale')}
 									</a>
 								</Button>
@@ -278,7 +278,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 						<div className="space-y-4">
 							{/* Not Connected Status */}
 							<div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-								<XCircle className="w-6 h-6 text-yellow-600" />
+								<X className="w-6 h-6 text-yellow-600" />
 								<div className="flex-1">
 									<p className="font-medium text-yellow-800">
 										{__('Not Connected', 'doublescale')}
@@ -294,7 +294,7 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 								onClick={handleConfigure}
 								className="flex items-center gap-2"
 							>
-								<Settings className="w-4 h-4" />
+								<SettingsIcon width={20} height={20} />
 								{__('Configure Meta WhatsApp', 'doublescale')}
 							</Button>
 						</div>
@@ -313,19 +313,19 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 				<CardContent>
 					<ul className="space-y-2 text-sm text-gray-600">
 						<li className="flex items-center gap-2">
-							<CheckCircle className="w-4 h-4 text-green-500" />
+							<CheckCheck className="w-4 h-4 text-green-500" />
 							{__('Send WhatsApp messages from contact detail page', 'doublescale')}
 						</li>
 						<li className="flex items-center gap-2">
-							<CheckCircle className="w-4 h-4 text-green-500" />
+							<CheckCheck className="w-4 h-4 text-green-500" />
 							{__('Use WhatsApp in automation workflows', 'doublescale')}
 						</li>
 						<li className="flex items-center gap-2">
-							<CheckCircle className="w-4 h-4 text-green-500" />
+							<CheckCheck className="w-4 h-4 text-green-500" />
 							{__('Track message delivery status', 'doublescale')}
 						</li>
 						<li className="flex items-center gap-2">
-							<CheckCircle className="w-4 h-4 text-green-500" />
+							<CheckCheck className="w-4 h-4 text-green-500" />
 							{__('Use Meta-approved message templates', 'doublescale')}
 						</li>
 					</ul>

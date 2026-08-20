@@ -1,10 +1,10 @@
 === DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
 Contributors: samuelgallegos, vixgrowy
-Tags:  crm, marketing automation, email campaigns, booking, pipelines
+Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,15 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.7 = 17 Aug 2026
+- Ship a complete Brazilian Portuguese (pt_BR) translation catalog for the free plugin
+- Rebuild script translation JSON when Loco saves a catalog so React admin strings update without a manual make-json
+- Improve internationalization coverage across admin UI components
+- Resolve merge tags correctly when rendering invoice/proposal PDFs and print output
+- Improve sales dialogs and dropdown menus (focus/outside-click handling, InfiniteScrollSelect accessibility)
+- Improve lead scoring layout/RTL direction handling and advanced-filter clear action
+- Polish react-select menus in contact field mapping and rule-builder connectors
+
 = 1.3.6 = 15 Aug 2026
 - Add built-in MCP server so AI clients (Claude, Cursor, and compatible tools) can operate DoubleScale via API keys
 - Add MCP settings: enable/disable endpoint, issue keys for eligible users, Application Password auth, Windows setup, and emailable connection instructions

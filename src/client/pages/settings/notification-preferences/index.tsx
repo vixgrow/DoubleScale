@@ -121,31 +121,31 @@ const CATEGORY_COLORS: Record<string, string> = {
 	projects: '#3A3A99',
 	sales: '#008230',
 	support: '#896900',
-	
+	booking: '#FFD242',
 };
 
 const CATEGORY_ICON_ELEMENTS: Record<string, React.ReactNode> = {
-	contacts: <ContactsIcon width={18} height={18} />,
-	pipeline: <PiplelinesIcon width={18} height={18} />,
+	contacts: <ContactsIcon width={24} height={24} />,
+	pipeline: <PiplelinesIcon width={24} height={24} />,
 	// CampaignsIcon paints with its own brand blue rather than currentColor,
 	// so its colour has to be passed through explicitly.
 	campaigns: (
 		<CampaignsIcon
-			width={18}
-			height={18}
+			width={24}
+			height={24}
 			color={CATEGORY_COLORS.campaigns}
 		/>
 	),
-	automations: <AutomationsIcon width={18} height={18} />,
-	tasks: <TasksIcon width={18} height={18} />,
-	email_tracking: <ProcessingEmailsIcon width={18} height={18} />,
-	system: <SystemIcon width={18} height={18} />,
-	booking: <UpcomingCalendarIcon width={18} height={18} />,
-	support: <SupportIcon width={18} height={18} />,
-	sales: <SalesIcon width={18} height={18} />,
-	projects: <ProjectsIcon width={18} height={18} />,
-	forms: <FormsIcon width={18} height={18} />,
-	integrations: <IntegrationsIcon width={18} height={18} />,
+	automations: <AutomationsIcon width={24} height={24} />,
+	tasks: <TasksIcon width={24} height={24} />,
+	email_tracking: <ProcessingEmailsIcon width={24} height={24} />,
+	system: <SystemIcon width={24} height={24} />,
+	booking: <UpcomingCalendarIcon width={24} height={24} />,
+	support: <SupportIcon width={24} height={24} />,
+	sales: <SalesIcon width={24} height={24} />,
+	projects: <ProjectsIcon width={24} height={24} />,
+	forms: <FormsIcon width={24} height={24} />,
+	integrations: <IntegrationsIcon width={24} height={24} />,
 };
 
 // The icons paint with currentColor, so the accent is applied by a wrapper

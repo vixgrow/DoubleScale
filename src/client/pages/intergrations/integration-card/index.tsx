@@ -82,7 +82,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 	} = useProUpgrade();
 
 	return (
-		<Card className="shadow-none relative overflow-hidden h-full">
+		<Card className="relative h-full overflow-hidden rounded-[20px] border border-border bg-[#F7F8FA]">
 			{isLoading && (
 				<div className="absolute inset-0 z-10 pointer-events-none">
 					<Skeleton className="w-full h-full rounded-lg" />
@@ -140,7 +140,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 							<Button
 								onClick={onNavigate}
 								variant="secondary"
-								className="rounded-lg"
+								className="rounded-lg bg-white"
 								disabled={isLoading}
 							>
 								{buttonText || (
@@ -153,7 +153,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 							{integration.is_connected && (
 								<Button
 									variant="destructive"
-									className="rounded-lg"
+									className="rounded-lg bg-white"
 									onClick={onDisconnect}
 									disabled={isLoading}
 								>

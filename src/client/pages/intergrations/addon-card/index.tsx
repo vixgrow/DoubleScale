@@ -30,7 +30,7 @@ export const AddonCard: React.FC<AddonCardProps> = ({ addon, imageUrl }) => {
 		: sprintf(__('%s addon required', 'doublescale'), addon.label);
 
 	return (
-		<Card className="shadow-none relative overflow-hidden h-full">
+		<Card className="relative h-full overflow-hidden rounded-[20px] border border-border bg-[#F7F8FA]">
 			<CardContent className="p-4 h-full flex flex-col">
 				<div className="flex items-center justify-between mb-3">
 					<div className="flex items-center gap-4">
@@ -65,7 +65,7 @@ export const AddonCard: React.FC<AddonCardProps> = ({ addon, imageUrl }) => {
 							onClick={() => navigate(getToLink('extensions') + `&search=${encodeURIComponent(addon.slug)}`)}
 							variant="secondary"
 							size="sm"
-							className="rounded-lg"
+							className="rounded-lg bg-white"
 						>
 							<ArrowRight className="w-4 h-4" />
 							{__('Go to Extensions', 'doublescale')}

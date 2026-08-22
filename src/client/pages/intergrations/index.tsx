@@ -8,19 +8,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
- * External dependencies
- */
-import { CreditCard, MessageSquare, ClipboardList, Workflow, Blocks } from 'lucide-react';
-
-/**
  * Internal dependencies
  */
 import type { NoticeMessage } from '@doublescale/client';
 import { getToLink, useNavigate, useParams } from '@doublescale/navigation';
 import ConfigAPI from '@doublescale/config';
 import Integration from '../integration';
-import { PageHeader, NoticeBanner, PageTabs, TotalCreditedIcon, SMSIcon, FormsIcon, AutomationsIcon, CategoryIcon, TotalSMSIcon } from '@doublescale/components';
-import { Card, CardContent } from '@doublescale/components/ui/card';
+import { PageHeader, NoticeBanner, PageTabs, TotalCreditedIcon, FormsIcon, AutomationsIcon, CategoryIcon, TotalSMSIcon } from '@doublescale/components';
 import { IntegrationCard } from './integration-card';
 import { AddonCard } from './addon-card';
 import './style.scss';
@@ -362,7 +356,7 @@ const Integrations: React.FC = () => {
 	);
 
 	return (
-		<div className="doublescale-integrations">
+		<div className="doublescale-integrations space-y-6">
 			<PageHeader
 				title={__('Integrations', 'doublescale')}
 				subtitle={__('Integrations', 'doublescale')}
@@ -371,33 +365,31 @@ const Integrations: React.FC = () => {
 
 			{notice && <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />}
 
-			<Card className="shadow-none bg-muted/50">
-				<CardContent className="p-6">
-					{visibleCategories.length > 0 ? (
-						<PageTabs
-							value={activeCategory}
-							defaultValue={visibleCategories[0]}
-							onValueChange={(value) =>
-								setActiveCategory(value as CatalogCategory)
-							}
-							tabsVariant="underline"
-							enableHorizontalScroll
-							tabsListWrapperClassName="border-b border-border pb-0 mb-6"
-							tabsListClassName="gap-6"
-							scrollArrowBg="bg-muted"
-							tabsList={visibleCategories.map((category) => ({
-								value: category,
-								label: catalogTabMeta[category].label,
-								icon: catalogTabMeta[category].icon,
-							}))}
-							tabsContent={visibleCategories.map((category) => ({
-								value: category,
-								children: renderCategoryGrid(category),
-							}))}
-						/>
-					) : null}
-				</CardContent>
-			</Card>
+			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+				{visibleCategories.length > 0 ? (
+					<PageTabs
+						value={activeCategory}
+						defaultValue={visibleCategories[0]}
+						onValueChange={(value) =>
+							setActiveCategory(value as CatalogCategory)
+						}
+						tabsVariant="underline"
+						enableHorizontalScroll
+						tabsListWrapperClassName="border-b border-border pb-0 mb-6"
+						tabsListClassName="gap-6"
+						scrollArrowBg="bg-white"
+						tabsList={visibleCategories.map((category) => ({
+							value: category,
+							label: catalogTabMeta[category].label,
+							icon: catalogTabMeta[category].icon,
+						}))}
+						tabsContent={visibleCategories.map((category) => ({
+							value: category,
+							children: renderCategoryGrid(category),
+						}))}
+					/>
+				) : null}
+			</div>
 
 			{id && !tab && allIntegrations[id] && (
 				<Integration

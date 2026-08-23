@@ -58,7 +58,7 @@ foreach ( $scan_dirs as $dir ) {
 
 $patterns = array(
 	'/(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
-	'/_n\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\2)[^\\\\])*\2\s*,\s*[^,]+,\s*[\'"]doublescale[\'"]\s*\)/',
+	'/_n\(\s*([\'"])((?:\\\\.|(?!\1)[^\\\\])*)\1\s*,\s*([\'"])((?:\\\\.|(?!\3)[^\\\\])*)\3\s*,\s*[^,]+,\s*[\'"]doublescale[\'"]\s*\)/',
 	'/_x\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*([\'"])(?:\\\\.|(?!\2)[^\\\\])*\2\s*,\s*[\'"]doublescale[\'"]\s*\)/',
 	'/\b__\(\s*([\'"])(?:\\\\.|(?!\1)[^\\\\])*\1\s*,\s*[\'"]doublescale[\'"]\s*\)/',
 );
@@ -74,6 +74,15 @@ foreach ( $files as $file ) {
 		}
 		foreach ( $matches as $match ) {
 			$raw = $match[0];
+			if ( 0 === strpos( $raw, '_n(' ) ) {
+				$singular = stripcslashes( $match[2] );
+				$plural   = stripcslashes( $match[4] );
+				if ( '' === $singular || is_merge_tag_only_string( $singular ) ) {
+					continue;
+				}
+				$strings[ $singular ] = $plural;
+				continue;
+			}
 			if ( ! preg_match( '/([\'"])(?:\\\\.|(?!\\1)[^\\\\])*\1/', $raw, $msg ) ) {
 				continue;
 			}
@@ -81,7 +90,9 @@ foreach ( $files as $file ) {
 			if ( '' === $string || is_merge_tag_only_string( $string ) ) {
 				continue;
 			}
-			$strings[ $string ] = true;
+			if ( ! array_key_exists( $string, $strings ) ) {
+				$strings[ $string ] = null;
+			}
 		}
 	}
 }
@@ -105,8 +116,14 @@ $pot .= "\"Content-Type: text/plain; charset=UTF-8\\n\"\n";
 $pot .= "\"Content-Transfer-Encoding: 8bit\\n\"\n";
 $pot .= "\"X-Domain: doublescale\\n\"\n\n";
 
-foreach ( array_keys( $strings ) as $string ) {
+foreach ( $strings as $string => $plural ) {
 	$pot .= 'msgid "' . po_escape( (string) $string ) . "\"\n";
+	if ( is_string( $plural ) && '' !== $plural ) {
+		$pot .= 'msgid_plural "' . po_escape( $plural ) . "\"\n";
+		$pot .= "msgstr[0] \"\"\n";
+		$pot .= "msgstr[1] \"\"\n\n";
+		continue;
+	}
 	$pot .= "msgstr \"\"\n\n";
 }
 

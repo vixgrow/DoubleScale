@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.2.8\n"
+"Project-Id-Version: DoubleScale 1.3.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "POT-Creation-Date: 2026-07-11 19:05+0000\n"
-"PO-Revision-Date: 2026-08-16 11:34+0000\n"
+"PO-Revision-Date: 2026-08-23 06:38+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: Portuguese (Brazil)\n"
 "Language: pt_BR\n"
@@ -177,6 +177,9 @@ msgstr "%1$s deve ser no máximo %2$s"
 msgid "%1$s must be one of: %2$s"
 msgstr "%1$s deve ser um de: %2$s"
 
+msgid "%1$s payment for invoice %2$s"
+msgstr "Pagamento %1$s da fatura %2$s"
+
 msgid "%1$s scheduled for %2$s."
 msgstr "%1$s agendado para %2$s."
 
@@ -341,8 +344,14 @@ msgstr "Ferramenta de Importação de Dados %s"
 msgid "%s Details"
 msgstr "%s Detalhes"
 
+msgid "%s disabled"
+msgstr "%s desativado"
+
 msgid "%s disconnected successfully."
 msgstr "%s desconectado com sucesso."
+
+msgid "%s enabled"
+msgstr "%s ativado"
 
 msgid "%s Failed"
 msgstr "%s  Reprovado"
@@ -421,6 +430,15 @@ msgstr "Falha na mensagem %s após tentativas de limite de memória"
 msgid "%s message failed with debug info"
 msgstr "Falha na mensagem %s com informações de debug"
 
+msgid "%s must be a list of objects."
+msgstr "%s deve ser uma lista de objetos."
+
+msgid "%s must be a list of positive record ids."
+msgstr "%s deve ser uma lista de ids de registros positivos."
+
+msgid "%s must be a list of record ids."
+msgstr "%s deve ser uma lista de ids de registros."
+
 msgid "%s must be a positive record id."
 msgstr "%s deve ser um id de registro positivo."
 
@@ -429,6 +447,12 @@ msgstr "%s deve ser uma data real no formato AAAA-MM-DD."
 
 msgid "%s must be in E.164 format (e.g., +12025551234)"
 msgstr "%s deve estar no formato E.164 (ex.: +12025551234)"
+
+msgid "%s must contain positive integer ids."
+msgstr "%s deve conter ids inteiros positivos."
+
+msgid "%s name reset"
+msgstr "Nome de %s redefinido"
 
 msgid "%s not found."
 msgstr "%s não encontrado."
@@ -441,6 +465,9 @@ msgstr "%s realizou uma ação"
 
 msgid "%s removed a file attachment"
 msgstr "%s removido um anexo de arquivo"
+
+msgid "%s renamed"
+msgstr "%s renomeado"
 
 msgid "%s replied"
 msgstr "%s respondeu"
@@ -590,6 +617,9 @@ msgstr "75%"
 
 msgid "9:01 AM"
 msgstr "9:01"
+
+msgid "+%d more currency"
+msgstr "+%d outra moeda"
 
 msgid "[%1$s] Connect %2$s to your CRM"
 msgstr "[%1$s] Conecte %2$s ao seu CRM"
@@ -760,8 +790,14 @@ msgstr "Prestes a Expirar"
 msgid "Accept"
 msgstr "Aceito"
 
+msgid "Accept card payments for invoices via Authorize.Net Accept Hosted."
+msgstr "Aceite pagamentos com cartão em faturas via Authorize.Net Accept Hosted."
+
 msgid "Accept failed."
 msgstr "Falha ao aceitar."
+
+msgid "Accept iDEAL, Bancontact, SEPA and card payments for invoices via Mollie."
+msgstr "Aceite pagamentos iDEAL, Bancontact, SEPA e cartão em faturas via Mollie."
 
 msgid "Accept payments and manage subscriptions through Stripe."
 msgstr "Aceite pagamentos e gerencie assinaturas através do Stripe."
@@ -772,6 +808,18 @@ msgid ""
 msgstr ""
 "Aceite pagamentos via PayPal para faturas. Configure as credenciais do app "
 "REST em sandbox ou produção."
+
+msgid ""
+"Accept Square payments for invoices. Configure sandbox or production access "
+"token and location."
+msgstr ""
+"Aceite pagamentos Square em faturas. Configure o token de acesso e o local "
+"de sandbox ou produção."
+
+msgid "Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay."
+msgstr ""
+"Aceite pagamentos UPI, cartão, internet banking e carteira digital em "
+"faturas via Razorpay."
 
 msgid "Accepted"
 msgstr "Aceito"
@@ -1060,6 +1108,9 @@ msgstr "Adicione uma conta para usar a integração com o Outlook."
 msgid "Add an automatic closing note or reply"
 msgstr "Adicione uma nota ou resposta automática de encerramento"
 
+msgid "Add an internal note to a ticket"
+msgstr "Adicionar uma nota interna a um ticket"
+
 msgid "Add an override"
 msgstr "Adicionar uma substituição"
 
@@ -1110,6 +1161,9 @@ msgstr "Adicionar Informações de Contato"
 
 msgid "Add Contact Individual"
 msgstr "Adicionar Contato Individual"
+
+msgid "Add contacts to lists"
+msgstr "Adicionar contatos às listas"
 
 msgid "Add Content"
 msgstr "Adicionar Conteúdo"
@@ -1180,6 +1234,18 @@ msgstr "Adicionar caixa de entrada"
 msgid "Add Manager"
 msgstr "Adicionar Gerente"
 
+msgid ""
+"Add many contacts in one call. Email must be unique per contact. Creating "
+"contacts does not email them. Set dry_run to preview without writing. Rows "
+"are processed independently — some may succeed while others fail. Check "
+"errors before reporting success."
+msgstr ""
+"Adicione vários contatos em uma única chamada. O e-mail deve ser exclusivo "
+"por contato. Criar contatos não envia e-mail a eles. Defina dry_run para "
+"pré-visualizar sem gravar. As linhas são processadas de forma independente "
+"— algumas podem ter sucesso enquanto outras falham. Verifique os erros "
+"antes de informar sucesso."
+
 msgid "Add New"
 msgstr "Adicionar Novo"
 
@@ -1212,6 +1278,9 @@ msgstr "Adicionar Nota"
 
 msgid "Add note"
 msgstr "Adicionar nota"
+
+msgid "Add notes to contacts in bulk"
+msgstr "Adicionar notas aos contatos em massa"
 
 msgid ""
 "Add one of these commands to your server cron (using cPanel, Plesk, or "
@@ -1280,6 +1349,9 @@ msgstr "Adicionar etiquetas ao carrinho perdido"
 
 msgid "Add tags to %d selected tickets. Existing tags are kept."
 msgstr "Adicione tags aos %d tickets selecionados. As tags existentes são mantidas."
+
+msgid "Add tags to contacts"
+msgstr "Adicionar tags aos contatos"
 
 msgid ""
 "Add tags to label VIPs, product users, and more — making it easier to filter,"
@@ -1628,6 +1700,15 @@ msgstr "Todos os Contatos no Segmento de Lista Selecionado"
 
 msgid ""
 "All contact tags and lists with their ids. Call this to resolve a tag or "
+"list name to an id before filtering contacts by it, or before "
+"add-contact-tags / add-contact-lists."
+msgstr ""
+"Todas as tags e listas de contatos com seus ids. Chame isto para resolver o "
+"nome de uma tag ou lista para um id antes de filtrar contatos por ele, ou "
+"antes de add-contact-tags / add-contact-lists."
+
+msgid ""
+"All contact tags and lists with their ids. Call this to resolve a tag or "
 "list name to an id before filtering contacts by it."
 msgstr "Todas as tags e listas de contatos com seus ids. Chame isto para resolver o nome de uma tag ou lista para um id antes de filtrar contatos."
 
@@ -1703,6 +1784,13 @@ msgstr "Todos os Administradores do WordPress recebem automaticamente acesso tot
 
 msgid "Allow attendee to select duration"
 msgstr "Permitir que o convidado selecione a duração"
+
+msgid ""
+"Allow DoubleScale to show notifications through your operating system "
+"notification center."
+msgstr ""
+"Permitir que o DoubleScale mostre notificações pelo centro de notificações "
+"do seu sistema operacional."
 
 msgid ""
 "Allow DoubleScale to show you notifications via your operating system's "
@@ -1948,6 +2036,33 @@ msgid ""
 "Append a note to a contact's timeline. The note is attributed to you and "
 "cannot be edited or removed through this tool."
 msgstr "Anexa uma nota à linha do tempo do contato. A nota é atribuída a você e não pode ser editada ou removida por esta ferramenta."
+
+msgid ""
+"Append a note to each of many contacts in one call. Provide exactly one of: "
+"notes (per-row objects, each with its own text), contact_ids, or filter. "
+"With contact_ids or filter, the same content is written to every match. Set "
+"dry_run to preview without writing. Notes are attributed to you and cannot "
+"be edited or removed through this tool. Nothing is emailed. Rows are "
+"processed independently — some may succeed while others fail. Check errors "
+"before reporting success."
+msgstr ""
+"Anexe uma nota a cada um de vários contatos em uma única chamada. Forneça "
+"exatamente um de: notes (objetos por linha, cada um com seu próprio texto), "
+"contact_ids ou filter. Com contact_ids ou filter, o mesmo conteúdo é "
+"gravado em cada correspondência. Defina dry_run para pré-visualizar sem "
+"gravar. As notas são atribuídas a você e não podem ser editadas ou "
+"removidas por esta ferramenta. Nada é enviado por e-mail. As linhas são "
+"processadas de forma independente — algumas podem ter sucesso enquanto "
+"outras falham. Verifique os erros antes de informar sucesso."
+
+msgid ""
+"Append an internal note to a ticket. Notes are staff-only — the customer "
+"never sees them and no email is sent. Use this to record context; use "
+"reply-to-ticket to actually answer the customer."
+msgstr ""
+"Anexe uma nota interna a um ticket. As notas são só da equipe — o cliente "
+"nunca as vê e nenhum e-mail é enviado. Use isto para registrar contexto; "
+"use reply-to-ticket para de fato responder ao cliente."
 
 msgid "Append replies when title and sender email match"
 msgstr "Anexar respostas quando o título e o e-mail do remetente corresponderem"
@@ -2227,6 +2342,18 @@ msgstr ""
 msgid "Attach calendar invite (.ics)"
 msgstr "Anexar convite de calendário (.ics)"
 
+msgid ""
+"Attach existing tags to contacts. Does not create tags — call "
+"list-contact-segments to resolve names to ids. Provide exactly one of: "
+"contact_id, contact_ids, or filter. Set dry_run to preview the match count "
+"without writing. Tags already on a contact are left as-is."
+msgstr ""
+"Anexe tags existentes aos contatos. Não cria tags — chame "
+"list-contact-segments para resolver nomes em ids. Forneça exatamente um de: "
+"contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar a "
+"quantidade de correspondências sem gravar. Tags já presentes em um contato "
+"permanecem como estão."
+
 msgid "Attach file"
 msgstr "Anexar arquivo"
 
@@ -2320,6 +2447,16 @@ msgstr "Autorize e selecione uma conta de provedor primeiro."
 
 msgid "Authorize DoubleScale in the popup window"
 msgstr "Autorize o DoubleScale na janela pop-up"
+
+msgid "Authorize.Net"
+msgstr "Authorize.Net"
+
+msgid ""
+"Authorize.Net Accept Hosted card checkout — credentials in Integrations → "
+"Authorize.Net."
+msgstr ""
+"Checkout de cartão Authorize.Net Accept Hosted — credenciais em Integrações "
+"→ Authorize.Net."
 
 msgid "Auto"
 msgstr "Auto"
@@ -3796,6 +3933,15 @@ msgid ""
 msgstr "Altere assunto, validade ou termos de uma proposta. Itens, descontos e totais não podem ser alterados aqui — isso muda o que está sendo orçado. Esta ferramenta nunca envia nada."
 
 msgid ""
+"Change a ticket's status, priority, or assigned agent. Reassigning notifies "
+"the new agent. The ticket title and the customer it belongs to are "
+"deliberately not editable here."
+msgstr ""
+"Altere o status, a prioridade ou o agente atribuído de um ticket. "
+"Reatribuir notifica o novo agente. O título do ticket e o cliente a que ele "
+"pertence propositalmente não são editáveis aqui."
+
+msgid ""
 "Change an invoice's due date, client note, or terms. Line items, discounts, "
 "and totals cannot be changed here — editing those alters what the customer "
 "owes, so it stays a human decision in the invoice editor. This tool never "
@@ -3811,8 +3957,27 @@ msgstr "Alterar Design"
 msgid "Change file"
 msgstr "Alterar arquivo"
 
+msgid ""
+"Change name, phone, or company on many contacts in one call. Email and "
+"subscription status are not editable here. Provide exactly one of: contacts "
+"(per-row objects), contact_ids, or filter. With contact_ids or filter, the "
+"patch fields apply to every match. Set dry_run to preview the match count "
+"without writing. Rows are processed independently — some may succeed while "
+"others fail. Check errors before reporting success."
+msgstr ""
+"Altere nome, telefone ou empresa em vários contatos em uma única chamada. "
+"E-mail e status de inscrição não são editáveis aqui. Forneça exatamente um "
+"de: contacts (objetos por linha), contact_ids ou filter. Com contact_ids ou "
+"filter, os campos da alteração se aplicam a cada correspondência. Defina "
+"dry_run para pré-visualizar a quantidade de correspondências sem gravar. As "
+"linhas são processadas de forma independente — algumas podem ter sucesso "
+"enquanto outras falham. Verifique os erros antes de informar sucesso."
+
 msgid "Change profile image"
 msgstr "Alterar imagem de perfil"
+
+msgid "Change status"
+msgstr "Alterar status"
 
 msgid "Change template"
 msgstr "Mudar Template"
@@ -3924,6 +4089,11 @@ msgstr "Escolha um contato para executar esta automação. As etapas são execut
 msgid ""
 "Choose a design and accent color. You can change both later while editing."
 msgstr "Escolha um design e uma cor de destaque. Você pode alterar ambos depois durante a edição."
+
+msgid "Choose a link trigger, then set the link text that appears in your message."
+msgstr ""
+"Escolha um acionador de link e defina o texto do link que aparece na sua "
+"mensagem."
 
 msgid "Choose A Pre-built Template"
 msgstr "Escolha um Template Pronto"
@@ -5290,6 +5460,9 @@ msgstr "Não foi possível carregar os dados do dashboard. Verifique sua conexã
 msgid "Could not load email log."
 msgstr "Não foi possível carregar o log de e-mails."
 
+msgid "Could not load link triggers."
+msgstr "Não foi possível carregar os acionadores de link."
+
 msgid "Could not load PayPal."
 msgstr "Não foi possível carregar o PayPal."
 
@@ -5364,6 +5537,9 @@ msgstr "Não foi possível enviar o e-mail."
 msgid "Could not send the WhatsApp message."
 msgstr "Não foi possível enviar a mensagem do WhatsApp."
 
+msgid "Could not start checkout."
+msgstr "Não foi possível iniciar o checkout."
+
 msgid "Could not start online payment."
 msgstr "Não foi possível iniciar o pagamento online."
 
@@ -5414,11 +5590,50 @@ msgstr "Criar um contato"
 msgid "Create a contract type to get started"
 msgstr "Crie um tipo de contrato para começar"
 
+msgid "Create a draft invoice"
+msgstr "Criar um rascunho de fatura"
+
+msgid ""
+"Create a draft invoice for an existing contact. Line items are allowed here "
+"because the document has not been sent yet. This tool never emails the "
+"customer — use send-invoice after the user has confirmed the draft. Status "
+"is always draft. The assigned sales agent is the connecting user."
+msgstr ""
+"Crie um rascunho de fatura para um contato existente. Itens de linha são "
+"permitidos aqui porque o documento ainda não foi enviado. Esta ferramenta "
+"nunca envia e-mail ao cliente — use send-invoice depois que o usuário "
+"confirmar o rascunho. O status é sempre rascunho. O agente de vendas "
+"atribuído é o usuário da conexão."
+
 msgid "Create a draft invoice from this proposal?"
 msgstr "Criar um rascunho de fatura a partir desta proposta?"
 
+msgid "Create a draft proposal"
+msgstr "Criar um rascunho de proposta"
+
+msgid ""
+"Create a draft proposal for an existing contact. Line items are allowed "
+"here because the document has not been sent yet. This tool never emails the "
+"customer — use send-proposal after the user has confirmed the draft. Status "
+"is always draft. The assigned user is the connecting user."
+msgstr ""
+"Crie um rascunho de proposta para um contato existente. Itens de linha são "
+"permitidos aqui porque o documento ainda não foi enviado. Esta ferramenta "
+"nunca envia e-mail ao cliente — use send-proposal depois que o usuário "
+"confirmar o rascunho. O status é sempre rascunho. O usuário atribuído é o "
+"usuário da conexão."
+
 msgid "Create a key above to get a ready-to-paste snippet."
 msgstr "Crie uma chave acima para obter um trecho pronto para colar."
+
+msgid ""
+"Create a key below to connect an AI agent to DoubleScale as you. It carries "
+"your own permissions — an agent using it sees exactly the records you can "
+"see, and nothing more."
+msgstr ""
+"Crie uma chave abaixo para conectar um agente de IA ao DoubleScale como "
+"você. Ela carrega as suas permissões — um agente que a usar vê exatamente "
+"os registros que você pode ver, e nada mais."
 
 msgid ""
 "Create a Loops API key and the transactional ID from your Loops workspace, "
@@ -5458,6 +5673,9 @@ msgstr "Crie uma nova proposta para começar"
 
 msgid "Create a proposal to send pricing and terms to this contact."
 msgstr "Crie uma proposta para enviar preços e termos a este contato."
+
+msgid "Create a support ticket"
+msgstr "Criar um ticket de suporte"
 
 msgid ""
 "Create a tag with a unique name, for example trigger_run_welcome_sequence."
@@ -5565,6 +5783,9 @@ msgstr "Criar contato"
 
 msgid "Create contact"
 msgstr "Criar contato"
+
+msgid "Create contacts in bulk"
+msgstr "Criar contatos em massa"
 
 msgid "Create contacts in CRM"
 msgstr "Criar contatos no CRM"
@@ -5705,6 +5926,13 @@ msgid ""
 "Create your campaign by choosing from ready-made email templates, starting "
 "from scratch, or reusing your saved designs."
 msgstr "Crie sua campanha escolhendo entre templates de e-mail prontos, começando do zero ou reutilizando seus designs salvos."
+
+msgid ""
+"Create your email by choosing from ready-made templates, starting from "
+"scratch, or reusing your saved designs."
+msgstr ""
+"Crie seu e-mail escolhendo modelos prontos, começando do zero ou "
+"reutilizando seus designs salvos."
 
 msgid "Create your first lead scoring level to get started"
 msgstr "Crie seu primeiro nível de pontuação de lead para começar"
@@ -5857,6 +6085,21 @@ msgstr "Moedas"
 
 msgid "Currency"
 msgstr "Moeda"
+
+msgid "Currency comes from the linked proposal and cannot be changed."
+msgstr "A moeda vem da proposta vinculada e não pode ser alterada."
+
+msgid "Currency is locked once a document is sent or a payment has been recorded."
+msgstr ""
+"A moeda fica bloqueada depois que o documento é enviado ou um pagamento é "
+"registrado."
+
+msgid ""
+"Currency is locked once a document is sent, a payment has been recorded, or "
+"this invoice was converted from a proposal."
+msgstr ""
+"A moeda fica bloqueada depois que o documento é enviado, um pagamento é "
+"registrado ou esta fatura foi convertida de uma proposta."
 
 msgid "Current DateTime"
 msgstr "Data e Hora Atual"
@@ -6555,8 +6798,24 @@ msgstr "Design:"
 msgid "Desktop"
 msgstr "Desktop"
 
+msgid ""
+"Desktop notifications are enabled to show desktop notifications when "
+"DoubleScale tab is not focused."
+msgstr ""
+"As notificações da área de trabalho estão ativadas para serem exibidas "
+"quando a aba do DoubleScale não estiver em foco."
+
 msgid "Desktop notifications are enabled. Test them or learn how they work."
 msgstr "As notificações de desktop estão ativadas. Teste-as ou saiba como funcionam."
+
+msgid ""
+"Detach tags from contacts. The tag itself is not deleted. Provide exactly "
+"one of: contact_id, contact_ids, or filter. Set dry_run to preview without "
+"writing."
+msgstr ""
+"Desanexe tags dos contatos. A tag em si não é excluída. Forneça exatamente "
+"um de: contact_id, contact_ids ou filter. Defina dry_run para "
+"pré-visualizar sem gravar."
 
 msgid "Details"
 msgstr "Detalhes"
@@ -6582,14 +6841,23 @@ msgstr "Direção para mover a etapa (para cima, para baixo ou mover)"
 msgid "Disable"
 msgstr "Desativar"
 
+msgid "Disable %s"
+msgstr "Desativar %s"
+
 msgid "Disable Action"
 msgstr "Desativar Ação"
 
 msgid "Disable anyway"
 msgstr "Desativar mesmo assim"
 
+msgid "Disable Condition"
+msgstr "Desativar Condição"
+
 msgid "Disable Event"
 msgstr "Desativar Evento"
+
+msgid "Disable Goal"
+msgstr "Desativar Meta"
 
 msgid "Disable module with assigned team roles?"
 msgstr "Desativar módulo com funções de equipe atribuídas?"
@@ -6840,6 +7108,29 @@ msgstr "DoubleScale"
 msgid "DoubleScale contact"
 msgstr "Contato do DoubleScale"
 
+msgid ""
+"DoubleScale CRM tools for this site, including reads and writes. Call "
+"doublescale-get-context first: it reports which modules are active and "
+"which tools you can actually use. Some tools change records or email "
+"customers — read each tool's description and annotations before calling it. "
+"Tools for disabled modules are not published, and results are scoped to "
+"what the connecting user is allowed to see. This HTTP transport cannot push "
+"a tools/list refresh; send header X-DoubleScale-Tools-Version (the value "
+"from the last response) so a stale cache is flagged in _meta.toolsStale, "
+"then call tools/list again."
+msgstr ""
+"Ferramentas de CRM do DoubleScale neste site, incluindo leituras e "
+"gravações. Chame doublescale-get-context primeiro: ele informa quais "
+"módulos estão ativos e quais ferramentas você realmente pode usar. Algumas "
+"ferramentas alteram registros ou enviam e-mail aos clientes — leia a "
+"descrição e as anotações de cada ferramenta antes de chamá-la. Ferramentas "
+"de módulos desativados não são publicadas, e os resultados ficam limitados "
+"ao que o usuário da conexão tem permissão de ver. Este transporte HTTP não "
+"consegue forçar uma atualização de tools/list; envie o cabeçalho "
+"X-DoubleScale-Tools-Version (o valor da última resposta) para que um cache "
+"desatualizado seja marcado em _meta.toolsStale e então chame tools/list "
+"novamente."
+
 msgid "DoubleScale database migration pending:"
 msgstr "Migração do banco de dados DoubleScale pendente:"
 
@@ -7085,6 +7376,9 @@ msgid ""
 "account."
 msgstr "Cada conta de provedor é um par domínio + chave de API (e região). Adicione uma nova conta para cada domínio Mailgun de onde você envia, ou selecione uma conta já armazenada."
 
+msgid "Each row must be an object with named fields."
+msgstr "Cada linha deve ser um objeto com campos nomeados."
+
 msgid "Easy Digital Downloads"
 msgstr "Easy Digital Downloads"
 
@@ -7312,6 +7606,11 @@ msgstr "O ElasticEmail não está configurado corretamente."
 msgid "Email"
 msgstr "Email"
 
+msgid "Email %1$s appears more than once in this batch (first at index %2$d)."
+msgstr ""
+"O e-mail %1$s aparece mais de uma vez neste lote (primeira ocorrência no "
+"índice %2$d)."
+
 msgid "Email & delivery"
 msgstr "E-mail e entrega"
 
@@ -7320,6 +7619,22 @@ msgstr "E-mail e Desktop"
 
 msgid "Email (optional)"
 msgstr "E-mail (opcional)"
+
+msgid ""
+"Email a proposal to the customer it belongs to. THIS EMAILS THE CUSTOMER "
+"IMMEDIATELY and cannot be recalled, so only call it when the user has "
+"explicitly asked to send this proposal. Sending also moves a draft to sent, "
+"stamps the sent date, and locks the currency and party details to what they "
+"are now. Declined proposals cannot be sent. The recipient is always the "
+"proposal's own contact and cannot be overridden."
+msgstr ""
+"Envie uma proposta por e-mail ao cliente a que ela pertence. ISSO ENVIA O "
+"E-MAIL AO CLIENTE IMEDIATAMENTE e não pode ser desfeito, então só chame "
+"quando o usuário tiver pedido explicitamente para enviar esta proposta. O "
+"envio também move um rascunho para enviado, registra a data de envio e "
+"bloqueia a moeda e os dados das partes no estado atual. Propostas recusadas "
+"não podem ser enviadas. O destinatário é sempre o próprio contato da "
+"proposta e não pode ser substituído."
 
 msgid "Email Address"
 msgstr "Endereço de e-mail"
@@ -7335,6 +7650,24 @@ msgstr "O endereço de e-mail é obrigatório para o canal de e-mail"
 
 msgid "Email address not available"
 msgstr "Endereço de e-mail não disponível"
+
+msgid ""
+"Email an invoice to the customer it belongs to. THIS EMAILS THE CUSTOMER "
+"IMMEDIATELY and cannot be recalled, so only call it when the user has "
+"explicitly asked to send this invoice. Sending also moves a draft to "
+"unpaid, stamps the sent date, and locks the currency and the billing and "
+"issuer details to what they are now — so send only once the invoice is "
+"final. Paid invoices cannot be sent. The recipient is always the invoice's "
+"own contact and cannot be overridden."
+msgstr ""
+"Envie uma fatura por e-mail ao cliente a que ela pertence. ISSO ENVIA O "
+"E-MAIL AO CLIENTE IMEDIATAMENTE e não pode ser desfeito, então só chame "
+"quando o usuário tiver pedido explicitamente para enviar esta fatura. O "
+"envio também move um rascunho para não pago, registra a data de envio e "
+"bloqueia a moeda e os dados de cobrança e do emissor no estado atual — "
+"portanto envie só quando a fatura estiver final. Faturas pagas não podem "
+"ser enviadas. O destinatário é sempre o próprio contato da fatura e não "
+"pode ser substituído."
 
 msgid "Email Analytics"
 msgstr "Análise de E-mail"
@@ -7561,6 +7894,9 @@ msgstr "Template de e-mail sem assunto"
 msgid "Email template missing unsubscribe link"
 msgstr "Template de e-mail sem link de cancelamento de inscrição"
 
+msgid "Email templates"
+msgstr "Modelos de e-mail"
+
 msgid "Email Test"
 msgstr "E-mail de teste"
 
@@ -7647,6 +7983,9 @@ msgstr "Habilitar"
 msgid "Enable %1$s to use %2$s."
 msgstr "Ative %1$s para usar %2$s."
 
+msgid "Enable %s"
+msgstr "Ativar %s"
+
 msgid "Enable Action"
 msgstr "Ativar Ação"
 
@@ -7666,6 +8005,9 @@ msgstr "Ativar rastreamento do carrinho"
 
 msgid "enable cart tracking"
 msgstr "ativar rastreamento de carrinho"
+
+msgid "Enable Condition"
+msgstr "Ativar Condição"
 
 msgid ""
 "Enable CRM contacts above to apply these lists and tags when a cart is "
@@ -7688,6 +8030,9 @@ msgid ""
 "in Integrations — the same Stripe keys used for Booking apply here."
 msgstr "Ative gateways para pagamentos online de faturas. As chaves de API são gerenciadas globalmente em Integrações — as mesmas chaves do Stripe usadas para Agendamento se aplicam aqui."
 
+msgid "Enable Goal"
+msgstr "Ativar Meta"
+
 msgid "Enable Google Calendar Notifications"
 msgstr "Ativar Notificações do Google Calendar"
 
@@ -7702,6 +8047,9 @@ msgstr "Ativar MCP para agentes de IA"
 
 msgid "Enable Microsoft Teams (Requires work/school account)"
 msgstr "Ativar Microsoft Teams (Requer conta corporativa/escolar)"
+
+msgid "Enable Mobile Push"
+msgstr "Ativar Push no celular"
 
 msgid ""
 "Enable or disable modules to customize your project. Disabled modules will "
@@ -8653,6 +9001,9 @@ msgstr ""
 "Falha ao entregar a notificação de teste. Seu token de dispositivo pode "
 "estar expirado — tente sair e entrar novamente no app móvel."
 
+msgid "Failed to disable %s"
+msgstr "Falha ao desativar %s"
+
 msgid "Failed to disable action"
 msgstr "Falha ao desativar ação"
 
@@ -8679,6 +9030,9 @@ msgstr "Falha ao duplicar grupo"
 
 msgid "Failed to duplicate step"
 msgstr "Falha ao duplicar etapa"
+
+msgid "Failed to enable %s"
+msgstr "Falha ao ativar %s"
 
 msgid "Failed to enable action"
 msgstr "Falha ao ativar ação"
@@ -8904,6 +9258,9 @@ msgstr "Falha ao carregar templates"
 msgid "Failed to load the portal page status."
 msgstr "Falha ao carregar o status da página do portal."
 
+msgid "Failed to load the selected template."
+msgstr "Falha ao carregar o modelo selecionado."
+
 msgid "Failed to load this event’s booking form fields."
 msgstr "Falha ao carregar os campos do formulário de agendamento deste evento."
 
@@ -8955,6 +9312,9 @@ msgstr "Falha ao registrar o token do dispositivo."
 
 msgid "Failed to remove user"
 msgstr "Falha ao remover usuário"
+
+msgid "Failed to rename %s"
+msgstr "Falha ao renomear %s"
 
 msgid "Failed to rename action"
 msgstr "Falha ao renomear ação"
@@ -9203,6 +9563,9 @@ msgstr "Falha ao atualizar tarefa"
 msgid "Failed to update template"
 msgstr "Falha ao atualizar o modelo"
 
+msgid "Failed to update the invoice status."
+msgstr "Falha ao atualizar o status da fatura."
+
 msgid "Failed to update the proposal status."
 msgstr "Falha ao atualizar o status da proposta."
 
@@ -9414,6 +9777,13 @@ msgstr "Filtrar a partir da data (A-m-d)"
 
 msgid "Filter individual message by linked activity ID."
 msgstr "Filtrar mensagem individual pelo ID de atividade vinculada."
+
+msgid ""
+"filter must include at least one criterion. An empty filter would match "
+"every record and is refused."
+msgstr ""
+"filter deve incluir pelo menos um critério. Um filtro vazio corresponderia "
+"a todos os registros e é recusado."
 
 msgid "Filter the results."
 msgstr "Filtrar os resultados."
@@ -9789,6 +10159,9 @@ msgstr "Obter fatura"
 msgid "Get it on Google Play"
 msgstr "Baixar no Google Play"
 
+msgid "Get my notification summary"
+msgstr "Obter meu resumo de notificações"
+
 msgid "Get proposal"
 msgstr "Obter proposta"
 
@@ -9853,6 +10226,23 @@ msgstr "Dê a cada cliente a própria chave — uma para o Claude Code, uma para
 msgid ""
 "Give this action a custom name to make complex workflows easier to follow."
 msgstr "Dê a esta ação um nome personalizado para tornar fluxos de trabalho complexos mais fáceis de acompanhar."
+
+msgid ""
+"Give this condition a custom name to make complex workflows easier to "
+"follow."
+msgstr ""
+"Dê a esta condição um nome personalizado para facilitar o acompanhamento de "
+"fluxos complexos."
+
+msgid "Give this delay a custom name to make complex workflows easier to follow."
+msgstr ""
+"Dê a este atraso um nome personalizado para facilitar o acompanhamento de "
+"fluxos complexos."
+
+msgid "Give this goal a custom name to make complex workflows easier to follow."
+msgstr ""
+"Dê a esta meta um nome personalizado para facilitar o acompanhamento de "
+"fluxos complexos."
 
 msgid ""
 "Give your campaign a clear internal name. Only your team sees this—it keeps "
@@ -10304,6 +10694,13 @@ msgstr "Como Funciona"
 msgid "How it works:"
 msgstr "Como funciona:"
 
+msgid ""
+"How many unread notifications you have, broken down by category. Use this "
+"for \"anything I need to look at\" before listing them all."
+msgstr ""
+"Quantas notificações não lidas você tem, discriminadas por categoria. Use "
+"isto para “algo que eu precise ver” antes de listá-las todas."
+
 msgid "How WhatsApp unsubscribe works"
 msgstr "Como funciona o cancelamento de inscrição via WhatsApp"
 
@@ -10590,6 +10987,9 @@ msgstr "Nos últimos 90 dias"
 msgid "In the last X days"
 msgstr "Nos últimos X dias"
 
+msgid "In-app"
+msgstr "No app"
+
 msgid "In-app (Bell)"
 msgstr "No app (Sino)"
 
@@ -10706,6 +11106,9 @@ msgstr "Inserir Link"
 
 msgid "Insert link"
 msgstr "Inserir link"
+
+msgid "Insert Link Trigger"
+msgstr "Inserir Acionador de Link"
 
 msgid "Insert Merge Tag"
 msgstr "Inserir Tag Mesclada"
@@ -11186,6 +11589,9 @@ msgstr "Fatura enviada"
 msgid "Invoice sent to the customer."
 msgstr "Fatura enviada ao cliente."
 
+msgid "Invoice status updated."
+msgstr "Status da fatura atualizado."
+
 msgid "Invoice submitted for approval."
 msgstr "Fatura enviada para aprovação."
 
@@ -11557,6 +11963,13 @@ msgstr "O plugin LearnPress não está instalado ou ativado. Instale o LearnPres
 msgid "Leave empty to generate automatically"
 msgstr "Deixe vazio para gerar automaticamente"
 
+msgid ""
+"Leave empty to run for every link trigger. Select specific links to limit "
+"this automation to those clicks."
+msgstr ""
+"Deixe vazio para executar em todo acionador de link. Selecione links "
+"específicos para limitar esta automação a esses cliques."
+
 msgid "Leave empty to trigger for all categories."
 msgstr "Deixe vazio para disparar em todas as categorias."
 
@@ -11700,6 +12113,9 @@ msgstr "Limites"
 msgid "Line Height"
 msgstr "Altura da linha"
 
+msgid "line_items must be a list of objects."
+msgstr "line_items deve ser uma lista de objetos."
+
 msgid "Link"
 msgstr "Link"
 
@@ -11709,11 +12125,17 @@ msgstr "Link Clickado"
 msgid "Link copied"
 msgstr "Link copiado"
 
+msgid "Link text"
+msgstr "Texto do link"
+
 msgid "Link the resulting activity to this deal."
 msgstr "Vincular a atividade resultante a este deal."
 
 msgid "Link the resulting activity to this project."
 msgstr "Vincular a atividade resultante a este projeto."
+
+msgid "Link trigger"
+msgstr "Acionador de link"
 
 msgid "Link Triggers"
 msgstr "Acionadores do link"
@@ -11812,6 +12234,9 @@ msgid ""
 "returned with their currency code. If your sales scope is \"own\" you see "
 "only invoices assigned to you — check get-context first."
 msgstr "Lista faturas com número, status, contato, total e vencimento. Os valores vêm com o código da moeda. Se o escopo de vendas for \"own\", você vê só as faturas atribuídas a você — confira get-context primeiro."
+
+msgid "List my notifications"
+msgstr "Listar minhas notificações"
 
 msgid "List Name"
 msgstr "Lista de nomes"
@@ -12048,6 +12473,9 @@ msgstr "Registrar uma nova ligação para este contato"
 
 msgid "Log Call"
 msgstr "Registrar Ligação"
+
+msgid "Log calls in bulk"
+msgstr "Registrar ligações em massa"
 
 msgid "Log Details"
 msgstr "Detalhes do Log"
@@ -12561,6 +12989,9 @@ msgstr ""
 msgid "Mark as Accepted"
 msgstr "Marcar como Aceito"
 
+msgid "Mark as Paid"
+msgstr "Marcar como Pago"
+
 msgid "Mark as sent"
 msgstr "Marcar como enviado"
 
@@ -12582,10 +13013,22 @@ msgstr "Marcar agendamento como concluído automaticamente após"
 msgid "Mark Complete"
 msgstr "Marcar completa"
 
+msgid "Mark notifications as read"
+msgstr "Marcar notificações como lidas"
+
 msgid ""
 "Mark this proposal as accepted on the customer’s behalf? This may create a "
 "draft invoice automatically."
 msgstr "Marcar esta proposta como aceita em nome do cliente? Isso pode criar uma fatura em rascunho automaticamente."
+
+msgid ""
+"Mark your own notifications as read. Pass id to mark one; omit id to mark "
+"all of yours. There is no user id — this can never mark another user's "
+"notifications."
+msgstr ""
+"Marque suas próprias notificações como lidas. Passe id para marcar uma; "
+"omita id para marcar todas as suas. Não há user id — isto nunca marca as "
+"notificações de outro usuário."
 
 msgid "Marketing"
 msgstr "Marketing"
@@ -12747,6 +13190,13 @@ msgstr "Endpoint MCP ativado."
 
 msgid "MCP for AI Agents"
 msgstr "MCP para agentes de IA"
+
+msgid ""
+"MCP is switched off for this site, so a key you create here will not "
+"connect yet. Ask an administrator to enable it."
+msgstr ""
+"O MCP está desligado neste site, então uma chave criada aqui ainda não vai "
+"conectar. Peça a um administrador para habilitá-lo."
 
 msgid ""
 "MCP needs the WordPress Abilities API, added in WordPress %1$s. This site "
@@ -13071,6 +13521,16 @@ msgid ""
 "say the feature is not enabled — do not report its data as empty or zero."
 msgstr "Módulos não listados aqui estão desligados neste site. Se perguntarem sobre um, diga que o recurso não está ativo — não reporte os dados como vazios ou zero."
 
+msgid "Mollie"
+msgstr "Mollie"
+
+msgid ""
+"Mollie hosted checkout (iDEAL, Bancontact, SEPA, cards) — credentials in "
+"Integrations → Mollie."
+msgstr ""
+"Checkout hospedado Mollie (iDEAL, Bancontact, SEPA, cartões) — credenciais "
+"em Integrações → Mollie."
+
 msgid "Mon"
 msgstr "Seg"
 
@@ -13389,6 +13849,11 @@ msgid ""
 "supported plugin to see triggers here."
 msgstr "Nenhuma integração ativa disponível nesta categoria. Instale e ative um plugin suportado para ver gatilhos aqui."
 
+msgid "No active link triggers yet. Create one under Settings → Link Triggers."
+msgstr ""
+"Ainda não há acionadores de link ativos. Crie um em Configurações → "
+"Acionadores do link."
+
 msgid "No activities found—this space is ready for your next action."
 msgstr "Nenhuma atividade encontrada — este espaço está pronto para sua próxima ação."
 
@@ -13676,6 +14141,9 @@ msgstr "Nenhuma chave de licença encontrada"
 msgid "No line items."
 msgstr "Nenhum item de linha."
 
+msgid "No link triggers match your search."
+msgstr "Nenhum acionador de link corresponde à sua busca."
+
 msgid "No lists"
 msgstr "Sem listas"
 
@@ -13769,6 +14237,9 @@ msgstr "Ainda sem notas"
 
 msgid "No notification categories are available yet."
 msgstr "Ainda sem categorias de notificação disponíveis."
+
+msgid "No notification found with that id."
+msgstr "Nenhuma notificação encontrada com esse id."
 
 msgid "No options available"
 msgstr "Não há opções disponíveis"
@@ -14194,6 +14665,12 @@ msgstr "Nada para alterar — informe um campo que esta ferramenta possa editar.
 
 msgid "Nothing to change — the contact already has those values."
 msgstr "Nada para alterar — o contato já tem esses valores."
+
+msgid "Nothing to change — those terms are already attached."
+msgstr "Nada a alterar — esses termos já estão vinculados."
+
+msgid "Nothing to change — those terms are not attached."
+msgstr "Nada a alterar — esses termos não estão vinculados."
 
 msgid "Nothing to configure here yet."
 msgstr "Nada para configurar aqui ainda."
@@ -14627,6 +15104,19 @@ msgstr "Oops!"
 msgid "Open"
 msgstr "Abrir"
 
+msgid ""
+"Open a new support ticket for an existing contact. Requires title, content, "
+"and contact_id. The default mailbox is used — this tool does not accept a "
+"mailbox, recipient, CC, or email address. May email the customer a "
+"confirmation if that notification is enabled on this site. The ticket is "
+"assigned to you."
+msgstr ""
+"Abra um novo ticket de suporte para um contato existente. Exige title, "
+"content e contact_id. A caixa de e-mail padrão é usada — esta ferramenta "
+"não aceita mailbox, destinatário, CC ou endereço de e-mail. Pode enviar uma "
+"confirmação por e-mail ao cliente se essa notificação estiver habilitada "
+"neste site. O ticket é atribuído a você."
+
 msgid "Open a new ticket"
 msgstr "Abrir novo ticket"
 
@@ -15043,6 +15533,9 @@ msgstr "Falha no Pagamento."
 msgid "Payment For"
 msgstr "Pagamento Para"
 
+msgid "Payment Gateway"
+msgstr "Gateway de Pagamento"
+
 msgid "Payment gateway not found."
 msgstr "Gateway de pagamento não encontrado."
 
@@ -15262,6 +15755,9 @@ msgstr "Erro do PHPMailer"
 msgid "Pick a category, then choose which notifications you want on desktop."
 msgstr "Escolha uma categoria, depois escolha quais notificações você quer no desktop."
 
+msgid "Pick a category, then choose which notifications you want on each channel."
+msgstr "Escolha uma categoria e depois quais notificações você quer em cada canal."
+
 msgid "Pick a date"
 msgstr "Escolha uma data"
 
@@ -15385,6 +15881,9 @@ msgstr "Concorde com os Termos e Condições antes de aceitar."
 
 msgid "Please choose a remote calendar from the list before closing."
 msgstr "Escolha um calendário remoto na lista antes de fechar."
+
+msgid "Please choose a valid currency."
+msgstr "Escolha uma moeda válida."
 
 msgid "Please choose the date the recurring invoice should stop on."
 msgstr "Escolha a data em que a fatura recorrente deve parar."
@@ -16030,7 +16529,6 @@ msgstr "Profissional"
 msgid "Profile image URL."
 msgstr "URL da imagem de perfil."
 
-#| msgid "Product"
 msgid "Project"
 msgstr "Projeto"
 
@@ -16161,6 +16659,9 @@ msgstr "Proposta enviada ao cliente"
 msgid "Proposal sent to the customer."
 msgstr "Proposta enviada ao cliente."
 
+msgid "Proposal status updated."
+msgstr "Status da proposta atualizado."
+
 msgid "Proposal submitted for approval."
 msgstr "Proposta enviada para aprovação."
 
@@ -16218,8 +16719,31 @@ msgid ""
 "include country code (e.g. +15550102030)."
 msgstr "Forneça um e-mail e/ou número de telefone. Usado para mensagens de WhatsApp quando definido; inclua o código do país (ex.: +15550102030)."
 
+msgid "Provide at least one field to apply to the matched rows."
+msgstr "Forneça pelo menos um campo para aplicar às linhas correspondentes."
+
+msgid "Provide at least one id in %s."
+msgstr "Forneça pelo menos um id em %s."
+
+msgid "Provide at least one of status, priority, or agent_user_id."
+msgstr "Forneça pelo menos um de status, priority ou agent_user_id."
+
 msgid "Provide either a contact id or an email address."
 msgstr "Informe um id de contato ou um endereço de e-mail."
+
+msgid ""
+"Provide exactly one of: %s. Combining them is refused so a filter cannot "
+"silently widen a row list."
+msgstr ""
+"Forneça exatamente um de: %s. Combiná-los é recusado para que um filtro não "
+"amplie silenciosamente uma lista de linhas."
+
+msgid ""
+"Provide exactly one of: contact_id, contact_ids, filter. Combining them is "
+"refused so a filter cannot silently widen a row list."
+msgstr ""
+"Forneça exatamente um de: contact_id, contact_ids, filter. Combiná-los é "
+"recusado para que um filtro não amplie silenciosamente uma lista de linhas."
 
 msgid "Provided email address will set as CC to this email notification."
 msgstr "O endereço de e-mail fornecido será definido como CC nesta notificação por e-mail."
@@ -16309,6 +16833,17 @@ msgstr ""
 msgid "Push notifications require DoubleScale Pro."
 msgstr "As notificações push exigem o DoubleScale Pro."
 
+msgid ""
+"Put contacts on existing lists. Does not create lists — call "
+"list-contact-segments to resolve names to ids. Provide exactly one of: "
+"contact_id, contact_ids, or filter. Set dry_run to preview without writing. "
+"Contacts already on a list are left as-is."
+msgstr ""
+"Coloque contatos em listas existentes. Não cria listas — chame "
+"list-contact-segments para resolver nomes em ids. Forneça exatamente um de: "
+"contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar sem "
+"gravar. Contatos que já estão em uma lista permanecem como estão."
+
 msgid "Put this in %s:"
 msgstr "Coloque isto em %s:"
 
@@ -16377,6 +16912,16 @@ msgstr "Taxa (%)"
 
 msgid "Rate limit exceeded. Try again later."
 msgstr "Limite de requisições excedido. Tente novamente mais tarde."
+
+msgid "Razorpay"
+msgstr "Razorpay"
+
+msgid ""
+"Razorpay hosted checkout (UPI, cards, netbanking, wallets) — credentials in "
+"Integrations → Razorpay."
+msgstr ""
+"Checkout hospedado Razorpay (UPI, cartões, internet banking, carteiras) — "
+"credenciais em Integrações → Razorpay."
 
 msgid "Re: {ticket_title}"
 msgstr "Re: {ticket_title}"
@@ -16532,6 +17077,24 @@ msgid ""
 "Record invoice payments, reconcile balances, and accept online payments with "
 "DoubleScale Pro."
 msgstr "Registre pagamentos de faturas, reconcilie saldos e aceite pagamentos online com o DoubleScale Pro."
+
+msgid ""
+"Record many calls in one call to this tool — useful after working through a "
+"call list. Provide exactly one of: calls (per-row objects), contact_ids, or "
+"filter. With contact_ids or filter, the same notes/duration/outcome apply "
+"to every match. Set dry_run to preview without writing. This only records "
+"history; it places no outbound calls and emails nobody. Rows are processed "
+"independently — some may succeed while others fail. Check errors before "
+"reporting success."
+msgstr ""
+"Registre várias ligações em uma única chamada a esta ferramenta — útil "
+"depois de percorrer uma lista de ligações. Forneça exatamente um de: calls "
+"(objetos por linha), contact_ids ou filter. Com contact_ids ou filter, as "
+"mesmas notes/duration/outcome se aplicam a cada correspondência. Defina "
+"dry_run para pré-visualizar sem gravar. Isto só registra o histórico; não "
+"faz ligações de saída nem envia e-mail a ninguém. As linhas são processadas "
+"de forma independente — algumas podem ter sucesso enquanto outras falham. "
+"Verifique os erros antes de informar sucesso."
 
 msgid "Record offline and online payments"
 msgstr "Registre pagamentos offline e online"
@@ -16708,6 +17271,9 @@ msgstr "Remover"
 msgid "Remove attachment"
 msgstr "Excluir anexo"
 
+msgid "Remove contacts from lists"
+msgstr "Remover contatos das listas"
+
 msgid "Remove CRM Access"
 msgstr "Remover Acesso ao CRM"
 
@@ -16757,14 +17323,26 @@ msgstr "Remover Marcação"
 msgid "Remove Tags"
 msgstr "Remover Tags"
 
+msgid "Remove tags from contacts"
+msgstr "Remover tags dos contatos"
+
 msgid "Remove this connection?"
 msgstr "Remover esta conexão?"
 
 msgid "Rename"
 msgstr "Renomear"
 
+msgid "Rename %s"
+msgstr "Renomear %s"
+
 msgid "Rename Action"
 msgstr "Renomear Ação"
+
+msgid "Rename Condition"
+msgstr "Renomear Condição"
+
+msgid "Rename Goal"
+msgstr "Renomear Meta"
 
 msgid "Renew License"
 msgstr "Renovar Licença"
@@ -16816,6 +17394,9 @@ msgstr "Responder para"
 
 msgid "Reply to"
 msgstr "Responder para"
+
+msgid "Reply to a support ticket"
+msgstr "Responder a um ticket de suporte"
 
 msgid "Reply to tickets"
 msgstr "Responder a bilhetes"
@@ -17085,6 +17666,9 @@ msgid ""
 msgstr ""
 "O roteamento foi ajustado porque a primeira conexão resolvida estava ausente "
 "das configurações salvas."
+
+msgid "Row %1$d failed: %2$s"
+msgstr "A linha %1$d falhou: %2$s"
 
 msgid "RTL (Arabic)"
 msgstr "RTL (Árabe)"
@@ -17574,6 +18158,9 @@ msgstr "Palavra-chave de busca."
 
 msgid "Search Levels"
 msgstr "Pesquisar Níveis"
+
+msgid "Search link triggers…"
+msgstr "Buscar acionadores de link…"
 
 msgid "Search Lists"
 msgstr "Listas de Pesquisa"
@@ -18088,6 +18675,22 @@ msgid ""
 "automatically."
 msgstr "Envie uma requisição POST para a URL de webhook acima. Os dados aparecerão aqui automaticamente."
 
+msgid "Send a proposal to the customer"
+msgstr "Enviar uma proposta ao cliente"
+
+msgid ""
+"Send a reply to the customer on a support ticket. THIS EMAILS THE CUSTOMER "
+"IMMEDIATELY and the reply cannot be edited or recalled, so only call it "
+"when the user has asked you to send a specific reply — never to draft, "
+"test, or check formatting. For staff-only context use add-ticket-note "
+"instead."
+msgstr ""
+"Envie uma resposta ao cliente em um ticket de suporte. ISSO ENVIA O E-MAIL "
+"AO CLIENTE IMEDIATAMENTE e a resposta não pode ser editada nem desfeita, "
+"então só chame quando o usuário tiver pedido para enviar uma resposta "
+"específica — nunca para rascunhar, testar ou conferir a formatação. Para "
+"contexto só da equipe, use add-ticket-note."
+
 msgid "Send a reply to the selected ticket."
 msgstr "Envie uma resposta ao ticket selecionado."
 
@@ -18113,6 +18716,9 @@ msgstr "Envie um WhatsApp de teste para"
 
 msgid "Send an email to the contact"
 msgstr "Envie um e-mail ao contato"
+
+msgid "Send an invoice to the customer"
+msgstr "Enviar uma fatura ao cliente"
 
 msgid ""
 "Send and receive WhatsApp messages directly from your contact details with "
@@ -19114,6 +19720,9 @@ msgstr "Square"
 msgid "Square corners"
 msgstr "Cantos quadrados"
 
+msgid "Square hosted checkout — credentials in Integrations → Square."
+msgstr "Checkout hospedado Square — credenciais em Integrações → Square."
+
 msgid "SSL is required for login."
 msgstr "SSL é obrigatório para login."
 
@@ -19181,6 +19790,20 @@ msgid ""
 "timezone. Modules that are switched off are absent from the list — their "
 "data is unavailable, not empty."
 msgstr "Comece aqui. Retorna quem você é, quais módulos DoubleScale estão ativos neste site, quais ferramentas você pode chamar, e a moeda e o fuso do site. Módulos desligados não entram na lista — os dados estão indisponíveis, não vazios."
+
+msgid ""
+"Start here. Returns who you are, which DoubleScale modules are active on "
+"this site, which tools you can actually call, and the site currency and "
+"timezone. Modules that are switched off are absent from the list — their "
+"data is unavailable, not empty. Some tools write records or email "
+"customers; this call only describes what is available."
+msgstr ""
+"Comece aqui. Retorna quem você é, quais módulos do DoubleScale estão ativos "
+"neste site, quais ferramentas você realmente pode chamar, e a moeda e o "
+"fuso horário do site. Módulos desligados não aparecem na lista — os dados "
+"deles estão indisponíveis, não vazios. Algumas ferramentas gravam registros "
+"ou enviam e-mail aos clientes; esta chamada só descreve o que está "
+"disponível."
 
 msgid "Start managing your CRM on the go!"
 msgstr "Comece a gerenciar seu CRM em qualquer lugar!"
@@ -19688,6 +20311,15 @@ msgstr "Tags atualizadas"
 msgid "Tags updated: added %1$s, removed %2$s"
 msgstr "Tags atualizadas: adicionadas %1$s, removidas %2$s"
 
+msgid ""
+"Take contacts off lists. The list itself is not deleted. Provide exactly "
+"one of: contact_id, contact_ids, or filter. Set dry_run to preview without "
+"writing."
+msgstr ""
+"Retire contatos das listas. A lista em si não é excluída. Forneça "
+"exatamente um de: contact_id, contact_ids ou filter. Defina dry_run para "
+"pré-visualizar sem gravar."
+
 msgid "Target Products"
 msgstr "Produtos Alvo"
 
@@ -20099,6 +20731,9 @@ msgstr ""
 msgid "The automation ID."
 msgstr "O ID da automação."
 
+msgid "The batch is empty. Provide at least one row."
+msgstr "O lote está vazio. Forneça pelo menos uma linha."
+
 msgid ""
 "The booking has been automatically cancelled because the payment failed."
 msgstr "O agendamento foi cancelado automaticamente porque o pagamento falhou."
@@ -20262,6 +20897,9 @@ msgstr "O campo \"%s\" tem um valor inválido."
 
 msgid "The field \"%s\" is required."
 msgstr "O campo \"%s\" é obrigatório."
+
+msgid "The filter matched no records."
+msgstr "O filtro não correspondeu a nenhum registro."
 
 msgid "The following related records will also be deleted or unlinked:"
 msgstr "Os seguintes registros relacionados também serão excluídos ou desvinculados:"
@@ -20588,6 +21226,13 @@ msgid "This availability is used by some events and can not be deleted"
 msgstr "Esta disponibilidade é usada por alguns eventos e não pode ser excluída"
 
 msgid ""
+"This batch has %2$d rows; the limit is %1$d. Split it into smaller batches "
+"and retry."
+msgstr ""
+"Este lote tem %2$d linhas; o limite é %1$d. Divida em lotes menores e tente "
+"de novo."
+
+msgid ""
 "This block is a Pro feature. Please install and activate the Pro version of "
 "the plugin to use it."
 msgstr "Este bloco é um recurso Pro. Instale e ative a versão Pro do plugin para usá-lo."
@@ -20725,6 +21370,13 @@ msgstr "Este arquivo não é uma exportação de workflow válida do DoubleScale
 msgid "This file type is not allowed."
 msgstr "Este tipo de arquivo não é permitido."
 
+msgid ""
+"This filter matches %2$d rows; the limit is %1$d. Call again with dry_run "
+"to confirm, then split into smaller batches."
+msgstr ""
+"Este filtro corresponde a %2$d linhas; o limite é %1$d. Chame de novo com "
+"dry_run para confirmar e depois divida em lotes menores."
+
 msgid "This goal requires %s to be installed and activated."
 msgstr "Esta meta exige que %s esteja instalado e ativado."
 
@@ -20769,6 +21421,13 @@ msgid ""
 msgstr "Esta fatura deve ser aprovada antes de ser enviada. Use Enviar para Aprovação primeiro."
 
 msgid ""
+"This invoice's contact has no email address, so there is nobody to send it "
+"to."
+msgstr ""
+"O contato desta fatura não tem endereço de e-mail, então não há para quem "
+"enviá-la."
+
+msgid ""
 "This is a bulk workflow export. Please use the Import button and select the "
 "bulk export file."
 msgstr "Esta é uma exportação em massa de fluxo de trabalho. Use o botão Importar e selecione o arquivo de exportação em massa."
@@ -20786,6 +21445,13 @@ msgid ""
 "This is an example of a meeting you would have with a potential customer to "
 "demonstrate your product."
 msgstr "Este é um exemplo de reunião que você teria com um cliente em potencial para demonstrar seu produto."
+
+msgid ""
+"This is the visible text in your message. It does not change the link "
+"trigger name in settings."
+msgstr ""
+"Este é o texto visível na sua mensagem. Ele não altera o nome do acionador "
+"de link nas configurações."
 
 msgid "This is used to identify the account in the connection list."
 msgstr "Isso é usado para identificar a conta na lista de conexões."
@@ -20863,6 +21529,13 @@ msgid ""
 msgstr "Esta proposta deve ser aprovada antes de ser enviada. Use Enviar para Aprovação primeiro."
 
 msgid ""
+"This proposal's contact has no email address, so there is nobody to send it "
+"to."
+msgstr ""
+"O contato desta proposta não tem endereço de e-mail, então não há para quem "
+"enviá-la."
+
+msgid ""
 "This removes every row in the SMTP email log for this site. It cannot be "
 "undone."
 msgstr "Isso remove todas as linhas do log de e-mail SMTP deste site. Não pode ser desfeito."
@@ -20885,8 +21558,20 @@ msgstr "Este trecho contém a sua chave de API. Trate como uma senha — não en
 msgid "This step cannot be duplicated."
 msgstr "Esta etapa não pode ser duplicada."
 
+msgid "This step cannot be enabled or disabled."
+msgstr "Esta etapa não pode ser ativada nem desativada."
+
 msgid "This step does not support analytics"
 msgstr "Esta etapa não suporta análise"
+
+msgid ""
+"This target matches %1$d rows; the write limit is %2$d. Split it into "
+"smaller batches (contact_ids, or a narrower filter) before calling without "
+"dry_run."
+msgstr ""
+"Este alvo corresponde a %1$d linhas; o limite de gravação é %2$d. Divida em "
+"lotes menores (contact_ids ou um filtro mais restrito) antes de chamar sem "
+"dry_run."
 
 msgid "This template has no content to export."
 msgstr "Este template não tem conteúdo para exportar."
@@ -20899,6 +21584,9 @@ msgstr "Este ticket não está atribuído a você."
 
 msgid "This time slot has just been booked. Please choose another."
 msgstr "Este horário acabou de ser agendado. Escolha outro."
+
+msgid "This tool does not support filter targeting."
+msgstr "Esta ferramenta não oferece suporte a targeting por filter."
 
 msgid "This trigger requires %s to be installed and activated."
 msgstr "Este gatilho exige que %s esteja instalado e ativado."
@@ -21527,6 +22215,9 @@ msgstr "Ter"
 msgid "Tuesday"
 msgstr "Terça"
 
+msgid "Turn On"
+msgstr "Ativar"
+
 msgid ""
 "Turn optional features on or off. Parent modules can include sub-features "
 "you control separately."
@@ -21698,6 +22389,11 @@ msgstr "Desconhecido"
 msgid "unknown"
 msgstr "desconhecido"
 
+msgid "Unknown %1$s ids: %2$s. Call list-contact-segments for ids that exist."
+msgstr ""
+"Ids de %1$s desconhecidos: %2$s. Chame list-contact-segments para ids que "
+"existem."
+
 msgid "Unknown Action"
 msgstr "Ação Desconhecida"
 
@@ -21845,6 +22541,9 @@ msgstr "Atualizar"
 msgid "Update a contact"
 msgstr "Atualizar um contato"
 
+msgid "Update a support ticket"
+msgstr "Atualizar um ticket de suporte"
+
 msgid "Update an existing template"
 msgstr "Atualizar um template existente"
 
@@ -21853,6 +22552,9 @@ msgstr "Automação de atualização"
 
 msgid "Update blank fields"
 msgstr "Atualizar campos em branco"
+
+msgid "Update contacts in bulk"
+msgstr "Atualizar contatos em massa"
 
 msgid "Update existing contact"
 msgstr "Atualizar contato existente"
@@ -22048,6 +22750,9 @@ msgstr "Usar uma Agenda Existente"
 
 msgid "Use custom fields in contact records, automations, and merge tags"
 msgstr "Use campos personalizados em registros de contato, automações e merge tags"
+
+msgid "Use default (%s)"
+msgstr "Usar padrão (%s)"
 
 msgid ""
 "Use it to add emails, notes, or tasks that keep your contact flow organized "
@@ -22786,6 +23491,13 @@ msgid ""
 msgstr "Quando os clientes enviarem pelo portal ou e-mail, os tickets deles aparecerão aqui."
 
 msgid ""
+"When enabled, CRM events will trigger push notifications to mobile devices "
+"to configure push notifications for the DoubleScale mobile app."
+msgstr ""
+"Quando ativado, eventos do CRM dispararão notificações push em dispositivos "
+"móveis para configurar o push do app DoubleScale."
+
+msgid ""
 "When enabled, CRM events will trigger push notifications to mobile devices."
 msgstr "Quando ativado, eventos do CRM disparam notificações push para dispositivos móveis."
 
@@ -23258,6 +23970,9 @@ msgstr "Você não tem permissão para ler todas as disponibilidades."
 msgid "You do not have permission to read this availability."
 msgstr "Você não tem permissão para ler esta disponibilidade."
 
+msgid "You do not have permission to reassign tickets."
+msgstr "Você não tem permissão para reatribuir tickets."
+
 msgid "You do not have permission to reschedule this booking."
 msgstr "Você não tem permissão para remarcar este agendamento."
 
@@ -23295,6 +24010,24 @@ msgid ""
 msgstr ""
 "Sua inscrição na nossa lista de e-mails foi cancelada com sucesso. Sentimos "
 "muito por você ir embora, mas respeitamos sua decisão."
+
+msgid ""
+"You have no notification categories with the in-app bell switched on, so "
+"nothing is counted here. Turn the bell on in Settings → Notifications to "
+"collect them."
+msgstr ""
+"Você não tem categorias de notificação com o sino no app ligado, então nada "
+"é contado aqui. Ligue o sino em Configurações → Notificações para "
+"coletá-las."
+
+msgid ""
+"You have no notification categories with the in-app bell switched on, so "
+"nothing is listed here. Turn the bell on in Settings → Notifications to "
+"collect them."
+msgstr ""
+"Você não tem categorias de notificação com o sino no app ligado, então nada "
+"é listado aqui. Ligue o sino em Configurações → Notificações para "
+"coletá-las."
 
 msgid "You have not created any availabilities yet."
 msgstr "Você ainda não criou nenhuma disponibilidade."
@@ -23342,6 +24075,9 @@ msgstr "Você precisa estar logado para acessar o portal de suporte."
 
 msgid "You must be logged in to view the calendar."
 msgstr "Você precisa estar logado para ver o calendário."
+
+msgid "You need a DoubleScale role to create an MCP API key."
+msgstr "Você precisa de uma função DoubleScale para criar uma chave de API MCP."
 
 msgid "You received this notification from Plugin."
 msgstr "Você recebeu esta notificação do Plugin."
@@ -23475,6 +24211,9 @@ msgstr "Sua licença expirou. Renove para continuar usando os recursos Pro."
 msgid "Your List was successfully added — check it out!"
 msgstr "Sua Lista foi adicionada com sucesso — confira!"
 
+msgid "Your MCP API keys"
+msgstr "Suas chaves de API MCP"
+
 msgid "Your meeting has been Scheduled"
 msgstr "Sua reunião foi Agendada"
 
@@ -23483,6 +24222,19 @@ msgstr "Seu Nome"
 
 msgid "Your name"
 msgstr "Seu nome"
+
+msgid ""
+"Your own notifications, newest first, with whether each has been read. "
+"Always scoped to you — there is no way to read another user's "
+"notifications, and no user id to pass. Only notifications for categories "
+"you have the bell enabled on appear, matching the dashboard exactly. Use "
+"mark-notifications-read to clear unread ones."
+msgstr ""
+"As suas próprias notificações, as mais recentes primeiro, com indicação se "
+"cada uma foi lida. Sempre restrito a você — não há como ler as notificações "
+"de outro usuário, e nenhum user id para passar. Só aparecem notificações "
+"das categorias em que você tem o sino ativado, exatamente como no painel. "
+"Use mark-notifications-read para limpar as não lidas."
 
 msgid "your payment history and transaction details."
 msgstr "seu histórico de pagamentos e detalhes de transações."

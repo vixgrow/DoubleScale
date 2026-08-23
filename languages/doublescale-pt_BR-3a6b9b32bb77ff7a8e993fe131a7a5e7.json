@@ -1,6 +1,6 @@
 {
-    "translation-revision-date": "2026-08-16 12:01+0000",
-    "generator": "doublescale\/bin\/make-json-translations",
+    "translation-revision-date": "2026-08-23 06:36+0000",
+    "generator": "doublescale\/jed-json-compiler",
     "source": "build\/renderer\/support\/index.js",
     "domain": "messages",
     "locale_data": {
@@ -162,6 +162,9 @@
             "%1$s must be one of: %2$s": [
                 "%1$s deve ser um de: %2$s"
             ],
+            "%1$s payment for invoice %2$s": [
+                "Pagamento %1$s da fatura %2$s"
+            ],
             "%1$s scheduled for %2$s.": [
                 "%1$s agendado para %2$s."
             ],
@@ -294,8 +297,14 @@
             "%s Details": [
                 "%s Detalhes"
             ],
+            "%s disabled": [
+                "%s desativado"
+            ],
             "%s disconnected successfully.": [
                 "%s desconectado com sucesso."
+            ],
+            "%s enabled": [
+                "%s ativado"
             ],
             "%s Failed": [
                 "%s  Reprovado"
@@ -372,6 +381,15 @@
             "%s message failed with debug info": [
                 "Falha na mensagem %s com informações de debug"
             ],
+            "%s must be a list of objects.": [
+                "%s deve ser uma lista de objetos."
+            ],
+            "%s must be a list of positive record ids.": [
+                "%s deve ser uma lista de ids de registros positivos."
+            ],
+            "%s must be a list of record ids.": [
+                "%s deve ser uma lista de ids de registros."
+            ],
             "%s must be a positive record id.": [
                 "%s deve ser um id de registro positivo."
             ],
@@ -380,6 +398,12 @@
             ],
             "%s must be in E.164 format (e.g., +12025551234)": [
                 "%s deve estar no formato E.164 (ex.: +12025551234)"
+            ],
+            "%s must contain positive integer ids.": [
+                "%s deve conter ids inteiros positivos."
+            ],
+            "%s name reset": [
+                "Nome de %s redefinido"
             ],
             "%s not found.": [
                 "%s não encontrado."
@@ -392,6 +416,9 @@
             ],
             "%s removed a file attachment": [
                 "%s removido um anexo de arquivo"
+            ],
+            "%s renamed": [
+                "%s renomeado"
             ],
             "%s replied": [
                 "%s respondeu"
@@ -537,6 +564,9 @@
             "9:01 AM": [
                 "9:01"
             ],
+            "+%d more currency": [
+                "+%d outra moeda"
+            ],
             "[%1$s] Connect %2$s to your CRM": [
                 "[%1$s] Conecte %2$s ao seu CRM"
             ],
@@ -678,14 +708,26 @@
             "Accept": [
                 "Aceito"
             ],
+            "Accept card payments for invoices via Authorize.Net Accept Hosted.": [
+                "Aceite pagamentos com cartão em faturas via Authorize.Net Accept Hosted."
+            ],
             "Accept failed.": [
                 "Falha ao aceitar."
+            ],
+            "Accept iDEAL, Bancontact, SEPA and card payments for invoices via Mollie.": [
+                "Aceite pagamentos iDEAL, Bancontact, SEPA e cartão em faturas via Mollie."
             ],
             "Accept payments and manage subscriptions through Stripe.": [
                 "Aceite pagamentos e gerencie assinaturas através do Stripe."
             ],
             "Accept PayPal payments for invoices. Configure sandbox or live REST app credentials.": [
                 "Aceite pagamentos via PayPal para faturas. Configure as credenciais do app REST em sandbox ou produção."
+            ],
+            "Accept Square payments for invoices. Configure sandbox or production access token and location.": [
+                "Aceite pagamentos Square em faturas. Configure o token de acesso e o local de sandbox ou produção."
+            ],
+            "Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay.": [
+                "Aceite pagamentos UPI, cartão, internet banking e carteira digital em faturas via Razorpay."
             ],
             "Accepted": [
                 "Aceito"
@@ -954,6 +996,9 @@
             "Add an automatic closing note or reply": [
                 "Adicione uma nota ou resposta automática de encerramento"
             ],
+            "Add an internal note to a ticket": [
+                "Adicionar uma nota interna a um ticket"
+            ],
             "Add an override": [
                 "Adicionar uma substituição"
             ],
@@ -1004,6 +1049,9 @@
             ],
             "Add Contact Individual": [
                 "Adicionar Contato Individual"
+            ],
+            "Add contacts to lists": [
+                "Adicionar contatos às listas"
             ],
             "Add Content": [
                 "Adicionar Conteúdo"
@@ -1074,6 +1122,9 @@
             "Add Manager": [
                 "Adicionar Gerente"
             ],
+            "Add many contacts in one call. Email must be unique per contact. Creating contacts does not email them. Set dry_run to preview without writing. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.": [
+                "Adicione vários contatos em uma única chamada. O e-mail deve ser exclusivo por contato. Criar contatos não envia e-mail a eles. Defina dry_run para pré-visualizar sem gravar. As linhas são processadas de forma independente — algumas podem ter sucesso enquanto outras falham. Verifique os erros antes de informar sucesso."
+            ],
             "Add New": [
                 "Adicionar Novo"
             ],
@@ -1106,6 +1157,9 @@
             ],
             "Add note": [
                 "Adicionar nota"
+            ],
+            "Add notes to contacts in bulk": [
+                "Adicionar notas aos contatos em massa"
             ],
             "Add one of these commands to your server cron (using cPanel, Plesk, or crontab -e):": [
                 "Adicione um destes comandos ao cron do seu servidor (usando cPanel, Plesk ou crontab -e):"
@@ -1166,6 +1220,9 @@
             ],
             "Add tags to %d selected tickets. Existing tags are kept.": [
                 "Adicione tags aos %d tickets selecionados. As tags existentes são mantidas."
+            ],
+            "Add tags to contacts": [
+                "Adicionar tags aos contatos"
             ],
             "Add tags to label VIPs, product users, and more — making it easier to filter, track, and personalize your CRM outreach.": [
                 "Adicione tags para identificar VIPs, usuários de produtos e mais — facilitando filtrar, acompanhar e personalizar o contato no seu CRM."
@@ -1461,6 +1518,9 @@
             "All Contact on Selected list Segment": [
                 "Todos os Contatos no Segmento de Lista Selecionado"
             ],
+            "All contact tags and lists with their ids. Call this to resolve a tag or list name to an id before filtering contacts by it, or before add-contact-tags \/ add-contact-lists.": [
+                "Todas as tags e listas de contatos com seus ids. Chame isto para resolver o nome de uma tag ou lista para um id antes de filtrar contatos por ele, ou antes de add-contact-tags \/ add-contact-lists."
+            ],
             "All contact tags and lists with their ids. Call this to resolve a tag or list name to an id before filtering contacts by it.": [
                 "Todas as tags e listas de contatos com seus ids. Chame isto para resolver o nome de uma tag ou lista para um id antes de filtrar contatos."
             ],
@@ -1535,6 +1595,9 @@
             ],
             "Allow attendee to select duration": [
                 "Permitir que o convidado selecione a duração"
+            ],
+            "Allow DoubleScale to show notifications through your operating system notification center.": [
+                "Permitir que o DoubleScale mostre notificações pelo centro de notificações do seu sistema operacional."
             ],
             "Allow DoubleScale to show you notifications via your operating system's notification center.": [
                 "Permita que o DoubleScale exiba notificações através da central de notificações do seu sistema operacional."
@@ -1763,6 +1826,12 @@
             ],
             "Append a note to a contact's timeline. The note is attributed to you and cannot be edited or removed through this tool.": [
                 "Anexa uma nota à linha do tempo do contato. A nota é atribuída a você e não pode ser editada ou removida por esta ferramenta."
+            ],
+            "Append a note to each of many contacts in one call. Provide exactly one of: notes (per-row objects, each with its own text), contact_ids, or filter. With contact_ids or filter, the same content is written to every match. Set dry_run to preview without writing. Notes are attributed to you and cannot be edited or removed through this tool. Nothing is emailed. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.": [
+                "Anexe uma nota a cada um de vários contatos em uma única chamada. Forneça exatamente um de: notes (objetos por linha, cada um com seu próprio texto), contact_ids ou filter. Com contact_ids ou filter, o mesmo conteúdo é gravado em cada correspondência. Defina dry_run para pré-visualizar sem gravar. As notas são atribuídas a você e não podem ser editadas ou removidas por esta ferramenta. Nada é enviado por e-mail. As linhas são processadas de forma independente — algumas podem ter sucesso enquanto outras falham. Verifique os erros antes de informar sucesso."
+            ],
+            "Append an internal note to a ticket. Notes are staff-only — the customer never sees them and no email is sent. Use this to record context; use reply-to-ticket to actually answer the customer.": [
+                "Anexe uma nota interna a um ticket. As notas são só da equipe — o cliente nunca as vê e nenhum e-mail é enviado. Use isto para registrar contexto; use reply-to-ticket para de fato responder ao cliente."
             ],
             "Append replies when title and sender email match": [
                 "Anexar respostas quando o título e o e-mail do remetente corresponderem"
@@ -2013,6 +2082,9 @@
             "Attach calendar invite (.ics)": [
                 "Anexar convite de calendário (.ics)"
             ],
+            "Attach existing tags to contacts. Does not create tags — call list-contact-segments to resolve names to ids. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview the match count without writing. Tags already on a contact are left as-is.": [
+                "Anexe tags existentes aos contatos. Não cria tags — chame list-contact-segments para resolver nomes em ids. Forneça exatamente um de: contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar a quantidade de correspondências sem gravar. Tags já presentes em um contato permanecem como estão."
+            ],
             "Attach file": [
                 "Anexar arquivo"
             ],
@@ -2102,6 +2174,12 @@
             ],
             "Authorize DoubleScale in the popup window": [
                 "Autorize o DoubleScale na janela pop-up"
+            ],
+            "Authorize.Net": [
+                "Authorize.Net"
+            ],
+            "Authorize.Net Accept Hosted card checkout — credentials in Integrations → Authorize.Net.": [
+                "Checkout de cartão Authorize.Net Accept Hosted — credenciais em Integrações → Authorize.Net."
             ],
             "Auto": [
                 "Auto"
@@ -3486,6 +3564,9 @@
             "Change a proposal's subject, expiry date, or terms. Line items, discounts, and totals cannot be changed here — editing those alters what is being quoted. This tool never sends anything.": [
                 "Altere assunto, validade ou termos de uma proposta. Itens, descontos e totais não podem ser alterados aqui — isso muda o que está sendo orçado. Esta ferramenta nunca envia nada."
             ],
+            "Change a ticket's status, priority, or assigned agent. Reassigning notifies the new agent. The ticket title and the customer it belongs to are deliberately not editable here.": [
+                "Altere o status, a prioridade ou o agente atribuído de um ticket. Reatribuir notifica o novo agente. O título do ticket e o cliente a que ele pertence propositalmente não são editáveis aqui."
+            ],
             "Change an invoice's due date, client note, or terms. Line items, discounts, and totals cannot be changed here — editing those alters what the customer owes, so it stays a human decision in the invoice editor. This tool never sends anything.": [
                 "Altere vencimento, nota ao cliente ou termos de uma fatura. Itens, descontos e totais não podem ser alterados aqui — isso muda o que o cliente deve, então permanece uma decisão humana no editor. Esta ferramenta nunca envia nada."
             ],
@@ -3498,8 +3579,14 @@
             "Change file": [
                 "Alterar arquivo"
             ],
+            "Change name, phone, or company on many contacts in one call. Email and subscription status are not editable here. Provide exactly one of: contacts (per-row objects), contact_ids, or filter. With contact_ids or filter, the patch fields apply to every match. Set dry_run to preview the match count without writing. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.": [
+                "Altere nome, telefone ou empresa em vários contatos em uma única chamada. E-mail e status de inscrição não são editáveis aqui. Forneça exatamente um de: contacts (objetos por linha), contact_ids ou filter. Com contact_ids ou filter, os campos da alteração se aplicam a cada correspondência. Defina dry_run para pré-visualizar a quantidade de correspondências sem gravar. As linhas são processadas de forma independente — algumas podem ter sucesso enquanto outras falham. Verifique os erros antes de informar sucesso."
+            ],
             "Change profile image": [
                 "Alterar imagem de perfil"
+            ],
+            "Change status": [
+                "Alterar status"
             ],
             "Change template": [
                 "Mudar Template"
@@ -3590,6 +3677,9 @@
             ],
             "Choose a design and accent color. You can change both later while editing.": [
                 "Escolha um design e uma cor de destaque. Você pode alterar ambos depois durante a edição."
+            ],
+            "Choose a link trigger, then set the link text that appears in your message.": [
+                "Escolha um acionador de link e defina o texto do link que aparece na sua mensagem."
             ],
             "Choose A Pre-built Template": [
                 "Escolha um Template Pronto"
@@ -4818,6 +4908,9 @@
             "Could not load email log.": [
                 "Não foi possível carregar o log de e-mails."
             ],
+            "Could not load link triggers.": [
+                "Não foi possível carregar os acionadores de link."
+            ],
             "Could not load PayPal.": [
                 "Não foi possível carregar o PayPal."
             ],
@@ -4890,6 +4983,9 @@
             "Could not send the WhatsApp message.": [
                 "Não foi possível enviar a mensagem do WhatsApp."
             ],
+            "Could not start checkout.": [
+                "Não foi possível iniciar o checkout."
+            ],
             "Could not start online payment.": [
                 "Não foi possível iniciar o pagamento online."
             ],
@@ -4938,11 +5034,26 @@
             "Create a contract type to get started": [
                 "Crie um tipo de contrato para começar"
             ],
+            "Create a draft invoice": [
+                "Criar um rascunho de fatura"
+            ],
+            "Create a draft invoice for an existing contact. Line items are allowed here because the document has not been sent yet. This tool never emails the customer — use send-invoice after the user has confirmed the draft. Status is always draft. The assigned sales agent is the connecting user.": [
+                "Crie um rascunho de fatura para um contato existente. Itens de linha são permitidos aqui porque o documento ainda não foi enviado. Esta ferramenta nunca envia e-mail ao cliente — use send-invoice depois que o usuário confirmar o rascunho. O status é sempre rascunho. O agente de vendas atribuído é o usuário da conexão."
+            ],
             "Create a draft invoice from this proposal?": [
                 "Criar um rascunho de fatura a partir desta proposta?"
             ],
+            "Create a draft proposal": [
+                "Criar um rascunho de proposta"
+            ],
+            "Create a draft proposal for an existing contact. Line items are allowed here because the document has not been sent yet. This tool never emails the customer — use send-proposal after the user has confirmed the draft. Status is always draft. The assigned user is the connecting user.": [
+                "Crie um rascunho de proposta para um contato existente. Itens de linha são permitidos aqui porque o documento ainda não foi enviado. Esta ferramenta nunca envia e-mail ao cliente — use send-proposal depois que o usuário confirmar o rascunho. O status é sempre rascunho. O usuário atribuído é o usuário da conexão."
+            ],
             "Create a key above to get a ready-to-paste snippet.": [
                 "Crie uma chave acima para obter um trecho pronto para colar."
+            ],
+            "Create a key below to connect an AI agent to DoubleScale as you. It carries your own permissions — an agent using it sees exactly the records you can see, and nothing more.": [
+                "Crie uma chave abaixo para conectar um agente de IA ao DoubleScale como você. Ela carrega as suas permissões — um agente que a usar vê exatamente os registros que você pode ver, e nada mais."
             ],
             "Create a Loops API key and the transactional ID from your Loops workspace, then save as a new provider account.": [
                 "Crie uma chave de API do Loops e o ID transacional do seu workspace do Loops, depois salve como uma nova conta de provedor."
@@ -4976,6 +5087,9 @@
             ],
             "Create a proposal to send pricing and terms to this contact.": [
                 "Crie uma proposta para enviar preços e termos a este contato."
+            ],
+            "Create a support ticket": [
+                "Criar um ticket de suporte"
             ],
             "Create a tag with a unique name, for example trigger_run_welcome_sequence.": [
                 "Crie uma tag com um nome único, por exemplo trigger_run_welcome_sequence."
@@ -5060,6 +5174,9 @@
             ],
             "Create contact": [
                 "Criar contato"
+            ],
+            "Create contacts in bulk": [
+                "Criar contatos em massa"
             ],
             "Create contacts in CRM": [
                 "Criar contatos no CRM"
@@ -5180,6 +5297,9 @@
             ],
             "Create your campaign by choosing from ready-made email templates, starting from scratch, or reusing your saved designs.": [
                 "Crie sua campanha escolhendo entre templates de e-mail prontos, começando do zero ou reutilizando seus designs salvos."
+            ],
+            "Create your email by choosing from ready-made templates, starting from scratch, or reusing your saved designs.": [
+                "Crie seu e-mail escolhendo modelos prontos, começando do zero ou reutilizando seus designs salvos."
             ],
             "Create your first lead scoring level to get started": [
                 "Crie seu primeiro nível de pontuação de lead para começar"
@@ -5327,6 +5447,15 @@
             ],
             "Currency": [
                 "Moeda"
+            ],
+            "Currency comes from the linked proposal and cannot be changed.": [
+                "A moeda vem da proposta vinculada e não pode ser alterada."
+            ],
+            "Currency is locked once a document is sent or a payment has been recorded.": [
+                "A moeda fica bloqueada depois que o documento é enviado ou um pagamento é registrado."
+            ],
+            "Currency is locked once a document is sent, a payment has been recorded, or this invoice was converted from a proposal.": [
+                "A moeda fica bloqueada depois que o documento é enviado, um pagamento é registrado ou esta fatura foi convertida de uma proposta."
             ],
             "Current DateTime": [
                 "Data e Hora Atual"
@@ -6003,8 +6132,14 @@
             "Desktop": [
                 "Desktop"
             ],
+            "Desktop notifications are enabled to show desktop notifications when DoubleScale tab is not focused.": [
+                "As notificações da área de trabalho estão ativadas para serem exibidas quando a aba do DoubleScale não estiver em foco."
+            ],
             "Desktop notifications are enabled. Test them or learn how they work.": [
                 "As notificações de desktop estão ativadas. Teste-as ou saiba como funcionam."
+            ],
+            "Detach tags from contacts. The tag itself is not deleted. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing.": [
+                "Desanexe tags dos contatos. A tag em si não é excluída. Forneça exatamente um de: contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar sem gravar."
             ],
             "Details": [
                 "Detalhes"
@@ -6030,14 +6165,23 @@
             "Disable": [
                 "Desativar"
             ],
+            "Disable %s": [
+                "Desativar %s"
+            ],
             "Disable Action": [
                 "Desativar Ação"
             ],
             "Disable anyway": [
                 "Desativar mesmo assim"
             ],
+            "Disable Condition": [
+                "Desativar Condição"
+            ],
             "Disable Event": [
                 "Desativar Evento"
+            ],
+            "Disable Goal": [
+                "Desativar Meta"
             ],
             "Disable module with assigned team roles?": [
                 "Desativar módulo com funções de equipe atribuídas?"
@@ -6279,6 +6423,9 @@
             "DoubleScale contact": [
                 "Contato do DoubleScale"
             ],
+            "DoubleScale CRM tools for this site, including reads and writes. Call doublescale-get-context first: it reports which modules are active and which tools you can actually use. Some tools change records or email customers — read each tool's description and annotations before calling it. Tools for disabled modules are not published, and results are scoped to what the connecting user is allowed to see. This HTTP transport cannot push a tools\/list refresh; send header X-DoubleScale-Tools-Version (the value from the last response) so a stale cache is flagged in _meta.toolsStale, then call tools\/list again.": [
+                "Ferramentas de CRM do DoubleScale neste site, incluindo leituras e gravações. Chame doublescale-get-context primeiro: ele informa quais módulos estão ativos e quais ferramentas você realmente pode usar. Algumas ferramentas alteram registros ou enviam e-mail aos clientes — leia a descrição e as anotações de cada ferramenta antes de chamá-la. Ferramentas de módulos desativados não são publicadas, e os resultados ficam limitados ao que o usuário da conexão tem permissão de ver. Este transporte HTTP não consegue forçar uma atualização de tools\/list; envie o cabeçalho X-DoubleScale-Tools-Version (o valor da última resposta) para que um cache desatualizado seja marcado em _meta.toolsStale e então chame tools\/list novamente."
+            ],
             "DoubleScale database migration pending:": [
                 "Migração do banco de dados DoubleScale pendente:"
             ],
@@ -6510,6 +6657,9 @@
             "Each provider account is a domain + API key pair (and region). Add a new account for each Mailgun domain you send from, or select an existing stored account.": [
                 "Cada conta de provedor é um par domínio + chave de API (e região). Adicione uma nova conta para cada domínio Mailgun de onde você envia, ou selecione uma conta já armazenada."
             ],
+            "Each row must be an object with named fields.": [
+                "Cada linha deve ser um objeto com campos nomeados."
+            ],
             "Easy Digital Downloads": [
                 "Easy Digital Downloads"
             ],
@@ -6729,6 +6879,9 @@
             "Email": [
                 "Email"
             ],
+            "Email %1$s appears more than once in this batch (first at index %2$d).": [
+                "O e-mail %1$s aparece mais de uma vez neste lote (primeira ocorrência no índice %2$d)."
+            ],
             "Email & delivery": [
                 "E-mail e entrega"
             ],
@@ -6737,6 +6890,9 @@
             ],
             "Email (optional)": [
                 "E-mail (opcional)"
+            ],
+            "Email a proposal to the customer it belongs to. THIS EMAILS THE CUSTOMER IMMEDIATELY and cannot be recalled, so only call it when the user has explicitly asked to send this proposal. Sending also moves a draft to sent, stamps the sent date, and locks the currency and party details to what they are now. Declined proposals cannot be sent. The recipient is always the proposal's own contact and cannot be overridden.": [
+                "Envie uma proposta por e-mail ao cliente a que ela pertence. ISSO ENVIA O E-MAIL AO CLIENTE IMEDIATAMENTE e não pode ser desfeito, então só chame quando o usuário tiver pedido explicitamente para enviar esta proposta. O envio também move um rascunho para enviado, registra a data de envio e bloqueia a moeda e os dados das partes no estado atual. Propostas recusadas não podem ser enviadas. O destinatário é sempre o próprio contato da proposta e não pode ser substituído."
             ],
             "Email Address": [
                 "Endereço de e-mail"
@@ -6752,6 +6908,9 @@
             ],
             "Email address not available": [
                 "Endereço de e-mail não disponível"
+            ],
+            "Email an invoice to the customer it belongs to. THIS EMAILS THE CUSTOMER IMMEDIATELY and cannot be recalled, so only call it when the user has explicitly asked to send this invoice. Sending also moves a draft to unpaid, stamps the sent date, and locks the currency and the billing and issuer details to what they are now — so send only once the invoice is final. Paid invoices cannot be sent. The recipient is always the invoice's own contact and cannot be overridden.": [
+                "Envie uma fatura por e-mail ao cliente a que ela pertence. ISSO ENVIA O E-MAIL AO CLIENTE IMEDIATAMENTE e não pode ser desfeito, então só chame quando o usuário tiver pedido explicitamente para enviar esta fatura. O envio também move um rascunho para não pago, registra a data de envio e bloqueia a moeda e os dados de cobrança e do emissor no estado atual — portanto envie só quando a fatura estiver final. Faturas pagas não podem ser enviadas. O destinatário é sempre o próprio contato da fatura e não pode ser substituído."
             ],
             "Email Analytics": [
                 "Análise de E-mail"
@@ -6966,6 +7125,9 @@
             "Email template missing unsubscribe link": [
                 "Template de e-mail sem link de cancelamento de inscrição"
             ],
+            "Email templates": [
+                "Modelos de e-mail"
+            ],
             "Email Test": [
                 "E-mail de teste"
             ],
@@ -7044,6 +7206,9 @@
             "Enable %1$s to use %2$s.": [
                 "Ative %1$s para usar %2$s."
             ],
+            "Enable %s": [
+                "Ativar %s"
+            ],
             "Enable Action": [
                 "Ativar Ação"
             ],
@@ -7062,6 +7227,9 @@
             "enable cart tracking": [
                 "ativar rastreamento de carrinho"
             ],
+            "Enable Condition": [
+                "Ativar Condição"
+            ],
             "Enable CRM contacts above to apply these lists and tags when a cart is abandoned.": [
                 "Ative contatos do CRM acima para aplicar essas listas e tags quando um carrinho for abandonado."
             ],
@@ -7077,6 +7245,9 @@
             "Enable gateways for invoice online payments. API keys are managed globally in Integrations — the same Stripe keys used for Booking apply here.": [
                 "Ative gateways para pagamentos online de faturas. As chaves de API são gerenciadas globalmente em Integrações — as mesmas chaves do Stripe usadas para Agendamento se aplicam aqui."
             ],
+            "Enable Goal": [
+                "Ativar Meta"
+            ],
             "Enable Google Calendar Notifications": [
                 "Ativar Notificações do Google Calendar"
             ],
@@ -7091,6 +7262,9 @@
             ],
             "Enable Microsoft Teams (Requires work\/school account)": [
                 "Ativar Microsoft Teams (Requer conta corporativa\/escolar)"
+            ],
+            "Enable Mobile Push": [
+                "Ativar Push no celular"
             ],
             "Enable or disable modules to customize your project. Disabled modules will not load, freeing up resources.": [
                 "Ative ou desative módulos para personalizar seu projeto. Módulos desativados não serão carregados, liberando recursos."
@@ -7986,6 +8160,9 @@
             "Failed to deliver the test notification. Your device token may be expired — try logging out and back in on the mobile app.": [
                 "Falha ao entregar a notificação de teste. Seu token de dispositivo pode estar expirado — tente sair e entrar novamente no app móvel."
             ],
+            "Failed to disable %s": [
+                "Falha ao desativar %s"
+            ],
             "Failed to disable action": [
                 "Falha ao desativar ação"
             ],
@@ -8012,6 +8189,9 @@
             ],
             "Failed to duplicate step": [
                 "Falha ao duplicar etapa"
+            ],
+            "Failed to enable %s": [
+                "Falha ao ativar %s"
             ],
             "Failed to enable action": [
                 "Falha ao ativar ação"
@@ -8229,6 +8409,9 @@
             "Failed to load the portal page status.": [
                 "Falha ao carregar o status da página do portal."
             ],
+            "Failed to load the selected template.": [
+                "Falha ao carregar o modelo selecionado."
+            ],
             "Failed to load this event’s booking form fields.": [
                 "Falha ao carregar os campos do formulário de agendamento deste evento."
             ],
@@ -8276,6 +8459,9 @@
             ],
             "Failed to remove user": [
                 "Falha ao remover usuário"
+            ],
+            "Failed to rename %s": [
+                "Falha ao renomear %s"
             ],
             "Failed to rename action": [
                 "Falha ao renomear ação"
@@ -8517,6 +8703,9 @@
             "Failed to update template": [
                 "Falha ao atualizar o modelo"
             ],
+            "Failed to update the invoice status.": [
+                "Falha ao atualizar o status da fatura."
+            ],
             "Failed to update the proposal status.": [
                 "Falha ao atualizar o status da proposta."
             ],
@@ -8717,6 +8906,9 @@
             ],
             "Filter individual message by linked activity ID.": [
                 "Filtrar mensagem individual pelo ID de atividade vinculada."
+            ],
+            "filter must include at least one criterion. An empty filter would match every record and is refused.": [
+                "filter deve incluir pelo menos um critério. Um filtro vazio corresponderia a todos os registros e é recusado."
             ],
             "Filter the results.": [
                 "Filtrar os resultados."
@@ -9066,6 +9258,9 @@
             "Get it on Google Play": [
                 "Baixar no Google Play"
             ],
+            "Get my notification summary": [
+                "Obter meu resumo de notificações"
+            ],
             "Get proposal": [
                 "Obter proposta"
             ],
@@ -9122,6 +9317,15 @@
             ],
             "Give this action a custom name to make complex workflows easier to follow.": [
                 "Dê a esta ação um nome personalizado para tornar fluxos de trabalho complexos mais fáceis de acompanhar."
+            ],
+            "Give this condition a custom name to make complex workflows easier to follow.": [
+                "Dê a esta condição um nome personalizado para facilitar o acompanhamento de fluxos complexos."
+            ],
+            "Give this delay a custom name to make complex workflows easier to follow.": [
+                "Dê a este atraso um nome personalizado para facilitar o acompanhamento de fluxos complexos."
+            ],
+            "Give this goal a custom name to make complex workflows easier to follow.": [
+                "Dê a esta meta um nome personalizado para facilitar o acompanhamento de fluxos complexos."
             ],
             "Give your campaign a clear internal name. Only your team sees this—it keeps reporting and drafts organized.": [
                 "Dê à sua campanha um nome interno claro. Só sua equipe vê isso — mantém os relatórios e rascunhos organizados."
@@ -9495,6 +9699,9 @@
             "How it works:": [
                 "Como funciona:"
             ],
+            "How many unread notifications you have, broken down by category. Use this for \"anything I need to look at\" before listing them all.": [
+                "Quantas notificações não lidas você tem, discriminadas por categoria. Use isto para “algo que eu precise ver” antes de listá-las todas."
+            ],
             "How WhatsApp unsubscribe works": [
                 "Como funciona o cancelamento de inscrição via WhatsApp"
             ],
@@ -9765,6 +9972,9 @@
             "In the last X days": [
                 "Nos últimos X dias"
             ],
+            "In-app": [
+                "No app"
+            ],
             "In-app (Bell)": [
                 "No app (Sino)"
             ],
@@ -9878,6 +10088,9 @@
             ],
             "Insert link": [
                 "Inserir link"
+            ],
+            "Insert Link Trigger": [
+                "Inserir Acionador de Link"
             ],
             "Insert Merge Tag": [
                 "Inserir Tag Mesclada"
@@ -10347,6 +10560,9 @@
             "Invoice sent to the customer.": [
                 "Fatura enviada ao cliente."
             ],
+            "Invoice status updated.": [
+                "Status da fatura atualizado."
+            ],
             "Invoice submitted for approval.": [
                 "Fatura enviada para aprovação."
             ],
@@ -10689,6 +10905,9 @@
             "Leave empty to generate automatically": [
                 "Deixe vazio para gerar automaticamente"
             ],
+            "Leave empty to run for every link trigger. Select specific links to limit this automation to those clicks.": [
+                "Deixe vazio para executar em todo acionador de link. Selecione links específicos para limitar esta automação a esses cliques."
+            ],
             "Leave empty to trigger for all categories.": [
                 "Deixe vazio para disparar em todas as categorias."
             ],
@@ -10824,6 +11043,9 @@
             "Line Height": [
                 "Altura da linha"
             ],
+            "line_items must be a list of objects.": [
+                "line_items deve ser uma lista de objetos."
+            ],
             "Link": [
                 "Link"
             ],
@@ -10833,11 +11055,17 @@
             "Link copied": [
                 "Link copiado"
             ],
+            "Link text": [
+                "Texto do link"
+            ],
             "Link the resulting activity to this deal.": [
                 "Vincular a atividade resultante a este deal."
             ],
             "Link the resulting activity to this project.": [
                 "Vincular a atividade resultante a este projeto."
+            ],
+            "Link trigger": [
+                "Acionador de link"
             ],
             "Link Triggers": [
                 "Acionadores do link"
@@ -10919,6 +11147,9 @@
             ],
             "List invoices with number, status, contact, total, and due date. Amounts are returned with their currency code. If your sales scope is \"own\" you see only invoices assigned to you — check get-context first.": [
                 "Lista faturas com número, status, contato, total e vencimento. Os valores vêm com o código da moeda. Se o escopo de vendas for \"own\", você vê só as faturas atribuídas a você — confira get-context primeiro."
+            ],
+            "List my notifications": [
+                "Listar minhas notificações"
             ],
             "List Name": [
                 "Lista de nomes"
@@ -11150,6 +11381,9 @@
             ],
             "Log Call": [
                 "Registrar Ligação"
+            ],
+            "Log calls in bulk": [
+                "Registrar ligações em massa"
             ],
             "Log Details": [
                 "Detalhes do Log"
@@ -11550,6 +11784,9 @@
             "Mark as Accepted": [
                 "Marcar como Aceito"
             ],
+            "Mark as Paid": [
+                "Marcar como Pago"
+            ],
             "Mark as sent": [
                 "Marcar como enviado"
             ],
@@ -11571,8 +11808,14 @@
             "Mark Complete": [
                 "Marcar completa"
             ],
+            "Mark notifications as read": [
+                "Marcar notificações como lidas"
+            ],
             "Mark this proposal as accepted on the customer’s behalf? This may create a draft invoice automatically.": [
                 "Marcar esta proposta como aceita em nome do cliente? Isso pode criar uma fatura em rascunho automaticamente."
+            ],
+            "Mark your own notifications as read. Pass id to mark one; omit id to mark all of yours. There is no user id — this can never mark another user's notifications.": [
+                "Marque suas próprias notificações como lidas. Passe id para marcar uma; omita id para marcar todas as suas. Não há user id — isto nunca marca as notificações de outro usuário."
             ],
             "Marketing": [
                 "Marketing"
@@ -11726,6 +11969,9 @@
             ],
             "MCP for AI Agents": [
                 "MCP para agentes de IA"
+            ],
+            "MCP is switched off for this site, so a key you create here will not connect yet. Ask an administrator to enable it.": [
+                "O MCP está desligado neste site, então uma chave criada aqui ainda não vai conectar. Peça a um administrador para habilitá-lo."
             ],
             "MCP needs the WordPress Abilities API, added in WordPress %1$s. This site runs WordPress %2$s, so no tools are published. Update WordPress to use this feature.": [
                 "O MCP precisa da API de Abilities do WordPress, adicionada no WordPress %1$s. Este site roda o WordPress %2$s, então nenhuma ferramenta é publicada. Atualize o WordPress para usar este recurso."
@@ -12020,6 +12266,12 @@
             ],
             "Modules not listed here are switched off on this site. If asked about one, say the feature is not enabled — do not report its data as empty or zero.": [
                 "Módulos não listados aqui estão desligados neste site. Se perguntarem sobre um, diga que o recurso não está ativo — não reporte os dados como vazios ou zero."
+            ],
+            "Mollie": [
+                "Mollie"
+            ],
+            "Mollie hosted checkout (iDEAL, Bancontact, SEPA, cards) — credentials in Integrations → Mollie.": [
+                "Checkout hospedado Mollie (iDEAL, Bancontact, SEPA, cartões) — credenciais em Integrações → Mollie."
             ],
             "Mon": [
                 "Seg"
@@ -12336,6 +12588,9 @@
             "No active integrations available for this category. Install and activate a supported plugin to see triggers here.": [
                 "Nenhuma integração ativa disponível nesta categoria. Instale e ative um plugin suportado para ver gatilhos aqui."
             ],
+            "No active link triggers yet. Create one under Settings → Link Triggers.": [
+                "Ainda não há acionadores de link ativos. Crie um em Configurações → Acionadores do link."
+            ],
             "No activities found—this space is ready for your next action.": [
                 "Nenhuma atividade encontrada — este espaço está pronto para sua próxima ação."
             ],
@@ -12606,6 +12861,9 @@
             "No line items.": [
                 "Nenhum item de linha."
             ],
+            "No link triggers match your search.": [
+                "Nenhum acionador de link corresponde à sua busca."
+            ],
             "No lists": [
                 "Sem listas"
             ],
@@ -12689,6 +12947,9 @@
             ],
             "No notification categories are available yet.": [
                 "Ainda sem categorias de notificação disponíveis."
+            ],
+            "No notification found with that id.": [
+                "Nenhuma notificação encontrada com esse id."
             ],
             "No options available": [
                 "Não há opções disponíveis"
@@ -13076,6 +13337,12 @@
             ],
             "Nothing to change — the contact already has those values.": [
                 "Nada para alterar — o contato já tem esses valores."
+            ],
+            "Nothing to change — those terms are already attached.": [
+                "Nada a alterar — esses termos já estão vinculados."
+            ],
+            "Nothing to change — those terms are not attached.": [
+                "Nada a alterar — esses termos não estão vinculados."
             ],
             "Nothing to configure here yet.": [
                 "Nada para configurar aqui ainda."
@@ -13473,6 +13740,9 @@
             "Open": [
                 "Abrir"
             ],
+            "Open a new support ticket for an existing contact. Requires title, content, and contact_id. The default mailbox is used — this tool does not accept a mailbox, recipient, CC, or email address. May email the customer a confirmation if that notification is enabled on this site. The ticket is assigned to you.": [
+                "Abra um novo ticket de suporte para um contato existente. Exige title, content e contact_id. A caixa de e-mail padrão é usada — esta ferramenta não aceita mailbox, destinatário, CC ou endereço de e-mail. Pode enviar uma confirmação por e-mail ao cliente se essa notificação estiver habilitada neste site. O ticket é atribuído a você."
+            ],
             "Open a new ticket": [
                 "Abrir novo ticket"
             ],
@@ -13839,6 +14109,9 @@
             "Payment For": [
                 "Pagamento Para"
             ],
+            "Payment Gateway": [
+                "Gateway de Pagamento"
+            ],
             "Payment gateway not found.": [
                 "Gateway de pagamento não encontrado."
             ],
@@ -14034,6 +14307,9 @@
             "Pick a category, then choose which notifications you want on desktop.": [
                 "Escolha uma categoria, depois escolha quais notificações você quer no desktop."
             ],
+            "Pick a category, then choose which notifications you want on each channel.": [
+                "Escolha uma categoria e depois quais notificações você quer em cada canal."
+            ],
             "Pick a date": [
                 "Escolha uma data"
             ],
@@ -14138,6 +14414,9 @@
             ],
             "Please choose a remote calendar from the list before closing.": [
                 "Escolha um calendário remoto na lista antes de fechar."
+            ],
+            "Please choose a valid currency.": [
+                "Escolha uma moeda válida."
             ],
             "Please choose the date the recurring invoice should stop on.": [
                 "Escolha a data em que a fatura recorrente deve parar."
@@ -14886,6 +15165,9 @@
             "Proposal sent to the customer.": [
                 "Proposta enviada ao cliente."
             ],
+            "Proposal status updated.": [
+                "Status da proposta atualizado."
+            ],
             "Proposal submitted for approval.": [
                 "Proposta enviada para aprovação."
             ],
@@ -14937,8 +15219,23 @@
             "Provide an email and\/or phone number. Used for WhatsApp messaging when set; include country code (e.g. +15550102030).": [
                 "Forneça um e-mail e\/ou número de telefone. Usado para mensagens de WhatsApp quando definido; inclua o código do país (ex.: +15550102030)."
             ],
+            "Provide at least one field to apply to the matched rows.": [
+                "Forneça pelo menos um campo para aplicar às linhas correspondentes."
+            ],
+            "Provide at least one id in %s.": [
+                "Forneça pelo menos um id em %s."
+            ],
+            "Provide at least one of status, priority, or agent_user_id.": [
+                "Forneça pelo menos um de status, priority ou agent_user_id."
+            ],
             "Provide either a contact id or an email address.": [
                 "Informe um id de contato ou um endereço de e-mail."
+            ],
+            "Provide exactly one of: %s. Combining them is refused so a filter cannot silently widen a row list.": [
+                "Forneça exatamente um de: %s. Combiná-los é recusado para que um filtro não amplie silenciosamente uma lista de linhas."
+            ],
+            "Provide exactly one of: contact_id, contact_ids, filter. Combining them is refused so a filter cannot silently widen a row list.": [
+                "Forneça exatamente um de: contact_id, contact_ids, filter. Combiná-los é recusado para que um filtro não amplie silenciosamente uma lista de linhas."
             ],
             "Provided email address will set as CC to this email notification.": [
                 "O endereço de e-mail fornecido será definido como CC nesta notificação por e-mail."
@@ -15012,6 +15309,9 @@
             "Push notifications require DoubleScale Pro.": [
                 "As notificações push exigem o DoubleScale Pro."
             ],
+            "Put contacts on existing lists. Does not create lists — call list-contact-segments to resolve names to ids. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing. Contacts already on a list are left as-is.": [
+                "Coloque contatos em listas existentes. Não cria listas — chame list-contact-segments para resolver nomes em ids. Forneça exatamente um de: contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar sem gravar. Contatos que já estão em uma lista permanecem como estão."
+            ],
             "Put this in %s:": [
                 "Coloque isto em %s:"
             ],
@@ -15077,6 +15377,12 @@
             ],
             "Rate limit exceeded. Try again later.": [
                 "Limite de requisições excedido. Tente novamente mais tarde."
+            ],
+            "Razorpay": [
+                "Razorpay"
+            ],
+            "Razorpay hosted checkout (UPI, cards, netbanking, wallets) — credentials in Integrations → Razorpay.": [
+                "Checkout hospedado Razorpay (UPI, cartões, internet banking, carteiras) — credenciais em Integrações → Razorpay."
             ],
             "Re: {ticket_title}": [
                 "Re: {ticket_title}"
@@ -15215,6 +15521,9 @@
             ],
             "Record invoice payments, reconcile balances, and accept online payments with DoubleScale Pro.": [
                 "Registre pagamentos de faturas, reconcilie saldos e aceite pagamentos online com o DoubleScale Pro."
+            ],
+            "Record many calls in one call to this tool — useful after working through a call list. Provide exactly one of: calls (per-row objects), contact_ids, or filter. With contact_ids or filter, the same notes\/duration\/outcome apply to every match. Set dry_run to preview without writing. This only records history; it places no outbound calls and emails nobody. Rows are processed independently — some may succeed while others fail. Check errors before reporting success.": [
+                "Registre várias ligações em uma única chamada a esta ferramenta — útil depois de percorrer uma lista de ligações. Forneça exatamente um de: calls (objetos por linha), contact_ids ou filter. Com contact_ids ou filter, as mesmas notes\/duration\/outcome se aplicam a cada correspondência. Defina dry_run para pré-visualizar sem gravar. Isto só registra o histórico; não faz ligações de saída nem envia e-mail a ninguém. As linhas são processadas de forma independente — algumas podem ter sucesso enquanto outras falham. Verifique os erros antes de informar sucesso."
             ],
             "Record offline and online payments": [
                 "Registre pagamentos offline e online"
@@ -15372,6 +15681,9 @@
             "Remove attachment": [
                 "Excluir anexo"
             ],
+            "Remove contacts from lists": [
+                "Remover contatos das listas"
+            ],
             "Remove CRM Access": [
                 "Remover Acesso ao CRM"
             ],
@@ -15417,14 +15729,26 @@
             "Remove Tags": [
                 "Remover Tags"
             ],
+            "Remove tags from contacts": [
+                "Remover tags dos contatos"
+            ],
             "Remove this connection?": [
                 "Remover esta conexão?"
             ],
             "Rename": [
                 "Renomear"
             ],
+            "Rename %s": [
+                "Renomear %s"
+            ],
             "Rename Action": [
                 "Renomear Ação"
+            ],
+            "Rename Condition": [
+                "Renomear Condição"
+            ],
+            "Rename Goal": [
+                "Renomear Meta"
             ],
             "Renew License": [
                 "Renovar Licença"
@@ -15476,6 +15800,9 @@
             ],
             "Reply to": [
                 "Responder para"
+            ],
+            "Reply to a support ticket": [
+                "Responder a um ticket de suporte"
             ],
             "Reply to tickets": [
                 "Responder a bilhetes"
@@ -15719,6 +16046,9 @@
             ],
             "Routing was adjusted because the first resolved connection was missing from saved settings.": [
                 "O roteamento foi ajustado porque a primeira conexão resolvida estava ausente das configurações salvas."
+            ],
+            "Row %1$d failed: %2$s": [
+                "A linha %1$d falhou: %2$s"
             ],
             "RTL (Arabic)": [
                 "RTL (Árabe)"
@@ -16172,6 +16502,9 @@
             ],
             "Search Levels": [
                 "Pesquisar Níveis"
+            ],
+            "Search link triggers…": [
+                "Buscar acionadores de link…"
             ],
             "Search Lists": [
                 "Listas de Pesquisa"
@@ -16668,6 +17001,12 @@
             "Send a POST request to the webhook URL above. The data will appear here automatically.": [
                 "Envie uma requisição POST para a URL de webhook acima. Os dados aparecerão aqui automaticamente."
             ],
+            "Send a proposal to the customer": [
+                "Enviar uma proposta ao cliente"
+            ],
+            "Send a reply to the customer on a support ticket. THIS EMAILS THE CUSTOMER IMMEDIATELY and the reply cannot be edited or recalled, so only call it when the user has asked you to send a specific reply — never to draft, test, or check formatting. For staff-only context use add-ticket-note instead.": [
+                "Envie uma resposta ao cliente em um ticket de suporte. ISSO ENVIA O E-MAIL AO CLIENTE IMEDIATAMENTE e a resposta não pode ser editada nem desfeita, então só chame quando o usuário tiver pedido para enviar uma resposta específica — nunca para rascunhar, testar ou conferir a formatação. Para contexto só da equipe, use add-ticket-note."
+            ],
             "Send a reply to the selected ticket.": [
                 "Envie uma resposta ao ticket selecionado."
             ],
@@ -16691,6 +17030,9 @@
             ],
             "Send an email to the contact": [
                 "Envie um e-mail ao contato"
+            ],
+            "Send an invoice to the customer": [
+                "Enviar uma fatura ao cliente"
             ],
             "Send and receive WhatsApp messages directly from your contact details with DoubleScale Pro.": [
                 "Envie e receba mensagens de WhatsApp diretamente dos detalhes do seu contato com o DoubleScale Pro."
@@ -17619,6 +17961,9 @@
             "Square corners": [
                 "Cantos quadrados"
             ],
+            "Square hosted checkout — credentials in Integrations → Square.": [
+                "Checkout hospedado Square — credenciais em Integrações → Square."
+            ],
             "SSL is required for login.": [
                 "SSL é obrigatório para login."
             ],
@@ -17681,6 +18026,9 @@
             ],
             "Start here. Returns who you are, which DoubleScale modules are active on this site, which tools you can actually call, and the site currency and timezone. Modules that are switched off are absent from the list — their data is unavailable, not empty.": [
                 "Comece aqui. Retorna quem você é, quais módulos DoubleScale estão ativos neste site, quais ferramentas você pode chamar, e a moeda e o fuso do site. Módulos desligados não entram na lista — os dados estão indisponíveis, não vazios."
+            ],
+            "Start here. Returns who you are, which DoubleScale modules are active on this site, which tools you can actually call, and the site currency and timezone. Modules that are switched off are absent from the list — their data is unavailable, not empty. Some tools write records or email customers; this call only describes what is available.": [
+                "Comece aqui. Retorna quem você é, quais módulos do DoubleScale estão ativos neste site, quais ferramentas você realmente pode chamar, e a moeda e o fuso horário do site. Módulos desligados não aparecem na lista — os dados deles estão indisponíveis, não vazios. Algumas ferramentas gravam registros ou enviam e-mail aos clientes; esta chamada só descreve o que está disponível."
             ],
             "Start managing your CRM on the go!": [
                 "Comece a gerenciar seu CRM em qualquer lugar!"
@@ -18156,6 +18504,9 @@
             "Tags updated: added %1$s, removed %2$s": [
                 "Tags atualizadas: adicionadas %1$s, removidas %2$s"
             ],
+            "Take contacts off lists. The list itself is not deleted. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing.": [
+                "Retire contatos das listas. A lista em si não é excluída. Forneça exatamente um de: contact_id, contact_ids ou filter. Defina dry_run para pré-visualizar sem gravar."
+            ],
             "Target Products": [
                 "Produtos Alvo"
             ],
@@ -18534,6 +18885,9 @@
             "The automation ID.": [
                 "O ID da automação."
             ],
+            "The batch is empty. Provide at least one row.": [
+                "O lote está vazio. Forneça pelo menos uma linha."
+            ],
             "The booking has been automatically cancelled because the payment failed.": [
                 "O agendamento foi cancelado automaticamente porque o pagamento falhou."
             ],
@@ -18668,6 +19022,9 @@
             ],
             "The field \"%s\" is required.": [
                 "O campo \"%s\" é obrigatório."
+            ],
+            "The filter matched no records.": [
+                "O filtro não correspondeu a nenhum registro."
             ],
             "The following related records will also be deleted or unlinked:": [
                 "Os seguintes registros relacionados também serão excluídos ou desvinculados:"
@@ -18903,6 +19260,9 @@
             "This availability is used by some events and can not be deleted": [
                 "Esta disponibilidade é usada por alguns eventos e não pode ser excluída"
             ],
+            "This batch has %2$d rows; the limit is %1$d. Split it into smaller batches and retry.": [
+                "Este lote tem %2$d linhas; o limite é %1$d. Divida em lotes menores e tente de novo."
+            ],
             "This block is a Pro feature. Please install and activate the Pro version of the plugin to use it.": [
                 "Este bloco é um recurso Pro. Instale e ative a versão Pro do plugin para usá-lo."
             ],
@@ -19002,6 +19362,9 @@
             "This file type is not allowed.": [
                 "Este tipo de arquivo não é permitido."
             ],
+            "This filter matches %2$d rows; the limit is %1$d. Call again with dry_run to confirm, then split into smaller batches.": [
+                "Este filtro corresponde a %2$d linhas; o limite é %1$d. Chame de novo com dry_run para confirmar e depois divida em lotes menores."
+            ],
             "This goal requires %s to be installed and activated.": [
                 "Esta meta exige que %s esteja instalado e ativado."
             ],
@@ -19035,6 +19398,9 @@
             "This invoice must be approved before it can be sent. Use Submit for Approval first.": [
                 "Esta fatura deve ser aprovada antes de ser enviada. Use Enviar para Aprovação primeiro."
             ],
+            "This invoice's contact has no email address, so there is nobody to send it to.": [
+                "O contato desta fatura não tem endereço de e-mail, então não há para quem enviá-la."
+            ],
             "This is a bulk workflow export. Please use the Import button and select the bulk export file.": [
                 "Esta é uma exportação em massa de fluxo de trabalho. Use o botão Importar e selecione o arquivo de exportação em massa."
             ],
@@ -19049,6 +19415,9 @@
             ],
             "This is an example of a meeting you would have with a potential customer to demonstrate your product.": [
                 "Este é um exemplo de reunião que você teria com um cliente em potencial para demonstrar seu produto."
+            ],
+            "This is the visible text in your message. It does not change the link trigger name in settings.": [
+                "Este é o texto visível na sua mensagem. Ele não altera o nome do acionador de link nas configurações."
             ],
             "This is used to identify the account in the connection list.": [
                 "Isso é usado para identificar a conta na lista de conexões."
@@ -19116,6 +19485,9 @@
             "This proposal must be approved before it can be sent. Use Submit for Approval first.": [
                 "Esta proposta deve ser aprovada antes de ser enviada. Use Enviar para Aprovação primeiro."
             ],
+            "This proposal's contact has no email address, so there is nobody to send it to.": [
+                "O contato desta proposta não tem endereço de e-mail, então não há para quem enviá-la."
+            ],
             "This removes every row in the SMTP email log for this site. It cannot be undone.": [
                 "Isso remove todas as linhas do log de e-mail SMTP deste site. Não pode ser desfeito."
             ],
@@ -19134,8 +19506,14 @@
             "This step cannot be duplicated.": [
                 "Esta etapa não pode ser duplicada."
             ],
+            "This step cannot be enabled or disabled.": [
+                "Esta etapa não pode ser ativada nem desativada."
+            ],
             "This step does not support analytics": [
                 "Esta etapa não suporta análise"
+            ],
+            "This target matches %1$d rows; the write limit is %2$d. Split it into smaller batches (contact_ids, or a narrower filter) before calling without dry_run.": [
+                "Este alvo corresponde a %1$d linhas; o limite de gravação é %2$d. Divida em lotes menores (contact_ids ou um filtro mais restrito) antes de chamar sem dry_run."
             ],
             "This template has no content to export.": [
                 "Este template não tem conteúdo para exportar."
@@ -19148,6 +19526,9 @@
             ],
             "This time slot has just been booked. Please choose another.": [
                 "Este horário acabou de ser agendado. Escolha outro."
+            ],
+            "This tool does not support filter targeting.": [
+                "Esta ferramenta não oferece suporte a targeting por filter."
             ],
             "This trigger requires %s to be installed and activated.": [
                 "Este gatilho exige que %s esteja instalado e ativado."
@@ -19710,6 +20091,9 @@
             "Tuesday": [
                 "Terça"
             ],
+            "Turn On": [
+                "Ativar"
+            ],
             "Turn optional features on or off. Parent modules can include sub-features you control separately.": [
                 "Ative ou desative recursos opcionais. Módulos pai podem incluir sub-recursos que você controla separadamente."
             ],
@@ -19863,6 +20247,9 @@
             "unknown": [
                 "desconhecido"
             ],
+            "Unknown %1$s ids: %2$s. Call list-contact-segments for ids that exist.": [
+                "Ids de %1$s desconhecidos: %2$s. Chame list-contact-segments para ids que existem."
+            ],
             "Unknown Action": [
                 "Ação Desconhecida"
             ],
@@ -20001,6 +20388,9 @@
             "Update a contact": [
                 "Atualizar um contato"
             ],
+            "Update a support ticket": [
+                "Atualizar um ticket de suporte"
+            ],
             "Update an existing template": [
                 "Atualizar um template existente"
             ],
@@ -20009,6 +20399,9 @@
             ],
             "Update blank fields": [
                 "Atualizar campos em branco"
+            ],
+            "Update contacts in bulk": [
+                "Atualizar contatos em massa"
             ],
             "Update existing contact": [
                 "Atualizar contato existente"
@@ -20192,6 +20585,9 @@
             ],
             "Use custom fields in contact records, automations, and merge tags": [
                 "Use campos personalizados em registros de contato, automações e merge tags"
+            ],
+            "Use default (%s)": [
+                "Usar padrão (%s)"
             ],
             "Use it to add emails, notes, or tasks that keep your contact flow organized and proactive.": [
                 "Use-o para adicionar e-mails, notas ou tarefas que mantêm seu fluxo de contato organizado e proativo."
@@ -20841,6 +21237,9 @@
             "When customers submit through the portal or email, their tickets will appear here.": [
                 "Quando os clientes enviarem pelo portal ou e-mail, os tickets deles aparecerão aqui."
             ],
+            "When enabled, CRM events will trigger push notifications to mobile devices to configure push notifications for the DoubleScale mobile app.": [
+                "Quando ativado, eventos do CRM dispararão notificações push em dispositivos móveis para configurar o push do app DoubleScale."
+            ],
             "When enabled, CRM events will trigger push notifications to mobile devices.": [
                 "Quando ativado, eventos do CRM disparam notificações push para dispositivos móveis."
             ],
@@ -21243,6 +21642,9 @@
             "You do not have permission to read this availability.": [
                 "Você não tem permissão para ler esta disponibilidade."
             ],
+            "You do not have permission to reassign tickets.": [
+                "Você não tem permissão para reatribuir tickets."
+            ],
             "You do not have permission to reschedule this booking.": [
                 "Você não tem permissão para remarcar este agendamento."
             ],
@@ -21272,6 +21674,12 @@
             ],
             "You have been successfully unsubscribed from our mailing list. We're sorry to see you go, but we respect your decision.": [
                 "Sua inscrição na nossa lista de e-mails foi cancelada com sucesso. Sentimos muito por você ir embora, mas respeitamos sua decisão."
+            ],
+            "You have no notification categories with the in-app bell switched on, so nothing is counted here. Turn the bell on in Settings → Notifications to collect them.": [
+                "Você não tem categorias de notificação com o sino no app ligado, então nada é contado aqui. Ligue o sino em Configurações → Notificações para coletá-las."
+            ],
+            "You have no notification categories with the in-app bell switched on, so nothing is listed here. Turn the bell on in Settings → Notifications to collect them.": [
+                "Você não tem categorias de notificação com o sino no app ligado, então nada é listado aqui. Ligue o sino em Configurações → Notificações para coletá-las."
             ],
             "You have not created any availabilities yet.": [
                 "Você ainda não criou nenhuma disponibilidade."
@@ -21317,6 +21725,9 @@
             ],
             "You must be logged in to view the calendar.": [
                 "Você precisa estar logado para ver o calendário."
+            ],
+            "You need a DoubleScale role to create an MCP API key.": [
+                "Você precisa de uma função DoubleScale para criar uma chave de API MCP."
             ],
             "You received this notification from Plugin.": [
                 "Você recebeu esta notificação do Plugin."
@@ -21435,6 +21846,9 @@
             "Your List was successfully added — check it out!": [
                 "Sua Lista foi adicionada com sucesso — confira!"
             ],
+            "Your MCP API keys": [
+                "Suas chaves de API MCP"
+            ],
             "Your meeting has been Scheduled": [
                 "Sua reunião foi Agendada"
             ],
@@ -21443,6 +21857,9 @@
             ],
             "Your name": [
                 "Seu nome"
+            ],
+            "Your own notifications, newest first, with whether each has been read. Always scoped to you — there is no way to read another user's notifications, and no user id to pass. Only notifications for categories you have the bell enabled on appear, matching the dashboard exactly. Use mark-notifications-read to clear unread ones.": [
+                "As suas próprias notificações, as mais recentes primeiro, com indicação se cada uma foi lida. Sempre restrito a você — não há como ler as notificações de outro usuário, e nenhum user id para passar. Só aparecem notificações das categorias em que você tem o sino ativado, exatamente como no painel. Use mark-notifications-read para limpar as não lidas."
             ],
             "your payment history and transaction details.": [
                 "seu histórico de pagamentos e detalhes de transações."

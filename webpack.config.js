@@ -32,11 +32,7 @@ const portalCreditNoteDetailAlias = fs.existsSync(proPortalCreditNoteDetail)
 	: path.resolve(__dirname, 'src/renderer/portal/credit-note-detail-stub.tsx');
 
 const proSrcRoot = path.resolve(__dirname, '../doublescale-pro/src');
-const proNotificationBell = path.resolve(
-	proSrcRoot,
-	'components/notification-bell/index.tsx'
-);
-const portalProAliases = fs.existsSync(proNotificationBell)
+const portalProAliases = fs.existsSync(proSrcRoot)
 	? {
 			'@pro/hooks': path.join(proSrcRoot, 'hooks'),
 			'@pro/services': path.join(proSrcRoot, 'services'),
@@ -460,15 +456,6 @@ const portalRendererConfig = {
 		alias: {
 			...sharedAlias,
 			...portalProAliases,
-			// When Pro is installed, swap the portal free bell for the shared admin component.
-			...(fs.existsSync(proNotificationBell)
-				? {
-						[path.resolve(
-							__dirname,
-							'src/renderer/portal/shared/notification-bell-free.tsx'
-						)]: proNotificationBell,
-					}
-				: {}),
 			// The Tickets section reuses the support ticket views, which import
 			// the Pro custom-fields block through this alias (free stub when Pro
 			// is absent). Mirror the support renderer config so it resolves here

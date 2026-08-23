@@ -331,6 +331,7 @@ export { default as NovicesIcon } from './novices';
 export { default as ProposalsIcon } from './proposals';
 export { default as InvoicesIcon } from './invoices';
 export { default as AttachmentsIcon } from './attachments';
+export { default as AttachmentFileIcon } from './attachment-file';
 export { default as EmptyPaymentsIcon } from './empty-payments';
 export { default as EmptyTaxesIcon } from './empty-taxes';
 export { default as EmptyContractTypesIcon } from './empty-contract-types';

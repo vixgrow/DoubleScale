@@ -4,19 +4,28 @@
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Calendar, Circle, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { InboxIcon } from '@/components/support';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { InboxIcon, PriorityPill } from '@/components/support';
 import {
 	PRIORITY_LABELS,
+	STATUS_LABELS,
 	TICKET_STATUSES,
 } from '@/constants/support';
-import type { TicketPriority, TicketStatus } from '@/constants/support';
+import type { TicketStatus } from '@/constants/support';
 import type { TicketFilters } from '@/types/support';
 
 import { usePortalTickets } from '../api';
 import type { PortalConfig, PortalTicket } from '../types';
+import { CalendarIcon, GradientTicketsIcon } from '@doublescale/components';
 
 interface Props {
 	config: PortalConfig;
@@ -68,32 +77,6 @@ const TicketList = ({
 		return searchedRows.filter((t) => t.status === statusFilter);
 	}, [searchedRows, statusFilter]);
 
-	const statusCounts = useMemo(() => {
-		const counts: Record<'all' | TicketStatus, number> = {
-			all: searchedRows.length,
-			open: 0,
-			pending: 0,
-			resolved: 0,
-			closed: 0,
-		};
-		for (const row of searchedRows) {
-			counts[row.status] += 1;
-		}
-		return counts;
-	}, [searchedRows]);
-
-	const filterOptions: Array<{ value: 'all' | TicketStatus; label: string }> =
-		[
-			{
-				value: 'all',
-				label: `${__('All', 'doublescale')} (${statusCounts.all})`,
-			},
-			...TICKET_STATUSES.map((s) => ({
-				value: s,
-				label: `${s.charAt(0).toUpperCase() + s.slice(1)} (${statusCounts[s]})`,
-			})),
-		];
-
 	const listHeader = !isPane ? (
 		<header className="mb-4 flex flex-wrap items-center justify-between gap-3">
 			<div>
@@ -114,9 +97,9 @@ const TicketList = ({
 
 	const listBody = (
 		<>
-			<div className="px-4 pt-4">
-				<div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-muted-foreground">
-					<Search width={14} height={14} />
+			<div className="flex flex-col gap-2 py-4 mx-4 sm:flex-row sm:items-center border-b border-border">
+				<div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-muted-foreground">
+					<Search width={14} height={14} className="shrink-0" />
 					<input
 						type="text"
 						value={query}
@@ -125,26 +108,34 @@ const TicketList = ({
 						className="w-full border-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
 					/>
 				</div>
-			</div>
-
-			<div className="flex flex-wrap gap-2 px-4 py-3">
-				{filterOptions.map((opt) => (
-					<button
-						type="button"
-						key={opt.value}
-						onClick={() => setStatusFilter(opt.value)}
-						className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-							statusFilter === opt.value
-								? 'bg-[#EEF0FF] text-[#2D3282]'
-								: 'bg-white border border-border text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-						}`}
+				<Select
+					value={statusFilter}
+					onValueChange={(value) =>
+						setStatusFilter(value as 'all' | TicketStatus)
+					}
+				>
+					<SelectTrigger
+						aria-label={__('Filter by status', 'doublescale')}
+						className="h-9 w-auto shrink-0 min-w-[8.5rem] bg-white"
 					>
-						{opt.label}
-					</button>
-				))}
+						<SelectValue
+							placeholder={__('All Statuses', 'doublescale')}
+						/>
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">
+							{__('All Statuses', 'doublescale')}
+						</SelectItem>
+						{TICKET_STATUSES.map((status) => (
+							<SelectItem key={status} value={status}>
+								{STATUS_LABELS[status]}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 
-			<div className={`min-h-0 flex-1 px-3 pb-4 ${isPane ? 'overflow-y-auto' : ''}`}>
+			<div className={`min-h-0 flex-1 p-4 ${isPane ? 'overflow-y-auto' : ''}`}>
 				{loading && (
 					<p className="px-1 text-sm text-muted-foreground">
 						{__('Loading…', 'doublescale')}
@@ -169,7 +160,7 @@ const TicketList = ({
 				)}
 
 				{!loading && visibleRows.length > 0 && (
-					<ul className="space-y-3">
+					<ul className="space-y-4">
 						{visibleRows.map((t) => (
 							<TicketRow
 								key={t.id}
@@ -198,33 +189,11 @@ const TicketList = ({
 	);
 };
 
-const PRIORITY_BADGE: Record<
-	TicketPriority,
-	{ className: string }
-> = {
-	urgent: {
-
-		className: 'bg-[#FEE2E2] text-[#DC2626]',
-	},
-	high: {
-
-		className: 'bg-[#FAEADF] text-[#CB5301]',
-	},
-	normal: {
-
-		className: 'bg-[#EFF6FF] text-[#2563EB]',
-	},
-	low: {
-
-		className: 'bg-[#ECFDF3] text-[#16A34A]',
-	},
-};
-
-const PRIORITY_ROW_ICON: Record<TicketPriority, string> = {
-	normal: 'text-[#0D9DFC]',
-	low: 'text-[#16A34A]',
-	high: 'text-[#CB5301]',
-	urgent: 'text-[#DC2626]',
+const STATUS_BADGE: Record<TicketStatus, string> = {
+	open: 'bg-[#D9E9F3] text-[#0D9DFC]',
+	pending: 'bg-[#FAEADF] text-[#CB5301]',
+	resolved: 'bg-[#E4FAEC] text-[#008230]',
+	closed: 'bg-[#E4FAEC] text-[#008230]',
 };
 
 const TicketRow = ({
@@ -236,30 +205,34 @@ const TicketRow = ({
 	onOpen: () => void;
 	selected?: boolean;
 }) => {
-	const priorityBadge = PRIORITY_BADGE[ticket.priority] ?? PRIORITY_BADGE.normal;
+	const showUrgent = ticket.priority === 'urgent';
+	const badgeClass = showUrgent
+		? 'bg-[#FBE8E8] text-[#C30A0A]'
+		: (STATUS_BADGE[ticket.status] ?? 'bg-muted text-muted-foreground');
+	const badgeLabel = showUrgent
+		? PRIORITY_LABELS.urgent
+		: (STATUS_LABELS[ticket.status] ?? ticket.status);
 
 	return (
 		<li>
 			<button
 				type="button"
 				onClick={onOpen}
-				className={`flex w-full flex-col rounded-xl border p-3.5 text-left transition ${
+				className={`flex w-full flex-col rounded-xl p-4 text-left transition ${
 					selected
-						? 'border-[#C7D2FE] border-l-4 border-l-[#2D3282] bg-[#EEF0FF]'
-						: 'border-border bg-white hover:border-[#C7D2FE] hover:bg-[#F8F9FF]'
+						? 'border-l-4 border-l-primary bg-[#EEEEFF]'
+						: 'border border-border bg-white hover:border-transparent hover:bg-[#F8F9FF]'
 				}`}
 			>
 				<div className="flex items-center justify-between gap-2">
 					<span className="text-sm font-semibold text-foreground">
 						ID:#{ticket.id}
 					</span>
-
-						<span
-							className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityBadge.className}`}
-						>
-							{PRIORITY_LABELS[ticket.priority]}
-						</span>
-
+					<span
+						className={`rounded-lg px-2 py-1 text-xs font-semibold ${badgeClass}`}
+					>
+						{badgeLabel}
+					</span>
 				</div>
 
 				<p className="m-0 mt-2 truncate text-sm text-foreground">
@@ -269,18 +242,9 @@ const TicketRow = ({
 				<div className="my-3 h-px bg-border" />
 
 				<div className="flex items-center justify-between gap-2">
-					<span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-						<Circle
-							width={14}
-							height={14}
-							className={
-								PRIORITY_ROW_ICON[ticket.priority] ?? 'text-[#0D9DFC]'
-							}
-						/>
-						{PRIORITY_LABELS[ticket.priority]}
-					</span>
-					<span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-						<Calendar width={12} height={12} />
+					<PriorityPill priority={ticket.priority} />
+					<span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+						<CalendarIcon width={20} height={20} />
 						{formatListDate(ticket.updated_at || ticket.created_at)}
 					</span>
 				</div>
@@ -298,8 +262,7 @@ const EmptyState = ({
 	onClearFilter: () => void;
 	onCompose: () => void;
 }) => (
-	<div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-background py-10 text-center">
-		<InboxIcon width={32} height={32} className="mb-3 text-muted-foreground" />
+	<div className="flex flex-col items-center justify-center py-10 text-center">
 		<p className="m-0 mb-1 text-base font-medium">
 			{hasFilter
 				? __('No tickets match this filter', 'doublescale')
@@ -311,7 +274,7 @@ const EmptyState = ({
 				: __('Submit your first ticket and our team will get back to you.', 'doublescale')}
 		</p>
 		{hasFilter ? (
-			<Button variant="outline" size="sm" onClick={onClearFilter}>
+			<Button variant="secondaryDeepBlue" size="sm" onClick={onClearFilter}>
 				{__('Show all tickets', 'doublescale')}
 			</Button>
 		) : (

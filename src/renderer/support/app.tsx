@@ -119,15 +119,16 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 	);
 
 	return (
-		<div className="doublescale-support-portal mx-auto w-full max-w-6xl text-base">
-			<div className="flex h-[min(82vh,700px)] flex-col overflow-hidden rounded-2xl bg-white support-portal-panel-shadow">
-				<header className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6">
+		<div className="doublescale-support-portal w-full min-w-0 overflow-x-hidden text-base">
+			<div className="flex h-[min(92vh,1100px)] min-h-0 flex-col overflow-hidden">
+				<header className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3">
 					<h2 className="m-0 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
 						{__('My Support Tickets', 'doublescale')}
 					</h2>
 					<Button
-						size="sm"
-						className="rounded-lg bg-[#2D3282] px-4 hover:bg-[#2D3282]/90"
+					    variant="default"
+						size="lg"
+						className=""
 						onClick={() => setShowCompose(true)}
 					>
 						<Plus width={14} height={14} className="mr-1.5" />
@@ -135,16 +136,16 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 					</Button>
 				</header>
 
-				<div className="min-h-0 flex-1 bg-[#F7F8FA] p-4 sm:p-5">
-					<div className="flex h-full min-h-0 gap-4">
+				<div className="min-h-0 flex-1 overflow-hidden">
+					<div className="flex h-full min-h-0 gap-4 overflow-hidden">
 						<div
-							className={`support-portal-panel-shadow h-full min-h-0 w-full shrink-0 rounded-xl lg:w-[min(100%,360px)] lg:max-w-[360px] ${
+							className={`support-portal-panel-shadow h-full min-h-0 w-full shrink-0 overflow-hidden rounded-xl lg:w-[min(100%,360px)] lg:max-w-[360px] ${
 								mobileShowDetail
 									? 'hidden lg:block'
 									: 'block'
 							}`}
 						>
-							<aside className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white">
+							<aside className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA]">
 								<TicketList
 									key={listVersion}
 									config={config}
@@ -158,13 +159,13 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 						</div>
 
 						<div
-							className={`support-portal-panel-shadow h-full min-h-0 min-w-0 flex-1 rounded-xl ${
+							className={`support-portal-panel-shadow h-full min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-[#F7F8FA] ${
 								mobileShowDetail ? 'block' : 'hidden lg:block'
 							}`}
 						>
-							<main className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white">
+							<main className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-xl">
 							{selectedTicketId ? (
-								<div className="flex h-full min-h-0 w-full flex-col">
+								<div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden">
 									<TicketDetail
 										key={selectedTicketId}
 										ticketId={selectedTicketId}

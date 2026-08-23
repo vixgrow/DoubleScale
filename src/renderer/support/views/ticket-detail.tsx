@@ -22,6 +22,7 @@ import {
 import {
 	AttachmentUploader,
 	AttachmentList,
+	PriorityPill,
 	toPendingAttachment,
 	revokePendingPreviews,
 	removePendingByHash,
@@ -85,7 +86,13 @@ const TicketDetail = ({
 
 	if (ticket.loading) {
 		return (
-			<div className={isPane ? 'support-portal-ticket-detail' : shellClass(false)}>
+			<div
+				className={
+					isPane
+						? 'support-portal-ticket-detail'
+						: shellClass(false)
+				}
+			>
 				<p className="p-5 text-sm text-muted-foreground">
 					{__('Loading ticket…', 'doublescale')}
 				</p>
@@ -95,7 +102,13 @@ const TicketDetail = ({
 
 	if (ticket.error || !ticket.data) {
 		return (
-			<div className={isPane ? 'support-portal-ticket-detail' : shellClass(false)}>
+			<div
+				className={
+					isPane
+						? 'support-portal-ticket-detail'
+						: shellClass(false)
+				}
+			>
 				{!isPane && (
 					<Button variant="outline" size="sm" onClick={onBack}>
 						<ArrowLeft width={14} height={14} className="mr-1" />
@@ -116,11 +129,11 @@ const TicketDetail = ({
 		<div
 			className={
 				isPane
-					? 'support-portal-ticket-detail'
-					: 'support-portal-ticket-detail rounded-xl border border-border bg-card p-6 shadow-sm'
+					? 'support-portal-ticket-detail flex h-full min-h-0 flex-col overflow-hidden'
+					: 'support-portal-ticket-detail flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA] p-6 shadow-sm'
 			}
 		>
-			<header className="support-portal-ticket-detail__header border-b border-border bg-[#F7F8FA] px-5 py-4">
+			<header className="support-portal-ticket-detail__header shrink-0 border-b border-border mx-4 py-4">
 				{isPane && showMobileBack && (
 					<Button
 						variant="outline"
@@ -139,21 +152,25 @@ const TicketDetail = ({
 					</Button>
 				)}
 				<div
-					className={`flex flex-wrap items-start justify-between gap-3 ${!isPane ? 'mt-4' : ''}`}
+					className={`flex flex-wrap items-center justify-between gap-3 ${!isPane ? 'mt-4' : ''}`}
 				>
 					<div className="min-w-0 flex-1">
-						<p className="m-0 text-xs font-medium text-[#667085]">
+						<p className="m-0 text-sm font-semibold leading-[18px] text-[#6B6C76]">
 							ID:#{t.id}
 						</p>
 						<h2 className="m-0 mt-1 text-base font-semibold leading-snug text-[#09090B]">
 							{t.title}
 						</h2>
 					</div>
-					<TicketHeaderBadges priority={t.priority} />
+					<TicketHeaderPriority priority={t.priority} />
 				</div>
 			</header>
 
-			<section className="support-portal-ticket-detail__conversation support-portal-conversation-scroll px-5 py-4">
+			{/* Conversation scrolls; composer stays pinned under the header. */}
+			<section
+				className="support-portal-ticket-detail__conversation support-portal-conversation-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-5 py-4"
+				aria-label={__('Conversation', 'doublescale')}
+			>
 				{conv.loading && (
 					<p className="text-sm text-muted-foreground">
 						{__('Loading…', 'doublescale')}
@@ -167,7 +184,7 @@ const TicketDetail = ({
 				)}
 
 				{!conv.loading && conv.data && conv.data.data.length > 0 && (
-					<ul className="space-y-4">
+					<ul className="m-0 flex list-none flex-col gap-4 p-0">
 						{conv.data.data.map((item) => (
 							<ConversationBubble
 								key={item.id}
@@ -183,9 +200,9 @@ const TicketDetail = ({
 				)}
 			</section>
 
-			<section className="support-portal-ticket-detail__composer px-5 py-4">
+			<section className="support-portal-ticket-detail__composer shrink-0 px-4 py-3">
 				{isClosed && (
-					<p className="mb-3 rounded border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+					<p className="mb-3 rounded-lg border border-border bg-[#F7F8FA] p-3 text-sm text-muted-foreground">
 						{__(
 							'This ticket is closed. Sending a reply will re-open it.',
 							'doublescale'
@@ -196,20 +213,17 @@ const TicketDetail = ({
 					{__('Message', 'doublescale')}
 					<span className="text-destructive"> *</span>
 				</p>
-				<div className="overflow-hidden rounded-lg border border-border bg-white [&_.editor-inner]:min-h-[80px] [&_.editor-input]:min-h-[80px]">
+				<div className="support-portal-reply-editor overflow-hidden rounded-lg border border-border bg-white">
 					<SupportRichText
 						message={draft}
 						onChange={setDraft}
-						placeholder={__(
-							'Write your reply here…',
-							'doublescale'
-						)}
+						placeholder={__('Write your reply here…', 'doublescale')}
 					/>
 				</div>
 				{sendError && (
 					<p className="mt-2 text-sm text-destructive">{sendError}</p>
 				)}
-				<div className="mt-3 flex items-end justify-between gap-3">
+				<div className="mt-2 flex items-end justify-between gap-3">
 					<AttachmentUploader
 						pending={pendingAttachments}
 						uploading={uploading}
@@ -264,64 +278,34 @@ const shellClass = (isPane: boolean) =>
 		? 'h-full min-h-0'
 		: 'rounded-xl border border-border bg-card p-6 shadow-sm';
 
-const PRIORITY_BADGE: Record<
-	TicketPriority,
-	{ className: string; show: boolean }
-> = {
-	urgent: {
-		show: true,
-		className: 'bg-[#FEE2E2] text-[#DC2626]',
-	},
-	high: {
-		show: true,
-		className: 'bg-[#FAEADF] text-[#CB5301]',
-	},
-	normal: {
-		show: false,
-		className: 'bg-[#EFF6FF] text-[#2563EB]',
-	},
-	low: {
-		show: false,
-		className: 'bg-[#ECFDF3] text-[#16A34A]',
-	},
+const PRIORITY_BADGE: Record<TicketPriority, string> = {
+	urgent: 'bg-[#FEE2E2] text-[#DC2626]',
+	high: 'bg-[#FAEADF] text-[#CB5301]',
+	normal: 'bg-[#EFF6FF] text-[#2563EB]',
+	low: 'bg-[#ECFDF3] text-[#16A34A]',
 };
 
-const PRIORITY_ROW_ICON: Record<TicketPriority, string> = {
-	normal: 'text-[#0D9DFC]',
-	low: 'text-[#16A34A]',
-	high: 'text-[#CB5301]',
-	urgent: 'text-[#DC2626]',
-};
-
-const TicketHeaderBadges: FC<{ priority: TicketPriority }> = ({ priority }) => {
-	const priorityBadge = PRIORITY_BADGE[priority] ?? PRIORITY_BADGE.normal;
-	const circleLabel = priorityBadge.show
-		? PRIORITY_LABELS.normal
-		: PRIORITY_LABELS[priority];
-
-	return (
-		<div className="flex shrink-0 flex-wrap items-center gap-3">
-			{priorityBadge.show && (
+/** Figma header: high/urgent show a colored pill + Normal circle; else PriorityPill. */
+const TicketHeaderPriority: FC<{ priority: TicketPriority }> = ({
+	priority,
+}) => {
+	if (priority === 'high' || priority === 'urgent') {
+		return (
+			<div className="flex shrink-0 flex-wrap items-center gap-3">
 				<span
-					className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityBadge.className}`}
+					className={`rounded-md px-2 py-0.5 text-xs font-semibold ${PRIORITY_BADGE[priority]}`}
 				>
 					{PRIORITY_LABELS[priority]}
 				</span>
-			)}
-			<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#09090B]">
-				<Circle
-					width={14}
-					height={14}
-					className={
-						priorityBadge.show
-							? PRIORITY_ROW_ICON.normal
-							: (PRIORITY_ROW_ICON[priority] ?? PRIORITY_ROW_ICON.normal)
-					}
-				/>
-				{circleLabel}
-			</span>
-		</div>
-	);
+				<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#09090B]">
+					<Circle width={14} height={14} className="text-[#0D9DFC]" />
+					{PRIORITY_LABELS.normal}
+				</span>
+			</div>
+		);
+	}
+
+	return <PriorityPill priority={priority} />;
 };
 
 const AvatarInitial: FC<{ name: string }> = ({ name }) => (
@@ -329,6 +313,9 @@ const AvatarInitial: FC<{ name: string }> = ({ name }) => (
 		{name.charAt(0).toUpperCase() || '?'}
 	</div>
 );
+
+const bubbleHtmlClass =
+	'prose prose-sm max-w-none break-words text-[#09090B] [&_*]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto';
 
 const ConversationBubble = ({
 	item,
@@ -348,7 +335,7 @@ const ConversationBubble = ({
 
 	if (isEvent) {
 		return (
-			<li className="flex items-center gap-2 px-3 py-1 text-xs text-muted-foreground">
+			<li className="flex items-center gap-2 px-1 py-1 text-xs text-muted-foreground">
 				<span className="h-px flex-1 bg-border" />
 				<span className="italic">{describeEvent(item)}</span>
 				<span className="h-px flex-1 bg-border" />
@@ -356,44 +343,46 @@ const ConversationBubble = ({
 		);
 	}
 
+	// Client (self) reply — right-aligned grey bubble (portal Figma).
 	if (isSelf) {
 		return (
-			<li className="flex flex-col items-end">
-				<p className="mb-1 max-w-[78%] text-right text-xs font-semibold text-[#09090B]">
+			<li className="flex w-full flex-col items-end">
+				<p className="mb-1 max-w-[min(100%,28rem)] text-right text-xs font-semibold text-[#09090B]">
 					{authorLabel}
 				</p>
-				<div className="max-w-[78%] rounded-lg bg-[#EBEEF2] px-4 py-3">
+				<div className="max-w-[min(100%,28rem)] rounded-lg bg-[#EBEEF2] px-4 py-3">
 					<div
-						className="prose prose-sm max-w-none text-[#09090B]"
+						className={bubbleHtmlClass}
 						dangerouslySetInnerHTML={{ __html: content }}
 					/>
 					<AttachmentList
 						attachments={item.attachments}
 						accentClassName="text-primary"
 					/>
-					<p className="mt-1 text-right text-xs text-[#667085]">{time}</p>
+					<p className="mt-2 text-right text-xs text-[#667085]">{time}</p>
 				</div>
 			</li>
 		);
 	}
 
+	// Support / admin — left-aligned white bordered bubble.
 	return (
-		<li className="flex justify-start gap-2.5">
+		<li className="flex w-full justify-start gap-2.5">
 			<AvatarInitial name={authorLabel} />
-			<div className="max-w-[78%] min-w-0">
+			<div className="min-w-0 max-w-[min(100%,28rem)]">
 				<p className="mb-1 text-xs font-semibold text-[#09090B]">
 					{authorLabel}
 				</p>
-				<div className="rounded-lg border border-border/80 bg-white px-4 py-3">
+				<div className="rounded-lg border border-border bg-white px-4 py-3">
 					<div
-						className="prose prose-sm max-w-none text-[#09090B]"
+						className={bubbleHtmlClass}
 						dangerouslySetInnerHTML={{ __html: content }}
 					/>
 					<AttachmentList
 						attachments={item.attachments}
 						accentClassName="text-primary"
 					/>
-					<p className="mt-1 text-right text-xs text-[#667085]">{time}</p>
+					<p className="mt-2 text-right text-xs text-[#667085]">{time}</p>
 				</div>
 			</div>
 		</li>

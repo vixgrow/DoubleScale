@@ -3,7 +3,7 @@
 // host pages (via the `[doublescale_support_portal]` shortcode) and preflight
 // would reset the host theme's typography. Matches the booking renderer's
 // approach so both public surfaces feel consistent inside third-party themes.
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @tailwind components;
 @tailwind utilities;
@@ -52,13 +52,9 @@
 	--ring: 240 45% 41%;
 	--radius: 0.5rem;
 
-	font-family: theme('fontFamily.sans');
+	font-family: theme("fontFamily.sans");
 	color: hsl(var(--foreground));
 	-webkit-font-smoothing: antialiased;
-}
-
-.support-portal-panel-shadow {
-	box-shadow: 0px 4px 20px 0px rgba(59, 130, 246, 0.14);
 }
 
 .support-portal-ticket-detail {
@@ -68,30 +64,62 @@
 	max-height: 100%;
 	min-height: 0;
 	overflow: hidden;
-	background: #fff;
+	background: #f7f8fa;
 }
 
 .support-portal-ticket-detail__header {
 	flex: 0 0 auto;
+	background: #f7f8fa;
 }
 
 .support-portal-ticket-detail__conversation {
-	flex: 1 1 0;
+	flex: 1 1 auto;
 	min-height: 0;
-	max-height: 100%;
+	overflow-x: hidden;
 	overflow-y: auto;
+	padding: 1rem 1.25rem;
 	background: #f7f8fa;
+	-webkit-overflow-scrolling: touch;
 }
 
 .support-portal-ticket-detail__composer {
 	flex: 0 0 auto;
-	border-top: 1px solid hsl(var(--border));
 	background: #fff;
+	box-shadow: 0 5px 12px 0 rgba(69, 141, 199, 0.2);
+}
+
+.support-portal-reply-editor {
+	.email-body-editor .editor-container {
+		border: 0;
+		border-radius: 0;
+	}
+
+	.email-body-editor .editor-inner,
+	.email-body-editor .editor-input {
+		min-height: 72px;
+	}
+
+	.email-body-editor .editor-inner {
+		padding: 8px 10px;
+	}
+
+	.email-body-editor .editor-input {
+		padding: 8px 0;
+		font-size: 14px;
+	}
+
+	.email-body-editor .editor-placeholder {
+		top: 16px;
+		font-size: 14px;
+	}
+
+	.email-body-editor .editor-container > div:last-child {
+		display: none;
+	}
 }
 
 .support-portal-conversation-scroll {
 	overscroll-behavior: contain;
-	scrollbar-gutter: stable;
 	scrollbar-width: thin;
 	scrollbar-color: rgb(148 163 184 / 0.85) rgb(241 245 249 / 0.95);
 }

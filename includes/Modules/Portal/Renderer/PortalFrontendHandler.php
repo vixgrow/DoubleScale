@@ -6,8 +6,10 @@
  * hosts the Tickets, Bookings, Dashboard (and gated Documents) sections.
  * Generalised from {@see \DoubleScale\Modules\Support\Renderer\PortalFrontendHandler}:
  *
- *   - Shortcode-driven (does NOT hijack `template_redirect`), so it renders
- *     inline on whatever page the admin pasted the shortcode onto.
+ *   - Shortcode-driven on a normal WordPress page. On portal pages we optionally
+ *     bypass the theme shell (header/footer) via {@see maybe_render_canvas()} so
+ *     the SPA gets a clean full-page surface; filter
+ *     `doublescale_client_portal_use_canvas_template` to keep theme chrome.
  *   - Logged-out visitors see a login gate; support staff (an agent whose email
  *     is not also a contact) see a redirect notice; logged-in customers load the
  *     SPA bundle.
@@ -39,9 +41,67 @@ final class PortalFrontendHandler {
 	public function __construct() {
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 		add_filter( 'body_class', array( $this, 'add_body_class' ) );
+		add_action( 'template_redirect', array( $this, 'maybe_render_canvas' ), 0 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_login_styles' ) );
 		add_action( 'save_post_page', array( self::class, 'maybe_flush_portal_url_cache' ), 10, 1 );
+	}
+
+	/**
+	 * Render a minimal HTML shell (no theme header/footer) for portal pages.
+	 *
+	 * CSS alone cannot reliably hide every theme's header and footer markup.
+	 * Outputting the page ourselves — only wp_head, the post content (shortcode),
+	 * and wp_footer — keeps the portal clean on any theme without a separate
+	 * template file.
+	 *
+	 * @return void
+	 */
+	public function maybe_render_canvas(): void {
+		if ( ! $this->current_page_has_shortcode() ) {
+			return;
+		}
+
+		/**
+		 * Filter whether the Client Portal should bypass the theme shell.
+		 *
+		 * Return false to keep the theme's header/footer (e.g. when the shortcode
+		 * is embedded inside a marketing page that should keep site chrome).
+		 *
+		 * @param bool $use_canvas Whether to render the minimal canvas shell.
+		 */
+		if ( ! (bool) apply_filters( 'doublescale_client_portal_use_canvas_template', true ) ) {
+			return;
+		}
+
+		status_header( 200 );
+		nocache_headers();
+
+		?>
+		<!DOCTYPE html>
+		<html <?php language_attributes(); ?>>
+		<head>
+			<meta charset="<?php bloginfo( 'charset' ); ?>">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<?php wp_head(); ?>
+		</head>
+		<body <?php body_class( 'doublescale-client-portal-canvas' ); ?>>
+		<?php
+		if ( function_exists( 'wp_body_open' ) ) {
+			wp_body_open();
+		}
+
+		while ( have_posts() ) {
+			the_post();
+			the_content();
+		}
+
+		wp_footer();
+		?>
+		</body>
+		</html>
+		<?php
+		exit;
 	}
 
 	/**
@@ -134,7 +194,13 @@ final class PortalFrontendHandler {
 	 * @return void
 	 */
 	public function maybe_enqueue(): void {
-		if ( ! $this->should_load_portal_spa() || ! $this->current_page_has_shortcode() ) {
+		if ( ! $this->current_page_has_shortcode() ) {
+			return;
+		}
+
+		$this->enqueue_portal_chrome_styles();
+
+		if ( ! $this->should_load_portal_spa() ) {
 			return;
 		}
 
@@ -167,12 +233,20 @@ final class PortalFrontendHandler {
 
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( self::HANDLE );
+	}
 
-		// The portal app owns the whole page, so hide the theme's page title
-		// ("Client Portal") and collapse the large header gap above it so the
-		// app starts near the top. Scoped to the portal body class so every
-		// other page keeps the theme's default title + spacing.
-		wp_add_inline_style( self::HANDLE, $this->page_chrome_css() );
+	/**
+	 * Hide leftover theme chrome when the canvas template is bypassed or a theme
+	 * injects header/footer outside the normal template hierarchy.
+	 *
+	 * @return void
+	 */
+	private function enqueue_portal_chrome_styles(): void {
+		$version = defined( 'DOUBLESCALE_VERSION' ) ? \DOUBLESCALE_VERSION : '1.0.0';
+
+		wp_register_style( 'doublescale-client-portal-chrome', false, array(), $version );
+		wp_enqueue_style( 'doublescale-client-portal-chrome' );
+		wp_add_inline_style( 'doublescale-client-portal-chrome', $this->page_chrome_css() );
 	}
 
 	/**
@@ -191,18 +265,25 @@ final class PortalFrontendHandler {
 	private function page_chrome_css(): string {
 		$b = 'body.doublescale-client-portal-page ';
 
-		return $b . '.wp-block-post-title,'
+		return 'body.doublescale-client-portal-canvas{background:hsl(228 25% 97%);margin:0}'
+			. $b . '.wp-block-post-title,'
 			. $b . '.entry-title,'
 			. $b . '.page-title,'
 			. $b . '.entry-header,'
 			. $b . '.wp-site-blocks > header,'
 			. $b . 'header.wp-block-template-part,'
 			. $b . '.site-header,'
+			. $b . '#masthead,'
+			. $b . 'nav.navbar,'
+			. $b . '.elementor-location-header,'
 			. $b . '.wp-site-blocks > footer,'
 			. $b . 'footer.wp-block-template-part,'
-			. $b . '.site-footer{display:none!important}'
-			. $b . 'main{margin-top:0!important}'
-			. $b . 'main>.wp-block-group{padding-top:0!important}';
+			. $b . '.site-footer,'
+			. $b . '#colophon,'
+			. $b . '.elementor-location-footer{display:none!important}'
+			. $b . 'main{margin-top:0!important;padding-top:0!important}'
+			. $b . 'main>.wp-block-group{padding-top:0!important}'
+			. $b . '.entry-content,.page-content,.site-content{max-width:none!important;padding-left:0!important;padding-right:0!important}';
 	}
 
 	/**

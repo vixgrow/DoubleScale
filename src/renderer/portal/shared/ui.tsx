@@ -4,6 +4,17 @@
 
 import { __ } from '@wordpress/i18n';
 
+/** Inner cards inside the portal content shell (lists, stat tiles, etc.). */
+export const PORTAL_INNER_CARD =
+	'rounded-xl border border-border bg-[#f7f8fa]';
+
+/** Grey dashboard section panel (analytics, calendar, activity). */
+export const PORTAL_DASHBOARD_PANEL = `${PORTAL_INNER_CARD} p-5`;
+
+/** White tile inside a dashboard panel. */
+export const PORTAL_DASHBOARD_TILE =
+	'rounded-xl bg-white shadow-[0px_2px_12px_0px_rgba(59,130,246,0.08)]';
+
 export const Spinner = ({ label }: { label?: string }) => (
 	<div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
 		<span className="inline-block w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />

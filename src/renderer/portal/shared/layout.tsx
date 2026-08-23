@@ -10,7 +10,7 @@ import { PortalNavIcon } from './icons';
 
 /** Outer shell for every portal tab's main content. */
 const PORTAL_CONTENT_SHELL =
-	'rounded-[20px] border border-[#E8E8ED] bg-white p-5 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]';
+	'rounded-[20px] bg-white p-5 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]';
 
 interface NavItem {
 	slug: string;
@@ -152,9 +152,9 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 		: displayName;
 
 	return (
-		<div className="doublescale-client-portal rounded-2xl bg-[#F7F8FA] text-base text-foreground">
+		<div className="doublescale-client-portal overflow-x-hidden rounded-2xl bg-[#F7F8FA] text-base text-foreground">
 			<div className="mx-auto max-w-[93rem] px-4 py-6 sm:px-6 sm:py-8">
-				<header className="mb-6 flex items-center gap-4 rounded-[20px] border border-[#E8E8ED] bg-white p-4 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] sm:p-5">
+				<header className="mb-6 flex items-center gap-4 rounded-[20px] bg-white p-4 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] sm:p-5">
 					<div className="flex min-w-0 items-center gap-4">
 						<Avatar identity={identity} />
 						<div className="min-w-0">

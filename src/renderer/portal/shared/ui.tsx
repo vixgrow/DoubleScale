@@ -2,7 +2,10 @@
  * Small presentational helpers shared across portal sections.
  */
 
+import type { ReactNode } from 'react';
 import { __ } from '@wordpress/i18n';
+
+import { GradientActivitiesIcon } from '@doublescale/components';
 
 /** Inner cards inside the portal content shell (lists, stat tiles, etc.). */
 export const PORTAL_INNER_CARD =
@@ -25,14 +28,22 @@ export const Spinner = ({ label }: { label?: string }) => (
 export const EmptyState = ({
 	title,
 	description,
+	icon,
 }: {
 	title: string;
 	description?: string;
+	/** Optional override; defaults to the portal activity empty icon. */
+	icon?: ReactNode;
 }) => (
-	<div className="text-center py-16 px-4">
+	<div className="px-4 py-16 text-center">
+		<div className="mb-3 flex items-center justify-center">
+			<span className="flex items-center justify-center">
+				{icon ?? <GradientActivitiesIcon width={40} height={40} />}
+			</span>
+		</div>
 		<p className="text-base font-semibold text-foreground">{title}</p>
 		{description && (
-			<p className="mt-1 text-sm text-muted-foreground">{description}</p>
+			<p className="mt-3 text-sm text-muted-foreground">{description}</p>
 		)}
 	</div>
 );

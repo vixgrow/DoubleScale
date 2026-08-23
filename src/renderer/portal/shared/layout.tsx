@@ -132,13 +132,24 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 			(!CRM_SLUGS.has(s.slug) && s.slug !== 'dashboard')
 	);
 
-	const linkClass = ({ isActive }: { isActive: boolean }): string =>
-		[
-			'relative flex items-center gap-3 rounded-lg p-3 text-sm font-medium transition-colors',
-			isActive
-				? 'bg-[#EEEEFF] text-primary before:absolute before:inset-y-1.5 before:start-0 before:w-1 before:rounded-full before:bg-primary'
-				: 'text-foreground hover:bg-accent',
-		].join(' ');
+	const linkClass = ({
+		isActive,
+		isPending,
+	}: {
+		isActive: boolean;
+		isPending?: boolean;
+	}): string => {
+		const active = isActive || Boolean(isPending);
+		return [
+			'portal-nav-link relative flex items-center gap-3 rounded-lg p-3 text-sm font-medium',
+			active ? 'portal-nav-link--active' : '',
+			active
+				? 'before:absolute before:inset-y-1.5 before:start-0 before:w-1 before:rounded-full before:bg-primary'
+				: 'hover:bg-accent',
+		]
+			.filter(Boolean)
+			.join(' ');
+	};
 
 	const navGroups = [
 		{ title: __('Main', 'doublescale'), items: [dashboardItem] },

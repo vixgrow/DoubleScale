@@ -40,6 +40,7 @@ const SECTION_SLUG_MAP: Record<string, BrandIcon> = {
 	bookings: BookingIcon,
 	projects: ProjectsIcon,
 	documents: AttachmentFileIcon,
+	subscriptions: RepeatIcon,
 };
 
 const renderBrandIcon = (
@@ -72,7 +73,7 @@ export const PortalNavIcon = ({
 	renderBrandIcon(
 		SECTION_SLUG_MAP[slug] || PHP_ICON_MAP[fallbackIcon] || DashboardIcon,
 		NAV_ICON_SIZE,
-		'shrink-0'
+		'portal-nav-link__icon shrink-0'
 	);
 
 interface UiIconProps {

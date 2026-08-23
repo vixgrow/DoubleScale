@@ -145,8 +145,14 @@ export interface PortalTimelineResponse {
 }
 
 export interface PortalProjectStatus {
+	id?: number;
 	name: string;
+	/** Text / accent color from the admin project board status. */
+	color?: string;
+	/** Soft header/pill background from the admin project board status. */
+	bg_color?: string;
 	is_completed: boolean;
+	position?: number;
 }
 
 export interface PortalProjectFinancials {

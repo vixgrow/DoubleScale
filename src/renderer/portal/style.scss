@@ -192,6 +192,33 @@
 		box-shadow: none;
 	}
 
+	// Sidebar nav — explicit active colors so `color: inherit` on anchors does not
+	// fight Tailwind utilities or delay icon/text updates on route change.
+	.portal-nav-link {
+		color: hsl(var(--foreground));
+
+		.portal-nav-link__icon {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			color: inherit;
+		}
+
+		&:hover:not(.portal-nav-link--active):not([aria-current='page']) {
+			background-color: hsl(var(--accent));
+		}
+
+		&.portal-nav-link--active,
+		&[aria-current='page'] {
+			color: hsl(var(--primary));
+			background-color: #eeeeff;
+
+			.portal-nav-link__icon {
+				color: hsl(var(--primary));
+			}
+		}
+	}
+
 	button,
 	input,
 	optgroup,

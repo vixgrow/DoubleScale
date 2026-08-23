@@ -88,7 +88,12 @@ export const fetchProjects = (): Promise<{ data: PortalProject[] }> =>
 export const fetchProject = (id: number): Promise<PortalProject> =>
 	apiFetch<PortalProject>({ path: `${PORTAL}/projects/${id}` });
 
-export type DocumentFilter = 'all' | 'invoice' | 'proposal' | 'contract' | 'credit_note';
+export type DocumentFilter =
+	| 'all'
+	| 'invoice'
+	| 'proposal'
+	| 'contract'
+	| 'credit_note';
 
 export const fetchDocuments = (
 	type: DocumentFilter = 'all'

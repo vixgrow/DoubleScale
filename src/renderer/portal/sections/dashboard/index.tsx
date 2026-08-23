@@ -261,7 +261,7 @@ const TimelineRow = ({ item }: { item: PortalTimelineItem }) => {
 
 	const body = (
 		<div className={`flex items-start gap-3 p-3 ${PORTAL_DASHBOARD_TILE}`}>
-			<span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EEEEFF] text-primary">
+			<span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FAEADF] text-[#CB5301]">
 				{timelineActivityIcon(item)}
 			</span>
 			<div className="min-w-0 flex-1">
@@ -299,10 +299,10 @@ const RecentActivityEmpty = () => (
 	<div
 		className={`flex flex-col items-center justify-center py-12 text-center ${PORTAL_DASHBOARD_TILE}`}
 	>
-		<span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#EEEEFF]">
+		<span className="mb-3 flex items-center justify-center">
 			<GradientActivitiesIcon width={40} height={40} />
 		</span>
-		<p className="text-sm font-medium text-foreground">
+		<p className="text-base font-semibold text-foreground">
 			{__('No recent activity yet', 'doublescale')}
 		</p>
 	</div>

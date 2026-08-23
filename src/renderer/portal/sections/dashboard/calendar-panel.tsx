@@ -102,10 +102,14 @@ const CalendarPanel = () => {
 					<p className="text-sm font-semibold text-foreground">
 						{format(grid.cursor, 'MMMM yyyy')}
 					</p>
-					<p className="text-xs text-muted-foreground">{rangeLabel}</p>
+					<p className="text-xs text-muted-foreground">
+						{rangeLabel}
+					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<div className={`flex items-center overflow-hidden ${PORTAL_DASHBOARD_TILE}`}>
+					<div
+						className={`flex items-center overflow-hidden border border-border ${PORTAL_DASHBOARD_TILE} !rounded-lg`}
+					>
 						<button
 							type="button"
 							onClick={goPrev}
@@ -126,7 +130,7 @@ const CalendarPanel = () => {
 					<button
 						type="button"
 						onClick={goToday}
-						className={`px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent ${PORTAL_DASHBOARD_TILE}`}
+						className={`px-4 py-1 h-8 text-sm font-medium text-foreground hover:bg-accent border border-primary ${PORTAL_DASHBOARD_TILE} !bg-[#EEEEFF] !rounded-lg`}
 					>
 						{__('Today', 'doublescale')}
 					</button>
@@ -150,7 +154,10 @@ const CalendarPanel = () => {
 						<EmptyState
 							title={
 								selectedKind
-									? __('Nothing in this category', 'doublescale')
+									? __(
+											'Nothing in this category',
+											'doublescale'
+										)
 									: __('Nothing scheduled', 'doublescale')
 							}
 							description={__(

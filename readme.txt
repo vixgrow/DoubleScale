@@ -8,7 +8,7 @@ Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Self-hosted CRM for sales, marketing, booking, helpdesk, tasks & MCP.
+Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, plus a built-in MCP server for AI clients. One plugin, your own database.
 
 
 == Description ==

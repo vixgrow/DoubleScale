@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Contacts\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ContactsLegalTaxColumns migration.
+ * ContactsTableLegalTaxColumns migration.
  */
-class ContactsLegalTaxColumns {
+class ContactsTableLegalTaxColumns {
 
 	/**
 	 * @return void

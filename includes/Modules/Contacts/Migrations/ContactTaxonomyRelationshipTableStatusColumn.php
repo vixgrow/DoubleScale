@@ -10,9 +10,9 @@ namespace DoubleScale\Modules\Contacts\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ContactTaxonomyStatusColumn migration.
+ * ContactTaxonomyRelationshipTableStatusColumn migration.
  */
-class ContactTaxonomyStatusColumn {
+class ContactTaxonomyRelationshipTableStatusColumn {
 
 	/**
 	 * @return void

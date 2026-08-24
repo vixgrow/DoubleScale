@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.14
+Stable tag: 1.3.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,9 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.15 = 24 Aug 2026
+- Ship a committed SMTP includes classmap so mailer classes load on WordPress.org / Linux installs without root vendor/
+
 = 1.3.14 = 24 Aug 2026
 - Fix SMTP provider autoloading on case-sensitive hosts (SendLayer and other mailers fatal when root Composer vendor is absent)
 

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.7
+Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,31 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.11 = 24 Aug 2026
+- Ship Integrations catalog icon assets with the WordPress.org package (Slack, Stripe, PayPal, Twilio, Square, Mollie, Razorpay, Authorize.Net, Meta WhatsApp, Zapier)
+- Keep typeform/jotform icons included as before
+
+= 1.3.10 = 24 Aug 2026
+- Fix schema indexes for utf8mb4 hosts with the 1000-byte key length limit (migrations tracker, task_meta, contacts phone/WhatsApp uniques, and related tables)
+- Log failed table creation after dbDelta instead of failing silently
+- Skip task_meta scheduling when the table is missing to avoid flooding error logs on broken installs
+- Update translation catalogs and improve string handling
+- Improve Integrations card layout and Slack integration instructions/icons
+
+= 1.3.9 = 20 Aug 2026
+- Fix WordPress.org release packaging for the 1.3.8 tag (remove accidental nested trunk directory)
+
+= 1.3.8 = 20 Aug 2026
+- Add multi-currency support for sales documents, including Egyptian Pound (EGP) and settled-value locking on proposals/invoices
+- Add payment gateway integrations: Square, Mollie, Razorpay, and Authorize.Net (alongside existing gateways)
+- Split the Integrations catalog into Payments, Messaging, Forms, and Automation tabs
+- Expand MCP / Abilities: bulk contact and activity writes with dry-run validation, richer tools, and stronger API key permissions
+- Add Link Trigger controls in the rich text editor and toolbar for automation-ready tracked links
+- Improve invoice and proposal status management
+- Improve automation workflow interactions, condition settings, and email builder / automation editor dialogs
+- Improve test-email click/open tracking
+- Polish settings and notification preferences layout, icons, and shared UI components
+
 = 1.3.7 = 17 Aug 2026
 - Ship a complete Brazilian Portuguese (pt_BR) translation catalog for the free plugin
 - Rebuild script translation JSON when Loco saves a catalog so React admin strings update without a manual make-json

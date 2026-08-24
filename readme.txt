@@ -1,4 +1,4 @@
-=== DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
+=== DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk & More ===
 Contributors: samuelgallegos, vixgrowy
 Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8

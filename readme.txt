@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.10
+Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -270,6 +270,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.11 = 24 Aug 2026
+- Ship Integrations catalog icon assets with the WordPress.org package (Slack, Stripe, PayPal, Twilio, Square, Mollie, Razorpay, Authorize.Net, Meta WhatsApp, Zapier)
+- Keep typeform/jotform icons included as before
+
 = 1.3.10 = 24 Aug 2026
 - Fix schema indexes for utf8mb4 hosts with the 1000-byte key length limit (migrations tracker, task_meta, contacts phone/WhatsApp uniques, and related tables)
 - Log failed table creation after dbDelta instead of failing silently

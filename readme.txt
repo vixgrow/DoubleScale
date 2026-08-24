@@ -1,4 +1,4 @@
-=== DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk & More ===
+=== DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More ===
 Contributors: samuelgallegos, vixgrowy
 Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
@@ -8,7 +8,7 @@ Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, plus a built-in MCP server for AI clients. One plugin, your own database.
+Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, automations plus a built-in MCP server for AI clients. One plugin.
 
 
 == Description ==

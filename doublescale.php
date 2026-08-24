@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk & More
+ * Plugin Name:       DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More
  * Plugin URI:        https://www.doublescale.io/
- * Description:       Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, plus a built-in MCP server for AI clients. One plugin, your own database.
+ * Description:       Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, automations plus a built-in MCP server for AI clients. One plugin.
  * Version:           1.3.11
  * Author:            vixgrowy
  * Author URI:        https://www.vixgrow.com

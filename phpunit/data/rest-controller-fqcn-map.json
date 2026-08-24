@@ -96,6 +96,7 @@
     "RestSmtpSendTestController": "DoubleScale\\Modules\\Smtp\\Rest\\Controllers\\RestSmtpSendTestController",
     "RestSmtpSettingsController": "DoubleScale\\Modules\\Smtp\\Rest\\Controllers\\RestSmtpSettingsController",
     "RestStageController": "DoubleScale\\Pro\\Modules\\Deals\\Rest\\Controllers\\RestStageController",
+    "RestSureCartProductController": "DoubleScale\\Pro\\Modules\\Sales\\Rest\\Controllers\\RestSureCartProductController",
     "RestTagController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestTagController",
     "RestTaskController": "DoubleScale\\Pro\\Modules\\Tasks\\Rest\\Controllers\\RestTaskController",
     "RestTaskReportsController": "DoubleScale\\Pro\\Modules\\Analytics\\Rest\\Controllers\\RestTaskReportsController",

@@ -96,6 +96,7 @@
     "RestSmtpSendTestController",
     "RestSmtpSettingsController",
     "RestStageController",
+    "RestSureCartProductController",
     "RestTagController",
     "RestTaskController",
     "RestTaskReportsController",

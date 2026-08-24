@@ -26,8 +26,14 @@ interface KindFilter {
 	label: string;
 }
 
+// Mirrors the admin calendar legend order, minus Tasks — tasks are internal
+// staff work and are never projected into the portal feed. A kind whose module
+// is disabled simply contributes no events, so its chip renders inert rather
+// than needing its own gate here.
 const KIND_FILTERS: KindFilter[] = [
 	{ kind: 'booking', label: __('Bookings', 'doublescale') },
+	{ kind: 'deal', label: __('Deals', 'doublescale') },
+	{ kind: 'contract', label: __('Contracts', 'doublescale') },
 	{ kind: 'invoice', label: __('Invoices', 'doublescale') },
 	{ kind: 'proposal', label: __('Proposals', 'doublescale') },
 ];

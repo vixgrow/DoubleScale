@@ -39,10 +39,17 @@ import NovicesIcon from '@doublescale/shared/icons/novices';
  * mid-list would remount the rows below and scramble in-progress typing.
  * It also stamps `amount`, keeping that invariant owned in one place.
  */
+export type LineItemPickerPlacement = 'toolbar' | 'empty';
+
 export interface LineItemProductPickerContext {
 	onInsert: (item: LineItem) => void;
 	disabled: boolean;
 	currency: string;
+	/**
+	 * `empty` stacks pickers in the empty state so hints can sit under each
+	 * control. `toolbar` is the compact header row used once items exist.
+	 */
+	placement?: LineItemPickerPlacement;
 }
 
 const emptyItem = (): LineItem => ({
@@ -327,18 +334,26 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 	const insertItem = (item: LineItem) =>
 		onChange([...items, { ...item, amount: computeAmount(item) }]);
 
-	// Pro fills this slot with the saved-products picker; empty in free.
-	const productPickerSlot = applyFilters(
-		'doublescale_line_items_product_picker',
-		null,
-		{ onInsert: insertItem, disabled: readOnly, currency }
-	) as React.ReactNode;
-
 	const removeItem = (index: number) => {
 		onChange(items.filter((_, i) => i !== index));
 	};
 
 	const showEmptyState = items.length === 0 && !readOnly;
+
+	// Pro fills this slot with the saved-products / Woo / SureCart pickers;
+	// empty in free. Placement switches the layout: stacked in the empty
+	// state so currency hints don't shove siblings off-alignment, compact
+	// in the header once rows exist.
+	const productPickerSlot = applyFilters(
+		'doublescale_line_items_product_picker',
+		null,
+		{
+			onInsert: insertItem,
+			disabled: readOnly,
+			currency,
+			placement: showEmptyState ? 'empty' : 'toolbar',
+		}
+	) as React.ReactNode;
 
 	const selectedTaxOptions = (item: LineItem) =>
 		(item.tax || [])
@@ -370,24 +385,28 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 		updateItem(index, { tax: taxes });
 	};
 
+	const customItemButton = (opts: { fullWidth?: boolean; size?: 'sm' | 'default' }) => (
+		<Button
+			type="button"
+			variant="outline"
+			size={opts.size ?? 'sm'}
+			className={`${addItemButtonClass}${opts.fullWidth ? ' h-10 w-full' : ''}`}
+			onClick={addItem}
+		>
+			<Plus className="mr-1 h-4 w-4" />
+			{__('Add custom item', 'doublescale')}
+		</Button>
+	);
+
 	const itemsHeader = (
 		<div className="flex items-center justify-between">
 			<Label className="text-sm !p-0 font-medium text-[#29292E]">
 				{__('Items', 'doublescale')}
 			</Label>
-			{!readOnly ? (
+			{!readOnly && !showEmptyState ? (
 				<div className="flex items-center gap-2">
 					{productPickerSlot}
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						className={addItemButtonClass}
-						onClick={addItem}
-					>
-						<Plus className="mr-1 h-4 w-4" />
-						{__('Add custom item', 'doublescale')}
-					</Button>
+					{customItemButton({ size: 'sm' })}
 				</div>
 			) : null}
 		</div>
@@ -413,25 +432,41 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 		return (
 			<div className="space-y-4">
 				{itemsHeader}
-				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-12 text-center">
+				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-10 text-center">
 					{emptyStateIcon ?? <GradientProposalItemsIcon />}
-					<p className="mt-4 text-sm font-semibold text-accent-foreground">
-						{__(
-							'No items found—this space is ready for adding items',
-							'doublescale'
-						)}
+					<p className="mt-3 text-sm font-semibold text-accent-foreground">
+						{__('No items yet', 'doublescale')}
 					</p>
-					<div className="mt-5 flex items-center justify-center gap-2">
-						{productPickerSlot}
-						<Button
-							type="button"
-							variant="outline"
-							className={addItemButtonClass}
-							onClick={addItem}
-						>
-							<Plus className="mr-1 h-4 w-4" />
-							{__('Add custom item', 'doublescale')}
-						</Button>
+					<p className="mt-1 max-w-sm text-xs text-[#6B7280]">
+						{productPickerSlot
+							? __(
+									'Add a product from your catalog, or start with a custom line.',
+									'doublescale'
+								)
+							: __('Add a custom line to get started.', 'doublescale')}
+					</p>
+					<div
+						className={
+							productPickerSlot
+								? 'mt-6 w-full max-w-sm space-y-3 text-left'
+								: 'mt-6'
+						}
+					>
+						{productPickerSlot ? (
+							<>
+								{productPickerSlot}
+								<div className="flex items-center gap-2">
+									<span className="h-px flex-1 bg-[#E5E7EB]" />
+									<span className="text-xs text-[#9CA3AF]">
+										{__('or', 'doublescale')}
+									</span>
+									<span className="h-px flex-1 bg-[#E5E7EB]" />
+								</div>
+								{customItemButton({ fullWidth: true, size: 'default' })}
+							</>
+						) : (
+							customItemButton({ size: 'default' })
+						)}
 					</div>
 				</div>
 				{totalsBlock}

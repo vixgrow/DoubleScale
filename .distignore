@@ -16,14 +16,9 @@
 /dist
 
 # Most UI images are webpack-bundled into build/client/images/. Keep shipping
-# the runtime-loaded sets used by Automations / Integrations (not hashed):
-#   templates-images, form-types, typeform, jotform
-# When syncing for release, use bin/build-zip.sh rsync filters:
-#   --include="/assets/images/templates-images/***"
-#   --include="/assets/images/form-types/***"
-#   --include="/assets/images/typeform/***"
-#   --include="/assets/images/jotform/***"
-#   --exclude="/assets/images/**"
+# the runtime-loaded sets used by Automations / Integrations / Extensions (not hashed):
+#   templates-images, form-types, typeform, jotform, catalog icons, white-label
+# When syncing for release, use bin/build-zip.sh rsync filters (see that script).
 # booking-icons/ live in DoubleScale Pro and are loaded from Pro at runtime.
 /assets/booking-icons
 

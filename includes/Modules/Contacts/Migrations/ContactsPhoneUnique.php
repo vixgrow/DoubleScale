@@ -87,6 +87,8 @@ class ContactsPhoneUnique {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "ALTER TABLE `{$table}` ADD UNIQUE KEY `{$index_name}` (`{$index_name}`)" );
+		// Prefix keeps utf8mb4 unique keys under the 1000-byte compact limit
+		// (191*4 = 764). Full VARCHAR(255) unique indexes are 1020 bytes.
+		$wpdb->query( "ALTER TABLE `{$table}` ADD UNIQUE KEY `{$index_name}` (`{$index_name}`(191))" );
 	}
 }

@@ -1,21 +1,22 @@
-=== DoubleScale | Self-Hosted CRM & Business Platform (Alternative to HubSpot & GoHighLevel) ===
+=== DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More ===
 Contributors: samuelgallegos, vixgrowy
 Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.7
+Stable tag: 1.3.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-All-in-one CRM with sales pipeline, projects, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin. Enable or disable any module.
+Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects, automations plus a built-in MCP server for AI clients. One plugin.
 
 
 == Description ==
 
-**DoubleScale is the operating system for a WordPress-native business.** It replaces the stack most teams cobble together — CRM + Mailchimp + Calendly + ClickUp + a transactional email provider + a helpdesk + a reporting dashboard — with **one plugin** that lives inside wp-admin and stores everything in your own database.
+**DoubleScale is a self-hosted CRM for WordPress** covering sales, marketing, booking, helpdesk, and task & project management — in **one plugin**, on your own database. A built-in **MCP server** lets AI clients (Claude, Cursor, and compatible tools) operate DoubleScale with API keys, using the same module and permission gates as the rest of the product.
 
-You shouldn't need eight separate logins, eight billing relationships, and eight half-broken integrations to run a small business. DoubleScale unifies them around a single contact record, so a form submit can fire an automation, book a meeting, open a support thread, score the lead, alert the assigned rep, and send the receipt — all from the same data model.
+You get one contact record, one activity timeline, and one automation engine instead of stitching together a CRM, email tool, calendar, helpdesk, and task app. Enable or disable optional modules under **Settings → Modules** so the admin stays lean.
+
 **Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
 = Modular architecture — enable or disable any module =
@@ -68,7 +69,10 @@ A complete helpdesk built into your CRM. Customers open tickets via a self-servi
 **9. Analytics — dashboards & reports**
 A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**10. User roles — scoped access for sales, support, booking, and project teams**
+**10. MCP — AI clients that can operate your CRM**
+DoubleScale ships a built-in **Model Context Protocol (MCP)** server. Enable it under MCP settings, issue API keys for eligible users, and connect Claude, Cursor, or other MCP-compatible clients. Tools cover contacts, documents, marketing, booking, forms, and more — gated by modules and roles, with validation on writes. Setup includes Application Password auth, Windows connection notes, and emailable instructions so teammates can connect without guessing.
+
+**11. User roles — scoped access for sales, support, booking, and project teams**
 DoubleScale ships dedicated roles (plus site administrators). Assign them under **Settings → Team**. Users can hold **multiple roles** — capabilities merge across roles.
 
 **Sales (Pro)**
@@ -120,6 +124,7 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 
 = Key capabilities =
 
+* **MCP for AI clients** — Built-in MCP server so Claude, Cursor, and compatible tools can list, create, and update CRM data via API keys, with the same module and role gates as wp-admin.
 * **AI-powered writing and assistance** — Connect your own API key from OpenAI, Google Gemini, Groq, OpenRouter, or any OpenAI-compatible provider. AI-assisted email composition, smart template generation, subject line suggestions, and content rewriting are built right into the campaign builder and email editor. Bring your own key, pick your provider, and keep full control over cost and data.
 * Modular architecture — enable or disable optional modules (Sales, Campaigns, Booking, Tasks, Projects, SMTP, Helpdesk, Forms, Automations, and more) from **Settings → Modules**.
 * One contact record shared across every module — campaigns, bookings, tasks, projects, helpdesk threads, and deals all attach to the same contact.
@@ -132,7 +137,7 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 
 = Who DoubleScale is for =
 
-Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want **one WordPress-native operations platform** instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
+Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want a **self-hosted WordPress CRM** for sales, marketing, booking, helpdesk, and delivery — plus MCP so AI tools can work inside that same stack — instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
 
 Learn more at [doublescale.io](https://doublescale.io/).
 
@@ -270,6 +275,36 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.12 = 24 Aug 2026
+- Update Extensions catalog: ship White Labeling icon, resolve addon images from free assets, and hide unreleased AI Assistant / Subscriptions cards
+- Fix Zapier add-on plugin path resolution across folder naming conventions
+- Refresh plugin title and short description branding
+
+= 1.3.11 = 24 Aug 2026
+- Ship Integrations catalog icon assets with the WordPress.org package (Slack, Stripe, PayPal, Twilio, Square, Mollie, Razorpay, Authorize.Net, Meta WhatsApp, Zapier)
+- Keep typeform/jotform icons included as before
+
+= 1.3.10 = 24 Aug 2026
+- Fix schema indexes for utf8mb4 hosts with the 1000-byte key length limit (migrations tracker, task_meta, contacts phone/WhatsApp uniques, and related tables)
+- Log failed table creation after dbDelta instead of failing silently
+- Skip task_meta scheduling when the table is missing to avoid flooding error logs on broken installs
+- Update translation catalogs and improve string handling
+- Improve Integrations card layout and Slack integration instructions/icons
+
+= 1.3.9 = 20 Aug 2026
+- Fix WordPress.org release packaging for the 1.3.8 tag (remove accidental nested trunk directory)
+
+= 1.3.8 = 20 Aug 2026
+- Add multi-currency support for sales documents, including Egyptian Pound (EGP) and settled-value locking on proposals/invoices
+- Add payment gateway integrations: Square, Mollie, Razorpay, and Authorize.Net (alongside existing gateways)
+- Split the Integrations catalog into Payments, Messaging, Forms, and Automation tabs
+- Expand MCP / Abilities: bulk contact and activity writes with dry-run validation, richer tools, and stronger API key permissions
+- Add Link Trigger controls in the rich text editor and toolbar for automation-ready tracked links
+- Improve invoice and proposal status management
+- Improve automation workflow interactions, condition settings, and email builder / automation editor dialogs
+- Improve test-email click/open tracking
+- Polish settings and notification preferences layout, icons, and shared UI components
+
 = 1.3.7 = 17 Aug 2026
 - Ship a complete Brazilian Portuguese (pt_BR) translation catalog for the free plugin
 - Rebuild script translation JSON when Loco saves a catalog so React admin strings update without a manual make-json

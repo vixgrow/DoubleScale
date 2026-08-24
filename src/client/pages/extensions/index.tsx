@@ -48,6 +48,18 @@ const addonImages: Record<string, string> = {
 	make: `${proPluginUrl}assets/images/make/make.svg`,
 };
 
+const getAddonImageUrl = (addon: Addon): string => {
+	if (addonImages[addon.slug]) {
+		return addonImages[addon.slug];
+	}
+
+	if (addon.image) {
+		return `${basePluginUrl}assets/images/${addon.image}`;
+	}
+
+	return '';
+};
+
 const ExtensionCard: React.FC<{
 	addon: Addon;
 	apiAction: ApiAction | null;
@@ -57,7 +69,7 @@ const ExtensionCard: React.FC<{
 }> = ({ addon, apiAction, onAction, highlighted, cardRef }) => {
 	const isProcessing = apiAction?.addon === addon.slug;
 	const currentAction = isProcessing ? apiAction?.action : null;
-	const imageUrl = addonImages[addon.slug] || '';
+	const imageUrl = getAddonImageUrl(addon);
 
 	const isPlanLocked =
 		!!addon.plan &&

@@ -65,6 +65,17 @@ rsync -a \
 	--include="/assets/images/form-types/***" \
 	--include="/assets/images/typeform/***" \
 	--include="/assets/images/jotform/***" \
+	--include="/assets/images/slack/***" \
+	--include="/assets/images/stripe/***" \
+	--include="/assets/images/paypal/***" \
+	--include="/assets/images/twilio/***" \
+	--include="/assets/images/square/***" \
+	--include="/assets/images/mollie/***" \
+	--include="/assets/images/razorpay/***" \
+	--include="/assets/images/authorize-net/***" \
+	--include="/assets/images/meta-whatsapp/***" \
+	--include="/assets/images/zapier/***" \
+	--include="/assets/images/white-label/***" \
 	--exclude="/assets/images/**" \
 	--exclude="/assets/booking-icons" \
 	./ "$STAGE_DIR/"

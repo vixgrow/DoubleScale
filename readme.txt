@@ -8,14 +8,15 @@ Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects — and built-in MCP for AI clients. Enable or disable any module.
+Self-hosted CRM for sales, marketing, booking, helpdesk, tasks & MCP.
 
 
 == Description ==
 
-**DoubleScale is the operating system for a WordPress-native business.** It replaces the stack most teams cobble together — CRM + Mailchimp + Calendly + ClickUp + a transactional email provider + a helpdesk + a reporting dashboard — with **one plugin** that lives inside wp-admin and stores everything in your own database.
+**DoubleScale is a self-hosted CRM for WordPress** covering sales, marketing, booking, helpdesk, and task & project management — in **one plugin**, on your own database. A built-in **MCP server** lets AI clients (Claude, Cursor, and compatible tools) operate DoubleScale with API keys, using the same module and permission gates as the rest of the product.
 
-You shouldn't need eight separate logins, eight billing relationships, and eight half-broken integrations to run a small business. DoubleScale unifies them around a single contact record, so a form submit can fire an automation, book a meeting, open a support thread, score the lead, alert the assigned rep, and send the receipt — all from the same data model.
+You get one contact record, one activity timeline, and one automation engine instead of stitching together a CRM, email tool, calendar, helpdesk, and task app. Enable or disable optional modules under **Settings → Modules** so the admin stays lean.
+
 **Live demo:** [try.doublescale.io](https://try.doublescale.io) · **Website:** [doublescale.io](https://doublescale.io) · **Documentation:** [doublescale.io/docs](https://doublescale.io/docs/)
 
 = Modular architecture — enable or disable any module =
@@ -68,7 +69,10 @@ A complete helpdesk built into your CRM. Customers open tickets via a self-servi
 **9. Analytics — dashboards & reports**
 A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**10. User roles — scoped access for sales, support, booking, and project teams**
+**10. MCP — AI clients that can operate your CRM**
+DoubleScale ships a built-in **Model Context Protocol (MCP)** server. Enable it under MCP settings, issue API keys for eligible users, and connect Claude, Cursor, or other MCP-compatible clients. Tools cover contacts, documents, marketing, booking, forms, and more — gated by modules and roles, with validation on writes. Setup includes Application Password auth, Windows connection notes, and emailable instructions so teammates can connect without guessing.
+
+**11. User roles — scoped access for sales, support, booking, and project teams**
 DoubleScale ships dedicated roles (plus site administrators). Assign them under **Settings → Team**. Users can hold **multiple roles** — capabilities merge across roles.
 
 **Sales (Pro)**
@@ -120,6 +124,7 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 
 = Key capabilities =
 
+* **MCP for AI clients** — Built-in MCP server so Claude, Cursor, and compatible tools can list, create, and update CRM data via API keys, with the same module and role gates as wp-admin.
 * **AI-powered writing and assistance** — Connect your own API key from OpenAI, Google Gemini, Groq, OpenRouter, or any OpenAI-compatible provider. AI-assisted email composition, smart template generation, subject line suggestions, and content rewriting are built right into the campaign builder and email editor. Bring your own key, pick your provider, and keep full control over cost and data.
 * Modular architecture — enable or disable optional modules (Sales, Campaigns, Booking, Tasks, Projects, SMTP, Helpdesk, Forms, Automations, and more) from **Settings → Modules**.
 * One contact record shared across every module — campaigns, bookings, tasks, projects, helpdesk threads, and deals all attach to the same contact.
@@ -132,7 +137,7 @@ Underneath every module is one workflow builder. **100+ triggers** across contac
 
 = Who DoubleScale is for =
 
-Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want **one WordPress-native operations platform** instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
+Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want a **self-hosted WordPress CRM** for sales, marketing, booking, helpdesk, and delivery — plus MCP so AI tools can work inside that same stack — instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
 
 Learn more at [doublescale.io](https://doublescale.io/).
 

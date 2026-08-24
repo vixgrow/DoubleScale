@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.7\n"
+"Project-Id-Version: DoubleScale 1.3.11\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,9 @@ msgid "%1$s: %2$s"
 msgstr ""
 
 msgid "%1$s and %2$d more"
-msgstr ""
+msgid_plural "%1$s and %2$d more"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%1$s at %2$s"
 msgstr ""
@@ -149,7 +151,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "%d file attached."
-msgstr ""
+msgid_plural "%d files attached."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
@@ -160,7 +164,9 @@ msgid "%d message(s) failed."
 msgstr ""
 
 msgid "%d minute"
-msgstr ""
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
@@ -179,19 +185,27 @@ msgid "%d seconds"
 msgstr ""
 
 msgid "%d team member"
-msgstr ""
+msgid_plural "%d team members"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d ticket"
-msgstr ""
+msgid_plural "%d tickets"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d ticket moved to the selected mailbox."
-msgstr ""
+msgid_plural "%d tickets moved to the selected mailbox."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d tickets"
 msgstr ""
 
 msgid "%d ticket will be moved."
-msgstr ""
+msgid_plural "%d tickets will be moved."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d week ago"
 msgid_plural "%d weeks ago"
@@ -492,7 +506,9 @@ msgid "+%d more"
 msgstr ""
 
 msgid "+%d more currency"
-msgstr ""
+msgid_plural "+%d more currencies"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "+1 555 010 2030"
 msgstr ""
@@ -860,6 +876,9 @@ msgstr ""
 msgid "Add a connection below before choosing a default."
 msgstr ""
 
+msgid "Add a custom line to get started."
+msgstr ""
+
 msgid "Add a mailbox"
 msgstr ""
 
@@ -891,6 +910,9 @@ msgid "Add an override"
 msgstr ""
 
 msgid "Add a personal note included in the email to the customer…"
+msgstr ""
+
+msgid "Add a product from your catalog, or start with a custom line."
 msgstr ""
 
 msgid "Add a reply"
@@ -7809,7 +7831,9 @@ msgid "Every"
 msgstr ""
 
 msgid "Every %d month"
-msgstr ""
+msgid_plural "Every %d months"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Every 5 minutes (DoubleScale)"
 msgstr ""
@@ -12803,7 +12827,7 @@ msgstr ""
 msgid "No items found"
 msgstr ""
 
-msgid "No items found—this space is ready for adding items"
+msgid "No items yet"
 msgstr ""
 
 msgid "No key-value pairs added yet."
@@ -18705,7 +18729,9 @@ msgid "Test email sent successfully"
 msgstr ""
 
 msgid "Test email sent successfully to %d recipient"
-msgstr ""
+msgid_plural "Test emails sent successfully to %d recipients"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Test emails sent: %1$d succeeded, %2$d failed"
 msgstr ""
@@ -18717,7 +18743,9 @@ msgid "Test Notification"
 msgstr ""
 
 msgid "Test notification sent to %d device. Check your mobile app!"
-msgstr ""
+msgid_plural "Test notification sent to %d devices. Check your mobile app!"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Test WhatsApp message sent successfully"
 msgstr ""
@@ -20493,10 +20521,14 @@ msgid "Upload or sync contacts"
 msgstr ""
 
 msgid "Up to %1$d file, %2$s each"
-msgstr ""
+msgid_plural "Up to %1$d files, %2$s each"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Up to %d file"
-msgstr ""
+msgid_plural "Up to %d files"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Urgent"
 msgstr ""
@@ -21486,10 +21518,14 @@ msgid "You can also create Teams and manage their events"
 msgstr ""
 
 msgid "You can attach at most %d file."
-msgstr ""
+msgid_plural "You can attach at most %d files."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "You can attach at most %d file to this contact."
-msgstr ""
+msgid_plural "You can attach at most %d files to this contact."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "You can attach at most %d file to this contract."
 msgid_plural "You can attach at most %d files to this contract."

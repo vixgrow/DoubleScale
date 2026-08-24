@@ -1778,17 +1778,17 @@ class RestContactController extends RestController {
 	private function get_surecart_purchase_history( $contact, $request ) {
 		$result = $this->get_default_purchase_history();
 
-		if ( ! defined( 'SURECART_PLUGIN_FILE' ) || ! class_exists( '\Surecart\Models\Customer' ) ) {
+		if ( ! defined( 'SURECART_PLUGIN_FILE' ) || ! class_exists( '\SureCart\Models\Customer' ) ) {
 			return $result;
 		}
 
-		$customer = \Surecart\Models\Customer::byEmail( $contact->email );
+		$customer = \SureCart\Models\Customer::byEmail( $contact->email );
 		if ( ! $customer || is_wp_error( $customer ) ) {
 			return $result;
 		}
 
 		// SureCart's Model::get() returns an array of model objects directly
-		$sc_orders = \Surecart\Models\Order::where(
+		$sc_orders = \SureCart\Models\Order::where(
 			array(
 				'customer_ids' => array( $customer->id ),
 			)

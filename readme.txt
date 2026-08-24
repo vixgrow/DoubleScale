@@ -270,10 +270,12 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
-= 1.3.10 = 22 Aug 2026
+= 1.3.10 = 24 Aug 2026
 - Fix schema indexes for utf8mb4 hosts with the 1000-byte key length limit (migrations tracker, task_meta, contacts phone/WhatsApp uniques, and related tables)
 - Log failed table creation after dbDelta instead of failing silently
 - Skip task_meta scheduling when the table is missing to avoid flooding error logs on broken installs
+- Update translation catalogs and improve string handling
+- Improve Integrations card layout and Slack integration instructions/icons
 
 = 1.3.9 = 20 Aug 2026
 - Fix WordPress.org release packaging for the 1.3.8 tag (remove accidental nested trunk directory)

@@ -8,7 +8,7 @@ Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-All-in-one CRM with sales pipeline, projects, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, proposals, invoices and automations — one plugin. Enable or disable any module.
+Self-hosted CRM with sales, marketing, booking, helpdesk, tasks & projects — and built-in MCP for AI clients. Enable or disable any module.
 
 
 == Description ==

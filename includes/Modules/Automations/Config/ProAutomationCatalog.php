@@ -182,6 +182,7 @@ return array(
 		\DoubleScale\Pro\Modules\Automations\Actions\Memberpress\RemoveUserFromMembership::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Messaging\SendSms::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Messaging\SendWhatsapp::class,
+		\DoubleScale\Pro\Modules\Automations\Actions\Messaging\UnsubscribeWhatsapp::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Pmpro\AddUserToMembershipLevel::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Pmpro\RemoveUserFromMembershipLevel::class,
 		\DoubleScale\Pro\Modules\Automations\Actions\Support\AddNoteTicket::class,

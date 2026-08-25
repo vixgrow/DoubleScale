@@ -308,4 +308,23 @@ class Settings {
 
 		return false === $decrypted ? $value : $decrypted;
 	}
+
+	/**
+	 * Whether incoming WhatsApp STOP-style keywords should auto-unsubscribe contacts.
+	 *
+	 * When disabled, use the Unsubscribe WhatsApp automation action instead.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return bool
+	 */
+	public static function is_whatsapp_auto_keyword_unsubscribe_enabled() {
+		$whatsapp = self::get( 'whatsapp', array() );
+
+		if ( ! is_array( $whatsapp ) || ! array_key_exists( 'auto_keyword_unsubscribe', $whatsapp ) ) {
+			return true;
+		}
+
+		return (bool) $whatsapp['auto_keyword_unsubscribe'];
+	}
 }

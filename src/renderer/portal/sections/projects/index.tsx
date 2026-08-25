@@ -22,6 +22,7 @@ import {
 	GradientProjectsIcon,
 	InfoIcon,
 	MoveStatusIcon,
+	DollerIcon
 } from '@doublescale/components';
 
 import {
@@ -240,10 +241,9 @@ const ProjectDetailModal = ({
 								{project.budget != null && (
 									<DetailRow
 										icon={
-											<DealValueIcon
+											<DollerIcon
 												width={24}
 												height={24}
-												color="#777777"
 											/>
 										}
 										label={__('Budget', 'doublescale')}

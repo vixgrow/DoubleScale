@@ -11,6 +11,7 @@ import {
 	CalendarIcon,
 	ContractDraftIcon,
 	DealsIcon,
+	DollerIcon,
 	GradientActivitiesIcon,
 	HelpdeskIcon,
 	InvoicesIcon,
@@ -49,7 +50,7 @@ const CARD_META: Record<
 	}
 > = {
 	outstanding_balance: {
-		icon: <DealsIcon width={32} height={32} />,
+		icon: <DollerIcon width={32} height={32} color="currentColor" />,
 		iconBgClass: 'bg-[#CB5301]',
 		iconColor: 'text-white',
 	},

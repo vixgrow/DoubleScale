@@ -125,7 +125,7 @@ class ContactModel extends Model {
 		'email'          => 'nullable',
 		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
 		'whatsapp_phone' => 'nullable|regex:/^\+[1-9][0-9]{0,14}$/',
-		'zip'            => 'nullable|numeric',
+		'zip'            => 'nullable|string|max:150',
 	);
 
 	/**
@@ -144,7 +144,7 @@ class ContactModel extends Model {
 		'phone.unique'                => 'A contact with this phone number already exists.',
 		'whatsapp_phone.regex'        => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
 		'whatsapp_phone.unique'       => 'A contact with this WhatsApp number already exists.',
-		'zip.numeric'                 => 'Invalid zip code.',
+		'zip.max'                     => 'Zip / postal code must be 150 characters or fewer.',
 	);
 
 	/**

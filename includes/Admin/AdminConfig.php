@@ -69,6 +69,7 @@ final class AdminConfig {
 			'doublescale_crm_manager'             => Permissions::is_crm_manager(),
 			'doublescale_sales_manager'           => Permissions::user_has_role( UserRoles::SALES_MANAGER ),
 			'doublescale_sales_rep'               => Permissions::user_has_role( UserRoles::SALES_REP ),
+			'doublescale_can_delete_contacts'     => Permissions::can_delete_contacts(),
 			// Server-computed Settings gate — prefer this in the SPA so
 			// CRM Manager + Sales Rep multi-role users never get locked to
 			// Mailbox/Notifications by composing membership flags in JS.

@@ -153,6 +153,11 @@ export const useCapabilities = () => {
         return caps.doublescale_is_project_only || false;
     }, []);
 
+    const canDeleteContacts = useCallback((): boolean => {
+        const caps = Config.getUserCapabilities();
+        return caps.doublescale_can_delete_contacts === true;
+    }, []);
+
     return {
         hasRequiredCapability,
         isSalesRep,
@@ -166,6 +171,7 @@ export const useCapabilities = () => {
         hasProjectAccess,
         canManageAllProjects,
         isProjectOnly,
+        canDeleteContacts,
     };
 };
 

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.12
+Stable tag: 1.3.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,12 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.13 = 24 Aug 2026
+- Allow alphanumeric zip / postal codes (string up to 150 characters) on contacts and automation field updates
+- Fix SureCart integration namespace casing so product rules and contact purchase history load correctly
+- Clean up contact and sales schema migrations (rename contact migration classes; remove unused SalesTagIdsColumn migration)
+- Update translation catalog
+
 = 1.3.12 = 24 Aug 2026
 - Update Extensions catalog: ship White Labeling icon, resolve addon images from free assets, and hide unreleased AI Assistant / Subscriptions cards
 - Fix Zapier add-on plugin path resolution across folder naming conventions

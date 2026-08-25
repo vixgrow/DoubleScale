@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ContactsPhoneUnique migration.
  */
-class ContactsPhoneUnique {
+class ContactsTablePhoneUnique {
 
 	/**
 	 * @return void

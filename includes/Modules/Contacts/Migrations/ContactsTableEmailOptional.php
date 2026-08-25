@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ContactsEmailOptional migration.
  */
-class ContactsEmailOptional {
+class ContactsTableEmailOptional {
 
 	/**
 	 * @return void

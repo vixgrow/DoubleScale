@@ -11,9 +11,9 @@ namespace DoubleScale\Modules\Contacts\Migrations;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * TermsSchemaRepair migration.
+ * TermsTableSchemaRepair migration.
  */
-class TermsSchemaRepair {
+class TermsTableSchemaRepair {
 
 	/**
 	 * Idempotent schema repair — safe to run on every install.

@@ -30,6 +30,7 @@ import {
 } from '@doublescale/components';
 import ContactDeleteModal from '../../client/pages/contacts/all-contacts/contact-delete-modal';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 
 interface BulkActionSelectProps {
 	bulkAction: string;
@@ -56,6 +57,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 	activeTab,
 	data, // <-- add data from context
 }) => {
+	const { canDeleteContacts } = useCapabilities();
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -142,11 +144,15 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 		switch (activeTab) {
 			case 'all': // All Contacts tab
 				return [
-					{
-						value: 'delete',
-						label: __('Delete', 'doublescale'),
-						icon: <DeleteIcon />,
-					},
+					...(canDeleteContacts()
+						? [
+								{
+									value: 'delete',
+									label: __('Delete', 'doublescale'),
+									icon: <DeleteIcon />,
+								},
+							]
+						: []),
 					{
 						value: 'add_to_list',
 						label: __('Add to List', 'doublescale'),

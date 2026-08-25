@@ -92,7 +92,6 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	// MCP saves through its own endpoint the moment the switch is flipped.
 	'mcp',
 	'license',
-	'whatsapp',
 	'debugging',
 	'notifications',
 	'mailbox',
@@ -104,6 +103,7 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
 	'sms',
+	'whatsapp',
 	'cart',
 	'currencies',
 	'website_tracking',

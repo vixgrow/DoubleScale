@@ -1,6 +1,6 @@
 <?php
 /**
- * Class ContactMetaTable
+ * Class ContactsTableMeta
  * This class is responsible for handling the contact meta table
  *
  * @since 1.0.0
@@ -15,9 +15,9 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Database\Migration;
 
 /**
- * ContactMetaTable class
+ * ContactsTableMeta class
  */
-class ContactMetaTable extends Migration {
+class ContactsTableMeta extends Migration {
 
 	/**
 	 * Table name

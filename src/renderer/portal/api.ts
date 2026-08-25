@@ -55,10 +55,10 @@ export const fetchTimeline = (
 		}),
 	});
 
-export type BookingFilter = 'upcoming' | 'past' | 'cancelled';
+export type BookingFilter = 'all' | 'upcoming' | 'past' | 'cancelled';
 
 export const fetchBookings = (
-	filter: BookingFilter
+	filter: BookingFilter = 'all'
 ): Promise<{ data: PortalBooking[] }> =>
 	apiFetch<{ data: PortalBooking[] }>({
 		path: addQueryArgs(`${PORTAL}/bookings`, { filter }),

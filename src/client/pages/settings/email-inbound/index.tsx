@@ -838,12 +838,8 @@ const EmailInboundSettingsPage: React.FC = () => {
 							const outlookProvider = outlookIsSmtp ? 'smtp_outlook' : 'outlook';
 							const outlookActive = settings.imap_provider === 'smtp_outlook' || settings.imap_provider === 'outlook';
 
-							// Custom IMAP: show when no OAuth configured, OR when non-Gmail/non-Outlook senders exist
-							const hasNonOAuthSenders = smtpDetection.from_emails.length > 0
-								&& (smtpDetection.detected_providers.length > 0
-									|| (!smtpDetection.gmail_detected && !smtpDetection.outlook_detected));
-							const showCustomImap = (!oauthAppsConfigured.gmail && !oauthAppsConfigured.outlook) || hasNonOAuthSenders;
-
+							// Custom IMAP is always available — users may run Gmail/Outlook for
+							// sending while polling a different inbox (cPanel, Zoho, etc.).
 							const tabs: { key: string; label: string; subtitle: string; icon: 'gmail' | 'outlook' | 'server'; active: boolean; onClick: () => void }[] = [];
 
 							if (showGmail) {
@@ -886,19 +882,17 @@ const EmailInboundSettingsPage: React.FC = () => {
 								});
 							}
 
-							if (showCustomImap) {
-								tabs.push({
-									key: 'custom',
-									label: __('Custom IMAP', 'doublescale'),
-									subtitle: __('Any IMAP server', 'doublescale'),
-									icon: 'server',
-									active: settings.imap_provider === 'custom',
-									onClick: () => {
-										setSettings((prev) => ({ ...prev, imap_provider: 'custom' }));
-										setTestResult(null);
-									},
-								});
-							}
+							tabs.push({
+								key: 'custom',
+								label: __('Custom IMAP', 'doublescale'),
+								subtitle: __('Any IMAP server', 'doublescale'),
+								icon: 'server',
+								active: settings.imap_provider === 'custom',
+								onClick: () => {
+									setSettings((prev) => ({ ...prev, imap_provider: 'custom' }));
+									setTestResult(null);
+								},
+							});
 
 							if (tabs.length === 0) {
 								return (
@@ -912,7 +906,7 @@ const EmailInboundSettingsPage: React.FC = () => {
 							}
 
 							return (
-								<div className={`grid gap-3 grid-cols-${tabs.length}`}>
+								<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 									{tabs.map((tab) => (
 										<div
 											key={tab.key}

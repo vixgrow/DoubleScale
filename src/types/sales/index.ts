@@ -109,6 +109,12 @@ export interface CreditNoteQueueDocument {
 	contact?: ContactSummary | null;
 }
 
+export type LineItemProductSource =
+	| 'custom'
+	| 'local'
+	| 'woo'
+	| 'surecart';
+
 export interface LineItem {
 	description: string;
 	long_description?: string;
@@ -116,7 +122,13 @@ export interface LineItem {
 	unit?: string;
 	rate: number;
 	tax?: LineItemTax[];
-	// Derived (qty * rate) for display; not persisted on the stored line item.
+	/** Per-line discount percentage (0–100). */
+	discount_percentage?: number;
+	/** Per-line tax rate percentage; synced to `tax` on save. */
+	tax_rate?: number;
+	product_source?: LineItemProductSource | string;
+	product_id?: number | string;
+	// Derived (qty * rate, after line discount) for display; not persisted on save.
 	// Use computeAmount() rather than reading this directly.
 	amount?: number;
 	optional?: boolean;

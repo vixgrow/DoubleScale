@@ -8,6 +8,10 @@ export type {
 	LineItemPickerPlacement,
 	LineItemProductPickerContext,
 } from './line-items-editor';
+export type {
+	LineItemProductSearchContext,
+	LineItemProductSourceOption,
+} from './line-item-product-cell';
 export { getGlobalCurrency } from './sales-currency-utils';
 export { DocumentCurrencySelect } from './document-currency-select';
 export type { DocumentCurrencySelectProps } from './document-currency-select';

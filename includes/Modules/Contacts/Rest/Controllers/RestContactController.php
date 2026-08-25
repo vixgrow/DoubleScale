@@ -3895,7 +3895,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_delete_contacts();
 	}
 
 	/**
@@ -3921,7 +3921,7 @@ class RestContactController extends RestController {
 	 * @return bool $response Permission check result.
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::can_delete_contacts();
 	}
 
 	/**

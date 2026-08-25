@@ -749,6 +749,34 @@ final class Permissions {
 
 
 	/**
+	 * Whether the user may permanently delete contacts (single or bulk).
+	 *
+	 * Sales Reps must never delete contacts — including when they also hold the
+	 * WordPress `administrator` role but are scoped to Sales Rep in Team settings.
+	 * CRM Managers and Sales Managers retain delete access.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function can_delete_contacts( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		if (
+			self::user_has_role( UserRoles::SALES_REP, $user_id )
+			&& ! self::user_has_role( UserRoles::SALES_MANAGER, $user_id )
+			&& ! self::user_has_role( UserRoles::CRM_MANAGER, $user_id )
+		) {
+			return false;
+		}
+
+		if ( self::is_crm_manager( $user_id ) ) {
+			return true;
+		}
+
+		return self::user_has_role( UserRoles::SALES_MANAGER, $user_id );
+	}
+
+	/**
 	 * Check if user has basic CRM access
 	 *
 	 * @since 1.0.0

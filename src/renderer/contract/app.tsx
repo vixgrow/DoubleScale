@@ -17,12 +17,15 @@ import {
 	usePublicContractAttachments,
 } from './public-api';
 import { SignaturePad } from './signature-pad';
+import { EditHeaderIcon } from '@doublescale/components';
 
 interface Props {
 	hash: string;
+	/** When true (portal embed), hide the local Download PDF toolbar. */
+	embedded?: boolean;
 }
 
-const PublicContractApp = ({ hash }: Props) => {
+const PublicContractApp = ({ hash, embedded = false }: Props) => {
 	const { data, loading, error, refetch } = usePublicContract(hash);
 	const { data: attachments, loading: attachmentsLoading } =
 		usePublicContractAttachments(hash);
@@ -76,7 +79,11 @@ const PublicContractApp = ({ hash }: Props) => {
 	}
 
 	return (
-		<div className="doublescale-contract-renderer">
+		<div
+			className={`doublescale-contract-renderer${
+				embedded ? ' doublescale-contract-renderer--embedded' : ''
+			}`}
+		>
 			{data.is_expired ? (
 				<div className="doublescale-contract-renderer__notice doublescale-contract-renderer__notice--warning">
 					{__('This contract has expired.', 'doublescale')}
@@ -94,17 +101,19 @@ const PublicContractApp = ({ hash }: Props) => {
 				</div>
 			) : null}
 
-			<div className="doublescale-contract-renderer__toolbar">
-				<a
-					className="doublescale-contract-renderer__download"
-					href={getPublicContractPdfUrl(hash)}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Download className="h-4 w-4" />
-					{__('Download PDF', 'doublescale')}
-				</a>
-			</div>
+			{!embedded ? (
+				<div className="doublescale-contract-renderer__toolbar">
+					<a
+						className="doublescale-contract-renderer__download"
+						href={getPublicContractPdfUrl(hash)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Download className="h-4 w-4" />
+						{__('Download PDF', 'doublescale')}
+					</a>
+				</div>
+			) : null}
 
 			<ContractDocumentPreview contract={data} />
 
@@ -145,7 +154,7 @@ const PublicContractApp = ({ hash }: Props) => {
 						}}
 						disabled={busy}
 					>
-						<PenLine className="h-4 w-4 mr-1" />
+						<EditHeaderIcon width={16} height={16} color="currentColor" />
 						{busy ? __('Processing…', 'doublescale') : __('Sign Contract', 'doublescale')}
 					</Button>
 				</div>
@@ -175,7 +184,7 @@ const PublicContractApp = ({ hash }: Props) => {
 						</p>
 					)}
 					<div className="flex justify-end gap-2 mt-4">
-						<Button variant="ghost" onClick={() => setShowSign(false)} disabled={busy}>
+						<Button variant="secondaryDeepBlue" onClick={() => setShowSign(false)} disabled={busy}>
 							{__('Cancel', 'doublescale')}
 						</Button>
 						<Button onClick={() => void handleSign()} disabled={busy}>

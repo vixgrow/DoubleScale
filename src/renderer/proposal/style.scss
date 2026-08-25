@@ -46,6 +46,12 @@
 	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
 	overflow: hidden;
 	padding: 1.5rem;
+
+	&--embedded {
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+	}
 }
 
 .doublescale-proposal-renderer__notice {

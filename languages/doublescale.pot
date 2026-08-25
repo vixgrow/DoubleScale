@@ -876,9 +876,6 @@ msgstr ""
 msgid "Add a connection below before choosing a default."
 msgstr ""
 
-msgid "Add a custom line to get started."
-msgstr ""
-
 msgid "Add a mailbox"
 msgstr ""
 
@@ -993,9 +990,6 @@ msgstr ""
 msgid "Add Custom Field"
 msgstr ""
 
-msgid "Add custom item"
-msgstr ""
-
 msgid "Add Custom Location"
 msgstr ""
 
@@ -1042,6 +1036,9 @@ msgid "Additional Recipients"
 msgstr ""
 
 msgid "Add Level"
+msgstr ""
+
+msgid "Add line item"
 msgstr ""
 
 msgid "Add Link"
@@ -7871,9 +7868,6 @@ msgstr ""
 msgid "Every Wednesday"
 msgstr ""
 
-msgid "ex: 1,2,3"
-msgstr ""
-
 msgid "Exactly"
 msgstr ""
 
@@ -10685,6 +10679,9 @@ msgstr ""
 msgid "Item Description"
 msgstr ""
 
+msgid "Item name"
+msgstr ""
+
 msgid "Items"
 msgstr ""
 
@@ -13109,9 +13106,6 @@ msgstr ""
 msgid "Not Available"
 msgstr ""
 
-msgid "No Tax"
-msgstr ""
-
 msgid "No taxes yet"
 msgstr ""
 
@@ -14990,7 +14984,13 @@ msgstr ""
 msgid "Product Launch"
 msgstr ""
 
+msgid "Product Name"
+msgstr ""
+
 msgid "Products"
+msgstr ""
+
+msgid "Products: %1$s • Total product quantity: %2$s"
 msgstr ""
 
 msgid "Pro feature"
@@ -15303,6 +15303,9 @@ msgid "Qty"
 msgstr ""
 
 msgid "Qty %d"
+msgstr ""
+
+msgid "Quantity"
 msgstr ""
 
 msgid "Quarter to get revenue for (1-4). Only applicable for quarterly period."
@@ -16413,6 +16416,9 @@ msgid "Search and add…"
 msgstr ""
 
 msgid "Search and page through CRM contacts. Returns id, name, email, phone, company, and status for each match. Use get-contact for the full record."
+msgstr ""
+
+msgid "Search and select"
 msgstr ""
 
 msgid "Search and select…"
@@ -18248,9 +18254,6 @@ msgstr ""
 msgid "Subtotal"
 msgstr ""
 
-msgid "Sub Total"
-msgstr ""
-
 msgid "Subtract Points"
 msgstr ""
 
@@ -18566,6 +18569,9 @@ msgstr ""
 msgid "Tax"
 msgstr ""
 
+msgid "Tax (Added)"
+msgstr ""
+
 msgid "Tax/VAT:"
 msgstr ""
 
@@ -18588,6 +18594,9 @@ msgid "Tax not found."
 msgstr ""
 
 msgid "Tax or VAT identification number."
+msgstr ""
+
+msgid "Tax Rate"
 msgstr ""
 
 msgid "Tax rate is required."

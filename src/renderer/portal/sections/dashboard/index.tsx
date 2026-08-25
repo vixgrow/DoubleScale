@@ -9,9 +9,9 @@ import { Link } from 'react-router-dom';
 import {
 	AppliedCreditIcon,
 	CalendarIcon,
+	ContractDraftIcon,
 	DealsIcon,
 	GradientActivitiesIcon,
-	GradientContractsIcon,
 	HelpdeskIcon,
 	InvoicesIcon,
 	ProjectsIcon,
@@ -146,10 +146,28 @@ const timelineCopy = (item: PortalTimelineItem): string => {
 					__('Proposal declined: %s', 'doublescale'),
 					name
 				);
+			case 'proposal_sent':
+				return sprintf(__('Proposal: %s', 'doublescale'), name);
 			case 'credit_note_sent':
 				return sprintf(__('Credit note: %s', 'doublescale'), name);
+			case 'contract_signed':
+				return sprintf(__('Contract signed: %s', 'doublescale'), name);
+			case 'contract_sent':
+				return sprintf(__('Contract: %s', 'doublescale'), name);
 			default:
-				return sprintf(__('Proposal: %s', 'doublescale'), name);
+				if (item.document_type === 'contract') {
+					return sprintf(__('Contract: %s', 'doublescale'), name);
+				}
+				if (item.document_type === 'invoice') {
+					return sprintf(__('Invoice: %s', 'doublescale'), name);
+				}
+				if (item.document_type === 'credit_note') {
+					return sprintf(__('Credit note: %s', 'doublescale'), name);
+				}
+				if (item.document_type === 'proposal') {
+					return sprintf(__('Proposal: %s', 'doublescale'), name);
+				}
+				return name;
 		}
 	}
 	if (item.type === 'support_reply') {
@@ -165,8 +183,19 @@ const timelineTarget = (item: PortalTimelineItem): string | null => {
 		return `/bookings/${item.booking_id}`;
 	}
 	if (item.kind === 'document') {
-		if (item.document_type === 'credit_note' && item.hash) {
-			return `/documents/credit-note/${item.hash}`;
+		if (item.hash) {
+			if (item.document_type === 'credit_note') {
+				return `/documents/credit-note/${item.hash}`;
+			}
+			if (item.document_type === 'contract') {
+				return `/documents/contract/${item.hash}`;
+			}
+			if (item.document_type === 'invoice') {
+				return `/documents/invoice/${item.hash}`;
+			}
+			if (item.document_type === 'proposal') {
+				return `/documents/proposal/${item.hash}`;
+			}
 		}
 		return '/documents';
 	}
@@ -227,7 +256,7 @@ const timelineActivityIcon = (item: PortalTimelineItem): ReactNode => {
 				);
 			case 'contract':
 				return (
-					<GradientContractsIcon
+					<ContractDraftIcon
 						width={TIMELINE_ICON_SIZE}
 						height={TIMELINE_ICON_SIZE}
 					/>

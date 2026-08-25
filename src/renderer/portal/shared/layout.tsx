@@ -1,16 +1,21 @@
 /**
  * Portal shell: identity header + grouped section nav + content area.
+ * Below `lg`, nav is a horizontal settings-style tab strip (no Main/CRM/Other).
  */
 
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { NavLink } from 'react-router-dom';
 
 import type { PortalIdentity, PortalSection } from '../types';
-import { PortalNavIcon } from './icons';
+import { ChevronLeftIcon, ChevronRightIcon, PortalNavIcon } from './icons';
 
 /** Outer shell for every portal tab's main content. */
 const PORTAL_CONTENT_SHELL =
 	'rounded-[20px] bg-white p-5 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]';
+
+const NAV_SHELL =
+	'overflow-hidden rounded-[20px] bg-white shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]';
 
 interface NavItem {
 	slug: string;
@@ -101,6 +106,153 @@ const NavGroup = ({
 	);
 };
 
+const NavBadge = ({
+	count,
+	active,
+}: {
+	count?: number;
+	active?: boolean;
+}) => {
+	if (!count || count <= 0) {
+		return null;
+	}
+	return (
+		<span
+			className={[
+				'inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-xs font-semibold',
+				active
+					? 'bg-primary-foreground/20 text-primary-foreground'
+					: 'bg-secondary text-secondary-foreground',
+			].join(' ')}
+		>
+			{count}
+		</span>
+	);
+};
+
+interface HorizontalNavProps {
+	items: NavItem[];
+	linkClass: (props: {
+		isActive: boolean;
+		isPending?: boolean;
+	}) => string;
+}
+
+/** Settings-style horizontal tabs with scroll chevrons when content overflows. */
+const HorizontalNav = ({ items, linkClass }: HorizontalNavProps) => {
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const [showLeft, setShowLeft] = useState(false);
+	const [showRight, setShowRight] = useState(false);
+
+	const updateScrollHints = () => {
+		const el = scrollRef.current;
+		if (!el) {
+			return;
+		}
+		const { scrollLeft, scrollWidth, clientWidth } = el;
+		const hasOverflow = scrollWidth > clientWidth + 1;
+		setShowLeft(hasOverflow && scrollLeft > 2);
+		setShowRight(
+			hasOverflow && scrollLeft < scrollWidth - clientWidth - 2
+		);
+	};
+
+	useEffect(() => {
+		updateScrollHints();
+		const el = scrollRef.current;
+		if (!el) {
+			return;
+		}
+		el.addEventListener('scroll', updateScrollHints, { passive: true });
+		window.addEventListener('resize', updateScrollHints);
+		const observer = new ResizeObserver(updateScrollHints);
+		observer.observe(el);
+		return () => {
+			el.removeEventListener('scroll', updateScrollHints);
+			window.removeEventListener('resize', updateScrollHints);
+			observer.disconnect();
+		};
+	}, [items.length]);
+
+	const scrollBy = (direction: 'left' | 'right') => {
+		const el = scrollRef.current;
+		if (!el) {
+			return;
+		}
+		el.scrollBy({
+			left: direction === 'left' ? -180 : 180,
+			behavior: 'smooth',
+		});
+	};
+
+	return (
+		<div className={`${NAV_SHELL} relative px-2.5 py-3 lg:hidden`}>
+			{showLeft && (
+				<>
+					<div
+						className="pointer-events-none absolute inset-y-0 start-0 z-[1] w-10 rounded-s-[20px] bg-gradient-to-r from-white via-white/90 to-transparent"
+						aria-hidden="true"
+					/>
+					<button
+						type="button"
+						onClick={() => scrollBy('left')}
+						className="absolute start-0 top-0 z-10 flex h-full items-center justify-center rounded-s-[20px] bg-white px-1"
+						aria-label={__('Scroll navigation left', 'doublescale')}
+					>
+						<ChevronLeftIcon className="h-4 w-4 text-muted-foreground" />
+					</button>
+				</>
+			)}
+			<div
+				ref={scrollRef}
+				className="portal-nav-tabs-scroll min-w-0 overflow-x-auto"
+			>
+				<ul className="flex w-max min-w-full flex-nowrap items-center justify-start gap-2 px-1">
+					{items.map((item) => (
+						<li key={item.slug} className="shrink-0">
+							<NavLink
+								to={item.to}
+								end={item.to === '/'}
+								className={linkClass}
+							>
+								{({ isActive }) => (
+									<>
+										<PortalNavIcon
+											slug={item.slug}
+											fallbackIcon={item.icon}
+										/>
+										<span>{item.label}</span>
+										<NavBadge
+											count={item.badge}
+											active={isActive}
+										/>
+									</>
+								)}
+							</NavLink>
+						</li>
+					))}
+				</ul>
+			</div>
+			{showRight && (
+				<>
+					<div
+						className="pointer-events-none absolute inset-y-0 end-0 z-[1] w-10 rounded-e-[20px] bg-gradient-to-l from-white via-white/90 to-transparent"
+						aria-hidden="true"
+					/>
+					<button
+						type="button"
+						onClick={() => scrollBy('right')}
+						className="absolute end-0 top-0 z-10 flex h-full items-center justify-center rounded-e-[20px] bg-white px-1"
+						aria-label={__('Scroll navigation right', 'doublescale')}
+					>
+						<ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+					</button>
+				</>
+			)}
+		</div>
+	);
+};
+
 interface Props {
 	identity: PortalIdentity;
 	sections: PortalSection[];
@@ -132,7 +284,7 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 			(!CRM_SLUGS.has(s.slug) && s.slug !== 'dashboard')
 	);
 
-	const linkClass = ({
+	const sidebarLinkClass = ({
 		isActive,
 		isPending,
 	}: {
@@ -151,11 +303,31 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 			.join(' ');
 	};
 
+	const tabsLinkClass = ({
+		isActive,
+		isPending,
+	}: {
+		isActive: boolean;
+		isPending?: boolean;
+	}): string => {
+		const active = isActive || Boolean(isPending);
+		return [
+			'portal-nav-link portal-nav-link--tabs inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg p-1 text-sm font-medium transition-all sm:px-4',
+			active
+				? 'portal-nav-link--tabs-active bg-primary text-primary-foreground shadow-sm'
+				: 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
+		]
+			.filter(Boolean)
+			.join(' ');
+	};
+
 	const navGroups = [
 		{ title: __('Main', 'doublescale'), items: [dashboardItem] },
 		{ title: __('CRM', 'doublescale'), items: crmItems },
 		{ title: __('Other', 'doublescale'), items: otherItems },
 	].filter((group) => group.items.length > 0);
+
+	const flatNavItems = navGroups.flatMap((group) => group.items);
 
 	const displayName = identity.name || __('Welcome', 'doublescale');
 	const welcomeLine = identity.email
@@ -184,14 +356,18 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 				</header>
 
 				<div className="flex flex-col gap-6 lg:flex-row">
-					<nav className="lg:w-72 lg:shrink-0">
-						<div className="overflow-hidden rounded-[20px] bg-white px-5 py-2 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
+					<nav className="min-w-0 lg:w-72 lg:shrink-0">
+						{/* max-lg: settings-style horizontal tabs (no Main/CRM/Other) */}
+						<HorizontalNav items={flatNavItems} linkClass={tabsLinkClass} />
+
+						{/* lg+: vertical grouped sidebar */}
+						<div className={`${NAV_SHELL} hidden px-5 py-2 lg:block`}>
 							{navGroups.map((group, index) => (
 								<NavGroup
 									key={group.title}
 									title={group.title}
 									items={group.items}
-									linkClass={linkClass}
+									linkClass={sidebarLinkClass}
 									showDivider={index < navGroups.length - 1}
 								/>
 							))}

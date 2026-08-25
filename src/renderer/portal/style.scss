@@ -204,18 +204,49 @@
 			color: inherit;
 		}
 
-		&:hover:not(.portal-nav-link--active):not([aria-current='page']) {
+		&:hover:not(.portal-nav-link--active):not(.portal-nav-link--tabs-active):not([aria-current='page']) {
 			background-color: hsl(var(--accent));
 		}
 
 		&.portal-nav-link--active,
-		&[aria-current='page'] {
+		&:not(.portal-nav-link--tabs)[aria-current='page'] {
 			color: hsl(var(--primary));
 			background-color: #eeeeff;
 
 			.portal-nav-link__icon {
 				color: hsl(var(--primary));
 			}
+		}
+
+		// max-lg horizontal strip — match settings PageTabs active pill.
+		&.portal-nav-link--tabs {
+			&:not(.portal-nav-link--tabs-active):not([aria-current='page']) {
+				color: hsl(var(--muted-foreground));
+			}
+
+			&:hover:not(.portal-nav-link--tabs-active):not([aria-current='page']) {
+				color: hsl(var(--foreground));
+				background-color: hsl(var(--muted) / 0.7);
+			}
+
+			&.portal-nav-link--tabs-active,
+			&[aria-current='page'] {
+				color: hsl(var(--primary-foreground));
+				background-color: hsl(var(--primary));
+
+				.portal-nav-link__icon {
+					color: hsl(var(--primary-foreground));
+				}
+			}
+		}
+	}
+
+	.portal-nav-tabs-scroll {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+
+		&::-webkit-scrollbar {
+			display: none;
 		}
 	}
 

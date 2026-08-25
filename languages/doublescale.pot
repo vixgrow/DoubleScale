@@ -2256,6 +2256,12 @@ msgstr ""
 msgid "Automatically sent to attendees when their booking is confirmed. Includes booking details, location, and cancellation options."
 msgstr ""
 
+msgid "Automatic keyword unsubscribe"
+msgstr ""
+
+msgid "Automatic keyword unsubscribe is turned off. Use an automation with the Unsubscribe WhatsApp action to handle opt-outs — for example, send a confirmation message first, then unsubscribe the contact."
+msgstr ""
+
 msgid "Automatic provisioning for booking hosts and notifications"
 msgstr ""
 
@@ -4530,9 +4536,6 @@ msgstr ""
 msgid "Contacts Analytics Overview"
 msgstr ""
 
-msgid "Contacts can resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP. The reply must be that keyword only (not part of a longer sentence)."
-msgstr ""
-
 msgid "Contacts date range filter."
 msgstr ""
 
@@ -6316,6 +6319,9 @@ msgid "Does not include (in any)"
 msgstr ""
 
 msgid "Does not match"
+msgstr ""
+
+msgid "Does turning off automatic unsubscribe affect resubscribe?"
 msgstr ""
 
 msgid "Do I need to add \"Reply STOP to unsubscribe\"?"
@@ -12572,6 +12578,9 @@ msgstr ""
 msgid "No-Show"
 msgstr ""
 
+msgid "No. Contacts can always resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP — even when automatic unsubscribe is turned off. Only opt-out keywords (STOP, UNSUBSCRIBE, etc.) are affected by the switch below."
+msgstr ""
+
 msgid "No active integrations available for this category. Install and activate a supported plugin to see triggers here."
 msgstr ""
 
@@ -15941,6 +15950,9 @@ msgstr ""
 msgid "REST field errors:"
 msgstr ""
 
+msgid "Resubscribe keywords (START, SUBSCRIBE, YES, UNSTOP) still work automatically while this is off."
+msgstr ""
+
 msgid "Retry"
 msgstr ""
 
@@ -19113,6 +19125,9 @@ msgstr ""
 msgid "There are no sections at the moment. Start adding sections and controlling elements."
 msgstr ""
 
+msgid "The reply must be that keyword only (not part of a longer sentence)."
+msgstr ""
+
 msgid "These contacts have invoices and cannot be deleted. Delete or reassign their invoices first."
 msgstr ""
 
@@ -20058,6 +20073,9 @@ msgstr ""
 msgid "Tuesday"
 msgstr ""
 
+msgid "Turn off to handle opt-outs through automations instead — useful when you want to send a confirmation message before unsubscribing."
+msgstr ""
+
 msgid "Turn On"
 msgstr ""
 
@@ -20314,6 +20332,9 @@ msgid "Unsubscribe from %s"
 msgstr ""
 
 msgid "Unsubscribe from all %s"
+msgstr ""
+
+msgid "Unsubscribe on STOP keywords"
 msgstr ""
 
 msgid "Unsubscribe Reason"
@@ -21190,7 +21211,7 @@ msgstr ""
 msgid "When a contact replies STOP, UNSUBSCRIBE, or similar keywords, DoubleScale automatically unsubscribes them from WhatsApp — no extra setup required."
 msgstr ""
 
-msgid "When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp. You do not need to configure anything for this."
+msgid "When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp."
 msgstr ""
 
 msgid "When an email bounces, your provider sends a notification to this webhook. DoubleScale automatically marks contacts as bounced (hard bounce) or tracks soft bounces. After 3 soft bounces, contacts are converted to hard bounce status."
@@ -21206,6 +21227,9 @@ msgid "When customers enter checkout details, inform them that their email, phon
 msgstr ""
 
 msgid "When customers submit through the portal or email, their tickets will appear here."
+msgstr ""
+
+msgid "When enabled, contacts are unsubscribed immediately when they reply with STOP or other standard opt-out keywords."
 msgstr ""
 
 msgid "When enabled, CRM events will trigger push notifications to mobile devices to configure push notifications for the DoubleScale mobile app."

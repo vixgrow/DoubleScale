@@ -51,7 +51,7 @@ import { formatTime } from '../../shared/format';
 import { ClockIcon, MapPinIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 6;
 
 const TABS: Array<{ key: BookingFilter; label: string }> = [
 	{ key: 'all', label: __('All', 'doublescale') },
@@ -620,7 +620,7 @@ const PortalBookingCard = ({
 	const locationValue = booking.location?.value || '—';
 
 	return (
-		<div className="rounded-xl border border-border bg-[#F7F8FA] w-80 p-4">
+		<div className="w-full min-w-0 rounded-xl border border-border bg-[#F7F8FA] p-4">
 			<div className="flex items-start gap-3">
 				<div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-border">
 					<div className="flex items-center justify-center bg-white px-1 py-2">
@@ -883,7 +883,7 @@ const BookingsBoard = ({
 
 			{!loading && !error && hasVisibleBookings && (
 				<>
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						{pageBookings.map((booking) => (
 							<PortalBookingCard
 								key={booking.id}

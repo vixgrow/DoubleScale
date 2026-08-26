@@ -147,14 +147,19 @@ const CalendarPanel = () => {
 			{!loading && error && <ErrorState message={error} />}
 			{!loading && !error && (
 				<>
-					<div className={`overflow-hidden ${PORTAL_DASHBOARD_TILE}`}>
-						<MonthGrid
-							days={grid.days}
-							cursor={grid.cursor}
-							events={visibleEvents}
-							onSelect={onSelect}
-							weekStartsOn={grid.weekStartsOn}
-						/>
+					<div
+						className={`min-w-0 max-sm:overflow-x-auto sm:overflow-hidden ${PORTAL_DASHBOARD_TILE}`}
+					>
+						{/* Keep desktop cell width on phones; scroll horizontally instead of squashing. */}
+						<div className="max-sm:min-w-[42rem]">
+							<MonthGrid
+								days={grid.days}
+								cursor={grid.cursor}
+								events={visibleEvents}
+								onSelect={onSelect}
+								weekStartsOn={grid.weekStartsOn}
+							/>
+						</div>
 					</div>
 					{visibleEvents.length === 0 && (
 						<EmptyState

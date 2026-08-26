@@ -22,6 +22,7 @@ import {
 	GradientProjectsIcon,
 	InfoIcon,
 	MoveStatusIcon,
+	DollerIcon
 } from '@doublescale/components';
 
 import {
@@ -240,10 +241,9 @@ const ProjectDetailModal = ({
 								{project.budget != null && (
 									<DetailRow
 										icon={
-											<DealValueIcon
+											<DollerIcon
 												width={24}
 												height={24}
-												color="#777777"
 											/>
 										}
 										label={__('Budget', 'doublescale')}
@@ -352,7 +352,7 @@ const KanbanColumn = ({
 	const { bg } = statusColors(column.status);
 
 	return (
-		<div className="flex h-full w-[360px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA] p-4">
+		<div className="flex h-full w-[360px] max-sm:w-[min(88vw,280px)] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA] p-4">
 			<div
 				className="flex shrink-0 items-center justify-between gap-2 rounded-xl p-3"
 				style={{ backgroundColor: bg }}

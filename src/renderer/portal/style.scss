@@ -29,7 +29,7 @@
 	--accent-foreground: 240 6% 17%;
 	--tertiary: 220 23% 97%;
 	--tertiary-foreground: 240 6% 17%;
-	--destructive: 0 84.2% 60.2%;
+	--destructive: 0 90% 40%;
 	--destructive-foreground: 0 0% 98%;
 	--border: 0 0% 82%;
 	--input: 0 0% 82%;
@@ -49,11 +49,26 @@
 .support-portal-ticket-detail {
 	display: flex;
 	flex-direction: column;
-	height: 100%;
-	max-height: 100%;
-	min-height: 0;
-	overflow: hidden;
 	background: #f7f8fa;
+
+	// Wide split inbox: fill the pane.
+	@media (min-width: 1200px) {
+		height: 100%;
+		max-height: 100%;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	// Stacked / mobile: height = header + replies + editor.
+	// Keep overflow hidden so the panel's rounded border isn't squared off
+	// by the composer / header backgrounds.
+	@media (max-width: 1199px) {
+		height: auto;
+		max-height: none;
+		min-height: 0;
+		overflow: hidden;
+		border-radius: 0.75rem;
+	}
 }
 
 .support-portal-ticket-detail__header {
@@ -62,17 +77,28 @@
 }
 
 .support-portal-ticket-detail__conversation {
-	flex: 1 1 auto;
-	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
 	padding: 1rem 1.25rem;
 	background: #f7f8fa;
 	-webkit-overflow-scrolling: touch;
+
+	@media (min-width: 1200px) {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	// Size to reply content; cap long threads so the editor stays on-screen.
+	@media (max-width: 1199px) {
+		flex: 0 1 auto;
+		height: auto;
+		max-height: min(48vh, 420px);
+	}
 }
 
 .support-portal-ticket-detail__composer {
 	flex: 0 0 auto;
+	flex-shrink: 0;
 	box-shadow: 0 5px 12px 0 rgba(69, 141, 199, 0.2);
 	background: #fff;
 }
@@ -105,6 +131,20 @@
 	// Word count bar — hide in compact portal reply composer.
 	.email-body-editor .editor-container > div:last-child {
 		display: none;
+	}
+
+	// Narrow / stacked inbox: give the composer room and tighten the toolbar.
+	@media (max-width: 1199px) {
+		.email-body-editor .editor-inner,
+		.email-body-editor .editor-input {
+			min-height: 120px;
+		}
+
+		.toolbar {
+			justify-content: flex-start;
+			gap: 0.5rem;
+			padding: 0.5rem 0.75rem;
+		}
 	}
 }
 
@@ -204,18 +244,49 @@
 			color: inherit;
 		}
 
-		&:hover:not(.portal-nav-link--active):not([aria-current='page']) {
+		&:hover:not(.portal-nav-link--active):not(.portal-nav-link--tabs-active):not([aria-current='page']) {
 			background-color: hsl(var(--accent));
 		}
 
 		&.portal-nav-link--active,
-		&[aria-current='page'] {
+		&:not(.portal-nav-link--tabs)[aria-current='page'] {
 			color: hsl(var(--primary));
 			background-color: #eeeeff;
 
 			.portal-nav-link__icon {
 				color: hsl(var(--primary));
 			}
+		}
+
+		// max-lg horizontal strip — match settings PageTabs active pill.
+		&.portal-nav-link--tabs {
+			&:not(.portal-nav-link--tabs-active):not([aria-current='page']) {
+				color: hsl(var(--muted-foreground));
+			}
+
+			&:hover:not(.portal-nav-link--tabs-active):not([aria-current='page']) {
+				color: hsl(var(--foreground));
+				background-color: hsl(var(--muted) / 0.7);
+			}
+
+			&.portal-nav-link--tabs-active,
+			&[aria-current='page'] {
+				color: hsl(var(--primary-foreground));
+				background-color: hsl(var(--primary));
+
+				.portal-nav-link__icon {
+					color: hsl(var(--primary-foreground));
+				}
+			}
+		}
+	}
+
+	.portal-nav-tabs-scroll {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+
+		&::-webkit-scrollbar {
+			display: none;
 		}
 	}
 

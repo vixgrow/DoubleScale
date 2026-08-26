@@ -22,9 +22,11 @@ import { SignaturePad } from './signature-pad';
 
 interface Props {
 	hash: string;
+	/** When true (portal embed), hide the local Download PDF toolbar. */
+	embedded?: boolean;
 }
 
-const PublicProposalApp = ({ hash }: Props) => {
+const PublicProposalApp = ({ hash, embedded = false }: Props) => {
 	const { data, loading, error, refetch } = usePublicProposal(hash);
 
 	const [busy, setBusy] = useState(false);
@@ -115,7 +117,11 @@ const PublicProposalApp = ({ hash }: Props) => {
 		(!data.require_signature || (signedName.trim() && signature));
 
 	return (
-		<div className="doublescale-proposal-renderer">
+		<div
+			className={`doublescale-proposal-renderer${
+				embedded ? ' doublescale-proposal-renderer--embedded' : ''
+			}`}
+		>
 			{data.is_expired ? (
 				<div className="doublescale-proposal-renderer__notice doublescale-proposal-renderer__notice--warning">
 					{__('This proposal has expired.', 'doublescale')}
@@ -147,17 +153,19 @@ const PublicProposalApp = ({ hash }: Props) => {
 				</div>
 			) : null}
 
-			<div className="doublescale-proposal-renderer__toolbar">
-				<a
-					className="doublescale-proposal-renderer__download"
-					href={getPublicProposalPdfUrl(hash)}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Download className="h-4 w-4" />
-					{__('Download PDF', 'doublescale')}
-				</a>
-			</div>
+			{!embedded ? (
+				<div className="doublescale-proposal-renderer__toolbar">
+					<a
+						className="doublescale-proposal-renderer__download"
+						href={getPublicProposalPdfUrl(hash)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Download className="h-4 w-4" />
+						{__('Download PDF', 'doublescale')}
+					</a>
+				</div>
+			) : null}
 
 			<ProposalDocumentPreview proposal={previewProposal} />
 
@@ -171,7 +179,7 @@ const PublicProposalApp = ({ hash }: Props) => {
 				<div className="doublescale-proposal-renderer__actions">
 					{data.can_decline ? (
 						<Button
-							variant="outline"
+							variant="secondaryDeepBlue"
 							onClick={() => {
 								setShowDecline((v) => !v);
 								setShowAccept(false);
@@ -243,11 +251,11 @@ const PublicProposalApp = ({ hash }: Props) => {
 							{__('Confirm that you accept this proposal.', 'doublescale')}
 						</p>
 					)}
-					<div className="flex justify-end gap-2 mt-4">
-						<Button variant="ghost" onClick={() => setShowAccept(false)} disabled={busy}>
+					<div className="mt-4 flex flex-col items-center gap-2 max-sm:w-full sm:flex-row sm:justify-end">
+						<Button variant="secondaryDeepBlue" onClick={() => setShowAccept(false)} disabled={busy} className="max-sm:w-full">
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button onClick={() => void handleAccept()} disabled={!canConfirmAccept}>
+						<Button onClick={() => void handleAccept()} disabled={!canConfirmAccept} className="max-sm:w-full">
 							{__('Confirm Accept', 'doublescale')}
 						</Button>
 					</div>
@@ -265,11 +273,11 @@ const PublicProposalApp = ({ hash }: Props) => {
 						onChange={(e) => setDeclineReason(e.target.value)}
 						rows={3}
 					/>
-					<div className="flex justify-end gap-2 mt-3">
-						<Button variant="ghost" onClick={() => setShowDecline(false)} disabled={busy}>
+					<div className="mt-3 flex flex-col items-center gap-2 max-sm:w-full sm:flex-row sm:justify-end">
+						<Button variant="secondaryDeepBlue" onClick={() => setShowDecline(false)} disabled={busy} className="max-sm:w-full">
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button variant="destructive" onClick={() => void handleDecline()} disabled={busy}>
+						<Button variant="destructive" onClick={() => void handleDecline()} disabled={busy} className="max-sm:w-full">
 							{__('Confirm Decline', 'doublescale')}
 						</Button>
 					</div>

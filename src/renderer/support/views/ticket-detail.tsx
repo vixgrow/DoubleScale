@@ -110,7 +110,7 @@ const TicketDetail = ({
 				}
 			>
 				{!isPane && (
-					<Button variant="outline" size="sm" onClick={onBack}>
+					<Button variant="secondaryDeepBlue" size="sm" onClick={onBack}>
 						<ArrowLeft width={14} height={14} className="mr-1" />
 						{__('Back', 'doublescale')}
 					</Button>
@@ -129,14 +129,14 @@ const TicketDetail = ({
 		<div
 			className={
 				isPane
-					? 'support-portal-ticket-detail flex h-full min-h-0 flex-col overflow-hidden'
-					: 'support-portal-ticket-detail flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA] p-6 shadow-sm'
+					? 'support-portal-ticket-detail flex flex-col overflow-hidden max-[1199px]:h-auto min-[1200px]:h-full min-[1200px]:min-h-0'
+					: 'support-portal-ticket-detail flex h-auto flex-col overflow-visible rounded-xl border border-border bg-[#F7F8FA] p-6 shadow-sm'
 			}
 		>
 			<header className="support-portal-ticket-detail__header shrink-0 border-b border-border mx-4 py-4">
 				{isPane && showMobileBack && (
 					<Button
-						variant="outline"
+						variant="secondaryDeepBlue"
 						size="sm"
 						className="mb-3 lg:hidden"
 						onClick={onBack}
@@ -146,7 +146,7 @@ const TicketDetail = ({
 					</Button>
 				)}
 				{!isPane && (
-					<Button variant="outline" size="sm" onClick={onBack}>
+					<Button variant="secondaryDeepBlue" size="sm" onClick={onBack}>
 						<ArrowLeft width={14} height={14} className="mr-1" />
 						{__('Back to tickets', 'doublescale')}
 					</Button>
@@ -166,9 +166,9 @@ const TicketDetail = ({
 				</div>
 			</header>
 
-			{/* Conversation scrolls; composer stays pinned under the header. */}
+			{/* Height follows reply content; scrolls only when the thread is long. */}
 			<section
-				className="support-portal-ticket-detail__conversation support-portal-conversation-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-5 py-4"
+				className="support-portal-ticket-detail__conversation support-portal-conversation-scroll overflow-x-hidden overflow-y-auto px-5 py-4 max-[1199px]:flex-none min-[1200px]:min-h-0 min-[1200px]:flex-1"
 				aria-label={__('Conversation', 'doublescale')}
 			>
 				{conv.loading && (

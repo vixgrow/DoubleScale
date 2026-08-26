@@ -41,6 +41,7 @@ final class PortalFrontendHandler {
 	public function __construct() {
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 		add_filter( 'body_class', array( $this, 'add_body_class' ) );
+		add_filter( 'the_content', array( $this, 'filter_portal_page_content' ), 1 );
 		add_action( 'template_redirect', array( $this, 'maybe_render_canvas' ), 0 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_login_styles' ) );
@@ -51,9 +52,9 @@ final class PortalFrontendHandler {
 	 * Render a minimal HTML shell (no theme header/footer) for portal pages.
 	 *
 	 * CSS alone cannot reliably hide every theme's header and footer markup.
-	 * Outputting the page ourselves — only wp_head, the post content (shortcode),
-	 * and wp_footer — keeps the portal clean on any theme without a separate
-	 * template file.
+	 * Outputting the page ourselves — only wp_head, the portal shortcode, and
+	 * wp_footer — keeps the portal clean on any theme without a separate
+	 * template file. Extra blocks/sections on the WordPress page are ignored.
 	 *
 	 * @return void
 	 */
@@ -93,7 +94,8 @@ final class PortalFrontendHandler {
 
 		while ( have_posts() ) {
 			the_post();
-			the_content();
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- shortcode HTML is escaped in render_shortcode().
+			echo $this->extract_portal_shortcode_html( (string) get_post()->post_content );
 		}
 
 		wp_footer();
@@ -102,6 +104,48 @@ final class PortalFrontendHandler {
 		</html>
 		<?php
 		exit;
+	}
+
+	/**
+	 * On the portal page, drop any extra editor blocks/sections so only the
+	 * Client Portal shortcode renders (marketing sections belong on other pages).
+	 *
+	 * @param string $content Post content HTML.
+	 * @return string
+	 */
+	public function filter_portal_page_content( $content ): string {
+		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+		if ( ! $this->current_page_has_shortcode() ) {
+			return $content;
+		}
+
+		/**
+		 * Filter whether non-portal blocks on the Client Portal page are stripped.
+		 *
+		 * @param bool $strip Whether to keep only the portal shortcode.
+		 */
+		if ( ! (bool) apply_filters( 'doublescale_client_portal_strip_extra_content', true ) ) {
+			return $content;
+		}
+
+		$raw = get_post() ? (string) get_post()->post_content : '';
+		return $this->extract_portal_shortcode_html( $raw !== '' ? $raw : (string) $content );
+	}
+
+	/**
+	 * Run only the `[doublescale_client_portal …]` shortcode from page content.
+	 *
+	 * @param string $content Raw post content (may include other blocks).
+	 * @return string
+	 */
+	private function extract_portal_shortcode_html( string $content ): string {
+		if ( preg_match( '/\[doublescale_client_portal(?:\s[^\]]*)?\]/i', $content, $matches ) ) {
+			return do_shortcode( $matches[0] );
+		}
+
+		return $this->render_shortcode( array() );
 	}
 
 	/**

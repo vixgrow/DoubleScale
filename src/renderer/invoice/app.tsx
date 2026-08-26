@@ -35,6 +35,8 @@ import {
 
 interface Props {
 	hash: string;
+	/** When true (portal embed), hide the local Download PDF toolbar. */
+	embedded?: boolean;
 }
 
 const StripePayForm: React.FC<{
@@ -379,7 +381,7 @@ const PublicOnlinePayment: React.FC<{
 	);
 };
 
-const PublicInvoiceApp = ({ hash }: Props) => {
+const PublicInvoiceApp = ({ hash, embedded = false }: Props) => {
 	const { data, loading, error, refetch } = usePublicInvoice(hash);
 	const [agreedTerms, setAgreedTerms] = useState(false);
 
@@ -408,7 +410,11 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 	const canPay = !hasTerms || agreedTerms;
 
 	return (
-		<div className="doublescale-invoice-renderer">
+		<div
+			className={`doublescale-invoice-renderer${
+				embedded ? ' doublescale-invoice-renderer--embedded' : ''
+			}`}
+		>
 			{data.is_overdue ? (
 				<div className="doublescale-invoice-renderer__notice doublescale-invoice-renderer__notice--warning">
 					{__('This invoice is overdue.', 'doublescale')}
@@ -421,17 +427,19 @@ const PublicInvoiceApp = ({ hash }: Props) => {
 				</div>
 			) : null}
 
-			<div className="doublescale-invoice-renderer__toolbar">
-				<a
-					className="doublescale-invoice-renderer__download"
-					href={getPublicInvoicePdfUrl(hash)}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Download className="h-4 w-4" />
-					{__('Download PDF', 'doublescale')}
-				</a>
-			</div>
+			{!embedded ? (
+				<div className="doublescale-invoice-renderer__toolbar">
+					<a
+						className="doublescale-invoice-renderer__download"
+						href={getPublicInvoicePdfUrl(hash)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Download className="h-4 w-4" />
+						{__('Download PDF', 'doublescale')}
+					</a>
+				</div>
+			) : null}
 
 			<InvoiceDocumentPreview invoice={previewInvoice} />
 

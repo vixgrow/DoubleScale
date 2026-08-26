@@ -11,6 +11,7 @@ import {
 	CalendarIcon,
 	ContractDraftIcon,
 	DealsIcon,
+	DollerIcon,
 	GradientActivitiesIcon,
 	HelpdeskIcon,
 	InvoicesIcon,
@@ -49,7 +50,7 @@ const CARD_META: Record<
 	}
 > = {
 	outstanding_balance: {
-		icon: <DealsIcon width={32} height={32} />,
+		icon: <DollerIcon width={32} height={32} color="currentColor" />,
 		iconBgClass: 'bg-[#CB5301]',
 		iconColor: 'text-white',
 	},
@@ -210,19 +211,28 @@ const TIMELINE_ICON_SIZE = 24;
 const timelineActivityIcon = (item: PortalTimelineItem): ReactNode => {
 	if (item.kind === 'booking') {
 		return (
-			<CalendarIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<CalendarIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 
 	if (item.type === 'support_reply') {
 		return (
-			<HelpdeskIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<HelpdeskIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 
 	if (item.type.includes('project')) {
 		return (
-			<ProjectsIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<ProjectsIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 
@@ -348,8 +358,8 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 				{__('Dashboard', 'doublescale')}
 			</h1>
 
-			<div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-				<div className="space-y-6">
+			<div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px] xl:items-stretch">
+				<div className="min-w-0 space-y-6">
 					{cards.length > 0 && (
 						<div className={PORTAL_DASHBOARD_PANEL}>
 							<h2 className="mb-4 text-base font-semibold text-foreground">
@@ -371,28 +381,36 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 					</div>
 				</div>
 
-				<aside className={PORTAL_DASHBOARD_PANEL}>
-					<div className="mb-4">
+				{/*
+				 * xl+: match analytics+calendar height (h-0/min-h-full so this
+				 * column doesn't grow the grid row); scroll inside.
+				 */}
+				<aside
+					className={`${PORTAL_DASHBOARD_PANEL} flex min-h-0 flex-col overflow-hidden max-xl:max-h-[32rem] xl:h-0 xl:min-h-full`}
+				>
+					<div className="mb-4 shrink-0">
 						<h2 className="text-base font-semibold text-foreground">
 							{__('Recent activity', 'doublescale')}
 						</h2>
 					</div>
 
-					{loading && <Spinner />}
-					{!loading && error && <ErrorState message={error} />}
-					{!loading && !error && items.length === 0 && (
-						<RecentActivityEmpty />
-					)}
-					{!loading && !error && items.length > 0 && (
-						<ul className="space-y-3">
-							{items.map((item) => (
-								<TimelineRow
-									key={`${item.kind}-${item.id}`}
-									item={item}
-								/>
-							))}
-						</ul>
-					)}
+					<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+						{loading && <Spinner />}
+						{!loading && error && <ErrorState message={error} />}
+						{!loading && !error && items.length === 0 && (
+							<RecentActivityEmpty />
+						)}
+						{!loading && !error && items.length > 0 && (
+							<ul className="space-y-3">
+								{items.map((item) => (
+									<TimelineRow
+										key={`${item.kind}-${item.id}`}
+										item={item}
+									/>
+								))}
+							</ul>
+						)}
+					</div>
 				</aside>
 			</div>
 		</section>

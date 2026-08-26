@@ -24,11 +24,15 @@ import { ListsIcon, TagsIcon } from '@doublescale/components';
 type List = {
 	id: number;
 	name: string;
+	contacts_count?: number;
+	eligible_contacts_count?: number;
 };
 
 type Tag = {
 	id: number;
 	name: string;
+	contacts_count?: number;
+	eligible_contacts_count?: number;
 };
 
 type FilterRow = {
@@ -43,6 +47,7 @@ interface ContactFilterSectionProps {
 	onReset?: () => void;
 	onChange?: (rows: FilterRow[]) => void;
 	initialRows?: FilterRow[];
+	campaignType?: string;
 }
 
 export interface ContactFilterRef {
@@ -146,7 +151,7 @@ const formatSelectedLabel = (
 export const ContactFilterSection = forwardRef<
 	ContactFilterRef,
 	ContactFilterSectionProps
->(({ title, description, onReset, onChange, initialRows }, ref) => {
+>(({ title, description, onReset, onChange, initialRows, campaignType }, ref) => {
 	const [lists, setLists] = useState<List[]>([]);
 	const [tags, setTags] = useState<Tag[]>([]);
 	const [loadingLists, setLoadingLists] = useState(false);
@@ -172,11 +177,15 @@ export const ContactFilterSection = forwardRef<
 		setLoadingLists(true);
 		setError(null);
 		try {
+			const queryArgs: Record<string, string | number> = {
+				per_page: perPage,
+				page,
+			};
+			if (campaignType) {
+				queryArgs.campaign_type = campaignType;
+			}
 			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/lists', {
-					per_page: perPage,
-					page,
-				}),
+				path: addQueryArgs('/doublescale/v1/lists', queryArgs),
 			})) as { data: List[]; total: number };
 
 			if (page === 1) {
@@ -200,17 +209,21 @@ export const ContactFilterSection = forwardRef<
 		} finally {
 			setLoadingLists(false);
 		}
-	}, []);
+	}, [campaignType]);
 
 	const fetchTags = useCallback(async (page = 1) => {
 		setLoadingTags(true);
 		setError(null);
 		try {
+			const queryArgs: Record<string, string | number> = {
+				per_page: perPage,
+				page,
+			};
+			if (campaignType) {
+				queryArgs.campaign_type = campaignType;
+			}
 			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/tags', {
-					per_page: perPage,
-					page,
-				}),
+				path: addQueryArgs('/doublescale/v1/tags', queryArgs),
 			})) as { data: Tag[]; total: number };
 
 			if (page === 1) {
@@ -234,7 +247,7 @@ export const ContactFilterSection = forwardRef<
 		} finally {
 			setLoadingTags(false);
 		}
-	}, []);
+	}, [campaignType]);
 
 	useEffect(() => {
 		fetchLists(1);
@@ -314,6 +327,13 @@ export const ContactFilterSection = forwardRef<
 				? prev.filter((item) => item !== tagId)
 				: [...prev, tagId]
 		);
+	};
+
+	const getItemRecipientCount = (item: List | Tag) => {
+		if (campaignType && typeof item.eligible_contacts_count === 'number') {
+			return item.eligible_contacts_count;
+		}
+		return item.contacts_count;
 	};
 
 	const activeItems = activeTab === 'lists' ? filteredLists : filteredTags;
@@ -504,7 +524,17 @@ export const ContactFilterSection = forwardRef<
 												}
 											>
 												<Checkbox checked={checked} />
-												<span className="truncate">{item.name}</span>
+												<span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+													<span className="truncate">{item.name}</span>
+													{typeof getItemRecipientCount(item) ===
+														'number' && (
+														<span className="shrink-0 text-xs text-muted-foreground">
+															{getItemRecipientCount(
+																item
+															)?.toLocaleString()}
+														</span>
+													)}
+												</span>
 											</button>
 										);
 									})

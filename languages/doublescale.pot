@@ -13700,6 +13700,15 @@ msgstr ""
 msgid "Only step in this branch"
 msgstr ""
 
+msgid "Only subscribed contacts with a valid email address are included. Contacts without an email or with an unverified status are excluded."
+msgstr ""
+
+msgid "Only subscribed contacts with a valid phone number are included."
+msgstr ""
+
+msgid "Only subscribed contacts with a valid WhatsApp number are included."
+msgstr ""
+
 msgid "Only Support Managers can create tickets."
 msgstr ""
 
@@ -21257,6 +21266,9 @@ msgid "When enabled, the goal only completes if the specific cart that triggered
 msgstr ""
 
 msgid "When enabled, the WooCommerce phone number will also be saved as the contact WhatsApp number (E.164 format)."
+msgstr ""
+
+msgid "When set, each item includes eligible_contacts_count for that campaign channel."
 msgstr ""
 
 msgid "When the workflow is enabled, sending follows these rules for proposals, invoices, contracts, and credit notes."

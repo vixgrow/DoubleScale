@@ -12,6 +12,7 @@ interface ListTagFilterProps {
 	loading?: boolean;
 	onApplyingChange?: (isApplying: boolean) => void;
 	showBtns?: boolean;
+	campaignType?: string;
 }
 
 export default function ListTagFilter({
@@ -21,6 +22,7 @@ export default function ListTagFilter({
 	loading = false,
 	onApplyingChange,
 	showBtns = true,
+	campaignType,
 }: ListTagFilterProps) {
 	// Create refs to access the ContactFilterSection components
 	const includeFilterRef = useRef<{ resetFilters: () => void } | null>(null);
@@ -142,6 +144,7 @@ export default function ListTagFilter({
 				ref={includeFilterRef}
 				onChange={setIncludeData}
 				initialRows={includeData}
+				campaignType={campaignType}
 			/>
 			<div className="border-t border-border"></div>
 			<ContactFilterSection
@@ -150,6 +153,7 @@ export default function ListTagFilter({
 				ref={excludeFilterRef}
 				onChange={setExcludeData}
 				initialRows={excludeData.length > 0 ? excludeData : []}
+				campaignType={campaignType}
 			/>
 
 			{showBtns && (

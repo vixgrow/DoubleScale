@@ -620,7 +620,7 @@ const PortalBookingCard = ({
 	const locationValue = booking.location?.value || '—';
 
 	return (
-		<div className="rounded-xl border border-border bg-[#F7F8FA] w-80 p-4">
+		<div className="w-full min-w-0 rounded-xl border border-border bg-[#F7F8FA] p-4">
 			<div className="flex items-start gap-3">
 				<div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-border">
 					<div className="flex items-center justify-center bg-white px-1 py-2">

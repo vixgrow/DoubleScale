@@ -1167,7 +1167,7 @@ const DocumentsHome = () => {
 
 	return (
 		<section>
-			<div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+			<div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
 				<h2 className="text-2xl font-semibold text-foreground">
 					{__('Documents', 'doublescale')}
 				</h2>

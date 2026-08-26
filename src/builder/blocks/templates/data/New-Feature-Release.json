@@ -217,7 +217,7 @@
                   "id": "block-6",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\"><strong>Visualize your sales flow with Pipelines 🚀</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>Visualize your sales flow with Pipelines 🚀</strong></p>",
                     "hyperlink": "",
                     "fontSize": 24,
                     "color": "#333333",
@@ -259,7 +259,7 @@
                   "id": "block-8",
                   "type": "text",
                   "props": {
-                    "content": "<p style='text-align:center; line-height:1.6;'>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it</p>",
+                    "content": "<p style='text-align:center; line-height:1.6'>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it</p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",
@@ -313,7 +313,7 @@
                   "id": "block-10",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\"><strong>Here is how it changes your daily workflow:</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>Here is how it changes your daily workflow:</strong></p>",
                     "hyperlink": "",
                     "fontSize": 24,
                     "color": "#000000",
@@ -844,7 +844,7 @@
                   "id": "block-27",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy</p><p style=\"text-align:center;\"><strong>{{contact:first_name}}</strong></p><p style=\"text-align:center;\"><strong>{{general:business_name}}</strong></p>",
+                    "content": "<p style=\"text-align:center\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy</p><p style=\"text-align:center\"><strong>{{contact:first_name}}</strong></p><p style=\"text-align:center\"><strong>{{general:business_name}}</strong></p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",
@@ -885,7 +885,7 @@
                   "id": "block-29",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\">Questions or faq? Contact us at <strong>info@tootle.com.np</strong> or call us on our Toll Free Number</p><p style=\"text-align:center;\"><strong>1800 8467 5362 3562.</strong></p>",
+                    "content": "<p style=\"text-align:center\">Questions or faq? Contact us at <strong>info@tootle.com.np</strong> or call us on our Toll Free Number</p><p style=\"text-align:center\"><strong>1800 8467 5362 3562.</strong></p>",
                     "hyperlink": "",
                     "fontSize": 15,
                     "color": "#121212",

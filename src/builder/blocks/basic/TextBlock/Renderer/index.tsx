@@ -12,7 +12,10 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { TextBlockProps } from '..';
 import { generateRandomString } from '@/builder/utils/idGenerator';
 import { getHeadingConfig } from '@/builder/utils/styleHelpers';
-import { stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
+import {
+	stripInlineColorAndFontSize,
+	stripRichTextChromeColors,
+} from '@/builder/utils/stripRichTextChromeColors';
 
 function escapeHtml(raw: string): string {
 	return raw
@@ -63,7 +66,6 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	const ElementType = headingConfig.element as keyof JSX.IntrinsicElements;
 	const fontSize = props.fontSize;
 	const textColor = props.color?.trim() || '#333';
-	const linkColorResolved = props.linkColor?.trim() || '#458DC7';
 	const isRtl = props.textDirection === 'rtl';
 	const listPaddingProp = isRtl ? 'padding-right' : 'padding-left';
 
@@ -73,48 +75,16 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		props.content.includes('<') &&
 		props.content.includes('>');
 
-	// Clean content to remove conflicting font styles but preserve formatting
+	// Clean content: keep bold/italic/align, but never let a word keep its own
+	// color or size — those come from the block Font Color / font size controls.
 	const getCleanContent = () => {
 		if (!isHtmlContent) return props.content;
 
-		// If HTML formatting exists, preserve all styles and only clean up empty attributes
-		if (hasHtmlFormatting()) {
-			let cleanContent = props.content;
-			// Only clean up empty style attributes
-			cleanContent = cleanContent.replace(/style\s*=\s*""\s*/gi, '');
-			cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
-			cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
-			cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
-			return stripRichTextChromeColors(cleanContent, {
-				blockColor: textColor,
-			});
-		}
-
-		// If no HTML formatting, remove font-size and font-family to use props
-		let cleanContent = props.content;
-		cleanContent = cleanContent.replace(
-			/style\s*=\s*"[^"]*font-size[^"]*"/gi,
-			''
-		);
-		cleanContent = cleanContent.replace(
-			/style\s*=\s*"[^"]*font-family[^"]*"/gi,
-			''
-		);
-		cleanContent = cleanContent.replace(
-			/style\s*=\s*'[^']*font-size[^']*'/gi,
-			''
-		);
-		cleanContent = cleanContent.replace(
-			/style\s*=\s*'[^']*font-family[^']*'/gi,
-			''
-		);
-
-		// Clean up empty style attributes
+		let cleanContent = stripInlineColorAndFontSize(props.content);
 		cleanContent = cleanContent.replace(/style\s*=\s*""\s*/gi, '');
 		cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
-
 		return stripRichTextChromeColors(cleanContent, {
 			blockColor: textColor,
 		});
@@ -174,7 +144,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 			return;
 		}
 		onCanvasContentChange(
-			stripRichTextChromeColors(html, {
+			stripRichTextChromeColors(stripInlineColorAndFontSize(html), {
 				blockColor: textColor,
 			})
 		);
@@ -197,12 +167,16 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 
 	const syncCanvasEditorColors = (root: HTMLElement) => {
 		root.style.color = textColor;
-		// Headings follow the block "Font Color". Clear any baked-in inline color
-		// so the heading inherits the block color (per-word <span> colors, which
-		// are nested inside, keep their own color).
-		root.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((node) => {
-			(node as HTMLElement).style.color = textColor;
-		});
+		// Whole block follows Font Color — clear baked-in inline color on every
+		// text node (including strong/span/links). Partial-text color is not a
+		// text-block control.
+		root
+			.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div, span, strong, b, em, i, u, s, strike, a, font, li')
+			.forEach((node) => {
+				(node as HTMLElement).style.removeProperty('color');
+				(node as HTMLElement).style.removeProperty('font-size');
+				(node as HTMLElement).style.removeProperty('-webkit-text-fill-color');
+			});
 	};
 
 	useLayoutEffect(() => {
@@ -240,22 +214,17 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				}
 				.${rendererId} p,
 				.${rendererId} div,
-				.${rendererId} span {
-					font-size: ${fontSize}px !important;
-					font-family: ${props.fontFamily} !important;
-				}
-				/* Only apply font size/family to formatting tags if no HTML formatting exists */
-				${!hasHtmlFormatting()
-					? `
+				.${rendererId} span,
 				.${rendererId} strong,
+				.${rendererId} b,
 				.${rendererId} em,
+				.${rendererId} i,
 				.${rendererId} u,
-				.${rendererId} strike {
+				.${rendererId} s,
+				.${rendererId} strike,
+				.${rendererId} font {
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
-				}
-				`
-					: ''
 				}
 				.${rendererId} ul {
 					list-style-type: disc !important;
@@ -283,10 +252,10 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} a:link,
 				.${rendererId} a:visited,
 				.${rendererId} a:hover {
-					color: ${linkColorResolved};
+					color: ${textColor} !important;
 					text-decoration: underline !important;
 				}
-				/* Selected / contentEditable: headings must inherit block color (UA defaults are dark). */
+				/* Whole block follows Font Color — including bold, spans, and links. */
 				.${rendererId} [data-text-canvas-editor="true"] {
 					color: ${textColor} !important;
 					caret-color: ${textColor};
@@ -300,6 +269,13 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} [data-text-canvas-editor="true"] p,
 				.${rendererId} [data-text-canvas-editor="true"] li,
 				.${rendererId} [data-text-canvas-editor="true"] div,
+				.${rendererId} [data-text-canvas-editor="true"] span,
+				.${rendererId} [data-text-canvas-editor="true"] strong,
+				.${rendererId} [data-text-canvas-editor="true"] b,
+				.${rendererId} [data-text-canvas-editor="true"] em,
+				.${rendererId} [data-text-canvas-editor="true"] i,
+				.${rendererId} [data-text-canvas-editor="true"] u,
+				.${rendererId} [data-text-canvas-editor="true"] a,
 				.${rendererId} .text-block-html-root h1,
 				.${rendererId} .text-block-html-root h2,
 				.${rendererId} .text-block-html-root h3,
@@ -308,30 +284,22 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} .text-block-html-root h6,
 				.${rendererId} .text-block-html-root p,
 				.${rendererId} .text-block-html-root li,
-				.${rendererId} .text-block-html-root div {
-					/* Block-level *structural* text follows the block "Font Color"
-					   (the container color), overriding any baked-in inline color on
-					   these elements. !important is required so it beats inline
-					   color:#333. Deliberately scoped to structural containers only:
-					   inline carriers (<span>/<font>) AND inline formatting
-					   (<strong>/<em>) are NOT matched, so a per-selection toolbar
-					   color on bold/italic/spanned text wins. -webkit-text-fill-color
-					   stays non-!important so it never leaks over a nested span's
-					   own color. */
+				.${rendererId} .text-block-html-root div,
+				.${rendererId} .text-block-html-root span,
+				.${rendererId} .text-block-html-root strong,
+				.${rendererId} .text-block-html-root b,
+				.${rendererId} .text-block-html-root em,
+				.${rendererId} .text-block-html-root i,
+				.${rendererId} .text-block-html-root u,
+				.${rendererId} .text-block-html-root a {
 					color: inherit !important;
 					-webkit-text-fill-color: currentColor;
 				}
-				/* Only override font-size and font-family inline styles if no HTML formatting exists */
-				${!hasHtmlFormatting()
-					? `
 				.${rendererId} [style*="font-size"] {
 					font-size: ${fontSize}px !important;
 				}
 				.${rendererId} [style*="font-family"] {
 					font-family: ${props.fontFamily} !important;
-				}
-				`
-					: ''
 				}
 			`}</style>
 			<div

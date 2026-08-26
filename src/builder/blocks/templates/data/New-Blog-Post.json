@@ -94,7 +94,7 @@
 									"id": "block-3",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>📌 Guide to grow your business 📌</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>📌 Guide to grow your business 📌</strong></p>",
 										"hyperlink": "",
 										"fontSize": 34,
 										"color": "#000000",
@@ -125,7 +125,7 @@
 									"id": "block-4",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor. Fusce sollicitudin erat eu turpis fermentum, sit amet mattis mi malesuada. Vestibulum varius augue ut lacus aliquam, non bibendum libero cursus. Nulla facilisi. Sed id leo a dolor malesuada pellentesque. Curabitur feugiat, purus nec viverra sagittis, justo ex tincidunt velit, nec malesuada neque arcu vel libero.</p>",
+										"content": "<p style=\"text-align:center\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor. Fusce sollicitudin erat eu turpis fermentum, sit amet mattis mi malesuada. Vestibulum varius augue ut lacus aliquam, non bibendum libero cursus. Nulla facilisi. Sed id leo a dolor malesuada pellentesque. Curabitur feugiat, purus nec viverra sagittis, justo ex tincidunt velit, nec malesuada neque arcu vel libero.</p>",
 										"hyperlink": "",
 										"fontSize": 18,
 										"color": "#121212",
@@ -437,7 +437,7 @@
 									"id": "block-13",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
 										"hyperlink": "",
 										"fontSize": 24,
 										"color": "#FFFFFF",
@@ -624,7 +624,7 @@
 									"id": "block-17",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:left;\"><a href=\"#\" style=\"text-decoration: underline; font-weight: bold; color: #FFFFFF;\">Privacy</a><br><a href=\"#\" style=\"text-decoration: underline; font-weight: bold; color: #FFFFFF;\">Imprint</a><br><a href=\"{{contact:unsubscribe_link}}\" style=\"text-decoration: underline; font-weight: bold; color: #FFFFFF;\">Unsubscribe</a></p>",
+										"content": "<p style=\"text-align:left\"><a href=\"#\" style=\"text-decoration: underline; font-weight: bold\">Privacy</a><br><a href=\"#\" style=\"text-decoration: underline; font-weight: bold\">Imprint</a><br><a href=\"{{contact:unsubscribe_link}}\" style=\"text-decoration: underline; font-weight: bold\">Unsubscribe</a></p>",
 										"hyperlink": "",
 										"fontSize": 16,
 										"color": "#FFFFFF",

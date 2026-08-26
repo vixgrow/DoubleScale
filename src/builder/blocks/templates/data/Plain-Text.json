@@ -147,7 +147,7 @@
                   "id": "block-4",
                   "type": "text",
                   "props": {
-                    "content": "<h1 style=\"text-align:center; color: #386ADC; font-weight: 700;\">Hi There !</h1>",
+                    "content": "<h1 style=\"text-align:center; font-weight: 700\">Hi There !</h1>",
                     "hyperlink": "",
                     "fontSize": 60,
                     "color": "#386ADC",
@@ -189,7 +189,7 @@
                   "id": "block-6",
                   "type": "text",
                   "props": {
-                    "content": "<p><span style=\"color: #333333;\">Hello </span><strong style=\"color: #407BFF; font-weight: 700;\">{{contact:first_name}},</strong></p>",
+                    "content": "<p>Hello <strong style=\"font-weight: 700\">{{contact:first_name}},</strong></p>",
                     "hyperlink": "",
                     "fontSize": 24,
                     "color": "#333333",
@@ -241,7 +241,7 @@
                   "id": "block-8",
                   "type": "text",
                   "props": {
-                    "content": "<p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>",
+                    "content": "<p>✦ Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p>✦ Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p>✦ Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#333333",

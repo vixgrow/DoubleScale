@@ -19,7 +19,7 @@
                   "id": "block-1",
                   "type": "text",
                   "props": {
-                    "content": "<h1 style=\"text-align:center; color:#AE2253;\"><strong>Thank You for Joining</strong></h1>",
+                    "content": "<h1 style=\"text-align:center\"><strong>Thank You for Joining</strong></h1>",
                     "hyperlink": "",
                     "fontSize": 30,
                     "color": "#AE2253",
@@ -61,7 +61,7 @@
                   "id": "block-3",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\"><strong>Hello {{contact:first_name}}</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>Hello {{contact:first_name}}</strong></p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",
@@ -87,7 +87,7 @@
                   "id": "block-4",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s..</p>",
+                    "content": "<p style=\"text-align:center\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s..</p>",
                     "hyperlink": "",
                     "fontSize": 15,
                     "color": "#121212",
@@ -113,7 +113,7 @@
                   "id": "block-5",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>",
+                    "content": "<p style=\"text-align:center\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>",
                     "hyperlink": "",
                     "fontSize": 15,
                     "color": "#121212",
@@ -182,7 +182,7 @@
                   "id": "block-9",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",
@@ -238,7 +238,7 @@
                   "id": "block-11",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\"><a href=\"#\" style=\"color:#1EBDC0;\"><strong>Edit preferences </strong></a> | <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\" style=\"color:#1EBDC0;\"><strong>Unsubscribe</strong></a></p>",
+                    "content": "<p style=\"text-align:center\"><a href=\"#\"><strong>Edit preferences </strong></a> | <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong>Unsubscribe</strong></a></p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.18
+Stable tag: 1.3.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,13 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.19 = 26 Aug 2026
+- Revamp the client portal: document status filters, projects Kanban, helpdesk inbox, dashboard calendar, and mobile tab navigation
+- Group outstanding portal balances by currency instead of mixing amounts
+- Use only the email text-block color and font size (strip leftover inline styles)
+- Add Zapier integration setup instructions
+- Embed contract, invoice, and proposal views inside the portal
+
 = 1.3.18 = 26 Aug 2026
 - Fix IMAP inbox polling crash on PHP 8.1+ hosts that have the IMAP PHP extension installed
 

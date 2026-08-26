@@ -211,19 +211,28 @@ const TIMELINE_ICON_SIZE = 24;
 const timelineActivityIcon = (item: PortalTimelineItem): ReactNode => {
 	if (item.kind === 'booking') {
 		return (
-			<CalendarIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<CalendarIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 
 	if (item.type === 'support_reply') {
 		return (
-			<HelpdeskIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<HelpdeskIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 
 	if (item.type.includes('project')) {
 		return (
-			<ProjectsIcon width={TIMELINE_ICON_SIZE} height={TIMELINE_ICON_SIZE} />
+			<ProjectsIcon
+				width={TIMELINE_ICON_SIZE}
+				height={TIMELINE_ICON_SIZE}
+			/>
 		);
 	}
 

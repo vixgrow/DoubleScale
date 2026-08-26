@@ -1,6 +1,6 @@
 import { IconProps } from '@/types/booking';
 
-const ClockIcon: React.FC<IconProps> = ({ width = 20, height = 21 }) => {
+const ClockIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 	return (
 		<svg
 			width={width}

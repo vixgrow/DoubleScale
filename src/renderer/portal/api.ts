@@ -55,10 +55,10 @@ export const fetchTimeline = (
 		}),
 	});
 
-export type BookingFilter = 'upcoming' | 'past' | 'cancelled';
+export type BookingFilter = 'all' | 'upcoming' | 'past' | 'cancelled';
 
 export const fetchBookings = (
-	filter: BookingFilter
+	filter: BookingFilter = 'all'
 ): Promise<{ data: PortalBooking[] }> =>
 	apiFetch<{ data: PortalBooking[] }>({
 		path: addQueryArgs(`${PORTAL}/bookings`, { filter }),
@@ -88,7 +88,12 @@ export const fetchProjects = (): Promise<{ data: PortalProject[] }> =>
 export const fetchProject = (id: number): Promise<PortalProject> =>
 	apiFetch<PortalProject>({ path: `${PORTAL}/projects/${id}` });
 
-export type DocumentFilter = 'all' | 'invoice' | 'proposal' | 'contract' | 'credit_note';
+export type DocumentFilter =
+	| 'all'
+	| 'invoice'
+	| 'proposal'
+	| 'contract'
+	| 'credit_note';
 
 export const fetchDocuments = (
 	type: DocumentFilter = 'all'

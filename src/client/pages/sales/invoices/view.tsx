@@ -16,8 +16,6 @@ import {
 } from '../contact-sales-return';
 import {
 	CalendarIcon,
-	ContactTotalEmailsIcon,
-	CurrencyIcon,
 	DeleteIcon,
 	DollerIcon,
 	DownloadIcon,
@@ -25,10 +23,8 @@ import {
 	NovicesIcon,
 	NoticeBanner,
 	PanelLayout,
-	PurchaseHistoryIcon,
 	RecordIcon,
 	SendTestEmailIcon,
-	UserActivityIcon,
 	UserIcon,
 	WhatsAppIcon,
 } from '@doublescale/components';

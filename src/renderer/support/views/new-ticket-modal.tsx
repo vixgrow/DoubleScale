@@ -9,9 +9,24 @@
 
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { X, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import {
@@ -20,6 +35,11 @@ import {
 	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
+import {
+	CustomDialogHeader,
+	GradientTicketsIcon,
+} from '@doublescale/components';
+import { cn } from '@/lib/utils';
 
 import {
 	PortalNewTicketCustomFieldsBlock,
@@ -51,6 +71,13 @@ interface Props {
 	// id is sent as `mailbox_id`.
 	boxId?: number;
 }
+
+const PRIORITY_SWATCH: Record<TicketPriority, string> = {
+	low: 'bg-[#16A34A]',
+	normal: 'bg-[#0D9DFC]',
+	high: 'bg-[#CB5301]',
+	urgent: 'bg-[#DC2626]',
+};
 
 const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const mailboxes = usePortalMailboxes();
@@ -144,7 +171,8 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 			});
 			onCreated(ticket);
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : __('Submission failed.', 'doublescale');
+			const msg =
+				e instanceof Error ? e.message : __('Submission failed.', 'doublescale');
 			setError(msg);
 		} finally {
 			setSubmitting(false);
@@ -156,178 +184,218 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const showMailboxSelect = !boxId && mailboxes.data.length > 1;
 
 	return (
-		<div
-			className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/40 p-4"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="doublescale-portal-new-ticket-title"
-		>
-			<div className="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-xl">
-				<header className="mb-4 flex items-center justify-between">
-					<h3
-						id="doublescale-portal-new-ticket-title"
-						className="m-0 text-lg font-semibold"
-					>
-						{__('Open a new ticket', 'doublescale')}
-					</h3>
-					<button
-						type="button"
-						onClick={onClose}
-						aria-label={__('Close', 'doublescale')}
-						className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-					>
-						<X width={18} height={18} />
-					</button>
-				</header>
-
-				<div className="space-y-4">
-					<div>
-						<label
-							htmlFor="doublescale-portal-title"
-							className="m-0 mb-1 block text-sm font-medium"
-						>
-							{__('Subject', 'doublescale')}
-						</label>
-						<input
-							id="doublescale-portal-title"
-							type="text"
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-							placeholder={__(
-								'Briefly describe your issue',
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent
+				className={cn(
+					'z-[150200] !flex !flex-col bg-white',
+					'mx-1 w-[calc(100%-2rem)] max-w-5xl max-h-[calc(100dvh-2rem)]',
+					'gap-0 overflow-hidden rounded-2xl p-0 sm:mx-auto sm:w-full'
+				)}
+				overlayClassName="bg-black/40 backdrop-blur-sm"
+			>
+				<DialogHeader className="shrink-0 space-y-0 bg-white px-4 pt-4 text-left sm:px-6 sm:pt-6">
+					<DialogTitle className="text-left">
+						<CustomDialogHeader
+							title={__('Create New Ticket', 'doublescale')}
+							subtitle={__(
+								'Provide a brief summary of the issue. Be specific so your team can quickly understand and prioritize it.',
 								'doublescale'
 							)}
+							icon={<GradientTicketsIcon width={20} height={20} />}
 						/>
-					</div>
+					</DialogTitle>
+				</DialogHeader>
 
-					{showMailboxSelect && (
-						<div>
-							<label
-								htmlFor="doublescale-portal-mailbox"
-								className="m-0 mb-1 block text-sm font-medium"
-							>
-								{__('Department', 'doublescale')}
-							</label>
-							<select
-								id="doublescale-portal-mailbox"
-								value={mailboxId ?? ''}
-								onChange={(e) =>
-									setMailboxId(
-										e.target.value
-											? Number(e.target.value)
-											: undefined
-									)
-								}
-								className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-							>
-								<option value="">
-									{__('Auto-select', 'doublescale')}
-								</option>
-								{mailboxes.data.map((m) => (
-									<option key={m.id} value={m.id}>
-										{m.name}
-									</option>
-								))}
-							</select>
+				<div className="flex min-h-0 flex-1 flex-col">
+					<div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-6">
+						<div className="space-y-4 rounded-lg border border-border bg-[#F7F8FA] p-4 sm:p-5">
+							<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+								<div className="min-w-0 space-y-2">
+									<Label
+										htmlFor="doublescale-portal-title"
+										className="text-sm font-medium text-foreground"
+									>
+										{__('Title', 'doublescale')}
+										<span className="text-destructive"> *</span>
+									</Label>
+									<Input
+										id="doublescale-portal-title"
+										type="text"
+										value={title}
+										onChange={(e) => setTitle(e.target.value)}
+										placeholder={__('Title', 'doublescale')}
+										className="bg-white"
+									/>
+								</div>
+
+								<div className="min-w-0 space-y-2">
+									<p className="m-0 text-sm font-medium text-foreground">
+										{__('Priority', 'doublescale')}
+										<span className="text-destructive"> *</span>
+									</p>
+									<div className="flex flex-wrap gap-2">
+										{TICKET_PRIORITIES.map((p) => {
+											const selected = priority === p;
+											return (
+												<button
+													key={p}
+													type="button"
+													onClick={() => setPriority(p)}
+													className={`inline-flex items-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm font-medium transition ${
+														selected
+															? 'border-primary text-primary ring-1 ring-primary'
+															: 'border-border text-foreground hover:border-primary/40'
+													}`}
+												>
+													<span
+														className={`h-3.5 w-3.5 shrink-0 rounded-sm ${PRIORITY_SWATCH[p]}`}
+														aria-hidden
+													/>
+													{PRIORITY_LABELS[p]}
+												</button>
+											);
+										})}
+									</div>
+								</div>
+							</div>
+
+							{showMailboxSelect && (
+								<div className="min-w-0 space-y-2">
+									<Label
+										htmlFor="doublescale-portal-mailbox"
+										className="text-sm font-medium text-foreground"
+									>
+										{__('Department', 'doublescale')}
+									</Label>
+									<Select
+										value={
+											mailboxId === undefined
+												? 'auto'
+												: String(mailboxId)
+										}
+										onValueChange={(value) =>
+											setMailboxId(
+												value === 'auto'
+													? undefined
+													: Number(value)
+											)
+										}
+									>
+										<SelectTrigger
+											id="doublescale-portal-mailbox"
+											className="h-10 w-full rounded-lg bg-white"
+										>
+											<SelectValue
+												placeholder={__(
+													'Auto-select',
+													'doublescale'
+												)}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="auto">
+												{__('Auto-select', 'doublescale')}
+											</SelectItem>
+											{mailboxes.data.map((m) => (
+												<SelectItem
+													key={m.id}
+													value={String(m.id)}
+												>
+													{m.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{portalConfig?.custom_fields_enabled && (
+								<PortalNewTicketCustomFieldsBlock
+									scope="portal"
+									context={{
+										title,
+										content,
+										priority,
+									}}
+									customData={customData}
+									onCustomDataChange={setCustomData}
+									errors={customFieldsErrors}
+									onErrorsChange={setCustomFieldsErrors}
+									onDefinitionsChange={setCustomFieldDefs}
+								/>
+							)}
+
+							<div>
+								<label
+									htmlFor="doublescale-portal-content"
+									className="m-0 mb-1.5 block text-sm font-medium text-foreground"
+								>
+									{__('Opening message', 'doublescale')}
+									<span className="text-destructive"> *</span>
+								</label>
+								<div className="overflow-hidden rounded-lg [&_.editor-inner]:min-h-[140px] [&_.editor-input]:min-h-[140px]">
+									<SupportRichText
+										message={content}
+										onChange={setContent}
+										placeholder={__(
+											'Tell us what we can help with…',
+											'doublescale'
+										)}
+									/>
+								</div>
+								<AttachmentUploader
+									pending={pendingAttachments}
+									uploading={uploading}
+									disabled={submitting}
+									maxFileCount={
+										portalConfig?.attachment_limits?.max_file_count
+									}
+									maxFileSizeBytes={
+										portalConfig?.attachment_limits
+											?.max_file_size_bytes
+									}
+									onValidationError={setError}
+									onSelect={handleAttachmentSelect}
+									onRemove={(hash) =>
+										setPendingAttachments((prev) =>
+											removePendingByHash(prev, hash)
+										)
+									}
+								/>
+							</div>
+
+							{error && (
+								<div className="rounded border border-destructive/30 bg-destructive/5 p-2 text-sm text-destructive">
+									{error}
+								</div>
+							)}
 						</div>
-					)}
-
-					<div>
-						<label
-							htmlFor="doublescale-portal-priority"
-							className="m-0 mb-1 block text-sm font-medium"
-						>
-							{__('Priority', 'doublescale')}
-						</label>
-						<select
-							id="doublescale-portal-priority"
-							value={priority}
-							onChange={(e) =>
-								setPriority(e.target.value as TicketPriority)
-							}
-							className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-						>
-							{TICKET_PRIORITIES.map((p) => (
-								<option key={p} value={p}>
-									{PRIORITY_LABELS[p]}
-								</option>
-							))}
-						</select>
 					</div>
 
-					{portalConfig?.custom_fields_enabled && (
-						<PortalNewTicketCustomFieldsBlock
-							scope="portal"
-							context={{
-								title,
-								content,
-								priority,
-							}}
-							customData={customData}
-							onCustomDataChange={setCustomData}
-							errors={customFieldsErrors}
-							onErrorsChange={setCustomFieldsErrors}
-							onDefinitionsChange={setCustomFieldDefs}
-						/>
-					)}
-
-					<div>
-						<label
-							htmlFor="doublescale-portal-content"
-							className="m-0 mb-1 block text-sm font-medium"
-						>
-							{__('Message', 'doublescale')}
-						</label>
-						<SupportRichText
-							message={content}
-							onChange={setContent}
-							placeholder={__(
-								'Tell us what we can help with…',
-								'doublescale'
-							)}
-						/>
-						<AttachmentUploader
-							pending={pendingAttachments}
-							uploading={uploading}
+					<DialogFooter className="shrink-0 flex-row justify-end gap-3 bg-white px-4 py-4 sm:space-x-0 sm:px-6">
+						<Button
+							type="button"
+							variant="secondaryDeepBlue"
+							onClick={onClose}
 							disabled={submitting}
-							maxFileCount={
-								portalConfig?.attachment_limits?.max_file_count
-							}
-							maxFileSizeBytes={
-								portalConfig?.attachment_limits
-									?.max_file_size_bytes
-							}
-							onValidationError={setError}
-							onSelect={handleAttachmentSelect}
-							onRemove={(hash) =>
-								setPendingAttachments((prev) =>
-									removePendingByHash(prev, hash)
-								)
-							}
-						/>
-					</div>
-
-					{error && (
-						<div className="rounded border border-destructive/30 bg-destructive/5 p-2 text-sm text-destructive">
-							{error}
-						</div>
-					)}
+							className="rounded-lg"
+						>
+							{__('Cancel', 'doublescale')}
+						</Button>
+						<Button
+							type="button"
+							onClick={handleSubmit}
+							disabled={submitting}
+							className="rounded-lg bg-[#2D3282] px-4 hover:bg-[#2D3282]/90"
+						>
+							{submitting
+								? __('Creating…', 'doublescale')
+								: __('Create Ticket', 'doublescale')}
+						</Button>
+					</DialogFooter>
 				</div>
-
-				<footer className="mt-6 flex justify-end gap-2">
-					<Button variant="outline" onClick={onClose} disabled={submitting}>
-						{__('Cancel', 'doublescale')}
-					</Button>
-					<Button onClick={handleSubmit} disabled={submitting}>
-						<Send width={14} height={14} className="mr-1" />
-						{submitting
-							? __('Submitting…', 'doublescale')
-							: __('Submit ticket', 'doublescale')}
-					</Button>
-				</footer>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

@@ -99,39 +99,6 @@ final class Module extends AbstractModule {
 		// portal page exists. Falls through to the admin URL otherwise, so
 		// nothing breaks when no portal page is published.
 		add_filter( 'doublescale_booking_details_url', array( $this, 'filter_booking_details_url' ), 10, 2 );
-
-		// The Calendar is the one section the host shell owns (it aggregates
-		// across modules rather than belonging to one). Registered here so it
-		// sits alongside the module-contributed sections in the nav.
-		add_filter( 'doublescale_portal_sections', array( $this, 'register_calendar_section' ) );
-	}
-
-	/**
-	 * Contribute the aggregate Calendar section descriptor.
-	 *
-	 * Gated on at least one contributing source being active so a site with
-	 * neither Booking nor released Sales documents (nor Support) doesn't show a
-	 * permanently empty Calendar tab — matching how every other section gates
-	 * itself. When a source is active but the contact has no dated items, the
-	 * tab still shows with an empty-month grid (portal empty-state discipline).
-	 *
-	 * @param array<int, array<string, mixed>> $sections Section descriptors.
-	 * @return array<int, array<string, mixed>>
-	 */
-	public function register_calendar_section( array $sections ): array {
-		$sections[] = array(
-			'slug'         => 'calendar',
-			'label'        => __( 'Calendar', 'doublescale' ),
-			'icon'         => 'calendar',
-			'order'        => 5,
-			'is_available' => static function () {
-				return doublescale_is_module_active( 'booking' )
-					|| doublescale_sales_documents_ready()
-					|| doublescale_is_module_active( 'support' );
-			},
-		);
-
-		return $sections;
 	}
 
 	/**

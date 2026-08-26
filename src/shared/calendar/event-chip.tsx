@@ -30,7 +30,7 @@ const EventChip = ({ event, onSelect }: EventChipProps) => {
 	};
 
 	const baseCls =
-		'block w-full truncate rounded px-1.5 py-0.5 text-left text-xs font-medium leading-tight transition-opacity';
+		'block w-full truncate rounded-lg px-2 py-1 text-left text-xs font-medium leading-tight transition-opacity';
 	const interactive = clickable
 		? 'cursor-pointer hover:opacity-90'
 		: 'cursor-default';
@@ -44,10 +44,6 @@ const EventChip = ({ event, onSelect }: EventChipProps) => {
 				title={event.title}
 				className={`${baseCls} ${interactive} flex items-center gap-1.5 ${tone.solid} disabled:cursor-default disabled:opacity-100`}
 			>
-				<span
-					className="h-2 w-2 shrink-0 rounded-full bg-white/90"
-					aria-hidden="true"
-				/>
 				<span className="truncate">{event.title}</span>
 			</button>
 		);

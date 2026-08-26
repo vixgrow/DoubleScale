@@ -14,12 +14,20 @@ import SupportPortalApp from '../../../support/app';
 import type { PortalConfig as SupportPortalConfig } from '../../../support/types';
 import { getPortalConfig } from '../../config';
 import { EmptyState } from '../../shared/ui';
+import { GradientTicketsIcon } from '@doublescale/components';
+import { __ } from '@wordpress/i18n';
 
 const TicketsApp = () => {
 	const { ticketId } = useParams();
 	const cfg = getPortalConfig();
 	if (!cfg) {
-		return <EmptyState title="Support unavailable" />;
+		return (
+			<EmptyState
+				title={__('No support tickets found yet', 'doublescale')}
+				description={__('Create, track, and resolve support tickets with ease.', 'doublescale')}
+				icon={<GradientTicketsIcon width={40} height={40} />}
+			/>
+		);
 	}
 
 	const supportConfig = {

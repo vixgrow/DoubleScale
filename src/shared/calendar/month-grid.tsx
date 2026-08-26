@@ -8,7 +8,7 @@
  * cell regardless of the viewer's offset.
  *
  * Days with more than {@link MAX_PER_CELL} events show a "+N more" control that
- * expands the cell to list the rest (and collapses again via "Show less").
+ * opens a modal listing every event for that day.
  */
 
 import { useState } from '@wordpress/element';
@@ -18,6 +18,7 @@ import { format, isSameMonth, isToday } from 'date-fns';
 import type { CalendarEvent } from './types';
 import { eventDayKey } from './dates';
 import EventChip from './event-chip';
+import MoreEventsModal from './more-events-modal';
 import {
 	DEFAULT_WEEK_STARTS_ON,
 	getWeekdayLabels,
@@ -39,6 +40,11 @@ export interface MonthGridProps {
 	weekStartsOn?: WeekStartsOn | number;
 }
 
+interface MoreEventsState {
+	date: Date;
+	events: CalendarEvent[];
+}
+
 const MonthGrid = ({
 	days,
 	cursor,
@@ -47,7 +53,7 @@ const MonthGrid = ({
 	weekStartsOn = DEFAULT_WEEK_STARTS_ON,
 }: MonthGridProps) => {
 	const weekdayLabels = getWeekdayLabels(normalizeWeekStartsOn(weekStartsOn));
-	const [expandedDay, setExpandedDay] = useState<string | null>(null);
+	const [moreEvents, setMoreEvents] = useState<MoreEventsState | null>(null);
 
 	// Bucket events by civil day once.
 	const byDay = new Map<string, CalendarEvent[]>();
@@ -62,85 +68,92 @@ const MonthGrid = ({
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-			<div className="grid grid-cols-7 border-b border-border bg-muted/40">
-				{weekdayLabels.map((label, index) => (
-					<div
-						key={`${label}-${index}`}
-						className="px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-					>
-						{label}
-					</div>
-				))}
-			</div>
-			<div className="grid grid-cols-7">
-				{days.map((day) => {
-					const key = format(day, 'yyyy-MM-dd');
-					const dayEvents = byDay.get(key) ?? [];
-					const inMonth = isSameMonth(day, cursor);
-					const today = isToday(day);
-					const isExpanded = expandedDay === key;
-					const visibleEvents = isExpanded
-						? dayEvents
-						: dayEvents.slice(0, MAX_PER_CELL);
-					const overflow = dayEvents.length - MAX_PER_CELL;
-
-					return (
+		<>
+			<div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+				<div className="grid grid-cols-7 border-b border-border bg-muted/40">
+					{weekdayLabels.map((label, index) => (
 						<div
-							key={key}
-							className={`min-h-[6.5rem] border-b border-r border-border p-1.5 last:border-r-0 ${
-								inMonth ? '' : 'bg-muted/30'
-							} ${isExpanded ? 'relative z-10 bg-card shadow-md' : ''}`}
+							key={`${label}-${index}`}
+							className="px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
 						>
-							<div className="mb-1 flex justify-end">
-								<span
-									className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-										today
-											? 'bg-primary font-semibold text-primary-foreground'
-											: inMonth
-												? 'text-foreground'
-												: 'text-muted-foreground'
-									}`}
-								>
-									{format(day, 'd')}
-								</span>
-							</div>
-							<div className="space-y-1">
-								{visibleEvents.map((event) => (
-									<EventChip
-										key={event.id}
-										event={event}
-										onSelect={onSelect}
-									/>
-								))}
-								{!isExpanded && overflow > 0 ? (
-									<button
-										type="button"
-										onClick={() => setExpandedDay(key)}
-										className="w-full rounded px-1 py-0.5 text-left text-xs font-medium text-primary hover:bg-primary/10"
-									>
-										{sprintf(
-											// translators: %d is the number of additional events.
-											__('+%d more', 'doublescale'),
-											overflow
-										)}
-									</button>
-								) : null}
-								{isExpanded && overflow > 0 ? (
-									<button
-										type="button"
-										onClick={() => setExpandedDay(null)}
-										className="w-full rounded px-1 py-0.5 text-left text-xs font-medium text-muted-foreground hover:bg-muted"
-									>
-										{__('Show less', 'doublescale')}
-									</button>
-								) : null}
-							</div>
+							{label}
 						</div>
-					);
-				})}
+					))}
+				</div>
+				<div className="grid grid-cols-7">
+					{days.map((day) => {
+						const key = format(day, 'yyyy-MM-dd');
+						const dayEvents = byDay.get(key) ?? [];
+						const inMonth = isSameMonth(day, cursor);
+						const today = isToday(day);
+						const visibleEvents = dayEvents.slice(0, MAX_PER_CELL);
+						const overflow = dayEvents.length - MAX_PER_CELL;
+
+						return (
+							<div
+								key={key}
+								className={`min-h-[6.5rem] border-b border-r border-border p-1.5 last:border-r-0 ${
+									inMonth ? '' : 'bg-muted/30'
+								}`}
+							>
+								<div className="mb-1 flex justify-end">
+									<span
+										className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+											today
+												? 'border border-primary bg-[#EEEEFF] font-semibold text-primary'
+												: inMonth
+													? 'text-foreground'
+													: 'text-muted-foreground'
+										}`}
+									>
+										{format(day, 'd')}
+									</span>
+								</div>
+								<div className="space-y-1">
+									{visibleEvents.map((event) => (
+										<EventChip
+											key={event.id}
+											event={event}
+											onSelect={onSelect}
+										/>
+									))}
+									{overflow > 0 ? (
+										<button
+											type="button"
+											onClick={() =>
+												setMoreEvents({
+													date: day,
+													events: dayEvents,
+												})
+											}
+											className="w-full rounded-lg bg-[#EEEEFF] px-2 py-1 text-left text-xs font-medium text-primary hover:bg-primary/10"
+										>
+											{sprintf(
+												// translators: %d is the number of additional events.
+												__('+%d more', 'doublescale'),
+												overflow
+											)}
+										</button>
+									) : null}
+								</div>
+							</div>
+						);
+					})}
+				</div>
 			</div>
-		</div>
+
+			<MoreEventsModal
+				open={moreEvents !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setMoreEvents(null);
+					}
+				}}
+				date={moreEvents?.date ?? null}
+				events={moreEvents?.events ?? []}
+				onSelect={onSelect}
+			/>
+		</>
 	);
 };
 

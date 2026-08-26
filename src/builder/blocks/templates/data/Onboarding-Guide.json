@@ -185,9 +185,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderTop": "1px solid #E2E2E2",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"borderRadius": "40px 40px 0px 0px",
 						"padding": "28px 24px 10px 24px",
 						"margin": "12px 32px 0px 32px",
@@ -312,8 +309,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -351,8 +346,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -476,8 +469,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -515,8 +506,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -640,8 +629,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -679,8 +666,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -804,9 +789,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
-						"borderBottom": "1px solid #E2E2E2",
 						"borderRadius": "0px 0px 40px 40px",
 						"padding": "14px 24px 24px 24px",
 						"margin": "0px 32px 16px 32px",

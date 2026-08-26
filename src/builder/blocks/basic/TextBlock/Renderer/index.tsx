@@ -14,6 +14,7 @@ import { generateRandomString } from '@/builder/utils/idGenerator';
 import { getHeadingConfig } from '@/builder/utils/styleHelpers';
 import {
 	stripInlineColorAndFontSize,
+	stripListInlineTextAlign,
 	stripRichTextChromeColors,
 } from '@/builder/utils/stripRichTextChromeColors';
 
@@ -80,7 +81,9 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 	const getCleanContent = () => {
 		if (!isHtmlContent) return props.content;
 
-		let cleanContent = stripInlineColorAndFontSize(props.content);
+		let cleanContent = stripListInlineTextAlign(
+			stripInlineColorAndFontSize(props.content)
+		);
 		cleanContent = cleanContent.replace(/style\s*=\s*""\s*/gi, '');
 		cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
@@ -144,9 +147,12 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 			return;
 		}
 		onCanvasContentChange(
-			stripRichTextChromeColors(stripInlineColorAndFontSize(html), {
-				blockColor: textColor,
-			})
+			stripRichTextChromeColors(
+				stripListInlineTextAlign(stripInlineColorAndFontSize(html)),
+				{
+					blockColor: textColor,
+				}
+			)
 		);
 	};
 
@@ -228,25 +234,38 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				}
 				.${rendererId} ul {
 					list-style-type: disc !important;
+					list-style-position: ${
+						props.textAlign === 'center' || props.textAlign === 'right'
+							? 'inside'
+							: 'outside'
+					} !important;
 					${listPaddingProp}: 20px !important;
 					padding-${isRtl ? 'left' : 'right'}: 0 !important;
 					margin: 10px 0 !important;
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
+					text-align: inherit !important;
 				}
 				.${rendererId} ol {
 					list-style-type: decimal !important;
+					list-style-position: ${
+						props.textAlign === 'center' || props.textAlign === 'right'
+							? 'inside'
+							: 'outside'
+					} !important;
 					${listPaddingProp}: 20px !important;
 					padding-${isRtl ? 'left' : 'right'}: 0 !important;
 					margin: 10px 0 !important;
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
+					text-align: inherit !important;
 				}
 				.${rendererId} li {
 					display: list-item !important;
 					margin: 5px 0 !important;
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
+					text-align: inherit !important;
 				}
 				.${rendererId} a,
 				.${rendererId} a:link,
@@ -309,14 +328,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 						fontSize: fontSize,
 						color: textColor,
 						direction: isRtl ? 'rtl' : 'ltr',
-						// Only apply textAlign from props if HTML doesn't have its own text-align
-						...(hasHtmlFormatting() &&
-							props.content.includes('text-align')
-							? {}
-							: {
-								textAlign:
-									props.textAlign as React.CSSProperties['textAlign'],
-							}),
+						textAlign:
+							props.textAlign as React.CSSProperties['textAlign'],
 						fontFamily: props.fontFamily,
 						// Only apply formatting styles if no HTML formatting exists
 						...(hasHtmlFormatting()

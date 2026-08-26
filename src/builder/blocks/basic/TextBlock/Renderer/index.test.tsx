@@ -135,4 +135,22 @@ describe('TextRenderer canvas editing → store commit', () => {
 		expect(onCanvasContentChange).toHaveBeenCalledTimes(1);
 		expect(onCanvasContentChange.mock.calls[0][0]).toContain('One two three');
 	});
+
+	it('keeps block text-align on the wrapper when content is a centered ordered list', () => {
+		const { container } = render(
+			<TextRenderer
+				props={{
+					...baseProps,
+					textAlign: 'center',
+					lineHeight: '2',
+					content:
+						'<ol style="text-align: left"><li>First</li></ol>',
+				}}
+			/>
+		);
+
+		const wrapper = container.querySelector('[style*="text-align"]');
+		expect(wrapper).toBeTruthy();
+		expect((wrapper as HTMLElement).style.textAlign).toBe('center');
+	});
 });

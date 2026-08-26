@@ -122,3 +122,36 @@ export function stripInlineColorAndFontSize(html: string): string {
 
 	return unwrapBareSpans(out);
 }
+
+/**
+ * Drop `text-align` on lists so they inherit the text-block alignment control.
+ *
+ * `insertOrderedList` / `insertUnorderedList` (with styleWithCSS) often bake
+ * `text-align: left` onto `<ol>`/`<ul>`/`<li>`. The canvas then treats that as
+ * "HTML has its own align" and skips the block control, while the sent email
+ * still uses the wrapper `text-align` — lists look left in the builder and
+ * centered (or whatever the block is) in the inbox.
+ */
+export function stripListInlineTextAlign(html: string): string {
+	if (!html || !/<(ol|ul|li)\b/i.test(html) || !html.includes('text-align')) {
+		return html;
+	}
+
+	return html.replace(
+		/<(ol|ul|li)(\s[^>]*)?>/gi,
+		(full, tag: string, attrs: string = '') => {
+			if (!/style\s*=/i.test(attrs)) {
+				return full;
+			}
+			const next = mapStyleAttributes(attrs, (style) => {
+				const kept = style
+					.split(';')
+					.map((s) => s.trim())
+					.filter(Boolean)
+					.filter((decl) => !/^text-align\s*:/i.test(decl));
+				return kept.length ? kept.join('; ') : null;
+			});
+			return `<${tag}${next}>`;
+		}
+	);
+}

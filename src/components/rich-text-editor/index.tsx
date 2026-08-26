@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 import { LinkDialog, LinkData } from './LinkDialog';
 import { MerageTagsIcon } from '@doublescale/components';
 import MergeTagsSelector from '@/components/merge-tags';
-import { stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
+import { stripListInlineTextAlign, stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
 import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import {
 	LinkTriggerPickerDialog,
@@ -96,7 +96,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	const emitContent = (html: string) => {
-		onChange(stripRichTextChromeColors(html, { blockColor: bodyColor }));
+		onChange(
+			stripRichTextChromeColors(stripListInlineTextAlign(html), {
+				blockColor: bodyColor,
+			})
+		);
 	};
 	const [selectedColor, setSelectedColor] = useState(bodyColor);
 	useEffect(() => {
@@ -362,6 +366,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		} else {
 			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand(command, false, value);
+		}
+
+		if (
+			command === 'insertUnorderedList' ||
+			command === 'insertOrderedList'
+		) {
+			root.querySelectorAll('ol, ul, li').forEach((el) => {
+				(el as HTMLElement).style.removeProperty('text-align');
+			});
 		}
 
 		emitContent(root.innerHTML);
@@ -946,48 +959,52 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 					<div className={toolbarSep} />
 
-					{/* Text alignment */}
-					<Button
-						variant="ghost"
-						size="sm"
-						className={toolbarIconBtn(activeFormats.justifyLeft)}
-						onClick={() => executeCommand('justifyLeft')}
-						onMouseDown={(e) => e.preventDefault()}
-					>
-						<AlignLeft className="h-4 w-4" />
-					</Button>
+					{!isCanvasFormat && (
+						<>
+							{/* Text alignment — block-level in the email builder */}
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(activeFormats.justifyLeft)}
+								onClick={() => executeCommand('justifyLeft')}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<AlignLeft className="h-4 w-4" />
+							</Button>
 
-					<Button
-						variant="ghost"
-						size="sm"
-						className={toolbarIconBtn(activeFormats.justifyCenter)}
-						onClick={() => executeCommand('justifyCenter')}
-						onMouseDown={(e) => e.preventDefault()}
-					>
-						<AlignCenter className="h-4 w-4" />
-					</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(activeFormats.justifyCenter)}
+								onClick={() => executeCommand('justifyCenter')}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<AlignCenter className="h-4 w-4" />
+							</Button>
 
-					<Button
-						variant="ghost"
-						size="sm"
-						className={toolbarIconBtn(activeFormats.justifyRight)}
-						onClick={() => executeCommand('justifyRight')}
-						onMouseDown={(e) => e.preventDefault()}
-					>
-						<AlignRight className="h-4 w-4" />
-					</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(activeFormats.justifyRight)}
+								onClick={() => executeCommand('justifyRight')}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<AlignRight className="h-4 w-4" />
+							</Button>
 
-					<Button
-						variant="ghost"
-						size="sm"
-						className={toolbarIconBtn(activeFormats.justifyFull)}
-						onClick={() => executeCommand('justifyFull')}
-						onMouseDown={(e) => e.preventDefault()}
-					>
-						<AlignJustify className="h-4 w-4" />
-					</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(activeFormats.justifyFull)}
+								onClick={() => executeCommand('justifyFull')}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<AlignJustify className="h-4 w-4" />
+							</Button>
 
-					<div className={toolbarSep} />
+							<div className={toolbarSep} />
+						</>
+					)}
 
 					{/* Lists */}
 					<Button

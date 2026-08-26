@@ -89,6 +89,7 @@ class TextBlock extends EmailBlock {
 		// Per-word color/size is not a text-block control — drop it so Font Color
 		// and font size apply to the whole block (matches the builder).
 		$content = $this->strip_inline_color_and_size( $content );
+		$content = $this->strip_list_inline_text_align( $content );
 
 		// Get font size based on heading style (matches frontend getFontSize)
 		// Ensure fontSize is an integer (remove 'px' suffix if present)
@@ -169,6 +170,7 @@ class TextBlock extends EmailBlock {
 				'color'       => $props['color'],
 			)
 		);
+		$content = $this->inject_list_alignment_styles( $content, (string) $props['textAlign'], $text_direction );
 
 		return "<div dir=\"" . esc_attr( $text_direction ) . "\" style=\"{$style_string}\">{$content}</div>";
 	}
@@ -216,6 +218,111 @@ class TextBlock extends EmailBlock {
 	}
 
 	/**
+	 * Remove inline text-align from lists so they inherit the block alignment.
+	 *
+	 * Browsers often persist `text-align:left` on `<ol>`/`<ul>` after list
+	 * commands; Gmail then ignores it and uses the wrapper, so the builder and
+	 * the sent email disagree.
+	 *
+	 * @param string $content HTML content
+	 * @return string
+	 */
+	private function strip_list_inline_text_align( string $content ): string {
+		if ( false === stripos( $content, '<ol' ) && false === stripos( $content, '<ul' ) && false === stripos( $content, '<li' ) ) {
+			return $content;
+		}
+
+		$replaced = preg_replace_callback(
+			'/<(ol|ul|li)(\s[^>]*)?>/i',
+			static function ( $matches ) {
+				$tag   = $matches[1];
+				$attrs = $matches[2] ?? '';
+				if ( '' === $attrs || false === stripos( $attrs, 'text-align' ) ) {
+					return $matches[0];
+				}
+
+				$attrs = preg_replace_callback(
+					'/style\s*=\s*(["\'])(.*?)\1/i',
+					static function ( $style_matches ) {
+						$quote = $style_matches[1];
+						$decls = preg_split( '/;/', $style_matches[2] );
+						$kept  = array();
+						foreach ( $decls as $decl ) {
+							$decl = trim( $decl );
+							if ( '' === $decl ) {
+								continue;
+							}
+							if ( preg_match( '/^text-align\s*:/i', $decl ) ) {
+								continue;
+							}
+							$kept[] = $decl;
+						}
+						if ( empty( $kept ) ) {
+							return '';
+						}
+						return 'style=' . $quote . implode( '; ', $kept ) . $quote;
+					},
+					$attrs
+				);
+
+				return '<' . $tag . $attrs . '>';
+			},
+			$content
+		);
+
+		return is_string( $replaced ) ? $replaced : $content;
+	}
+
+	/**
+	 * Apply block alignment to lists so email clients match the canvas.
+	 *
+	 * @param string $content         HTML content
+	 * @param string $text_align      Block text-align
+	 * @param string $text_direction  ltr|rtl
+	 * @return string
+	 */
+	private function inject_list_alignment_styles( string $content, string $text_align, string $text_direction ): string {
+		if ( false === stripos( $content, '<ol' ) && false === stripos( $content, '<ul' ) ) {
+			return $content;
+		}
+
+		$align  = in_array( $text_align, array( 'left', 'center', 'right', 'justify' ), true ) ? $text_align : 'left';
+		$inside = in_array( $align, array( 'center', 'right', 'justify' ), true );
+		$pad    = ( 'rtl' === $text_direction ) ? 'padding-right' : 'padding-left';
+
+		$replaced = preg_replace_callback(
+			'/<(ol|ul)((?:\s+[^>]*)?)>/i',
+			function ( $matches ) use ( $align, $inside, $pad ) {
+				$tag   = $matches[1];
+				$attrs = $matches[2];
+				$extra = array(
+					'text-align: ' . esc_attr( $align ),
+					'list-style-position: ' . ( $inside ? 'inside' : 'outside' ),
+					$pad . ': 20px',
+				);
+
+				foreach ( array( 'text-align', 'list-style-position', $pad ) as $prop ) {
+					$attrs = preg_replace( '/' . preg_quote( $prop, '/' ) . '\s*:\s*[^;"\']+;?/i', '', $attrs );
+				}
+
+				$inject_str = implode( '; ', $extra );
+				if ( preg_match( '/style\s*=\s*"/i', $attrs ) ) {
+					$attrs = preg_replace( '/style\s*=\s*"/i', 'style="' . $inject_str . '; ', $attrs );
+					return '<' . $tag . $attrs . '>';
+				}
+				if ( preg_match( "/style\s*=\s*'/i", $attrs ) ) {
+					$attrs = preg_replace( "/style\s*=\s*'/i", "style='" . $inject_str . '; ', $attrs );
+					return '<' . $tag . $attrs . '>';
+				}
+				return '<' . $tag . $attrs . ' style="' . $inject_str . ';">';
+			},
+			$content
+		);
+
+		return is_string( $replaced ) ? $replaced : $content;
+	}
+
+	/**
 	 * Inject inherited styles into block-level elements inside the content HTML.
 	 *
 	 * Email clients (especially Outlook and Gmail) don't reliably inherit
@@ -248,7 +355,7 @@ class TextBlock extends EmailBlock {
 		$block_tags  = array( 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
 
 		$replaced = preg_replace_callback(
-			'/<(p|div|h[1-6]|span|strong|b|em|i|u|s|strike|a|font)((?:\s+[^>]*)?)>/i',
+			'/<(p|div|h[1-6]|span|strong|b|em|i|u|s|strike|a|font|ol|ul|li)((?:\s+[^>]*)?)>/i',
 			function ( $matches ) use ( $escaped, $force_props, $block_tags ) {
 				$tag   = $matches[1];
 				$attrs = $matches[2];

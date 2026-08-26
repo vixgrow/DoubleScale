@@ -385,7 +385,7 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 				 * xl+: match analytics+calendar height (h-0/min-h-full so this
 				 * column doesn't grow the grid row); scroll inside.
 				 */}
-				<aside
+				<div
 					className={`${PORTAL_DASHBOARD_PANEL} flex min-h-0 flex-col overflow-hidden max-xl:max-h-[32rem] xl:h-0 xl:min-h-full`}
 				>
 					<div className="mb-4 shrink-0">
@@ -411,7 +411,7 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 							</ul>
 						)}
 					</div>
-				</aside>
+				</div>
 			</div>
 		</section>
 	);

@@ -6,10 +6,8 @@
  * hosts the Tickets, Bookings, Dashboard (and gated Documents) sections.
  * Generalised from {@see \DoubleScale\Modules\Support\Renderer\PortalFrontendHandler}:
  *
- *   - Shortcode-driven on a normal WordPress page. On portal pages we optionally
- *     bypass the theme shell (header/footer) via {@see maybe_render_canvas()} so
- *     the SPA gets a clean full-page surface; filter
- *     `doublescale_client_portal_use_canvas_template` to keep theme chrome.
+ *   - Shortcode-driven (does NOT hijack `template_redirect`), so it renders
+ *     inline on whatever page the admin pasted the shortcode onto.
  *   - Logged-out visitors see a login gate; support staff (an agent whose email
  *     is not also a contact) see a redirect notice; logged-in customers load the
  *     SPA bundle.
@@ -41,111 +39,9 @@ final class PortalFrontendHandler {
 	public function __construct() {
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 		add_filter( 'body_class', array( $this, 'add_body_class' ) );
-		add_filter( 'the_content', array( $this, 'filter_portal_page_content' ), 1 );
-		add_action( 'template_redirect', array( $this, 'maybe_render_canvas' ), 0 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_login_styles' ) );
 		add_action( 'save_post_page', array( self::class, 'maybe_flush_portal_url_cache' ), 10, 1 );
-	}
-
-	/**
-	 * Render a minimal HTML shell (no theme header/footer) for portal pages.
-	 *
-	 * CSS alone cannot reliably hide every theme's header and footer markup.
-	 * Outputting the page ourselves — only wp_head, the portal shortcode, and
-	 * wp_footer — keeps the portal clean on any theme without a separate
-	 * template file. Extra blocks/sections on the WordPress page are ignored.
-	 *
-	 * @return void
-	 */
-	public function maybe_render_canvas(): void {
-		if ( ! $this->current_page_has_shortcode() ) {
-			return;
-		}
-
-		/**
-		 * Filter whether the Client Portal should bypass the theme shell.
-		 *
-		 * Return false to keep the theme's header/footer (e.g. when the shortcode
-		 * is embedded inside a marketing page that should keep site chrome).
-		 *
-		 * @param bool $use_canvas Whether to render the minimal canvas shell.
-		 */
-		if ( ! (bool) apply_filters( 'doublescale_client_portal_use_canvas_template', true ) ) {
-			return;
-		}
-
-		status_header( 200 );
-		nocache_headers();
-
-		?>
-		<!DOCTYPE html>
-		<html <?php language_attributes(); ?>>
-		<head>
-			<meta charset="<?php bloginfo( 'charset' ); ?>">
-			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<?php wp_head(); ?>
-		</head>
-		<body <?php body_class( 'doublescale-client-portal-canvas' ); ?>>
-		<?php
-		if ( function_exists( 'wp_body_open' ) ) {
-			wp_body_open();
-		}
-
-		while ( have_posts() ) {
-			the_post();
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- shortcode HTML is escaped in render_shortcode().
-			echo $this->extract_portal_shortcode_html( (string) get_post()->post_content );
-		}
-
-		wp_footer();
-		?>
-		</body>
-		</html>
-		<?php
-		exit;
-	}
-
-	/**
-	 * On the portal page, drop any extra editor blocks/sections so only the
-	 * Client Portal shortcode renders (marketing sections belong on other pages).
-	 *
-	 * @param string $content Post content HTML.
-	 * @return string
-	 */
-	public function filter_portal_page_content( $content ): string {
-		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
-			return $content;
-		}
-		if ( ! $this->current_page_has_shortcode() ) {
-			return $content;
-		}
-
-		/**
-		 * Filter whether non-portal blocks on the Client Portal page are stripped.
-		 *
-		 * @param bool $strip Whether to keep only the portal shortcode.
-		 */
-		if ( ! (bool) apply_filters( 'doublescale_client_portal_strip_extra_content', true ) ) {
-			return $content;
-		}
-
-		$raw = get_post() ? (string) get_post()->post_content : '';
-		return $this->extract_portal_shortcode_html( $raw !== '' ? $raw : (string) $content );
-	}
-
-	/**
-	 * Run only the `[doublescale_client_portal …]` shortcode from page content.
-	 *
-	 * @param string $content Raw post content (may include other blocks).
-	 * @return string
-	 */
-	private function extract_portal_shortcode_html( string $content ): string {
-		if ( preg_match( '/\[doublescale_client_portal(?:\s[^\]]*)?\]/i', $content, $matches ) ) {
-			return do_shortcode( $matches[0] );
-		}
-
-		return $this->render_shortcode( array() );
 	}
 
 	/**
@@ -218,14 +114,8 @@ final class PortalFrontendHandler {
 
 		$box_id = max( 0, (int) $atts['box_id'] );
 
-		// `alignfull` opts the portal into the block theme's full-bleed width.
-		// Block themes constrain `.entry-content` children to the (narrow)
-		// content size by default; the portal is a full app surface that owns
-		// its page, so request the full size where supported. The shell caps its
-		// own readable measure internally, so this widens the page without
-		// running text edge-to-edge.
 		return sprintf(
-			'<div id="%s" class="alignfull" data-box-id="%d"></div>',
+			'<div id="%s" data-box-id="%d"></div>',
 			esc_attr( self::MOUNT_ID ),
 			$box_id
 		);
@@ -242,7 +132,7 @@ final class PortalFrontendHandler {
 			return;
 		}
 
-		$this->enqueue_portal_chrome_styles();
+		$this->enqueue_host_isolation_styles();
 
 		if ( ! $this->should_load_portal_spa() ) {
 			return;
@@ -280,54 +170,48 @@ final class PortalFrontendHandler {
 	}
 
 	/**
-	 * Hide leftover theme chrome when the canvas template is bypassed or a theme
-	 * injects header/footer outside the normal template hierarchy.
+	 * Let the portal use its designed centered width instead of the host
+	 * theme's blog column (e.g. max-w-4xl / content-size).
 	 *
 	 * @return void
 	 */
-	private function enqueue_portal_chrome_styles(): void {
+	private function enqueue_host_isolation_styles(): void {
 		$version = defined( 'DOUBLESCALE_VERSION' ) ? \DOUBLESCALE_VERSION : '1.0.0';
+		$css     = '
+			body.doublescale-client-portal-page #content > main > .max-w-4xl,
+			body.doublescale-client-portal-page .max-w-4xl:has(#doublescale-client-portal),
+			body.doublescale-client-portal-page .entry-content:has(#doublescale-client-portal),
+			body.doublescale-client-portal-page .wp-block-post-content:has(#doublescale-client-portal),
+			body.doublescale-client-portal-page .is-layout-constrained:has(#doublescale-client-portal){
+				max-width:93rem!important;
+				width:100%!important;
+				margin-left:auto!important;
+				margin-right:auto!important;
+			}
+			body.doublescale-client-portal-page .is-layout-constrained > #doublescale-client-portal,
+			body.doublescale-client-portal-page .entry-content > #doublescale-client-portal,
+			body.doublescale-client-portal-page .wp-block-post-content > #doublescale-client-portal,
+			body.doublescale-client-portal-page #doublescale-client-portal{
+				position:relative!important;
+				z-index:1;
+				display:block!important;
+				float:none!important;
+				clear:both;
+				width:100%!important;
+				max-width:93rem!important;
+				margin-left:auto!important;
+				margin-right:auto!important;
+				left:auto!important;
+				right:auto!important;
+				transform:none!important;
+				grid-column:1/-1;
+				justify-self:center;
+			}
+		';
 
-		wp_register_style( 'doublescale-client-portal-chrome', false, array(), $version );
-		wp_enqueue_style( 'doublescale-client-portal-chrome' );
-		wp_add_inline_style( 'doublescale-client-portal-chrome', $this->page_chrome_css() );
-	}
-
-	/**
-	 * CSS that turns the host page into a clean, full-page app surface: it hides
-	 * the theme's page title, site header (nav) and footer, then zeroes the top
-	 * gap so the portal renders flush to the top (its own inner padding supplies
-	 * the breathing room). Selectors cover block themes (`.wp-block-post-title`,
-	 * `.wp-site-blocks > header|footer`, `*.wp-block-template-part`) and classic
-	 * themes (`.entry-title`/`.site-header`/`.site-footer`); each is scoped to
-	 * the portal body class so every other page keeps the theme's chrome, and is
-	 * harmless on themes whose markup does not match. The WP admin bar is left
-	 * intact (it is the logged-in customer's log-out affordance).
-	 *
-	 * @return string
-	 */
-	private function page_chrome_css(): string {
-		$b = 'body.doublescale-client-portal-page ';
-
-		return 'body.doublescale-client-portal-canvas{background:hsl(228 25% 97%);margin:0}'
-			. $b . '.wp-block-post-title,'
-			. $b . '.entry-title,'
-			. $b . '.page-title,'
-			. $b . '.entry-header,'
-			. $b . '.wp-site-blocks > header,'
-			. $b . 'header.wp-block-template-part,'
-			. $b . '.site-header,'
-			. $b . '#masthead,'
-			. $b . 'nav.navbar,'
-			. $b . '.elementor-location-header,'
-			. $b . '.wp-site-blocks > footer,'
-			. $b . 'footer.wp-block-template-part,'
-			. $b . '.site-footer,'
-			. $b . '#colophon,'
-			. $b . '.elementor-location-footer{display:none!important}'
-			. $b . 'main{margin-top:0!important;padding-top:0!important}'
-			. $b . 'main>.wp-block-group{padding-top:0!important}'
-			. $b . '.entry-content,.page-content,.site-content{max-width:none!important;padding-left:0!important;padding-right:0!important}';
+		wp_register_style( 'doublescale-client-portal-host', false, array(), $version );
+		wp_enqueue_style( 'doublescale-client-portal-host' );
+		wp_add_inline_style( 'doublescale-client-portal-host', $css );
 	}
 
 	/**

@@ -84,6 +84,7 @@ class TextBlock extends EmailBlock {
 
 		// Process content for merge tags
 		$content = $this->process_merge_tags( $props['content'], $contact );
+		$content = $this->rewrite_html_image_srcs( $content );
 
 		// Per-word color/size is not a text-block control — drop it so Font Color
 		// and font size apply to the whole block (matches the builder).

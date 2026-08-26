@@ -4,6 +4,7 @@
 import type {
   DOMConversionMap,
   DOMConversionOutput,
+  DOMExportOutput,
   EditorConfig,
   LexicalNode,
   NodeKey,
@@ -73,7 +74,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       span.className = className;
     }
     const img = document.createElement('img');
-    img.src = this.__src;
+    img.setAttribute('src', this.__src);
     img.alt = this.__altText;
     if (typeof this.__width === 'number') {
       img.width = this.__width;
@@ -139,6 +140,25 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       height,
     });
     return node;
+  }
+
+  exportDOM(): DOMExportOutput {
+    const img = document.createElement('img');
+    // setAttribute keeps merge tags / data URIs intact. Assigning img.src
+    // resolves them against the admin URL and empties the sent email image.
+    img.setAttribute('src', this.__src);
+    img.setAttribute('alt', this.__altText);
+    if (typeof this.__width === 'number') {
+      img.setAttribute('width', String(this.__width));
+    } else if (this.__width) {
+      img.style.width = this.__width;
+    }
+    if (typeof this.__height === 'number') {
+      img.setAttribute('height', String(this.__height));
+    } else if (this.__height) {
+      img.style.height = this.__height;
+    }
+    return { element: img };
   }
 
   exportJSON(): SerializedImageNode {

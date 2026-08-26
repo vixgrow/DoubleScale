@@ -5,10 +5,13 @@ import { useEffect, useRef } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $generateHtmlFromNodes } from '@lexical/html';
 
-const SANITIZED_MERGE_TAG_URL = /href="https?:\/\/(\{\{.*?\}\})"/g;
+const SANITIZED_MERGE_TAG_URL = /(href|src)="https?:\/\/(\{\{.*?\}\})"/g;
 
-function restoreMergeTagHrefs(html: string): string {
-  return html.replace(SANITIZED_MERGE_TAG_URL, (_match, mergeTag) => `href="${mergeTag}"`);
+function restoreMergeTagUrls(html: string): string {
+  return html.replace(
+    SANITIZED_MERGE_TAG_URL,
+    (_match, attr, mergeTag) => `${attr}="${mergeTag}"`
+  );
 }
 
 interface HtmlSerializerProps {
@@ -31,7 +34,7 @@ export default function HtmlSerializer({ onChange, onWordCountChange }: HtmlSeri
         editorState.read(() => {
           try {
             let htmlString = $generateHtmlFromNodes(editor);
-            htmlString = restoreMergeTagHrefs(htmlString);
+            htmlString = restoreMergeTagUrls(htmlString);
             
             if (onWordCountChange) {
               const tempDiv = document.createElement('div');

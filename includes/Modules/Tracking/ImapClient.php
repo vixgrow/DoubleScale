@@ -114,43 +114,11 @@ class ImapClient {
 	}
 
 	/**
-	 * SMTP submission ports that are never valid for IMAP.
-	 *
-	 * Operators often paste SMTP (send) settings into the IMAP (receive) form.
-	 * 587/465/25/2525 will fail with a generic "couldn't open stream" unless we
-	 * reject them first.
-	 *
-	 * @param int $port Port number.
-	 * @return bool
-	 */
-	public static function is_smtp_port( $port ) {
-		return in_array( (int) $port, array( 25, 465, 587, 2525 ), true );
-	}
-
-	/**
-	 * Human-readable error when an SMTP port is used for IMAP.
-	 *
-	 * @param int $port Port number.
-	 * @return string
-	 */
-	public static function smtp_port_error_message( $port ) {
-		return sprintf(
-			/* translators: %d: SMTP port number that was entered as IMAP */
-			__( 'Port %d is an SMTP (sending) port, not IMAP. Use 993 with SSL, or 143 with TLS/STARTTLS.', 'doublescale' ),
-			(int) $port
-		);
-	}
-
-	/**
 	 * Connect to the IMAP server
 	 *
 	 * @throws \RuntimeException If connection fails.
 	 */
 	public function connect() {
-		if ( self::is_smtp_port( $this->port ) ) {
-			throw new \RuntimeException( self::smtp_port_error_message( $this->port ) );
-		}
-
 		$mailbox = $this->build_mailbox_string();
 		$flags   = ( 'oauth' === $this->authentication ) ? OP_XOAUTH2 : 0;
 

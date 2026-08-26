@@ -555,14 +555,6 @@ class RestSettingsControllerPro {
 			),
 		);
 
-		if ( ImapClient::is_smtp_port( $settings['imap']['port'] ) ) {
-			return new WP_Error(
-				'invalid_imap_port',
-				ImapClient::smtp_port_error_message( $settings['imap']['port'] ),
-				array( 'status' => 400 )
-			);
-		}
-
 		// Preserve OAuth tokens (managed by OAuth flow, not settings save).
 		// Credentials are centralized in email_oauth_apps — not stored here.
 		$settings['oauth'] = $existing['oauth'] ?? array();

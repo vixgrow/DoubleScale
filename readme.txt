@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.16
+Stable tag: 1.3.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.17 = 26 Aug 2026
+- Stop blocking IMAP mailbox save on SMTP ports (587/465/25) so the port you enter is stored as-is
+- Keep IMAP SINCE search fallback when a server returns no results for date-filtered unseen mail
+
 = 1.3.16 = 26 Aug 2026
 - Reject SMTP sending ports (587/465/25) in IMAP mailbox settings and recover when IMAP SINCE searches return empty
 - Always offer Custom IMAP for the shared inbox, even when Gmail or Outlook is used for sending

@@ -595,23 +595,12 @@ const EmailInboundSettingsPage: React.FC = () => {
 
 	// ─── Helpers ────────────────────────────────────────────────────────
 
-	const SMTP_PORTS = [25, 465, 587, 2525];
 	const updateImap = (key: string, value: any) => {
-		setSettings((prev) => {
-			const imap = { ...prev.imap, [key]: value };
-			// TLS in SMTP UIs means port 587; for IMAP it means STARTTLS on 143.
-			if (
-				key === 'encryption' &&
-				SMTP_PORTS.includes(Number(imap.port))
-			) {
-				imap.port = value === 'tls' ? 143 : 993;
-			}
-			return { ...prev, imap };
-		});
+		setSettings((prev) => ({
+			...prev,
+			imap: { ...prev.imap, [key]: value },
+		}));
 	};
-	const imapPortIsSmtp = SMTP_PORTS.includes(
-		Number(settings.imap.port)
-	);
 
 	// Current OAuth provider shorthand.
 	const currentProvider = settings.imap_provider as
@@ -985,7 +974,6 @@ const EmailInboundSettingsPage: React.FC = () => {
 											id="imap-port"
 											type="number"
 											placeholder="993"
-											autoComplete="off"
 											value={
 												settings.imap.port
 											}
@@ -1000,20 +988,6 @@ const EmailInboundSettingsPage: React.FC = () => {
 											}
 											className="!border-border !rounded-lg"
 										/>
-										<p className="text-xs text-muted-foreground">
-											{__(
-												'IMAP uses 993 (SSL) or 143 (TLS). Do not use 587 — that is SMTP.',
-												'doublescale'
-											)}
-										</p>
-										{imapPortIsSmtp && (
-											<p className="text-xs text-red-600">
-												{__(
-													'This is an SMTP sending port. Incoming mail will fail until you switch to 993/SSL or 143/TLS.',
-													'doublescale'
-												)}
-											</p>
-										)}
 									</div>
 								</div>
 

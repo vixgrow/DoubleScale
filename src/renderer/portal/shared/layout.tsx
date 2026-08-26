@@ -336,8 +336,8 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 
 	return (
 		<div className="doublescale-client-portal overflow-x-hidden rounded-2xl bg-[#F7F8FA] text-base text-foreground">
-			<div className="mx-auto max-w-[93rem] px-4 py-6 sm:px-6 sm:py-8">
-				<header className="mb-6 flex items-center gap-4 rounded-[20px] bg-white p-4 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] sm:p-5">
+			<div className="mx-auto w-full max-w-[93rem] px-4 py-6 sm:px-6 sm:py-8">
+				<div className="mb-6 flex items-center gap-4 rounded-[20px] bg-white p-4 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] sm:p-5">
 					<div className="flex min-w-0 items-center gap-4">
 						<Avatar identity={identity} />
 						<div className="min-w-0">
@@ -353,10 +353,10 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 							</p>
 						</div>
 					</div>
-				</header>
+				</div>
 
 				<div className="flex flex-col gap-6 lg:flex-row">
-					<nav className="min-w-0 lg:w-72 lg:shrink-0">
+					<div className="min-w-0 lg:w-72 lg:shrink-0">
 						{/* max-lg: settings-style horizontal tabs (no Main/CRM/Other) */}
 						<HorizontalNav items={flatNavItems} linkClass={tabsLinkClass} />
 
@@ -372,11 +372,11 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 								/>
 							))}
 						</div>
-					</nav>
+					</div>
 
-					<main className="min-w-0 flex-1">
+					<div className="min-w-0 flex-1">
 						<div className={PORTAL_CONTENT_SHELL}>{children}</div>
-					</main>
+					</div>
 				</div>
 			</div>
 		</div>

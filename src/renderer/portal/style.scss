@@ -42,7 +42,15 @@
 }
 
 #doublescale-client-portal {
-	max-width: 100%;
+	position: relative;
+	z-index: 1;
+	isolation: isolate;
+	display: block;
+	float: none;
+	clear: both;
+	width: 100%;
+	max-width: 93rem;
+	margin-inline: auto;
 	overflow-x: hidden;
 }
 
@@ -211,6 +219,22 @@
 	figure,
 	blockquote {
 		margin: 0;
+	}
+
+	// Host themes often style bare `header`/`nav`/`main`/`aside` as site chrome
+	// (fixed/absolute logo bars and sidebars). Neutralize that inside the SPA.
+	header,
+	nav,
+	main,
+	aside {
+		position: relative;
+		float: none;
+		inset: auto;
+		width: auto;
+		max-width: none;
+		height: auto;
+		background: transparent;
+		transform: none;
 	}
 
 	ul,

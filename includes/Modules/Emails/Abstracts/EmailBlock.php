@@ -64,10 +64,17 @@ abstract class EmailBlock implements EmailBlockInterface {
 	}
 
 	/**
-	 * Escape an image src for an HTML attribute without emptying merge tags or data URIs.
+	 * Escape an image `src` for an HTML attribute.
 	 *
-	 * WordPress `esc_url()` strips `{{…}}` and rejects the `data:` protocol, which
-	 * leaves `<img src="">` — email clients then show alt text instead of the image.
+	 * Src values are a single string in one of these shapes:
+	 * - `{{ASSETS_URL}}templates-images/greetings/img13.png` (template placeholder)
+	 * - `https://example.com/wp-content/uploads/2026/08/photo.png` (media / full URL)
+	 * - `http://localhost/wordpress/wp-content/plugins/doublescale/assets/images/…`
+	 * - `data:image/png;base64,…` (inline image)
+	 *
+	 * Use `esc_attr()`, not `esc_url()`. WordPress `esc_url()` strips `{{…}}`
+	 * and rejects the `data:` protocol, which leaves `<img src="">` and the
+	 * inbox shows alt text instead of the picture.
 	 *
 	 * @param string $src Image source.
 	 * @return string
@@ -78,15 +85,11 @@ abstract class EmailBlock implements EmailBlockInterface {
 			return '';
 		}
 
-		if ( false !== strpos( $src, '{{' ) ) {
-			return esc_attr( $src );
+		if ( preg_match( '/^(?:javascript|vbscript|file):/i', $src ) ) {
+			return '';
 		}
 
-		if ( 0 === stripos( $src, 'data:image/' ) ) {
-			return esc_attr( $src );
-		}
-
-		return esc_url( $src );
+		return esc_attr( $src );
 	}
 
 	/**

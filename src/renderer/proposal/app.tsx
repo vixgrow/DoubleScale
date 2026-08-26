@@ -251,11 +251,11 @@ const PublicProposalApp = ({ hash, embedded = false }: Props) => {
 							{__('Confirm that you accept this proposal.', 'doublescale')}
 						</p>
 					)}
-					<div className="flex justify-end gap-2 mt-4">
-						<Button variant="secondaryDeepBlue" onClick={() => setShowAccept(false)} disabled={busy}>
+					<div className="mt-4 flex flex-col items-center gap-2 max-sm:w-full sm:flex-row sm:justify-end">
+						<Button variant="secondaryDeepBlue" onClick={() => setShowAccept(false)} disabled={busy} className="max-sm:w-full">
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button onClick={() => void handleAccept()} disabled={!canConfirmAccept}>
+						<Button onClick={() => void handleAccept()} disabled={!canConfirmAccept} className="max-sm:w-full">
 							{__('Confirm Accept', 'doublescale')}
 						</Button>
 					</div>
@@ -273,11 +273,11 @@ const PublicProposalApp = ({ hash, embedded = false }: Props) => {
 						onChange={(e) => setDeclineReason(e.target.value)}
 						rows={3}
 					/>
-					<div className="flex justify-end gap-2 mt-3">
-						<Button variant="secondaryDeepBlue" onClick={() => setShowDecline(false)} disabled={busy}>
+					<div className="mt-3 flex flex-col items-center gap-2 max-sm:w-full sm:flex-row sm:justify-end">
+						<Button variant="secondaryDeepBlue" onClick={() => setShowDecline(false)} disabled={busy} className="max-sm:w-full">
 							{__('Cancel', 'doublescale')}
 						</Button>
-						<Button variant="destructive" onClick={() => void handleDecline()} disabled={busy}>
+						<Button variant="destructive" onClick={() => void handleDecline()} disabled={busy} className="max-sm:w-full">
 							{__('Confirm Decline', 'doublescale')}
 						</Button>
 					</div>

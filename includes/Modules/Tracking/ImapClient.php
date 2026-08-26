@@ -75,9 +75,9 @@ class ImapClient {
 	private $novalidate_cert = true;
 
 	/**
-	 * IMAP connection (Connection object from php-imap2, or native resource)
+	 * IMAP connection (php-imap2 Connection, native ext-imap resource, or IMAP\Connection)
 	 *
-	 * @var \Javanile\Imap2\Connection|resource|false
+	 * @var \Javanile\Imap2\Connection|\IMAP\Connection|resource|false
 	 */
 	private $connection = false;
 
@@ -133,7 +133,7 @@ class ImapClient {
 			}
 		);
 
-		$this->connection = imap2_open( $mailbox, $this->username, $this->password, $flags );
+		$this->connection = $this->open_mailbox( $mailbox, $flags );
 
 		restore_error_handler();
 
@@ -169,6 +169,44 @@ class ImapClient {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Open an IMAP mailbox.
+	 *
+	 * php-imap2's imap2_open() delegates to ext-imap when it is installed.
+	 * On PHP 8.1+ that returns an IMAP\Connection object, which imap2_check()
+	 * and imap2_search() still treat as invalid (they test is_resource()).
+	 * imap2_check() then fatals: invalidImapConnection() requires 3 arguments
+	 * but Mailbox::check() only passes 2. Use the pure-PHP client instead.
+	 *
+	 * @param string $mailbox Mailbox string.
+	 * @param int    $flags   imap2_open flags.
+	 * @return \Javanile\Imap2\Connection|\IMAP\Connection|resource|false
+	 */
+	private function open_mailbox( $mailbox, $flags ) {
+		if ( class_exists( '\Javanile\Imap2\Connection' ) ) {
+			return \Javanile\Imap2\Connection::open( $mailbox, $this->username, $this->password, $flags );
+		}
+
+		return imap2_open( $mailbox, $this->username, $this->password, $flags );
+	}
+
+	/**
+	 * Whether the handle is native ext-imap (resource or PHP 8 IMAP\Connection).
+	 *
+	 * @return bool
+	 */
+	private function is_native_imap_connection() {
+		if ( ! $this->connection ) {
+			return false;
+		}
+
+		if ( is_resource( $this->connection ) ) {
+			return 'imap' === get_resource_type( $this->connection );
+		}
+
+		return is_object( $this->connection ) && 'IMAP\Connection' === get_class( $this->connection );
 	}
 
 	/**
@@ -411,7 +449,12 @@ class ImapClient {
 			return array();
 		}
 
-		$msgnos = imap2_search( $this->connection, $criteria );
+		if ( $this->is_native_imap_connection() && function_exists( 'imap_search' ) ) {
+			$msgnos = imap_search( $this->connection, $criteria );
+		} else {
+			$msgnos = imap2_search( $this->connection, $criteria );
+		}
+
 		if ( ! $msgnos || ! is_array( $msgnos ) ) {
 			return array();
 		}
@@ -450,6 +493,11 @@ class ImapClient {
 			return 0;
 		}
 
+		if ( $this->is_native_imap_connection() && function_exists( 'imap_num_msg' ) ) {
+			$n = imap_num_msg( $this->connection );
+			return false !== $n && null !== $n ? (int) $n : 0;
+		}
+
 		if ( function_exists( 'imap2_num_msg' ) ) {
 			$n = imap2_num_msg( $this->connection );
 			if ( false !== $n && null !== $n ) {
@@ -457,10 +505,8 @@ class ImapClient {
 			}
 		}
 
-		$check = function_exists( 'imap2_check' ) ? imap2_check( $this->connection ) : false;
-		if ( $check && isset( $check->Nmsgs ) ) {
-			return (int) $check->Nmsgs;
-		}
+		// Do not call imap2_check(): php-imap2 0.1.10 Mailbox::check() fatals on
+		// an invalid handle (invalidImapConnection() called with 2 args, needs 3).
 
 		return 0;
 	}

@@ -360,7 +360,8 @@ const BuilderContent: React.FC<BuilderProps> = ({
 				}
 
 				body:has(#doublescale-email-builder) [data-radix-popper-content-wrapper] {
-					z-index: 160051 !important;
+					z-index: 2000000 !important;
+					pointer-events: auto !important;
 				}
 
 				body:has(#doublescale-email-builder) .media-modal-backdrop {

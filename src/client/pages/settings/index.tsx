@@ -724,8 +724,10 @@ const SettingsPage: React.FC = () => {
 				onValueChange={handleTabChange}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
-				tabsListWrapperClassName="py-3 px-2.5 rounded-lg bg-white shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]"
-				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
+				enableHorizontalScroll
+				scrollArrowBg="bg-white"
+				tabsListWrapperClassName="min-w-0 py-3 px-2.5 rounded-lg bg-white shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]"
+				tabsListClassName="gap-2 bg-transparent text-foreground justify-start"
 			/>
 		</div>
 	);

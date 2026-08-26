@@ -90,7 +90,7 @@
                   "id": "block-3",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:left;\"><strong>Monthly Privacy Update</strong></p>",
+                    "content": "<p style=\"text-align:left\"><strong>Monthly Privacy Update</strong></p>",
                     "hyperlink": "",
                     "fontSize": 28,
                     "color": "#FFFFFF",
@@ -131,7 +131,7 @@
                   "id": "block-4",
                   "type": "text",
                   "props": {
-                    "content": "<p style='font-weight: bold;'>Hello {{contact:first_name}},</p><p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</p><br><p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</p>",
+                    "content": "<p style='font-weight: bold'>Hello {{contact:first_name}},</p><p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</p><br><p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</p>",
                     "hyperlink": "",
                     "fontSize": 18,
                     "color": "#656565",
@@ -172,7 +172,7 @@
                   "id": "block-5",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:left;\"><strong>Privacy Policy Updates</strong></p>",
+                    "content": "<p style=\"text-align:left\"><strong>Privacy Policy Updates</strong></p>",
                     "hyperlink": "",
                     "fontSize": 28,
                     "color": "#FFFFFF",
@@ -586,7 +586,7 @@
                   "id": "block-20",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\">By clicking agree, you agree to our <strong style=\"text-decoration: underline;\">Privacy Policy Updated.</strong></p>",
+                    "content": "<p style=\"text-align:center\">By clicking agree, you agree to our <strong style=\"text-decoration: underline\">Privacy Policy Updated.</strong></p>",
                     "hyperlink": "",
                     "fontSize": 20,
                     "color": "#121212",
@@ -639,7 +639,7 @@
                   "id": "block-23",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\">Questions or faq? Contact us at <strong>info@tootle.com.np</strong> or call us on our Toll Free Number</p><p style=\"text-align:center;\"><strong>1800 8467 5362 3562.</strong></p>",
+                    "content": "<p style=\"text-align:center\">Questions or faq? Contact us at <strong>info@tootle.com.np</strong> or call us on our Toll Free Number</p><p style=\"text-align:center\"><strong>1800 8467 5362 3562.</strong></p>",
                     "hyperlink": "",
                     "fontSize": 15,
                     "color": "#121212",

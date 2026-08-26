@@ -85,6 +85,10 @@ class TextBlock extends EmailBlock {
 		// Process content for merge tags
 		$content = $this->process_merge_tags( $props['content'], $contact );
 
+		// Per-word color/size is not a text-block control — drop it so Font Color
+		// and font size apply to the whole block (matches the builder).
+		$content = $this->strip_inline_color_and_size( $content );
+
 		// Get font size based on heading style (matches frontend getFontSize)
 		// Ensure fontSize is an integer (remove 'px' suffix if present)
 		$base_font_size = is_numeric( $props['fontSize'] ) ? (int) $props['fontSize'] : (int) str_replace( 'px', '', $props['fontSize'] );
@@ -169,6 +173,48 @@ class TextBlock extends EmailBlock {
 	}
 
 	/**
+	 * Remove per-word color and font-size from inline styles.
+	 *
+	 * The block Font Color / fontSize props are the single source of truth.
+	 * Other styles (text-align, weight, decoration, coupon badge layout) stay.
+	 *
+	 * @param string $content HTML content
+	 * @return string
+	 */
+	private function strip_inline_color_and_size( string $content ): string {
+		$content = preg_replace_callback(
+			'/style\s*=\s*(["\'])(.*?)\1/i',
+			static function ( $matches ) {
+				$quote = $matches[1];
+				$decls = preg_split( '/;/', $matches[2] );
+				$kept  = array();
+				foreach ( $decls as $decl ) {
+					$decl = trim( $decl );
+					if ( '' === $decl ) {
+						continue;
+					}
+					if ( preg_match( '/^(color|font-size|-webkit-text-fill-color)\s*:/i', $decl ) ) {
+						continue;
+					}
+					$kept[] = $decl;
+				}
+				if ( empty( $kept ) ) {
+					return '';
+				}
+				return 'style=' . $quote . implode( '; ', $kept ) . $quote;
+			},
+			$content
+		);
+
+		if ( ! is_string( $content ) ) {
+			return '';
+		}
+
+		$unwrapped = preg_replace( '/<span\s*>(.*?)<\/span>/is', '$1', $content );
+		return is_string( $unwrapped ) ? $unwrapped : $content;
+	}
+
+	/**
 	 * Inject inherited styles into block-level elements inside the content HTML.
 	 *
 	 * Email clients (especially Outlook and Gmail) don't reliably inherit
@@ -198,10 +244,11 @@ class TextBlock extends EmailBlock {
 		}
 
 		$force_props = array( 'color', 'font-size', 'font-family' );
+		$block_tags  = array( 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
 
-		return preg_replace_callback(
-			'/<(p|div|h[1-6])((?:\s+[^>]*)?)>/i',
-			function ( $matches ) use ( $escaped, $force_props ) {
+		$replaced = preg_replace_callback(
+			'/<(p|div|h[1-6]|span|strong|b|em|i|u|s|strike|a|font)((?:\s+[^>]*)?)>/i',
+			function ( $matches ) use ( $escaped, $force_props, $block_tags ) {
 				$tag   = $matches[1];
 				$attrs = $matches[2];
 
@@ -215,7 +262,7 @@ class TextBlock extends EmailBlock {
 						$inject[] = $prop . ': ' . $val;
 					}
 				}
-				if ( ! preg_match( '/style\s*=\s*("[^"]*|\'[^\']*)margin/i', $attrs ) ) {
+				if ( in_array( strtolower( $tag ), $block_tags, true ) && ! preg_match( '/style\s*=\s*("[^"]*|\'[^\']*)margin/i', $attrs ) ) {
 					$inject[] = 'margin: 0';
 				}
 
@@ -239,6 +286,8 @@ class TextBlock extends EmailBlock {
 			},
 			$content
 		);
+
+		return is_string( $replaced ) ? $replaced : $content;
 	}
 
 	/**

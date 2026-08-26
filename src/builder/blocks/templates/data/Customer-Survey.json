@@ -279,7 +279,7 @@
 									"id": "block-8",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>📌 Share your experience about our event 📌</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>📌 Share your experience about our event 📌</strong></p>",
 										"hyperlink": "",
 										"fontSize": 27,
 										"color": "#121212",
@@ -331,7 +331,7 @@
 									"id": "block-10",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\">We use your feedback to actively improve and make sure you get the service you deserve.</p>",
+										"content": "<p style=\"text-align:center\">We use your feedback to actively improve and make sure you get the service you deserve.</p>",
 										"hyperlink": "",
 										"fontSize": 16,
 										"color": "#121212",
@@ -415,7 +415,7 @@
 									"id": "block-13",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>Need help?</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>Need help?</strong></p>",
 										"hyperlink": "",
 										"fontSize": 32,
 										"color": "#FFFFFF",
@@ -688,7 +688,7 @@
 									"id": "block-21",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\">Want To Change How You Receive These Emails?</p><br><p style=\"text-align:center;\">You Can Update Your Preferences Or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong style=\"text-decoration: underline; color: #121212;\">Unsubscribe</strong></a> From This List.</p>",
+										"content": "<p style=\"text-align:center\">Want To Change How You Receive These Emails?</p><br><p style=\"text-align:center\">You Can Update Your Preferences Or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong style=\"text-decoration: underline\">Unsubscribe</strong></a> From This List.</p>",
 										"hyperlink": "",
 										"fontSize": 16,
 										"color": "#121212",
@@ -739,7 +739,7 @@
 									"id": "block-23",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
 										"hyperlink": "",
 										"fontSize": 24,
 										"color": "#121212",

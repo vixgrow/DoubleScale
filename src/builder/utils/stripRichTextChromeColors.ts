@@ -58,6 +58,25 @@ function cleanStyleAttribute(
 	return kept.length ? kept.join('; ') : null;
 }
 
+function mapStyleAttributes(
+	html: string,
+	clean: (style: string) => string | null
+): string {
+	let out = html.replace(/\sstyle\s*=\s*"([^"]*)"/gi, (_m, style: string) => {
+		const next = clean(style);
+		return next ? ` style="${next}"` : '';
+	});
+	out = out.replace(/\sstyle\s*=\s*'([^']*)'/gi, (_m, style: string) => {
+		const next = clean(style);
+		return next ? ` style='${next}'` : '';
+	});
+	return out;
+}
+
+function unwrapBareSpans(html: string): string {
+	return html.replace(/<span\s*>([\s\S]*?)<\/span>/gi, '$1');
+}
+
 /**
  * Strip accidental editor-chrome text colors from inline `style` attributes so block
  * `color` and email body styles apply as expected. Also drops `-webkit-text-fill-color`
@@ -74,13 +93,32 @@ export function stripRichTextChromeColors(
 
 	const blockColor = options.blockColor?.trim() || undefined;
 
-	let out = html.replace(/\sstyle\s*=\s*"([^"]*)"/gi, (_m, style: string) => {
-		const next = cleanStyleAttribute(style, blockColor);
-		return next ? ` style="${next}"` : '';
-	});
-	out = out.replace(/\sstyle\s*=\s*'([^']*)'/gi, (_m, style: string) => {
-		const next = cleanStyleAttribute(style, blockColor);
-		return next ? ` style='${next}'` : '';
-	});
-	return out;
+	return mapStyleAttributes(html, (style) =>
+		cleanStyleAttribute(style, blockColor)
+	);
+}
+
+const DROP_BLOCK_STYLE = /^(color|font-size|-webkit-text-fill-color)\s*:/i;
+
+/**
+ * Remove per-word `color` and `font-size` so the text-block Font Color and size
+ * controls the whole block. Other inline styles (align, weight, decoration,
+ * coupon badge layout) are kept.
+ */
+export function stripInlineColorAndFontSize(html: string): string {
+	if (!html) return html;
+
+	let out = html;
+	if (html.includes('style')) {
+		out = mapStyleAttributes(html, (style) => {
+			const kept = style
+				.split(';')
+				.map((s) => s.trim())
+				.filter(Boolean)
+				.filter((decl) => !DROP_BLOCK_STYLE.test(decl));
+			return kept.length ? kept.join('; ') : null;
+		});
+	}
+
+	return unwrapBareSpans(out);
 }

@@ -37,7 +37,7 @@
 									"id": "block-2",
 									"type": "text",
 									"props": {
-										"content": "<h1 style=\"text-align:center; font-weight: bold; font-style: italic;\">📌 Let's Get Started With Wisdom! [Product Name] 📌</h1>",
+										"content": "<h1 style=\"text-align:center; font-weight: bold; font-style: italic\">📌 Let's Get Started With Wisdom! [Product Name] 📌</h1>",
 										"hyperlink": "",
 										"fontSize": 28,
 										"color": "#121212",
@@ -68,7 +68,7 @@
 									"id": "block-3",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>Dear {{contact:first_name}} &amp; {{contact:last_name}}!</strong></p><p style=\"text-align:center;\">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>",
+										"content": "<p style=\"text-align:center\"><strong>Dear {{contact:first_name}} &amp; {{contact:last_name}}!</strong></p><p style=\"text-align:center\">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>",
 										"hyperlink": "",
 										"fontSize": 17,
 										"color": "#121212",
@@ -153,7 +153,7 @@
 									"id": "block-6",
 									"type": "text",
 									"props": {
-										"content": "<h2 style=\"text-align:center; color:#212121;\"><strong>Guides Steps to your business</strong></h2>",
+										"content": "<h2 style=\"text-align:center\"><strong>Guides Steps to your business</strong></h2>",
 										"hyperlink": "",
 										"fontSize": 32,
 										"color": "#121212",
@@ -185,9 +185,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderTop": "1px solid #E2E2E2",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"borderRadius": "40px 40px 0px 0px",
 						"padding": "28px 24px 10px 24px",
 						"margin": "12px 32px 0px 32px",
@@ -312,8 +309,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -351,8 +346,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -476,8 +469,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -515,8 +506,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -640,8 +629,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "14px 24px 29px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -679,8 +666,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
 						"padding": "0px 24px",
 						"margin": "0px 32px",
 						"hideAddBlockButton": true
@@ -804,9 +789,6 @@
 					],
 					"styles": {
 						"backgroundColor": "#FFFFFF",
-						"borderLeft": "1px solid #E2E2E2",
-						"borderRight": "1px solid #E2E2E2",
-						"borderBottom": "1px solid #E2E2E2",
 						"borderRadius": "0px 0px 40px 40px",
 						"padding": "14px 24px 24px 24px",
 						"margin": "0px 32px 16px 32px",
@@ -966,7 +948,7 @@
 									"id": "block-29",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\"><strong>Follow Us On Social Media</strong></p>",
+										"content": "<p style=\"text-align:center\"><strong>Follow Us On Social Media</strong></p>",
 										"hyperlink": "",
 										"fontSize": 20,
 										"color": "#121212",
@@ -1100,7 +1082,7 @@
 									"id": "block-32",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center; color:#121212;\">This email was sent to {{contact:email}}. Update your settings to manage <strong style=\"color:#2E82C6;\">notifications,</strong> <strong style=\"color:#2E82C6;\">languages</strong> or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong style=\"color:#2E82C6;\">unsubscribe</strong></a>.</p>",
+										"content": "<p style=\"text-align:center\">This email was sent to {{contact:email}}. Update your settings to manage <strong>notifications,</strong> <strong>languages</strong> or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong>unsubscribe</strong></a>.</p>",
 										"hyperlink": "",
 										"fontSize": 15,
 										"color": "#121212",

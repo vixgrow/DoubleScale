@@ -122,7 +122,7 @@
 									"id": "block-5",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center;\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor.</p>",
+										"content": "<p style=\"text-align:center\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor.</p>",
 										"hyperlink": "",
 										"fontSize": 14,
 										"color": "#121212",
@@ -169,7 +169,7 @@
 									"id": "block-6",
 									"type": "text",
 									"props": {
-										"content": "<h1 style=\"text-align:center; color:#FFFFFF;\"><strong>📌 Our Benefits 📌</strong></h1>",
+										"content": "<h1 style=\"text-align:center\"><strong>📌 Our Benefits 📌</strong></h1>",
 										"hyperlink": "",
 										"fontSize": 34,
 										"color": "#FFFFFF",
@@ -247,7 +247,7 @@
 									"id": "block-8",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit One</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Two</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Three</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p>",
+										"content": "<p><strong>✦ Benefit One</strong></p><p>Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p><strong>✦ Benefit Two</strong></p><p>Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p><strong>✦ Benefit Three</strong></p><p>Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p>",
 										"hyperlink": "",
 										"fontSize": 14,
 										"color": "#FFFFFF",
@@ -318,7 +318,7 @@
 									"id": "block-10",
 									"type": "text",
 									"props": {
-										"content": "<h2 style=\"text-align:center; color:#FFFFFF;\"><strong>📌 A Small Gift for a Great Start 📌</strong></h2>",
+										"content": "<h2 style=\"text-align:center\"><strong>📌 A Small Gift for a Great Start 📌</strong></h2>",
 										"hyperlink": "",
 										"fontSize": 34,
 										"color": "#FFFFFF",
@@ -349,7 +349,7 @@
 									"id": "block-11",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center; color:#DDE6FF;\">Use this code for a discount <strong style=\"color:#FFFFFF; font-style: italic;\">10% Off</strong> on everything in our platform.</p>",
+										"content": "<p style=\"text-align:center\">Use this code for a discount <strong style=\"font-style: italic\">10% Off</strong> on everything in our platform.</p>",
 										"hyperlink": "",
 										"fontSize": 21,
 										"color": "#FFFFFF",
@@ -429,7 +429,7 @@
 									"id": "block-13",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center; color:#FFFFFF; font-size: 36px;\">Code: <strong style=\"font-style: italic;\">WELCOME10</strong></p>",
+										"content": "<p style=\"text-align:center\">Code: <strong style=\"font-style: italic\">WELCOME10</strong></p>",
 										"hyperlink": "",
 										"fontSize": 36,
 										"color": "#FFFFFF",
@@ -558,7 +558,7 @@
 									"id": "block-17",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"color:#DDE6FF;\">{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
+										"content": "<p>{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
 										"hyperlink": "",
 										"fontSize": 14,
 										"color": "#DDE6FF",
@@ -598,7 +598,7 @@
 									"id": "block-18",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"color:#DDE6FF;\"><strong>LINKS</strong></p>",
+										"content": "<p><strong>LINKS</strong></p>",
 										"hyperlink": "",
 										"fontSize": 16,
 										"color": "#DDE6FF",
@@ -629,7 +629,7 @@
 									"id": "block-19",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"color:#DDE6FF;\">Services</p><p style=\"color:#DDE6FF;\">Policy</p><p style=\"color:#DDE6FF;\">Guidance</p><p style=\"color:#DDE6FF;\"><a style=\"color: #DDE6FF;\" href=\"{{contact:unsubscribe_link}}\" target=\"_blank\">Unsubscribe</a></p>",
+										"content": "<p>Services</p><p>Policy</p><p>Guidance</p><p><a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\">Unsubscribe</a></p>",
 										"hyperlink": "",
 										"fontSize": 14,
 										"color": "#DDE6FF",
@@ -666,7 +666,7 @@
 									"id": "block-20",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"color:#DDE6FF;\"><strong>FOLLOW US</strong></p>",
+										"content": "<p><strong>FOLLOW US</strong></p>",
 										"hyperlink": "",
 										"fontSize": 16,
 										"color": "#DDE6FF",
@@ -821,7 +821,7 @@
 									"id": "block-23",
 									"type": "text",
 									"props": {
-										"content": "<p style=\"text-align:center; color:#FFFFFF;\">© 2026 BRAND NAME - ALL RIGHTS RESERVED.</p>",
+										"content": "<p style=\"text-align:center\">© 2026 BRAND NAME - ALL RIGHTS RESERVED.</p>",
 										"hyperlink": "",
 										"fontSize": 18,
 										"color": "#FFFFFF",

@@ -156,7 +156,8 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				<div
 					ref={scrollContainerRef}
 					className={cn(
-						usesHorizontalScroll && 'min-w-0 overflow-x-auto hide-scrollbar'
+						usesHorizontalScroll &&
+							'w-full min-w-0 max-w-full overflow-x-auto hide-scrollbar'
 					)}
 				>
 					<TabsList className={resolvedTabsListClassName}>

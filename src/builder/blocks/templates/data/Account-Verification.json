@@ -32,7 +32,7 @@
                   "id": "block-2",
                   "type": "text",
                   "props": {
-                    "content": "<h1 style=\"text-align:center; color:#DCE3F8;\"><strong>Forgot your password?<br>Let's fix that!</strong></h1>",
+                    "content": "<h1 style=\"text-align:center\"><strong>Forgot your password?<br>Let's fix that!</strong></h1>",
                     "hyperlink": "",
                     "fontSize": 44,
                     "color": "#DCE3F8",
@@ -89,7 +89,7 @@
                   "id": "block-4",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center;\"><strong>Hello {{contact:first_name}}👋</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>Hello {{contact:first_name}}👋</strong></p>",
                     "hyperlink": "",
                     "fontSize": 20,
                     "color": "#121212",
@@ -115,7 +115,7 @@
                   "id": "block-5",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#2A2A2A;\">Forgot your password? No problem - we've got you covered! Click the button below to reset your password and regain access to your account.</p><br><p style=\"text-align:center; color:#2A2A2A;\">Your security is our top priority, so this link will expire in 24 hours.</p>",
+                    "content": "<p style=\"text-align:center\">Forgot your password? No problem - we've got you covered! Click the button below to reset your password and regain access to your account.</p><br><p style=\"text-align:center\">Your security is our top priority, so this link will expire in 24 hours.</p>",
                     "hyperlink": "",
                     "fontSize": 16,
                     "color": "#121212",
@@ -159,7 +159,7 @@
                   "id": "block-6",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\"><strong>ALU-OZS</strong></p>",
+                    "content": "<p style=\"text-align:center\"><strong>ALU-OZS</strong></p>",
                     "hyperlink": "",
                     "fontSize": 38,
                     "color": "#121212",
@@ -220,7 +220,7 @@
                   "id": "block-8",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\">If you didn't request this change, please ignore this email or contact our <strong style=\"color:#2245AD;\"><u>support</u></strong> team immediately.</p><br><p style=\"text-align:center; color:#121212;\">Stay secure, Cognitive.inc</p>",
+                    "content": "<p style=\"text-align:center\">If you didn't request this change, please ignore this email or contact our <strong><u>support</u></strong> team immediately.</p><br><p style=\"text-align:center\">Stay secure, Cognitive.inc</p>",
                     "hyperlink": "",
                     "fontSize": 17,
                     "color": "#121212",
@@ -316,7 +316,7 @@
                   "id": "block-11",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"color:#121212;\">{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
+                    "content": "<p>{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
                     "hyperlink": "",
                     "fontSize": 15,
                     "color": "#121212",
@@ -374,7 +374,7 @@
                   "id": "block-13",
                   "type": "text",
                   "props": {
-                    "content": "<p style=\"text-align:center; color:#121212;\">Want to change which emails you receive from us? You can <strong style=\"color:#2245AD;\"><u>Update your preferences</u></strong> or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong style=\"color:#2245AD;\"><u>Unsubscribe</u></strong></a>. You can view our <strong style=\"color:#2245AD;\"><u>Privacy Policy.</u></strong></p>",
+                    "content": "<p style=\"text-align:center\">Want to change which emails you receive from us? You can <strong><u>Update your preferences</u></strong> or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong><u>Unsubscribe</u></strong></a>. You can view our <strong><u>Privacy Policy.</u></strong></p>",
                     "hyperlink": "",
                     "fontSize": 15.9,
                     "color": "#121212",

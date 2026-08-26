@@ -27,6 +27,8 @@ import { Button } from '@doublescale/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@doublescale/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon, PhoneIcon, SettingsIcon, ExternalLinkIcon } from '@doublescale/components';
+import { Switch } from '@doublescale/components/ui/switch';
+import { Label } from '@doublescale/components/ui/label';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import WhatsappIcon from '@doublescale/shared/icons/whatsapp-icon';
 
@@ -50,8 +52,13 @@ interface WhatsAppStatus {
 	phone_number_id?: string;
 }
 
-const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard = false }) => {
+const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({
+	settings,
+	onChange,
+	hideConnectionCard = false,
+}) => {
 	const navigate = useNavigate();
+	const autoKeywordUnsubscribe = settings?.whatsapp?.auto_keyword_unsubscribe ?? true;
 	const [isLoading, setIsLoading] = useState(true);
 	const [status, setStatus] = useState<WhatsAppStatus | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -170,10 +177,15 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 				</CardHeader>
 				<CardContent className="space-y-3 text-sm text-gray-700">
 					<p>
-						{__(
-							'When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp. You do not need to configure anything for this.',
-							'doublescale'
-						)}
+						{autoKeywordUnsubscribe
+							? __(
+									'When a contact replies with a standard opt-out keyword — such as STOP, UNSUBSCRIBE, CANCEL, END, QUIT, or STOP ALL — DoubleScale automatically marks them as unsubscribed from WhatsApp.',
+									'doublescale'
+								)
+							: __(
+									'Automatic keyword unsubscribe is turned off. Use an automation with the Unsubscribe WhatsApp action to handle opt-outs — for example, send a confirmation message first, then unsubscribe the contact.',
+									'doublescale'
+								)}
 					</p>
 					<p>
 						<strong>{__('Do I need to add "Reply STOP to unsubscribe"?', 'doublescale')}</strong>{' '}
@@ -183,13 +195,72 @@ const WhatsAppSettings: React.FC<WhatsAppSettingsProps> = ({ hideConnectionCard 
 						)}
 					</p>
 					<p>
+						<strong>{__('Does turning off automatic unsubscribe affect resubscribe?', 'doublescale')}</strong>{' '}
 						{__(
-							'Contacts can resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP. The reply must be that keyword only (not part of a longer sentence).',
+							'No. Contacts can always resubscribe by replying with START, SUBSCRIBE, YES, or UNSTOP — even when automatic unsubscribe is turned off. Only opt-out keywords (STOP, UNSUBSCRIBE, etc.) are affected by the switch below.',
+							'doublescale'
+						)}
+					</p>
+					<p>
+						{__(
+							'The reply must be that keyword only (not part of a longer sentence).',
 							'doublescale'
 						)}
 					</p>
 				</CardContent>
 			</Card>
+
+			{settings && onChange && (
+				<Card className="shadow-sm">
+					<CardHeader className="pb-3">
+						<CardTitle className="text-base">
+							{__('Automatic keyword unsubscribe', 'doublescale')}
+						</CardTitle>
+						<CardDescription>
+							{__(
+								'When enabled, contacts are unsubscribed immediately when they reply with STOP or other standard opt-out keywords.',
+								'doublescale'
+							)}
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-center justify-between gap-4">
+							<div className="space-y-1">
+								<Label htmlFor="whatsapp-auto-keyword-unsubscribe">
+									{__('Unsubscribe on STOP keywords', 'doublescale')}
+								</Label>
+								<p className="text-sm text-gray-600">
+									{__(
+										'Turn off to handle opt-outs through automations instead — useful when you want to send a confirmation message before unsubscribing.',
+										'doublescale'
+									)}
+								</p>
+								{!autoKeywordUnsubscribe && (
+									<p className="text-sm text-gray-600">
+										{__(
+											'Resubscribe keywords (START, SUBSCRIBE, YES, UNSTOP) still work automatically while this is off.',
+											'doublescale'
+										)}
+									</p>
+								)}
+							</div>
+							<Switch
+								id="whatsapp-auto-keyword-unsubscribe"
+								checked={autoKeywordUnsubscribe}
+								onCheckedChange={(checked: boolean) => {
+									onChange({
+										...settings,
+										whatsapp: {
+											...settings.whatsapp,
+											auto_keyword_unsubscribe: checked,
+										},
+									});
+								}}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
 			{/* Connection Status Card */}
 			{! hideConnectionCard && (

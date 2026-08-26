@@ -1,9 +1,9 @@
 /**
- * Line items editor for proposals and invoices.
+ * Line items editor for proposals and invoices (Bit CRM style).
  */
 
 import React, { useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import {
 	isPercentDiscountType,
@@ -11,15 +11,12 @@ import {
 } from './sales-discount-utils';
 import { getCurrencySymbol } from './sales-currency-utils';
 import { formatMoney } from '@/constants/currencies';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 import { DeleteIcon, GradientProposalItemsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { MultiSelect } from '@/components/ui/multi-select';
-import { Switch } from '@/components/ui/switch';
 import {
 	Table,
 	TableBody,
@@ -28,16 +25,22 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import { useSalesTaxes } from '@/hooks/sales';
-import type { LineItem, LineItemTax, SalesTax } from '@/types/sales';
-import NovicesIcon from '@doublescale/shared/icons/novices';
+import { LineItemProductCell } from './line-item-product-cell';
+import {
+	computeAmount,
+	computeLineSubtotal,
+	computeLineTotalWithTax,
+	getLineItemTaxRate,
+	normalizeLineItem,
+	syncLineItemTax,
+} from './line-item-utils';
+import type { LineItem } from '@/types/sales';
 
 /**
  * Context handed to the `doublescale_line_items_product_picker` slot.
  *
- * `onInsert` appends only — rows are keyed by array index, so inserting
- * mid-list would remount the rows below and scramble in-progress typing.
- * It also stamps `amount`, keeping that invariant owned in one place.
+ * @deprecated Toolbar pickers are replaced by per-row product cells. Pro still
+ * registers row-level search via `doublescale_line_item_product_search`.
  */
 export type LineItemPickerPlacement = 'toolbar' | 'empty';
 
@@ -45,35 +48,27 @@ export interface LineItemProductPickerContext {
 	onInsert: (item: LineItem) => void;
 	disabled: boolean;
 	currency: string;
-	/**
-	 * `empty` stacks pickers in the empty state so hints can sit under each
-	 * control. `toolbar` is the compact header row used once items exist.
-	 */
 	placement?: LineItemPickerPlacement;
 }
 
-const emptyItem = (): LineItem => ({
-	description: '',
-	long_description: '',
-	qty: 1,
-	unit: '',
-	rate: 0,
-	tax: [],
-	amount: 0,
-	optional: false,
-});
+const emptyItem = (): LineItem =>
+	normalizeLineItem({
+		description: '',
+		long_description: '',
+		qty: 1,
+		unit: '',
+		rate: 0,
+		tax: [],
+		discount_percentage: 0,
+		tax_rate: 0,
+		product_source: 'local',
+		optional: false,
+	});
 
 export const formatSalesAmount = (value: number, currency = 'USD') =>
 	formatMoney(value, currency);
 
-export const computeAmount = (item: LineItem): number => {
-	const qty = Number(item.qty) || 0;
-	const rate = Number(item.rate) || 0;
-	return Math.round(qty * rate * 100) / 100;
-};
-
-const taxLabel = (tax: SalesTax | LineItemTax): string =>
-	`${Number(tax.rate).toFixed(2)}% ${tax.name}`;
+export { computeAmount, computeLineSubtotal, computeLineTotalWithTax };
 
 export const computeLineItemsTotals = (
 	items: LineItem[],
@@ -81,9 +76,6 @@ export const computeLineItemsTotals = (
 	discountValue: number,
 	adjustment: number
 ) => {
-	// Must mirror the backend TotalsCalculator::compute exactly, otherwise the
-	// preview shows a different total than what gets saved (the model recomputes
-	// on save). before_tax/after_tax change BOTH the tax base and the discount base.
 	let subtotal = 0;
 	const lines: { amount: number; taxRates: number[] }[] = [];
 
@@ -95,7 +87,7 @@ export const computeLineItemsTotals = (
 		subtotal += amount;
 		lines.push({
 			amount,
-			taxRates: (item.tax || []).map((tax) => Number(tax.rate) || 0),
+			taxRates: [getLineItemTaxRate(item)],
 		});
 	});
 
@@ -153,129 +145,39 @@ interface LineItemsEditorProps {
 	onDiscountTypeChange?: (value: string) => void;
 	onDiscountValueChange?: (value: number) => void;
 	onAdjustmentChange?: (value: number) => void;
-	/** When true, discount type is controlled outside (e.g. proposal header). */
 	hideDiscountTypeSelect?: boolean;
 	readOnly?: boolean;
 	emptyStateIcon?: React.ReactNode;
 }
 
-const addItemButtonClass =
-	'rounded-lg border-[#262666] bg-white text-[#262666] hover:bg-[#F7F8FA]';
+const PercentSuffix = () => (
+	<Input
+		readOnly
+		tabIndex={-1}
+		value="%"
+		className="h-10 w-10 shrink-0 rounded-none border-0 border-l border-[#D0D0D0] bg-[#F7F8FA] px-0 text-center text-sm text-[#6B7280] shadow-none"
+	/>
+);
 
-interface TotalsSummaryProps {
-	totals: ReturnType<typeof computeLineItemsTotals>;
-	currency: string;
-	discountType: string;
-	discountValue: number;
-	adjustment: number;
-	hideDiscountTypeSelect: boolean;
-	readOnly: boolean;
-	onDiscountTypeChange?: (value: string) => void;
-	onDiscountValueChange?: (value: number) => void;
-	onAdjustmentChange?: (value: number) => void;
-	showAdjustmentField?: boolean;
-}
-
-const TotalsSummary: React.FC<TotalsSummaryProps> = ({
-	totals,
-	currency,
-	discountType,
-	discountValue,
-	adjustment,
-	hideDiscountTypeSelect,
-	readOnly,
-	onDiscountTypeChange,
-	onDiscountValueChange,
-	onAdjustmentChange,
-	showAdjustmentField = false,
-}) => (
-	<div className="flex w-full justify-end pt-4">
-		<div className="w-full min-w-[240px] max-w-[280px] rounded-2xl border border-[#E5E7EB] bg-[#F7F8FA] p-4">
-			<div className="mb-3 flex items-center justify-between">
-				<span className="text-xs font-medium text-[#6B7280]">
-					{__('Currency', 'doublescale')}
-				</span>
-				<span className="flex items-center gap-1 rounded-lg border border-border bg-white px-2.5 py-1 text-sm font-medium">
-					<span>{getCurrencySymbol(currency)}</span>
-					<span className="text-muted-foreground">{currency}</span>
-				</span>
-			</div>
-			{!hideDiscountTypeSelect && onDiscountTypeChange && onDiscountValueChange ? (
-				<div className="mb-3 grid grid-cols-2 gap-2">
-					<select
-						className="rounded-lg border border-[#D0D0D0] bg-white px-2 py-1.5 text-sm"
-						value={discountType}
-						onChange={(e) => onDiscountTypeChange(e.target.value)}
-						disabled={readOnly}
-					>
-						<option value="none">{__('No discount', 'doublescale')}</option>
-						<option value="percent">{__('Percent', 'doublescale')}</option>
-						<option value="fixed">{__('Fixed', 'doublescale')}</option>
-					</select>
-					{discountType !== 'none' ? (
-						<Input
-							type="number"
-							min={0}
-							max={isPercentDiscountType(discountType) ? 100 : undefined}
-							step="0.01"
-							value={discountValue}
-							onChange={(e) =>
-								onDiscountValueChange(parseDiscountInput(e.target.value))
-							}
-							disabled={readOnly}
-							placeholder={
-								discountType === 'percent'
-									? __('%', 'doublescale')
-									: __('Amount', 'doublescale')
-							}
-						/>
-					) : (
-						<div />
-					)}
-				</div>
-			) : null}
-			<div className="space-y-3 text-sm">
-				<div className="flex items-center justify-between gap-6">
-					<span className="text-[#6B7280]">{__('Sub Total', 'doublescale')}</span>
-					<span className="font-semibold text-[#111827]">
-						{formatSalesAmount(totals.subtotal, currency)}
-					</span>
-				</div>
-				{totals.discount > 0 ? (
-					<div className="flex items-center justify-between gap-6">
-						<span className="text-[#6B7280]">{__('Discount', 'doublescale')}</span>
-						<span className="font-semibold text-[#111827]">
-							-{formatSalesAmount(totals.discount, currency)}
-						</span>
-					</div>
-				) : null}
-				<div className="flex items-center justify-between gap-6">
-					<span className="text-[#6B7280]">{__('Tax', 'doublescale')}</span>
-					<span className="font-semibold text-[#111827]">
-						{formatSalesAmount(totals.totalTax, currency)}
-					</span>
-				</div>
-				{onAdjustmentChange && showAdjustmentField ? (
-					<div className="space-y-1 border-t border-[#E5E7EB] pt-3">
-						<Label className="text-[#6B7280]">{__('Adjustment', 'doublescale')}</Label>
-						<Input
-							type="number"
-							step="0.01"
-							value={adjustment}
-							onChange={(e) => onAdjustmentChange(Number(e.target.value))}
-							disabled={readOnly}
-							className="bg-white"
-						/>
-					</div>
-				) : null}
-				<div className="flex items-center justify-between gap-6 border-t border-[#E5E7EB] pt-3">
-					<span className="text-[#6B7280]">{__('Total', 'doublescale')}</span>
-					<span className="text-base font-semibold text-[#111827]">
-						{formatSalesAmount(totals.total, currency)}
-					</span>
-				</div>
-			</div>
-		</div>
+const currencyInput = (
+	value: number,
+	onChange: (value: number) => void,
+	currency: string,
+	disabled: boolean
+) => (
+	<div className="flex overflow-hidden rounded-lg border border-[#D0D0D0] bg-white">
+		<span className="flex h-10 shrink-0 items-center border-r border-[#D0D0D0] bg-[#F7F8FA] px-2 text-xs font-medium text-[#6B7280]">
+			{currency}
+		</span>
+		<Input
+			type="number"
+			min={0}
+			step="0.01"
+			value={value}
+			onChange={(e) => onChange(Number(e.target.value))}
+			disabled={disabled}
+			className="h-10 rounded-none border-0 shadow-none focus-visible:ring-0"
+		/>
 	</div>
 );
 
@@ -293,315 +195,214 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 	readOnly = false,
 	emptyStateIcon,
 }) => {
-	const { data: salesTaxes, loading: taxesLoading } = useSalesTaxes();
-
-	const taxOptions = useMemo(
-		() =>
-			salesTaxes.map((tax) => ({
-				label: taxLabel(tax),
-				value: String(tax.id),
-			})),
-		[salesTaxes]
-	);
-
-	const taxById = useMemo(() => {
-		const map = new Map<string, SalesTax>();
-		salesTaxes.forEach((tax) => map.set(String(tax.id), tax));
-		return map;
-	}, [salesTaxes]);
-
 	const totals = useMemo(
 		() => computeLineItemsTotals(items, discountType, discountValue, adjustment),
 		[items, discountType, discountValue, adjustment]
 	);
 
-	const updateItem = (index: number, patch: Partial<LineItem>) => {
+	const activeItems = items.filter((item) => !item.optional);
+	const productCount = activeItems.filter((item) => item.description.trim() !== '').length;
+	const totalQuantity = activeItems.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+
+	const commitItem = (index: number, patch: Partial<LineItem>) => {
 		const next = items.map((item, i) => {
 			if (i !== index) {
 				return item;
 			}
-			const merged = { ...item, ...patch };
-			return { ...merged, amount: computeAmount(merged) };
+			return normalizeLineItem({ ...item, ...patch });
 		});
 		onChange(next);
 	};
 
-	const addItem = () => onChange([...items, emptyItem()]);
+	const handleSourceChange = (index: number, source: string) => {
+		const item = items[index];
+		commitItem(index, {
+			product_source: source,
+			product_id: undefined,
+			description: source === 'custom' ? item.description : '',
+			long_description: source === 'custom' ? item.long_description : '',
+			rate: source === 'custom' ? item.rate : 0,
+			discount_percentage: 0,
+			tax_rate: 0,
+			tax: [],
+		});
+	};
 
-	// Append-only, and `amount` is stamped here rather than trusted from the
-	// caller: TotalsCalculator prefers a supplied `amount` over qty * rate, so a
-	// stale one would silently corrupt the saved total.
-	const insertItem = (item: LineItem) =>
-		onChange([...items, { ...item, amount: computeAmount(item) }]);
+	const addItem = () => onChange([...items, emptyItem()]);
 
 	const removeItem = (index: number) => {
 		onChange(items.filter((_, i) => i !== index));
 	};
 
+	const clearAll = () => onChange([]);
+
 	const showEmptyState = items.length === 0 && !readOnly;
 
-	// Pro fills this slot with the saved-products / Woo / SureCart pickers;
-	// empty in free. Placement switches the layout: stacked in the empty
-	// state so currency hints don't shove siblings off-alignment, compact
-	// in the header once rows exist.
-	const productPickerSlot = applyFilters(
-		'doublescale_line_items_product_picker',
-		null,
-		{
-			onInsert: insertItem,
-			disabled: readOnly,
-			currency,
-			placement: showEmptyState ? 'empty' : 'toolbar',
-		}
-	) as React.ReactNode;
-
-	const selectedTaxOptions = (item: LineItem) =>
-		(item.tax || [])
-			.map((tax) => {
-				const id = tax.id != null ? String(tax.id) : '';
-				const match = id ? taxById.get(id) : salesTaxes.find((t) => t.name === tax.name);
-				if (!match) {
-					return {
-						label: taxLabel(tax),
-						value: id || tax.name,
-					};
-				}
-				return {
-					label: taxLabel(match),
-					value: String(match.id),
-				};
-			})
-			.filter((option, index, list) => list.findIndex((o) => o.value === option.value) === index);
-
-	const handleTaxChange = (index: number, selected: { label: string; value: string }[]) => {
-		const taxes: LineItemTax[] = selected
-			.map((option) => taxById.get(option.value))
-			.filter((tax): tax is SalesTax => Boolean(tax))
-			.map((tax) => ({
-				id: tax.id,
-				name: tax.name,
-				rate: tax.rate,
-			}));
-		updateItem(index, { tax: taxes });
-	};
-
-	const customItemButton = (opts: { fullWidth?: boolean; size?: 'sm' | 'default' }) => (
-		<Button
-			type="button"
-			variant="outline"
-			size={opts.size ?? 'sm'}
-			className={`${addItemButtonClass}${opts.fullWidth ? ' h-10 w-full' : ''}`}
-			onClick={addItem}
-		>
-			<Plus className="mr-1 h-4 w-4" />
-			{__('Add custom item', 'doublescale')}
-		</Button>
-	);
-
-	const itemsHeader = (
-		<div className="flex items-center justify-between">
-			<Label className="text-sm !p-0 font-medium text-[#29292E]">
-				{__('Items', 'doublescale')}
-			</Label>
-			{!readOnly && !showEmptyState ? (
-				<div className="flex items-center gap-2">
-					{productPickerSlot}
-					{customItemButton({ size: 'sm' })}
-				</div>
-			) : null}
-		</div>
-	);
-
-	const totalsBlock = (
-		<TotalsSummary
-			totals={totals}
-			currency={currency}
-			discountType={discountType}
-			discountValue={discountValue}
-			adjustment={adjustment}
-			hideDiscountTypeSelect={hideDiscountTypeSelect}
-			readOnly={readOnly}
-			onDiscountTypeChange={onDiscountTypeChange}
-			onDiscountValueChange={onDiscountValueChange}
-			onAdjustmentChange={onAdjustmentChange}
-			showAdjustmentField={items.length > 0}
-		/>
-	);
+	// Legacy toolbar slot — kept for backward compatibility with extensions.
+	applyFilters('doublescale_line_items_product_picker', null, {
+		onInsert: (item: LineItem) => onChange([...items, normalizeLineItem(item)]),
+		disabled: readOnly,
+		currency,
+		placement: showEmptyState ? 'empty' : 'toolbar',
+	});
 
 	if (showEmptyState) {
 		return (
 			<div className="space-y-4">
-				{itemsHeader}
+				<div className="flex items-center justify-between">
+					<Label className="text-sm !p-0 font-medium text-[#29292E]">
+						{__('Items', 'doublescale')}
+					</Label>
+				</div>
 				<div className="flex flex-col items-center justify-center rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] px-6 py-10 text-center">
 					{emptyStateIcon ?? <GradientProposalItemsIcon />}
 					<p className="mt-3 text-sm font-semibold text-accent-foreground">
 						{__('No items yet', 'doublescale')}
 					</p>
 					<p className="mt-1 max-w-sm text-xs text-[#6B7280]">
-						{productPickerSlot
-							? __(
-									'Add a product from your catalog, or start with a custom line.',
-									'doublescale'
-								)
-							: __('Add a custom line to get started.', 'doublescale')}
-					</p>
-					<div
-						className={
-							productPickerSlot
-								? 'mt-6 w-full max-w-sm space-y-3 text-left'
-								: 'mt-6'
-						}
-					>
-						{productPickerSlot ? (
-							<>
-								{productPickerSlot}
-								<div className="flex items-center gap-2">
-									<span className="h-px flex-1 bg-[#E5E7EB]" />
-									<span className="text-xs text-[#9CA3AF]">
-										{__('or', 'doublescale')}
-									</span>
-									<span className="h-px flex-1 bg-[#E5E7EB]" />
-								</div>
-								{customItemButton({ fullWidth: true, size: 'default' })}
-							</>
-						) : (
-							customItemButton({ size: 'default' })
+						{__(
+							'Add a product from your catalog, or start with a custom line.',
+							'doublescale'
 						)}
-					</div>
+					</p>
+					<Button
+						type="button"
+						variant="outline"
+						className="mt-6 rounded-lg border-[#262666] bg-white text-[#262666] hover:bg-[#F7F8FA]"
+						onClick={addItem}
+					>
+						<Plus className="mr-1 h-4 w-4" />
+						{__('Add line item', 'doublescale')}
+					</Button>
 				</div>
-				{totalsBlock}
 			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			{itemsHeader}
+			<div className="flex items-center justify-between">
+				<Label className="text-sm !p-0 font-medium text-[#29292E]">
+					{__('Items', 'doublescale')}
+				</Label>
+				{!readOnly ? (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="rounded-lg border-[#262666] bg-white text-[#262666] hover:bg-[#F7F8FA]"
+						onClick={addItem}
+					>
+						<Plus className="mr-1 h-4 w-4" />
+						{__('Add line item', 'doublescale')}
+					</Button>
+				) : null}
+			</div>
 
 			<div className="overflow-hidden rounded-xl border border-[#DEE1E6]">
 				<Table>
 					<TableHeader className="bg-[#F8F8F8]">
 						<TableRow>
-							<TableHead className="min-w-[120px]">{__('Item', 'doublescale')}</TableHead>
-							<TableHead className="min-w-[140px]">
-								{__('Description', 'doublescale')}
+							<TableHead className="min-w-[280px]">
+								{__('Product Name', 'doublescale')}
 							</TableHead>
-							<TableHead className="w-20">{__('Qty', 'doublescale')}</TableHead>
-							<TableHead className="w-24">{__('Rate', 'doublescale')}</TableHead>
-							<TableHead className="w-28">{__('Amount', 'doublescale')}</TableHead>
-							<TableHead className="w-24">{__('Unit', 'doublescale')}</TableHead>
-							<TableHead className="min-w-[120px]">{__('Tax', 'doublescale')}</TableHead>
-							<TableHead className="w-24 text-center">
-								{__('Optional', 'doublescale')}
-							</TableHead>
-							{!readOnly ? (
-								<TableHead className="w-16 text-center">
-									{__('Actions', 'doublescale')}
-								</TableHead>
-							) : null}
+							<TableHead className="w-[120px]">{__('Price', 'doublescale')}</TableHead>
+							<TableHead className="w-[90px]">{__('Quantity', 'doublescale')}</TableHead>
+							<TableHead className="w-[100px]">{__('Discount', 'doublescale')}</TableHead>
+							<TableHead className="w-[100px]">{__('Tax Rate', 'doublescale')}</TableHead>
+							<TableHead className="w-[120px]">{__('Total', 'doublescale')}</TableHead>
+							{!readOnly ? <TableHead className="w-12" /> : null}
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{items.map((item, index) => (
-							<TableRow key={`line-item-${index}`} className="py-3">
-								<TableCell className="align-middle">
-									<Input
-										value={item.description}
-										onChange={(e) =>
-											updateItem(index, { description: e.target.value })
-										}
-										placeholder={__('Item', 'doublescale')}
+							<TableRow key={`line-item-${index}`}>
+								<TableCell className="align-top py-3">
+									<LineItemProductCell
+										item={item}
+										currency={currency}
 										disabled={readOnly}
+										onChange={(patch) => commitItem(index, patch)}
+										onSourceChange={(source) => handleSourceChange(index, source)}
 									/>
 								</TableCell>
-								<TableCell className="align-middle">
-									<Textarea
-										value={item.long_description || ''}
-										onChange={(e) =>
-											updateItem(index, {
-												long_description: e.target.value,
-											})
-										}
-										rows={2}
-										disabled={readOnly}
-									/>
+								<TableCell className="align-top py-3">
+									{currencyInput(
+										item.rate,
+										(rate) => commitItem(index, { rate }),
+										currency,
+										readOnly
+									)}
 								</TableCell>
-								<TableCell className="align-middle">
+								<TableCell className="align-top py-3">
 									<Input
 										type="number"
 										min={0}
 										step="0.01"
 										value={item.qty}
 										onChange={(e) =>
-											updateItem(index, { qty: Number(e.target.value) })
+											commitItem(index, { qty: Number(e.target.value) })
 										}
 										disabled={readOnly}
-										className="!rounded-lg !border-border"
+										className="h-10 rounded-lg border-[#D0D0D0]"
 									/>
 								</TableCell>
-								<TableCell className="align-middle">
-									<Input
-										type="number"
-										min={0}
-										step="0.01"
-										value={item.rate}
-										onChange={(e) =>
-											updateItem(index, { rate: Number(e.target.value) })
-										}
-										placeholder={__('ex: 1,2,3', 'doublescale')}
-										disabled={readOnly}
-										className="!rounded-lg !border-border"
-									/>
-								</TableCell>
-								<TableCell className="align-middle">
-									<div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
-										{formatSalesAmount(computeAmount(item), currency)}
-									</div>
-								</TableCell>
-								<TableCell className="align-middle">
-									<Input
-										value={item.unit || ''}
-										onChange={(e) =>
-											updateItem(index, { unit: e.target.value })
-										}
-										disabled={readOnly}
-									/>
-								</TableCell>
-								<TableCell className="align-middle">
-									<MultiSelect
-										options={taxOptions}
-										selected={selectedTaxOptions(item)}
-										onChange={(selected) => handleTaxChange(index, selected)}
-										placeholder={__('No Tax', 'doublescale')}
-										disabled={readOnly || taxesLoading}
-										isLoading={taxesLoading}
-										className="h-10"
-									/>
-								</TableCell>
-								<TableCell className="align-middle">
-									<div className="flex h-10 items-center justify-center">
-										<Switch
-											checked={Boolean(item.optional)}
-											onCheckedChange={(checked) =>
-												updateItem(index, { optional: Boolean(checked) })
+								<TableCell className="align-top py-3">
+									<div className="flex overflow-hidden rounded-lg border border-[#D0D0D0] bg-white">
+										<Input
+											type="number"
+											min={0}
+											max={100}
+											step="0.01"
+											value={item.discount_percentage ?? 0}
+											onChange={(e) =>
+												commitItem(index, {
+													discount_percentage: Number(e.target.value),
+												})
 											}
 											disabled={readOnly}
+											className="h-10 rounded-none border-0 shadow-none focus-visible:ring-0"
 										/>
+										<PercentSuffix />
+									</div>
+								</TableCell>
+								<TableCell className="align-top py-3">
+									<div className="flex overflow-hidden rounded-lg border border-[#D0D0D0] bg-white">
+										<Input
+											type="number"
+											min={0}
+											max={1000}
+											step="0.01"
+											value={getLineItemTaxRate(item)}
+											onChange={(e) =>
+												commitItem(
+													index,
+													syncLineItemTax(item, Number(e.target.value))
+												)
+											}
+											disabled={readOnly}
+											className="h-10 rounded-none border-0 shadow-none focus-visible:ring-0"
+										/>
+										<PercentSuffix />
+									</div>
+								</TableCell>
+								<TableCell className="align-top py-3">
+									<div className="flex h-10 items-center text-sm font-semibold text-[#111827]">
+										{formatSalesAmount(computeLineTotalWithTax(item), currency)}
 									</div>
 								</TableCell>
 								{!readOnly ? (
-									<TableCell className="align-middle">
-										<div className="flex h-10 items-center justify-center">
-											<Button
-												type="button"
-												variant="ghost"
-												className="text-destructive hover:text-destructive"
-												onClick={() => removeItem(index)}
-												aria-label={__('Remove item', 'doublescale')}
-											>
-												<DeleteIcon />
-											</Button>
-										</div>
+									<TableCell className="align-top py-3">
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+											onClick={() => removeItem(index)}
+											aria-label={__('Remove item', 'doublescale')}
+										>
+											<DeleteIcon />
+										</Button>
 									</TableCell>
 								) : null}
 							</TableRow>
@@ -610,7 +411,120 @@ export const LineItemsEditor: React.FC<LineItemsEditorProps> = ({
 				</Table>
 			</div>
 
-			{totalsBlock}
+			<div className="flex flex-col gap-4 pt-2 lg:flex-row lg:items-start lg:justify-between">
+				{!readOnly ? (
+					<Button
+						type="button"
+						variant="outline"
+						className="border-dashed border-red-300 bg-white text-red-600 hover:bg-red-50 hover:text-red-700"
+						onClick={clearAll}
+					>
+						<Trash2 className="mr-2 h-4 w-4" />
+						{__('Clear All', 'doublescale')}
+					</Button>
+				) : (
+					<div />
+				)}
+
+				<div className="w-full max-w-md space-y-3 lg:text-right">
+					<p className="text-xs text-[#6B7280]">
+						{sprintf(
+							/* translators: 1: product count, 2: total quantity */
+							__(
+								'Products: %1$s • Total product quantity: %2$s',
+								'doublescale'
+							),
+							productCount,
+							totalQuantity
+						)}
+					</p>
+
+					<div className="space-y-2 rounded-2xl border border-[#E5E7EB] bg-[#F7F8FA] p-4 text-sm">
+						{!hideDiscountTypeSelect && onDiscountTypeChange && onDiscountValueChange ? (
+							<div className="mb-3 grid grid-cols-2 gap-2 text-left">
+								<select
+									className="rounded-lg border border-[#D0D0D0] bg-white px-2 py-1.5 text-sm"
+									value={discountType}
+									onChange={(e) => onDiscountTypeChange(e.target.value)}
+									disabled={readOnly}
+								>
+									<option value="none">{__('No discount', 'doublescale')}</option>
+									<option value="percent">{__('Percent', 'doublescale')}</option>
+									<option value="fixed">{__('Fixed', 'doublescale')}</option>
+								</select>
+								{discountType !== 'none' ? (
+									<Input
+										type="number"
+										min={0}
+										max={isPercentDiscountType(discountType) ? 100 : undefined}
+										step="0.01"
+										value={discountValue}
+										onChange={(e) =>
+											onDiscountValueChange(parseDiscountInput(e.target.value))
+										}
+										disabled={readOnly}
+										placeholder={
+											discountType === 'percent'
+												? __('%', 'doublescale')
+												: __('Amount', 'doublescale')
+										}
+									/>
+								) : (
+									<div />
+								)}
+							</div>
+						) : null}
+
+						<div className="flex items-center justify-between gap-6">
+							<span className="text-[#6B7280]">{__('Subtotal', 'doublescale')}</span>
+							<span className="font-semibold text-[#111827]">
+								{formatSalesAmount(totals.subtotal, currency)}
+							</span>
+						</div>
+						<div className="flex items-center justify-between gap-6">
+							<span className="text-[#6B7280]">
+								{__('Tax (Added)', 'doublescale')}
+							</span>
+							<span className="font-semibold text-[#111827]">
+								{formatSalesAmount(totals.totalTax, currency)}
+							</span>
+						</div>
+						{totals.discount > 0 ? (
+							<div className="flex items-center justify-between gap-6">
+								<span className="text-[#6B7280]">{__('Discount', 'doublescale')}</span>
+								<span className="font-semibold text-[#111827]">
+									-{formatSalesAmount(totals.discount, currency)}
+								</span>
+							</div>
+						) : null}
+						{onAdjustmentChange ? (
+							<div className="space-y-1 border-t border-[#E5E7EB] pt-3 text-left">
+								<Label className="text-[#6B7280]">
+									{__('Adjustment', 'doublescale')}
+								</Label>
+								<Input
+									type="number"
+									step="0.01"
+									value={adjustment}
+									onChange={(e) => onAdjustmentChange(Number(e.target.value))}
+									disabled={readOnly}
+									className="bg-white"
+								/>
+							</div>
+						) : null}
+						<div className="flex items-center justify-between gap-6 border-t border-[#E5E7EB] pt-3">
+							<span className="text-[#6B7280]">{__('Total', 'doublescale')}</span>
+							<span className="text-base font-semibold text-[#111827]">
+								{formatSalesAmount(totals.total, currency)}
+							</span>
+						</div>
+						<div className="flex items-center justify-end gap-1 text-xs text-[#6B7280]">
+							<span>{getCurrencySymbol(currency)}</span>
+							<span>{currency}</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };

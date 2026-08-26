@@ -829,6 +829,10 @@ export type Settings = {
 		retention_type: 'days' | 'never' | null;
 		retention_days: string | null;
 	};
+	whatsapp?: {
+		max_in_second?: number;
+		auto_keyword_unsubscribe?: boolean;
+	};
 };
 
 export type Response = {

@@ -910,7 +910,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const onNodeClick: NodeMouseHandler = useCallback(
 		(event, node) => {
 			const target = event.target as HTMLElement | null;
-			if (target?.closest('[data-doublescale-dialog-layer]')) {
+			// Nested confirm/rename dialogs have their own layer. The editor
+			// itself also lives in a dialog layer — matching every layer would
+			// swallow every canvas click and never open step settings.
+			if (
+				target?.closest(
+					'[data-doublescale-dialog-layer]:not(:has(#doublescale-automation-editor-dialog))'
+				)
+			) {
 				return;
 			}
 

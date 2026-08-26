@@ -132,7 +132,7 @@
 	},
 	"scripts": {
 		"dev": "wp-scripts start --config webpack.config.js",
-		"build": "rm -rf build/client build/renderer node_modules/.cache/webpack && NODE_OPTIONS=--max-old-space-size=4096 wp-scripts build --config webpack.config.js",
+		"build": "rm -rf build/client build/renderer node_modules/.cache/webpack && NODE_OPTIONS=--max-old-space-size=4096 wp-scripts build --config webpack.config.js && npm run make-pot",
 		"make-pot": "php bin/make-pot.php",
 		"make-mo": "bash bin/compile-translations.sh",
 		"make-json": "php bin/make-json-translations.php",

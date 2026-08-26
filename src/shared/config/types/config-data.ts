@@ -211,6 +211,8 @@ export type UserCapabilities = {
 	doublescale_can_assign_project_owner?: boolean;
 	doublescale_can_assign_task_assignee?: boolean;
 	doublescale_can_assign_sales_rep?: boolean;
+	/** False for Sales Rep users (even when they also hold WP administrator). */
+	doublescale_can_delete_contacts?: boolean;
 };
 
 export type DefaultStage = {

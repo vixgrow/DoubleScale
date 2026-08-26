@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.19
+Stable tag: 1.3.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.20 = 26 Aug 2026
+- Keep email text-block list alignment in line with the block setting (strip leftover inline text-align on lists)
+- Resolve {{ASSETS_URL}} and image sources when rendering emails so plugin assets load in sent mail
+
 = 1.3.19 = 26 Aug 2026
 - Revamp the client portal: document status filters, projects Kanban, helpdesk inbox, dashboard calendar, and mobile tab navigation
 - Group outstanding portal balances by currency instead of mixing amounts

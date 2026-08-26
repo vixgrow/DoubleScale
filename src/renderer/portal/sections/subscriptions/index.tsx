@@ -19,7 +19,7 @@ import {
 } from '../../api';
 import type { PortalSubscription } from '../../types';
 import { formatDate, formatMoney } from '../../shared/format';
-import { EmptyState, ErrorState, Spinner, StatusBadge } from '../../shared/ui';
+import { EmptyState, ErrorState, PORTAL_INNER_CARD, Spinner, StatusBadge } from '../../shared/ui';
 
 const billingLabel = (sub: PortalSubscription): string => {
 	const price = formatMoney(sub.amount, sub.currency);
@@ -64,7 +64,7 @@ const SubscriptionCard = ({
 	};
 
 	return (
-		<div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+		<div className={`${PORTAL_INNER_CARD} p-5`}>
 			<div className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
 					<p className="truncate text-lg font-semibold text-foreground">

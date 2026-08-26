@@ -1,16 +1,96 @@
 /**
- * Tiny inline-SVG icon set for the portal shell (avoids pulling a full icon
- * dependency into the public bundle). Keyed by the `icon` slug a section
- * descriptor declares server-side.
+ * Portal icons — sidebar nav, PHP slug resolver, and tiny UI chevrons.
+ * Brand icons come from @/components/icons (same as admin navbar).
  */
 
-interface IconProps {
+import type { ComponentType } from 'react';
+
+import {
+	BookingIcon,
+	ClockIcon as BookingClockIcon,
+	LocationIcon as BookingLocationIcon,
+} from '@/components/booking';
+import {
+	AttachmentFileIcon,
+	DashboardIcon,
+	HelpdeskIcon,
+	PaymentModeIcon,
+	ProjectsIcon,
+	RepeatIcon,
+} from '@/components/icons';
+import type { IconProps } from '@doublescale/config';
+
+type BrandIcon = ComponentType<IconProps>;
+
+const NAV_ICON_SIZE = 24;
+
+const PHP_ICON_MAP: Record<string, BrandIcon> = {
+	home: DashboardIcon,
+	ticket: HelpdeskIcon,
+	calendar: BookingIcon,
+	document: AttachmentFileIcon,
+	folder: ProjectsIcon,
+	clock: BookingClockIcon,
+	subscriptions: RepeatIcon,
+};
+
+const SECTION_SLUG_MAP: Record<string, BrandIcon> = {
+	dashboard: DashboardIcon,
+	tickets: HelpdeskIcon,
+	bookings: BookingIcon,
+	projects: ProjectsIcon,
+	documents: AttachmentFileIcon,
+	subscriptions: RepeatIcon,
+};
+
+const renderBrandIcon = (
+	Icon: BrandIcon,
+	size: number,
+	className?: string
+) => (
+	<span className={className}>
+		<Icon width={size} height={size} color="currentColor" />
+	</span>
+);
+
+export const SectionIcon = ({
+	icon,
+	className,
+	size = NAV_ICON_SIZE,
+}: {
+	icon: string;
+	className?: string;
+	size?: number;
+}) => renderBrandIcon(PHP_ICON_MAP[icon] || DashboardIcon, size, className);
+
+export const PortalNavIcon = ({
+	slug,
+	fallbackIcon,
+}: {
+	slug: string;
+	fallbackIcon: string;
+}) =>
+	renderBrandIcon(
+		SECTION_SLUG_MAP[slug] || PHP_ICON_MAP[fallbackIcon] || DashboardIcon,
+		NAV_ICON_SIZE,
+		'portal-nav-link__icon shrink-0'
+	);
+
+interface UiIconProps {
+	className?: string;
+	size?: number;
+}
+
+const uiIcon = (Icon: BrandIcon, { className, size = 16 }: UiIconProps) =>
+	renderBrandIcon(Icon, size, className);
+
+interface ChevronProps {
 	className?: string;
 }
 
-const base = (path: JSX.Element, props: IconProps) => (
+const chevronBase = (path: JSX.Element, { className }: ChevronProps) => (
 	<svg
-		className={props.className || 'w-5 h-5'}
+		className={className || 'h-6 w-6'}
 		viewBox="0 0 24 24"
 		fill="none"
 		stroke="currentColor"
@@ -23,107 +103,20 @@ const base = (path: JSX.Element, props: IconProps) => (
 	</svg>
 );
 
-export const HomeIcon = (p: IconProps) =>
-	base(
-		<>
-			<path d="M3 10.5 12 3l9 7.5" />
-			<path d="M5 9.5V21h14V9.5" />
-		</>,
-		p
-	);
+export const ChevronLeftIcon = (props: ChevronProps) =>
+	chevronBase(<path d="M15 6l-6 6 6 6" />, props);
 
-export const TicketIcon = (p: IconProps) =>
-	base(
-		<>
-			<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z" />
-			<path d="M13 6v12" strokeDasharray="2 2" />
-		</>,
-		p
-	);
+export const ChevronRightIcon = (props: ChevronProps) =>
+	chevronBase(<path d="M9 6l6 6-6 6" />, props);
 
-export const CalendarIcon = (p: IconProps) =>
-	base(
-		<>
-			<rect x="3" y="4.5" width="18" height="16" rx="2" />
-			<path d="M3 9h18M8 3v3M16 3v3" />
-		</>,
-		p
-	);
+export const ClockIcon = (props: UiIconProps) =>
+	uiIcon(BookingClockIcon, props);
 
-export const DocumentIcon = (p: IconProps) =>
-	base(
-		<>
-			<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
-			<path d="M14 3v5h5M9 13h6M9 17h6" />
-		</>,
-		p
-	);
+export const MapPinIcon = (props: UiIconProps) =>
+	uiIcon(BookingLocationIcon, props);
 
-export const ClockIcon = (p: IconProps) =>
-	base(
-		<>
-			<circle cx="12" cy="12" r="9" />
-			<path d="M12 7v5l3 2" />
-		</>,
-		p
-	);
+export const PaymentIcon = (props: UiIconProps) =>
+	uiIcon(PaymentModeIcon, { size: 24, ...props });
 
-export const MapPinIcon = (p: IconProps) =>
-	base(
-		<>
-			<path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z" />
-			<circle cx="12" cy="10" r="2.5" />
-		</>,
-		p
-	);
-
-export const FolderIcon = (p: IconProps) =>
-	base(
-		<path d="M4 5a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />,
-		p
-	);
-
-export const ChevronLeftIcon = (p: IconProps) => base(<path d="M15 6l-6 6 6 6" />, p);
-
-export const PaymentIcon = (p: IconProps) =>
-	base(
-		<>
-			<rect x="2" y="5" width="20" height="14" rx="2" />
-			<path d="M2 10h20" />
-		</>,
-		p
-	);
-
-export const ChevronRightIcon = (p: IconProps) => base(<path d="M9 6l6 6-6 6" />, p);
-
-export const RepeatIcon = (p: IconProps) =>
-	base(
-		<>
-			<path d="M17 1l4 4-4 4" />
-			<path d="M3 11V9a4 4 0 0 1 4-4h14" />
-			<path d="M7 23l-4-4 4-4" />
-			<path d="M21 13v2a4 4 0 0 1-4 4H3" />
-		</>,
-		p
-	);
-
-const REGISTRY: Record<string, (p: IconProps) => JSX.Element> = {
-	home: HomeIcon,
-	ticket: TicketIcon,
-	calendar: CalendarIcon,
-	document: DocumentIcon,
-	folder: FolderIcon,
-	clock: ClockIcon,
-	subscriptions: RepeatIcon,
-};
-
-export const SectionIcon = ({
-	icon,
-	className,
-}: {
-	icon: string;
-	className?: string;
-}) => {
-	const Cmp = REGISTRY[icon] || HomeIcon;
-	return <Cmp className={className} />;
-};
+export const DocumentIcon = (props: UiIconProps) =>
+	uiIcon(AttachmentFileIcon, { size: 24, ...props });

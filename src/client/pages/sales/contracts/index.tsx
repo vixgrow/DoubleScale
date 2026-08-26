@@ -33,7 +33,6 @@ import {
 	NoData,
 	PageHeader,
 	PlusIcon,
-	SalesIcon,
 	SendTestEmailIcon,
 } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';

@@ -147,8 +147,8 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 					<span className="text-sm font-medium text-muted-foreground">
 						{label}
 					</span>
-					<div className="flex items-baseline gap-2">
-						<span className="text-2xl font-bold text-foreground">
+					<div className="flex min-w-0 flex-wrap items-baseline gap-2">
+						<span className="break-words text-2xl font-bold text-foreground">
 							{value}
 						</span>
 						{percentage !== undefined && (

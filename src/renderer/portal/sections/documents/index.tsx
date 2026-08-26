@@ -133,6 +133,97 @@ const CREDIT_NOTE_STATUS_CLASSES: Record<string, string> = {
 	void: 'bg-[#FBE8E8] text-[#C30A0A]',
 };
 
+type StatusGroupKey = 'invoice' | 'proposal' | 'contract' | 'credit_note';
+
+const toStatusFilterToken = (type: StatusGroupKey, status: string): string =>
+	`${type}:${status}`;
+
+const parseStatusFilterToken = (
+	token: string
+): { type: StatusGroupKey; status: string } | null => {
+	const sep = token.indexOf(':');
+	if (sep <= 0) {
+		return null;
+	}
+
+	const type = token.slice(0, sep) as StatusGroupKey;
+	const status = token.slice(sep + 1);
+	if (
+		!['invoice', 'proposal', 'contract', 'credit_note'].includes(type) ||
+		status === ''
+	) {
+		return null;
+	}
+
+	return { type, status };
+};
+
+/**
+ * Match a portal document against a status filter value. Uses computed flags
+ * (overdue / expired) so filters align with what the status pills show.
+ */
+const documentHasFilterStatus = (
+	doc: PortalDocument,
+	status: string
+): boolean => {
+	switch (doc.type) {
+		case 'invoice':
+			if (status === 'overdue') {
+				return doc.status === 'overdue' || doc.is_overdue;
+			}
+			return doc.status === status;
+
+		case 'contract': {
+			const expired = doc.is_expired || doc.status === 'expired';
+			if (status === 'expired') {
+				return expired;
+			}
+			if (expired) {
+				return false;
+			}
+			return doc.status === status;
+		}
+
+		case 'proposal':
+			if (status === 'expired') {
+				return doc.is_expired;
+			}
+			return doc.status === status;
+
+		default:
+			return doc.status === status;
+	}
+};
+
+const documentMatchesStatusFilter = (
+	doc: PortalDocument,
+	selected: string[]
+): boolean => {
+	if (selected.length === 0) {
+		return true;
+	}
+
+	return selected.some((token) => {
+		const parsed = parseStatusFilterToken(token);
+		if (!parsed) {
+			return false;
+		}
+		if (doc.type !== parsed.type) {
+			return false;
+		}
+
+		return documentHasFilterStatus(doc, parsed.status);
+	});
+};
+
+const resolveInvoiceDisplayStatus = (doc: PortalDocument): InvoiceStatus => {
+	if (doc.status === 'overdue' || doc.is_overdue) {
+		return 'overdue';
+	}
+
+	return doc.status as InvoiceStatus;
+};
+
 const CreditNoteStatusPill = ({ status }: { status: string }) => (
 	<span
 		className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
@@ -145,7 +236,7 @@ const CreditNoteStatusPill = ({ status }: { status: string }) => (
 
 const documentStatusPill = (doc: PortalDocument): ReactNode => {
 	if (doc.type === 'invoice') {
-		return <InvoiceStatusPill status={doc.status as InvoiceStatus} />;
+		return <InvoiceStatusPill status={resolveInvoiceDisplayStatus(doc)} />;
 	}
 	if (doc.type === 'proposal') {
 		return (
@@ -169,8 +260,6 @@ const documentStatusPill = (doc: PortalDocument): ReactNode => {
 	return null;
 };
 
-type StatusGroupKey = 'invoice' | 'proposal' | 'contract' | 'credit_note';
-
 type StatusGroup = {
 	key: StatusGroupKey;
 	label: string;
@@ -189,10 +278,16 @@ const STATUS_GROUPS: StatusGroup[] = [
 	{
 		key: 'proposal',
 		label: __('Proposals', 'doublescale'),
-		statuses: PROPOSAL_STATUSES.map((value) => ({
-			value,
-			label: PROPOSAL_STATUS_LABELS[value],
-		})),
+		statuses: [
+			...PROPOSAL_STATUSES.map((value) => ({
+				value,
+				label: PROPOSAL_STATUS_LABELS[value],
+			})),
+			{
+				value: 'expired',
+				label: __('Expired', 'doublescale'),
+			},
+		],
 	},
 	{
 		key: 'contract',
@@ -692,8 +787,13 @@ const StatusFilterSelect = ({
 			? __('All Status', 'doublescale')
 			: selected.length === 1
 				? visibleGroups
-						.flatMap((g) => g.statuses)
-						.find((s) => s.value === selected[0])?.label ||
+						.flatMap((group) =>
+							group.statuses.map((status) => ({
+								token: toStatusFilterToken(group.key, status.value),
+								label: status.label,
+							}))
+						)
+						.find((entry) => entry.token === selected[0])?.label ||
 					__('All Status', 'doublescale')
 				: sprintf(
 						/* translators: %d is the number of selected statuses. */
@@ -701,11 +801,11 @@ const StatusFilterSelect = ({
 						selected.length
 				  );
 
-	const toggle = (value: string) => {
-		if (selected.includes(value)) {
-			onChange(selected.filter((v) => v !== value));
+	const toggle = (token: string) => {
+		if (selected.includes(token)) {
+			onChange(selected.filter((value) => value !== token));
 		} else {
-			onChange([...selected, value]);
+			onChange([...selected, token]);
 		}
 	};
 
@@ -739,14 +839,18 @@ const StatusFilterSelect = ({
 						<DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
 							{group.label}
 						</DropdownMenuLabel>
-						{group.statuses.map((status) => (
-							<StatusOptionCheckbox
-								key={`${group.key}-${status.value}`}
-								checked={selected.includes(status.value)}
-								label={status.label}
-								onToggle={() => toggle(status.value)}
-							/>
-						))}
+						{group.statuses.map((status) => {
+							const token = toStatusFilterToken(group.key, status.value);
+
+							return (
+								<StatusOptionCheckbox
+									key={token}
+									checked={selected.includes(token)}
+									label={status.label}
+									onToggle={() => toggle(token)}
+								/>
+							);
+						})}
 					</div>
 				))}
 			</DropdownMenuContent>
@@ -1088,7 +1192,7 @@ const DocumentsHome = () => {
 
 	const filteredDocs = useMemo(() => {
 		return docs.filter((doc) => {
-			if (statuses.length > 0 && !statuses.includes(doc.status)) {
+			if (!documentMatchesStatusFilter(doc, statuses)) {
 				return false;
 			}
 			if (!normalizedQuery) {
@@ -1124,7 +1228,7 @@ const DocumentsHome = () => {
 			sortDate: documentSortDate(doc),
 		}));
 
-		if (tab !== 'all' || !invoicesPaymentsPro) {
+		if (tab !== 'all' || !invoicesPaymentsPro || statuses.length > 0) {
 			return docItems;
 		}
 
@@ -1139,7 +1243,7 @@ const DocumentsHome = () => {
 		return [...docItems, ...paymentItems].sort((a, b) =>
 			b.sortDate.localeCompare(a.sortDate)
 		);
-	}, [tab, filteredDocs, filteredPayments, invoicesPaymentsPro]);
+	}, [tab, filteredDocs, filteredPayments, invoicesPaymentsPro, statuses]);
 
 	const isPaymentsOnly = tab === 'payments';
 	const loading =

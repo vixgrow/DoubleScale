@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.15
+Stable tag: 1.3.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,14 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.16 = 26 Aug 2026
+- Reject SMTP sending ports (587/465/25) in IMAP mailbox settings and recover when IMAP SINCE searches return empty
+- Always offer Custom IMAP for the shared inbox, even when Gmail or Outlook is used for sending
+- Add WhatsApp automatic keyword unsubscribe (STOP-style opt-out)
+- Restrict contact deletion by role so Sales Reps cannot delete contacts
+- Track campaign contact eligibility by channel (email, SMS, WhatsApp)
+- Improve sales line-item product selection, email builder overlays, and automation canvas clicks
+
 = 1.3.15 = 24 Aug 2026
 - Ship a committed SMTP includes classmap so mailer classes load on WordPress.org / Linux installs without root vendor/
 

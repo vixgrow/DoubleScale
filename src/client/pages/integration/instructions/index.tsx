@@ -10,6 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
 import SlackInstructions from './slack-instructions';
 import TypeformInstructions from './typeform-instructions';
 import JotformInstructions from './jotform-instructions';
+import ZapierInstructions from './zapier-instructions';
 
 interface InstructionsProps {
     slug: string;
@@ -37,6 +38,8 @@ const Instructions: React.FC<InstructionsProps> = ({ slug, label, description })
             return <TypeformInstructions />;
         case 'jotform':
             return <JotformInstructions />;
+        case 'zapier':
+            return <ZapierInstructions />;
         default:
             // Default fallback for other integrations
             return (

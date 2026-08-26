@@ -108,6 +108,7 @@ const SelectContent = React.forwardRef<
 						className
 					)}
 					position={position}
+					onCloseAutoFocus={(event) => event.preventDefault()}
 					{...props}
 				>
 					<SelectScrollUpButton />
@@ -160,6 +161,7 @@ const SelectItem = React.forwardRef<
 				className
 			)}
 			textValue={itemLabel ?? textValue}
+			onPointerDown={(event) => event.preventDefault()}
 			{...props}
 		>
 			<span className="absolute right-2 top-2 flex h-3.5 w-3.5 items-center justify-center">

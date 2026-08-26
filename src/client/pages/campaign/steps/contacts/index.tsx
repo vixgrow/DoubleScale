@@ -421,6 +421,7 @@ const Contacts: React.FC = () => {
 											fetchContacts={handleApplyFilters}
 											loading={isLoading}
 											onApplyingChange={setIsApplying}
+											campaignType={campaign?.type}
 										/>
 									)}
 									{filterBy === 'advanced' && (

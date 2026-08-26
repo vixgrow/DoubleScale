@@ -71,6 +71,31 @@ const getContactInitials = (firstName: string, lastName: string): string => {
 	return first + last || '?';
 };
 
+const getEligibilityHint = (campaignType?: string) => {
+	switch (campaignType) {
+		case 'sms':
+			return __(
+				'Only subscribed contacts with a valid phone number are included.',
+				'doublescale'
+			);
+		case 'whatsapp':
+			return __(
+				'Only subscribed contacts with a valid WhatsApp number are included.',
+				'doublescale'
+			);
+		case 'email':
+			return __(
+				'Only subscribed contacts with a valid email address are included. Contacts without an email or with an unverified status are excluded.',
+				'doublescale'
+			);
+		default:
+			return __(
+				'Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign.',
+				'doublescale'
+			);
+	}
+};
+
 const ContactList: React.FC<ContactListProps> = ({
 	filters = [],
 	loading = false,
@@ -265,10 +290,7 @@ const ContactList: React.FC<ContactListProps> = ({
 										)}
 							</p>
 							<p className="mt-2 text-sm font-normal leading-snug text-muted-foreground">
-								{__(
-									'Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign.',
-									'doublescale'
-								)}
+								{getEligibilityHint(campaignType)}
 							</p>
 						</>
 					)}

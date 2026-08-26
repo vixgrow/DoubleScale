@@ -46,7 +46,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.3.13',
+			'DOUBLESCALE_VERSION'       => '1.3.15',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -136,6 +136,35 @@ final class Lifecycle {
 				}
 				if ( $doublescale_plugin_map ) {
 					$doublescale_composer_loader->addClassMap( $doublescale_plugin_map );
+				}
+			}
+		}
+
+		/*
+		 * WordPress.org packages omit root vendor/. SMTP (and other WP-style
+		 * class-*.php files) still need Composer’s classmap. Ship a generated
+		 * subset at includes/includes-classmap.php and always merge/register it.
+		 */
+		$doublescale_includes_classmap_file = $dir . 'includes/includes-classmap.php';
+		if ( is_readable( $doublescale_includes_classmap_file ) ) {
+			$doublescale_includes_classmap = require $doublescale_includes_classmap_file;
+			if ( is_array( $doublescale_includes_classmap ) && $doublescale_includes_classmap ) {
+				$doublescale_absolute_map = array();
+				foreach ( $doublescale_includes_classmap as $doublescale_fqcn => $doublescale_rel ) {
+					$doublescale_absolute_map[ $doublescale_fqcn ] = $dir . ltrim( (string) $doublescale_rel, '/' );
+				}
+				if ( $doublescale_composer_loader instanceof \Composer\Autoload\ClassLoader ) {
+					$doublescale_composer_loader->addClassMap( $doublescale_absolute_map );
+				} else {
+					spl_autoload_register(
+						static function ( $class ) use ( $doublescale_absolute_map ) {
+							if ( isset( $doublescale_absolute_map[ $class ] ) && is_readable( $doublescale_absolute_map[ $class ] ) ) {
+								require_once $doublescale_absolute_map[ $class ];
+							}
+						},
+						true,
+						true
+					);
 				}
 			}
 		}

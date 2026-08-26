@@ -75,6 +75,9 @@ rsync -a \
 	--include="/assets/images/authorize-net/***" \
 	--include="/assets/images/meta-whatsapp/***" \
 	--include="/assets/images/zapier/***" \
+	--include="/assets/images/asana/***" \
+	--include="/assets/images/gmail/***" \
+	--include="/assets/images/google-sheets/***" \
 	--include="/assets/images/white-label/***" \
 	--exclude="/assets/images/**" \
 	--exclude="/assets/booking-icons" \

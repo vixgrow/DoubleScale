@@ -3,7 +3,7 @@
  *
  * Uses a HashRouter — the portal lives inside a host page, so we can't own
  * `window.location.pathname`. PHP (`/portal/bootstrap`) decides identity + which
- * sections are visible; the static registry maps each visible slug to its lazy
+ * sections are visible; the static registry maps each visible slug to its view.
  * view. A `doublescale_portal_path` query arg (set by email deep-links, which
  * survive the WP login redirect) is translated into the initial hash route.
  */
@@ -81,7 +81,9 @@ const PortalApp = ({ config }: Props) => {
 		);
 	}
 
-	const visibleSections = data.sections.filter((s) => hasSection(s.slug));
+	const visibleSections = data.sections.filter(
+		(s) => hasSection(s.slug) && s.slug !== 'calendar'
+	);
 
 	return (
 		<HashRouter>
@@ -103,6 +105,7 @@ const PortalApp = ({ config }: Props) => {
 								/>
 							);
 						})}
+						<Route path="/calendar/*" element={<Navigate to="/" replace />} />
 						<Route path="*" element={<Navigate to="/" replace />} />
 					</Routes>
 				</Suspense>

@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, mcp, pipelines
 Requires at least: 5.8
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 1.3.15
+Stable tag: 1.3.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,28 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.19 = 26 Aug 2026
+- Revamp the client portal: document status filters, projects Kanban, helpdesk inbox, dashboard calendar, and mobile tab navigation
+- Group outstanding portal balances by currency instead of mixing amounts
+- Use only the email text-block color and font size (strip leftover inline styles)
+- Add Zapier integration setup instructions
+- Embed contract, invoice, and proposal views inside the portal
+
+= 1.3.18 = 26 Aug 2026
+- Fix IMAP inbox polling crash on PHP 8.1+ hosts that have the IMAP PHP extension installed
+
+= 1.3.17 = 26 Aug 2026
+- Stop blocking IMAP mailbox save on SMTP ports (587/465/25) so the port you enter is stored as-is
+- Keep IMAP SINCE search fallback when a server returns no results for date-filtered unseen mail
+
+= 1.3.16 = 26 Aug 2026
+- Reject SMTP sending ports (587/465/25) in IMAP mailbox settings and recover when IMAP SINCE searches return empty
+- Always offer Custom IMAP for the shared inbox, even when Gmail or Outlook is used for sending
+- Add WhatsApp automatic keyword unsubscribe (STOP-style opt-out)
+- Restrict contact deletion by role so Sales Reps cannot delete contacts
+- Track campaign contact eligibility by channel (email, SMS, WhatsApp)
+- Improve sales line-item product selection, email builder overlays, and automation canvas clicks
+
 = 1.3.15 = 24 Aug 2026
 - Ship a committed SMTP includes classmap so mailer classes load on WordPress.org / Linux installs without root vendor/
 

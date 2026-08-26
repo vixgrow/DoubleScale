@@ -1,23 +1,21 @@
 /**
  * Static slug → React component registry. PHP (the bootstrap endpoint) decides
- * which sections are *visible*; this maps a visible slug to its lazy-loaded
- * view. A section the bootstrap reports but that has no entry here (e.g. a
- * future Documents view shipped separately) is simply skipped — the renderer
- * stays self-contained with no cross-bundle React.
+ * which sections are *visible*; this maps a visible slug to its view.
+ *
+ * Sections are imported statically (not React.lazy) so the portal ships as a
+ * single entry bundle — async chunks otherwise 404 when index.js is cache-busted
+ * via asset.php but stale chunk hashes linger in the browser.
  */
 
-import { lazy } from '@wordpress/element';
 import type { ComponentType } from 'react';
 
-const Calendar = lazy(() => import('./calendar'));
-const Tickets = lazy(() => import('./tickets'));
-const Bookings = lazy(() => import('./bookings'));
-const Documents = lazy(() => import('./documents'));
-const Subscriptions = lazy(() => import('./subscriptions'));
-const Projects = lazy(() => import('./projects'));
+import Bookings from './bookings';
+import Documents from './documents';
+import Projects from './projects';
+import Subscriptions from './subscriptions';
+import Tickets from './tickets';
 
 export const SECTION_REGISTRY: Record<string, ComponentType> = {
-	calendar: Calendar,
 	tickets: Tickets,
 	bookings: Bookings,
 	documents: Documents,

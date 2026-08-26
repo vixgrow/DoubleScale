@@ -1,8 +1,9 @@
 /**
  * Portal SPA root.
  *
- * Logged-in customers get a split inbox: ticket list on the left, conversation
- * + composer on the right inside one card shell.
+ * Logged-in customers get a split inbox: ticket list + conversation. Side-by-side
+ * starts at 1200px; from `lg`–1199px the panes stack vertically so the composer
+ * keeps a usable width. Below `lg`, only one pane is shown at a time.
  */
 
 import { useCallback, useEffect, useState } from '@wordpress/element';
@@ -119,15 +120,20 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 	);
 
 	return (
-		<div className="doublescale-support-portal mx-auto w-full max-w-6xl text-base">
-			<div className="flex h-[min(82vh,700px)] flex-col overflow-hidden rounded-2xl bg-white support-portal-panel-shadow">
-				<header className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6">
+		<div className="doublescale-support-portal w-full min-w-0 overflow-x-hidden text-base">
+			{/*
+			 * ≥1200px: fixed-height split inbox.
+			 * <1200px: detail card height follows replies + editor (page scrolls).
+			 */}
+			<div className="flex flex-col min-[1200px]:h-[min(92vh,1100px)] min-[1200px]:min-h-0 min-[1200px]:overflow-hidden">
+				<header className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3">
 					<h2 className="m-0 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
 						{__('My Support Tickets', 'doublescale')}
 					</h2>
 					<Button
-						size="sm"
-						className="rounded-lg bg-[#2D3282] px-4 hover:bg-[#2D3282]/90"
+						variant="default"
+						size="lg"
+						className=""
 						onClick={() => setShowCompose(true)}
 					>
 						<Plus width={14} height={14} className="mr-1.5" />
@@ -135,16 +141,20 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 					</Button>
 				</header>
 
-				<div className="min-h-0 flex-1 bg-[#F7F8FA] p-4 sm:p-5">
-					<div className="flex h-full min-h-0 gap-4">
+				<div className="flex min-h-0 flex-1 flex-col min-[1200px]:overflow-hidden">
+					{/*
+					 * <1200px: column (full-width composer). <lg: one pane at a time.
+					 * ≥1200px: list | detail side-by-side.
+					 */}
+					<div className="flex min-h-0 flex-1 flex-col gap-4 min-[1200px]:h-full min-[1200px]:flex-row min-[1200px]:overflow-hidden">
 						<div
-							className={`support-portal-panel-shadow h-full min-h-0 w-full shrink-0 rounded-xl lg:w-[min(100%,360px)] lg:max-w-[360px] ${
+							className={`support-portal-panel-shadow w-full shrink-0 overflow-hidden rounded-xl max-lg:min-h-[min(70vh,560px)] lg:max-[1199px]:h-[300px] lg:max-[1199px]:min-h-[300px] lg:max-[1199px]:max-h-[300px] min-[1200px]:h-full min-[1200px]:min-h-0 min-[1200px]:w-[min(100%,360px)] min-[1200px]:max-w-[360px] ${
 								mobileShowDetail
 									? 'hidden lg:block'
 									: 'block'
 							}`}
 						>
-							<aside className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white">
+							<aside className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-border bg-[#F7F8FA]">
 								<TicketList
 									key={listVersion}
 									config={config}
@@ -158,30 +168,30 @@ const PortalApp = ({ config, initialTicketId }: Props) => {
 						</div>
 
 						<div
-							className={`support-portal-panel-shadow h-full min-h-0 min-w-0 flex-1 rounded-xl ${
+							className={`support-portal-panel-shadow min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-[#F7F8FA] max-[1199px]:h-auto min-[1200px]:min-h-0 ${
 								mobileShowDetail ? 'block' : 'hidden lg:block'
 							}`}
 						>
-							<main className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white">
-							{selectedTicketId ? (
-								<div className="flex h-full min-h-0 w-full flex-col">
-									<TicketDetail
-										key={selectedTicketId}
-										ticketId={selectedTicketId}
-										config={config}
-										variant="pane"
-										showMobileBack
-										onBack={backToList}
-									/>
-								</div>
-							) : (
-								<div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-muted-foreground">
-									{__(
-										'Select a ticket to view the conversation.',
-										'doublescale'
-									)}
-								</div>
-							)}
+							<main className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-xl max-[1199px]:h-auto">
+								{selectedTicketId ? (
+									<div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-xl max-[1199px]:h-auto">
+										<TicketDetail
+											key={selectedTicketId}
+											ticketId={selectedTicketId}
+											config={config}
+											variant="pane"
+											showMobileBack
+											onBack={backToList}
+										/>
+									</div>
+								) : (
+									<div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-muted-foreground min-[1200px]:min-h-[240px]">
+										{__(
+											'Select a ticket to view the conversation.',
+											'doublescale'
+										)}
+									</div>
+								)}
 							</main>
 						</div>
 					</div>

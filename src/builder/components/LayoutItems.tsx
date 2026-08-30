@@ -68,7 +68,7 @@ const LayoutItems = ({
 		},
 		{
 			id: 'my-blocks',
-			title: __('My Blocks', 'doublescale'),
+			title: __('My Sections', 'doublescale'),
 			component: SavedBlocksLibrary,
 		},
 	];

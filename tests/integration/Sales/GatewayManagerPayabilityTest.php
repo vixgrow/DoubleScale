@@ -35,6 +35,7 @@ final class GatewayManagerPayabilityTest extends IntegrationTestCase {
 		parent::setUp();
 		$this->ensure_sales_module();
 		delete_option( 'doublescale_sales_settings' );
+		add_filter( 'doublescale_sales_online_payments_available', '__return_true' );
 
 		$this->known_slugs = array();
 		add_filter(
@@ -47,6 +48,7 @@ final class GatewayManagerPayabilityTest extends IntegrationTestCase {
 
 	protected function tearDown(): void {
 		remove_all_filters( 'doublescale_sales_online_payment_gateway_slugs' );
+		remove_filter( 'doublescale_sales_online_payments_available', '__return_true' );
 		delete_option( 'doublescale_sales_settings' );
 		parent::tearDown();
 	}
@@ -191,6 +193,28 @@ final class GatewayManagerPayabilityTest extends IntegrationTestCase {
 
 		$this->assertTrue( GatewayManager::instance()->is_enabled_for_sales( 'gm_enabled' ) );
 		$this->assertContains( 'gm_enabled', $this->payable_slugs( $invoice ) );
+	}
+
+	public function test_invoice_online_payments_require_pro(): void {
+		remove_filter( 'doublescale_sales_online_payments_available', '__return_true' );
+		add_filter( 'doublescale_sales_online_payments_available', '__return_false' );
+
+		$this->register_gateway( 'gm_pro_locked' );
+		$this->enable_only( array( 'gm_pro_locked' ) );
+
+		$invoice = $this->make_invoice();
+
+		$this->assertSame( array(), $this->payable_slugs( $invoice ) );
+
+		$result = GatewayManager::instance()->init(
+			GatewayManager::CONTEXT_INVOICE,
+			'gm_pro_locked',
+			$this->make_subject()
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'online_payments_pro', $result->get_error_code() );
+		$this->assertSame( 403, $result->get_error_data()['status'] );
 	}
 
 	// -------------------------------------------------------------------

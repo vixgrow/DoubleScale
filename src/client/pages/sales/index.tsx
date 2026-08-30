@@ -17,8 +17,6 @@ import config from '@doublescale/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
 	ContractsProGate,
-	InvoicesProGate,
-	PaymentsProGate,
 	ProductsProGate,
 } from './pro-gates';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
@@ -26,6 +24,11 @@ import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 const ProposalsList = lazy(() => import('./proposals'));
 const ProposalView = lazy(() => import('./proposals/view'));
 const ProposalEdit = lazy(() => import('./proposals/edit'));
+const InvoicesList = lazy(() => import('./invoices'));
+const InvoiceView = lazy(() => import('./invoices/view'));
+const InvoiceEdit = lazy(() => import('./invoices/edit'));
+const PaymentsList = lazy(() => import('./payments'));
+const PaymentView = lazy(() => import('./payments/view'));
 const SalesSettings = lazy(() => import('./settings'));
 
 const SalesPageSkeleton: React.FC = () => (
@@ -177,49 +180,44 @@ if (isSalesDocumentsReady()) {
 		...documentsPageDefaults,
 	});
 
-	// Invoice & payment routes — stub registration the Pro plugin overrides via filter.
+	// Invoices and offline payments ship in free. Online gateways stay Pro.
 	registerAdminPage('sales-invoices', {
 		path: 'sales/invoices',
-		component: () => <InvoicesProGate />,
+		component: wrap(InvoicesList),
 		label: __('Invoices', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-new', {
 		path: 'sales/invoices/new',
-		component: () => <InvoicesProGate />,
+		component: wrap(InvoiceEdit),
 		label: __('New Invoice', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice', {
 		path: 'sales/invoices/:id',
-		component: () => <InvoicesProGate />,
+		component: wrap(InvoiceView),
 		label: __('Invoice', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-invoice-edit', {
 		path: 'sales/invoices/:id/edit',
-		component: () => <InvoicesProGate />,
+		component: wrap(InvoiceEdit),
 		label: __('Edit Invoice', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
 	registerAdminPage('sales-payments', {
 		path: 'sales/payments',
-		component: () => <PaymentsProGate />,
+		component: wrap(PaymentsList),
 		label: __('Payments', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 
@@ -271,10 +269,9 @@ if (isSalesDocumentsReady()) {
 
 	registerAdminPage('sales-payment', {
 		path: 'sales/payments/:id',
-		component: () => <PaymentsProGate />,
+		component: wrap(PaymentView),
 		label: __('Payment', 'doublescale'),
 		hidden: true,
-		requiresPro: true,
 		...documentsPageDefaults,
 	});
 

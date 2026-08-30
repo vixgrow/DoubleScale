@@ -13946,6 +13946,9 @@ msgstr ""
 msgid "Online Gateways"
 msgstr ""
 
+msgid "Online invoice payments require DoubleScale Pro."
+msgstr ""
+
 msgid "Online Meeting"
 msgstr ""
 

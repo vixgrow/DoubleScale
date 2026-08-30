@@ -22,6 +22,7 @@ import {
 	WhatsAppIcon,
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -77,6 +78,7 @@ import {
 	type WhatsappShareOptions,
 } from '@/hooks/sales';
 import config from '@doublescale/config';
+import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { getGlobalCurrency } from '@/constants/currencies';
 import type {
 	ContactSummary,
@@ -123,10 +125,22 @@ export interface InvoiceFormProps {
 
 const selectTriggerClass = 'h-10 w-full rounded-lg border-[#D0D0D0] bg-white';
 
-const paymentModePillClass = (selected: boolean) =>
-	selected
-		? 'border border-border bg-white text-foreground'
-		: 'border-0 bg-[#EEF] text-[#3A3A99] font-medium';
+const paymentModePillClass = (selected: boolean, disabled = false) =>
+	[
+		selected
+			? 'border border-border bg-white text-foreground'
+			: 'border-0 bg-[#EEF] text-[#3A3A99] font-medium',
+		disabled ? 'cursor-not-allowed opacity-70' : '',
+	].join(' ');
+
+const ProLockBadge: React.FC = () => (
+	<Badge
+		variant="secondary"
+		className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 border-orange-200"
+	>
+		{__('Pro', 'doublescale')}
+	</Badge>
+);
 
 const today = () => new Date().toISOString().slice(0, 10);
 const monthFromToday = () => {
@@ -183,6 +197,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const { data: salesSettings } = useSalesSettings();
 	const { data: assignableUsers, loading: usersLoading } =
 		useAssignableSalesUsers();
+	const onlineLocked = !useIsProActive();
 
 	const [status, setStatus] = useState('draft');
 	const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -391,8 +406,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		if (allowedPaymentModes.length > 0) {
 			return;
 		}
-		const onlineDefaults =
-			(salesSettings.default_online_payment_gateways ?? []).length > 0
+		const onlineDefaults = onlineLocked
+			? []
+			: (salesSettings.default_online_payment_gateways ?? []).length > 0
 				? salesSettings.default_online_payment_gateways
 				: (salesSettings.enabled_online_gateways ?? []);
 		const defaults = [
@@ -402,7 +418,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 		if (defaults.length > 0) {
 			setAllowedPaymentModes(defaults);
 		}
-	}, [isNew, existing, salesSettings, allowedPaymentModes.length]);
+	}, [isNew, existing, salesSettings, allowedPaymentModes.length, onlineLocked]);
 
 	useEffect(() => {
 		if (!isNew || templatePicked || !salesSettings) {
@@ -416,6 +432,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	}, [isNew, templatePicked, salesSettings]);
 
 	const togglePaymentMode = (mode: string) => {
+		if (
+			onlineLocked &&
+			(ONLINE_PAYMENT_GATEWAYS as readonly string[]).includes(mode)
+		) {
+			return;
+		}
 		setAllowedPaymentModes((prev) =>
 			prev.includes(mode)
 				? prev.filter((m) => m !== mode)
@@ -424,12 +446,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	};
 
 	const selectableOnlineGateways = useMemo(() => {
+		if (onlineLocked) {
+			return [...ONLINE_PAYMENT_GATEWAYS];
+		}
 		const enabled = salesSettings?.enabled_online_gateways ?? [];
 		const selectedOnline = allowedPaymentModes.filter((mode) =>
 			(ONLINE_PAYMENT_GATEWAYS as readonly string[]).includes(mode)
 		);
 		return Array.from(new Set([...enabled, ...selectedOnline]));
-	}, [salesSettings?.enabled_online_gateways, allowedPaymentModes]);
+	}, [onlineLocked, salesSettings?.enabled_online_gateways, allowedPaymentModes]);
 
 	const [sendOpen, setSendOpen] = useState(false);
 	/**
@@ -734,8 +759,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 	const canAssignSalesRep =
 		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
 	const saleAgentReadOnly =
-		assignableUsers.length === 0 ||
-		(!canAssignSalesRep && assignableUsers.length <= 1);
+		!canAssignSalesRep && assignableUsers.length <= 1;
 
 	const pageTitle = isNew
 		? __('Create New Invoice', 'doublescale')
@@ -1430,8 +1454,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 						</div>
 						<div className="space-y-3 rounded-lg border border-border bg-[#F7F8FA] p-6">
 							<div>
-								<p className="text-lg font-semibold text-foreground">
+								<p className="text-lg font-semibold text-foreground flex items-center gap-2">
 									{__('Online Gateways', 'doublescale')}
+									{onlineLocked ? <ProLockBadge /> : null}
 								</p>
 								<p className="mt-3  text-muted-foreground">
 									{__(
@@ -1445,14 +1470,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 									<button
 										key={mode}
 										type="button"
-										className={`rounded-md px-3 py-1.5 text-sm transition-colors ${paymentModePillClass(
-											allowedPaymentModes.includes(mode)
+										disabled={onlineLocked || fieldsLocked}
+										className={`rounded-md px-3 py-1.5 text-sm transition-colors inline-flex items-center gap-1.5 ${paymentModePillClass(
+											!onlineLocked &&
+												allowedPaymentModes.includes(mode),
+											onlineLocked || fieldsLocked
 										)}`}
 										onClick={() => togglePaymentMode(mode)}
 									>
 										{ONLINE_PAYMENT_GATEWAY_LABELS[
 											mode as keyof typeof ONLINE_PAYMENT_GATEWAY_LABELS
 										] ?? mode}
+										{onlineLocked ? <ProLockBadge /> : null}
 									</button>
 								))}
 							</div>

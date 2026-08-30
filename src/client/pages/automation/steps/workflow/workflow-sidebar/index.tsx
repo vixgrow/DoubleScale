@@ -125,11 +125,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		const id = stepId || currentStep?.id;
 
 		if (!id) {
+			const message = __('Invalid step data', 'doublescale');
 			setNotice({
 				type: 'error',
-				message: __('Invalid step data', 'doublescale'),
+				message,
 			});
-			return;
+			throw new Error(message);
 		}
 
 		try {
@@ -168,6 +169,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 			// Debug log to help troubleshoot error format
 			console.error('Save error:', { error, errorMessage });
+			throw new Error(errorMessage);
 		}
 	};
 
@@ -180,9 +182,13 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			return;
 		}
 
-		await handleSave({ action: goalKey }, __('Goal saved', 'doublescale'), {
-			clearTempAction: true,
-		});
+		try {
+			await handleSave({ action: goalKey }, __('Goal saved', 'doublescale'), {
+				clearTempAction: true,
+			});
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleActionSave = async (actionKey: string) => {
@@ -194,11 +200,15 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			return;
 		}
 
-		await handleSave(
-			{ action: actionKey },
-			__('Action saved', 'doublescale'),
-			{ clearTempAction: true }
-		);
+		try {
+			await handleSave(
+				{ action: actionKey },
+				__('Action saved', 'doublescale'),
+				{ clearTempAction: true }
+			);
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleDelaySave = async (delayKey: string) => {
@@ -210,18 +220,23 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			return;
 		}
 
-		await handleSave({ action: delayKey }, __('Delay saved', 'doublescale'), {
-			clearTempAction: true,
-		});
+		try {
+			await handleSave({ action: delayKey }, __('Delay saved', 'doublescale'), {
+				clearTempAction: true,
+			});
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
 		if (!stepData.id) {
+			const message = __('Invalid step data', 'doublescale');
 			setNotice({
 				type: 'error',
-				message: __('Invalid step data', 'doublescale'),
+				message,
 			});
-			return;
+			throw new Error(message);
 		}
 
 		await handleSave(stepData, __('Step saved', 'doublescale'), {
@@ -232,10 +247,14 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const handleConditionSave = async (data: Partial<AutomationStep>) => {
 		if (!currentStep) return;
 
-		await handleSave(
-			{ settings: data.settings },
-			__('Conditions saved', 'doublescale')
-		);
+		try {
+			await handleSave(
+				{ settings: data.settings },
+				__('Conditions saved', 'doublescale')
+			);
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const renderContent = () => {

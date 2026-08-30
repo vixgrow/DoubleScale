@@ -244,7 +244,8 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	};
 	return (
-		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
+		<div className="flex flex-col flex-shrink-0">
+		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input">
 			<div className="flex items-center align-center gap-2">
 				{/*
 				 * Campaign-only. In embedded mode (automation "Send Email",
@@ -477,6 +478,15 @@ const Header: React.FC<HeaderProps> = ({
 				error={previewError}
 				onRetry={loadPreview}
 			/>
+		</div>
+		{error && (
+			<div
+				className="px-4 py-2 bg-red-50 border-b border-red-200 text-sm text-red-700"
+				role="alert"
+			>
+				{error}
+			</div>
+		)}
 		</div>
 	);
 };

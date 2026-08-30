@@ -48,7 +48,7 @@ type FieldsType = {
 interface FieldsProps {
 	fields: FieldsType;
 	values: { [key: string]: any };
-	onChange: (value: any) => void;
+	onChange: (value: any) => void | Promise<void>;
 	stepId?: number;
 	requiredFields?: string[];
 	className?: string;
@@ -68,7 +68,7 @@ const Fields: React.FC<FieldsProps> = ({
 			[key]: value,
 		};
 
-		onChange(newValues);
+		return onChange(newValues);
 	};
 
 	/**

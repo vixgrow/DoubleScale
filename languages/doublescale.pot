@@ -4926,6 +4926,9 @@ msgstr ""
 msgid "Corner Frame"
 msgstr ""
 
+msgid "Couldn't save. The server returned an unexpected response instead of confirmation. Try again — if it keeps happening, the email may be too large (images) or the server ran out of memory."
+msgstr ""
+
 msgid "Could not add identity."
 msgstr ""
 

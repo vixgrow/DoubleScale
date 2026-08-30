@@ -32,30 +32,25 @@ export const SectionDropZone: React.FC<SectionDropZoneProps> = ({
 	});
 
 	return (
-		<div
-			ref={setNodeRef}
-			className={`relative transition-all ${isOver ? 'h-16' : 'h-0'}`}
-		>
-			{isOver && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="w-full relative">
-						{/* Glowing line */}
+		<div className="relative z-20 h-0">
+			<div
+				ref={setNodeRef}
+				className={`absolute inset-x-0 flex items-center justify-center ${
+					isOver ? '-top-8 h-16' : '-top-3 h-6'
+				}`}
+			>
+				{isOver && (
+					<div className="relative w-full">
 						<div className="h-1 bg-blue-500 rounded-full shadow-lg animate-pulse" />
 						<div className="absolute inset-0 h-1 bg-blue-400 blur-sm" />
-
-						{/* Start indicator dot */}
 						<div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full shadow-lg" />
-
-						{/* End indicator dot */}
 						<div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full shadow-lg" />
-
-						{/* Text label */}
 						<div className="absolute left-1/2 -translate-x-1/2 -top-6 bg-blue-500 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap">
 							{__('Drop here to add section', 'doublescale')}
 						</div>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 		</div>
 	);
 };

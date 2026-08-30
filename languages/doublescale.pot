@@ -6774,6 +6774,9 @@ msgstr ""
 msgid "E.g., Write a welcome paragraph for new subscribers…"
 msgstr ""
 
+msgid "e.g. 14"
+msgstr ""
+
 msgid "e.g. abcd efgh ijkl mnop qrst uvwx"
 msgstr ""
 
@@ -13836,6 +13839,9 @@ msgid "Number of Bookings"
 msgstr ""
 
 msgid "Number of Days"
+msgstr ""
+
+msgid "Number of days"
 msgstr ""
 
 msgid "Number of events to retrieve."

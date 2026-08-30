@@ -84,11 +84,12 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 	);
 
 	const handleFilterChange = useCallback(
-		(index: number, key: string, value: any) => {
+		(index: number, key: string, value: any, extra?: Record<string, any>) => {
 			const newFilters = [...filters];
 			newFilters[index] = {
 				...newFilters[index],
 				[key]: value,
+				...extra,
 			};
 			onChange(newFilters);
 		},
@@ -192,11 +193,12 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 										key={`${filter.group}-${filter.filter}-${index}`}
 										filterSettings={filterSettings}
 										filter={filter}
-										onChange={(key, value) =>
+										onChange={(key, value, extra) =>
 											handleFilterChange(
 												index,
 												key,
-												value
+												value,
+												extra
 											)
 										}
 										onRemove={() =>

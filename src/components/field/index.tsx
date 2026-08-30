@@ -56,6 +56,7 @@ import FormSubmission from '@/components/form-submission';
 import PageVisited from '@/components/page-visited';
 import LoggedInOut from '@/components/logged-in-out';
 import WasActiveInactive from '@/components/was-active-inactive';
+import WithinDaysInput from '../within-days-input';
 import {
 	reactSelectControl,
 	reactSelectMenuOverlay,
@@ -103,6 +104,8 @@ interface FieldProps {
 	tooltip?: string;
 	disabled?: boolean;
 	compact?: boolean;
+	/** Date rules: `within` renders a day-count input instead of a calendar. */
+	operator?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -128,6 +131,7 @@ const Field: React.FC<FieldProps> = ({
 	tooltip,
 	disabled,
 	compact = false,
+	operator,
 }) => {
 	const { createNotice } = useDispatch('doublescale/core');
 
@@ -703,16 +707,23 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'date':
-			fieldContent = (
-				<DatePicker
-					value={value}
-					onChange={(dateValue) => onChange(dateValue)}
-					error={status === 'error'}
-					required={required}
-					placeholder="Select a date"
-					outputFormat="iso"
-				/>
-			);
+			fieldContent =
+				operator === 'within' ? (
+					<WithinDaysInput
+						value={value}
+						onChange={(days) => onChange(days)}
+						className={className}
+					/>
+				) : (
+					<DatePicker
+						value={value}
+						onChange={(dateValue) => onChange(dateValue)}
+						error={status === 'error'}
+						required={required}
+						placeholder="Select a date"
+						outputFormat="iso"
+					/>
+				);
 			break;
 		case 'contact_mapped_fields':
 			fieldContent = (

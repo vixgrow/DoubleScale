@@ -9,7 +9,6 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import dayjs from 'dayjs';
 import { map, isEmpty, isArray } from 'lodash';
 
 /**
@@ -24,8 +23,8 @@ import type {
 } from '@doublescale/client';
 import { DeleteIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { DatePicker } from '@/components/ui/date-picker';
+import WithinDaysInput from '../within-days-input';
 import {
 	Select,
 	SelectContent,
@@ -38,7 +37,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 interface FilterProps {
 	filterSettings: FilterSettings;
 	filter: FilterType;
-	onChange: (key: string, value: string | string[]) => void;
+	onChange: (key: string, value: any, extra?: Record<string, any>) => void;
 	onRemove: () => void;
 }
 
@@ -106,9 +105,16 @@ const Filter: React.FC<FilterProps> = ({
 					{filterSettings.operators && (
 						<Select
 							value={filter.operator}
-							onValueChange={(value) =>
-								onChange('operator', value)
-							}
+							onValueChange={(value) => {
+								const togglingWithin =
+									(filter.operator === 'within') !==
+									(value === 'within');
+								onChange(
+									'operator',
+									value,
+									togglingWithin ? { value: '' } : undefined
+								);
+							}}
 						>
 							<SelectTrigger>
 								<SelectValue />
@@ -227,40 +233,12 @@ const Filter: React.FC<FilterProps> = ({
 					{showValueInput && filterSettings.type === 'date' && (
 						<>
 							{filter.operator === 'within' ? (
-								<DateRangePicker
+								<WithinDaysInput
+									value={filter.value}
+									onChange={(days) =>
+										onChange('value', days)
+									}
 									className={datePickerClassName}
-									value={{
-										from:
-											!isEmpty(filter.value) &&
-											isArray(filter.value) &&
-											filter.value[0]
-												? new Date(filter.value[0])
-												: null,
-										to:
-											!isEmpty(filter.value) &&
-											isArray(filter.value) &&
-											filter.value[1]
-												? new Date(filter.value[1])
-												: null,
-									}}
-									onChange={(range) => {
-										const newValue: string[] = [];
-										if (range.from) {
-											newValue[0] = dayjs(
-												range.from
-											).format('YYYY-MM-DD');
-										}
-										if (range.to) {
-											newValue[1] = dayjs(
-												range.to
-											).format('YYYY-MM-DD');
-										}
-										onChange('value', newValue);
-									}}
-									placeholder={__(
-										'Select date range',
-										'doublescale'
-									)}
 								/>
 							) : (
 								<DatePicker

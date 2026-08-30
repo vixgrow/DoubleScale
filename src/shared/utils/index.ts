@@ -761,6 +761,19 @@ export const getApiErrorMessage = (
 ): string => {
 	const typed = error as ApiErrorShape | undefined;
 
+	// api-fetch throws this when the body is HTML (PHP fatal, timeout, 413)
+	// instead of JSON — the stock WP copy is not actionable.
+	const rawMessage = typed?.message || '';
+	if (
+		typed?.code === 'invalid_json' ||
+		/not a valid JSON response/i.test(rawMessage)
+	) {
+		return __(
+			"Couldn't save. The server returned an unexpected response instead of confirmation. Try again — if it keeps happening, the email may be too large (images) or the server ran out of memory.",
+			'doublescale'
+		);
+	}
+
 	// Check for validation errors with detailed params
 	// WordPress REST API stores validation errors in data.params
 	if (typed?.code === 'rest_invalid_param' && typed?.data?.params) {

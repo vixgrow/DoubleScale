@@ -33,10 +33,30 @@ import {
 } from '../reactflow-workflow/constants/action-types';
 import { useSidebarLayout } from '../workflow-sidebar/sidebar-layout-context';
 
+const collectOpenBuilderFieldKeys = (
+	fields: Record<string, { type?: string; fields?: Record<string, unknown> }> | undefined
+): string[] => {
+	if (!fields) {
+		return [];
+	}
+
+	return Object.entries(fields).flatMap(([key, field]) => {
+		const nested = field?.fields
+			? collectOpenBuilderFieldKeys(
+					field.fields as Record<
+						string,
+						{ type?: string; fields?: Record<string, unknown> }
+					>
+				)
+			: [];
+		return field?.type === 'open_builder' ? [key, ...nested] : nested;
+	});
+};
+
 interface StepFieldsModalProps {
 	step: OrganizedStep;
 	setStep: (step: OrganizedStep | null) => void;
-	saveStep: (step: Partial<OrganizedStep>) => void;
+	saveStep: (step: Partial<OrganizedStep>) => void | Promise<void>;
 }
 
 const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
@@ -116,6 +136,51 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		[actionKey]
 	);
 
+	const openBuilderFieldKeys = useMemo(
+		() =>
+			collectOpenBuilderFieldKeys(
+				action?.fields as
+					| Record<
+							string,
+							{ type?: string; fields?: Record<string, unknown> }
+						>
+					| undefined
+			),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[actionKey]
+	);
+
+	const persistSettings = useCallback(
+		async (nextSettings: Record<string, unknown>) => {
+			setIsSaving(true);
+			try {
+				await saveStep({
+					...step,
+					settings: {
+						...step.settings,
+						...nextSettings,
+					},
+				});
+			} finally {
+				setIsSaving(false);
+			}
+		},
+		[step, saveStep]
+	);
+
+	const handleFieldsChange = useCallback(
+		async (value: Record<string, unknown>) => {
+			const builderChanged = openBuilderFieldKeys.some(
+				(key) => value?.[key] !== settings?.[key]
+			);
+			setSettings(value);
+			if (builderChanged) {
+				await persistSettings(value);
+			}
+		},
+		[openBuilderFieldKeys, persistSettings, settings]
+	);
+
 	const handleSave = useCallback(async () => {
 		if (isWhatsAppAction) {
 			const whatsappTemplate = settings?.whatsapp_template;
@@ -184,9 +249,13 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				...settings, // Merge with updated form values
 			},
 		};
-		await saveStep(newStep);
-
-		setIsSaving(false);
+		try {
+			await saveStep(newStep);
+		} catch {
+			// Notice already shown by saveStep.
+		} finally {
+			setIsSaving(false);
+		}
 		// `action` is read for the error label only and is intentionally omitted
 		// to keep handleSave's identity stable (it feeds the footer effect).
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -408,9 +477,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				<Fields
 					fields={action.fields}
 					values={settings}
-					onChange={(value) => {
-						setSettings(value);
-					}}
+					onChange={handleFieldsChange}
 					stepId={step.id}
 					requiredFields={requiredFieldKeys}
 				/>

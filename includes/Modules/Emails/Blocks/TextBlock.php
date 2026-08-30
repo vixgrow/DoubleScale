@@ -171,6 +171,7 @@ class TextBlock extends EmailBlock {
 			)
 		);
 		$content = $this->inject_list_alignment_styles( $content, (string) $props['textAlign'], $text_direction );
+		$content = $this->style_text_links( $content, (string) $props['color'] );
 
 		return "<div dir=\"" . esc_attr( $text_direction ) . "\" style=\"{$style_string}\">{$content}</div>";
 	}
@@ -391,6 +392,78 @@ class TextBlock extends EmailBlock {
 				}
 
 				return '<' . $tag . $attrs . ' style="' . $inject_str . ';">';
+			},
+			$content
+		);
+
+		return is_string( $replaced ) ? $replaced : $content;
+	}
+
+	/**
+	 * Text-block links: underline only, same color as the block Font Color.
+	 *
+	 * Inboxes (especially Gmail) recolor bare `<a>` tags blue. An inner span
+	 * keeps the font color; `text-decoration:underline` is the only extra cue.
+	 *
+	 * @param string $content HTML content
+	 * @param string $color   Block font color
+	 * @return string
+	 */
+	private function style_text_links( string $content, string $color ): string {
+		if ( false === stripos( $content, '<a' ) ) {
+			return $content;
+		}
+
+		$color      = esc_attr( $color );
+		$link_style = 'color: ' . $color . '; text-decoration: underline';
+
+		$replaced = preg_replace_callback(
+			'/<a\b([^>]*)>(.*?)<\/a>/is',
+			static function ( $matches ) use ( $color, $link_style ) {
+				$attrs = $matches[1];
+				$inner = $matches[2];
+
+				$attrs = preg_replace_callback(
+					'/style\s*=\s*(["\'])(.*?)\1/i',
+					static function ( $style_matches ) {
+						$quote = $style_matches[1];
+						$decls = preg_split( '/;/', $style_matches[2] );
+						$kept  = array();
+						foreach ( $decls as $decl ) {
+							$decl = trim( $decl );
+							if ( '' === $decl ) {
+								continue;
+							}
+							if ( preg_match( '/^(color|text-decoration|-webkit-text-fill-color)\s*:/i', $decl ) ) {
+								continue;
+							}
+							$kept[] = $decl;
+						}
+						if ( empty( $kept ) ) {
+							return '';
+						}
+						return 'style=' . $quote . implode( '; ', $kept ) . $quote;
+					},
+					$attrs
+				);
+
+				if ( preg_match( '/style\s*=\s*"/i', $attrs ) ) {
+					$attrs = preg_replace( '/style\s*=\s*"/i', 'style="' . $link_style . '; ', $attrs );
+				} elseif ( preg_match( "/style\s*=\s*'/i", $attrs ) ) {
+					$attrs = preg_replace( "/style\s*=\s*'/i", "style='" . $link_style . '; ', $attrs );
+				} else {
+					$attrs .= ' style="' . $link_style . ';"';
+				}
+
+				$already_wrapped = (bool) preg_match(
+					'/^\s*<span\b[^>]*style\s*=\s*["\'][^"\']*text-decoration\s*:\s*underline/i',
+					$inner
+				);
+				if ( ! $already_wrapped ) {
+					$inner = '<span style="color: ' . $color . '; text-decoration: underline;">' . $inner . '</span>';
+				}
+
+				return '<a' . $attrs . '>' . $inner . '</a>';
 			},
 			$content
 		);

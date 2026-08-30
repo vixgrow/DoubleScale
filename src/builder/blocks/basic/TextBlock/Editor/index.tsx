@@ -58,9 +58,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 								fontSize={props.fontSize}
 								fontFamily={props.fontFamily}
 								defaultBodyColor={props.color?.trim() || '#333'}
-								defaultLinkColor={
-									props.linkColor?.trim() || '#458DC7'
-								}
 							/>
 						</div>
 

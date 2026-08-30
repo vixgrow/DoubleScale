@@ -179,7 +179,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		});
 	};
 
-	// Process all links to open in new tab; underline always, color only if unset (rich-text color can override).
+	// Process all links to open in new tab.
+	// Text-block canvas: underline only — no distinct link color (inherit Font Color).
+	// Other editors: underline always, color only if unset.
 	const anchorHasTextColor = (link: HTMLAnchorElement): boolean => {
 		const attr = link.getAttribute('style') || '';
 		if (/(?:^|;)\s*color\s*:/i.test(attr)) return true;
@@ -198,6 +200,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				link.setAttribute('rel', 'noopener noreferrer');
 			}
 			link.style.textDecoration = 'underline';
+			if (isCanvasFormat) {
+				link.style.removeProperty('color');
+				link.removeAttribute('color');
+				return;
+			}
 			if (!anchorHasTextColor(link)) {
 				link.style.color = defaultLinkColorResolved;
 			}
@@ -642,6 +649,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
 			linkElement.style.textDecoration = 'underline';
+			if (!isCanvasFormat) {
+				linkElement.style.color = selectedColor;
+			}
 			linkElement.textContent = fallbackText;
 			root.appendChild(linkElement);
 			processLinks();
@@ -662,13 +672,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			existingLink.target = '_blank';
 			existingLink.rel = 'noopener noreferrer';
 			existingLink.style.textDecoration = 'underline';
+			if (isCanvasFormat) {
+				existingLink.style.removeProperty('color');
+				existingLink.removeAttribute('color');
+			}
 		} else {
 			const linkElement = document.createElement('a');
 			linkElement.href = url;
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
 			linkElement.style.textDecoration = 'underline';
-			linkElement.style.color = selectedColor;
+			if (!isCanvasFormat) {
+				linkElement.style.color = selectedColor;
+			}
 
 			const selectedText = range.toString();
 			if (selectedText) {

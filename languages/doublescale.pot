@@ -12599,9 +12599,6 @@ msgstr ""
 msgid "Multiple Select"
 msgstr ""
 
-msgid "My Blocks"
-msgstr ""
-
 msgid "My Email"
 msgstr ""
 
@@ -12609,6 +12606,9 @@ msgid "My Reports"
 msgstr ""
 
 msgid "My Schedule"
+msgstr ""
+
+msgid "My Sections"
 msgstr ""
 
 msgid "My support tickets"

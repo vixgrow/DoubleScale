@@ -190,6 +190,8 @@ export type CanvasNote = {
 	content: string;
 	position: { x: number; y: number };
 	color?: string;
+	width?: number;
+	height?: number;
 };
 
 export type Automation = {

@@ -1082,13 +1082,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 											return '#d9d9d9';
 									}
 								}}
-								nodeStrokeColor="#666"
-								maskColor="rgba(240, 240, 240, 0.6)"
+								nodeStrokeColor="#667085"
+								maskColor="rgba(16, 24, 40, 0.28)"
+								maskStrokeColor="#1d4ed8"
+								maskStrokeWidth={3}
 								style={{
 									height: LAYOUT_CONSTANTS.MINIMAP_HEIGHT,
 									width: LAYOUT_CONSTANTS.MINIMAP_WIDTH,
-									border: '1px solid #e8e8e8',
-									borderRadius: '4px',
+									border: '1px solid #667085',
+									borderRadius: '6px',
+									backgroundColor: '#f8fafc',
 								}}
 								zoomable
 								pannable

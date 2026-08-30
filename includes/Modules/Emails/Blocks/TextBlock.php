@@ -455,12 +455,15 @@ class TextBlock extends EmailBlock {
 					$attrs .= ' style="' . $link_style . ';"';
 				}
 
-				$already_wrapped = (bool) preg_match(
-					'/^\s*<span\b[^>]*style\s*=\s*["\'][^"\']*text-decoration\s*:\s*underline/i',
-					$inner
-				);
+				$already_wrapped = (bool) preg_match( '/<font\b[^>]*\bcolor=/i', $inner );
 				if ( ! $already_wrapped ) {
-					$inner = '<span style="color: ' . $color . '; text-decoration: underline;">' . $inner . '</span>';
+					// Gmail recolors <a> and often drops text-decoration on it.
+					// <u> + <font color> is the combination it leaves alone.
+					$inner = '<span style="color: ' . $color . '; text-decoration: underline;">'
+						. '<u style="color: ' . $color . '; text-decoration: underline;">'
+						. '<font color="' . $color . '">'
+						. $inner
+						. '</font></u></span>';
 				}
 
 				return '<a' . $attrs . '>' . $inner . '</a>';

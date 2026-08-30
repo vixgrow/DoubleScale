@@ -13,7 +13,26 @@ import { generateBlockId, generateColumnId, generateSectionId } from '@doublesca
 import { isTemplateSection } from '@doublescale/utils/templateUtils';
 import { buildSectionFromSavedBlock } from '../utils/savedBlockUtils';
 
-// Helper: Auto-select and scroll to a block
+const LIBRARY_TEMPLATE_TYPES: TemplateType[] = [
+  'library-template',
+  'header-template',
+  'email-body-template',
+  'footer-template',
+  'hero-image-template',
+  'image-gallery-template',
+  'preheader-template',
+  'saved-block-template',
+];
+
+const scrollToBlock = (blockId: string) => {
+  setTimeout(() => {
+    const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+    blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+};
+
+// Auto-select and scroll to a block (Blocks palette). Library drops skip
+// selection so the sidebar stays on Library / My Blocks.
 const selectAndScrollToBlock = (
   dispatch: any,
   blockId: string,
@@ -52,27 +71,18 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
     const { active, over } = event;
     setActiveItem(null);
 
-    // Call the callback to close sidebar after drop
-    if (onDragEndCallback && over) {
+    const activeType = active.data?.current?.type as TemplateType;
+    const isLibraryDrop = LIBRARY_TEMPLATE_TYPES.includes(activeType);
+
+    // Keep Library / My Blocks open after a library drop so more items can
+    // be added without reopening the accordion and switching to Settings.
+    if (onDragEndCallback && over && !isLibraryDrop) {
       onDragEndCallback();
     }
 
     if (!over || active.id === over.id) {
       return;
     }
-
-    const templateTypes: TemplateType[] = [
-      'library-template',
-      'header-template',
-      'email-body-template',
-      'footer-template',
-      'hero-image-template',
-      'image-gallery-template',
-      'preheader-template',
-      'saved-block-template',
-    ];
-
-    const activeType = active.data?.current?.type as TemplateType;
 
     // Saved blocks are full sections — handle before flat block-list templates.
     if (activeType === 'saved-block-template' && active.data?.current) {
@@ -96,18 +106,13 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
 
       const firstColumn = newSection.columns[0];
       const firstBlock = firstColumn?.blocks[0];
-      if (firstBlock && firstColumn) {
-        selectAndScrollToBlock(
-          dispatch,
-          firstBlock.id,
-          newSection.id,
-          firstColumn.id
-        );
+      if (firstBlock) {
+        scrollToBlock(firstBlock.id);
       }
       return;
     }
 
-    if (templateTypes.includes(activeType) && active.data?.current) {
+    if (LIBRARY_TEMPLATE_TYPES.includes(activeType) && active.data?.current) {
       const template = active.data.current.template as TemplateConfig;
       const overData = over.data?.current;
 
@@ -143,9 +148,8 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
         // Insert at the drop zone position
         dispatch(STORE_KEY).addSection(newSection, insertIndex);
 
-        // Auto-select and scroll to first block
         if (newBlocks.length > 0) {
-          selectAndScrollToBlock(dispatch, newBlocks[0].id, newSectionId, newColumnId);
+          scrollToBlock(newBlocks[0].id);
         }
         return;
       }
@@ -158,8 +162,7 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
         (section) => dispatch(STORE_KEY).addSection(section),
         (sectionId, columnId, block) =>
           dispatch(STORE_KEY).addBlock(sectionId, columnId, block),
-        (sectionId, columnId, firstBlockId) =>
-          selectAndScrollToBlock(dispatch, firstBlockId, sectionId, columnId)
+        (_sectionId, _columnId, firstBlockId) => scrollToBlock(firstBlockId)
       );
       return;
     }

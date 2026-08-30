@@ -6,15 +6,10 @@ import { applyFilters } from '@wordpress/hooks';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
- * external dependencies
- */
-import { Trash2 } from 'lucide-react';
-
-/**
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { MyTemplatesIcon } from '@/components/icons';
+import { MyTemplatesIcon, DeleteIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 import { getSavedBlocks, deleteSavedBlock } from '@/builder/api/savedBlocks';
 import type { SavedBlock, SavedBlockCategory } from '@/builder/types/common';
@@ -212,7 +207,7 @@ const SavedBlocksLibrary = ({ onSidebarClose }: SavedBlocksLibraryProps) => {
 														deletingId === block.id
 													}
 												>
-													<Trash2 className="h-4 w-4" />
+													<DeleteIcon width={18} height={18} />
 												</button>
 											)}
 										</div>

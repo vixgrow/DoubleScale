@@ -136,6 +136,24 @@ describe('TextRenderer canvas editing → store commit', () => {
 		expect(onCanvasContentChange.mock.calls[0][0]).toContain('One two three');
 	});
 
+	it('styles text-block links as underline-only inheriting Font Color', () => {
+		const { container } = render(
+			<TextRenderer
+				props={{
+					...baseProps,
+					color: '#111111',
+					content:
+						'<p>Visit <a href="https://example.com" style="color:#458DC7">our site</a></p>',
+				}}
+			/>
+		);
+
+		const styleTag = container.querySelector('style');
+		expect(styleTag?.textContent).toContain('text-decoration: underline !important');
+		expect(styleTag?.textContent).toMatch(/a[^{]*\{[^}]*color: inherit !important/);
+		expect(styleTag?.textContent).not.toContain('#458DC7');
+	});
+
 	it('keeps block text-align on the wrapper when content is a centered ordered list', () => {
 		const { container } = render(
 			<TextRenderer

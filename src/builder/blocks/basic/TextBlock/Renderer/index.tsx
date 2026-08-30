@@ -270,8 +270,9 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} a,
 				.${rendererId} a:link,
 				.${rendererId} a:visited,
-				.${rendererId} a:hover {
-					color: ${textColor} !important;
+				.${rendererId} a:hover,
+				.${rendererId} a:active {
+					color: inherit !important;
 					text-decoration: underline !important;
 				}
 				/* Whole block follows Font Color — including bold, spans, and links. */

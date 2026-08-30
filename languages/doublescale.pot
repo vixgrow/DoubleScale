@@ -16496,6 +16496,9 @@ msgstr ""
 msgid "Save & Continue"
 msgstr ""
 
+msgid "Save & Exit"
+msgstr ""
+
 msgid "Save & Publish"
 msgstr ""
 

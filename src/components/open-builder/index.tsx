@@ -161,9 +161,6 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		};
 		const emailBodyJson = JSON.stringify(preparedDataEmailBody);
 		onSave(emailBodyJson);
-		setIsBuilderOpen(false);
-		setBuilderMode(null);
-		setBuilderInitialData(null);
 		return Promise.resolve();
 	};
 
@@ -481,7 +478,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 							}}
 						>
 							<Builder
-								key={`${builderKey}-${builderInitialData ? 'picked' : initialEmailBody || 'new-email'}-${builderMode}`}
+								key={`${builderKey}-${builderInitialData ? 'picked' : 'existing'}-${builderMode}`}
 								initialData={getBuilderInitialData()}
 								onSave={handleBuilderSave}
 								onClose={handleBuilderClose}

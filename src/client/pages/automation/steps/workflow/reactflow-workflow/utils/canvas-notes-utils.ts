@@ -27,6 +27,29 @@ const getStepTypeLabel = (type: string): string => {
 	}
 };
 
+export const DEFAULT_CANVAS_NOTE_WIDTH = 220;
+export const DEFAULT_CANVAS_NOTE_HEIGHT = 160;
+export const MIN_CANVAS_NOTE_WIDTH = 180;
+export const MIN_CANVAS_NOTE_HEIGHT = 120;
+export const MAX_CANVAS_NOTE_WIDTH = 720;
+export const MAX_CANVAS_NOTE_HEIGHT = 640;
+
+const clamp = (value: number, min: number, max: number): number =>
+	Math.min(max, Math.max(min, Math.round(value)));
+
+export const getCanvasNoteSize = (
+	note?: Pick<CanvasNote, 'width' | 'height'> | null
+): { width: number; height: number } => ({
+	width:
+		note?.width && note.width > 0
+			? clamp(note.width, MIN_CANVAS_NOTE_WIDTH, MAX_CANVAS_NOTE_WIDTH)
+			: DEFAULT_CANVAS_NOTE_WIDTH,
+	height:
+		note?.height && note.height > 0
+			? clamp(note.height, MIN_CANVAS_NOTE_HEIGHT, MAX_CANVAS_NOTE_HEIGHT)
+			: DEFAULT_CANVAS_NOTE_HEIGHT,
+});
+
 export const getCanvasNotes = (automation?: Automation | null): CanvasNote[] => {
 	const notes = automation?.settings?.canvas_notes;
 	return Array.isArray(notes) ? notes : [];
@@ -42,6 +65,8 @@ export const createCanvasNote = (position: {
 			: `note-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
 	content: '',
 	position,
+	width: DEFAULT_CANVAS_NOTE_WIDTH,
+	height: DEFAULT_CANVAS_NOTE_HEIGHT,
 });
 
 export const saveCanvasNotes = async (

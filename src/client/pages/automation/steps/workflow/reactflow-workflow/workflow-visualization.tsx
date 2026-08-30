@@ -45,6 +45,8 @@ import { useAutomationContext } from '../../../state/context';
 import { Button } from '@/components/ui/button';
 import {
 	createCanvasNote,
+	DEFAULT_CANVAS_NOTE_WIDTH,
+	getCanvasNoteSize,
 	getCanvasNotes,
 	saveCanvasNotes,
 } from './utils/canvas-notes-utils';
@@ -202,6 +204,36 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[automation, updateAutomation]
 	);
 
+	const handleNoteResize = useCallback(
+		async (
+			noteId: string,
+			size: {
+				width: number;
+				height: number;
+				position: { x: number; y: number };
+			}
+		) => {
+			if (!automation) {
+				return;
+			}
+
+			const { width, height } = getCanvasNoteSize(size);
+			const notes = getCanvasNotes(automation);
+			const updatedNotes = notes.map((note) =>
+				note.id === noteId
+					? { ...note, width, height, position: size.position }
+					: note
+			);
+
+			try {
+				await saveCanvasNotes(automation, updatedNotes, updateAutomation);
+			} catch (error) {
+				console.error('Failed to save canvas note size:', error);
+			}
+		},
+		[automation, updateAutomation]
+	);
+
 	const handleNoteDelete = useCallback(
 		async (noteId: string) => {
 			if (!automation) {
@@ -236,7 +268,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		}
 
 		const position = reactFlowInstance.screenToFlowPosition({
-			x: bounds.left + bounds.width / 2 - 110,
+			x: bounds.left + bounds.width / 2 - DEFAULT_CANVAS_NOTE_WIDTH / 2,
 			y: bounds.top + bounds.height / 2 - 80,
 		});
 
@@ -574,10 +606,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 		const canvasNotes = getCanvasNotes(automation);
 		canvasNotes.forEach((note) => {
+			const { width, height } = getCanvasNoteSize(note);
 			initialNodes.push({
 				id: `sticky-note-${note.id}`,
 				type: 'sticky_note',
 				position: note.position,
+				width,
+				height,
+				style: { width, height },
 				draggable: !viewMode,
 				selectable: !viewMode,
 				zIndex: 5,
@@ -586,6 +622,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					viewMode,
 					onUpdate: handleNoteUpdate,
 					onDelete: handleNoteDelete,
+					onResize: handleNoteResize,
 				},
 			});
 		});
@@ -608,6 +645,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		analyticsData,
 		handleNoteUpdate,
 		handleNoteDelete,
+		handleNoteResize,
 	]);
 
 	// Patch sticky note content without rebuilding the full workflow layout.
@@ -632,16 +670,28 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}
 
 				const existingNote = (node.data as { note?: CanvasNote })?.note;
-				if (
+				const { width, height } = getCanvasNoteSize(note);
+				const sizeUnchanged =
 					existingNote?.content === note.content &&
-					existingNote?.color === note.color
-				) {
+					existingNote?.color === note.color &&
+					existingNote?.width === note.width &&
+					existingNote?.height === note.height &&
+					node.width === width &&
+					node.height === height;
+				if (sizeUnchanged) {
 					return node;
 				}
 
 				changed = true;
 				return {
 					...node,
+					width,
+					height,
+					style: {
+						...(node.style || {}),
+						width,
+						height,
+					},
 					data: {
 						...node.data,
 						note,

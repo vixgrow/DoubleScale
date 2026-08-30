@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { type NodeProps } from '@xyflow/react';
+import { NodeResizer, type NodeProps } from '@xyflow/react';
 import { StickyNote, Trash2 } from 'lucide-react';
 
 /**
@@ -16,16 +16,30 @@ import { StickyNote, Trash2 } from 'lucide-react';
 import type { CanvasNote } from '@doublescale/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import {
+	MAX_CANVAS_NOTE_HEIGHT,
+	MAX_CANVAS_NOTE_WIDTH,
+	MIN_CANVAS_NOTE_HEIGHT,
+	MIN_CANVAS_NOTE_WIDTH,
+} from '../utils/canvas-notes-utils';
 
 interface StickyNoteNodeData {
 	note: CanvasNote;
 	viewMode?: boolean;
 	onUpdate: (noteId: string, content: string) => void;
 	onDelete: (noteId: string) => void;
+	onResize?: (
+		noteId: string,
+		size: {
+			width: number;
+			height: number;
+			position: { x: number; y: number };
+		}
+	) => void;
 }
 
-const StickyNoteNode: React.FC<NodeProps> = ({ data }) => {
-	const { note, viewMode = false, onUpdate, onDelete } =
+const StickyNoteNode: React.FC<NodeProps> = ({ data, selected }) => {
+	const { note, viewMode = false, onUpdate, onDelete, onResize } =
 		data as unknown as StickyNoteNodeData;
 	const [content, setContent] = useState(note.content);
 	const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -66,11 +80,30 @@ const StickyNoteNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<div
-			className={`doublescale-reactflow-sticky-note${viewMode ? ' doublescale-reactflow-sticky-note--readonly' : ''}`}
+			className={`doublescale-reactflow-sticky-note${viewMode ? ' doublescale-reactflow-sticky-note--readonly' : ''}${selected ? ' doublescale-reactflow-sticky-note--selected' : ''}`}
 			style={{
 				backgroundColor: note.color || '#fef3c7',
 			}}
 		>
+			{!viewMode && (
+				<NodeResizer
+					minWidth={MIN_CANVAS_NOTE_WIDTH}
+					minHeight={MIN_CANVAS_NOTE_HEIGHT}
+					maxWidth={MAX_CANVAS_NOTE_WIDTH}
+					maxHeight={MAX_CANVAS_NOTE_HEIGHT}
+					isVisible
+					color="#d97706"
+					handleClassName="doublescale-reactflow-sticky-note__resize-handle"
+					lineClassName="doublescale-reactflow-sticky-note__resize-line"
+					onResizeEnd={(_event, params) => {
+						onResize?.(note.id, {
+							width: params.width,
+							height: params.height,
+							position: { x: params.x, y: params.y },
+						});
+					}}
+				/>
+			)}
 			<div className="doublescale-reactflow-sticky-note__header">
 				<div className="doublescale-reactflow-sticky-note__title">
 					<StickyNote className="h-4 w-4" />
@@ -108,7 +141,6 @@ const StickyNoteNode: React.FC<NodeProps> = ({ data }) => {
 						'doublescale'
 					)}
 					className="doublescale-reactflow-sticky-note__textarea nodrag nopan"
-					rows={5}
 				/>
 			)}
 		</div>

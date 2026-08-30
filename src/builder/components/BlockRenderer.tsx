@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelect } from '@wordpress/data';
+import { useDndContext } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
+import { LIBRARY_TEMPLATE_TYPES } from '@doublescale/utils/dragAndDropHelpers';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -45,6 +47,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		transform,
 		transition,
 		isDragging,
+		isOver,
 	} = useSortable({
 		id: block.id,
 		data: {
@@ -56,6 +59,21 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		},
 		disabled: isThisTemplateBlock, // Disable dragging for template blocks
 	});
+
+	const { active, over } = useDndContext();
+	const activeType = active?.data?.current?.type as string | undefined;
+	const isInsertDrag =
+		activeType === 'element' ||
+		LIBRARY_TEMPLATE_TYPES.includes(activeType as (typeof LIBRARY_TEMPLATE_TYPES)[number]);
+	const showInsertLine = isOver && isInsertDrag && !isDragging;
+	const insertAfter =
+		showInsertLine &&
+		over?.rect &&
+		active?.rect.current.translated
+			? active.rect.current.translated.top +
+					active.rect.current.translated.height / 2 >
+				over.rect.top + over.rect.height / 2
+			: false;
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -207,6 +225,13 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			`}
 			onClick={handleBlockClick}
 		>
+			{showInsertLine && (
+				<div
+					className={`pointer-events-none absolute inset-x-0 z-30 h-1 rounded-full bg-blue-500 shadow-lg ${
+						insertAfter ? '-bottom-0.5' : '-top-0.5'
+					}`}
+				/>
+			)}
 			{isTextAiChrome ? (
 				<Popover
 					open={aiPopoverOpen}

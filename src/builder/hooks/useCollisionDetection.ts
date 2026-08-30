@@ -3,53 +3,80 @@ import {
   CollisionDetection,
   pointerWithin
 } from '@dnd-kit/core';
+import { LIBRARY_TEMPLATE_TYPES } from '@doublescale/utils/dragAndDropHelpers';
+
+const filterByType = (
+  droppableContainers: { values: () => Iterable<{ data?: { current?: { type?: string } } }> },
+  type: string
+) =>
+  Array.from(droppableContainers.values()).filter(
+    (container) => container.data?.current?.type === type
+  );
 
 export const useCollisionDetection = (): CollisionDetection => {
   return (args) => {
     const { active, droppableContainers } = args;
+    const activeType = active.data?.current?.type as string | undefined;
 
-    // Layout items - detect drop zones between sections
-    if (active.data?.current?.type === 'layout') {
-      const canvasContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) =>
-          container.id === 'canvas' ||
-          container.id === 'canvas-blocks'
-      );
+    const canvasContainers = Array.from(droppableContainers.values()).filter(
+      (container) =>
+        container.id === 'canvas' || container.id === 'canvas-blocks'
+    );
 
-      // Check if we're over the canvas first
-      const canvasCollision = pointerWithin({
+    const isOverCanvas =
+      pointerWithin({
         ...args,
         droppableContainers: canvasContainers,
-      });
+      }).length > 0;
 
-      // Only detect drop zones if we're over the canvas
-      if (canvasCollision.length === 0) {
+    // Layouts stay section-level. Library / saved blocks can also land
+    // inside a section (column or between existing blocks).
+    if (activeType === 'layout' || LIBRARY_TEMPLATE_TYPES.includes(activeType as any)) {
+      if (!isOverCanvas) {
         return [];
       }
 
-      const dropZoneContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) => container.data?.current?.type === 'section-drop-zone'
+      if (LIBRARY_TEMPLATE_TYPES.includes(activeType as any)) {
+        const blockContainers = filterByType(droppableContainers, 'block');
+        const blockHits = pointerWithin({
+          ...args,
+          droppableContainers: blockContainers,
+        });
+        if (blockHits.length > 0) {
+          return blockHits;
+        }
+
+        const columnContainers = filterByType(droppableContainers, 'column');
+        const columnHits = pointerWithin({
+          ...args,
+          droppableContainers: columnContainers,
+        });
+        if (columnHits.length > 0) {
+          return columnHits;
+        }
+      }
+
+      const dropZoneContainers = filterByType(
+        droppableContainers,
+        'section-drop-zone'
       );
 
-      const allContainers = [...dropZoneContainers, ...canvasContainers];
+      if (dropZoneContainers.length > 0) {
+        return closestCenter({
+          ...args,
+          droppableContainers: dropZoneContainers,
+        });
+      }
 
       return closestCenter({
         ...args,
-        droppableContainers: allContainers,
+        droppableContainers: canvasContainers,
       });
     }
 
     // Section reordering - only detect other sections
-    if (active.data?.current?.type === 'section') {
-      const sectionContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) => container.data?.current?.type === 'section'
-      );
+    if (activeType === 'section') {
+      const sectionContainers = filterByType(droppableContainers, 'section');
 
       return closestCenter({
         ...args,
@@ -57,116 +84,35 @@ export const useCollisionDetection = (): CollisionDetection => {
       });
     }
 
-    // Template types (library items) - work same as layouts (use drop zones)
-    const templateTypes = [
-      'library-template',
-      'header-template',
-      'email-body-template',
-      'hero-image-template',
-      'image-gallery-template',
-      'footer-template',
-      'preheader-template',
-    ];
-
-    if (
-      active.data?.current?.type &&
-      templateTypes.includes(active.data.current.type)
-    ) {
-      // Allow canvas drop (for empty canvas)
-      const canvasContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) =>
-          container.id === 'canvas' ||
-          container.id === 'canvas-blocks'
-      );
-
-      // Check if we're over the canvas first
-      const canvasCollision = pointerWithin({
-        ...args,
-        droppableContainers: canvasContainers,
-      });
-
-      // Only detect drop zones if we're over the canvas
-      if (canvasCollision.length === 0) {
+    if (activeType === 'block') {
+      if (!isOverCanvas) {
         return [];
       }
 
-      // Use section-drop-zones (same as layouts)
-      const dropZoneContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) => container.data?.current?.type === 'section-drop-zone'
-      );
-
-      const allContainers = [...dropZoneContainers, ...canvasContainers];
-
-      return closestCenter({
-        ...args,
-        droppableContainers: allContainers,
-      });
-    }
-
-    if (active.data?.current?.type === 'block') {
-      // First check if we're over the canvas
-      const canvasContainers = Array.from(
-        droppableContainers.values()
-      ).filter((container) =>
-        container.id === 'canvas' || container.id === 'canvas-blocks'
-      );
-
-      const canvasCollision = pointerWithin({
-        ...args,
-        droppableContainers: canvasContainers,
-      });
-
-      // Only detect collisions if we're over the canvas
-      if (canvasCollision.length === 0) {
-        return [];
-      }
-
-      const columnContainers = Array.from(
-        droppableContainers.values()
-      ).filter((container) =>
-        container.data?.current?.type === 'column'
-      );
-
-      const blockContainers = Array.from(
-        droppableContainers.values()
-      ).filter((container) => container.data?.current?.type === 'block');
-
-      const allContainers = [...columnContainers, ...blockContainers];
+      const columnContainers = filterByType(droppableContainers, 'column');
+      const blockContainers = filterByType(droppableContainers, 'block');
 
       return pointerWithin({
         ...args,
-        droppableContainers: allContainers,
+        droppableContainers: [...columnContainers, ...blockContainers],
       });
     }
 
-    if (active.data?.current?.type === 'element') {
-      // First check if we're over the canvas
-      const canvasContainers = Array.from(
-        droppableContainers.values()
-      ).filter((container) =>
-        container.id === 'canvas' || container.id === 'canvas-blocks'
-      );
-
-      const canvasCollision = pointerWithin({
-        ...args,
-        droppableContainers: canvasContainers,
-      });
-
-      // Only detect column collisions if we're over the canvas
-      if (canvasCollision.length === 0) {
+    if (activeType === 'element') {
+      if (!isOverCanvas) {
         return [];
       }
 
-      const columnContainers = Array.from(
-        droppableContainers.values()
-      ).filter((container) =>
-        container.data?.current?.type === 'column'
-      );
+      const blockContainers = filterByType(droppableContainers, 'block');
+      const blockHits = pointerWithin({
+        ...args,
+        droppableContainers: blockContainers,
+      });
+      if (blockHits.length > 0) {
+        return blockHits;
+      }
 
+      const columnContainers = filterByType(droppableContainers, 'column');
       return closestCenter({
         ...args,
         droppableContainers: columnContainers,
@@ -176,4 +122,3 @@ export const useCollisionDetection = (): CollisionDetection => {
     return pointerWithin(args);
   };
 };
-

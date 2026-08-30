@@ -1,6 +1,79 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EmailSection } from '../../stores/email-builder/types';
-import { TemplateConfig } from '../types/common';
+import { TemplateConfig, TemplateType } from '../types/common';
+
+export const LIBRARY_TEMPLATE_TYPES: TemplateType[] = [
+  'library-template',
+  'header-template',
+  'email-body-template',
+  'footer-template',
+  'hero-image-template',
+  'image-gallery-template',
+  'preheader-template',
+  'saved-block-template',
+];
+
+export type ColumnInsertTarget = {
+  sectionId: string;
+  columnId: string;
+  index?: number;
+};
+
+/**
+ * Resolve a column + insert index from a drop on a column or an existing block.
+ * Hovering the top half of a block inserts before it; the bottom half inserts after.
+ */
+export const resolveColumnInsertTarget = (
+  overData: {
+    type?: string;
+    sectionId?: string;
+    columnId?: string;
+  } | undefined,
+  overId: string | number | undefined,
+  overRect: { top: number; height: number } | undefined,
+  pointerY: number | undefined,
+  sections: EmailSection[]
+): ColumnInsertTarget | null => {
+  if (!overData?.sectionId || !overData?.columnId) {
+    return null;
+  }
+
+  if (overData.type === 'column') {
+    return {
+      sectionId: overData.sectionId,
+      columnId: overData.columnId,
+    };
+  }
+
+  if (overData.type !== 'block') {
+    return null;
+  }
+
+  const targetSection = sections.find((section) => section.id === overData.sectionId);
+  const targetColumn = targetSection?.columns.find(
+    (column) => column.id === overData.columnId
+  );
+  const blockIndex =
+    targetColumn?.blocks.findIndex((block) => block.id === overId) ?? -1;
+
+  if (blockIndex < 0) {
+    return {
+      sectionId: overData.sectionId,
+      columnId: overData.columnId,
+    };
+  }
+
+  const insertAfter =
+    overRect && pointerY !== undefined
+      ? pointerY > overRect.top + overRect.height / 2
+      : true;
+
+  return {
+    sectionId: overData.sectionId,
+    columnId: overData.columnId,
+    index: insertAfter ? blockIndex + 1 : blockIndex,
+  };
+};
 
 /**
  * Creates a new section with default styles
@@ -68,13 +141,28 @@ export const createBlocksFromTemplate = (
   template: TemplateConfig,
   sectionId: string,
   columnId: string,
-  addBlockFn: (sectionId: string, columnId: string, block: any) => void
+  addBlockFn: (
+    sectionId: string,
+    columnId: string,
+    block: any,
+    index?: number
+  ) => void,
+  startIndex?: number
 ): void => {
+  let nextIndex = startIndex;
+
+  const addAtIndex = (block: any) => {
+    addBlockFn(sectionId, columnId, block, nextIndex);
+    if (nextIndex !== undefined) {
+      nextIndex += 1;
+    }
+  };
+
   // Handle templates with multiple blocks
   if (template.blocks && Array.isArray(template.blocks)) {
     template.blocks.forEach((blockConfig) => {
       const blockProps = markAsTemplateBlock(blockConfig, template.layout);
-      addBlockFn(sectionId, columnId, {
+      addAtIndex({
         id: uuidv4(),
         type: blockConfig.type,
         props: blockProps,
@@ -84,7 +172,7 @@ export const createBlocksFromTemplate = (
   }
 
   // Fallback: Add template as a single block (rarely used, all templates should have blocks array)
-  addBlockFn(sectionId, columnId, {
+  addAtIndex({
     id: uuidv4(),
     type: template.type,
     props: {

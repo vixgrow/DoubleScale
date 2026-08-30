@@ -96,7 +96,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	isLoading = false,
 	currentStep,
 	isTriggerVisible,
-	isSidebarOpen = false,
 	viewMode = false,
 	analyticsData = [],
 	onStepClick,
@@ -108,7 +107,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const { createNotice } = useDispatch('doublescale/core');
 	const reactFlowInstance = useReactFlow();
 
-	// Track the last focused step ID to maintain focus when sidebar closes
+	// Track the last focused step ID when a step or trigger is selected
 	const lastFocusedStepIdRef = useRef<string | null>(null);
 	// Track previous step state to detect when modal closes
 	const prevStepStateRef = useRef<{
@@ -120,8 +119,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		action: null,
 		type: null,
 	});
-	// Track previous sidebar state to detect when it closes
-	const prevSidebarOpenRef = useRef<boolean>(false);
 	const initialViewportSetRef = useRef(false);
 	const [activeDragStep, setActiveDragStep] = useState<AutomationStep | null>(
 		null
@@ -729,35 +726,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		isTriggerVisible,
 		currentStep?.id,
 	]);
-
-	// Track sidebar state and handle focus out when it closes
-	useEffect(() => {
-		if (!reactFlowInstance) return undefined;
-
-		// Check if sidebar just closed
-		const sidebarJustClosed = prevSidebarOpenRef.current && !isSidebarOpen;
-
-		if (sidebarJustClosed) {
-			// Sidebar closed - reset view (focus out)
-			const timer = setTimeout(() => {
-				lastFocusedStepIdRef.current = null;
-				prevStepStateRef.current = {
-					id: null,
-					action: null,
-					type: null,
-				};
-				focusViewportOnTrigger(400);
-				initialViewportSetRef.current = true;
-			}, 100);
-
-			prevSidebarOpenRef.current = isSidebarOpen;
-			return () => clearTimeout(timer);
-		}
-
-		// Update previous sidebar state
-		prevSidebarOpenRef.current = isSidebarOpen;
-		return undefined;
-	}, [isSidebarOpen, reactFlowInstance, focusViewportOnTrigger]);
 
 	// Focus on selected node when currentStep changes or trigger is selected
 	useEffect(() => {

@@ -135,15 +135,27 @@ const Header: React.FC<HeaderProps> = ({
 		hasUnsavedChanges,
 	});
 
-	const handleSaveAndContinue = async () => {
-		if (!ensureNotEmptyOrNotify()) return;
+	const handleSave = async () => {
+		if (!ensureNotEmptyOrNotify()) {
+			return { success: false as const };
+		}
+		return save();
+	};
 
-		const { success } = await save();
+	const handleSaveAndContinue = async () => {
+		const { success } = await handleSave();
 		if (success && campaign) {
 			const path = `campaigns/${campaign.id}/contacts`;
 			handleNavigate
 				? handleNavigate(path)
 				: navigateFromRouter(getToLink(path));
+		}
+	};
+
+	const handleSaveAndExit = async () => {
+		const { success } = await handleSave();
+		if (success) {
+			onClose?.();
 		}
 	};
 
@@ -342,6 +354,19 @@ const Header: React.FC<HeaderProps> = ({
 						/>
 
 						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={() => {
+								void handleSave();
+							}}
+							disabled={isSaving || isBuilderEmpty}
+						>
+							{isSaving
+								? __('Saving...', 'doublescale')
+								: __('Save', 'doublescale')}
+						</Button>
+
+						<Button
 							variant="default"
 							className="px-3 min-w-[200px]"
 							onClick={handleSaveAndContinue}
@@ -406,11 +431,10 @@ const Header: React.FC<HeaderProps> = ({
 							</Button>
 						)}
 						<Button
-							variant="default"
+							variant={onClose ? 'secondary' : 'default'}
 							className="px-3"
 							onClick={() => {
-								if (!ensureNotEmptyOrNotify()) return;
-								save();
+								void handleSave();
 							}}
 							disabled={isSaving || isBuilderEmpty}
 						>
@@ -418,6 +442,20 @@ const Header: React.FC<HeaderProps> = ({
 								? __('Saving...', 'doublescale')
 								: __('Save', 'doublescale')}
 						</Button>
+						{onClose && (
+							<Button
+								variant="default"
+								className="px-3"
+								onClick={() => {
+									void handleSaveAndExit();
+								}}
+								disabled={isSaving || isBuilderEmpty}
+							>
+								{isSaving
+									? __('Saving...', 'doublescale')
+									: __('Save & Exit', 'doublescale')}
+							</Button>
+						)}
 					</>
 				)}
 			</div>

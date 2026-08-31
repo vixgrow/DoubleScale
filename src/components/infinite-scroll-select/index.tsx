@@ -24,6 +24,8 @@ import { createPortal } from 'react-dom';
  */
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useDialogLayerContainer } from '@/components/ui/dialog-layer-context';
+import { FLOATING_LAYER_Z_INDEX } from '@/components/ui/lift-radix-popper';
 import { InfiniteScrollSelectProps } from './types';
 
 /**
@@ -88,8 +90,9 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	error: externalError,
 	className = '',
 	inputClassName,
-	menuZIndex = 200000,
+	menuZIndex = FLOATING_LAYER_Z_INDEX,
 }) => {
+	const dialogContainer = useDialogLayerContainer();
 	const [items, setItems] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [search, setSearch] = useState('');
@@ -507,7 +510,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 							event.preventDefault();
 						}}
 						onWheel={(event) => event.stopPropagation()}
-						className="bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto overscroll-contain"
+						className="pointer-events-auto bg-white border border-gray-200 rounded-md shadow-lg overflow-y-auto overscroll-contain"
 					>
 						{loading && items.length === 0 && (
 							<div className="px-3 py-2 text-sm text-gray-500">
@@ -588,7 +591,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 							</>
 						)}
 					</div>,
-					document.body
+					dialogContainer ?? document.body
 				)
 			: null;
 

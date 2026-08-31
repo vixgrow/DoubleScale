@@ -41,7 +41,7 @@ export interface InfiniteScrollSelectProps {
   error?: string;
   className?: string;
   inputClassName?: string;
-  /** Raise above nested dialogs (e.g. contact detail → add deal). Default 200000. */
+  /** Raise above nested dialogs. Default matches Select/Popover floating layer. */
   menuZIndex?: number;
 }
 

@@ -520,8 +520,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 	const canAssignSalesRep =
 		config.getUserCapabilities().doublescale_can_assign_sales_rep === true;
 	const assigneeReadOnly =
-		assignableUsers.length === 0 ||
-		(!canAssignSalesRep && assignableUsers.length <= 1);
+		!canAssignSalesRep && assignableUsers.length <= 1;
 
 	const handleClose = goBack;
 

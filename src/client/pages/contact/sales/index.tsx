@@ -8,7 +8,6 @@ import type { ColumnDef } from '@tanstack/react-table';
 
 import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
-import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { summarizeProposals } from '@doublescale/shared/utils/proposal-summary';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
@@ -41,7 +40,6 @@ import type {
 	Invoice,
 	Proposal,
 } from '@/types/sales';
-import { InvoicesProGate, PaymentsProGate } from '../../sales/pro-gates';
 import { formatMoney } from '@/constants/currencies';
 
 interface ContactSalesProps {
@@ -101,7 +99,6 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 	const invoices = invoicesData?.data ?? [];
 	const payments = paymentsData?.data ?? [];
 	const showDocuments = config.isModuleToggleEnabled('documents');
-	const isProActive = useIsProActive();
 	const proposalSummary = summarizeProposals(proposals);
 	const proposalCurrency = proposals[0]?.currency || 'USD';
 
@@ -386,8 +383,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 			) : null}
 
 			{showDocuments && showInvoices ? (
-				isProActive ? (
-					<section className="flex flex-col gap-5">
+				<section className="flex flex-col gap-5">
 						<div className="flex items-center justify-between gap-3">
 							<h2 className="text-2xl font-semibold">
 								{__('Invoices', 'doublescale')}
@@ -432,14 +428,10 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 							)}
 						</div>
 					</section>
-				) : (
-					<InvoicesProGate />
-				)
 			) : null}
 
 			{showDocuments && showPayments ? (
-				isProActive ? (
-					<section className="flex flex-col gap-5">
+				<section className="flex flex-col gap-5">
 						<h3 className="text-base font-semibold">
 							{__('Payments', 'doublescale')}
 						</h3>
@@ -472,9 +464,6 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 							)}
 						</div>
 					</section>
-				) : (
-					<PaymentsProGate />
-				)
 			) : null}
 
 			<ProposalFormDialog

@@ -1,10 +1,10 @@
 === DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More ===
 Contributors: samuelgallegos, vixgrowy
-Tags:  crm, marketing automation, email campaigns, mcp, pipelines
+Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
-Tested up to: 7.0.2
+Tested up to: 7.1.0
 Requires PHP: 7.4
-Stable tag: 1.3.20
+Stable tag: 1.3.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.3.21 = 26 Aug 2026
+- Render the client portal shortcode on the page instead of replacing the whole canvas, and isolate layout from the host theme
+- Escape email image sources with esc_attr so merge tags and data URIs survive rendering
+
 = 1.3.20 = 26 Aug 2026
 - Keep email text-block list alignment in line with the block setting (strip leftover inline text-align on lists)
 - Resolve {{ASSETS_URL}} and image sources when rendering emails so plugin assets load in sent mail

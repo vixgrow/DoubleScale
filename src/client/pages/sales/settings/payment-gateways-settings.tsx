@@ -11,6 +11,7 @@ import {
 	PaymentModeIcon,
 	SettingsPaymentsIcon,
 } from '@doublescale/components';
+import { useIsProActive } from '@doublescale/shared/hooks/use-is-pro-active';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -138,6 +139,7 @@ interface SettingsSectionCardProps {
 	title: string;
 	icon: ReactNode;
 	description: string;
+	badge?: ReactNode;
 	children: ReactNode;
 }
 
@@ -145,6 +147,7 @@ const SettingsSectionCard: FC<SettingsSectionCardProps> = ({
 	title,
 	icon,
 	description,
+	badge,
 	children,
 }) => (
 	<section className="space-y-6 rounded-xl border border-border bg-[#F7F8FA] sm:p-6 p-3">
@@ -153,8 +156,9 @@ const SettingsSectionCard: FC<SettingsSectionCardProps> = ({
 				<div className="flex p-1.5 shrink-0 text-[#0D9DFC] items-center justify-center rounded-full border border-border bg-white">
 					{icon}
 				</div>
-				<h2 className="lg:text-xl text-base font-semibold text-foreground">
+				<h2 className="lg:text-xl text-base font-semibold text-foreground flex items-center gap-2">
 					{title}
+					{badge}
 				</h2>
 			</div>
 			<p className="pl-[52px] lg:text-base text-sm text-muted-foreground">
@@ -163,6 +167,15 @@ const SettingsSectionCard: FC<SettingsSectionCardProps> = ({
 		</div>
 		{children}
 	</section>
+);
+
+const ProLockBadge: FC = () => (
+	<Badge
+		variant="secondary"
+		className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 border-orange-200"
+	>
+		{__('Pro', 'doublescale')}
+	</Badge>
 );
 
 const GatewayStatusBadge: FC<{ gateway: OnlinePaymentGatewayStatus }> = ({ gateway }) => {
@@ -200,10 +213,16 @@ const GatewayStatusBadge: FC<{ gateway: OnlinePaymentGatewayStatus }> = ({ gatew
 const GatewayCard: FC<{
 	gateway: OnlinePaymentGatewayStatus;
 	enabled: boolean;
+	locked?: boolean;
 	onToggle: (enabled: boolean) => void;
 	onConfigure: () => void;
-}> = ({ gateway, enabled, onToggle, onConfigure }) => (
-	<div className="flex flex-col gap-4 rounded-xl border border-border bg-white p-4 sm:p-6 sm:flex-row sm:items-center sm:justify-between">
+}> = ({ gateway, enabled, locked = false, onToggle, onConfigure }) => (
+	<div
+		className={cn(
+			'flex flex-col gap-4 rounded-xl border border-border bg-white p-4 sm:p-6 sm:flex-row sm:items-center sm:justify-between',
+			locked && 'opacity-70'
+		)}
+	>
 		<div className="flex min-w-0 flex-1 items-start sm:flex-row flex-col gap-3">
 			{GATEWAY_IMAGES[gateway.slug] ? (
 				<img
@@ -217,16 +236,17 @@ const GatewayCard: FC<{
 				</div>
 			)}
 			<div className="min-w-0 space-y-3">
-					<h3 className="text-sm font-semibold text-foreground">
+					<h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
 						{gateway.name}
+						{locked ? <ProLockBadge /> : null}
 					</h3>
 				{gateway.description ? (
 					<p className="text-sm text-muted-foreground">
 						{gateway.description}
 					</p>
 				) : null}
-				<GatewayStatusBadge gateway={gateway} />
-				{gateway.available && !gateway.configured && gateway.configuration_hint ? (
+				{locked ? null : <GatewayStatusBadge gateway={gateway} />}
+				{!locked && gateway.available && !gateway.configured && gateway.configuration_hint ? (
 					<p className="text-sm text-[#896900]">{gateway.configuration_hint}</p>
 				) : null}
 			</div>
@@ -235,14 +255,15 @@ const GatewayCard: FC<{
 		<div className="flex shrink-0 items-start justify-start sm:justify-end gap-3 flex-col sm:items-end">
 			<Switch
 				id={`gateway-${gateway.slug}`}
-				checked={enabled}
-				disabled={!gateway.available}
+				checked={locked ? false : enabled}
+				disabled={locked || !gateway.available}
 				onCheckedChange={onToggle}
 				aria-label={__('Enabled', 'doublescale')}
 			/>
-			{gateway.slug === 'stripe' ||
+			{!locked &&
+			(gateway.slug === 'stripe' ||
 			gateway.slug === 'paypal' ||
-			gateway.integration_url ? (
+			gateway.integration_url) ? (
 				<Button
 					type="button"
 					variant="secondaryDeepBlue"
@@ -263,24 +284,31 @@ const GatewayCard: FC<{
 const SelectionChip: FC<{
 	label: string;
 	selected: boolean;
+	disabled?: boolean;
+	badge?: ReactNode;
 	onClick: () => void;
-}> = ({ label, selected, onClick }) => (
+}> = ({ label, selected, disabled = false, badge, onClick }) => (
 	<button
 		type="button"
 		onClick={onClick}
+		disabled={disabled}
 		className={cn(
-			'rounded-lg border px-2 py-1 text-sm font-medium transition-colors',
+			'rounded-lg border px-2 py-1 text-sm font-medium transition-colors inline-flex items-center gap-1.5',
 			selected
 				? 'border-[#EEEEFF] bg-[#EEEEFF] text-primary'
-				: 'border-[#D0D0D0] bg-white text-foreground hover:bg-muted/40'
+				: 'border-[#D0D0D0] bg-white text-foreground hover:bg-muted/40',
+			disabled && 'cursor-not-allowed opacity-70 hover:bg-white'
 		)}
 	>
 		{label}
+		{badge}
 	</button>
 );
 
 export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form, patch }) => {
 	const navigate = useNavigate();
+	const isProActive = useIsProActive();
+	const onlineLocked = !isProActive;
 	const { data: gateways, loading } = useSalesOnlinePaymentGateways();
 
 	// Known slugs first (curated order), then any gateway the backend registered
@@ -299,6 +327,9 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 	const enabledSlugs = form.enabled_online_gateways ?? [];
 
 	const toggleGatewayEnabled = (slug: string, enabled: boolean) => {
+		if (onlineLocked) {
+			return;
+		}
 		const next = enabled
 			? [...new Set([...enabledSlugs, slug])]
 			: enabledSlugs.filter((s) => s !== slug);
@@ -314,6 +345,9 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 	};
 
 	const toggleDefaultOnline = (slug: string) => {
+		if (onlineLocked) {
+			return;
+		}
 		const current = form.default_online_payment_gateways ?? [];
 		const next = current.includes(slug)
 			? current.filter((s) => s !== slug)
@@ -335,6 +369,7 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 		<div className="space-y-6">
 			<SettingsSectionCard
 				title={__('Online Payment Gateways', 'doublescale')}
+				badge={onlineLocked ? <ProLockBadge /> : null}
 				icon={<SettingsPaymentsIcon width={20} height={20} color="#0D9DFC" />}
 				description={__(
 					'Enable gateways for invoice online payments. API keys are managed globally in Integrations — the same Stripe keys used for Booking apply here.',
@@ -352,6 +387,7 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 								key={gateway.slug}
 								gateway={gateway}
 								enabled={enabledSlugs.includes(gateway.slug)}
+								locked={onlineLocked}
 								onToggle={(value) => toggleGatewayEnabled(gateway.slug, value)}
 								onConfigure={() => openIntegration(gateway)}
 							/>
@@ -395,8 +431,9 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 
 					<div className="bg-white p-4 sm:p-6 rounded-xl border border-border">
 						<div>
-							<h3 className="text-base font-semibold text-foreground">
+							<h3 className="text-base font-semibold text-foreground flex items-center gap-2">
 								{__('Online Gateways', 'doublescale')}
+								{onlineLocked ? <ProLockBadge /> : null}
 							</h3>
 							<p className="mt-3 text-sm text-muted-foreground">
 								{__(
@@ -414,9 +451,14 @@ export const PaymentGatewaysSettings: FC<PaymentGatewaysSettingsProps> = ({ form
 											gateway.slug as keyof typeof ONLINE_PAYMENT_GATEWAY_LABELS
 										] ?? gateway.name
 									}
-									selected={(form.default_online_payment_gateways ?? []).includes(
-										gateway.slug
-									)}
+									selected={
+										!onlineLocked &&
+										(form.default_online_payment_gateways ?? []).includes(
+											gateway.slug
+										)
+									}
+									disabled={onlineLocked}
+									badge={onlineLocked ? <ProLockBadge /> : null}
 									onClick={() => toggleDefaultOnline(gateway.slug)}
 								/>
 							))}

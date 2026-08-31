@@ -50,14 +50,14 @@ class EmailNotOpened extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $source = 'crm';
+	public $source = 'messaging';
 
 	/**
 	 * Group
 	 *
 	 * @var string
 	 */
-	public $group = 'contact';
+	public $group = 'messaging';
 }
 
 TriggersManager::instance()->register( new EmailNotOpened() );

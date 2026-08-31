@@ -33,7 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { updateSalesSettings, useSalesSettings } from '@/hooks/sales';
 import type { SalesSettings } from '@/types/sales';
 import type { SalesEmailDocumentType } from '@/components/merge-tags/utils';
-import { ApprovalsProGate, PaymentsProGate } from '../pro-gates';
+import { ApprovalsProGate } from '../pro-gates';
 import { ApprovalWorkflowSettings } from './approval-workflow-settings';
 import { ContractTypesManager } from './contract-types-manager';
 import { PaymentGatewaysSettings } from './payment-gateways-settings';
@@ -219,30 +219,28 @@ const SalesSettingsPage: FC = () => {
 				documentType="proposal"
 			/>
 
-			{isProActive ? (
-				<EmailSettingsCard
-					title={__('Invoice Emails', 'doublescale')}
-					icon={
-						<PurchaseHistoryIcon
-							width={20}
-							height={20}
-							color="#0D9DFC"
-						/>
-					}
-					subject={form.invoice_email_subject}
-					subjectPlaceholder={
-						SALES_EMAIL_SUBJECT_PLACEHOLDERS.invoice_email_subject
-					}
-					onSubjectChange={(value) =>
-						patch('invoice_email_subject', value)
-					}
-					intro={form.invoice_email_intro}
-					onIntroChange={(value) =>
-						patch('invoice_email_intro', value)
-					}
-					documentType="invoice"
-				/>
-			) : null}
+			<EmailSettingsCard
+				title={__('Invoice Emails', 'doublescale')}
+				icon={
+					<PurchaseHistoryIcon
+						width={20}
+						height={20}
+						color="#0D9DFC"
+					/>
+				}
+				subject={form.invoice_email_subject}
+				subjectPlaceholder={
+					SALES_EMAIL_SUBJECT_PLACEHOLDERS.invoice_email_subject
+				}
+				onSubjectChange={(value) =>
+					patch('invoice_email_subject', value)
+				}
+				intro={form.invoice_email_intro}
+				onIntroChange={(value) =>
+					patch('invoice_email_intro', value)
+				}
+				documentType="invoice"
+			/>
 
 			{isProActive ? (
 				<EmailSettingsCard
@@ -496,7 +494,6 @@ const SalesSettingsPage: FC = () => {
 			? tabs
 			: tabs.filter(
 					(t) =>
-						t.value !== 'payments' &&
 						t.value !== 'approvals' &&
 						t.value !== 'contract-types'
 				);
@@ -515,14 +512,10 @@ const SalesSettingsPage: FC = () => {
 							value: 'payments',
 							children: (
 								<div className="pt-6">
-									{isProActive ? (
-										<PaymentGatewaysSettings
-											form={form}
-											patch={patch}
-										/>
-									) : (
-										<PaymentsProGate />
-									)}
+									<PaymentGatewaysSettings
+										form={form}
+										patch={patch}
+									/>
 								</div>
 							),
 						},

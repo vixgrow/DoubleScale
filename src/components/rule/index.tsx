@@ -24,7 +24,7 @@ import TrashIcon from '@doublescale/shared/icons/trash';
 interface RuleProps {
 	ruleSettings: RuleSettings;
 	rule: RuleType;
-	onChange: (key: string, value: string) => void;
+	onChange: (key: string, value: any, extra?: Record<string, any>) => void;
 	onRemove?: () => void;
 	hideRemoveButton?: boolean;
 }
@@ -47,9 +47,16 @@ const Rule: React.FC<RuleProps> = ({
 					<div className="min-w-0 flex-1 max-sm:w-full sm:basis-0">
 						<Select
 							value={rule.operator}
-							onValueChange={(value) =>
-								onChange('operator', value)
-							}
+							onValueChange={(value) => {
+								const togglingWithin =
+									(rule.operator === 'within') !==
+									(value === 'within');
+								onChange(
+									'operator',
+									value,
+									togglingWithin ? { value: '' } : undefined
+								);
+							}}
 						>
 							<SelectTrigger className="h-12 w-full min-w-0 !border-border !rounded-lg">
 								<SelectValue placeholder="Select operator" />
@@ -76,6 +83,7 @@ const Rule: React.FC<RuleProps> = ({
 					<Field
 						compact
 						type={ruleSettings.type}
+						operator={rule.operator}
 						value={rule.value}
 						onChange={(value) => onChange('value', value)}
 						options={map(

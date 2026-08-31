@@ -270,8 +270,11 @@ class EmailRenderer {
 			/* Font inheritance */
 			* { font-family: Arial, sans-serif; }
 			
-			/* Link styles */
-			a { text-decoration: none; }
+			/* Text links: inherit Font Color + underline (matches the builder).
+			   Gmail honors this head rule; `text-decoration:none` here is why
+			   inbox links went blue with no underline. Buttons, social icons,
+			   and image links keep `text-decoration:none` on the <a> itself. */
+			a { color: inherit; text-decoration: underline; }
 
 			/* Fallback media query for clients that support it */
 			@media only screen and (max-width: ' . $mobile_breakpoint . 'px) {

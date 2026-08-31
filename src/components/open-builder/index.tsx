@@ -19,7 +19,7 @@ import EmailTemplatesPicker from '@/components/email-templates-picker';
 
 export interface OpenBuilderProps {
 	initialEmailBody?: string | object;
-	onSave: (emailBodyJson: string) => void;
+	onSave: (emailBodyJson: string) => void | Promise<void>;
 	buttonText?: string;
 	buttonVariant?:
 		| 'default'
@@ -154,17 +154,13 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 		});
 	};
 
-	const handleBuilderSave = (builderData: any) => {
+	const handleBuilderSave = async (builderData: any) => {
 		const preparedDataEmailBody = {
 			type: 'builder',
 			value: builderData,
 		};
 		const emailBodyJson = JSON.stringify(preparedDataEmailBody);
-		onSave(emailBodyJson);
-		setIsBuilderOpen(false);
-		setBuilderMode(null);
-		setBuilderInitialData(null);
-		return Promise.resolve();
+		await onSave(emailBodyJson);
 	};
 
 	const handleBuilderClose = () => {
@@ -481,7 +477,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 							}}
 						>
 							<Builder
-								key={`${builderKey}-${builderInitialData ? 'picked' : initialEmailBody || 'new-email'}-${builderMode}`}
+								key={`${builderKey}-${builderInitialData ? 'picked' : 'existing'}-${builderMode}`}
 								initialData={getBuilderInitialData()}
 								onSave={handleBuilderSave}
 								onClose={handleBuilderClose}

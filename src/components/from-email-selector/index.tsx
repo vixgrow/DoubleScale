@@ -244,7 +244,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 					className={cn(
-						'w-full',
+						'w-full !border-border !rounded-lg',
 						error && '!border-destructive focus-visible:!ring-destructive/20'
 					)}
 						required={required}

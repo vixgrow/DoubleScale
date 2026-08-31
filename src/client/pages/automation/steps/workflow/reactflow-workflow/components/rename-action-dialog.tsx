@@ -88,6 +88,7 @@ const RenameActionDialog: React.FC<RenameActionDialogProps> = ({
 					automationDialogSurfaceMedium,
 					'z-[150470] gap-0 p-0'
 				)}
+				onCloseAutoFocus={(event) => event.preventDefault()}
 			>
 				<DialogHeader
 					className={cn(

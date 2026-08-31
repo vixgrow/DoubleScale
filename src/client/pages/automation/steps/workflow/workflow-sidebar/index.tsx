@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -54,7 +54,44 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		useAutomationContext();
 	const [tempAction, setTempAction] = useState<string>('');
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
-	const closeNotice = () => setNotice(null);
+	const noticeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const closeNotice = () => {
+		if (noticeTimeoutRef.current) {
+			clearTimeout(noticeTimeoutRef.current);
+			noticeTimeoutRef.current = null;
+		}
+		setNotice(null);
+	};
+
+	const showNotice = (nextNotice: NoticeMessage) => {
+		if (noticeTimeoutRef.current) {
+			clearTimeout(noticeTimeoutRef.current);
+			noticeTimeoutRef.current = null;
+		}
+		setNotice(nextNotice);
+		if (nextNotice.type === 'success') {
+			noticeTimeoutRef.current = setTimeout(() => {
+				setNotice(null);
+				noticeTimeoutRef.current = null;
+			}, 4000);
+		}
+	};
+
+	// A save notice belongs to the step that produced it. Switching
+	// actions (or to the trigger) must not keep the previous banner.
+	useEffect(() => {
+		closeNotice();
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- only reset on context change
+	}, [currentStep?.id, isTriggerVisible]);
+
+	useEffect(() => {
+		return () => {
+			if (noticeTimeoutRef.current) {
+				clearTimeout(noticeTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
@@ -101,6 +138,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			setCurrentStep(null);
 		}
 		setTempAction('');
+		closeNotice();
 	};
 
 	const handleActionChange = (value: string) => {
@@ -125,11 +163,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		const id = stepId || currentStep?.id;
 
 		if (!id) {
-			setNotice({
+			const message = __('Invalid step data', 'doublescale');
+			showNotice({
 				type: 'error',
-				message: __('Invalid step data', 'doublescale'),
+				message,
 			});
-			return;
+			throw new Error(message);
 		}
 
 		try {
@@ -155,73 +194,87 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				setTempAction('');
 			}
 
-			setNotice({ type: 'success', message: successMessage });
+			showNotice({ type: 'success', message: successMessage });
 		} catch (error: any) {
 			// Use utility to extract detailed error message from WordPress REST API
 			// This handles validation errors (rest_invalid_param) with detailed params
 			const errorMessage = getApiErrorMessage(error, __('Failed to save', 'doublescale'));
 
-			setNotice({
+			showNotice({
 				type: 'error',
 				message: errorMessage,
 			});
 
 			// Debug log to help troubleshoot error format
 			console.error('Save error:', { error, errorMessage });
+			throw new Error(errorMessage);
 		}
 	};
 
 	const handleGoalSave = async (goalKey: string) => {
 		if (!currentStep || !goalKey) {
-			setNotice({
+			showNotice({
 				type: 'error',
 				message: __('Please select a goal', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave({ action: goalKey }, __('Goal saved', 'doublescale'), {
-			clearTempAction: true,
-		});
+		try {
+			await handleSave({ action: goalKey }, __('Goal saved', 'doublescale'), {
+				clearTempAction: true,
+			});
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleActionSave = async (actionKey: string) => {
 		if (!currentStep || !actionKey) {
-			setNotice({
+			showNotice({
 				type: 'error',
 				message: __('Please select an action', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave(
-			{ action: actionKey },
-			__('Action saved', 'doublescale'),
-			{ clearTempAction: true }
-		);
+		try {
+			await handleSave(
+				{ action: actionKey },
+				__('Action saved', 'doublescale'),
+				{ clearTempAction: true }
+			);
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleDelaySave = async (delayKey: string) => {
 		if (!currentStep || !delayKey) {
-			setNotice({
+			showNotice({
 				type: 'error',
 				message: __('Please select a delay type', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave({ action: delayKey }, __('Delay saved', 'doublescale'), {
-			clearTempAction: true,
-		});
+		try {
+			await handleSave({ action: delayKey }, __('Delay saved', 'doublescale'), {
+				clearTempAction: true,
+			});
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
 		if (!stepData.id) {
-			setNotice({
+			const message = __('Invalid step data', 'doublescale');
+			showNotice({
 				type: 'error',
-				message: __('Invalid step data', 'doublescale'),
+				message,
 			});
-			return;
+			throw new Error(message);
 		}
 
 		await handleSave(stepData, __('Step saved', 'doublescale'), {
@@ -232,10 +285,14 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const handleConditionSave = async (data: Partial<AutomationStep>) => {
 		if (!currentStep) return;
 
-		await handleSave(
-			{ settings: data.settings },
-			__('Conditions saved', 'doublescale')
-		);
+		try {
+			await handleSave(
+				{ settings: data.settings },
+				__('Conditions saved', 'doublescale')
+			);
+		} catch {
+			// Notice already shown by handleSave.
+		}
 	};
 
 	const renderContent = () => {

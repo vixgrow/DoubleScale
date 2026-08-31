@@ -207,13 +207,14 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 									<Rule
 										ruleSettings={getRuleBySlug(rule.rule)}
 										rule={rule}
-										onChange={(key, value) => {
+										onChange={(key, value, extra) => {
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
 												...newRules[groupIndex][
 													ruleIndex
 												],
 												[key]: value,
+												...extra,
 											};
 											onRulesChange(newRules);
 										}}

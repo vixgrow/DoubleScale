@@ -135,15 +135,27 @@ const Header: React.FC<HeaderProps> = ({
 		hasUnsavedChanges,
 	});
 
-	const handleSaveAndContinue = async () => {
-		if (!ensureNotEmptyOrNotify()) return;
+	const handleSave = async () => {
+		if (!ensureNotEmptyOrNotify()) {
+			return { success: false as const };
+		}
+		return save();
+	};
 
-		const { success } = await save();
+	const handleSaveAndContinue = async () => {
+		const { success } = await handleSave();
 		if (success && campaign) {
 			const path = `campaigns/${campaign.id}/contacts`;
 			handleNavigate
 				? handleNavigate(path)
 				: navigateFromRouter(getToLink(path));
+		}
+	};
+
+	const handleSaveAndExit = async () => {
+		const { success } = await handleSave();
+		if (success) {
+			onClose?.();
 		}
 	};
 
@@ -232,7 +244,8 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	};
 	return (
-		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
+		<div className="flex flex-col flex-shrink-0">
+		<div className="flex items-center flex-col lg:flex-row justify-center gap-3 lg:gap-0 lg:justify-between px-4 py-2 bg-primary-foreground border-b border-input">
 			<div className="flex items-center align-center gap-2">
 				{/*
 				 * Campaign-only. In embedded mode (automation "Send Email",
@@ -342,6 +355,19 @@ const Header: React.FC<HeaderProps> = ({
 						/>
 
 						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={() => {
+								void handleSave();
+							}}
+							disabled={isSaving || isBuilderEmpty}
+						>
+							{isSaving
+								? __('Saving...', 'doublescale')
+								: __('Save', 'doublescale')}
+						</Button>
+
+						<Button
 							variant="default"
 							className="px-3 min-w-[200px]"
 							onClick={handleSaveAndContinue}
@@ -406,11 +432,10 @@ const Header: React.FC<HeaderProps> = ({
 							</Button>
 						)}
 						<Button
-							variant="default"
+							variant={onClose ? 'secondary' : 'default'}
 							className="px-3"
 							onClick={() => {
-								if (!ensureNotEmptyOrNotify()) return;
-								save();
+								void handleSave();
 							}}
 							disabled={isSaving || isBuilderEmpty}
 						>
@@ -418,6 +443,20 @@ const Header: React.FC<HeaderProps> = ({
 								? __('Saving...', 'doublescale')
 								: __('Save', 'doublescale')}
 						</Button>
+						{onClose && (
+							<Button
+								variant="default"
+								className="px-3"
+								onClick={() => {
+									void handleSaveAndExit();
+								}}
+								disabled={isSaving || isBuilderEmpty}
+							>
+								{isSaving
+									? __('Saving...', 'doublescale')
+									: __('Save & Exit', 'doublescale')}
+							</Button>
+						)}
 					</>
 				)}
 			</div>
@@ -439,6 +478,15 @@ const Header: React.FC<HeaderProps> = ({
 				error={previewError}
 				onRetry={loadPreview}
 			/>
+		</div>
+		{error && (
+			<div
+				className="px-4 py-2 bg-red-50 border-b border-red-200 text-sm text-red-700"
+				role="alert"
+			>
+				{error}
+			</div>
+		)}
 		</div>
 	);
 };

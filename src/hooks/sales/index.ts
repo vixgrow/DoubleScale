@@ -525,9 +525,15 @@ export const useAssignableSalesUsers = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		apiFetch<SalesAssignableUser[]>({ path: `${NAMESPACE}/assignable-users` })
+		apiFetch<SalesAssignableUser[] | { data?: SalesAssignableUser[] }>({
+			path: `${NAMESPACE}/assignable-users`,
+		})
 			.then((response) => {
-				setData(Array.isArray(response) ? response : []);
+				if (Array.isArray(response)) {
+					setData(response);
+					return;
+				}
+				setData(Array.isArray(response?.data) ? response.data : []);
 			})
 			.catch((err: unknown) => {
 				setError(formatRestError(err));

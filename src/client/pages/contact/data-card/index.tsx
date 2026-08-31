@@ -232,7 +232,6 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		const proOnlyTabValues = new Set([
 			'whatsapp',
 			'attachments',
-			'invoices',
 			'lead-score',
 			'website_tracking',
 			'deals',

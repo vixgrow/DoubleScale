@@ -19,7 +19,7 @@ import StepFieldsModal from '../step-fields-modal';
 import GoalSelector from '../goal-selector';
 import ActionSelector from '../action-selector';
 import ConditionsModal from '../conditions-modal';
-import { getAction, getGoal } from '@doublescale/utils';
+import { getAction, getGoal, getApiErrorMessage } from '@doublescale/utils';
 import { isEmpty } from 'lodash';
 
 interface StepModalProps {
@@ -66,11 +66,16 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 				type: 'success',
 				message: __('Automation updated', 'doublescale'),
 			});
-		} catch (error: any) {
+		} catch (error: unknown) {
+			const errorMessage = getApiErrorMessage(
+				error,
+				__('Failed to save', 'doublescale')
+			);
 			createNotice({
 				type: 'error',
-				message: error.message,
+				message: errorMessage,
 			});
+			throw new Error(errorMessage);
 		}
 	};
 

@@ -1,6 +1,7 @@
 import { select, useSelect, useDispatch } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { getApiErrorMessage } from '@doublescale/utils';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { getTemplate, saveTemplate } from '../api/templates';
 import { BuilderData } from '../index';
@@ -151,9 +152,11 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 				// Call custom save callback with complete builder data
 				await customSaveCallback(builderData);
 
+				// Persist already succeeded. A parent re-render may unmount this
+				// instance (e.g. Save & Exit); still report success so the caller
+				// can close instead of requiring a second click.
 				if (isMountedRef.current) {
 					const now = new Date();
-					// Update the saved state reference with the fresh state
 					const freshStateString = JSON.stringify(builderData);
 					lastSavedStateRef.current = freshStateString;
 					setSaveStatus({
@@ -162,11 +165,13 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 						hasUnsavedChanges: false,
 						error: null,
 					});
-					return { success: true, templateId: null };
 				}
-				return { success: false, templateId: null };
+				return { success: true, templateId: null };
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+				const errorMessage = getApiErrorMessage(
+					error,
+					__('Failed to save', 'doublescale')
+				);
 				if (isMountedRef.current) {
 					setSaveStatus((prev) => ({
 						...prev,
@@ -267,7 +272,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			}
 			return { success: false, templateId: null };
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+			const errorMessage = getApiErrorMessage(
+				error,
+				__('Failed to save', 'doublescale')
+			);
 			if (isMountedRef.current) {
 				setSaveStatus((prev) => ({
 					...prev,

@@ -65,22 +65,6 @@ const Header: React.FC<HeaderProps> = ({
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = useSelect(
-		(select) => select(STORE_KEY).getGlobalSettings(),
-		[]
-	);
-	const buttonSettings = useSelect(
-		(select) => select(STORE_KEY).getAllButtonSettings(),
-		[]
-	);
-	const linkSettings = useSelect(
-		(select) => select(STORE_KEY).getLinkSettings(),
-		[]
-	);
-	const attachments = useSelect(
-		(select) => select(STORE_KEY).getAttachments(),
-		[]
-	);
 
 	// `onSave` is supplied only by the embedded hosts (automation "Send Email",
 	// email sequences); see builderMode for why campaign chrome must key off
@@ -164,6 +148,42 @@ const Header: React.FC<HeaderProps> = ({
 	};
 
 	/**
+	 * Live builder payload for preview / test send.
+	 *
+	 * Read from the store at click time (not a render-time closure) so Theme →
+	 * Link Style matches the canvas. The campaign test-send used to render the
+	 * last saved template instead, which is why the email arrived without the
+	 * link style sitting in the sidebar.
+	 */
+	const getLiveBuilderValue = (): BuilderData => {
+		const store = select(STORE_KEY) as {
+			getSections: () => BuilderData['sections'];
+			getGlobalSettings: () => BuilderData['globalSettings'];
+			getAllButtonSettings: () => BuilderData['buttonSettings'];
+			getLinkSettings: () => BuilderData['linkSettings'];
+			getAttachments: () => BuilderData['attachments'];
+		};
+		return {
+			sections: store.getSections(),
+			globalSettings: store.getGlobalSettings(),
+			buttonSettings: store.getAllButtonSettings(),
+			linkSettings: store.getLinkSettings(),
+			attachments: store.getAttachments(),
+		};
+	};
+
+	const getLiveTestContent = () => {
+		const value = getLiveBuilderValue();
+		return {
+			body: JSON.stringify({
+				type: 'builder',
+				value,
+			}),
+			attachments: value.attachments,
+		};
+	};
+
+	/**
 	 * Render the current email for preview.
 	 *
 	 * Always renders the live builder state rather than a saved template. Going
@@ -180,30 +200,13 @@ const Header: React.FC<HeaderProps> = ({
 		setPreviewError(null);
 
 		try {
-			const {
-				getSections,
-				getGlobalSettings,
-				getAllButtonSettings,
-				getLinkSettings,
-			} = select(STORE_KEY) as {
-				getSections: () => unknown;
-				getGlobalSettings: () => unknown;
-				getAllButtonSettings: () => unknown;
-				getLinkSettings: () => unknown;
-			};
-
 			const { html } = await apiFetch<{ html: string }>({
 				path: '/doublescale/v1/automation-steps/preview-email',
 				method: 'POST',
 				data: {
 					body: JSON.stringify({
 						type: 'builder',
-						value: {
-							sections: getSections(),
-							globalSettings: getGlobalSettings(),
-							buttonSettings: getAllButtonSettings(),
-							linkSettings: getLinkSettings(),
-						},
+						value: getLiveBuilderValue(),
 					}),
 				},
 			});
@@ -353,6 +356,7 @@ const Header: React.FC<HeaderProps> = ({
 						<SendTestEmailPopover
 							campaignId={campaign.id}
 							disabled={isSaving || isBuilderEmpty}
+							getTestContent={getLiveTestContent}
 							onBeforeSend={async () => {
 								if (!ensureNotEmptyOrNotify()) {
 									return { success: false };
@@ -412,17 +416,7 @@ const Header: React.FC<HeaderProps> = ({
 								disabled={isSaving || isBuilderEmpty}
 								getTestContent={() => ({
 									...getTestEmailContext(),
-									body: JSON.stringify({
-										type: 'builder',
-										value: {
-											sections,
-											globalSettings,
-											buttonSettings,
-											linkSettings,
-											attachments,
-										},
-									}),
-									attachments,
+									...getLiveTestContent(),
 								})}
 								onBeforeSend={async () => ({
 									success: ensureNotEmptyOrNotify(),

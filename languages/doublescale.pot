@@ -7605,9 +7605,6 @@ msgstr ""
 msgid "Enter one or more addresses (comma-separated). The design currently in the builder will be sent."
 msgstr ""
 
-msgid "Enter one or more addresses (comma-separated). The latest saved design will be sent."
-msgstr ""
-
 msgid "Enter option"
 msgstr ""
 
@@ -14118,6 +14115,9 @@ msgid "Optional channel to filter results (e.g., sms, whatsapp). If not provided
 msgstr ""
 
 msgid "Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers."
+msgstr ""
+
+msgid "Optional live builder JSON. When present, the test is rendered from this instead of the last saved template."
 msgstr ""
 
 msgid "Optional — shown on sales documents and receipts."

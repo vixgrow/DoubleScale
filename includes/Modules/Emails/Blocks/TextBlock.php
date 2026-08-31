@@ -361,6 +361,13 @@ class TextBlock extends EmailBlock {
 				$tag   = $matches[1];
 				$attrs = $matches[2];
 
+				// Theme → Links owns <a> styling. Forcing the text-block color/
+				// size onto anchors here made Send test email look like body
+				// copy instead of the Link Style sitting in the sidebar.
+				if ( 0 === strcasecmp( $tag, 'a' ) ) {
+					return $matches[0];
+				}
+
 				$inject = array();
 				foreach ( $escaped as $prop => $val ) {
 					$has_prop = (bool) preg_match( '/style\s*=\s*("[^"]*|\'[^\']*)' . preg_quote( $prop, '/' ) . '/i', $attrs );
@@ -401,8 +408,9 @@ class TextBlock extends EmailBlock {
 
 	/**
 	 * Text-block links: Theme → Links styles (font, color, size, spacing,
-	 * decoration). Gmail recolors bare `<a>` tags, so an inner span / `<u>` /
-	 * `<font color>` keeps the theme color and underline.
+	 * decoration). Gmail recolors bare `<a>` tags, so an inner span /
+	 * `<font color>` keeps the theme color. A `<u>` wrapper is not used —
+	 * it stacked a second underline on top of text-decoration.
 	 *
 	 * @param string $content       HTML content
 	 * @param string $fallback_color Block font color when theme color is empty
@@ -413,16 +421,44 @@ class TextBlock extends EmailBlock {
 			return $content;
 		}
 
-		$settings   = $this->get_theme_link_settings();
-		$color      = esc_attr( ! empty( $settings['color'] ) ? (string) $settings['color'] : $fallback_color );
-		$link_style = $this->build_theme_link_style( $settings, $color );
-		$decoration = $this->get_theme_link_decoration( $settings );
+		$settings    = $this->get_theme_link_settings();
+		$color       = esc_attr( ! empty( $settings['color'] ) ? (string) $settings['color'] : $fallback_color );
+		$link_style  = $this->build_theme_link_style( $settings, $color );
+		$outer_style = $this->build_theme_link_style( $settings, $color, 'none' );
 
 		$replaced = preg_replace_callback(
 			'/<a\b([^>]*)>(.*?)<\/a>/is',
-			static function ( $matches ) use ( $color, $link_style, $decoration ) {
+			static function ( $matches ) use ( $color, $link_style, $outer_style, $settings ) {
 				$attrs = $matches[1];
 				$inner = $matches[2];
+
+				$inner = preg_replace_callback(
+					'/style\s*=\s*(["\'])(.*?)\1/i',
+					static function ( $style_matches ) {
+						$quote = $style_matches[1];
+						$decls = preg_split( '/;/', $style_matches[2] );
+						$kept  = array();
+						foreach ( $decls as $decl ) {
+							$decl = trim( $decl );
+							if ( '' === $decl ) {
+								continue;
+							}
+							if ( preg_match( '/^(color|text-decoration|-webkit-text-fill-color|font-family|font-size|letter-spacing|font-weight|font-style)\s*:/i', $decl ) ) {
+								continue;
+							}
+							$kept[] = $decl;
+						}
+						if ( empty( $kept ) ) {
+							return '';
+						}
+						return 'style=' . $quote . implode( '; ', $kept ) . $quote;
+					},
+					$inner
+				);
+				if ( ! is_string( $inner ) ) {
+					$inner = $matches[2];
+				}
+				$link_html = $inner;
 
 				$attrs = preg_replace_callback(
 					'/style\s*=\s*(["\'])(.*?)\1/i',
@@ -449,24 +485,19 @@ class TextBlock extends EmailBlock {
 				);
 
 				if ( preg_match( '/style\s*=\s*"/i', $attrs ) ) {
-					$attrs = preg_replace( '/style\s*=\s*"/i', 'style="' . $link_style . '; ', $attrs );
+					$attrs = preg_replace( '/style\s*=\s*"/i', 'style="' . $outer_style . '; ', $attrs );
 				} elseif ( preg_match( "/style\s*=\s*'/i", $attrs ) ) {
-					$attrs = preg_replace( "/style\s*=\s*'/i", "style='" . $link_style . '; ', $attrs );
+					$attrs = preg_replace( "/style\s*=\s*'/i", "style='" . $outer_style . '; ', $attrs );
 				} else {
-					$attrs .= ' style="' . $link_style . ';"';
+					$attrs .= ' style="' . $outer_style . ';"';
 				}
 
 				$already_wrapped = (bool) preg_match( '/<font\b[^>]*\bcolor=/i', $inner );
 				if ( ! $already_wrapped ) {
-					$inner_style = 'color: ' . $color . '; text-decoration: ' . $decoration . ';';
-					$inner       = '<span style="' . $inner_style . '">';
-					if ( false !== strpos( $decoration, 'underline' ) ) {
-						$inner .= '<u style="' . $inner_style . '">';
-					}
-					$inner .= '<font color="' . $color . '">' . $matches[2] . '</font>';
-					if ( false !== strpos( $decoration, 'underline' ) ) {
-						$inner .= '</u>';
-					}
+					// Underline only on the span. <a> + <font> also having
+					// text-decoration draws a second line in Gmail.
+					$inner  = '<span class="ds-text-link" style="' . $link_style . ';">';
+					$inner .= '<font color="' . $color . '" face="' . esc_attr( (string) ( $settings['font'] ?? 'Arial, sans-serif' ) ) . '" style="' . $outer_style . ';">' . $link_html . '</font>';
 					$inner .= '</span>';
 				}
 
@@ -526,7 +557,10 @@ class TextBlock extends EmailBlock {
 	 * @param string $color    Escaped color
 	 * @return string
 	 */
-	private function build_theme_link_style( array $settings, string $color ): string {
+	private function build_theme_link_style( array $settings, string $color, ?string $decoration = null ): string {
+		if ( null === $decoration ) {
+			$decoration = $this->get_theme_link_decoration( $settings );
+		}
 		return sprintf(
 			'font-family: %s; font-size: %spx; letter-spacing: %s; color: %s; font-weight: %s; font-style: %s; text-decoration: %s',
 			esc_attr( (string) ( $settings['font'] ?? 'Arial, sans-serif' ) ),
@@ -535,7 +569,7 @@ class TextBlock extends EmailBlock {
 			$color,
 			! empty( $settings['bold'] ) ? 'bold' : 'normal',
 			! empty( $settings['italic'] ) ? 'italic' : 'normal',
-			$this->get_theme_link_decoration( $settings )
+			$decoration
 		);
 	}
 

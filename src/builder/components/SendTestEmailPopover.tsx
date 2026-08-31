@@ -119,9 +119,9 @@ export const SendTestEmailPopover: React.FC<SendTestEmailPopoverProps> = ({
 
 		try {
 			const response: { message?: string } = await apiFetch({
-				path: content
-					? '/doublescale/v1/automation-steps/send-test-email'
-					: `/doublescale/v1/campaigns/${campaignId}/send-test-email`,
+				path: campaignId
+					? `/doublescale/v1/campaigns/${campaignId}/send-test-email`
+					: '/doublescale/v1/automation-steps/send-test-email',
 				method: 'POST',
 				data: content ? { ...content, emails } : { emails },
 				signal: abortControllerRef.current.signal,
@@ -179,15 +179,10 @@ export const SendTestEmailPopover: React.FC<SendTestEmailPopoverProps> = ({
 						{__('Send a test email', 'doublescale')}
 					</p>
 					<p className="text-xs text-muted-foreground">
-						{getTestContent
-							? __(
-									'Enter one or more addresses (comma-separated). The design currently in the builder will be sent.',
-									'doublescale'
-								)
-							: __(
-									'Enter one or more addresses (comma-separated). The latest saved design will be sent.',
-									'doublescale'
-								)}
+						{__(
+							'Enter one or more addresses (comma-separated). The design currently in the builder will be sent.',
+							'doublescale'
+						)}
 					</p>
 					<Textarea
 						value={testEmails}

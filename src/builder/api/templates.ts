@@ -197,6 +197,7 @@ interface BuilderData {
 	sections: unknown[];
 	globalSettings: Record<string, unknown>;
 	buttonSettings: Record<string, unknown>;
+	linkSettings?: Record<string, unknown>;
 }
 
 /**

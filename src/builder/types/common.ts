@@ -206,6 +206,17 @@ export interface ButtonSettings {
 	underline: boolean;
 }
 
+export interface LinkSettings {
+	font: string;
+	size: number;
+	letterSpacing: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	strikethrough: boolean;
+}
+
 // ============================================================================
 // Global Settings Types
 // ============================================================================
@@ -290,6 +301,7 @@ export interface EmailTemplate {
 			sections: EmailSection[];
 			globalSettings: GlobalSettings;
 			buttonSettings: Record<ButtonType, ButtonSettings>;
+			linkSettings?: LinkSettings;
 			attachments?: EmailAttachment[];
 		};
 	};

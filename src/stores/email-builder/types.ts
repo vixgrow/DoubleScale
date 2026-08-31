@@ -23,6 +23,17 @@ export interface ButtonSettings {
 	strikethrough: boolean;
 }
 
+export interface LinkSettings {
+	font: string;
+	size: number;
+	letterSpacing: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	strikethrough: boolean;
+}
+
 export interface EmailBlock {
 	id: string;
 	type: BlockType;
@@ -84,6 +95,7 @@ export interface EmailBuilderState {
 	draggedBlock: EmailBlock | null;
 	globalSettings: GlobalEmailSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+	linkSettings: LinkSettings;
 	attachments: EmailAttachment[];
 	isLoading: boolean;
 	history: {
@@ -241,6 +253,20 @@ export interface SetButtonSettingsAction {
 	};
 }
 
+export interface UpdateLinkSettingsAction {
+	type: 'UPDATE_LINK_SETTINGS';
+	payload: {
+		settings: Partial<LinkSettings>;
+	};
+}
+
+export interface SetLinkSettingsAction {
+	type: 'SET_LINK_SETTINGS';
+	payload: {
+		settings: LinkSettings;
+	};
+}
+
 export interface SetAttachmentsAction {
 	type: 'SET_ATTACHMENTS';
 	payload: {
@@ -276,5 +302,7 @@ export type EmailBuilderActionTypes =
 	| RedoAction
 	| UpdateButtonSettingsAction
 	| SetButtonSettingsAction
+	| UpdateLinkSettingsAction
+	| SetLinkSettingsAction
 	| SetAttachmentsAction
 	| SetLoadingAction;

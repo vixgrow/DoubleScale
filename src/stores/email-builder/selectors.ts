@@ -6,6 +6,7 @@ import type {
 	EmailColumn,
 	EmailSection,
 	GlobalEmailSettings,
+	LinkSettings,
 } from './types';
 
 // Section selectors
@@ -142,6 +143,10 @@ export const getButtonSettings = (
 	buttonType: ButtonType
 ): ButtonSettings => {
 	return state.buttonSettings[buttonType];
+};
+
+export const getLinkSettings = (state: EmailBuilderState): LinkSettings => {
+	return state.linkSettings;
 };
 
 // Loading selectors

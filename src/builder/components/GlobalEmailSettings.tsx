@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { applyFilters } from '@wordpress/hooks';
 /**
  * external dependencies
  */
@@ -17,30 +16,24 @@ import {
 	BackgroundIcon,
 	InfoIcon,
 	ButtonsIcon,
-	PremiumIcon,
+	ExternalLinkIcon,
 } from '@doublescale/components';
 import { cn } from '@/lib/utils';
-import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import LockedButtons from './LockedButtons';
 import BackgroundSettings from './BackgroudSettings';
+import ButtonSettings from './ButtonSettings';
+import LinkSettings from './LinkSettings';
 
-type ThemePanel = 'background' | 'buttons' | null;
+type ThemePanel = 'background' | 'buttons' | 'links' | null;
 
 const GlobalEmailSettings: React.FC = () => {
 	const dispatch = useDispatch();
 	const [themePanel, setThemePanel] = useState<ThemePanel>(null);
-	const { isProActive } = useProUpgrade();
 
 	const globalSettings = useSelect(
 		(select) => select(STORE_KEY).getGlobalSettings(),
 		[]
 	);
-
-	const ThemeButtonsExpanded = applyFilters(
-		'doublescale_builder_theme_buttons_expanded',
-		LockedButtons
-	) as React.ComponentType<Record<string, never>>;
 
 	const themeAccordionTriggerClass = cn(
 		'flex w-full items-center justify-between bg-white/[0.05] px-4 py-4 text-left text-sm text-white transition-colors hover:bg-white/[0.08]'
@@ -143,14 +136,7 @@ const GlobalEmailSettings: React.FC = () => {
 							<span className="inline-flex shrink-0 text-white">
 								<ButtonsIcon width={32} height={32} />
 							</span>
-							<span className="flex items-center gap-2">
-								{__('Buttons', 'doublescale')}
-								{!isProActive ? (
-									<div className="rounded-full bg-[#FAEADF] p-1">
-										<PremiumIcon width={16} height={16} />
-									</div>
-								) : null}
-							</span>
+							<span>{__('Buttons', 'doublescale')}</span>
 						</div>
 						{themePanel === 'buttons' ? (
 							<ChevronDown className="h-6 w-6 shrink-0 text-white" />
@@ -160,7 +146,40 @@ const GlobalEmailSettings: React.FC = () => {
 					</button>
 					{themePanel === 'buttons' && (
 						<div className={themeAccordionBodyClass}>
-							<ThemeButtonsExpanded />
+							<ButtonSettings />
+						</div>
+					)}
+				</div>
+
+				<div className={themeAccordionShell}>
+					<button
+						type="button"
+						className={cn(
+							themeAccordionTriggerClass,
+							themePanel === 'links' &&
+							'border-b border-white/10'
+						)}
+						onClick={() =>
+							setThemePanel((p) =>
+								p === 'links' ? null : 'links'
+							)
+						}
+					>
+						<div className="flex items-center gap-3">
+							<span className="inline-flex shrink-0 text-white">
+								<ExternalLinkIcon width={32} height={32} />
+							</span>
+							<span>{__('Links', 'doublescale')}</span>
+						</div>
+						{themePanel === 'links' ? (
+							<ChevronDown className="h-6 w-6 shrink-0 text-white" />
+						) : (
+							<ChevronRight className="h-6 w-6 shrink-0 text-white" />
+						)}
+					</button>
+					{themePanel === 'links' && (
+						<div className={themeAccordionBodyClass}>
+							<LinkSettings />
 						</div>
 					)}
 				</div>

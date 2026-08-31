@@ -249,7 +249,8 @@ export class EmailBuilderService {
   static toBuilderData(
     sections: EmailSection[],
     globalSettings: any,
-    buttonSettings: any
+    buttonSettings: any,
+    linkSettings?: any
   ) {
     return {
       type: 'builder',
@@ -257,6 +258,7 @@ export class EmailBuilderService {
         sections,
         globalSettings,
         buttonSettings,
+        linkSettings,
       },
     };
   }
@@ -268,6 +270,7 @@ export class EmailBuilderService {
     sections: EmailSection[];
     globalSettings: any;
     buttonSettings: any;
+    linkSettings: any;
   } | null {
     if (!data || data.type !== 'builder') {
       return null;
@@ -277,6 +280,7 @@ export class EmailBuilderService {
       sections: data.value?.sections || [],
       globalSettings: data.value?.globalSettings || {},
       buttonSettings: data.value?.buttonSettings || {},
+      linkSettings: data.value?.linkSettings || {},
     };
   }
 }

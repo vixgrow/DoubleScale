@@ -27,6 +27,7 @@ import * as TypographyControls from '../../shared/control-groups/typography';
 import * as StyleControls from '../../shared/control-groups/style';
 import * as LayoutControls from '../../shared/control-groups/layout';
 import { getDefaultFontSizeForStyle } from '@/builder/utils/styleHelpers';
+import { useLinkSettings } from '@doublescale/hooks/useLinkSettings';
 
 export interface TextEditorProps {
 	props: TextBlockProps;
@@ -34,6 +35,8 @@ export interface TextEditorProps {
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
+	const { getLinkSettings } = useLinkSettings();
+	const themeLinkColor = getLinkSettings().color;
 	const handleDirectionChange = (textDirection: 'ltr' | 'rtl') => {
 		const updates: Partial<TextBlockProps> = { textDirection };
 		if (textDirection === 'rtl' && props.textAlign === 'left') {
@@ -58,6 +61,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 								fontSize={props.fontSize}
 								fontFamily={props.fontFamily}
 								defaultBodyColor={props.color?.trim() || '#333'}
+								defaultLinkColor={themeLinkColor}
 							/>
 						</div>
 

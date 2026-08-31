@@ -41,6 +41,13 @@ class EmailRenderer {
 	private $button_settings = array();
 
 	/**
+	 * Theme link settings from template
+	 *
+	 * @var array
+	 */
+	private $link_settings = array();
+
+	/**
 	 * Rendered conditional section IDs for current render
 	 *
 	 * @var array
@@ -205,6 +212,10 @@ class EmailRenderer {
 			$this->button_settings = $content['buttonSettings'];
 		}
 
+		if ( isset( $content['linkSettings'] ) && is_array( $content['linkSettings'] ) ) {
+			$this->link_settings = $content['linkSettings'];
+		}
+
 		// Extract global settings (with defaults)
 		$canvas_color        = isset( $global_settings['canvasColor'] ) ? $global_settings['canvasColor'] : '#ffffff';
 		$canvas_width        = isset( $global_settings['canvasWidth'] ) ? $global_settings['canvasWidth'] : 900;
@@ -270,11 +281,10 @@ class EmailRenderer {
 			/* Font inheritance */
 			* { font-family: Arial, sans-serif; }
 			
-			/* Text links: inherit Font Color + underline (matches the builder).
-			   Gmail honors this head rule; `text-decoration:none` here is why
-			   inbox links went blue with no underline. Buttons, social icons,
-			   and image links keep `text-decoration:none` on the <a> itself. */
-			a { color: inherit; text-decoration: underline; }
+			/* Text links follow Theme → Links. Buttons, social icons, and
+			   image links keep their own inline styles (including
+			   text-decoration:none) on the <a> itself. */
+			a { ' . $this->get_link_css_declarations() . ' }
 
 			/* Fallback media query for clients that support it */
 			@media only screen and (max-width: ' . $mobile_breakpoint . 'px) {
@@ -874,6 +884,60 @@ class EmailRenderer {
 		}
 
 		return array();
+	}
+
+	/**
+	 * Default theme link settings (matches the builder store).
+	 *
+	 * @return array
+	 */
+	public function get_default_link_settings(): array {
+		return array(
+			'font'           => 'Arial, sans-serif',
+			'size'           => 16,
+			'letterSpacing'  => '0px',
+			'color'          => '#458DC7',
+			'bold'           => false,
+			'italic'         => false,
+			'underline'      => true,
+			'strikethrough'  => false,
+		);
+	}
+
+	/**
+	 * Theme link settings for text-block links.
+	 *
+	 * @return array
+	 */
+	public function get_link_settings(): array {
+		return wp_parse_args( $this->link_settings, $this->get_default_link_settings() );
+	}
+
+	/**
+	 * CSS declarations for theme links (no trailing semicolon).
+	 *
+	 * @return string
+	 */
+	public function get_link_css_declarations(): string {
+		$settings    = $this->get_link_settings();
+		$decoration  = array();
+		if ( ! empty( $settings['underline'] ) ) {
+			$decoration[] = 'underline';
+		}
+		if ( ! empty( $settings['strikethrough'] ) ) {
+			$decoration[] = 'line-through';
+		}
+
+		return sprintf(
+			'font-family: %s; font-size: %spx; letter-spacing: %s; color: %s; font-weight: %s; font-style: %s; text-decoration: %s;',
+			esc_attr( (string) $settings['font'] ),
+			(int) $settings['size'],
+			esc_attr( (string) $settings['letterSpacing'] ),
+			esc_attr( (string) $settings['color'] ),
+			! empty( $settings['bold'] ) ? 'bold' : 'normal',
+			! empty( $settings['italic'] ) ? 'italic' : 'normal',
+			! empty( $decoration ) ? implode( ' ', $decoration ) : 'none'
+		);
 	}
 
 	/**

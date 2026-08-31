@@ -13,6 +13,10 @@ export default defineConfig({
 			// entries from tsconfig.json paths. Add more here as new test files
 			// reach into deeper parts of the source tree.
 			'@doublescale/shared': path.join(srcDir, 'shared'),
+			'@doublescale/hooks/useLinkSettings': path.join(
+				srcDir,
+				'builder/hooks/useLinkSettings.ts'
+			),
 			'@doublescale/utils/dragAndDropHelpers': path.join(
 				srcDir,
 				'builder/utils/dragAndDropHelpers.ts'

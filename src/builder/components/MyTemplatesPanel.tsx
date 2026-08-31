@@ -148,7 +148,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 
 				if (bodyData.type === 'builder' && bodyData.value) {
 					// Load the template data into the builder
-					const { sections, globalSettings, buttonSettings } =
+					const { sections, globalSettings, buttonSettings, linkSettings } =
 						bodyData.value;
 
 					console.log('Template data:', {
@@ -174,6 +174,10 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 
 					if (buttonSettings) {
 						dispatch(STORE_KEY).setButtonSettings(buttonSettings);
+					}
+
+					if (linkSettings) {
+						dispatch(STORE_KEY).setLinkSettings(linkSettings);
 					}
 				} else {
 					console.warn('Invalid template body structure:', bodyData);

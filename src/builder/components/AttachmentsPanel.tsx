@@ -3,10 +3,11 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useSelect, useDispatch, select } from '@wordpress/data';
-import { Paperclip, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import type { EmailAttachment } from '../../stores/email-builder/types';
+import { AttachmentsIcon } from '@doublescale/components';
 
 export const MAX_EMAIL_ATTACHMENTS = 5;
 export const MAX_EMAIL_ATTACHMENT_BYTES = 10 * 1024 * 1024;
@@ -425,9 +426,9 @@ const AttachmentsPanel: React.FC = () => {
 					{attachments.map((file) => (
 						<li
 							key={file.id}
-							className="flex items-center gap-2 rounded-lg bg-white/[0.05] px-3 py-2"
+							className="flex items-center gap-2 rounded-lg text-white bg-white/[0.05] px-3 py-2"
 						>
-							<Paperclip className="h-4 w-4 shrink-0 text-white/70" />
+							<AttachmentsIcon width={32} height={32} />
 							<div className="min-w-0 flex-1">
 								<div
 									className="truncate text-sm text-white"
@@ -466,7 +467,7 @@ const AttachmentsPanel: React.FC = () => {
 				onClick={openMediaLibrary}
 				disabled={attachments.length >= MAX_EMAIL_ATTACHMENTS}
 			>
-				<Paperclip className="mr-2 h-4 w-4" />
+				<AttachmentsIcon width={32} height={32} />
 				{__('Add attachment', 'doublescale')}
 			</Button>
 		</div>

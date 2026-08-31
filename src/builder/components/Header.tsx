@@ -73,6 +73,10 @@ const Header: React.FC<HeaderProps> = ({
 		(select) => select(STORE_KEY).getAllButtonSettings(),
 		[]
 	);
+	const linkSettings = useSelect(
+		(select) => select(STORE_KEY).getLinkSettings(),
+		[]
+	);
 	const attachments = useSelect(
 		(select) => select(STORE_KEY).getAttachments(),
 		[]
@@ -180,10 +184,12 @@ const Header: React.FC<HeaderProps> = ({
 				getSections,
 				getGlobalSettings,
 				getAllButtonSettings,
+				getLinkSettings,
 			} = select(STORE_KEY) as {
 				getSections: () => unknown;
 				getGlobalSettings: () => unknown;
 				getAllButtonSettings: () => unknown;
+				getLinkSettings: () => unknown;
 			};
 
 			const { html } = await apiFetch<{ html: string }>({
@@ -196,6 +202,7 @@ const Header: React.FC<HeaderProps> = ({
 							sections: getSections(),
 							globalSettings: getGlobalSettings(),
 							buttonSettings: getAllButtonSettings(),
+							linkSettings: getLinkSettings(),
 						},
 					}),
 				},
@@ -411,6 +418,7 @@ const Header: React.FC<HeaderProps> = ({
 											sections,
 											globalSettings,
 											buttonSettings,
+											linkSettings,
 											attachments,
 										},
 									}),

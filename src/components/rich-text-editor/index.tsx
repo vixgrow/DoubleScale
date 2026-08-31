@@ -180,8 +180,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	// Process all links to open in new tab.
-	// Text-block canvas: underline only — no distinct link color (inherit Font Color).
-	// Other editors: underline always, color only if unset.
+	// Theme link color/underline apply in the builder; other editors
+	// keep underline and only set color when unset.
 	const anchorHasTextColor = (link: HTMLAnchorElement): boolean => {
 		const attr = link.getAttribute('style') || '';
 		if (/(?:^|;)\s*color\s*:/i.test(attr)) return true;
@@ -201,8 +201,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			}
 			link.style.textDecoration = 'underline';
 			if (isCanvasFormat) {
-				link.style.removeProperty('color');
-				link.removeAttribute('color');
+				link.style.color = defaultLinkColorResolved;
 				return;
 			}
 			if (!anchorHasTextColor(link)) {
@@ -649,9 +648,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
 			linkElement.style.textDecoration = 'underline';
-			if (!isCanvasFormat) {
-				linkElement.style.color = selectedColor;
-			}
+			linkElement.style.color = isCanvasFormat
+				? defaultLinkColorResolved
+				: selectedColor;
 			linkElement.textContent = fallbackText;
 			root.appendChild(linkElement);
 			processLinks();
@@ -673,8 +672,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			existingLink.rel = 'noopener noreferrer';
 			existingLink.style.textDecoration = 'underline';
 			if (isCanvasFormat) {
-				existingLink.style.removeProperty('color');
-				existingLink.removeAttribute('color');
+				existingLink.style.color = defaultLinkColorResolved;
 			}
 		} else {
 			const linkElement = document.createElement('a');
@@ -682,9 +680,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
 			linkElement.style.textDecoration = 'underline';
-			if (!isCanvasFormat) {
-				linkElement.style.color = selectedColor;
-			}
+			linkElement.style.color = isCanvasFormat
+				? defaultLinkColorResolved
+				: selectedColor;
 
 			const selectedText = range.toString();
 			if (selectedText) {

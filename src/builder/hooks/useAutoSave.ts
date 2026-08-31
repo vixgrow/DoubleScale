@@ -45,6 +45,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		(select) => select(STORE_KEY).getAllButtonSettings(),
 		[]
 	);
+	const linkSettings = useSelect(
+		(select) => select(STORE_KEY).getLinkSettings(),
+		[]
+	);
 	const attachments = useSelect(
 		(select) => select(STORE_KEY).getAttachments(),
 		[]
@@ -67,6 +71,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		sections,
 		globalSettings,
 		buttonSettings,
+		linkSettings,
 		attachments,
 	});
 
@@ -132,12 +137,14 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			const freshSections = store.getSections();
 			const freshGlobalSettings = store.getGlobalSettings();
 			const freshButtonSettings = store.getAllButtonSettings();
+			const freshLinkSettings = store.getLinkSettings();
 			const freshAttachments = store.getAttachments();
 
 			return {
 				sections: freshSections,
 				globalSettings: freshGlobalSettings,
 				buttonSettings: freshButtonSettings,
+				linkSettings: freshLinkSettings,
 				attachments: freshAttachments,
 			};
 		};

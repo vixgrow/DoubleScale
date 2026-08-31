@@ -37,6 +37,7 @@ import {
 	ButtonSettings,
 	ButtonType,
 	EmailAttachment,
+	LinkSettings,
 } from './types/common';
 import { DialogLayerContext } from '@/components/ui/dialog-layer-context';
 
@@ -44,6 +45,7 @@ export interface BuilderData {
 	sections: EmailSection[];
 	globalSettings: GlobalSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+	linkSettings?: LinkSettings;
 	attachments?: EmailAttachment[];
 }
 
@@ -152,7 +154,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			dispatch(STORE_KEY).setLoading(true);
 			dispatch(STORE_KEY).resetBuilder();
 
-			const { sections, globalSettings, buttonSettings, attachments } = data;
+			const { sections, globalSettings, buttonSettings, linkSettings, attachments } = data;
 
 			if (sections?.length) {
 				dispatch(STORE_KEY).setBuilderState(sections);
@@ -164,6 +166,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 				Object.entries(buttonSettings).forEach(([type, settings]) => {
 					dispatch(STORE_KEY).updateButtonSettings(type, settings);
 				});
+			}
+			if (linkSettings) {
+				dispatch(STORE_KEY).setLinkSettings(linkSettings);
 			}
 			if (attachments) {
 				dispatch(STORE_KEY).setAttachments(attachments);

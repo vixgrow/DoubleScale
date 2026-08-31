@@ -3678,6 +3678,9 @@ msgstr ""
 msgid "Changes made to this button will be reflected throughout the whole email."
 msgstr ""
 
+msgid "Changes made to this link style will be reflected throughout the whole email."
+msgstr ""
+
 msgid "Change status"
 msgstr ""
 
@@ -11249,6 +11252,9 @@ msgstr ""
 msgid "Link Clicked"
 msgstr ""
 
+msgid "Link color"
+msgstr ""
+
 msgid "Link copied"
 msgstr ""
 
@@ -11256,6 +11262,9 @@ msgid "Linked account"
 msgstr ""
 
 msgid "Linked emails, files, notes, invoices & proposals per project"
+msgstr ""
+
+msgid "Links"
 msgstr ""
 
 msgid "Link text"
@@ -16485,6 +16494,9 @@ msgid "Sales workspace with proposals, invoices, contracts, payments, and team s
 msgstr ""
 
 msgid "Same or different as phone"
+msgstr ""
+
+msgid "Sample link"
 msgstr ""
 
 msgid "Sample project"

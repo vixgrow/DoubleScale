@@ -120,6 +120,10 @@ const sharedAlias = {
 		__dirname,
 		'src/builder/hooks/useButtonSettings.ts'
 	),
+	'@doublescale/hooks/useLinkSettings': path.resolve(
+		__dirname,
+		'src/builder/hooks/useLinkSettings.ts'
+	),
 	'@doublescale/hooks/useImageResize': path.resolve(
 		__dirname,
 		'src/builder/hooks/useImageResize.ts'

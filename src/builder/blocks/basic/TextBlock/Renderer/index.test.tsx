@@ -14,6 +14,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TextRenderer } from './index';
 import { TextBlockProps } from '..';
+import { DEFAULT_LINK_SETTINGS } from '@/builder/utils/linkSettings';
+
+vi.mock('@doublescale/hooks/useLinkSettings', () => ({
+	useLinkSettings: () => ({
+		getLinkSettings: () => DEFAULT_LINK_SETTINGS,
+		linkSettings: DEFAULT_LINK_SETTINGS,
+		updateLinkSettings: vi.fn(),
+	}),
+}));
 
 // Minimal valid props — built inline so the test does not import the TextBlock
 // index (which would pull in the Editor/icon and their dependencies).
@@ -136,22 +145,22 @@ describe('TextRenderer canvas editing → store commit', () => {
 		expect(onCanvasContentChange.mock.calls[0][0]).toContain('One two three');
 	});
 
-	it('styles text-block links as underline-only inheriting Font Color', () => {
+	it('styles text-block links from theme link settings', () => {
 		const { container } = render(
 			<TextRenderer
 				props={{
 					...baseProps,
 					color: '#111111',
 					content:
-						'<p>Visit <a href="https://example.com" style="color:#458DC7">our site</a></p>',
+						'<p>Visit <a href="https://example.com" style="color:#111111">our site</a></p>',
 				}}
 			/>
 		);
 
 		const styleTag = container.querySelector('style');
+		expect(styleTag?.textContent).toContain('color: #458DC7 !important');
 		expect(styleTag?.textContent).toContain('text-decoration: underline !important');
-		expect(styleTag?.textContent).toMatch(/a[^{]*\{[^}]*color: inherit !important/);
-		expect(styleTag?.textContent).not.toContain('#458DC7');
+		expect(styleTag?.textContent).toContain('font-size: 16px !important');
 	});
 
 	it('keeps block text-align on the wrapper when content is a centered ordered list', () => {

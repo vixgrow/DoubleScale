@@ -14,10 +14,12 @@ import {
 	SET_BUILDER_STATE,
 	SET_ATTACHMENTS,
 	SET_BUTTON_SETTINGS,
+	SET_LINK_SETTINGS,
 	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
+	UPDATE_LINK_SETTINGS,
 	UPDATE_COLUMN,
 	UPDATE_GLOBAL_SETTINGS,
 	UPDATE_SECTION,
@@ -31,6 +33,7 @@ import type {
 	EmailBuilderActionTypes,
 	EmailSection,
 	GlobalEmailSettings,
+	LinkSettings,
 } from './types';
 
 // Block actions
@@ -199,6 +202,20 @@ export const setButtonSettings = (
 	settings: Record<ButtonType, ButtonSettings>
 ): EmailBuilderActionTypes => ({
 	type: SET_BUTTON_SETTINGS,
+	payload: { settings },
+});
+
+export const updateLinkSettings = (
+	settings: Partial<LinkSettings>
+): EmailBuilderActionTypes => ({
+	type: UPDATE_LINK_SETTINGS,
+	payload: { settings },
+});
+
+export const setLinkSettings = (
+	settings: LinkSettings
+): EmailBuilderActionTypes => ({
+	type: SET_LINK_SETTINGS,
 	payload: { settings },
 });
 

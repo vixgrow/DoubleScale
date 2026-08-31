@@ -43,10 +43,11 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
   const dispatch = useDispatch();
 
   // Select data from store
-  const { sections, globalSettings, buttonSettings } = useSelect((select: any) => ({
+  const { sections, globalSettings, buttonSettings, linkSettings } = useSelect((select: any) => ({
     sections: select(STORE_KEY).getSections(),
     globalSettings: select(STORE_KEY).getGlobalSettings(),
     buttonSettings: select(STORE_KEY).getAllButtonSettings(),
+    linkSettings: select(STORE_KEY).getLinkSettings(),
   }), []);
 
   /**
@@ -57,8 +58,9 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
       sections,
       globalSettings,
       buttonSettings,
+      linkSettings,
     };
-  }, [sections, globalSettings, buttonSettings]);
+  }, [sections, globalSettings, buttonSettings, linkSettings]);
 
   /**
    * Saves the current template

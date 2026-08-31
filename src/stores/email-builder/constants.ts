@@ -31,6 +31,8 @@ export const REDO = 'REDO';
 // Button settings actions
 export const UPDATE_BUTTON_SETTINGS = 'UPDATE_BUTTON_SETTINGS';
 export const SET_BUTTON_SETTINGS = 'SET_BUTTON_SETTINGS';
+export const UPDATE_LINK_SETTINGS = 'UPDATE_LINK_SETTINGS';
+export const SET_LINK_SETTINGS = 'SET_LINK_SETTINGS';
 
 export const SET_ATTACHMENTS = 'SET_ATTACHMENTS';
 

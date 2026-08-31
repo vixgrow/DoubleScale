@@ -230,6 +230,29 @@ if ( ! function_exists( 'esc_attr' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_parse_args' ) ) {
+	/**
+	 * @param mixed $args
+	 * @param mixed $defaults
+	 * @return array
+	 */
+	function wp_parse_args( $args, $defaults = array() ) {
+		if ( is_object( $args ) ) {
+			$parsed = get_object_vars( $args );
+		} elseif ( is_array( $args ) ) {
+			$parsed = $args;
+		} else {
+			parse_str( (string) $args, $parsed );
+		}
+
+		if ( is_array( $defaults ) && $defaults ) {
+			return array_merge( $defaults, $parsed );
+		}
+
+		return $parsed;
+	}
+}
+
 if ( ! function_exists( 'esc_url_raw' ) ) {
 	/**
 	 * @param string       $url

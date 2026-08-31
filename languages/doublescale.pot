@@ -3678,6 +3678,9 @@ msgstr ""
 msgid "Changes made to this button will be reflected throughout the whole email."
 msgstr ""
 
+msgid "Changes made to this link style will be reflected throughout the whole email."
+msgstr ""
+
 msgid "Change status"
 msgstr ""
 
@@ -7602,9 +7605,6 @@ msgstr ""
 msgid "Enter one or more addresses (comma-separated). The design currently in the builder will be sent."
 msgstr ""
 
-msgid "Enter one or more addresses (comma-separated). The latest saved design will be sent."
-msgstr ""
-
 msgid "Enter option"
 msgstr ""
 
@@ -11249,6 +11249,9 @@ msgstr ""
 msgid "Link Clicked"
 msgstr ""
 
+msgid "Link color"
+msgstr ""
+
 msgid "Link copied"
 msgstr ""
 
@@ -11256,6 +11259,9 @@ msgid "Linked account"
 msgstr ""
 
 msgid "Linked emails, files, notes, invoices & proposals per project"
+msgstr ""
+
+msgid "Links"
 msgstr ""
 
 msgid "Link text"
@@ -14111,6 +14117,9 @@ msgstr ""
 msgid "Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers."
 msgstr ""
 
+msgid "Optional live builder JSON. When present, the test is rendered from this instead of the last saved template."
+msgstr ""
+
 msgid "Optional — shown on sales documents and receipts."
 msgstr ""
 
@@ -16485,6 +16494,9 @@ msgid "Sales workspace with proposals, invoices, contracts, payments, and team s
 msgstr ""
 
 msgid "Same or different as phone"
+msgstr ""
+
+msgid "Sample link"
 msgstr ""
 
 msgid "Sample project"

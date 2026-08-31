@@ -17,6 +17,11 @@ import {
 	stripListInlineTextAlign,
 	stripRichTextChromeColors,
 } from '@/builder/utils/stripRichTextChromeColors';
+import { useLinkSettings } from '@doublescale/hooks/useLinkSettings';
+import {
+	applyLinkThemeToElement,
+	getLinkCssDeclarations,
+} from '@/builder/utils/linkSettings';
 
 function escapeHtml(raw: string): string {
 	return raw
@@ -63,6 +68,9 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		rendererIdRef.current = `text-block-renderer-${generateRandomString()}`;
 	}
 	const rendererId = rendererIdRef.current;
+	const { getLinkSettings } = useLinkSettings();
+	const linkSettings = getLinkSettings();
+	const linkCss = getLinkCssDeclarations(linkSettings, true);
 	const headingConfig = getHeadingConfig(props.headingStyle);
 	const ElementType = headingConfig.element as keyof JSX.IntrinsicElements;
 	const fontSize = props.fontSize;
@@ -177,12 +185,15 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		// text node (including strong/span/links). Partial-text color is not a
 		// text-block control.
 		root
-			.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div, span, strong, b, em, i, u, s, strike, a, font, li')
+			.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div, span, strong, b, em, i, u, s, strike, font, li')
 			.forEach((node) => {
 				(node as HTMLElement).style.removeProperty('color');
 				(node as HTMLElement).style.removeProperty('font-size');
 				(node as HTMLElement).style.removeProperty('-webkit-text-fill-color');
 			});
+		root.querySelectorAll('a').forEach((node) => {
+			applyLinkThemeToElement(node as HTMLElement, linkSettings);
+		});
 	};
 
 	useLayoutEffect(() => {
@@ -203,7 +214,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 			editRef.current.innerHTML = next;
 		}
 		syncCanvasEditorColors(editRef.current);
-	}, [canvasEditable, onCanvasContentChange, props.content, textColor]); // sync store → canvas when not actively typing
+	}, [canvasEditable, onCanvasContentChange, props.content, textColor, linkSettings]); // sync store → canvas when not actively typing
 
 	const content = (
 		<>
@@ -272,8 +283,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} a:visited,
 				.${rendererId} a:hover,
 				.${rendererId} a:active {
-					color: inherit !important;
-					text-decoration: underline !important;
+					${linkCss};
 				}
 				/* Whole block follows Font Color — including bold, spans, and links. */
 				.${rendererId} [data-text-canvas-editor="true"] {
@@ -295,7 +305,6 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} [data-text-canvas-editor="true"] em,
 				.${rendererId} [data-text-canvas-editor="true"] i,
 				.${rendererId} [data-text-canvas-editor="true"] u,
-				.${rendererId} [data-text-canvas-editor="true"] a,
 				.${rendererId} .text-block-html-root h1,
 				.${rendererId} .text-block-html-root h2,
 				.${rendererId} .text-block-html-root h3,
@@ -310,8 +319,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 				.${rendererId} .text-block-html-root b,
 				.${rendererId} .text-block-html-root em,
 				.${rendererId} .text-block-html-root i,
-				.${rendererId} .text-block-html-root u,
-				.${rendererId} .text-block-html-root a {
+				.${rendererId} .text-block-html-root u {
 					color: inherit !important;
 					-webkit-text-fill-color: currentColor;
 				}

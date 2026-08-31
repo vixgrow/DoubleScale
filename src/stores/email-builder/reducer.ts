@@ -16,10 +16,12 @@ import {
 	SET_BUILDER_STATE,
 	SET_ATTACHMENTS,
 	SET_BUTTON_SETTINGS,
+	SET_LINK_SETTINGS,
 	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
+	UPDATE_LINK_SETTINGS,
 	UPDATE_COLUMN,
 	UPDATE_GLOBAL_SETTINGS,
 	UPDATE_SECTION,
@@ -94,6 +96,16 @@ const initialState: EmailBuilderState = {
 			underline: false,
 			strikethrough: false,
 		},
+	},
+	linkSettings: {
+		font: 'Arial, sans-serif',
+		size: 16,
+		letterSpacing: '0px',
+		color: '#458DC7',
+		bold: false,
+		italic: false,
+		underline: true,
+		strikethrough: false,
 	},
 	attachments: [],
 	history: {
@@ -489,6 +501,25 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 			return {
 				...state,
 				buttonSettings: settings,
+			};
+		}
+
+		case UPDATE_LINK_SETTINGS: {
+			const { settings } = action.payload;
+			return {
+				...state,
+				linkSettings: {
+					...state.linkSettings,
+					...settings,
+				},
+			};
+		}
+
+		case SET_LINK_SETTINGS: {
+			const { settings } = action.payload;
+			return {
+				...state,
+				linkSettings: settings,
 			};
 		}
 

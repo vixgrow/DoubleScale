@@ -1,8 +1,8 @@
 === DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More ===
 Contributors: samuelgallegos, vixgrowy
-Tags:  crm, marketing automation, email campaigns, mcp, pipelines
+Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
-Tested up to: 7.0.2
+Tested up to: 7.1.0
 Requires PHP: 7.4
 Stable tag: 1.3.21
 License: GPLv2 or later

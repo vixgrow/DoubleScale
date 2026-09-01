@@ -42,7 +42,6 @@ class InvoiceModel extends Model {
 		'template_color',
 		'contact_id',
 		'proposal_id',
-		'subscription_id',
 		'recurrence_id',
 		'sale_agent_user_id',
 		'invoice_date',
@@ -102,27 +101,6 @@ class InvoiceModel extends Model {
 	 */
 	public function proposal() {
 		return $this->belongsTo( ProposalModel::class, 'proposal_id', 'id' );
-	}
-
-	/**
-	 * Subscription that generated this child invoice (add-on feature).
-	 *
-	 * The model class is resolved through the `doublescale_subscription_model_class`
-	 * filter, supplied by the DoubleScale Subscriptions add-on. Free holds no
-	 * compile-time dependency on that plugin; the string literal default keeps the
-	 * relation resolvable once the add-on is active even if the filter is
-	 * detached. The relation is only ever read by the add-on UI — when the add-on
-	 * is absent, `subscription_id` is an inert column and this method is never
-	 * called, so the (then non-existent) default class is never instantiated.
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-	 */
-	public function subscription() {
-		$class = apply_filters( 'doublescale_subscription_model_class', '\\DoubleScale\\Subscriptions\\Models\\SubscriptionModel' );
-		if ( ! is_string( $class ) || '' === $class ) {
-			$class = '\\DoubleScale\\Subscriptions\\Models\\SubscriptionModel';
-		}
-		return $this->belongsTo( $class, 'subscription_id', 'id' );
 	}
 
 	/**

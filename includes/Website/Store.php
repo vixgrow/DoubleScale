@@ -103,14 +103,6 @@ class Store {
 			// 	'image'       => 'ai-assistant/ai-assistant.svg',
 			// 	'plan'        => 'plus',
 			// ),
-			// 'subscriptions' => array(
-			// 	'name'        => __( 'Subscriptions', 'doublescale' ),
-			// 	'slug'        => 'subscriptions',
-			// 	'description' => __( 'Recurring Stripe billing — subscribe customers to a plan, auto-charge each cycle, and record a child invoice per charge.', 'doublescale' ),
-			// 	'plugin_file' => self::resolve_subscriptions_plugin_file( $plugins_dir ),
-			// 	'image'       => 'subscriptions/subscriptions.svg',
-			// 	'plan'        => 'enterprise',
-			// ),
 		);
 
 		$this->addons = apply_filters( 'doublescale_store_addons', $addons );
@@ -302,27 +294,6 @@ class Store {
 		$candidates = array(
 			'DoubleScale-AIAssistant/doublescale-ai-assistant.php',
 			'DS-AIAssistant/ds-ai-assistant.php',
-		);
-
-		foreach ( $candidates as $file ) {
-			if ( file_exists( $plugins_dir . $file ) ) {
-				return $file;
-			}
-		}
-
-		return $candidates[0];
-	}
-
-	/**
-	 * Resolve the Subscriptions add-on plugin file path across naming conventions.
-	 *
-	 * @param string $plugins_dir Absolute path to the plugins directory.
-	 * @return string Plugin file relative path.
-	 */
-	private static function resolve_subscriptions_plugin_file( $plugins_dir ) {
-		$candidates = array(
-			'DoubleScale-Subscriptions/doublescale-subscriptions.php',
-			'doublescale-subscriptions/doublescale-subscriptions.php',
 		);
 
 		foreach ( $candidates as $file ) {

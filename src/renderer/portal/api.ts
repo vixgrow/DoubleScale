@@ -107,14 +107,14 @@ export const fetchPayments = (): Promise<PortalPaymentsResponse> =>
 
 export const fetchSubscriptions = (): Promise<{ data: PortalSubscription[] }> =>
 	apiFetch<{ data: PortalSubscription[] }>({
-		path: `${PORTAL}/subscriptions`,
+		path: `${PORTAL}/memberships`,
 	});
 
 export const cancelSubscription = (
 	id: number
 ): Promise<{ message: string; subscription: PortalSubscription }> =>
 	apiFetch<{ message: string; subscription: PortalSubscription }>({
-		path: `${PORTAL}/subscriptions/${id}/cancel`,
+		path: `${PORTAL}/memberships/${id}/cancel`,
 		method: 'POST',
 	});
 

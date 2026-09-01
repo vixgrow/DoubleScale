@@ -34,6 +34,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'campaigns',
 	'booking',
 	'support',
+	'memberships',
 ] as const;
 
 /**
@@ -79,10 +80,18 @@ const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
 	...CHILD_MODULE_SLUGS,
 ]);
 
-/** Pro marketing rows: feature ships in Pro; free install still shows toggle + install copy until Pro is active. */
+/**
+ * Pro marketing rows: feature ships in Pro; free install still shows toggle +
+ * install copy until Pro is active.
+ *
+ * `memberships` additionally needs its own add-on plugin, so the row stays in
+ * the "unavailable" state until that plugin registers the module — the same
+ * shape as the other Pro rows from the user's point of view.
+ */
 const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set([
 	'tasks',
 	'projects',
+	'memberships',
 ]);
 
 export type OptionalMarketingModuleSlug =
@@ -171,6 +180,14 @@ function placeholderFor(
 				label: __('Helpdesk', 'doublescale'),
 				description: __(
 					'Ticket-based customer helpdesk with mailbox channels, email piping, and a customer portal.',
+					'doublescale'
+				),
+			};
+		case 'memberships':
+			return {
+				label: __('Memberships', 'doublescale'),
+				description: __(
+					'Sell recurring access to content — membership plans, member records, and rules that gate pages behind a plan, role, or CRM tag.',
 					'doublescale'
 				),
 			};

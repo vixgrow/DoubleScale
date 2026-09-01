@@ -575,40 +575,82 @@ registerAdminPage('project-detail', {
 	],
 });
 
-// Subscriptions - stub the DoubleScale-Subscriptions add-on plugin overrides via
-// the `doublescale_navigation_page_settings` filter. `requiresModule` gates the
-// route on the module being active (add-on plugin active AND Sales on): when the
-// add-on is inactive the row is `enabled: false` in the modules payload, so
-// `ProtectedRoute` redirects to '/' instead of rendering this fallback. Activation
-// is owned by the WordPress Plugins screen — there is no toggle in DoubleScale →
-// Modules, so this stub never doubles as a Pro upsell.
-// hidden: the sidebar entry lives in the Sales group's submenu (navbar builds it
-// from the `sales` item, also gated on the module).
-registerAdminPage('subscriptions', {
-	path: 'subscriptions',
+// Memberships - stubs the DoubleScale Memberships add-on plugin overrides via
+// the `doublescale_navigation_page_settings` filter. The add-on cannot register
+// routes itself: `adminPages` is module-private to this bundle, so a separately
+// compiled bundle calling `registerAdminPage()` would write into its own copy
+// and the routes would never appear. Declaring the stubs here is the only seam.
+//
+// `requiresModule` gates each route on the module being active (add-on plugin
+// active AND toggled on): when it is inactive the row is `enabled: false` in the
+// modules payload, so `ProtectedRoute` redirects to '/' instead of rendering
+// these fallbacks. Activation is owned by the WordPress Plugins screen, so these
+// stubs never double as a Pro upsell.
+//
+// The parent row is visible: it is a top-level CRM sidebar item (like Booking),
+// and the navbar attaches Plans / Access Rules to it as a submenu. The two child
+// routes stay hidden so they are reachable but not duplicated in the sidebar.
+registerAdminPage('memberships', {
+	path: 'memberships',
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real plans list.
+	label: __('Memberships', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
+});
+
+registerAdminPage('memberships-plans', {
+	path: 'memberships/plans',
 	hidden: true,
-	requiresModule: 'subscriptions',
-	component: () => null, // Add-on plugin overrides with the real subscriptions list.
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real plans list.
+	label: __('Membership Plans', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
+});
+
+registerAdminPage('memberships-rules', {
+	path: 'memberships/rules',
+	hidden: true,
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real rules list.
+	label: __('Access Rules', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
+});
+
+registerAdminPage('memberships-members', {
+	path: 'memberships/members',
+	hidden: true,
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real members list.
+	label: __('Members', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
+});
+
+registerAdminPage('memberships-subscriptions', {
+	path: 'memberships/subscriptions',
+	hidden: true,
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real billing list.
 	label: __('Subscriptions', 'doublescale'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: [
 		'doublescale_crm_manager',
 		'doublescale_sales_manager',
-		'doublescale_sales_rep',
-	],
-});
-
-// Subscription detail - stub the add-on plugin overrides. Same module gate.
-registerAdminPage('subscription-detail', {
-	path: 'subscriptions/:id',
-	requiresModule: 'subscriptions',
-	component: () => null,
-	label: __('Subscription Details', 'doublescale'),
-	hidden: true,
-	requiredCapability: [
-		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
 	],
 });
 

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.21\n"
+"Project-Id-Version: DoubleScale 1.3.22\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -661,6 +661,9 @@ msgid "Access key ID"
 msgstr ""
 
 msgid "Access key is missing."
+msgstr ""
+
+msgid "Access Rules"
 msgstr ""
 
 msgid "Access Token"
@@ -12263,6 +12266,9 @@ msgstr ""
 msgid "MemberPress plugin is not installed or activated. Install MemberPress to use these triggers."
 msgstr ""
 
+msgid "Members"
+msgstr ""
+
 msgid "Members."
 msgstr ""
 
@@ -12270,6 +12276,12 @@ msgid "Membership"
 msgstr ""
 
 msgid "Membership and subscription automation"
+msgstr ""
+
+msgid "Membership Plans"
+msgstr ""
+
+msgid "Memberships"
 msgstr ""
 
 msgid "memberships selected"
@@ -15851,9 +15863,6 @@ msgstr ""
 msgid "Recurring Stripe billing — auto-charge customers each cycle and record a child invoice per charge."
 msgstr ""
 
-msgid "Recurring Stripe billing — subscribe customers to a plan, auto-charge each cycle, and record a child invoice per charge."
-msgstr ""
-
 msgid "Recurring tasks, subtasks & subtask groups"
 msgstr ""
 
@@ -17324,6 +17333,9 @@ msgstr ""
 msgid "Self-hosted"
 msgstr ""
 
+msgid "Sell recurring access to content — membership plans, member records, and rules that gate pages behind a plan, role, or CRM tag."
+msgstr ""
+
 msgid "Send"
 msgstr ""
 
@@ -18600,9 +18612,6 @@ msgid "Subscription"
 msgstr ""
 
 msgid "Subscription Confirmed"
-msgstr ""
-
-msgid "Subscription Details"
 msgstr ""
 
 msgid "Subscriptions"

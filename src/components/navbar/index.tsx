@@ -104,6 +104,7 @@ const CRM_NAV_ITEM_ORDER: Record<string, number> = {
 	support: 3,
 	tasks: 4,
 	projects: 5,
+	memberships: 6,
 };
 
 const SECTION_NAV_ITEM_ORDER: Record<string, Record<string, number>> = {
@@ -124,6 +125,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	support: 'crm',
 	tasks: 'crm',
 	projects: 'crm',
+	memberships: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
 	forms: 'marketing',
@@ -171,8 +173,11 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	'pipeline/deal/:id': 'deals',
-	subscriptions: 'subscriptions',
-	'subscriptions/:id': 'subscriptions',
+	memberships: 'memberships',
+	'memberships/members': 'memberships',
+	'memberships/plans': 'memberships',
+	'memberships/subscriptions': 'memberships',
+	'memberships/rules': 'memberships',
 	sales: 'sales',
 	'sales/proposals': 'documents',
 	'sales/proposals/:id': 'documents',
@@ -491,6 +496,27 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					);
 				}
 
+				if (item.path === 'memberships') {
+					navItem.subMenu = [
+						{
+							path: 'memberships/members',
+							label: __('Members', 'doublescale'),
+						},
+						{
+							path: 'memberships/plans',
+							label: __('Membership Plans', 'doublescale'),
+						},
+						{
+							path: 'memberships/subscriptions',
+							label: __('Subscriptions', 'doublescale'),
+						},
+						{
+							path: 'memberships/rules',
+							label: __('Access Rules', 'doublescale'),
+						},
+					];
+				}
+
 				if (item.path === 'sales') {
 					navItem.subMenu = [
 						...(config.isModuleToggleEnabled('deals')
@@ -553,19 +579,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 											'doublescale_view_sales',
 											'doublescale_manage_all_sales',
 											'doublescale_manage_own_sales',
-											'doublescale_crm_manager',
-											'doublescale_sales_manager',
-											'doublescale_sales_rep',
-										],
-									},
-							  ]
-							: []),
-						...(config.isModuleToggleEnabled('subscriptions')
-							? [
-									{
-										path: 'subscriptions',
-										label: __('Subscriptions', 'doublescale'),
-										requiredCapability: [
 											'doublescale_crm_manager',
 											'doublescale_sales_manager',
 											'doublescale_sales_rep',

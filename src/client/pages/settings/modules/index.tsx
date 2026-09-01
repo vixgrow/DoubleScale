@@ -93,7 +93,7 @@ const MODULE_DIALOG_GROUPS: {
 	{
 		key: 'workspace',
 		label: __( 'Workspace', 'doublescale' ),
-		slugs: [ 'tasks', 'projects', 'booking', 'support' ],
+		slugs: [ 'tasks', 'projects', 'booking', 'support', 'memberships' ],
 	},
 ];
 

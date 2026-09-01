@@ -81,6 +81,9 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'product_catalog',
 		'tasks',
 		'projects',
+		// Ships in its own add-on plugin; the toggle is persisted here so the
+		// settings row keeps its position before that plugin is installed.
+		'memberships',
 	);
 
 	return array_values( array_unique( apply_filters( 'doublescale_phantom_module_toggle_slugs', $slugs ) ) );
@@ -568,13 +571,14 @@ function doublescale_filter_merge_tag_groups_for_modules( array $groups ): array
  */
 function doublescale_automation_module_label( string $slug ): string {
 	$labels = array(
-		'support'   => __( 'Helpdesk', 'doublescale' ),
-		'deals'     => __( 'Pipelines & Deals', 'doublescale' ),
-		'booking'   => __( 'Booking', 'doublescale' ),
-		'forms'     => __( 'Forms', 'doublescale' ),
-		'sales'     => __( 'Sales', 'doublescale' ),
-		'documents' => __( 'Proposals & Invoices', 'doublescale' ),
-		'contracts' => __( 'Contracts', 'doublescale' ),
+		'support'     => __( 'Helpdesk', 'doublescale' ),
+		'deals'       => __( 'Pipelines & Deals', 'doublescale' ),
+		'booking'     => __( 'Booking', 'doublescale' ),
+		'memberships' => __( 'Memberships', 'doublescale' ),
+		'forms'       => __( 'Forms', 'doublescale' ),
+		'sales'       => __( 'Sales', 'doublescale' ),
+		'documents'   => __( 'Proposals & Invoices', 'doublescale' ),
+		'contracts'   => __( 'Contracts', 'doublescale' ),
 	);
 
 	return $labels[ $slug ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $slug ) );

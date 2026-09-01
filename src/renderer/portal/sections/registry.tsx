@@ -19,7 +19,10 @@ export const SECTION_REGISTRY: Record<string, ComponentType> = {
 	tickets: Tickets,
 	bookings: Bookings,
 	documents: Documents,
-	subscriptions: Subscriptions,
+	// The Memberships add-on contributes a `memberships` section; it reuses this
+	// view because the customer-facing shape is the same — a recurring plan with
+	// a status, a price, a renewal date, and a cancel action.
+	memberships: Subscriptions,
 	projects: Projects,
 };
 

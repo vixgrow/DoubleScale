@@ -178,6 +178,7 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'memberships/plans': 'memberships',
 	'memberships/subscriptions': 'memberships',
 	'memberships/rules': 'memberships',
+	'memberships/settings': 'memberships',
 	sales: 'sales',
 	'sales/proposals': 'documents',
 	'sales/proposals/:id': 'documents',
@@ -513,6 +514,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{
 							path: 'memberships/rules',
 							label: __('Access Rules', 'doublescale'),
+						},
+						{
+							path: 'memberships/settings',
+							label: __('Settings', 'doublescale'),
 						},
 					];
 				}

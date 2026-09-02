@@ -654,6 +654,19 @@ registerAdminPage('memberships-subscriptions', {
 	],
 });
 
+registerAdminPage('memberships-settings', {
+	path: 'memberships/settings',
+	hidden: true,
+	requiresModule: 'memberships',
+	component: () => null, // Add-on plugin overrides with the real settings form.
+	label: __('Settings', 'doublescale'),
+	icon: <PiplelinesIcon />,
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_sales_manager',
+	],
+});
+
 // Credit Notes — stub registration the Pro plugin overrides via filter.
 registerAdminPage('sales-credit-notes', {
 	path: 'sales/credit-notes',

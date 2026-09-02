@@ -4,7 +4,7 @@ Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1.0
 Requires PHP: 7.4
-Stable tag: 1.3.22
+Stable tag: 1.3.23
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,11 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+
+= 1.3.23 = 3 Sep 2026
+- Add link settings in the email builder
+- Support live builder JSON in the email builder
+- Add link-related translation strings
 
 = 1.3.22 = 31 Aug 2026
 - Add EmailNotOpened trigger for automation workflows

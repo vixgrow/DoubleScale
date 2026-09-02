@@ -227,6 +227,11 @@ const SharedEmailFreeIdentity: React.FC = () => {
 				</CardContent>
 			</Card>
 
+			{/*
+				Hidden deliberately — kept in place, not removed. Pro notices
+				appear on enough screens already, and a second one here reads
+				as nagging rather than informing. Restore by uncommenting.
+
 			<ProFeatureNotice
 				featureName={__('IMAP Polling & OAuth Sync', 'doublescale')}
 				description={__(
@@ -234,6 +239,7 @@ const SharedEmailFreeIdentity: React.FC = () => {
 					'doublescale'
 				)}
 			/>
+			*/}
 		</div>
 	);
 };

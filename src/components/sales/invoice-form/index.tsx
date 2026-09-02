@@ -1481,7 +1481,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 										{ONLINE_PAYMENT_GATEWAY_LABELS[
 											mode as keyof typeof ONLINE_PAYMENT_GATEWAY_LABELS
 										] ?? mode}
-										{onlineLocked ? <ProLockBadge /> : null}
 									</button>
 								))}
 							</div>

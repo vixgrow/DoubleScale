@@ -698,13 +698,20 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		}
 	};
 
+	// Parents the user has explicitly collapsed. Auto-expand must respect
+	// this: without it, navigating inside a section re-opens the submenu the
+	// user just closed, so it can never be hidden.
+	const manuallyCollapsedRef = useRef<Set<string>>(new Set());
+
 	const toggleSubMenu = (path: string) => {
 		setExpandedSubMenus((prev) => {
 			const next = new Set(prev);
 			if (next.has(path)) {
 				next.delete(path);
+				manuallyCollapsedRef.current.add(path);
 			} else {
 				next.add(path);
+				manuallyCollapsedRef.current.delete(path);
 			}
 			return next;
 		});
@@ -756,7 +763,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					currentPath.startsWith(
 						matched.path.replace(/^\//, '') + '/'
 					);
-				if (matchesChild) {
+				if (matchesChild && !manuallyCollapsedRef.current.has(matched.path)) {
 					setExpandedSubMenus((prev) => {
 						if (prev.has(matched.path)) return prev;
 						const next = new Set(prev);
@@ -931,11 +938,19 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					<SidebarMenuButton
 						isActive={active}
 						className={linkClassName}
+						aria-expanded={hasSubMenu ? isExpanded : undefined}
 						onClick={() => {
-							if (hasSubMenu) {
-								toggleSubMenu(item.path);
+							if (!hasSubMenu) {
 								handleNavigation(item.path);
-							} else {
+								return;
+							}
+							const willExpand = !isExpanded;
+							toggleSubMenu(item.path);
+							// Only navigate when opening. Navigating on
+							// collapse lands on the parent route, which
+							// redirects to a child and re-expands the menu
+							// the user just closed.
+							if (willExpand) {
 								handleNavigation(item.path);
 							}
 						}}

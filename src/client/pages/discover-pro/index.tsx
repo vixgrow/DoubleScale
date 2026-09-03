@@ -67,14 +67,13 @@ const useFeatureCategories = (): FeatureCategory[] => [
 	},
 	{
 		icon: <SalesIcon width={24} height={24} />,
-		title: __('Sales & Invoicing', 'doublescale'),
+		title: __('Sales', 'doublescale'),
 		features: [
 			__('Deal pipelines with drag-and-drop stages', 'doublescale'),
-			__('Invoices, payments & subscriptions', 'doublescale'),
 			__('Contracts with e-signature & file attachments', 'doublescale'),
 			__('Credit notes and refunds', 'doublescale'),
 			__('Internal approval workflow before sending', 'doublescale'),
-			__('Client portal for invoices, contracts & credit notes', 'doublescale'),
+			__('Client portal for contracts & credit notes', 'doublescale'),
 			__('Abandoned cart recovery', 'doublescale'),
 			__('Deal automation triggers & actions (stage, status, owner & value changes)', 'doublescale'),
 		],
@@ -173,7 +172,7 @@ const useFeatureCategories = (): FeatureCategory[] => [
 		features: [
 			__('Deal, sales-rep & pipeline analytics', 'doublescale'),
 			__('Deal source analysis', 'doublescale'),
-			__('Invoice, proposal, contract & credit note reports', 'doublescale'),
+			__('Proposal, contract & credit note reports', 'doublescale'),
 			__('Cart recovery & project analytics', 'doublescale'),
 			__('Custom "My Reports"', 'doublescale'),
 		],
@@ -204,7 +203,6 @@ const useFeatureCategories = (): FeatureCategory[] => [
 		title: __('Third-Party Integrations', 'doublescale'),
 		features: [
 			__('Meta WhatsApp Business API', 'doublescale'),
-			__('Stripe & PayPal for payments', 'doublescale'),
 			__('Twilio SMS and Slack notifications', 'doublescale'),
 			__('Typeform & Jotform', 'doublescale'),
 			__('Zapier & Make', 'doublescale'),
@@ -238,7 +236,7 @@ const DiscoverPro: React.FC = () => {
 					</div>
 					<p className="doublescale-discover-pro-hero__text">
 						{__(
-							'Everything below is already built into DoubleScale — deal pipelines, invoicing, the email builder, automations, shared mailbox, reporting, and more. Activate Pro to unlock it all in the platform you already run.',
+							'Everything below is already built into DoubleScale — deal pipelines, the email builder, automations, shared mailbox, reporting, and more. Activate Pro to unlock it all in the platform you already run.',
 							'doublescale'
 						)}
 					</p>

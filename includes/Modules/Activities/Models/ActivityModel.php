@@ -562,10 +562,60 @@ class ActivityModel extends Model {
 	 *
 	 * @return string
 	 */
+	/**
+	 * Human-readable line for a `membership_event` row.
+	 *
+	 * These are system events (a webhook charged a card, a cron sweep expired a
+	 * membership), so the sentence is about the CUSTOMER, not about a WordPress
+	 * user — "Unknown User performed an action" is exactly what a support agent
+	 * does not need to read.
+	 *
+	 * @return string
+	 */
+	protected function membership_event_message() {
+		$data = is_array( $this->data ) ? $this->data : array();
+		$plan = isset( $data['plan_name'] ) ? (string) $data['plan_name'] : '';
+		$key  = isset( $data['event_key'] ) ? (string) $data['event_key'] : '';
+
+		$named = array(
+			/* translators: %s: membership plan name */
+			'membership_granted'        => __( 'Started a %s membership', 'doublescale' ),
+			/* translators: %s: membership plan name */
+			'membership_renewed'        => __( 'Renewed their %s membership', 'doublescale' ),
+			/* translators: %s: membership plan name */
+			'membership_payment_failed' => __( 'Payment failed for their %s membership', 'doublescale' ),
+			/* translators: %s: membership plan name */
+			'membership_expired'        => __( 'Their %s membership expired', 'doublescale' ),
+			/* translators: %s: membership plan name */
+			'membership_revoked'        => __( 'Their %s membership was cancelled', 'doublescale' ),
+			/* translators: %s: membership plan name */
+			'subscription_cancelled'    => __( 'Cancelled their %s subscription', 'doublescale' ),
+		);
+
+		// A membership whose plan row was deleted still has to say something.
+		$plain = array(
+			'membership_granted'        => __( 'Started a membership', 'doublescale' ),
+			'membership_renewed'        => __( 'Renewed their membership', 'doublescale' ),
+			'membership_payment_failed' => __( 'A membership payment failed', 'doublescale' ),
+			'membership_expired'        => __( 'Their membership expired', 'doublescale' ),
+			'membership_revoked'        => __( 'Their membership was cancelled', 'doublescale' ),
+			'subscription_cancelled'    => __( 'Cancelled their subscription', 'doublescale' ),
+		);
+
+		if ( ! isset( $named[ $key ] ) ) {
+			return __( 'Membership activity', 'doublescale' );
+		}
+
+		return '' !== $plan ? sprintf( $named[ $key ], $plan ) : $plain[ $key ];
+	}
+
 	public function getFormattedMessageAttribute() {
 		$user_name = $this->user ? $this->user->display_name : __( 'Unknown User', 'doublescale' );
 
 		switch ( $this->activity_type ) {
+			case 'membership_event':
+				return $this->membership_event_message();
+
 			case 'created':
 				return sprintf(
 					/* translators: %s: user name */

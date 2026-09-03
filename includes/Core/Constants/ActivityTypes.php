@@ -64,6 +64,13 @@ class ActivityTypes {
 	const PROJECT_EVENT   = 'project_event'; // System-generated project lifecycle audit row
 
 	/**
+	 * Membership lifecycle audit row — granted, renewed, payment failed, expired,
+	 * cancelled. One type with an `event_key` discriminator in `data`, following
+	 * TASK_EVENT/PROJECT_EVENT, so the add-on needs no new type per event.
+	 */
+	const MEMBERSHIP_EVENT = 'membership_event';
+
+	/**
 	 * Booking lifecycle types — virtual rows projected from `doublescale_bookings`
 	 * via `ActivityManager::build_bookings_union_sql()`. Read-only; the source of
 	 * truth is the booking row itself, edits go through booking endpoints.
@@ -117,6 +124,7 @@ class ActivityTypes {
 			self::SUPPORT_EVENT,
 			self::TASK_EVENT,
 			self::PROJECT_EVENT,
+			self::MEMBERSHIP_EVENT,
 		);
 	}
 
@@ -159,6 +167,7 @@ class ActivityTypes {
 			self::SUPPORT_EVENT,
 			self::TASK_EVENT,
 			self::PROJECT_EVENT,
+			self::MEMBERSHIP_EVENT,
 		);
 	}
 
@@ -268,6 +277,7 @@ class ActivityTypes {
 			self::SUPPORT_EVENT     => __( 'Ticket activity', 'doublescale' ),
 			self::TASK_EVENT        => __( 'Task activity', 'doublescale' ),
 			self::PROJECT_EVENT     => __( 'Project activity', 'doublescale' ),
+			self::MEMBERSHIP_EVENT  => __( 'Membership activity', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
@@ -317,6 +327,7 @@ class ActivityTypes {
 			self::SUPPORT_EVENT       => __( 'Ticket Activity', 'doublescale' ),
 			self::TASK_EVENT          => __( 'Task Activity', 'doublescale' ),
 			self::PROJECT_EVENT       => __( 'Project Activity', 'doublescale' ),
+			self::MEMBERSHIP_EVENT    => __( 'Membership Activity', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

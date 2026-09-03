@@ -1885,6 +1885,45 @@ final class ActivityManager {
 			return $base;
 		}
 
+		if ( ActivityTypes::MEMBERSHIP_EVENT === $type ) {
+			$plan = isset( $data['plan_name'] ) ? (string) $data['plan_name'] : '';
+			$key  = isset( $data['event_key'] ) ? (string) $data['event_key'] : '';
+
+			// Plan-name variants read far better on a timeline than "Membership
+			// activity", and a membership without a resolvable plan still has to
+			// say something, so every case has a name-free fallback.
+			$named = array(
+				/* translators: %s: membership plan name */
+				'membership_granted'        => __( 'Started a %s membership', 'doublescale' ),
+				/* translators: %s: membership plan name */
+				'membership_renewed'        => __( 'Renewed their %s membership', 'doublescale' ),
+				/* translators: %s: membership plan name */
+				'membership_payment_failed' => __( 'Payment failed for their %s membership', 'doublescale' ),
+				/* translators: %s: membership plan name */
+				'membership_expired'        => __( 'Their %s membership expired', 'doublescale' ),
+				'membership_revoked'        => __( 'Their %s membership was cancelled', 'doublescale' ),
+				/* translators: %s: membership plan name */
+				'subscription_cancelled'    => __( 'Cancelled their %s subscription', 'doublescale' ),
+			);
+
+			$plain = array(
+				'membership_granted'        => __( 'Started a membership', 'doublescale' ),
+				'membership_renewed'        => __( 'Renewed their membership', 'doublescale' ),
+				'membership_payment_failed' => __( 'A membership payment failed', 'doublescale' ),
+				'membership_expired'        => __( 'Their membership expired', 'doublescale' ),
+				'membership_revoked'        => __( 'Their membership was cancelled', 'doublescale' ),
+				'subscription_cancelled'    => __( 'Cancelled their subscription', 'doublescale' ),
+			);
+
+			if ( isset( $named[ $key ] ) ) {
+				return '' !== $plan
+					? sprintf( $named[ $key ], $plan )
+					: $plain[ $key ];
+			}
+
+			return ActivityTypes::get_activity_message( $type, $user_name );
+		}
+
 		if ( ActivityTypes::STATUS_CHANGED === $type ) {
 			$actor = $user_name ?? __( 'Someone', 'doublescale' );
 			if ( ! empty( $data['proposal_id'] ) ) {

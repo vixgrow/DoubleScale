@@ -34,6 +34,8 @@ type ContactDeletionImpact = {
 	credit_notes?: number;
 	tickets?: number;
 	bookings?: number;
+	memberships?: number;
+	subscriptions?: number;
 	activities?: number;
 };
 
@@ -55,6 +57,8 @@ const IMPACT_LABELS: Record<keyof ContactDeletionImpact, string> = {
 	credit_notes: __('Credit notes', 'doublescale'),
 	tickets: __('Support tickets', 'doublescale'),
 	bookings: __('Bookings', 'doublescale'),
+	memberships: __('Memberships', 'doublescale'),
+	subscriptions: __('Active subscriptions', 'doublescale'),
 	activities: __('Activities', 'doublescale'),
 };
 

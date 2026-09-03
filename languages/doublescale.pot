@@ -882,6 +882,9 @@ msgstr ""
 msgid "ActiveCampaign connection timeout. The import will resume from where it left off."
 msgstr ""
 
+msgid "Active subscriptions"
+msgstr ""
+
 msgid "Active — Push notifications are ready to be sent to mobile devices."
 msgstr ""
 
@@ -1633,6 +1636,9 @@ msgid "Amazon SES — IAM access key, secret, and region."
 msgstr ""
 
 msgid "Amber"
+msgstr ""
+
+msgid "A membership payment failed"
 msgstr ""
 
 msgid "Amount"
@@ -3451,6 +3457,12 @@ msgid "Cancelled"
 msgstr ""
 
 msgid "Cancelled by."
+msgstr ""
+
+msgid "Cancelled their %s subscription"
+msgstr ""
+
+msgid "Cancelled their subscription"
 msgstr ""
 
 msgid "Cancelling..."
@@ -12269,6 +12281,12 @@ msgstr ""
 msgid "Membership"
 msgstr ""
 
+msgid "Membership activity"
+msgstr ""
+
+msgid "Membership Activity"
+msgstr ""
+
 msgid "Membership and subscription automation"
 msgstr ""
 
@@ -14384,6 +14402,9 @@ msgstr ""
 msgid "Payment failed."
 msgstr ""
 
+msgid "Payment failed for their %s membership"
+msgstr ""
+
 msgid "Payment For"
 msgstr ""
 
@@ -16059,6 +16080,12 @@ msgid "Rename Condition"
 msgstr ""
 
 msgid "Rename Goal"
+msgstr ""
+
+msgid "Renewed their %s membership"
+msgstr ""
+
+msgid "Renewed their membership"
 msgstr ""
 
 msgid "Renew License"
@@ -18374,6 +18401,12 @@ msgstr ""
 msgid "Started"
 msgstr ""
 
+msgid "Started a %s membership"
+msgstr ""
+
+msgid "Started a membership"
+msgstr ""
+
 msgid "Started At"
 msgstr ""
 
@@ -19444,6 +19477,18 @@ msgid "The importer is not active"
 msgstr ""
 
 msgid "The invoice was saved, but the recurring schedule could not be stored."
+msgstr ""
+
+msgid "Their %s membership expired"
+msgstr ""
+
+msgid "Their %s membership was cancelled"
+msgstr ""
+
+msgid "Their membership expired"
+msgstr ""
+
+msgid "Their membership was cancelled"
 msgstr ""
 
 msgid "The key acts as a specific user. If that user only sees their own invoices or tickets, so does the agent. Issue the key from an account with wider access if you need a wider view."

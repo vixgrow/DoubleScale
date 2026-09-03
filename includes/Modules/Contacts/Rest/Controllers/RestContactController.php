@@ -2699,7 +2699,21 @@ class RestContactController extends RestController {
 			$impact['activities'] = 0;
 		}
 
-		return $impact;
+		/**
+		 * Filter the related-record counts shown before a contact is deleted.
+		 *
+		 * Add-ons that store rows against a contact (memberships, for instance)
+		 * add their own key here, so the confirmation dialog states everything
+		 * that is about to be destroyed rather than only what core knows about.
+		 *
+		 * Values must be integers; a key with a zero count is hidden by the UI.
+		 *
+		 * @param array<string, int> $impact      Related-record counts.
+		 * @param array<int>         $contact_ids Contacts being deleted.
+		 */
+		$impact = (array) apply_filters( 'doublescale_contact_deletion_impact', $impact, $contact_ids );
+
+		return array_map( 'intval', $impact );
 	}
 
 	/**

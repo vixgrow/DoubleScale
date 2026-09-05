@@ -4,7 +4,7 @@ Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1.0
 Requires PHP: 7.4
-Stable tag: 1.3.24
+Stable tag: 1.3.25
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,13 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+
+= 1.3.25 = 5 Sep 2026
+- Add a Coming Soon section on Discover Pro for Membership, LMS, and Community modules
+- Fix MCP task-type schema so clients keep the task tools (enum of stored keys, not labels)
+- Detect WPForms Lite correctly when registering form automation triggers
+- Log a warning when form field mapping produces no email so skipped contacts are easier to diagnose
+- Standardize casing in the translation template
 
 = 1.3.24 = 3 Sep 2026
 - Move invoices and payments out of Discover Pro; subscriptions are no longer listed as a Pro feature

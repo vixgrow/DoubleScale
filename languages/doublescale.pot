@@ -648,10 +648,10 @@ msgstr ""
 msgid "Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay."
 msgstr ""
 
-msgid "Access Denied"
+msgid "Access denied"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access Denied"
 msgstr ""
 
 msgid "Access denied. Please ensure your API key has the necessary permissions."
@@ -1008,10 +1008,10 @@ msgstr ""
 msgid "Add Conditions"
 msgstr ""
 
-msgid "Add Connection"
+msgid "Add connection"
 msgstr ""
 
-msgid "Add connection"
+msgid "Add Connection"
 msgstr ""
 
 msgid "Add Contact"
@@ -1440,10 +1440,10 @@ msgstr ""
 msgid "AI Assistant"
 msgstr ""
 
-msgid "AI email builder"
+msgid "AI Email Builder"
 msgstr ""
 
-msgid "AI Email Builder"
+msgid "AI email builder"
 msgstr ""
 
 msgid "AI features are disabled."
@@ -1590,10 +1590,10 @@ msgstr ""
 msgid "All templates"
 msgstr ""
 
-msgid "All Types"
+msgid "All types"
 msgstr ""
 
-msgid "All types"
+msgid "All Types"
 msgstr ""
 
 msgid "All UTM fields are required when UTM is enabled"
@@ -1789,6 +1789,9 @@ msgid "API Domain should be in format: yourcompany.pipedrive.com (without https:
 msgstr ""
 
 msgid "API Error"
+msgstr ""
+
+msgid "Api Key"
 msgstr ""
 
 msgid "API key"
@@ -2382,10 +2385,10 @@ msgstr ""
 msgid "Automation List"
 msgstr ""
 
-msgid "Automation Name"
+msgid "Automation name"
 msgstr ""
 
-msgid "Automation name"
+msgid "Automation Name"
 msgstr ""
 
 msgid "Automation name is required"
@@ -2781,10 +2784,10 @@ msgstr ""
 msgid "Booking Confirmation Email to Attendee"
 msgstr ""
 
-msgid "Booking Confirmed"
+msgid "Booking confirmed"
 msgstr ""
 
-msgid "Booking confirmed"
+msgid "Booking Confirmed"
 msgstr ""
 
 msgid "Booking confirmed by Host"
@@ -2898,10 +2901,10 @@ msgstr ""
 msgid "Booking Questions From Booking Guest."
 msgstr ""
 
-msgid "Booking rejected"
+msgid "Booking Rejected"
 msgstr ""
 
-msgid "Booking Rejected"
+msgid "Booking rejected"
 msgstr ""
 
 msgid "Booking rejected by Host"
@@ -2916,10 +2919,10 @@ msgstr ""
 msgid "Booking Request"
 msgstr ""
 
-msgid "Booking rescheduled"
+msgid "Booking Rescheduled"
 msgstr ""
 
-msgid "Booking Rescheduled"
+msgid "Booking rescheduled"
 msgstr ""
 
 msgid "Booking rescheduled by Attendee"
@@ -3372,10 +3375,10 @@ msgstr ""
 msgid "Campaign List"
 msgstr ""
 
-msgid "Campaign Name"
+msgid "Campaign name"
 msgstr ""
 
-msgid "Campaign name"
+msgid "Campaign Name"
 msgstr ""
 
 msgid "Campaign name is required"
@@ -3612,16 +3615,16 @@ msgstr ""
 msgid "Catch big swings in a deal before the review meeting."
 msgstr ""
 
-msgid "categories"
-msgstr ""
-
 msgid "Categories"
 msgstr ""
 
-msgid "Category"
+msgid "categories"
 msgstr ""
 
 msgid "category"
+msgstr ""
+
+msgid "Category"
 msgstr ""
 
 msgid "Category:"
@@ -3981,10 +3984,10 @@ msgstr ""
 msgid "Client runs on:"
 msgstr ""
 
-msgid "Client secret"
+msgid "Client Secret"
 msgstr ""
 
-msgid "Client Secret"
+msgid "Client secret"
 msgstr ""
 
 msgid "Client Secret:"
@@ -4056,10 +4059,10 @@ msgstr ""
 msgid "Column to sort the collection by."
 msgstr ""
 
-msgid "Coming Soon"
+msgid "Coming soon"
 msgstr ""
 
-msgid "Coming soon"
+msgid "Coming Soon"
 msgstr ""
 
 msgid "Comma-separated activity kinds to include: reply,note,event. Defaults to all three."
@@ -5301,10 +5304,10 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
-msgid "Created at"
+msgid "Created At"
 msgstr ""
 
-msgid "Created At"
+msgid "Created at"
 msgstr ""
 
 msgid "Create Date"
@@ -5478,10 +5481,10 @@ msgstr ""
 msgid "Credit Note Reports"
 msgstr ""
 
-msgid "Credit notes"
+msgid "Credit Notes"
 msgstr ""
 
-msgid "Credit Notes"
+msgid "Credit notes"
 msgstr ""
 
 msgid "Credit notes and refunds"
@@ -5583,10 +5586,10 @@ msgstr ""
 msgid "Cursor"
 msgstr ""
 
-msgid "Custom"
+msgid "custom"
 msgstr ""
 
-msgid "custom"
+msgid "Custom"
 msgstr ""
 
 msgid "Custom \"My Reports\""
@@ -5790,10 +5793,10 @@ msgstr ""
 msgid "Date the object was last modified."
 msgstr ""
 
-msgid "day"
+msgid "Day"
 msgstr ""
 
-msgid "Day"
+msgid "day"
 msgstr ""
 
 msgid "Day(s)"
@@ -5808,10 +5811,10 @@ msgstr ""
 msgid "Day of Week"
 msgstr ""
 
-msgid "days"
+msgid "Days"
 msgstr ""
 
-msgid "Days"
+msgid "days"
 msgstr ""
 
 msgid "Days Before"
@@ -6060,10 +6063,10 @@ msgstr ""
 msgid "Delete after specific days"
 msgstr ""
 
-msgid "Delete All"
+msgid "Delete all"
 msgstr ""
 
-msgid "Delete all"
+msgid "Delete All"
 msgstr ""
 
 msgid "Delete all email log entries?"
@@ -6090,10 +6093,10 @@ msgstr ""
 msgid "Delete Contract"
 msgstr ""
 
-msgid "Delete Contract Type"
+msgid "Delete contract type"
 msgstr ""
 
-msgid "Delete contract type"
+msgid "Delete Contract Type"
 msgstr ""
 
 msgid "Deleted Contact"
@@ -6132,10 +6135,10 @@ msgstr ""
 msgid "Delete note"
 msgstr ""
 
-msgid "Delete payment"
+msgid "Delete Payment"
 msgstr ""
 
-msgid "Delete Payment"
+msgid "Delete payment"
 msgstr ""
 
 msgid "Delete Proposal"
@@ -6705,10 +6708,10 @@ msgstr ""
 msgid "Due"
 msgstr ""
 
-msgid "Due date"
+msgid "Due Date"
 msgstr ""
 
-msgid "Due Date"
+msgid "Due date"
 msgstr ""
 
 msgid "Due Date Changed"
@@ -6966,19 +6969,19 @@ msgstr ""
 msgid "Edit Style"
 msgstr ""
 
-msgid "Edit tag"
+msgid "Edit Tag"
 msgstr ""
 
-msgid "Edit Tag"
+msgid "Edit tag"
 msgstr ""
 
 msgid "Edit tags"
 msgstr ""
 
-msgid "Edit Tax"
+msgid "Edit tax"
 msgstr ""
 
-msgid "Edit tax"
+msgid "Edit Tax"
 msgstr ""
 
 msgid "Edit Template"
@@ -7038,10 +7041,10 @@ msgstr ""
 msgid "Email, SMS, and channel tracking."
 msgstr ""
 
-msgid "Email address"
+msgid "Email Address"
 msgstr ""
 
-msgid "Email Address"
+msgid "Email address"
 msgstr ""
 
 msgid "Email address (for email channel)"
@@ -7215,10 +7218,10 @@ msgstr ""
 msgid "Email Received"
 msgstr ""
 
-msgid "Emails"
+msgid "emails"
 msgstr ""
 
-msgid "emails"
+msgid "Emails"
 msgstr ""
 
 msgid "Emails:"
@@ -7380,10 +7383,10 @@ msgstr ""
 msgid "Enable CRM contacts above to apply these lists and tags when a cart is marked lost."
 msgstr ""
 
-msgid "ENABLED"
+msgid "Enabled"
 msgstr ""
 
-msgid "Enabled"
+msgid "ENABLED"
 msgstr ""
 
 msgid "Enabled step"
@@ -9068,10 +9071,10 @@ msgstr ""
 msgid "Fine-tune your event with custom questions, redirect URLs, attendee limits, and conditional logic to match every booking workflow."
 msgstr ""
 
-msgid "First name"
+msgid "First Name"
 msgstr ""
 
-msgid "First Name"
+msgid "First name"
 msgstr ""
 
 msgid "First name of the contact."
@@ -9338,10 +9341,10 @@ msgstr ""
 msgid "General Host Settings"
 msgstr ""
 
-msgid "General Settings"
+msgid "General settings"
 msgstr ""
 
-msgid "General settings"
+msgid "General Settings"
 msgstr ""
 
 msgid "General system notifications."
@@ -9656,10 +9659,10 @@ msgstr ""
 msgid "Go to Support Admin Page"
 msgstr ""
 
-msgid "Greater Than"
+msgid "Greater than"
 msgstr ""
 
-msgid "Greater than"
+msgid "Greater Than"
 msgstr ""
 
 msgid "Green"
@@ -10157,13 +10160,16 @@ msgstr ""
 msgid "Include or exclude specific tags"
 msgstr ""
 
-msgid "Includes"
-msgstr ""
-
 msgid "includes"
 msgstr ""
 
 msgid "includes all"
+msgstr ""
+
+msgid "Includes"
+msgstr ""
+
+msgid "Includes all"
 msgstr ""
 
 msgid "Includes all"
@@ -10247,10 +10253,10 @@ msgstr ""
 msgid "Insert Form Field"
 msgstr ""
 
-msgid "Insert link"
+msgid "Insert Link"
 msgstr ""
 
-msgid "Insert Link"
+msgid "Insert link"
 msgstr ""
 
 msgid "Insert Link Trigger"
@@ -10574,10 +10580,10 @@ msgstr ""
 msgid "Invalid Pipedrive credentials. Please check your API Domain and Token."
 msgstr ""
 
-msgid "Invalid Pipedrive credentials. Please verify your API Domain and Token."
+msgid "Invalid Pipedrive credentials. Please verify your Api Domain and Token."
 msgstr ""
 
-msgid "Invalid Pipedrive credentials. Please verify your Api Domain and Token."
+msgid "Invalid Pipedrive credentials. Please verify your API Domain and Token."
 msgstr ""
 
 msgid "Invalid Plugin Pro plugin installation detected"
@@ -10853,10 +10859,10 @@ msgstr ""
 msgid "It does not expire. Anyone who reads this email can use it to read your CRM data, so set it up and then delete this message. If you think it has been seen by someone else, ask an administrator to revoke it — a replacement takes seconds."
 msgstr ""
 
-msgid "item"
+msgid "Item"
 msgstr ""
 
-msgid "Item"
+msgid "item"
 msgstr ""
 
 msgid "Item 1"
@@ -10925,10 +10931,10 @@ msgstr ""
 msgid "June"
 msgstr ""
 
-msgid "just now"
+msgid "Just now"
 msgstr ""
 
-msgid "Just now"
+msgid "just now"
 msgstr ""
 
 msgid "Kanban project board"
@@ -11003,10 +11009,10 @@ msgstr ""
 msgid "Last month"
 msgstr ""
 
-msgid "Last name"
+msgid "Last Name"
 msgstr ""
 
-msgid "Last Name"
+msgid "Last name"
 msgstr ""
 
 msgid "Last name of the contact."
@@ -11054,10 +11060,10 @@ msgstr ""
 msgid "Lead Score"
 msgstr ""
 
-msgid "Lead scoring"
+msgid "Lead Scoring"
 msgstr ""
 
-msgid "Lead Scoring"
+msgid "Lead scoring"
 msgstr ""
 
 msgid "Lead scoring is not available"
@@ -11372,10 +11378,10 @@ msgstr ""
 msgid "List proposals with number, subject, status, contact, and total. If your sales scope is \"own\" you see only proposals assigned to you."
 msgstr ""
 
-msgid "lists"
+msgid "Lists"
 msgstr ""
 
-msgid "Lists"
+msgid "lists"
 msgstr ""
 
 msgid "Lists: %1$d subscribed / %2$d assigned"
@@ -12011,10 +12017,10 @@ msgstr ""
 msgid "Mark as sent"
 msgstr ""
 
-msgid "Mark as subscribed"
+msgid "Mark as Subscribed"
 msgstr ""
 
-msgid "Mark as Subscribed"
+msgid "Mark as subscribed"
 msgstr ""
 
 msgid "Mark as Unavailable"
@@ -12119,10 +12125,10 @@ msgstr ""
 msgid "Max File Count"
 msgstr ""
 
-msgid "Max File Size (MB)"
+msgid "Max file size (MB)"
 msgstr ""
 
-msgid "Max file size (MB)"
+msgid "Max File Size (MB)"
 msgstr ""
 
 msgid "Maximum 50 recipients per batch."
@@ -12623,10 +12629,10 @@ msgstr ""
 msgid "My Sections"
 msgstr ""
 
-msgid "My Support Tickets"
+msgid "My support tickets"
 msgstr ""
 
-msgid "My support tickets"
+msgid "My Support Tickets"
 msgstr ""
 
 msgid "My Templates"
@@ -12707,10 +12713,10 @@ msgstr ""
 msgid "never used"
 msgstr ""
 
-msgid "NEW"
+msgid "New"
 msgstr ""
 
-msgid "New"
+msgid "NEW"
 msgstr ""
 
 msgid "New availability schedule created successfully"
@@ -12791,10 +12797,10 @@ msgstr ""
 msgid "New task u2192 Asana task"
 msgstr ""
 
-msgid "New ticket"
+msgid "New Ticket"
 msgstr ""
 
-msgid "New Ticket"
+msgid "New ticket"
 msgstr ""
 
 msgid "New ticket from %s"
@@ -13406,6 +13412,9 @@ msgstr ""
 msgid "Not Configured"
 msgstr ""
 
+msgid "Not Configured"
+msgstr ""
+
 msgid "Not Connected"
 msgstr ""
 
@@ -13472,10 +13481,10 @@ msgstr ""
 msgid "Not Equal To"
 msgstr ""
 
-msgid "notes"
+msgid "Notes"
 msgstr ""
 
-msgid "Notes"
+msgid "notes"
 msgstr ""
 
 msgid "Note saved successfully"
@@ -14135,10 +14144,10 @@ msgstr ""
 msgid "Options are required for %s field"
 msgstr ""
 
-msgid "OR"
+msgid "or"
 msgstr ""
 
-msgid "or"
+msgid "OR"
 msgstr ""
 
 msgid "Or adding New Customer"
@@ -15482,10 +15491,10 @@ msgstr ""
 msgid "Proposals & Invoices"
 msgstr ""
 
-msgid "Proposal sent"
+msgid "Proposal Sent"
 msgstr ""
 
-msgid "Proposal Sent"
+msgid "Proposal sent"
 msgstr ""
 
 msgid "Proposal sent to customer"
@@ -16004,10 +16013,10 @@ msgstr ""
 msgid "Remove contacts from lists"
 msgstr ""
 
-msgid "Remove CRM Access"
+msgid "Remove CRM access"
 msgstr ""
 
-msgid "Remove CRM access"
+msgid "Remove CRM Access"
 msgstr ""
 
 msgid "Remove field"
@@ -16574,10 +16583,10 @@ msgstr ""
 msgid "Save as Draft"
 msgstr ""
 
-msgid "Save as Template"
+msgid "Save as template"
 msgstr ""
 
-msgid "Save as template"
+msgid "Save as Template"
 msgstr ""
 
 msgid "Save Block"
@@ -16637,10 +16646,10 @@ msgstr ""
 msgid "Save Setting Changes"
 msgstr ""
 
-msgid "Save Settings"
+msgid "Save settings"
 msgstr ""
 
-msgid "Save settings"
+msgid "Save Settings"
 msgstr ""
 
 msgid "Save Template"
@@ -17549,10 +17558,10 @@ msgstr ""
 msgid "Send Test SMS"
 msgstr ""
 
-msgid "Send test WhatsApp"
+msgid "Send Test WhatsApp"
 msgstr ""
 
-msgid "Send Test WhatsApp"
+msgid "Send test WhatsApp"
 msgstr ""
 
 msgid "Send the same reply to %d selected tickets."
@@ -18021,6 +18030,9 @@ msgid "SMS Campaigns"
 msgstr ""
 
 msgid "SMS campaigns"
+msgstr ""
+
+msgid "SMS Campaigns"
 msgstr ""
 
 msgid "SMS campaigns and broadcast messaging"
@@ -18704,10 +18716,10 @@ msgstr ""
 msgid "Support team"
 msgstr ""
 
-msgid "Support tickets"
+msgid "Support Tickets"
 msgstr ""
 
-msgid "Support Tickets"
+msgid "Support tickets"
 msgstr ""
 
 msgid "Support tickets, threads, and workload summaries."
@@ -18815,10 +18827,10 @@ msgstr ""
 msgid "Tag name is required"
 msgstr ""
 
-msgid "tags"
+msgid "Tags"
 msgstr ""
 
-msgid "Tags"
+msgid "tags"
 msgstr ""
 
 msgid "Tags added: %s"
@@ -18878,10 +18890,10 @@ msgstr ""
 msgid "Task activities require Plugin Pro plugin"
 msgstr ""
 
-msgid "Task Activity"
+msgid "Task activity"
 msgstr ""
 
-msgid "Task activity"
+msgid "Task Activity"
 msgstr ""
 
 msgid "Task Assigned"
@@ -18971,10 +18983,10 @@ msgstr ""
 msgid "Tax/VAT: %s"
 msgstr ""
 
-msgid "Tax / VAT number"
+msgid "Tax / VAT Number"
 msgstr ""
 
-msgid "Tax / VAT Number"
+msgid "Tax / VAT number"
 msgstr ""
 
 msgid "Taxes"
@@ -20058,10 +20070,10 @@ msgstr ""
 msgid "Ticket custom fields"
 msgstr ""
 
-msgid "Ticket Details"
+msgid "Ticket details"
 msgstr ""
 
-msgid "Ticket details"
+msgid "Ticket Details"
 msgstr ""
 
 msgid "Ticket lifecycle notifications for agents (new ticket, customer reply, assignment, resolved, reopened)."
@@ -20952,10 +20964,10 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-msgid "Updated at"
+msgid "Updated At"
 msgstr ""
 
-msgid "Updated At"
+msgid "Updated at"
 msgstr ""
 
 msgid "Updated automation"
@@ -21090,10 +21102,10 @@ msgstr ""
 msgid "Upload from Media Library"
 msgstr ""
 
-msgid "Upload image"
+msgid "Upload Image"
 msgstr ""
 
-msgid "Upload Image"
+msgid "Upload image"
 msgstr ""
 
 msgid "Uploading..."
@@ -21733,10 +21745,10 @@ msgstr ""
 msgid "WhatsApp number"
 msgstr ""
 
-msgid "Whatsapp Phone"
+msgid "WhatsApp Phone"
 msgstr ""
 
-msgid "WhatsApp Phone"
+msgid "Whatsapp Phone"
 msgstr ""
 
 msgid "Whatsapp phone number of the contact in E.164 format (e.g., +12025551234)."
@@ -22039,10 +22051,10 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-msgid "Yes, Cancel"
+msgid "Yes, cancel"
 msgstr ""
 
-msgid "Yes, cancel"
+msgid "Yes, Cancel"
 msgstr ""
 
 msgid "Yes, Delete"

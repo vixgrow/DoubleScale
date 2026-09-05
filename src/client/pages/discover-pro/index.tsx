@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Sparkles } from 'lucide-react';
+import { GraduationCap, MessagesSquare, Sparkles, Users } from 'lucide-react';
 
 /**
  * DoubleScale dependencies
@@ -281,23 +281,66 @@ const DiscoverPro: React.FC = () => {
 						</CardContent>
 					</Card>
 				))}
+			</div>
 
-				<Card className="doublescale-discover-pro-grid__more-card shadow-none">
-					<CardContent className="p-5">
-						<span className="doublescale-discover-pro-grid__more-icon">
-							<Sparkles width={20} height={20} />
-						</span>
-						<h3 className="doublescale-discover-pro-grid__more-title">
-							{__('More coming soon', 'doublescale')}
-						</h3>
-						<p className="doublescale-discover-pro-grid__more-text">
-							{__(
-								"We're shipping new Pro features every month.",
-								'doublescale'
-							)}
-						</p>
-					</CardContent>
-				</Card>
+			<div className="doublescale-discover-pro-coming-soon">
+				<div className="doublescale-discover-pro-coming-soon__intro">
+					<span className="doublescale-discover-pro-coming-soon__badge">
+						<Sparkles width={14} height={14} />
+						{__('Coming soon', 'doublescale')}
+					</span>
+					<h2>{__('Next modules on the roadmap', 'doublescale')}</h2>
+					<p>
+						{__(
+							'These Pro modules are in development. Get Pro now and they will land in the same workspace.',
+							'doublescale'
+						)}
+					</p>
+				</div>
+				<div className="doublescale-discover-pro-coming-soon__grid">
+					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+						<CardContent className="p-5">
+							<span className="doublescale-discover-pro-coming-soon__icon">
+								<Users width={22} height={22} />
+							</span>
+							<h3>{__('Membership Module', 'doublescale')}</h3>
+							<p>
+								{__(
+									'Plans, member portals, and access rules tied to the same contact record.',
+									'doublescale'
+								)}
+							</p>
+						</CardContent>
+					</Card>
+					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+						<CardContent className="p-5">
+							<span className="doublescale-discover-pro-coming-soon__icon">
+								<GraduationCap width={22} height={22} />
+							</span>
+							<h3>{__('LMS Module', 'doublescale')}</h3>
+							<p>
+								{__(
+									'Courses, enrollments, and progress that trigger automations from the CRM.',
+									'doublescale'
+								)}
+							</p>
+						</CardContent>
+					</Card>
+					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+						<CardContent className="p-5">
+							<span className="doublescale-discover-pro-coming-soon__icon">
+								<MessagesSquare width={22} height={22} />
+							</span>
+							<h3>{__('Community Module', 'doublescale')}</h3>
+							<p>
+								{__(
+									'Spaces, discussions, and member activity on the same timeline as sales and support.',
+									'doublescale'
+								)}
+							</p>
+						</CardContent>
+					</Card>
+				</div>
 			</div>
 
 			<div className="doublescale-discover-pro-footer-cta">

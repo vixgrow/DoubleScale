@@ -674,7 +674,7 @@ final class TriggersManager {
 			case 'sureforms':
 				return doublescale_is_plugin_active( 'sureforms/sureforms.php' );
 			case 'wpforms':
-				return doublescale_is_plugin_active( 'wpforms/wpforms.php' );
+				return doublescale_is_plugin_active( 'wpforms-lite/wpforms.php' );
 			case 'wsform':
 				return doublescale_is_plugin_active( 'ws-form/ws-form.php' )
 					|| doublescale_is_plugin_active( 'ws-form-pro/ws-form.php' );

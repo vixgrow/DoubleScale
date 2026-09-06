@@ -94,20 +94,83 @@ class MetaTemplateFetcher {
 		// Composite key: template_name:language
 		$external_id = $meta_template['name'] . ':' . $meta_template['language'];
 
+		$header_component = $this->find_component( $meta_template['components'] ?? array(), 'HEADER' );
+
+		$settings = array(
+			'provider'    => 'meta-whatsapp',
+			'external_id' => $external_id,
+			'variables'   => $variables,
+			'components'  => $meta_template['components'] ?? array(),
+			'status'      => $meta_template['status'] ?? 'APPROVED',
+		);
+
+		// Surface the header format so senders know a media component is required,
+		// and seed the media from Meta's approved example. Without a link the send
+		// is rejected outright, and the example is the only URL knowable at fetch
+		// time — callers can still override it per send.
+		$header_format = strtoupper( (string) ( $header_component['format'] ?? '' ) );
+		if ( '' !== $header_format ) {
+			$settings['header_format'] = $header_format;
+
+			$example_media = $this->extract_header_example_media( $header_component, $header_format );
+			if ( $example_media ) {
+				$settings['header_media'] = $example_media;
+			}
+		}
+
 		return array(
 			'sid'      => $external_id,
 			'name'     => $this->format_template_name( $meta_template['name'], $meta_template['language'] ),
 			'body'     => $body_text,
 			'category' => $meta_template['category'] ?? 'UTILITY',
 			'language' => $meta_template['language'],
-			'settings' => array(
-				'provider'    => 'meta-whatsapp',
-				'external_id' => $external_id,
-				'variables'   => $variables,
-				'components'  => $meta_template['components'] ?? array(),
-				'status'      => $meta_template['status'] ?? 'APPROVED',
-			),
+			'settings' => $settings,
 		);
+	}
+
+	/**
+	 * Pull the example media URL Meta stores against an approved media header.
+	 *
+	 * Meta returns the sample used at approval time under `example.header_handle`.
+	 * It is a usable link, so it gives media templates a working default rather
+	 * than failing the send when no media was chosen for this particular send.
+	 *
+	 * @param array|null $header_component Header component from Meta.
+	 * @param string     $header_format    Uppercase header format.
+	 * @return array|null Media descriptor, or null when the header carries no media.
+	 */
+	private function extract_header_example_media( ?array $header_component, string $header_format ): ?array {
+		$media_formats = array(
+			'IMAGE'    => 'image',
+			'VIDEO'    => 'video',
+			'DOCUMENT' => 'document',
+		);
+
+		if ( ! $header_component || ! isset( $media_formats[ $header_format ] ) ) {
+			return null;
+		}
+
+		$handles = $header_component['example']['header_handle'] ?? array();
+		$link    = is_array( $handles ) ? ( $handles[0] ?? '' ) : (string) $handles;
+
+		if ( empty( $link ) ) {
+			return null;
+		}
+
+		$media = array(
+			'type' => $media_formats[ $header_format ],
+			'link' => (string) $link,
+		);
+
+		if ( 'document' === $media['type'] ) {
+			$path     = wp_parse_url( (string) $link, PHP_URL_PATH );
+			$filename = $path ? basename( $path ) : '';
+			if ( ! empty( $filename ) ) {
+				$media['filename'] = $filename;
+			}
+		}
+
+		return $media;
 	}
 
 	/**

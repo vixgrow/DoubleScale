@@ -19,10 +19,14 @@ import { test, expect } from './fixtures';
 
 test.describe('WhatsApp media templates', () => {
 	test('contacts screen loads', async ({ adminPage }) => {
-		await adminPage.goto('wp-admin/admin.php?page=doublescale&path=contacts');
+		await adminPage.goto(
+			'wp-admin/admin.php?page=doublescale&path=contacts'
+		);
 
 		await expect(
-			adminPage.getByRole('heading', { level: 1, name: /Contacts/i }).first()
+			adminPage
+				.getByRole('heading', { level: 1, name: /Contacts/i })
+				.first()
 		).toBeVisible({ timeout: 45_000 });
 	});
 
@@ -84,7 +88,10 @@ test.describe('WhatsApp media templates', () => {
 		// The endpoint envelope is `{ templates: [...] }`. Assert we actually got
 		// rows: an empty list would make the loop below vacuously pass and hide
 		// exactly the defect this test exists to catch.
-		expect(rows.length, 'no WhatsApp templates returned to inspect').toBeGreaterThan(0);
+		expect(
+			rows.length,
+			'no WhatsApp templates returned to inspect'
+		).toBeGreaterThan(0);
 
 		for (const row of rows) {
 			const templateSettings = row?.settings ?? {};

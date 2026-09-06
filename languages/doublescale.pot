@@ -11120,6 +11120,9 @@ msgstr ""
 msgid "Left padding"
 msgstr ""
 
+msgid "less"
+msgstr ""
+
 msgid "Less than"
 msgstr ""
 
@@ -12525,6 +12528,9 @@ msgid "Month to get revenue for (1-12). Only applicable for monthly period."
 msgstr ""
 
 msgid "More"
+msgstr ""
+
+msgid "more..."
 msgstr ""
 
 msgid "More Events"

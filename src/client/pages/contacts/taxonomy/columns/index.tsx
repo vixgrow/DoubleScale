@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import type { List as ContactList, Tag as ContactTag } from '@doublescale/client';
-import { EditIcon, SortIcon, TimeAgoCell } from '@doublescale/components';
+import { EditIcon, SortIcon, TimeAgoCell, WrappedTextCell } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
 import type { TaxonomyItem, TaxonomyType } from '../index';
@@ -66,6 +66,9 @@ export const getTaxonomyColumns = ({
 		},
 		{
 			accessorKey: 'description',
+			meta: {
+				className: 'max-w-[16rem] whitespace-normal overflow-hidden',
+			},
 			header: ({ column }) => (
 				<div
 					className="flex items-center gap-1"
@@ -75,7 +78,9 @@ export const getTaxonomyColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.description || '-',
+			cell: ({ row }) => (
+				<WrappedTextCell value={row.original.description} />
+			),
 		},
 		{
 			accessorKey: 'contacts_count',

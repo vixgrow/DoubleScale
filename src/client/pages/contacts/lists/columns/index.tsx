@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { List as ContactList } from '@doublescale/client';
-import { SortIcon, TimeAgoCell, getRowNumber } from '@doublescale/components';
+import { SortIcon, TimeAgoCell, WrappedTextCell, getRowNumber } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
@@ -88,6 +88,9 @@ export const getListColumns = ({
 		},
 		{
 			accessorKey: 'description',
+			meta: {
+				className: 'max-w-[16rem] whitespace-normal overflow-hidden',
+			},
 			header: ({ column }) => (
 				<div
 					className="flex items-center gap-1"
@@ -99,7 +102,9 @@ export const getListColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.description || '-',
+			cell: ({ row }) => (
+				<WrappedTextCell value={row.original.description} />
+			),
 		},
 		{
 			accessorKey: 'contacts_count',

@@ -139,7 +139,15 @@ export function DataTable<TData>({
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
 											key={cell.id}
-											className="text-[#09090B]"
+											className={cn(
+												'text-[#09090B]',
+												(
+													cell.column.columnDef
+														.meta as
+														| { className?: string }
+														| undefined
+												)?.className
+											)}
 										>
 											{flexRender(
 												cell.column.columnDef.cell,

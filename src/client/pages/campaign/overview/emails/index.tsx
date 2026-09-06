@@ -22,6 +22,7 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import {
 	Select,
 	SelectContent,
@@ -103,7 +104,10 @@ const EmailsTab: React.FC = () => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchCampaignEmails = async () => {
+		const generation = beginFetch();
 		setIsLoading(true);
 
 		try {
@@ -115,6 +119,10 @@ const EmailsTab: React.FC = () => {
 				}),
 			})) as CampaignEmailsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setTotalRecords(response.total);
 			setData(response.data);
 
@@ -124,12 +132,18 @@ const EmailsTab: React.FC = () => {
 				) || false;
 			setHasFailedEmails(hasFailed);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setNotice({
 				type: 'error',
 				message:
 					error.message || __('Failed to fetch messages', 'doublescale'),
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setIsLoading(false);
 		}
 	};

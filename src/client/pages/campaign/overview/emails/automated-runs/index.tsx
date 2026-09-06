@@ -26,6 +26,7 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getColumns } from '../columns';
 import { getColumns as getUnsubColumns } from '../../unsubscribes/columns';
 import MessageDetails from '../message-details-dialog';
@@ -195,7 +196,12 @@ const AutomatedRunsView: React.FC = () => {
 		setPerPage: setRunUnsubscribesPerPage,
 	});
 
+	const runsFetch = useFetchGeneration();
+	const messagesFetch = useFetchGeneration();
+	const unsubscribesFetch = useFetchGeneration();
+
 	const fetchRuns = async () => {
+		const generation = runsFetch.beginFetch();
 		setIsLoadingRuns(true);
 		try {
 			const response = (await apiFetch({
@@ -205,14 +211,24 @@ const AutomatedRunsView: React.FC = () => {
 				}),
 			})) as RunsResponse;
 
+			if (!runsFetch.isCurrent(generation)) {
+				return;
+			}
+
 			setRuns(response.data);
 			setTotalRuns(response.total);
 		} catch (error: any) {
+			if (!runsFetch.isCurrent(generation)) {
+				return;
+			}
 			setNotice({
 				type: 'error',
 				message: error.message || __('Failed to fetch campaign runs', 'doublescale'),
 			});
 		} finally {
+			if (!runsFetch.isCurrent(generation)) {
+				return;
+			}
 			setIsLoadingRuns(false);
 		}
 	};
@@ -222,6 +238,7 @@ const AutomatedRunsView: React.FC = () => {
 	}, [runsPage, runsPerPage]);
 
 	const fetchRunMessages = async (runBatch: string) => {
+		const generation = messagesFetch.beginFetch();
 		setIsLoadingMessages(true);
 		try {
 			const response = (await apiFetch({
@@ -233,6 +250,10 @@ const AutomatedRunsView: React.FC = () => {
 				}),
 			})) as CampaignEmailsResponse;
 
+			if (!messagesFetch.isCurrent(generation)) {
+				return;
+			}
+
 			setRunMessages(response.data);
 			setRunMessagesTotal(response.total);
 
@@ -241,11 +262,17 @@ const AutomatedRunsView: React.FC = () => {
 				setBatchFirstMessage(response.data[0]);
 			}
 		} catch (error: any) {
+			if (!messagesFetch.isCurrent(generation)) {
+				return;
+			}
 			setNotice({
 				type: 'error',
 				message: error.message || __('Failed to fetch run messages', 'doublescale'),
 			});
 		} finally {
+			if (!messagesFetch.isCurrent(generation)) {
+				return;
+			}
 			setIsLoadingMessages(false);
 		}
 	};
@@ -270,6 +297,7 @@ const AutomatedRunsView: React.FC = () => {
 	};
 
 	const fetchRunUnsubscribes = async (runBatch: string) => {
+		const generation = unsubscribesFetch.beginFetch();
 		setIsLoadingUnsubscribes(true);
 		try {
 			const response = (await apiFetch({
@@ -280,14 +308,24 @@ const AutomatedRunsView: React.FC = () => {
 				}),
 			})) as CampaignEmailsResponse;
 
+			if (!unsubscribesFetch.isCurrent(generation)) {
+				return;
+			}
+
 			setRunUnsubscribes(response.data);
 			setRunUnsubscribesTotal(response.total);
 		} catch (error: any) {
+			if (!unsubscribesFetch.isCurrent(generation)) {
+				return;
+			}
 			setNotice({
 				type: 'error',
 				message: error.message || __('Failed to fetch unsubscribes', 'doublescale'),
 			});
 		} finally {
+			if (!unsubscribesFetch.isCurrent(generation)) {
+				return;
+			}
 			setIsLoadingUnsubscribes(false);
 		}
 	};

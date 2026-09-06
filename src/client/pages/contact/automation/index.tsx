@@ -18,6 +18,7 @@ import { GradientAutomationsIcon, NoData } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getColumns } from './columns';
 import Result from '../../automation/steps/workflow/result';
 import { Provider as AutomationProvider } from '../../automation/state/context';
@@ -45,7 +46,10 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchAutomationContacts = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -59,14 +63,24 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 				),
 			})) as AutomationContactsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setAutomationContacts(response.data);
 			setTotalRecords(response.total);
 		} catch (error) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			createNotice({
 				type: 'error',
 				message: __('Failed to fetch automation', 'doublescale'),
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

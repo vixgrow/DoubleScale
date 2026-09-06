@@ -24,6 +24,7 @@ import {
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getColumns } from './columns';
 import CallDialog from './call-dialog';
 import type { NoticeMessage } from '@doublescale/client';
@@ -93,7 +94,10 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 		}
 	}, [notice]);
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchCalls = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -106,17 +110,27 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 				}),
 			});
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			// The API returns { data: [...], meta: { total, per_page, ... } }
 			if (response?.data && Array.isArray(response.data)) {
 				setCalls(response.data);
 				setTotalRecords(response.meta?.total || response.data.length);
 			}
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice(
 				'error',
 				error.message || __('Failed to fetch calls', 'doublescale')
 			);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

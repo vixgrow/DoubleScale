@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { fetchSmtpEmailLogs } from '../settings/smtp/smtp-api';
 import SmtpEmailLogTable, {
 	type SmtpLogFilter,
@@ -87,11 +88,14 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	useEffect(() => {
 		setPage(1);
 	}, [debouncedSearch, dateRangeKey]);
 
 	const loadLogs = useCallback(async () => {
+		const generation = beginFetch();
 		setLogLoading(true);
 		setError(null);
 		try {
@@ -111,6 +115,9 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 				params.end_date = formatLocalYmd(dateRange.to);
 			}
 			const res = await fetchSmtpEmailLogs(params);
+			if (!isCurrent(generation)) {
+				return;
+			}
 			const nextTotalItems = res.total_items ?? 0;
 			const nextTotalPages = Math.max(
 				1,
@@ -126,15 +133,21 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 			setTotalItems(nextTotalItems);
 			setLogs((res.items || []) as EmailLogRow[]);
 		} catch (e: unknown) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setError(
 				e instanceof Error
 					? e.message
 					: __('Could not load email log.', 'doublescale')
 			);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLogLoading(false);
 		}
-	}, [activeFilter, dateRangeKey, debouncedSearch, page, perPage]);
+	}, [activeFilter, dateRangeKey, debouncedSearch, page, perPage, beginFetch, isCurrent]);
 
 	useEffect(() => {
 		void loadLogs();

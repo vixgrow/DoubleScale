@@ -26,6 +26,7 @@ import {
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getWooColumns, getEddColumns, getSurecartColumns } from './columns';
 
 interface PurchaseHistoryProps {
@@ -144,7 +145,10 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 		setPerPage: setSurecartPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchPurchaseHistory = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -161,6 +165,10 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				),
 			})) as PurchaseHistoryType;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			if (response) {
 				setPurchaseHistory(response);
 				setWooTotalRecords(response.wc?.total || 0);
@@ -168,11 +176,17 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				setSurecartTotalRecords(response.surecart?.total || 0);
 			}
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			createNotice({
 				type: 'error',
 				message: error.message,
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

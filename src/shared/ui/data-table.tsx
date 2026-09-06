@@ -57,7 +57,11 @@ export function DataTable<TData>({
 		data,
 		columns,
 		config,
-		initialPageSize
+		initialPageSize,
+		// External DataTablePagination + API page/per_page already slice the
+		// result set. Client pagination on top of that hides rows 11–50 and
+		// empties page 3+ when pageIndex is not 0.
+		!showPagination
 	);
 
 	const handleSearchChange = (value: string) => {

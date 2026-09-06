@@ -15,6 +15,7 @@ import { useParams } from '@doublescale/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getColumns } from './columns';
 import { NoData, UnsubscribesIcon, UnsubscribeSMSIcon } from '@doublescale/components';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
@@ -43,7 +44,10 @@ const UnsubscribesTab: React.FC = () => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchUnsubscribes = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -55,9 +59,16 @@ const UnsubscribesTab: React.FC = () => {
 				}),
 			})) as CampaignEmailsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			response.total && setTotal(response.total);
 			response.data && setData(response.data);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			createNotice({
 				type: 'error',
 				message:
@@ -65,6 +76,9 @@ const UnsubscribesTab: React.FC = () => {
 					__('Failed to fetch unsubscribes', 'doublescale'),
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

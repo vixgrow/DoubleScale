@@ -24,6 +24,7 @@ import {
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { getColumns } from './columns';
 import NoteDialog from './note-dialog';
 
@@ -74,7 +75,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		}
 	}, [notice]);
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchNotes = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -85,14 +89,24 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				}),
 			})) as NotesResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setNotes(response.data);
 			setTotalRecords(response.total);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice(
 				'error',
 				error.message || __('Failed to fetch notes', 'doublescale')
 			);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

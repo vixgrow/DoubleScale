@@ -35,6 +35,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { TagsDialog } from './tags-dialog';
 import { useTagsColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 import {
@@ -158,7 +159,10 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchTags = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -175,12 +179,22 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				}),
 			})) as TagsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setTags(response.data);
 			setTotalRecords(response.total);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', error.message);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

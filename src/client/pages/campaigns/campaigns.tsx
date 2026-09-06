@@ -31,6 +31,7 @@ import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable'; // Import the hook
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { formatDateForAPI } from '@doublescale/utils';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
@@ -142,6 +143,8 @@ const Campaigns: React.FC<CampaignsProps> = ({
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	useEffect(() => {
 		fetchCampaigns();
 	}, [page, perPage, dateRange, keywords, channel, campaignFilters, sort]);
@@ -172,6 +175,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 			return;
 		}
 
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -241,6 +245,9 @@ const Campaigns: React.FC<CampaignsProps> = ({
 					path: addQueryArgs('/doublescale/v1/campaigns', queryParams),
 				}
 			)) as CampaignsResponse | null;
+			if (!isCurrent(generation)) {
+				return;
+			}
 			if (!response) {
 				setCampaigns([]);
 				setTotalRecords(0);
@@ -255,11 +262,17 @@ const Campaigns: React.FC<CampaignsProps> = ({
 			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
 		} catch (error) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setNotice({
 				type: 'error',
 				message: __('Failed to fetch campaigns', 'doublescale'),
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

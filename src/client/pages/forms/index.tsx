@@ -45,6 +45,7 @@ import {
 	serializeDateRange,
 } from '@doublescale/services/list-preferences-service';
 import { useListPreferencesPersistence } from '@doublescale/hooks/use-list-preferences';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 
 /**
  * Columns the forms list can be sorted by. Mirrors the server allow-list.
@@ -154,7 +155,10 @@ const FormsList: React.FC = () => {
 		showNotice('success', message);
 	};
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchForms = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -170,12 +174,21 @@ const FormsList: React.FC = () => {
 				}),
 				method: 'GET',
 			})) as FormsResponse;
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setForms(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', error.message);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

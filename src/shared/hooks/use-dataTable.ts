@@ -22,7 +22,8 @@ export function useDataTable<TData>(
 	data: TData[],
 	columns: ColumnDef<TData, any>[],
 	config: DataTableConfig<TData>,
-	initialPageSize?: number | undefined
+	initialPageSize?: number | undefined,
+	manualPagination = false
 ) {
 	const [localSorting, setLocalSorting] = useState<SortingState>([]);
 
@@ -66,31 +67,6 @@ export function useDataTable<TData>(
 	);
 	const [globalFilter, setGlobalFilter] = useState('');
 
-	// Filter data based on date range
-	const filteredData = useMemo(() => {
-		if (
-			!config.dateRange?.enabled ||
-			(!config.dateRange.value.from && !config.dateRange.value.to)
-		) {
-			return data;
-		}
-
-		return data.filter((item: any) => {
-			const createdAt = new Date(item.created_at);
-			const { from, to } = config.dateRange!.value;
-
-			if (from && to) {
-				return createdAt >= from && createdAt <= to;
-			} else if (from) {
-				return createdAt >= from;
-			} else if (to) {
-				return createdAt <= to;
-			}
-
-			return true;
-		});
-	}, [data, config.dateRange?.value, config.dateRange?.enabled]);
-
 	// Convert selectedKeys to rowSelection format
 	const rowSelection = useMemo(() => {
 		if (!config.selection?.enabled) return {};
@@ -114,12 +90,18 @@ export function useDataTable<TData>(
 		config.selection.onSelectionChange(newKeys);
 	};
 
+	// Do not slice or date-filter here: server lists already paginate with
+	// page/per_page and from/to. A second pass hid rows 11–50 and dropped
+	// older rows on page 3+ when a date range was set.
 	const table = useReactTable({
-		data: filteredData,
+		data,
 		columns,
 		enableRowSelection: config.selection?.enabled || false,
 		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
+		manualPagination,
+		...(manualPagination
+			? {}
+			: { getPaginationRowModel: getPaginationRowModel() }),
 		onSortingChange: handleSortingChange,
 		// With server-side sorting the rows already arrive in order; re-sorting
 		// them locally would only reorder the current page.
@@ -133,16 +115,20 @@ export function useDataTable<TData>(
 		onGlobalFilterChange: setGlobalFilter,
 		globalFilterFn: 'includesString',
 		getRowId: (row: any) => row.id?.toString() || '',
+		// Uncontrolled pagination so client-side tables can change page.
+		// Putting pageIndex in `state` without onPaginationChange froze it at 0.
+		initialState: {
+			pagination: {
+				pageSize: initialPageSize || 10,
+				pageIndex: 0,
+			},
+		},
 		state: {
 			sorting,
 			columnFilters,
 			columnVisibility,
 			rowSelection,
 			globalFilter,
-			pagination: {
-				pageSize: initialPageSize || 10,
-				pageIndex: 0,
-			},
 		},
 	});
 

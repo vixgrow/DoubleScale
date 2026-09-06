@@ -110,14 +110,15 @@ class MetaTemplateSaver {
 	 * @return TemplateModel The template, updated when it was missing header data.
 	 */
 	private function backfill_header_settings( TemplateModel $template, array $settings ): TemplateModel {
-		// Only templates that actually declare a header are worth repairing.
-		// `components` alone is no signal — every template has components, so
-		// backfilling on that would rewrite every row on every re-sync.
-		if ( empty( $settings['header_format'] ) ) {
+		// Only templates that actually declare a header or interactive buttons
+		// are worth repairing. `components` alone is no signal — every template
+		// has components, so backfilling on that would rewrite every row on
+		// every re-sync.
+		if ( empty( $settings['header_format'] ) && empty( $settings['buttons'] ) ) {
 			return $template;
 		}
 
-		$header_keys = array( 'components', 'header_format', 'header_media' );
+		$header_keys = array( 'components', 'header_format', 'header_media', 'buttons', 'template_type' );
 		$stored      = is_array( $template->settings ) ? $template->settings : array();
 		$changed     = false;
 

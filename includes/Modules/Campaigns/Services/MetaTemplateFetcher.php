@@ -108,6 +108,20 @@ class MetaTemplateFetcher {
 		// and seed the media from Meta's approved example. Without a link the send
 		// is rejected outright, and the example is the only URL knowable at fetch
 		// time — callers can still override it per send.
+		// Surface the declared buttons and the template's interactive sub-type so
+		// the send path knows a button component is required. Without this a
+		// catalog template is sent with body/header only and Meta answers
+		// "(#131008) Required parameter is missing".
+		$buttons = $this->extract_buttons( $meta_template['components'] ?? array() );
+		if ( ! empty( $buttons ) ) {
+			$settings['buttons'] = $buttons;
+
+			$interactive = $this->detect_interactive_type( $buttons );
+			if ( '' !== $interactive ) {
+				$settings['template_type'] = $interactive;
+			}
+		}
+
 		$header_format = strtoupper( (string) ( $header_component['format'] ?? '' ) );
 		if ( '' !== $header_format ) {
 			$settings['header_format'] = $header_format;
@@ -126,6 +140,55 @@ class MetaTemplateFetcher {
 			'language' => $meta_template['language'],
 			'settings' => $settings,
 		);
+	}
+
+	/**
+	 * Pull the BUTTONS block out of an approved template's components.
+	 *
+	 * The order matters: a button component's `index` refers to the button's
+	 * position in the approved template, so the list must not be re-sorted.
+	 *
+	 * @param array $components Components array from Meta.
+	 * @return array Declared buttons, in their approved order.
+	 */
+	private function extract_buttons( array $components ): array {
+		$buttons_component = $this->find_component( $components, 'BUTTONS' );
+
+		if ( ! $buttons_component || empty( $buttons_component['buttons'] ) ) {
+			return array();
+		}
+
+		$buttons = $buttons_component['buttons'];
+
+		return is_array( $buttons ) ? array_values( $buttons ) : array();
+	}
+
+	/**
+	 * Name the interactive sub-type a template's buttons imply.
+	 *
+	 * Meta does not return a "sub-type" field: a catalog template is simply one
+	 * whose buttons include a CATALOG button. Recording it saves every consumer
+	 * from re-deriving it, and tells the UI which extra fields to collect.
+	 *
+	 * @param array $buttons Declared buttons.
+	 * @return string CATALOG, MPM, FLOW, COPY_CODE, or '' when plain.
+	 */
+	private function detect_interactive_type( array $buttons ): string {
+		$interactive = array( 'CATALOG', 'MPM', 'FLOW', 'COPY_CODE' );
+
+		foreach ( $buttons as $button ) {
+			if ( ! is_array( $button ) ) {
+				continue;
+			}
+
+			$type = strtoupper( (string) ( $button['type'] ?? '' ) );
+
+			if ( in_array( $type, $interactive, true ) ) {
+				return $type;
+			}
+		}
+
+		return '';
 	}
 
 	/**

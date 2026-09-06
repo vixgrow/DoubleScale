@@ -289,7 +289,20 @@ class TemplateModel extends Model {
 	public function get_whatsapp_header_settings() {
 		$settings = array();
 
-		foreach ( array( 'components', 'header_format', 'header_media', 'header_variables' ) as $key ) {
+		$keys = array(
+			'components',
+			'header_format',
+			'header_media',
+			'header_variables',
+			// Interactive templates (catalog, product list, flow, coupon): the
+			// send path needs the declared buttons and the values for them, or
+			// Meta rejects the message with error 131008.
+			'buttons',
+			'button_params',
+			'template_type',
+		);
+
+		foreach ( $keys as $key ) {
 			$value = $this->get_setting( $key );
 
 			if ( ! empty( $value ) ) {

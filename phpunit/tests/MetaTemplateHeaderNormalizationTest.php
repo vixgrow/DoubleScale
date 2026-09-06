@@ -144,6 +144,84 @@ class MetaTemplateHeaderNormalizationTest extends TestCase {
 	}
 
 	/**
+	 * A catalog template records its buttons and interactive sub-type.
+	 *
+	 * Without these the send path cannot know a button component is required,
+	 * and Meta rejects the message with error 131008.
+	 */
+	public function test_catalog_template_records_buttons_and_type() {
+		$normalized = $this->normalize(
+			$this->template(
+				array(
+					array(
+						'type' => 'BODY',
+						'text' => 'Browse our offers',
+					),
+					array(
+						'type'    => 'BUTTONS',
+						'buttons' => array(
+							array( 'type' => 'CATALOG' ),
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertSame( 'CATALOG', $normalized['settings']['template_type'] );
+		$this->assertSame( 'CATALOG', $normalized['settings']['buttons'][0]['type'] );
+	}
+
+	/**
+	 * Button order is preserved: a component's index refers to this position.
+	 */
+	public function test_button_order_is_preserved() {
+		$normalized = $this->normalize(
+			$this->template(
+				array(
+					array(
+						'type'    => 'BUTTONS',
+						'buttons' => array(
+							array(
+								'type' => 'URL',
+								'text' => 'Track',
+							),
+							array( 'type' => 'COPY_CODE' ),
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertSame( 'URL', $normalized['settings']['buttons'][0]['type'] );
+		$this->assertSame( 'COPY_CODE', $normalized['settings']['buttons'][1]['type'] );
+		$this->assertSame( 'COPY_CODE', $normalized['settings']['template_type'] );
+	}
+
+	/**
+	 * Plain quick-reply buttons are recorded but imply no interactive type.
+	 */
+	public function test_quick_reply_buttons_are_not_an_interactive_type() {
+		$normalized = $this->normalize(
+			$this->template(
+				array(
+					array(
+						'type'    => 'BUTTONS',
+						'buttons' => array(
+							array(
+								'type' => 'QUICK_REPLY',
+								'text' => 'Yes',
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertCount( 1, $normalized['settings']['buttons'] );
+		$this->assertArrayNotHasKey( 'template_type', $normalized['settings'] );
+	}
+
+	/**
 	 * Regression: a header-less template gains neither key, and the existing
 	 * normalized shape is untouched.
 	 */

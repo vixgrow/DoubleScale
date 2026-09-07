@@ -28,7 +28,7 @@ import { isEmpty, map } from 'lodash';
  * Internal dependencies
  */
 import type { Fields, Integration } from '@/config/booking';
-import { useApi } from '@/hooks/booking';
+import { bookingApiNoticeMessage, useApi } from '@/hooks/booking';
 import type { NoticeMessage } from '@/types/booking';
 import { ProGlobalIntegrations } from '@/components/booking';
 
@@ -305,12 +305,13 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'error',
 					title: __('Error', 'doublescale'),
-					message:
-						error ||
+					message: bookingApiNoticeMessage(
+						error,
 						__(
 							'Failed to save Apple Calendar settings.',
 							'doublescale'
-						),
+						)
+					),
 				});
 			},
 		});
@@ -432,7 +433,10 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'error',
 					title: __('Error', 'doublescale'),
-					message: error.message,
+					message: bookingApiNoticeMessage(
+						error,
+						__('Failed to load accounts.', 'doublescale')
+					),
 				});
 			},
 		});
@@ -541,9 +545,10 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 					setNotice({
 						type: 'error',
 						title: __('Error', 'doublescale'),
-						message:
-							error?.message ||
-							__('Failed to delete account', 'doublescale'),
+						message: bookingApiNoticeMessage(
+							error,
+							__('Failed to delete account', 'doublescale')
+						),
 					});
 				},
 			});
@@ -597,7 +602,13 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'error',
 					title: __('Error', 'doublescale'),
-					message: error.message,
+					message: bookingApiNoticeMessage(
+						error,
+						__(
+							'Could not start sign-in. Check your connection or OAuth settings.',
+							'doublescale'
+						)
+					),
 				});
 			},
 		});
@@ -658,6 +669,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 						},
 					},
 					onSuccess() {
+						setVisible(false);
 						fetchAccounts();
 						setNotice({
 							type: 'success',
@@ -669,7 +681,13 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 						setNotice({
 							type: 'error',
 							title: __('Error', 'doublescale'),
-							message: error.message,
+							message: bookingApiNoticeMessage(
+								error,
+								__(
+									'Could not connect. Check your credentials and try again.',
+									'doublescale'
+								)
+							),
 						});
 					},
 				});
@@ -742,7 +760,10 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'error',
 					title: __('Error', 'doublescale'),
-					message: error.message,
+					message: bookingApiNoticeMessage(
+						error,
+						__('Failed to update calendar selection.', 'doublescale')
+					),
 				});
 			},
 		});
@@ -963,9 +984,10 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'error',
 					title: __('Error', 'doublescale'),
-					message:
-						error.message ||
-						__('Failed to update settings', 'doublescale'),
+					message: bookingApiNoticeMessage(
+						error,
+						__('Failed to update settings', 'doublescale')
+					),
 				});
 			},
 		});
@@ -1403,7 +1425,6 @@ const IntegrationDetailsPage: React.FC<Props> = ({
                                         <Button
                                             onClick={() => {
                                                 handleConnectBasic();
-                                                setVisible(false);
                                             }}
                                             disabled={connectLoading}
                                             style={{ marginTop: '10px' }}
@@ -1541,7 +1562,6 @@ const IntegrationDetailsPage: React.FC<Props> = ({
                                                 form.validateFields()
                                                     .then(() => {
                                                         handleConnectBasic();
-                                                        setVisible(false);
                                                     })
                                                     .catch(() => {
                                                         // Ant Design surfaces field errors inline.

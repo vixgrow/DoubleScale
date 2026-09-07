@@ -21,6 +21,9 @@ php-scoper.phar
 phpcs.xml
 yarn.lock
 
+# Local ECC/Cursor harness (machine paths, hook runtime, MCP templates)
+.cursor/
+
 .cache
 *.tsbuildinfo
 .docker/mysql/*

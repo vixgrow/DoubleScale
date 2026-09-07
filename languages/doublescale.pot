@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.25\n"
+"Project-Id-Version: DoubleScale 1.3.26\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2610,6 +2610,9 @@ msgstr ""
 msgid "Back to builder"
 msgstr ""
 
+msgid "Back to calendars"
+msgstr ""
+
 msgid "Back to connection"
 msgstr ""
 
@@ -3813,6 +3816,9 @@ msgstr ""
 msgid "Choose a design and accent color. You can change both later while editing."
 msgstr ""
 
+msgid "Choose a different service"
+msgstr ""
+
 msgid "Choose a link trigger, then set the link text that appears in your message."
 msgstr ""
 
@@ -4389,9 +4395,6 @@ msgstr ""
 msgid "Conflicting fields were kept on the primary contact:"
 msgstr ""
 
-msgid "Connect"
-msgstr ""
-
 msgid "Connect %s"
 msgstr ""
 
@@ -4401,13 +4404,13 @@ msgstr ""
 msgid "Connect & fetch data"
 msgstr ""
 
+msgid "Connect a calendar or conferencing account so DoubleScale can check for conflicts and add your bookings."
+msgstr ""
+
 msgid "Connect account"
 msgstr ""
 
 msgid "Connect a client"
-msgstr ""
-
-msgid "Connect calendar and conferencing integrations"
 msgstr ""
 
 msgid "Connect DoubleScale to your tools and apps to enhance your scheduling automations."
@@ -4525,6 +4528,9 @@ msgid "Connect to GoHighLevel"
 msgstr ""
 
 msgid "Connect to Meta WhatsApp Business API to send WhatsApp messages to your contacts."
+msgstr ""
+
+msgid "Connect to remote calendars"
 msgstr ""
 
 msgid "Connect to your email server to poll for incoming messages every 60 seconds."
@@ -14822,7 +14828,7 @@ msgstr ""
 msgid "Please agree to the Terms & Conditions before accepting."
 msgstr ""
 
-msgid "Please choose a remote calendar from the list before closing."
+msgid "Please choose a remote calendar from the list before leaving."
 msgstr ""
 
 msgid "Please choose a valid currency."

@@ -15,10 +15,15 @@
 import React, { useEffect, lazy, Suspense } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-import { registerAdminPage, useNavigate, getToLink } from '@doublescale/navigation';
+import {
+	registerAdminPage,
+	useNavigate,
+	getToLink,
+} from '@doublescale/navigation';
 
 const Calendars = lazy(() => import('./calendars'));
 const Calendar = lazy(() => import('./calendar'));
+const RemoteCalendars = lazy(() => import('./remote-calendars'));
 const Availability = lazy(() => import('./availability'));
 const AvailabilityDetails = lazy(() => import('./availability-details'));
 const Bookings = lazy(() => import('./bookings'));
@@ -118,6 +123,25 @@ registerAdminPage('booking-calendar', {
 	path: 'booking/calendars/:id',
 	component: wrap(Calendar),
 	label: __('Calendar', 'doublescale'),
+	hidden: true,
+	requiredCapability: [
+		'doublescale_booking_manage_own_calendars',
+		'doublescale_booking_manage_all_calendars',
+	],
+	requiresModule: 'booking',
+});
+
+/**
+ * Connecting a remote calendar is its own route rather than a dialog on the
+ * Calendars list. The OAuth handoff is a full page navigation and the provider
+ * callback redirects back into wp-admin, so the "which provider was I
+ * connecting" context has to live in the URL — dialog state cannot survive the
+ * round trip. Pro's Google/Outlook/Zoom callbacks redirect here.
+ */
+registerAdminPage('booking-remote-calendars', {
+	path: 'booking/calendars/:id/remote-calendars',
+	component: wrap(RemoteCalendars),
+	label: __('Connect to remote calendars', 'doublescale'),
 	hidden: true,
 	requiredCapability: [
 		'doublescale_booking_manage_own_calendars',

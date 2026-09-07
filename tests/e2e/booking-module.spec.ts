@@ -40,8 +40,14 @@ async function gotoBookingPath(
 
 async function ensureBookingModuleActive(adminPage: Page): Promise<void> {
 	const onBookingRoute = /path=booking/i.test(adminPage.url());
+
+	// Booking pages are lazy-loaded chunks, so the wrapper appears a tick after
+	// the admin layout does. A bare isVisible() races that and silently skips a
+	// test that should have run — wait, and treat only a real timeout as
+	// "module disabled".
 	const shellVisible = await bookingPageWrapper(adminPage)
-		.isVisible()
+		.waitFor({ state: 'visible', timeout: 30_000 })
+		.then(() => true)
 		.catch(() => false);
 
 	if (!onBookingRoute || !shellVisible) {
@@ -90,9 +96,7 @@ test.describe('Booking calendars', () => {
 	test('calendars: search events', async ({ adminPage }) => {
 		const shell = calendarsShell(adminPage);
 
-		await expect(
-			shell.getByPlaceholder(/^Search Events$/i)
-		).toBeVisible();
+		await expect(shell.getByPlaceholder(/^Search Events$/i)).toBeVisible();
 	});
 
 	test('calendars: list loads calendars or empty state', async ({
@@ -101,7 +105,11 @@ test.describe('Booking calendars', () => {
 		const shell = calendarsShell(adminPage);
 		const loaded = shell
 			.locator('.doublescale-booking-calendar-events')
-			.or(shell.getByText(/No Calendars available|No matching events found/i))
+			.or(
+				shell.getByText(
+					/No Calendars available|No matching events found/i
+				)
+			)
 			.or(shell.getByText(/^Create Event$/i));
 
 		await expect(loaded.first()).toBeVisible({ timeout: 45_000 });
@@ -117,7 +125,9 @@ test.describe('Booking bookings list', () => {
 		).toBeVisible({ timeout: 45_000 });
 	});
 
-	test('bookings: header and manual booking action', async ({ adminPage }) => {
+	test('bookings: header and manual booking action', async ({
+		adminPage,
+	}) => {
 		await expect(
 			adminPage.getByText(
 				/See your scheduled events from your calendar events links/i
@@ -125,7 +135,9 @@ test.describe('Booking bookings list', () => {
 		).toBeVisible();
 
 		await expect(
-			adminPage.getByRole('button', { name: /^Booking Manually$/i }).first()
+			adminPage
+				.getByRole('button', { name: /^Booking Manually$/i })
+				.first()
 		).toBeVisible();
 	});
 

@@ -11,12 +11,32 @@ import apiFetch from '@wordpress/api-fetch';
 import { NAMESPACE } from '@/constants/booking';
 
 /**
+ * `useApi` calls `onError` with a formatted string. Callers that read
+ * `error.message` render an empty notice body (a string has no `.message`).
+ */
+export function bookingApiNoticeMessage(
+	error: unknown,
+	fallback: string
+): string {
+	if (typeof error === 'string' && error.trim()) {
+		return error.trim();
+	}
+	if (error && typeof error === 'object' && 'message' in error) {
+		const msg = (error as { message?: unknown }).message;
+		if (typeof msg === 'string' && msg.trim()) {
+			return msg.trim();
+		}
+	}
+	return fallback;
+}
+
+/**
  * Turn WP REST / apiFetch errors into a clearer message (includes validation param hints).
  *
  * @param apiPath Relative path passed to callApi (e.g. `integrations/zoom/…/accounts`). Used so
  * Zoom-only copy is not shown for Apple (which also nests credentials under `app_credentials`).
  */
-function formatBookingRestError(err: unknown, apiPath = ''): string {
+export function formatBookingRestError(err: unknown, apiPath = ''): string {
 	const e = err as {
 		message?: string;
 		data?: { params?: Record<string, string> };

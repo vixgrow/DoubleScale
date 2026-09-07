@@ -21,7 +21,11 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-import { PlusSquare as PlusSquareOutlined, Trash2 as DeleteOutlined, ArrowLeft as ArrowLeftOutlined } from 'lucide-react';
+import {
+	PlusSquare as PlusSquareOutlined,
+	Trash2 as DeleteOutlined,
+	ArrowLeft as ArrowLeftOutlined,
+} from 'lucide-react';
 import { isEmpty, map } from 'lodash';
 
 /**
@@ -37,7 +41,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckboxCard } from '@/components/booking';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 
 const getIntegrationRequirements = (
@@ -194,10 +204,10 @@ function fieldsForIntegrationDetails(
 	slug: string,
 	fields: Fields | undefined
 ): Fields {
-	if ( fields && Object.keys( fields ).length > 0 ) {
+	if (fields && Object.keys(fields).length > 0) {
 		return fields;
 	}
-	if ( slug === 'zoom' ) {
+	if (slug === 'zoom') {
 		return getZoomCredentialFieldsFallback();
 	}
 	return fields || {};
@@ -238,7 +248,8 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 	const [formValues, setFormValues] = useState<Record<string, any>>({});
 	const form = {
 		getFieldsValue: () => formValues,
-		setFieldsValue: (vals: Record<string, any>) => setFormValues((prev) => ({ ...prev, ...vals })),
+		setFieldsValue: (vals: Record<string, any>) =>
+			setFormValues((prev) => ({ ...prev, ...vals })),
 		getFieldValue: (key: string) => formValues[key],
 		resetFields: () => setFormValues({}),
 		validateFields: async () => formValues,
@@ -394,7 +405,8 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				let nextSelected = '';
 				for (const account of accounts) {
 					if (account.config?.default_calendar?.calendar_id) {
-						nextSelected = account.config.default_calendar.calendar_id;
+						nextSelected =
+							account.config.default_calendar.calendar_id;
 						break;
 					}
 				}
@@ -466,11 +478,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				onSuccess(response: any) {
 					if (response.success) {
 						// User has Teams capability, proceed with enabling Teams
-						handleSettingsChange(
-							account.id,
-							type,
-							checked
-						);
+						handleSettingsChange(account.id, type, checked);
 					} else {
 						// User doesn't have Teams capability
 						setNotice({
@@ -762,17 +770,17 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 					title: __('Error', 'doublescale'),
 					message: bookingApiNoticeMessage(
 						error,
-						__('Failed to update calendar selection.', 'doublescale')
+						__(
+							'Failed to update calendar selection.',
+							'doublescale'
+						)
 					),
 				});
 			},
 		});
 	};
 
-	const accountManagerLayout = computeAccountManagerLayout(
-		integration,
-		slug
-	);
+	const accountManagerLayout = computeAccountManagerLayout(integration, slug);
 
 	useEffect(() => {
 		if (!onCloseReadinessChange) {
@@ -974,10 +982,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				setNotice({
 					type: 'success',
 					title: __('Success', 'doublescale'),
-					message: __(
-						'Settings updated successfully',
-						'doublescale'
-					),
+					message: __('Settings updated successfully', 'doublescale'),
 				});
 			},
 			onError(error) {
@@ -994,204 +999,223 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 	};
 
 	const renderAccountList = () => (
-		<div className='flex flex-col gap-5 w-full'>
-			<div className='flex flex-col gap-5'>
+		<div className="flex flex-col gap-5 w-full">
+			<div className="flex flex-col gap-5">
 				{loading ? (
 					<Spinner />
 				) : (
 					accounts.map((account) => (
-						<Card key={account.id}><CardContent>
-                                <div
-                                    className='flex items-center gap-4 p-0 text-color-primary-text border-b pb-5 mb-5'>
-                                    <img
-                                        src={integration.icon}
-                                        alt={integration.name}
-                                        className="size-8"
-                                    />
-                                    <div className='flex justify-between items-center'>
-                                        <div>
-                                            <span className="text-[#09090B] font-bold text-2xl block">
-                                                {account.name}
-                                                <span className="text-[#0EA473] text-xs font-medium italic ml-3">
-                                                    {__(
-                                                        'Connected',
-                                                        'doublescale'
-                                                    )}
-                                                </span>
-                                            </span>
-                                            <span className="text-[#3F4254] italic font-medium">
-                                                {account.config.email}
-                                            </span>
-                                        </div>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button
-                                                    title={__(
-                                                        'Delete Account',
-                                                        'doublescale'
-                                                    )}
-                                                    variant="destructive"
-                                                    size="icon"
-                                                >
-                                                    <DeleteOutlined className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>
-                                                        {__('Are you sure you want to delete this account?', 'doublescale')}
-                                                    </AlertDialogTitle>
-                                                    <AlertDialogDescription />
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>{__('No', 'doublescale')}</AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={() => handleDeleteAccount(account.id)}
-                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                    >
-                                                        {__('Yes', 'doublescale')}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </div>
-                                {integration.is_calendar && (
-                                    <div className='flex flex-col gap-2.5 w-full border-b pb-4 mb-4'>
-                                        <span className="text-[#9197A4]">
-                                            {__(
-                                                'Enable the calendars you want to check for conflicts to prevent double bookings.',
-                                                'doublescale'
-                                            )}
-                                        </span>
-                                        {!isEmpty(account.calendars) ? (
-                                            <div className='flex flex-col gap-2'>
-                                                {account.calendars.map(
-                                                    (calendar) => (
-                                                        <CheckboxCard
-                                                            key={calendar.id}
-                                                            checked={
-                                                                !isEmpty(
-                                                                    account.config
-                                                                ) &&
-                                                                Array.isArray(
-                                                                    account.config
-                                                                        .calendars
-                                                                )
-                                                                    ? account.config.calendars.includes(
-                                                                            calendar.id
-                                                                        )
-                                                                    : false
-                                                            }
-                                                            onCheckedChange={(checked) =>
-                                                                handleCalendarSelection(
-                                                                    account.id,
-                                                                    calendar.id,
-                                                                    checked
-                                                                )
-                                                            }
-                                                            className="text-color-primary-text font-semibold"
-                                                        >
-                                                            {calendar.name}
-                                                        </CheckboxCard>
-                                                    )
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <span>
-                                                {__(
-                                                    'No calendars found.',
-                                                    'doublescale'
-                                                )}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                                {/* Additional integration-specific settings for existing accounts */}
-                                {integrationSlug === 'google' && (
-                                    <div className='flex flex-col gap-2.5 w-full border-b pb-4 mb-4'>
-                                        <span className="text-[#9197A4] font-semibold">
-                                            {__(
-                                                'Google Calendar Settings',
-                                                'doublescale'
-                                            )}
-                                        </span>
-                                        <div className='flex flex-col gap-2'>
-                                            <CheckboxCard
-                                                checked={
-                                                    account.config?.settings
-                                                        ?.enable_notifications ===
-                                                    true
-                                                }
-                                                onCheckedChange={(checked) =>
-                                                    handleSettingsChange(
-                                                        account.id,
-                                                        'enable_notifications',
-                                                        checked
-                                                    )
-                                                }
-                                                className="text-color-primary-text font-semibold"
-                                            >
-                                                {__(
-                                                    'Enable Google Calendar Notifications',
-                                                    'doublescale'
-                                                )}
-                                            </CheckboxCard>
-                                            <CheckboxCard
-                                                checked={
-                                                    account.config?.settings
-                                                        ?.guests_can_see_others ===
-                                                    true
-                                                }
-                                                onCheckedChange={(checked) =>
-                                                    handleSettingsChange(
-                                                        account.id,
-                                                        'guests_can_see_others',
-                                                        checked
-                                                    )
-                                                }
-                                                className="text-color-primary-text font-semibold"
-                                            >
-                                                {__(
-                                                    'Guests can see other guests of the slot',
-                                                    'doublescale'
-                                                )}
-                                            </CheckboxCard>
-                                        </div>
-                                    </div>
-                                )}
-                                {integrationSlug === 'outlook' && (
-                                    <div className='flex flex-col gap-2.5 w-full border-b pb-4 mb-4'>
-                                        <span className="text-[#9197A4] font-semibold">
-                                            {__(
-                                                'Microsoft Settings',
-                                                'doublescale'
-                                            )}
-                                        </span>
-                                        <div className='flex flex-col gap-2'>
-                                            <CheckboxCard
-                                                checked={
-                                                    account.config?.settings
-                                                        ?.enable_teams === true
-                                                }
-                                                onCheckedChange={(checked) =>
-                                                    handleCheckTeamsCapabilities(
-                                                        account,
-                                                        'enable_teams',
-                                                        checked
-                                                    )
-                                                }
-                                                className="text-color-primary-text font-semibold"
-                                            >
-                                                {__(
-                                                    'Enable Microsoft Teams (Requires work/school account)',
-                                                    'doublescale'
-                                                )}
-                                            </CheckboxCard>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent></Card>
+						<Card key={account.id}>
+							<CardContent>
+								<div className="flex items-center gap-4 p-0 text-color-primary-text border-b pb-5 mb-5">
+									<img
+										src={integration.icon}
+										alt={integration.name}
+										className="size-8"
+									/>
+									<div className="flex justify-between items-center">
+										<div>
+											<span className="text-[#09090B] font-bold text-2xl block">
+												{account.name}
+												<span className="text-[#0EA473] text-xs font-medium italic ml-3">
+													{__(
+														'Connected',
+														'doublescale'
+													)}
+												</span>
+											</span>
+											<span className="text-[#3F4254] italic font-medium">
+												{account.config.email}
+											</span>
+										</div>
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button
+													title={__(
+														'Delete Account',
+														'doublescale'
+													)}
+													variant="destructive"
+													size="icon"
+												>
+													<DeleteOutlined className="h-4 w-4" />
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>
+														{__(
+															'Are you sure you want to delete this account?',
+															'doublescale'
+														)}
+													</AlertDialogTitle>
+													<AlertDialogDescription />
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>
+														{__(
+															'No',
+															'doublescale'
+														)}
+													</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() =>
+															handleDeleteAccount(
+																account.id
+															)
+														}
+														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+													>
+														{__(
+															'Yes',
+															'doublescale'
+														)}
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									</div>
+								</div>
+								{integration.is_calendar && (
+									<div className="flex flex-col gap-2.5 w-full border-b pb-4 mb-4">
+										<span className="text-[#9197A4]">
+											{__(
+												'Enable the calendars you want to check for conflicts to prevent double bookings.',
+												'doublescale'
+											)}
+										</span>
+										{!isEmpty(account.calendars) ? (
+											<div className="flex flex-col gap-2">
+												{account.calendars.map(
+													(calendar) => (
+														<CheckboxCard
+															key={calendar.id}
+															checked={
+																!isEmpty(
+																	account.config
+																) &&
+																Array.isArray(
+																	account
+																		.config
+																		.calendars
+																)
+																	? account.config.calendars.includes(
+																			calendar.id
+																		)
+																	: false
+															}
+															onCheckedChange={(
+																checked
+															) =>
+																handleCalendarSelection(
+																	account.id,
+																	calendar.id,
+																	checked
+																)
+															}
+															className="text-color-primary-text font-semibold"
+														>
+															{calendar.name}
+														</CheckboxCard>
+													)
+												)}
+											</div>
+										) : (
+											<span>
+												{__(
+													'No calendars found.',
+													'doublescale'
+												)}
+											</span>
+										)}
+									</div>
+								)}
+								{/* Additional integration-specific settings for existing accounts */}
+								{integrationSlug === 'google' && (
+									<div className="flex flex-col gap-2.5 w-full border-b pb-4 mb-4">
+										<span className="text-[#9197A4] font-semibold">
+											{__(
+												'Google Calendar Settings',
+												'doublescale'
+											)}
+										</span>
+										<div className="flex flex-col gap-2">
+											<CheckboxCard
+												checked={
+													account.config?.settings
+														?.enable_notifications ===
+													true
+												}
+												onCheckedChange={(checked) =>
+													handleSettingsChange(
+														account.id,
+														'enable_notifications',
+														checked
+													)
+												}
+												className="text-color-primary-text font-semibold"
+											>
+												{__(
+													'Enable Google Calendar Notifications',
+													'doublescale'
+												)}
+											</CheckboxCard>
+											<CheckboxCard
+												checked={
+													account.config?.settings
+														?.guests_can_see_others ===
+													true
+												}
+												onCheckedChange={(checked) =>
+													handleSettingsChange(
+														account.id,
+														'guests_can_see_others',
+														checked
+													)
+												}
+												className="text-color-primary-text font-semibold"
+											>
+												{__(
+													'Guests can see other guests of the slot',
+													'doublescale'
+												)}
+											</CheckboxCard>
+										</div>
+									</div>
+								)}
+								{integrationSlug === 'outlook' && (
+									<div className="flex flex-col gap-2.5 w-full border-b pb-4 mb-4">
+										<span className="text-[#9197A4] font-semibold">
+											{__(
+												'Microsoft Settings',
+												'doublescale'
+											)}
+										</span>
+										<div className="flex flex-col gap-2">
+											<CheckboxCard
+												checked={
+													account.config?.settings
+														?.enable_teams === true
+												}
+												onCheckedChange={(checked) =>
+													handleCheckTeamsCapabilities(
+														account,
+														'enable_teams',
+														checked
+													)
+												}
+												className="text-color-primary-text font-semibold"
+											>
+												{__(
+													'Enable Microsoft Teams (Requires work/school account)',
+													'doublescale'
+												)}
+											</CheckboxCard>
+										</div>
+									</div>
+								)}
+							</CardContent>
+						</Card>
 					))
 				)}
 			</div>
@@ -1199,455 +1223,621 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 	);
 
 	return (
-        <Card className="integration-details-page h-fit"><CardContent>
-                    <div
-                        className='flex items-center gap-4 p-0 text-color-primary-text border-b pb-5 mb-5'>
-                        <img
-                            src={integration.icon}
-                            alt={integration.name}
-                            className="size-12"
-                        />
-                        <div className='flex justify-between items-center'>
-                            <div>
-                                <span className="text-[#09090B] font-bold text-2xl block">
-                                    {integration.name}
-                                </span>
-                                <span className="text-sm">
-                                    {integration.description}
-                                </span>
-                            </div>
-                            {canAddAccount() && (
-                                <Button
-                                    onClick={() =>
-                                        isOAuthAuthType(integration.auth_type)
-                                            ? handleConnectOAuth()
-                                            : setVisible(true)
-                                    }
-                                    disabled={
-                                        connectLoading ||
-                                        (integrationSlug === 'apple' &&
-                                            isProVersion &&
-                                            appleIntegrationUiLocked)
-                                    }
-                                    variant="secondaryDeepBlue"
-                                    className="text-base font-medium inline-flex items-center gap-2"
-                                >
-                                    {connectLoading ? (
-                                        <Spinner className="h-4 w-4" />
-                                    ) : (
-                                        <PlusSquareOutlined className="h-4 w-4" />
-                                    )}
-                                    {__('Add New', 'doublescale')}
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                    {integrationSlug === 'apple' && isProVersion ? (
-                        <div className="flex flex-col gap-4 border-b border-border pb-5 mb-5">
-                            <p className="text-[#3F4254] text-base">
-                                {__(
-                                    'To use Apple Calendar Integration for your Booking forms, please enable the integration.',
-                                    'doublescale'
-                                )}{' '}
-                                <a
-                                    href={
-                                        (applyFilters(
-                                            'doublescale_booking_apple_documentation_url',
-                                            '#'
-                                        ) as string) || '#'
-                                    }
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-semibold text-primary underline"
-                                >
-                                    {__('Read the documentation', 'doublescale')}
-                                </a>
-                            </p>
-                            <div className="flex flex-col gap-2">
-                                <span className="text-[#09090B] font-bold text-base">
-                                    {__('Status', 'doublescale')}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        className="custom-checkbox"
-                                        checked={appleIntegrationEnabledChecked}
-                                        disabled={
-                                            appleGlobalSettings === null ||
-                                            appleIntegrationSettingsLoading
-                                        }
-                                        onCheckedChange={(checked) =>
-                                            handleAppleGlobalEnabledChange(
-                                                Boolean(checked)
-                                            )
-                                        }
-                                    />
-                                    <span className="text-color-primary-text font-semibold">
-                                        {__(
-                                            'Enable Apple Calendar Integration',
-                                            'doublescale'
-                                        )}
-                                    </span>
-                                    {appleIntegrationSettingsLoading ? (
-                                        <Spinner className="h-4 w-4" />
-                                    ) : null}
-                                </div>
-                            </div>
-                        </div>
-                    ) : null}
-                    {!accountManagerLayout ? (
-                        isProVersion ? (
-                            <>
-                                <div className="zoom-fields">
-                                    <div className='flex flex-col gap-2.5 w-full'>
-                                        <div className="text-[#71717A] italic">
-                                            {__('Please read the', 'doublescale')}
-                                            {' '}
-                                            <span className="cursor-pointer font-semibold underline mx-1">
-                                                {__(
-                                                    'documentation here',
-                                                    'doublescale'
-                                                )}
-                                            </span>{' '}
-                                            {__(
-                                                'for step by step guide to know how you can get credentials from Zoom Account',
-                                                'doublescale'
-                                            )}
-                                        </div>
-                                        <div className="space-y-4">
-                                            {map(
-                                                fieldsForIntegrationDetails(
-                                                    integrationSlug,
-                                                    integration.fields
-                                                ),
-                                                (field, fieldKey) => (
-                                                    <div key={fieldKey} className="space-y-1">
-                                                        <label
-                                                            htmlFor={`${integrationSlug}-${fieldKey}`}
-                                                            className="text-[#3F4254] font-semibold text-[16px]"
-                                                        >
-                                                            {field.label}
-                                                        </label>
-                                                        {field.type === 'password' ||
-                                                        fieldKey === 'client_secret' ? (
-                                                            <div className='flex gap-2.5'>
-                                                                <Input
-                                                                    id={`${integrationSlug}-${fieldKey}`}
-                                                                    placeholder={field.placeholder}
-                                                                    className="rounded-lg h-[48px]"
-                                                                    type='password'
-                                                                    value={formValues[fieldKey] || ''}
-                                                                    onChange={(e) => form.setFieldsValue({ [fieldKey]: e.target.value })}
-                                                                    required={field.required}
-                                                                />
-                                                                {accounts.length > 0 && (
-                                                                    <Button
-                                                                        className="h-[48px]"
-                                                                        onClick={() => handleDeleteAccount(accounts[0].id)}
-                                                                        disabled={loading}
-                                                                        variant='destructive'
-                                                                    >
-                                                                        {__('Disconnect', 'doublescale')}
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <Input
-                                                                id={`${integrationSlug}-${fieldKey}`}
-                                                                type={field.type}
-                                                                placeholder={field.placeholder}
-                                                                className="rounded-lg h-[48px]"
-                                                                value={formValues[fieldKey] || ''}
-                                                                onChange={(e) => form.setFieldsValue({ [fieldKey]: e.target.value })}
-                                                                required={field.required}
-                                                            />
-                                                        )}
-                                                        <span className="text-xs">
-                                                            {field.description ||
-                                                                `You Can Find Your ${field.label.replace('*', '')} In Your ${integration.name} App Settings.`}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            )}
+		<Card className="integration-details-page h-fit">
+			<CardContent>
+				<div className="flex items-center gap-4 p-0 text-color-primary-text border-b pb-5 mb-5">
+					<img
+						src={integration.icon}
+						alt={integration.name}
+						className="size-12"
+					/>
+					<div className="flex justify-between items-center">
+						<div>
+							<span className="text-[#09090B] font-bold text-2xl block">
+								{integration.name}
+							</span>
+							<span className="text-sm">
+								{integration.description}
+							</span>
+						</div>
+						{canAddAccount() && (
+							<Button
+								onClick={() =>
+									isOAuthAuthType(integration.auth_type)
+										? handleConnectOAuth()
+										: setVisible(true)
+								}
+								disabled={
+									connectLoading ||
+									(integrationSlug === 'apple' &&
+										isProVersion &&
+										appleIntegrationUiLocked)
+								}
+								variant="secondaryDeepBlue"
+								className="text-base font-medium inline-flex items-center gap-2"
+							>
+								{connectLoading ? (
+									<Spinner className="h-4 w-4" />
+								) : (
+									<PlusSquareOutlined className="h-4 w-4" />
+								)}
+								{__('Add New', 'doublescale')}
+							</Button>
+						)}
+					</div>
+				</div>
+				{integrationSlug === 'apple' && isProVersion ? (
+					<div className="flex flex-col gap-4 border-b border-border pb-5 mb-5">
+						<p className="text-[#3F4254] text-base">
+							{__(
+								'To use Apple Calendar Integration for your Booking forms, please enable the integration.',
+								'doublescale'
+							)}{' '}
+							<a
+								href={
+									(applyFilters(
+										'doublescale_booking_apple_documentation_url',
+										'#'
+									) as string) || '#'
+								}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="font-semibold text-primary underline"
+							>
+								{__('Read the documentation', 'doublescale')}
+							</a>
+						</p>
+						<div className="flex flex-col gap-2">
+							<span className="text-[#09090B] font-bold text-base">
+								{__('Status', 'doublescale')}
+							</span>
+							<div className="flex items-center gap-2">
+								<Checkbox
+									className="custom-checkbox"
+									checked={appleIntegrationEnabledChecked}
+									disabled={
+										appleGlobalSettings === null ||
+										appleIntegrationSettingsLoading
+									}
+									onCheckedChange={(checked) =>
+										handleAppleGlobalEnabledChange(
+											Boolean(checked)
+										)
+									}
+								/>
+								<span className="text-color-primary-text font-semibold">
+									{__(
+										'Enable Apple Calendar Integration',
+										'doublescale'
+									)}
+								</span>
+								{appleIntegrationSettingsLoading ? (
+									<Spinner className="h-4 w-4" />
+								) : null}
+							</div>
+						</div>
+					</div>
+				) : null}
+				{!accountManagerLayout ? (
+					isProVersion ? (
+						<>
+							<div className="zoom-fields">
+								<div className="flex flex-col gap-2.5 w-full">
+									<div className="text-[#71717A] italic">
+										{__('Please read the', 'doublescale')}{' '}
+										<span className="cursor-pointer font-semibold underline mx-1">
+											{__(
+												'documentation here',
+												'doublescale'
+											)}
+										</span>{' '}
+										{__(
+											'for step by step guide to know how you can get credentials from Zoom Account',
+											'doublescale'
+										)}
+									</div>
+									<div className="space-y-4">
+										{map(
+											fieldsForIntegrationDetails(
+												integrationSlug,
+												integration.fields
+											),
+											(field, fieldKey) => (
+												<div
+													key={fieldKey}
+													className="space-y-1"
+												>
+													<label
+														htmlFor={`${integrationSlug}-${fieldKey}`}
+														className="text-[#3F4254] font-semibold text-[16px]"
+													>
+														{field.label}
+													</label>
+													{field.type ===
+														'password' ||
+													fieldKey ===
+														'client_secret' ? (
+														<div className="flex gap-2.5">
+															<Input
+																id={`${integrationSlug}-${fieldKey}`}
+																placeholder={
+																	field.placeholder
+																}
+																className="rounded-lg h-[48px]"
+																type="password"
+																value={
+																	formValues[
+																		fieldKey
+																	] || ''
+																}
+																onChange={(e) =>
+																	form.setFieldsValue(
+																		{
+																			[fieldKey]:
+																				e
+																					.target
+																					.value,
+																		}
+																	)
+																}
+																required={
+																	field.required
+																}
+															/>
+															{accounts.length >
+																0 && (
+																<Button
+																	className="h-[48px]"
+																	onClick={() =>
+																		handleDeleteAccount(
+																			accounts[0]
+																				.id
+																		)
+																	}
+																	disabled={
+																		loading
+																	}
+																	variant="destructive"
+																>
+																	{__(
+																		'Disconnect',
+																		'doublescale'
+																	)}
+																</Button>
+															)}
+														</div>
+													) : (
+														<Input
+															id={`${integrationSlug}-${fieldKey}`}
+															type={field.type}
+															placeholder={
+																field.placeholder
+															}
+															className="rounded-lg h-[48px]"
+															value={
+																formValues[
+																	fieldKey
+																] || ''
+															}
+															onChange={(e) =>
+																form.setFieldsValue(
+																	{
+																		[fieldKey]:
+																			e
+																				.target
+																				.value,
+																	}
+																)
+															}
+															required={
+																field.required
+															}
+														/>
+													)}
+													<span className="text-xs">
+														{field.description ||
+															`You Can Find Your ${field.label.replace('*', '')} In Your ${integration.name} App Settings.`}
+													</span>
+												</div>
+											)
+										)}
 
-                                            {integrationSlug === 'google' && (
-                                                <>
-                                                    <hr className='border-t border-border my-4' />
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Checkbox
-                                                            className="custom-checkbox"
-                                                            checked={formValues.enable_notifications || false}
-                                                            onCheckedChange={(checked) => form.setFieldsValue({ enable_notifications: Boolean(checked) })}
-                                                        />
-                                                        <span className="text-color-primary-text font-semibold">
-                                                            {__('Enable Google Calendar Notifications', 'doublescale')}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            className="custom-checkbox"
-                                                            checked={formValues.guests_can_see_others || false}
-                                                            onCheckedChange={(checked) => form.setFieldsValue({ guests_can_see_others: Boolean(checked) })}
-                                                        />
-                                                        <span className="text-color-primary-text font-semibold">
-                                                            {__('Guests can see other guests of the slot', 'doublescale')}
-                                                        </span>
-                                                    </div>
-                                                </>
-                                            )}
+										{integrationSlug === 'google' && (
+											<>
+												<hr className="border-t border-border my-4" />
+												<div className="flex items-center gap-2 mb-2">
+													<Checkbox
+														className="custom-checkbox"
+														checked={
+															formValues.enable_notifications ||
+															false
+														}
+														onCheckedChange={(
+															checked
+														) =>
+															form.setFieldsValue(
+																{
+																	enable_notifications:
+																		Boolean(
+																			checked
+																		),
+																}
+															)
+														}
+													/>
+													<span className="text-color-primary-text font-semibold">
+														{__(
+															'Enable Google Calendar Notifications',
+															'doublescale'
+														)}
+													</span>
+												</div>
+												<div className="flex items-center gap-2">
+													<Checkbox
+														className="custom-checkbox"
+														checked={
+															formValues.guests_can_see_others ||
+															false
+														}
+														onCheckedChange={(
+															checked
+														) =>
+															form.setFieldsValue(
+																{
+																	guests_can_see_others:
+																		Boolean(
+																			checked
+																		),
+																}
+															)
+														}
+													/>
+													<span className="text-color-primary-text font-semibold">
+														{__(
+															'Guests can see other guests of the slot',
+															'doublescale'
+														)}
+													</span>
+												</div>
+											</>
+										)}
 
-                                            {integrationSlug === 'outlook' && (
-                                                <>
-                                                    <hr className='border-t border-border my-4' />
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            className="custom-checkbox"
-                                                            checked={formValues.enable_teams || false}
-                                                            onCheckedChange={(checked) => form.setFieldsValue({ enable_teams: Boolean(checked) })}
-                                                        />
-                                                        <span className="text-color-primary-text font-semibold">
-                                                            {__('Enable Microsoft Teams (Requires work/school account)', 'doublescale')}
-                                                        </span>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
+										{integrationSlug === 'outlook' && (
+											<>
+												<hr className="border-t border-border my-4" />
+												<div className="flex items-center gap-2">
+													<Checkbox
+														className="custom-checkbox"
+														checked={
+															formValues.enable_teams ||
+															false
+														}
+														onCheckedChange={(
+															checked
+														) =>
+															form.setFieldsValue(
+																{
+																	enable_teams:
+																		Boolean(
+																			checked
+																		),
+																}
+															)
+														}
+													/>
+													<span className="text-color-primary-text font-semibold">
+														{__(
+															'Enable Microsoft Teams (Requires work/school account)',
+															'doublescale'
+														)}
+													</span>
+												</div>
+											</>
+										)}
+									</div>
 
-                                        <hr className='border-t border-border my-4' />
+									<hr className="border-t border-border my-4" />
 
-                                        <div className="text-[#71717A] italic">
-                                            {__(
-                                                'The above credentials will be encrypted and stored securely.',
-                                                'doublescale'
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <Button
-                                            onClick={() => {
-                                                handleConnectBasic();
-                                            }}
-                                            disabled={connectLoading}
-                                            style={{ marginTop: '10px' }}
-                                            variant='default'
-                                            className="inline-flex items-center gap-2"
-                                        >
-                                            {connectLoading ? (
-                                                <Spinner className="h-4 w-4" />
-                                            ) : null}
-                                            {connectLoading
-                                                ? __(
-                                                        'Saving & Validating...',
-                                                        'doublescale'
-                                                    )
-                                                : __(
-                                                        'Save & Validate Credentials',
-                                                        'doublescale'
-                                                    )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <ProGlobalIntegrations
-                                list={getIntegrationRequirements(
-                                    integrationSlug,
-                                    integration.name
-                                )}
-                            />
-                        )
-                    ) : (
-                        <div
-                            className={
-                                appleIntegrationUiLocked
-                                    ? 'pointer-events-none opacity-50 select-none'
-                                    : undefined
-                            }
-                        >
-                            <>
-                            {visible ? (
-                                <div className='flex flex-col gap-2.5 w-full'>
-                                    {/* add back button */}
-                                    <div className='flex justify-between items-center'>
-                                        <Button
-                                            onClick={() => setVisible(false)}
-                                            className="text-[#3F4254] font-semibold mb-2"
-                                            variant='link'>{<ArrowLeftOutlined />} 
-                                            {__('Back', 'doublescale')}
-                                        </Button>
-                                    </div>
-                                    {integrationSlug === 'apple' && (
-                                        <div className="text-[#71717A] italic">
-                                            {__(
-                                                'To connect to Apple Server, please enter your Apple Email and app specific password. Generate App Specific Password at',
-                                                'doublescale'
-                                            )}
-                                            <span className="cursor-pointer font-semibold underline mx-1">
-                                                {__(
-                                                    'https://appleid.apple.com/account/manage',
-                                                    'doublescale'
-                                                )}
-                                            </span>
-                                            {__(
-                                                'Your credentials will be stored as encrypted.',
-                                                'doublescale'
-                                            )}
-                                        </div>
-                                    )}
-                                    {integrationSlug === 'zoom' && (
-                                        <div className="text-[#71717A] italic">
-                                            {__('Please read the', 'doublescale')}
-                                            {' '}
-                                            <span className="cursor-pointer font-semibold underline mx-1">
-                                                {__('documentation here', 'doublescale')}
-                                            </span>{' '}
-                                            {__(
-                                                'for a step-by-step guide on creating a Server-to-Server OAuth app in the Zoom Marketplace.',
-                                                'doublescale'
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="space-y-4">
-                                        {map(
-                                            fieldsForIntegrationDetails(
-                                                integrationSlug,
-                                                integration.fields
-                                            ),
-                                            (field, fieldKey) => (
-                                            <div key={fieldKey} className="space-y-1">
-                                                <label
-                                                    htmlFor={`${integrationSlug}-${fieldKey}`}
-                                                    className="text-[#3F4254] font-semibold text-[16px]"
-                                                >
-                                                    {field.label}
-                                                </label>
-                                                {field.type === 'password' ||
-                                                fieldKey === 'client_secret' ? (
-                                                    <div className='flex gap-2.5'>
-                                                        <Input
-                                                            id={`${integrationSlug}-${fieldKey}`}
-                                                            placeholder={field.placeholder}
-                                                            className="rounded-lg h-[48px]"
-                                                            type='password'
-                                                            value={formValues[fieldKey] || ''}
-                                                            onChange={(e) => form.setFieldsValue({ [fieldKey]: e.target.value })}
-                                                            required={field.required}
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <Input
-                                                        id={`${integrationSlug}-${fieldKey}`}
-                                                        type={
-                                                            field.type === 'swtich' ||
-                                                            field.type === 'checkbox'
-                                                                ? 'text'
-                                                                : field.type
-                                                        }
-                                                        placeholder={field.placeholder}
-                                                        className="rounded-lg h-[48px]"
-                                                        value={formValues[fieldKey] || ''}
-                                                        onChange={(e) => form.setFieldsValue({ [fieldKey]: e.target.value })}
-                                                        required={field.required}
-                                                    />
-                                                )}
-                                                <span className="text-xs">
-                                                    {field.description ||
-                                                        `You Can Find Your ${field.label.replace('*', '')} In Your ${integration.name} App Settings.`}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <Button
-                                            onClick={() => {
-                                                form.validateFields()
-                                                    .then(() => {
-                                                        handleConnectBasic();
-                                                    })
-                                                    .catch(() => {
-                                                        // Ant Design surfaces field errors inline.
-                                                    });
-                                            }}
-                                            disabled={connectLoading}
-                                            style={{ marginTop: '10px' }}
-                                            variant='default'
-                                            className="inline-flex items-center gap-2"
-                                        >
-                                            {connectLoading ? (
-                                                <Spinner className="h-4 w-4" />
-                                            ) : null}
-                                            {connectLoading
-                                                ? __('Connecting...', 'doublescale')
-                                                : integrationSlug === 'apple'
-                                                    ? __(
-                                                            'Connect with Apple Calendar',
-                                                            'doublescale'
-                                                        )
-                                                    : integrationSlug === 'zoom'
-                                                        ? __(
-                                                                'Save & Validate Credentials',
-                                                                'doublescale'
-                                                            )
-                                                        : __(
-                                                                'Connect account',
-                                                                'doublescale'
-                                                            )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className='flex flex-col gap-5 w-full'>
-                                    <div className='flex flex-col'>
-                                        <div className="text-[#3F4254] font-semibold text-[16px]">
-                                            {__('Remote Calendar', 'doublescale')}
-                                            <span className="text-[#E53E3E]">
-                                                {__('*', 'doublescale')}
-                                            </span>
-                                        </div>
-                                        <Select
-                                            key={`remote-cal-${integrationSlug}-${calendarId}-${selectedCalendar || 'none'}`}
-                                            value={selectedCalendar || undefined}
-                                            onValueChange={handleRemoteCalendarChange}
-                                            disabled={
-                                                loading ||
-                                                !accounts.length ||
-                                                appleIntegrationUiLocked
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full rounded-lg h-12">
-                                                <SelectValue
-                                                    placeholder={__(
-                                                        'Select a Remote Calendar',
-                                                        'doublescale'
-                                                    )}
-                                                />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {getAllCalendars().map((c) => (
-                                                    <SelectItem
-                                                        key={c.value}
-                                                        value={c.value}
-                                                        disabled={!c.can_edit}
-                                                    >
-                                                        {c.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <div className="text-[#71717A] italic">
-                                            {__(
-                                                'Choose which remote calendar new events are added to when this host is booked.',
-                                                'doublescale'
-                                            )}
-                                        </div>
-                                    </div>
-                                    {renderAccountList()}
-                                </div>
-                            )}
-                            </>
-                        </div>
-                    )}
-                </CardContent></Card>
-    );
+									<div className="text-[#71717A] italic">
+										{__(
+											'The above credentials will be encrypted and stored securely.',
+											'doublescale'
+										)}
+									</div>
+								</div>
+								<div className="flex justify-end">
+									<Button
+										onClick={() => {
+											handleConnectBasic();
+										}}
+										disabled={connectLoading}
+										style={{ marginTop: '10px' }}
+										variant="default"
+										className="inline-flex items-center gap-2"
+									>
+										{connectLoading ? (
+											<Spinner className="h-4 w-4" />
+										) : null}
+										{connectLoading
+											? __(
+													'Saving & Validating...',
+													'doublescale'
+												)
+											: __(
+													'Save & Validate Credentials',
+													'doublescale'
+												)}
+									</Button>
+								</div>
+							</div>
+						</>
+					) : (
+						<ProGlobalIntegrations
+							list={getIntegrationRequirements(
+								integrationSlug,
+								integration.name
+							)}
+						/>
+					)
+				) : (
+					<div
+						className={
+							appleIntegrationUiLocked
+								? 'pointer-events-none opacity-50 select-none'
+								: undefined
+						}
+					>
+						<>
+							{visible ? (
+								<div className="flex flex-col gap-2.5 w-full">
+									{/* add back button */}
+									<div className="flex justify-between items-center">
+										<Button
+											onClick={() => setVisible(false)}
+											className="text-[#3F4254] font-semibold mb-2"
+											variant="link"
+										>
+											{<ArrowLeftOutlined />}
+											{__('Back', 'doublescale')}
+										</Button>
+									</div>
+									{integrationSlug === 'apple' && (
+										<div className="text-[#71717A] italic">
+											{__(
+												'To connect to Apple Server, please enter your Apple Email and app specific password. Generate App Specific Password at',
+												'doublescale'
+											)}
+											<span className="cursor-pointer font-semibold underline mx-1">
+												{__(
+													'https://appleid.apple.com/account/manage',
+													'doublescale'
+												)}
+											</span>
+											{__(
+												'Your credentials will be stored as encrypted.',
+												'doublescale'
+											)}
+										</div>
+									)}
+									{integrationSlug === 'zoom' && (
+										<div className="text-[#71717A] italic">
+											{__(
+												'Please read the',
+												'doublescale'
+											)}{' '}
+											<span className="cursor-pointer font-semibold underline mx-1">
+												{__(
+													'documentation here',
+													'doublescale'
+												)}
+											</span>{' '}
+											{__(
+												'for a step-by-step guide on creating a Server-to-Server OAuth app in the Zoom Marketplace.',
+												'doublescale'
+											)}
+										</div>
+									)}
+									<div className="space-y-4">
+										{map(
+											fieldsForIntegrationDetails(
+												integrationSlug,
+												integration.fields
+											),
+											(field, fieldKey) => (
+												<div
+													key={fieldKey}
+													className="space-y-1"
+												>
+													<label
+														htmlFor={`${integrationSlug}-${fieldKey}`}
+														className="text-[#3F4254] font-semibold text-[16px]"
+													>
+														{field.label}
+													</label>
+													{field.type ===
+														'password' ||
+													fieldKey ===
+														'client_secret' ? (
+														<div className="flex gap-2.5">
+															<Input
+																id={`${integrationSlug}-${fieldKey}`}
+																placeholder={
+																	field.placeholder
+																}
+																className="rounded-lg h-[48px]"
+																type="password"
+																value={
+																	formValues[
+																		fieldKey
+																	] || ''
+																}
+																onChange={(e) =>
+																	form.setFieldsValue(
+																		{
+																			[fieldKey]:
+																				e
+																					.target
+																					.value,
+																		}
+																	)
+																}
+																required={
+																	field.required
+																}
+															/>
+														</div>
+													) : (
+														<Input
+															id={`${integrationSlug}-${fieldKey}`}
+															type={
+																field.type ===
+																	'swtich' ||
+																field.type ===
+																	'checkbox'
+																	? 'text'
+																	: field.type
+															}
+															placeholder={
+																field.placeholder
+															}
+															className="rounded-lg h-[48px]"
+															value={
+																formValues[
+																	fieldKey
+																] || ''
+															}
+															onChange={(e) =>
+																form.setFieldsValue(
+																	{
+																		[fieldKey]:
+																			e
+																				.target
+																				.value,
+																	}
+																)
+															}
+															required={
+																field.required
+															}
+														/>
+													)}
+													<span className="text-xs">
+														{field.description ||
+															`You Can Find Your ${field.label.replace('*', '')} In Your ${integration.name} App Settings.`}
+													</span>
+												</div>
+											)
+										)}
+									</div>
+									<div className="flex justify-end">
+										<Button
+											onClick={() => {
+												form.validateFields()
+													.then(() => {
+														handleConnectBasic();
+													})
+													.catch(() => {
+														// Ant Design surfaces field errors inline.
+													});
+											}}
+											disabled={connectLoading}
+											style={{ marginTop: '10px' }}
+											variant="default"
+											className="inline-flex items-center gap-2"
+										>
+											{connectLoading ? (
+												<Spinner className="h-4 w-4" />
+											) : null}
+											{connectLoading
+												? __(
+														'Connecting...',
+														'doublescale'
+													)
+												: integrationSlug === 'apple'
+													? __(
+															'Connect with Apple Calendar',
+															'doublescale'
+														)
+													: integrationSlug === 'zoom'
+														? __(
+																'Save & Validate Credentials',
+																'doublescale'
+															)
+														: __(
+																'Connect account',
+																'doublescale'
+															)}
+										</Button>
+									</div>
+								</div>
+							) : (
+								<div className="flex flex-col gap-5 w-full">
+									<div className="flex flex-col">
+										<div className="text-[#3F4254] font-semibold text-[16px]">
+											{__(
+												'Remote Calendar',
+												'doublescale'
+											)}
+											<span className="text-[#E53E3E]">
+												{__('*', 'doublescale')}
+											</span>
+										</div>
+										<Select
+											// The key deliberately excludes `selectedCalendar`:
+											// including it remounted the Select on every pick, which
+											// tore down the click mid-flight, so the change never
+											// reached the server and the field looked empty again
+											// after a reload. It still keys on provider/host so
+											// switching integration resets cleanly.
+											key={`remote-cal-${integrationSlug}-${calendarId}-${selectedCalendar || 'none'}`}
+											value={
+												selectedCalendar || undefined
+											}
+											onValueChange={
+												handleRemoteCalendarChange
+											}
+											disabled={
+												loading ||
+												!accounts.length ||
+												appleIntegrationUiLocked
+											}
+										>
+											<SelectTrigger className="w-full rounded-lg h-12">
+												<SelectValue
+													placeholder={__(
+														'Select a Remote Calendar',
+														'doublescale'
+													)}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{getAllCalendars().map((c) => (
+													<SelectItem
+														key={c.value}
+														value={c.value}
+														disabled={!c.can_edit}
+													>
+														{c.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<div className="text-[#71717A] italic">
+											{__(
+												'Choose which remote calendar new events are added to when this host is booked.',
+												'doublescale'
+											)}
+										</div>
+									</div>
+									{renderAccountList()}
+								</div>
+							)}
+						</>
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
 };
 
 export default IntegrationDetailsPage;

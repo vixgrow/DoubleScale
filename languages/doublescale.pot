@@ -5034,6 +5034,9 @@ msgstr ""
 msgid "Could not clear the email log."
 msgstr ""
 
+msgid "Could not connect. Check your credentials and try again."
+msgstr ""
+
 msgid "Could not copy to clipboard"
 msgstr ""
 
@@ -5173,6 +5176,9 @@ msgid "Could not start PayPal checkout."
 msgstr ""
 
 msgid "Could not start sign-in (invalid authorization URL). Check your connection or OAuth settings."
+msgstr ""
+
+msgid "Could not start sign-in. Check your connection or OAuth settings."
 msgstr ""
 
 msgid "Could not update the document status."
@@ -8576,6 +8582,9 @@ msgstr ""
 msgid "Failed to join waiting list"
 msgstr ""
 
+msgid "Failed to load accounts."
+msgstr ""
+
 msgid "Failed to load analytics. Please try again."
 msgstr ""
 
@@ -8889,6 +8898,9 @@ msgid "Failed to update availability"
 msgstr ""
 
 msgid "Failed to update booking status"
+msgstr ""
+
+msgid "Failed to update calendar selection."
 msgstr ""
 
 msgid "Failed to update comment. Please try again."

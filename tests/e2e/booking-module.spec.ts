@@ -103,16 +103,147 @@ test.describe('Booking calendars', () => {
 		adminPage,
 	}) => {
 		const shell = calendarsShell(adminPage);
-		const loaded = shell
-			.locator('.doublescale-booking-calendar-events')
-			.or(
-				shell.getByText(
-					/No Calendars available|No matching events found/i
-				)
-			)
-			.or(shell.getByText(/^Create Event$/i));
+		// Host cards render even when the host has no events. `.or()` without
+		// `.first()` is strict and fails when Host Settings and the landing
+		// page link are both on screen.
+		await expect(
+			shell
+				.getByRole('button', { name: /Host Settings/i })
+				.or(shell.getByText(/No Calendars available/i))
+				.first()
+		).toBeVisible({ timeout: 45_000 });
+	});
 
-		await expect(loaded.first()).toBeVisible({ timeout: 45_000 });
+	test('calendars: nonsense search shows no matching events', async ({
+		adminPage,
+	}) => {
+		const shell = calendarsShell(adminPage);
+		await expect(shell.getByPlaceholder(/^Search Events$/i)).toBeVisible({
+			timeout: 45_000,
+		});
+		// Wait for the first fetch to finish so the keyword request is not
+		// racing the initial empty `search` load.
+		await expect(
+			shell
+				.getByRole('button', { name: /Host Settings/i })
+				.or(shell.getByText(/No Calendars available/i))
+				.first()
+		).toBeVisible({ timeout: 45_000 });
+
+		const keyword = 'zzz-e2e-no-match-calendar-xyz';
+		const filtered = adminPage.waitForResponse(
+			(res) =>
+				res.ok() &&
+				/\/calendars/i.test(res.url()) &&
+				res.url().includes(keyword),
+			{ timeout: 45_000 }
+		);
+		await shell.getByPlaceholder(/^Search Events$/i).fill(keyword);
+		await filtered;
+
+		await expect(
+			shell.getByText(/No matching events found|No Calendars available/i)
+		).toBeVisible({ timeout: 45_000 });
+	});
+
+	test('calendars: host card exposes settings, landing page, and actions', async ({
+		adminPage,
+	}) => {
+		const shell = calendarsShell(adminPage);
+		const hostSettings = shell.getByRole('button', {
+			name: /Host Settings/i,
+		});
+		const empty = shell.getByText(/No Calendars available/i);
+
+		await expect(hostSettings.or(empty).first()).toBeVisible({
+			timeout: 45_000,
+		});
+		if (await empty.isVisible().catch(() => false)) {
+			test.skip(true, 'No host calendar is provisioned for this user.');
+		}
+
+		await expect(
+			shell.getByRole('link', { name: /View My Landing Page/i }).first()
+		).toBeVisible();
+
+		await shell
+			.getByRole('button', { name: /Calendar actions/i })
+			.first()
+			.click();
+		await expect(
+			adminPage.getByRole('button', { name: /^Edit$/i })
+		).toBeVisible();
+		await expect(
+			adminPage.getByRole('button', { name: /Clone Event/i })
+		).toBeVisible();
+		await expect(
+			adminPage.getByRole('button', { name: /^Delete$/i })
+		).toBeVisible();
+	});
+
+	test('calendars: Host Settings opens the host calendar page', async ({
+		adminPage,
+	}) => {
+		const shell = calendarsShell(adminPage);
+		const hostSettings = shell.getByRole('button', {
+			name: /Host Settings/i,
+		});
+		const empty = shell.getByText(/No Calendars available/i);
+
+		await expect(hostSettings.or(empty).first()).toBeVisible({
+			timeout: 45_000,
+		});
+		if (await empty.isVisible().catch(() => false)) {
+			test.skip(true, 'No host calendar is provisioned for this user.');
+		}
+
+		await hostSettings.first().click();
+		await expect(adminPage).toHaveURL(
+			/path=booking(%2F|\/)calendars(%2F|\/)\d+/,
+			{ timeout: 45_000 }
+		);
+		await expect(adminPage).not.toHaveURL(/remote-calendars/);
+	});
+
+	test('calendars: Create Event opens the event type dialog', async ({
+		adminPage,
+	}) => {
+		const shell = calendarsShell(adminPage);
+		const createEvent = shell.getByRole('button', {
+			name: /^Create Event$/i,
+		});
+		const noCalendars = shell.getByText(/No Calendars available/i);
+
+		await expect(createEvent.or(noCalendars).first()).toBeVisible({
+			timeout: 45_000,
+		});
+		if (await noCalendars.isVisible().catch(() => false)) {
+			test.skip(
+				true,
+				'Create Event is hidden until a host calendar exists.'
+			);
+		}
+
+		await createEvent.first().click();
+		const dialog = adminPage.getByRole('dialog');
+		await expect(dialog).toBeVisible({ timeout: 15_000 });
+		await expect(
+			dialog.getByRole('heading', { name: /^Single Event$/i })
+		).toBeVisible();
+		await expect(
+			dialog.getByRole('heading', { name: /^Group Event$/i })
+		).toBeVisible();
+		await adminPage.keyboard.press('Escape');
+	});
+
+	test('calendars: Team Events tab is available on Pro', async ({
+		adminPage,
+	}) => {
+		const shell = calendarsShell(adminPage);
+		const teamTab = shell.getByRole('tab', { name: /^Team Events$/i });
+		await expect(teamTab).toBeVisible({ timeout: 45_000 });
+		await teamTab.click();
+		await expect(teamTab).toHaveAttribute('data-state', 'active');
 	});
 });
 

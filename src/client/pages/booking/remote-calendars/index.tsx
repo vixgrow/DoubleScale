@@ -39,15 +39,15 @@ import { ProFeatureNotice } from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+	SLUG_ORDER,
+	normalizeProviderSlug,
+	resolveProviderCopy,
+	type CalendarIntegrationSlug,
+} from './providers';
 
-export type CalendarIntegrationSlug = 'google' | 'zoom' | 'apple' | 'outlook';
-
-export const SLUG_ORDER: CalendarIntegrationSlug[] = [
-	'google',
-	'zoom',
-	'apple',
-	'outlook',
-];
+export type { CalendarIntegrationSlug } from './providers';
+export { SLUG_ORDER, normalizeProviderSlug } from './providers';
 
 const BUNDLED_ICONS: Record<CalendarIntegrationSlug, string> = {
 	google: googleIcon,
@@ -79,50 +79,18 @@ export const buildIntegrationRows = (
 	all: Record<string, Integration> | undefined | null
 ): IntegrationRow[] => {
 	const configs = all || {};
-	const fallbackName: Record<CalendarIntegrationSlug, string> = {
-		google: __('Google Calendar / Meet', 'doublescale'),
-		zoom: __('Zoom', 'doublescale'),
-		apple: __('Apple Calendar', 'doublescale'),
-		outlook: __('Outlook / Microsoft 365', 'doublescale'),
-	};
-	const fallbackDescription: Record<CalendarIntegrationSlug, string> = {
-		google: __(
-			'Sync availability and add bookings to Google Calendar.',
-			'doublescale'
-		),
-		zoom: __('Create Zoom meetings when events are booked.', 'doublescale'),
-		apple: __(
-			'Sync with Apple Calendar using a secure app password.',
-			'doublescale'
-		),
-		outlook: __(
-			'Sync with Outlook and optional Microsoft Teams.',
-			'doublescale'
-		),
-	};
 
 	return SLUG_ORDER.map((slug) => {
 		const cfg = configs[slug] as Integration | undefined;
+		const copy = resolveProviderCopy(slug, cfg);
 		return {
 			slug,
 			icon: BUNDLED_ICONS[slug],
-			name: cfg?.name || fallbackName[slug],
-			description: cfg?.description || fallbackDescription[slug],
+			name: copy.name,
+			description: copy.description,
 		};
 	});
 };
-
-/**
- * A provider slug is only honoured when it is one we render. Anything else
- * (a stale bookmark, a hand-edited URL) falls back to no selection rather than
- * rendering an empty panel.
- */
-export const normalizeProviderSlug = (
-	value: string | null | undefined
-): CalendarIntegrationSlug | null =>
-	value && (SLUG_ORDER as string[]).includes(value)
-		? (value as CalendarIntegrationSlug)
-		: null;
 
 const RemoteCalendarsPage: FC = () => {
 	const { id } = useParams<{ id: string }>();

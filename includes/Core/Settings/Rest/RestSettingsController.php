@@ -631,6 +631,23 @@ class RestSettingsController extends RestController {
 			}
 		}
 
+		// Validate the automatic-merge notification address. The notifier
+		// silently sends nothing to an address it cannot use, so a typo has to
+		// be caught here — otherwise the save succeeds, no notice ever arrives,
+		// and there is nothing on screen to explain why. Empty is how the
+		// feature is turned off, so only a non-empty bad address is an error.
+		if ( isset( $settings['contact_merge']['notify_email'] ) ) {
+			$notify_email = trim( (string) $settings['contact_merge']['notify_email'] );
+
+			if ( '' !== $notify_email && ! is_email( $notify_email ) ) {
+				return new \WP_Error(
+					'invalid_email',
+					__( 'Merge notification email is not a valid email address', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
 		// Validate calendar week start (0 = Sunday … 6 = Saturday).
 		if ( isset( $settings['calendar']['week_starts_on'] ) ) {
 			$day = (int) $settings['calendar']['week_starts_on'];

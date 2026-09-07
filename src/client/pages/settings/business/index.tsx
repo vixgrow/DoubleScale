@@ -37,8 +37,10 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
 	settings,
 	onChange,
 }) => {
-	const { business_name, business_address, business_logo } = settings.business;
+	const { business_name, business_address, business_logo } =
+		settings.business;
 	const weekStartsOn = settings.calendar?.week_starts_on ?? 1;
+	const mergeNotifyEmail = settings.contact_merge?.notify_email ?? '';
 
 	const handleFieldChange = (key: string, value: string) => {
 		const nextBusiness = {
@@ -52,6 +54,16 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
 		if (typeof window !== 'undefined' && window.doublescaleConfig) {
 			window.doublescaleConfig.business = nextBusiness;
 		}
+	};
+
+	const handleMergeNotifyEmailChange = (value: string) => {
+		onChange({
+			...settings,
+			contact_merge: {
+				...(settings.contact_merge ?? { notify_email: '' }),
+				notify_email: value,
+			},
+		});
 	};
 
 	const handleWeekStartsOnChange = (value: string) => {
@@ -116,10 +128,7 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
 					>
 						<SelectTrigger className="h-11 max-w-sm rounded-lg">
 							<SelectValue
-								placeholder={__(
-									'Select a day',
-									'doublescale'
-								)}
+								placeholder={__('Select a day', 'doublescale')}
 							/>
 						</SelectTrigger>
 						<SelectContent>
@@ -130,6 +139,27 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
 							))}
 						</SelectContent>
 					</Select>
+				</div>
+			</div>
+
+			<div className="mt-8 space-y-2 border-t border-border pt-6">
+				<div className="text-[#09090B] text-lg font-semibold">
+					{__('Duplicate contacts', 'doublescale')}
+				</div>
+				<div className="space-y-1.5">
+					<Field
+						label={__('Merge notification email', 'doublescale')}
+						value={mergeNotifyEmail}
+						onChange={handleMergeNotifyEmailChange}
+						type="text"
+						placeholder="dataquality@example.com"
+					/>
+					<p className="text-sm text-muted-foreground">
+						{__(
+							'When two records are merged automatically — because nothing about them conflicted — a notice is sent to this address. Leave it empty to send nothing.',
+							'doublescale'
+						)}
+					</p>
 				</div>
 			</div>
 		</div>

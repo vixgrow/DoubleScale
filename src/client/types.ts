@@ -105,7 +105,7 @@ export type Order = {
 		date: string;
 		timezone: string;
 		timezone_type: number;
-	}
+	};
 	parent_order_id: string;
 	payment_method: string;
 	payment_method_title: string;
@@ -336,11 +336,7 @@ export type ReviewStepData = {
 
 export type AutomatedTriggerType = 'event' | 'schedule';
 
-export type ScheduleFrequency =
-	| 'daily'
-	| 'weekly'
-	| 'monthly'
-	| 'custom';
+export type ScheduleFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 
 export type ScheduleDay =
 	| 'monday'
@@ -787,6 +783,10 @@ export type Settings = {
 		/** 0 = Sunday … 6 = Saturday. Default Monday (1). */
 		week_starts_on: number;
 	};
+	contact_merge?: {
+		/** Where to send the notice after a duplicate is merged unattended. Empty sends nothing. */
+		notify_email: string;
+	};
 	email: {
 		from_name: string;
 		from_email: string;
@@ -1129,8 +1129,11 @@ export const CONTACT_STATUS = {
 	},
 } as const;
 
-export type EmailStatus = (typeof CONTACT_STATUS.EMAIL)[keyof typeof CONTACT_STATUS.EMAIL];
-export type SmsStatus = (typeof CONTACT_STATUS.SMS)[keyof typeof CONTACT_STATUS.SMS];
-export type WhatsAppStatus = (typeof CONTACT_STATUS.WHATSAPP)[keyof typeof CONTACT_STATUS.WHATSAPP];
+export type EmailStatus =
+	(typeof CONTACT_STATUS.EMAIL)[keyof typeof CONTACT_STATUS.EMAIL];
+export type SmsStatus =
+	(typeof CONTACT_STATUS.SMS)[keyof typeof CONTACT_STATUS.SMS];
+export type WhatsAppStatus =
+	(typeof CONTACT_STATUS.WHATSAPP)[keyof typeof CONTACT_STATUS.WHATSAPP];
 
 export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

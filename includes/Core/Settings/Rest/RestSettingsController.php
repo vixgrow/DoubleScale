@@ -172,6 +172,18 @@ class RestSettingsController extends RestController {
 						),
 					),
 				),
+				'contact_merge'    => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						// Where to send the notice after a duplicate is merged
+						// without review. Empty means send nothing.
+						'notify_email' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+					),
+				),
 				'sms'              => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,

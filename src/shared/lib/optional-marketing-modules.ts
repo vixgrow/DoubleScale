@@ -106,17 +106,16 @@ function placeholderFor(
 				),
 			};
 		case 'sales':
+			// Deliberately unconditional — mirrors PHP `Sales\Module::description()`.
+			// `isSalesDocumentsReady()` tracks whether Sales is *active*, so gating
+			// this copy on it showed "coming soon" to exactly the audience still
+			// deciding whether to switch Sales on.
 			return {
 				label: __('Sales', 'doublescale'),
-				description: isSalesDocumentsReady()
-					? __(
-							'Sales workspace with proposals, invoices, contracts, payments, and team settings.',
-							'doublescale'
-					  )
-					: __(
-							'Sales tools for your team. Includes the sales pipeline; proposals and invoices are coming soon.',
-							'doublescale'
-					  ),
+				description: __(
+					'Sales workspace with pipelines, proposals, invoices, contracts, credit notes, taxes, subscriptions, and team settings.',
+					'doublescale'
+				),
 			};
 		case 'forms':
 			return {

@@ -120,6 +120,7 @@ final class Module extends AbstractModule implements ProvidesAbilities {
 		);
 
 		$container->singleton( Renderer\BookingFrontendHandler::class, static fn () => new Renderer\BookingFrontendHandler() );
+		$container->singleton( Renderer\BookingShortcode::class, static fn () => new Renderer\BookingShortcode() );
 
 		$container->singleton( EventLocations\PersonAddress::class, static fn () => EventLocations\PersonAddress::instance() );
 		$container->singleton( EventLocations\AttendeeAddress::class, static fn () => EventLocations\AttendeeAddress::instance() );
@@ -191,6 +192,10 @@ final class Module extends AbstractModule implements ProvidesAbilities {
 		);
 
 		$container->get( Renderer\BookingFrontendHandler::class );
+
+		// Registers `[doublescale_booking]`, which embeds the standalone booking
+		// page served by the handler above.
+		$container->get( Renderer\BookingShortcode::class );
 
 		$container->get( Managers\FieldsManager::class );
 		$container->get( Managers\LocationsManager::class );

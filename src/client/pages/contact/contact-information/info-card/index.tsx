@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, X, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 /**
  * Internal dependencies
@@ -51,7 +51,7 @@ type EditingField =
 	| null;
 
 const InfoCard: React.FC = () => {
-	const { contact, updateContact } = useContactContext();
+	const { contact, updateContact, mergeEpoch = 0 } = useContactContext();
 
 	const { groups = [], loading: isLoading = false } =
 		useCustomFields('contact');
@@ -86,6 +86,16 @@ const InfoCard: React.FC = () => {
 	const [fieldErrors, setFieldErrors] = useState<
 		Partial<Record<NonNullable<EditingField>, string>>
 	>({});
+
+	useEffect(() => {
+		if (!mergeEpoch) {
+			return;
+		}
+		setEditingField(null);
+		setEditValue('');
+		setFieldErrors({});
+		setIsSaving(false);
+	}, [mergeEpoch]);
 
 	const handleEdit = (field: EditingField, currentValue: string) => {
 		setEditingField(field);
@@ -134,6 +144,8 @@ const InfoCard: React.FC = () => {
 				if (result.success) {
 					setEditingField(null);
 					setEditValue('');
+					setFieldErrors({});
+				} else if ('mergeRequired' in result && result.mergeRequired) {
 					setFieldErrors({});
 				} else if (result.field) {
 					setFieldErrors({ [result.field]: result.message });

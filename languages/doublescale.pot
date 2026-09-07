@@ -472,6 +472,9 @@ msgstr ""
 msgid "%s updated the value"
 msgstr ""
 
+msgid "%s will remain the primary contact."
+msgstr ""
+
 msgid "(%d more characters omitted)"
 msgstr ""
 
@@ -720,16 +723,28 @@ msgstr ""
 msgid "a contact"
 msgstr ""
 
+msgid "A contact cannot be merged into itself."
+msgstr ""
+
 msgid "A contact with the address %1$s already exists (id %2$d). Use update-contact to change it."
 msgstr ""
 
 msgid "A contact with this email address already exists."
 msgstr ""
 
+msgid "A contact with this email address already exists. Review and confirm a merge to continue."
+msgstr ""
+
 msgid "A contact with this phone number already exists."
 msgstr ""
 
+msgid "A contact with this phone number already exists. Review and confirm a merge to continue."
+msgstr ""
+
 msgid "A contact with this WhatsApp number already exists."
+msgstr ""
+
+msgid "A contact with this WhatsApp number already exists. Review and confirm a merge to continue."
 msgstr ""
 
 msgid "Action"
@@ -1356,6 +1371,9 @@ msgstr ""
 msgid "Admin URL from config: %s"
 msgstr ""
 
+msgid "A duplicate contact was found. Review and confirm a merge to continue."
+msgstr ""
+
 msgid "Advanced button & theme styling"
 msgstr ""
 
@@ -1708,6 +1726,9 @@ msgid "A new contact will be created (or matched by email) when the booking is s
 msgstr ""
 
 msgid "A new support ticket was opened."
+msgstr ""
+
+msgid "An existing contact already uses this identifier. Confirm to merge the duplicate into the contact you are editing."
 msgstr ""
 
 msgid "An invitee"
@@ -2983,6 +3004,9 @@ msgid "Border Width"
 msgstr ""
 
 msgid "Both Client ID and Client Secret are required for %s."
+msgstr ""
+
+msgid "Both contacts are required."
 msgstr ""
 
 msgid "Both download_url and plugin_file are required."
@@ -4314,6 +4338,9 @@ msgstr ""
 msgid "confirmed"
 msgstr ""
 
+msgid "Confirm merge"
+msgstr ""
+
 msgid "Confirm Sign"
 msgstr ""
 
@@ -4333,6 +4360,12 @@ msgid "Confirm Unsubscribe"
 msgstr ""
 
 msgid "Confirm URL"
+msgstr ""
+
+msgid "Conflicting fields kept on the primary contact"
+msgstr ""
+
+msgid "Conflicting fields were kept on the primary contact:"
 msgstr ""
 
 msgid "Connect"
@@ -4569,6 +4602,12 @@ msgstr ""
 msgid "Contact IDs to inspect before deletion."
 msgstr ""
 
+msgid "Contact ID to keep as the primary record."
+msgstr ""
+
+msgid "Contact ID to merge into the primary record."
+msgstr ""
+
 msgid "Contact ID to use for merge tags"
 msgstr ""
 
@@ -4588,6 +4627,18 @@ msgid "Contact logged out"
 msgstr ""
 
 msgid "Contact management, lists, tags, segments, and import/export."
+msgstr ""
+
+msgid "Contact merged"
+msgstr ""
+
+msgid "Contact merged on %s."
+msgstr ""
+
+msgid "Contact merge failed. No records were changed."
+msgstr ""
+
+msgid "Contact merge failed and was rolled back."
 msgstr ""
 
 msgid "Contact must have an email address or phone number."
@@ -4648,6 +4699,9 @@ msgid "Contact skipped: %s"
 msgstr ""
 
 msgid "Contacts List"
+msgstr ""
+
+msgid "Contacts merged successfully"
 msgstr ""
 
 msgid "Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign."
@@ -6727,6 +6781,9 @@ msgid "Duplicate Action"
 msgstr ""
 
 msgid "Duplicate Condition"
+msgstr ""
+
+msgid "Duplicate contact #%d was merged into this contact. Related records were preserved."
 msgstr ""
 
 msgid "Duplicated step"
@@ -12296,6 +12353,9 @@ msgstr ""
 msgid "Menu"
 msgstr ""
 
+msgid "Merge contacts"
+msgstr ""
+
 msgid "Merge Tag"
 msgstr ""
 
@@ -13949,6 +14009,9 @@ msgstr ""
 msgid "One invoice with line items, totals, amount paid, and balance due."
 msgstr ""
 
+msgid "One of the contacts could not be found."
+msgstr ""
+
 msgid "One proposal with line items and totals."
 msgstr ""
 
@@ -15251,6 +15314,9 @@ msgstr ""
 msgid "Primary Button"
 msgstr ""
 
+msgid "Primary contact"
+msgstr ""
+
 msgid "Priority"
 msgstr ""
 
@@ -15861,6 +15927,9 @@ msgid "Record offline and online payments"
 msgstr ""
 
 msgid "Record Payment"
+msgstr ""
+
+msgid "Records that will be preserved"
 msgstr ""
 
 msgid "Record that a call happened with a contact, with optional duration, outcome, and notes. This only records history — it does not place a call."
@@ -19578,6 +19647,9 @@ msgstr ""
 msgid "The reply must be that keyword only (not part of a longer sentence)."
 msgstr ""
 
+msgid "These contacts cannot be merged because they have different values for the same identifier."
+msgstr ""
+
 msgid "These contacts have invoices and cannot be deleted. Delete or reassign their invoices first."
 msgstr ""
 
@@ -21893,6 +21965,9 @@ msgid "Why this works:"
 msgstr ""
 
 msgid "Width"
+msgstr ""
+
+msgid "Will be merged"
 msgstr ""
 
 msgid "Will be shown on landing page social share meta or profile block."

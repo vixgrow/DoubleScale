@@ -726,7 +726,24 @@ class ContactModel extends Model {
 	 * @return ContactModel
 	 */
 	public static function get_by_hash_id( $hash_id ) {
-		return self::where( 'hash_id', $hash_id )->first();
+		$contact = self::where( 'hash_id', $hash_id )->first();
+		if ( $contact ) {
+			return $contact;
+		}
+
+		if ( '' === (string) $hash_id ) {
+			return null;
+		}
+
+		$meta = ContactMetaModel::where( 'meta_key', \DoubleScale\Modules\Contacts\Services\ContactMergeService::MERGED_HASH_META_KEY )
+			->where( 'meta_value', $hash_id )
+			->first();
+
+		if ( ! $meta ) {
+			return null;
+		}
+
+		return self::find( (int) $meta->contact_id );
 	}
 
 	/**

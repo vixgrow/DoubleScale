@@ -19,6 +19,7 @@ import { Contact as ContactType, NoticeMessage } from '@doublescale/client';
 import { mapContactIdentifierError } from '@doublescale/shared/utils/contact-identifier-errors';
 import { isWordPressMediaElement } from '@doublescale/shared/utils/wordpress-media-modal';
 import type { ContactUpdateResult } from './state/context';
+import MergeDialog, { type MergePreview } from './merge-dialog';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import { Provider } from './state/context';
@@ -57,6 +58,9 @@ const Contact: React.FC<ContactProps> = ({
 	// When used as a route (isDialog=false), the dialog should be open by default
 	const [showFullPageDialog, setShowFullPageDialog] = useState(true);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [mergePreview, setMergePreview] = useState<MergePreview | null>(null);
+	const [isMerging, setIsMerging] = useState(false);
+	const [mergeEpoch, setMergeEpoch] = useState(0);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [state, dispatch] = useReducer(reducer, {
 		contact: null,
@@ -162,6 +166,14 @@ const Contact: React.FC<ContactProps> = ({
 			return { success: true };
 		} catch (error: any) {
 			console.error('Update contact error:', error);
+			if (error?.code === 'merge_required' && error?.data?.primary && error?.data?.source) {
+				setMergePreview(error.data as MergePreview);
+				return {
+					success: false,
+					mergeRequired: true,
+					message: error.message,
+				};
+			}
 			const mapped = mapContactIdentifierError(error);
 			setNotice({
 				type: 'error',
@@ -174,6 +186,53 @@ const Contact: React.FC<ContactProps> = ({
 			};
 		} finally {
 			setIsUpdating(false);
+		}
+	};
+
+	const cancelMerge = () => {
+		if (isMerging) {
+			return;
+		}
+		setMergePreview(null);
+	};
+
+	const confirmMerge = async () => {
+		if (!contact || !mergePreview || isMerging) {
+			return;
+		}
+
+		setIsMerging(true);
+		try {
+			const response = await apiFetch({
+				path: '/doublescale/v1/contacts/merge',
+				method: 'POST',
+				data: {
+					primary_id: contact.id,
+					source_id: mergePreview.source.id,
+				},
+			});
+
+			const unified = response as ContactType;
+			setContact(unified);
+			if (onContactUpdate) {
+				onContactUpdate(unified);
+			}
+			setMergePreview(null);
+			setMergeEpoch((value) => value + 1);
+			setNotice({
+				type: 'success',
+				message: __('Contacts merged successfully', 'doublescale'),
+			});
+		} catch (error: any) {
+			console.error('Merge contact error:', error);
+			setNotice({
+				type: 'error',
+				message:
+					error?.message ||
+					__('Contact merge failed. No records were changed.', 'doublescale'),
+			});
+		} finally {
+			setIsMerging(false);
 		}
 	};
 
@@ -231,9 +290,13 @@ const Contact: React.FC<ContactProps> = ({
 	}, []);
 
 	return (
+		<>
 		<Dialog
 			open={isDialog ? isOpen : showFullPageDialog}
 			onOpenChange={(value) => {
+				if (!value && (mergePreview || isMerging)) {
+					return;
+				}
 				if (!value) {
 					handleClose();
 				}
@@ -249,17 +312,30 @@ const Contact: React.FC<ContactProps> = ({
 					paddingBottom: '0px',
 				}}
 				onEscapeKeyDown={(event) => {
-					if (document.querySelector('.media-modal')) {
+					if (mergePreview || isMerging || document.querySelector('.media-modal')) {
 						event.preventDefault();
 					}
 				}}
 				onPointerDownOutside={(event) => {
-					if (isWordPressMediaElement(event.target as HTMLElement)) {
+					if (
+						mergePreview ||
+						isMerging ||
+						isWordPressMediaElement(event.target as HTMLElement)
+					) {
 						event.preventDefault();
 					}
 				}}
 				onInteractOutside={(event) => {
-					if (isWordPressMediaElement(event.target as HTMLElement)) {
+					if (
+						mergePreview ||
+						isMerging ||
+						isWordPressMediaElement(event.target as HTMLElement)
+					) {
+						event.preventDefault();
+					}
+				}}
+				onFocusOutside={(event) => {
+					if (mergePreview || isMerging) {
 						event.preventDefault();
 					}
 				}}
@@ -300,7 +376,8 @@ const Contact: React.FC<ContactProps> = ({
 							...state,
 							...$actions,
 							isLoading: loading,
-							isUpdating: isUpdating,
+							isUpdating: isUpdating || isMerging,
+							mergeEpoch,
 							updateContact,
 							showNotice: setNotice,
 						}}
@@ -341,6 +418,14 @@ const Contact: React.FC<ContactProps> = ({
 				)}
 			</DialogContent>
 		</Dialog>
+		<MergeDialog
+			open={Boolean(mergePreview)}
+			busy={isMerging}
+			preview={mergePreview}
+			onCancel={cancelMerge}
+			onConfirm={confirmMerge}
+		/>
+		</>
 	);
 };
 

@@ -20,6 +20,11 @@ export type ContactUpdateResult =
 	| { success: true }
 	| {
 			success: false;
+			mergeRequired: true;
+			message?: string;
+	  }
+	| {
+			success: false;
 			message: string;
 			field?: ContactIdentifierField;
 	  };
@@ -36,6 +41,7 @@ export type ContactContextType = {
 		updatedData?: Partial<Contact>
 	) => Promise<ContactUpdateResult>;
 	isUpdating: boolean;
+	mergeEpoch?: number;
 	showNotice?: (notice: NoticeMessage) => void;
 	notes: Note[];
 	setNotes: (notes: Note[]) => void;

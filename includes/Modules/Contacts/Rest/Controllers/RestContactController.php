@@ -37,6 +37,7 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Modules\Contacts\Services\ContactUpdateNotifier;
+use DoubleScale\Modules\Contacts\Services\ContactMergeService;
 use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
@@ -153,6 +154,30 @@ class RestContactController extends RestController {
 							'description' => __( 'Also delete financial records (invoices, contracts, credit notes) tied to these contacts.', 'doublescale' ),
 							'type'        => 'boolean',
 							'default'     => false,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/merge',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'merge_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'primary_id' => array(
+							'description' => __( 'Contact ID to keep as the primary record.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'source_id'  => array(
+							'description' => __( 'Contact ID to merge into the primary record.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => true,
 						),
 					),
 				),
@@ -2145,6 +2170,74 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * When an identifier belongs to another contact and a merge is safe, ask
+	 * the admin to confirm instead of returning a generic duplicate error.
+	 *
+	 * @param int                                               $primary_id Contact being edited.
+	 * @param array{field: string, contact: ContactModel}|null $conflict   Identifier conflict.
+	 * @return WP_Error|null
+	 */
+	private function merge_required_error( $primary_id, $conflict ) {
+		if ( ! $conflict || empty( $conflict['contact'] ) ) {
+			return null;
+		}
+
+		$preview = ( new ContactMergeService() )->preview( $primary_id, (int) $conflict['contact']->id );
+		if ( is_wp_error( $preview ) || ! empty( $preview['blocking'] ) ) {
+			return null;
+		}
+
+		$field    = (string) $conflict['field'];
+		$messages = array(
+			'email'          => __( 'A contact with this email address already exists. Review and confirm a merge to continue.', 'doublescale' ),
+			'phone'          => __( 'A contact with this phone number already exists. Review and confirm a merge to continue.', 'doublescale' ),
+			'whatsapp_phone' => __( 'A contact with this WhatsApp number already exists. Review and confirm a merge to continue.', 'doublescale' ),
+		);
+
+		return new WP_Error(
+			'merge_required',
+			$messages[ $field ] ?? __( 'A duplicate contact was found. Review and confirm a merge to continue.', 'doublescale' ),
+			array_merge(
+				$preview,
+				array(
+					'status' => 409,
+					'field'  => $field,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Merge a source contact into a primary contact after explicit confirmation.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function merge_item( $request ) {
+		$service = new ContactMergeService();
+		$result  = $service->merge(
+			(int) $request->get_param( 'primary_id' ),
+			(int) $request->get_param( 'source_id' )
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$contact = ContactModel::find( (int) $result['id'] );
+		if ( ! $contact ) {
+			return new WP_REST_Response( $result, 200 );
+		}
+
+		$contact->load( array( 'lists', 'tags' ) );
+		if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
+			$contact->load( 'custom_fields' );
+		}
+
+		return new WP_REST_Response( $contact, 200 );
+	}
+
+	/**
 	 * Permission check for unified messages endpoint
 	 *
 	 * @param WP_REST_Request $request
@@ -2835,6 +2928,10 @@ class RestContactController extends RestController {
 
 			$duplicate = ContactModel::find_identifier_conflict( $contact_data, (int) $contact_id );
 			if ( $duplicate ) {
+				$merge_error = $this->merge_required_error( (int) $contact_id, $duplicate );
+				if ( $merge_error ) {
+					return $merge_error;
+				}
 				return $this->identifier_conflict_error( $duplicate );
 			}
 

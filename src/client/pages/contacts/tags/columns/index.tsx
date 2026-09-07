@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import type { Tag as ContactTag } from '@doublescale/client';
-import { SortIcon, TimeAgoCell, getRowNumber } from '@doublescale/components';
+import { SortIcon, TimeAgoCell, WrappedTextCell, getRowNumber } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@doublescale/components/ui/button';
 import EditHeaderIcon from '@/components/icons/edit-header';
@@ -90,6 +90,9 @@ export const useTagsColumns = ({
 		},
 		{
 			accessorKey: 'description',
+			meta: {
+				className: 'max-w-[16rem] whitespace-normal overflow-hidden',
+			},
 			header: ({ column }) => (
 				<div
 					className="flex items-center gap-1"
@@ -101,7 +104,9 @@ export const useTagsColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.description || '-',
+			cell: ({ row }) => (
+				<WrappedTextCell value={row.original.description} />
+			),
 		},
 		{
 			accessorKey: 'contacts_count',

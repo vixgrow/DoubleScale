@@ -24,6 +24,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { LevelDialog } from './level-dialog';
 import { useLevelsColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 
@@ -120,7 +121,10 @@ const Levels = forwardRef<LevelsRef, LevelsProps>(({ activeTab }, ref) => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchLevels = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 
 		try {
@@ -135,12 +139,22 @@ const Levels = forwardRef<LevelsRef, LevelsProps>(({ activeTab }, ref) => {
 				}),
 			})) as LevelsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setLevels(response.data);
 			setTotalRecords(response.total);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', error.message);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

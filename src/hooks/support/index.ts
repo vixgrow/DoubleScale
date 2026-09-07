@@ -10,7 +10,7 @@
  * plumbing needed.
  */
 
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
@@ -110,8 +110,10 @@ export const useTickets = (filters: TicketFilters = {}) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const filterKey = JSON.stringify(filters);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(
@@ -120,12 +122,21 @@ export const useTickets = (filters: TicketFilters = {}) => {
 		);
 		apiFetch<PaginatedResponse<Ticket>>({ path: url })
 			.then((response) => {
+				if (generation !== fetchGeneration.current) {
+					return;
+				}
 				setData(response);
 			})
 			.catch((err) => {
+				if (generation !== fetchGeneration.current) {
+					return;
+				}
 				setError(formatRestError(err));
 			})
 			.finally(() => {
+				if (generation !== fetchGeneration.current) {
+					return;
+				}
 				setLoading(false);
 			});
 		// filterKey is the serialized form of filters; including the object directly

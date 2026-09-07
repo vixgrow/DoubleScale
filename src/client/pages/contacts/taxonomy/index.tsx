@@ -29,6 +29,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { TaxonomyDialog } from './taxonomy-dialog';
 import { getTaxonomyColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 
@@ -152,8 +153,11 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	// API functions
 	const fetchItems = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -166,12 +170,22 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 				}),
 			})) as ListsResponse | TagsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setItems(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', error.message);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

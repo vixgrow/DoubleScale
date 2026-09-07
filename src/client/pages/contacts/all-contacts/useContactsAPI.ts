@@ -7,6 +7,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import { isEmail } from 'validator';
 /**
  * internal dependencies
@@ -64,8 +65,10 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 	} = useContactsContext();
 
 	const { openDialogOnCreate = true } = options || {};
+	const { beginFetch, isCurrent } = useFetchGeneration();
 
 	const fetchContacts = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -83,12 +86,22 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 				method: 'GET',
 			})) as ContactsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setTotalRecords(response.total || 0);
 			setHasRecords((response.total_count || 0) > 0);
 			response.data && setData(response.data);
 		} catch (error) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', __('Failed to fetch contacts', 'doublescale'));
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 			setIsFiltering(false);
 		}

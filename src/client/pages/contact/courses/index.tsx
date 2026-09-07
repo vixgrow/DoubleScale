@@ -16,6 +16,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { GradientCoursesIcon, NoData, NoticeBanner } from '@doublescale/components';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 
 interface CoursesProps {
@@ -56,7 +57,10 @@ const Courses = ({ contact_id }: CoursesProps) => {
         }
     }, [notice]);
 
+    const { beginFetch, isCurrent } = useFetchGeneration();
+
     const fetchCourses = async () => {
+        const generation = beginFetch();
         setLoading(true);
         setNotice(null);
         try {
@@ -70,15 +74,25 @@ const Courses = ({ contact_id }: CoursesProps) => {
                 ),
             })) as LMSCoursesResponse;
 
+            if (!isCurrent(generation)) {
+                return;
+            }
+
             setCourses(response.data);
             setTotalRecords(response.total);
 
         } catch (error: any) {
+            if (!isCurrent(generation)) {
+                return;
+            }
             showNotice(
                 'error',
                 error?.message || __('Failed to fetch courses', 'doublescale')
             );
         } finally {
+            if (!isCurrent(generation)) {
+                return;
+            }
             setLoading(false);
         }
     };

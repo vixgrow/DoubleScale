@@ -21,6 +21,7 @@ import Result from '../workflow/result';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 
 const ContactsList: React.FC = () => {
@@ -42,7 +43,10 @@ const ContactsList: React.FC = () => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchContacts = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -54,15 +58,25 @@ const ContactsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationContactsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setTotalRecords(response.total ?? 0);
 			setContacts(response.data ?? []);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			createNotice({
 				type: 'error',
 				message:
 					error.message || __('Failed to fetch contacts', 'doublescale'),
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect } from '@wordpress/element';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
@@ -102,11 +103,13 @@ export const useContactMessages = ({
 	const [data, setData] = useState<MessagesResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const { createNotice } = useDispatch('doublescale/core');
+	const { beginFetch, isCurrent } = useFetchGeneration();
 
 	/**
 	 * Fetch messages from API
 	 */
 	const fetchMessages = async (): Promise<void> => {
+		const generation = beginFetch();
 		setLoading(true);
 		setError(null);
 
@@ -119,6 +122,10 @@ export const useContactMessages = ({
 				}),
 			})) as MessagesResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			// Validate response structure
 			if (!response || !response.messages) {
 				throw new Error(
@@ -128,6 +135,10 @@ export const useContactMessages = ({
 
 			setData(response);
 		} catch (err: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			const errorMsg =
 				err.message ||
 				sprintf(
@@ -146,6 +157,9 @@ export const useContactMessages = ({
 
 			console.error(`[useContactMessages] Error fetching ${mode}:`, err);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

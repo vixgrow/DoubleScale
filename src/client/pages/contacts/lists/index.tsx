@@ -33,6 +33,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { getListColumns } from './columns';
 import { ListDialog } from './lists-dialog';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 import {
@@ -149,8 +150,11 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	// API functions
 	const fetchLists = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -166,12 +170,22 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				}),
 			})) as ListsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setLists(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			showNotice('error', error.message);
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

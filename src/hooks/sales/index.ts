@@ -2,7 +2,7 @@
  * Sales module API hooks.
  */
 
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
@@ -59,27 +59,46 @@ export const formatRestError = (err: unknown): string => {
 	return __('Something went wrong. Please try again.', 'doublescale');
 };
 
+const applyIfCurrent = <T>(
+	generationRef: { current: number },
+	generation: number,
+	value: T,
+	apply: (next: T) => void
+): T => {
+	if (generation === generationRef.current) {
+		apply(value);
+	}
+	return value;
+};
+
 export const useProposals = (filters: ProposalFilters = {}) => {
 	const [data, setData] = useState<PaginatedResponse<Proposal> | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const filterKey = JSON.stringify(filters);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/proposals`, filters as Record<string, unknown>);
 		return apiFetch<PaginatedResponse<Proposal>>({ path: url })
-			.then((response) => {
-				setData(response);
-				return response;
-			})
+			.then((response) =>
+				applyIfCurrent(fetchGeneration, generation, response, setData)
+			)
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [filterKey]);
 
 	useEffect(() => {
@@ -145,22 +164,29 @@ export const useContracts = (filters: ContractFilters = {}) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const filterKey = JSON.stringify(filters);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/contracts`, filters as Record<string, unknown>);
 		return apiFetch<PaginatedResponse<Contract>>({ path: url })
-			.then((response) => {
-				setData(response);
-				return response;
-			})
+			.then((response) =>
+				applyIfCurrent(fetchGeneration, generation, response, setData)
+			)
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [filterKey]);
 
 	useEffect(() => {
@@ -398,22 +424,29 @@ export const useInvoices = (filters: InvoiceFilters = {}) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const filterKey = JSON.stringify(filters);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/invoices`, filters as Record<string, unknown>);
 		return apiFetch<PaginatedResponse<Invoice>>({ path: url })
-			.then((response) => {
-				setData(response);
-				return response;
-			})
+			.then((response) =>
+				applyIfCurrent(fetchGeneration, generation, response, setData)
+			)
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [filterKey]);
 
 	useEffect(() => {
@@ -598,22 +631,29 @@ export const usePayments = (filters: PaymentFilters = {}) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const filterKey = JSON.stringify(filters);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/payments`, filters as Record<string, unknown>);
 		return apiFetch<PaginatedResponse<PaymentListItem>>({ path: url })
-			.then((response) => {
-				setData(response);
-				return response;
-			})
+			.then((response) =>
+				applyIfCurrent(fetchGeneration, generation, response, setData)
+			)
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [filterKey]);
 
 	useEffect(() => {
@@ -674,11 +714,13 @@ export const useContactSalesPayments = (contactId: number | null, page = 1, perP
 	const [data, setData] = useState<PaginatedResponse<ContactInvoicePayment> | null>(null);
 	const [loading, setLoading] = useState(Boolean(contactId));
 	const [error, setError] = useState<string | null>(null);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
 		if (!contactId) {
 			return Promise.resolve(null);
 		}
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/contacts/${contactId}/payments`, {
@@ -686,16 +728,21 @@ export const useContactSalesPayments = (contactId: number | null, page = 1, perP
 			per_page: perPage,
 		});
 		return apiFetch<PaginatedResponse<ContactInvoicePayment>>({ path: url })
-			.then((response) => {
-				setData(response);
-				return response;
-			})
+			.then((response) =>
+				applyIfCurrent(fetchGeneration, generation, response, setData)
+			)
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [contactId, page, perPage]);
 
 	useEffect(() => {
@@ -1051,23 +1098,34 @@ export const useApprovalQueue = (page = 1, perPage = 20) => {
 	const [meta, setMeta] = useState({ total: 0, page: 1, per_page: perPage });
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const fetchGeneration = useRef(0);
 
 	const refetch = useCallback(() => {
+		const generation = ++fetchGeneration.current;
 		setLoading(true);
 		setError(null);
 		const url = addQueryArgs(`${NAMESPACE}/approvals`, { page, per_page: perPage });
 		return apiFetch<{ data: ApprovalQueueItem[]; meta: typeof meta }>({ path: url })
 			.then((response) => {
+				if (generation !== fetchGeneration.current) {
+					return response;
+				}
 				setData(response.data ?? []);
 				setMeta(response.meta ?? { total: 0, page, per_page: perPage });
 				return response;
 			})
 			.catch((err: unknown) => {
-				const message = formatRestError(err);
-				setError(message);
+				if (generation === fetchGeneration.current) {
+					const message = formatRestError(err);
+					setError(message);
+				}
 				throw err;
 			})
-			.finally(() => setLoading(false));
+			.finally(() => {
+				if (generation === fetchGeneration.current) {
+					setLoading(false);
+				}
+			});
 	}, [page, perPage]);
 
 	useEffect(() => {

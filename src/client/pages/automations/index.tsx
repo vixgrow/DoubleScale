@@ -40,6 +40,7 @@ import ImportWorkflowsModal from './import-workflows-modal';
 import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { useFetchGeneration } from '@doublescale/hooks/use-fetch-generation';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { isProActive } from '@doublescale/hooks/use-is-pro-active';
 import {
@@ -149,7 +150,10 @@ const AutomationsList: React.FC = () => {
 		setPerPage,
 	});
 
+	const { beginFetch, isCurrent } = useFetchGeneration();
+
 	const fetchAutomations = async () => {
+		const generation = beginFetch();
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -166,15 +170,25 @@ const AutomationsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationsResponse;
 
+			if (!isCurrent(generation)) {
+				return;
+			}
+
 			setData(response.data ?? []);
 			setTotalRecords(response.total ?? 0);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setListError({
 				type: 'error',
 				message: error.message,
 			});
 		} finally {
+			if (!isCurrent(generation)) {
+				return;
+			}
 			setLoading(false);
 		}
 	};

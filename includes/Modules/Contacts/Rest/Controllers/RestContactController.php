@@ -139,7 +139,13 @@ class RestContactController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ) + array(
+						'merge_existing' => array(
+							'description' => __( 'Confirm updating the contact that already owns this identifier instead of creating a new one.', 'doublescale' ),
+							'type'        => 'boolean',
+							'required'    => false,
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -2208,6 +2214,134 @@ class RestContactController extends RestController {
 	}
 
 	/**
+	 * Offer the existing contact instead of refusing the create outright.
+	 *
+	 * Returns the record that owns the identifier plus the fields the submitted
+	 * data would add or change, so the admin can see the consequence before
+	 * confirming. Nothing is written here.
+	 *
+	 * @param array{field: string, contact: ContactModel}|null $conflict     Identifier conflict.
+	 * @param array<string, mixed>                             $contact_data Submitted data.
+	 * @return WP_Error|null
+	 */
+	private function existing_contact_offer( $conflict, array $contact_data ) {
+		if ( ! $conflict || empty( $conflict['contact'] ) ) {
+			return null;
+		}
+
+		$existing = $conflict['contact'];
+		$changes  = array();
+
+		// Identifiers matter as much as profile fields here: submitting a phone
+		// number the existing record lacks is the main reason to confirm.
+		$reviewable = array_merge(
+			ContactMergeService::IDENTIFIER_FIELDS,
+			ContactMergeService::PROFILE_FIELDS
+		);
+
+		foreach ( $reviewable as $field ) {
+			if ( ! array_key_exists( $field, $contact_data ) ) {
+				continue;
+			}
+
+			$incoming = $contact_data[ $field ];
+			if ( ContactMergeService::is_empty_value( $incoming ) ) {
+				continue;
+			}
+
+			$current = $existing->$field ?? null;
+
+			// A value that already matches is not worth showing.
+			if ( ! ContactMergeService::is_empty_value( $current )
+				&& (string) $current === (string) $incoming ) {
+				continue;
+			}
+
+			$changes[] = array(
+				'field'    => $field,
+				'existing' => $current,
+				'incoming' => $incoming,
+				// Filling an empty field is an addition; replacing a different
+				// value is a decision the admin has to make.
+				'conflict' => ! ContactMergeService::is_empty_value( $current ),
+			);
+		}
+
+		$field    = (string) $conflict['field'];
+		$messages = array(
+			'email'          => __( 'A contact with this email address already exists. Review the existing contact and confirm to update it.', 'doublescale' ),
+			'phone'          => __( 'A contact with this phone number already exists. Review the existing contact and confirm to update it.', 'doublescale' ),
+			'whatsapp_phone' => __( 'A contact with this WhatsApp number already exists. Review the existing contact and confirm to update it.', 'doublescale' ),
+		);
+
+		return new WP_Error(
+			'contact_exists_merge_available',
+			$messages[ $field ] ?? __( 'This contact already exists. Review the existing contact and confirm to update it.', 'doublescale' ),
+			array(
+				'status'   => 409,
+				'field'    => $field,
+				'existing' => $existing,
+				'changes'  => $changes,
+			)
+		);
+	}
+
+	/**
+	 * Apply the submitted data to the contact that already owns the identifier.
+	 *
+	 * Reached only when the admin confirmed the offer above, so this updates the
+	 * existing record rather than creating a second one.
+	 *
+	 * @param WP_REST_Request                                  $request      Request.
+	 * @param array{field: string, contact: ContactModel}|null $conflict     Identifier conflict.
+	 * @param array<string, mixed>                             $contact_data Submitted data.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	private function update_existing_on_create( $request, $conflict, array $contact_data ) {
+		if ( ! $conflict || empty( $conflict['contact'] ) ) {
+			return $this->identifier_conflict_error( $conflict );
+		}
+
+		$existing = $conflict['contact'];
+
+		// Another contact may own one of the *other* identifiers being
+		// submitted; updating would then trade one duplicate for another.
+		$other = ContactModel::find_identifier_conflict( $contact_data, (int) $existing->id );
+		if ( $other ) {
+			$merge_error = $this->merge_required_error( (int) $existing->id, $other );
+			if ( $merge_error ) {
+				return $merge_error;
+			}
+			return $this->identifier_conflict_error( $other );
+		}
+
+		$changes = ContactUpdateNotifier::collect_field_changes( $existing, $contact_data );
+		$existing->update( $contact_data );
+
+		$sync_lists = $this->sync_lists( $request, $existing );
+		if ( is_wp_error( $sync_lists ) ) {
+			return $sync_lists;
+		}
+
+		$sync_tags = $this->sync_tags( $request, $existing );
+		if ( is_wp_error( $sync_tags ) ) {
+			return $sync_tags;
+		}
+
+		if ( ! empty( $changes ) ) {
+			ContactUpdateNotifier::fire(
+				$existing,
+				array(
+					'updated_by' => 'admin',
+					'changes'    => $changes,
+				)
+			);
+		}
+
+		return new WP_REST_Response( $existing, 200 );
+	}
+
+	/**
 	 * Merge a source contact into a primary contact after explicit confirmation.
 	 *
 	 * @param WP_REST_Request $request Request.
@@ -2425,6 +2559,19 @@ class RestContactController extends RestController {
 
 			$existing = ContactModel::find_identifier_conflict( $contact_data );
 			if ( $existing ) {
+				// The identifier already belongs to someone. Rather than a flat
+				// "already exists" that leaves the admin to hunt for the other
+				// record, offer it: show what would change, and update it on
+				// confirmation instead of creating a second contact.
+				if ( $request->get_param( 'merge_existing' ) ) {
+					return $this->update_existing_on_create( $request, $existing, $contact_data );
+				}
+
+				$offer = $this->existing_contact_offer( $existing, $contact_data );
+				if ( $offer ) {
+					return $offer;
+				}
+
 				return $this->identifier_conflict_error( $existing );
 			}
 

@@ -135,6 +135,84 @@ final class ContactMergeService {
 	}
 
 	/**
+	 * Merge a duplicate only when the result needs no human judgement.
+	 *
+	 * Unattended paths — a visitor updating their own details, a purchase, a
+	 * registration, a CSV import — have nobody to review the outcome, and a
+	 * merge cannot be undone. So this runs only when there is genuinely nothing
+	 * to decide, and otherwise leaves the duplicate for an admin to confirm
+	 * through the merge dialog.
+	 *
+	 * @param int    $primary_id Primary contact ID (kept).
+	 * @param int    $source_id  Source contact ID (absorbed).
+	 * @param string $reason     Short context for logs and notifications.
+	 * @return array|null Merged contact, or null when it was not safe to merge.
+	 */
+	public function auto_merge( $primary_id, $source_id, $reason = '' ) {
+		$preview = $this->preview( $primary_id, $source_id );
+
+		if ( is_wp_error( $preview ) || ! $this->preview_is_auto_mergeable( $preview ) ) {
+			return null;
+		}
+
+		$merged = $this->merge( $primary_id, $source_id );
+
+		if ( is_wp_error( $merged ) ) {
+			doublescale_get_logger()->error(
+				'Automatic contact merge failed',
+				array(
+					'primary_id' => (int) $primary_id,
+					'source_id'  => (int) $source_id,
+					'reason'     => (string) $reason,
+					'error'      => $merged->get_error_message(),
+					'code'       => 'contact_auto_merge_failed',
+				)
+			);
+			return null;
+		}
+
+		/**
+		 * Fires after a duplicate is merged without human review.
+		 *
+		 * @param array  $merged  Public merged contact row.
+		 * @param array  $preview The preview the decision was made on.
+		 * @param string $reason  Context for the merge.
+		 */
+		do_action( 'doublescale_contact_auto_merged', $merged, $preview, (string) $reason );
+
+		return $merged;
+	}
+
+	/**
+	 * Whether a preview describes a merge with nothing left to decide.
+	 *
+	 * Requires **both** lists to be present and empty: a blocking conflict means
+	 * the same identifier holds two different values, and a field conflict means
+	 * a human has to pick which value survives. A malformed preview is treated
+	 * as unsafe rather than assumed clean.
+	 *
+	 * @param mixed $preview Preview payload.
+	 * @return bool
+	 */
+	private function preview_is_auto_mergeable( $preview ) {
+		if ( ! is_array( $preview ) ) {
+			return false;
+		}
+
+		foreach ( array( 'blocking', 'conflicts' ) as $key ) {
+			if ( ! isset( $preview[ $key ] ) || ! is_array( $preview[ $key ] ) ) {
+				return false;
+			}
+
+			if ( ! empty( $preview[ $key ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Execute the merge. Source is removed only after relationships move.
 	 *
 	 * @param int $primary_id Primary contact ID.

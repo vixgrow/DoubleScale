@@ -243,6 +243,11 @@ test.describe('Booking: remote calendar selection persists', () => {
 				name: 'e2e-persist@example.test',
 				config: {},
 				calendars: [
+					{
+						id: 'ar.eg#holiday@group.v.calendar.google.com',
+						name: 'Holidays',
+						can_edit: false,
+					},
 					{ id: 'cal-a', name: 'Primary', can_edit: true },
 					{ id: 'cal-b', name: 'Team', can_edit: true },
 				],
@@ -409,6 +414,84 @@ test.describe('Booking: remote calendar selection persists', () => {
 		).toBeVisible({ timeout: 45_000 });
 
 		await expect(reloaded.getByRole('combobox').first()).toContainText(
+			/Primary/i,
+			{ timeout: 30_000 }
+		);
+	});
+
+	test('holiday calendars with # in the id do not empty the dropdown', async ({
+		adminPage,
+	}) => {
+		await connectButton(adminPage).click();
+		const shell = remoteCalendarsShell(adminPage);
+		await expect(shell).toBeVisible({ timeout: 45_000 });
+		await shell
+			.getByRole('button', { name: /Google Calendar/i })
+			.first()
+			.click();
+		await expect(
+			shell.getByText(/e2e-persist@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+
+		const trigger = shell.getByRole('combobox').first();
+		await expect(trigger).toBeEnabled({ timeout: 45_000 });
+		await trigger.click();
+		await expect(
+			adminPage.getByRole('option', { name: /Primary/i }).first()
+		).toBeVisible();
+		await expect(
+			adminPage.getByRole('option', { name: /Holidays/i }).first()
+		).toBeDisabled();
+	});
+
+	test('the selection survives switching provider and coming back', async ({
+		adminPage,
+	}) => {
+		await connectButton(adminPage).click();
+		const shell = remoteCalendarsShell(adminPage);
+		await expect(shell).toBeVisible({ timeout: 45_000 });
+		await shell
+			.getByRole('button', { name: /Google Calendar/i })
+			.first()
+			.click();
+		await expect(
+			shell.getByText(/e2e-persist@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+
+		const savePut = adminPage.waitForRequest(
+			(req) =>
+				(req.method() === 'PUT' || req.method() === 'POST') &&
+				/integrations\/google\/.*\/accounts/.test(req.url())
+		);
+		const trigger = shell.getByRole('combobox').first();
+		await expect(trigger).toBeEnabled({ timeout: 45_000 });
+		await trigger.click();
+		await adminPage
+			.getByRole('option', { name: /Primary/i })
+			.first()
+			.click();
+		await savePut;
+		await expect(trigger).toContainText(/Primary/i, { timeout: 30_000 });
+
+		await shell
+			.getByRole('button', { name: /Apple Calendar/i })
+			.first()
+			.click();
+		await expect(adminPage).toHaveURL(/provider=apple/, {
+			timeout: 45_000,
+		});
+
+		await shell
+			.getByRole('button', { name: /Google Calendar/i })
+			.first()
+			.click();
+		await expect(adminPage).toHaveURL(/provider=google/, {
+			timeout: 45_000,
+		});
+		await expect(
+			shell.getByText(/e2e-persist@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+		await expect(shell.getByRole('combobox').first()).toContainText(
 			/Primary/i,
 			{ timeout: 30_000 }
 		);
@@ -1057,5 +1140,218 @@ test.describe('Booking: remote calendars page survives a cold load', () => {
 				name: /Connect to remote calendars/i,
 			})
 		).toBeVisible({ timeout: 45_000 });
+	});
+});
+
+/**
+ * Two connected accounts, one shared selection.
+ *
+ * Choosing a calendar writes to EVERY account: the chosen one gets the
+ * `default_calendar`, its siblings get `null`. The server stores all accounts
+ * under a single host meta key and `update_account()` is a read-modify-write
+ * over that whole array (`includes/Modules/Booking/Integration/Accounts.php`),
+ * so two writes issued together both read the same starting state and the last
+ * one to land overwrites the other. When the clearing write wins, the value the
+ * user just picked is erased — the field comes back empty after a reload and
+ * the user has to pick a second time.
+ *
+ * The stub below reproduces that server: it snapshots the store *before*
+ * yielding, exactly as PHP reads the option before writing it back. A frontend
+ * that fires the writes concurrently loses the update here too.
+ */
+test.describe('Booking: remote calendar selection with two accounts', () => {
+	const ACCOUNT_ONE = '101430818806126115244';
+	const ACCOUNT_TWO = '109009665404577674870';
+
+	test.beforeEach(async ({ adminPage }) => {
+		test.setTimeout(120_000);
+
+		const stored: Record<string, Record<string, unknown>> = {
+			[ACCOUNT_ONE]: {
+				name: 'first@example.test',
+				config: {},
+				calendars: [
+					{
+						id: 'first-primary',
+						name: 'First Primary',
+						can_edit: true,
+					},
+				],
+				app_credentials: {},
+			},
+			[ACCOUNT_TWO]: {
+				name: 'second@example.test',
+				config: {},
+				calendars: [
+					{
+						id: 'second-primary',
+						name: 'Second Primary',
+						can_edit: true,
+					},
+				],
+				app_credentials: {},
+			},
+		};
+
+		await adminPage.route(
+			/integrations\/google\/[^/?]+\/accounts/i,
+			async (route) => {
+				const request = route.request();
+				const method = request.method();
+				const path = new URL(request.url()).pathname;
+
+				if (/\/accounts\/[^/]+\/[^/]+/.test(path)) {
+					return route.fulfill({
+						status: 200,
+						contentType: 'application/json',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({}),
+					});
+				}
+
+				if (method === 'GET') {
+					return route.fulfill({
+						status: 200,
+						contentType: 'application/json',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(stored),
+					});
+				}
+
+				if (method === 'PUT' || method === 'POST') {
+					const id = path.split('/').filter(Boolean).pop() as string;
+					let payload: { config?: Record<string, unknown> } = {};
+					try {
+						payload = JSON.parse(request.postData() || '{}');
+					} catch {
+						payload = {};
+					}
+
+					// Read first, write later — the PHP read-modify-write. The
+					// snapshot is taken before the await, so a concurrent
+					// sibling write is invisible to this one and gets clobbered.
+					const snapshot = JSON.parse(
+						JSON.stringify(stored)
+					) as typeof stored;
+					const existing = snapshot[id] || {};
+					const existingConfig = (existing.config || {}) as Record<
+						string,
+						unknown
+					>;
+					snapshot[id] = {
+						...existing,
+						config: {
+							...existingConfig,
+							...(payload.config || {}),
+						},
+					};
+
+					// Yield, so overlapping requests interleave the way real
+					// HTTP round trips do.
+					await new Promise((resolve) => setTimeout(resolve, 60));
+
+					for (const key of Object.keys(snapshot)) {
+						stored[key] = snapshot[key];
+					}
+
+					return route.fulfill({
+						status: 200,
+						contentType: 'application/json',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(stored[id]),
+					});
+				}
+
+				return route.continue();
+			}
+		);
+
+		await gotoBookingPath(adminPage, 'calendars');
+		await ensureBookingModuleActive(adminPage);
+		await expect(calendarsShell(adminPage)).toBeVisible({
+			timeout: 45_000,
+		});
+		await expect(connectButton(adminPage)).toBeVisible({ timeout: 45_000 });
+	});
+
+	async function openGoogleAccounts(adminPage: Page) {
+		await connectButton(adminPage).click();
+		const shell = remoteCalendarsShell(adminPage);
+		await expect(shell).toBeVisible({ timeout: 45_000 });
+		await shell
+			.getByRole('button', { name: /Google Calendar/i })
+			.first()
+			.click();
+		await expect(
+			shell.getByText(/first@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+		return shell;
+	}
+
+	test('a first-time pick is not wiped by the sibling account write', async ({
+		adminPage,
+	}) => {
+		const shell = await openGoogleAccounts(adminPage);
+
+		const trigger = shell.getByRole('combobox').first();
+		await expect(trigger).toBeEnabled({ timeout: 45_000 });
+		await trigger.click();
+		await adminPage
+			.getByRole('option', { name: /Second Primary/i })
+			.first()
+			.click();
+
+		await expect(trigger).toContainText(/Second Primary/i, {
+			timeout: 30_000,
+		});
+
+		// The reload is what exposes the lost update: the UI looked right, but
+		// the clearing write landed last and erased what was just saved.
+		await adminPage.goto(adminPage.url());
+		await waitForDoubleScaleAdmin(adminPage);
+
+		const reloaded = remoteCalendarsShell(adminPage);
+		await expect(reloaded).toBeVisible({ timeout: 45_000 });
+		await expect(
+			reloaded.getByText(/first@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+
+		await expect(reloaded.getByRole('combobox').first()).toContainText(
+			/Second Primary/i,
+			{ timeout: 30_000 }
+		);
+	});
+
+	test('switching back and forth keeps the last pick', async ({
+		adminPage,
+	}) => {
+		const shell = await openGoogleAccounts(adminPage);
+		const trigger = shell.getByRole('combobox').first();
+		await expect(trigger).toBeEnabled({ timeout: 45_000 });
+
+		for (const name of [
+			/First Primary/i,
+			/Second Primary/i,
+			/First Primary/i,
+		]) {
+			await trigger.click();
+			await adminPage.getByRole('option', { name }).first().click();
+			await expect(trigger).toContainText(name, { timeout: 30_000 });
+		}
+
+		await adminPage.goto(adminPage.url());
+		await waitForDoubleScaleAdmin(adminPage);
+
+		const reloaded = remoteCalendarsShell(adminPage);
+		await expect(reloaded).toBeVisible({ timeout: 45_000 });
+		await expect(
+			reloaded.getByText(/first@example\.test/i).first()
+		).toBeVisible({ timeout: 45_000 });
+
+		// The last thing the user chose must be what survives.
+		await expect(reloaded.getByRole('combobox').first()).toContainText(
+			/First Primary/i,
+			{ timeout: 30_000 }
+		);
 	});
 });

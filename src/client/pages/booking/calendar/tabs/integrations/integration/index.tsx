@@ -49,6 +49,11 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
+import {
+	buildRemoteCalendarOptions,
+	decodeRemoteCalendarSelectValue,
+	encodeRemoteCalendarSelectValue,
+} from './remote-calendar-options';
 
 const getIntegrationRequirements = (
 	integrationSlug: string,
@@ -377,7 +382,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 		for (const account of accounts) {
 			if (account.config?.default_calendar?.calendar_id) {
 				setSelectedCalendar(
-					account.config.default_calendar.calendar_id
+					String(account.config.default_calendar.calendar_id)
 				);
 				break;
 			}
@@ -405,8 +410,9 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				let nextSelected = '';
 				for (const account of accounts) {
 					if (account.config?.default_calendar?.calendar_id) {
-						nextSelected =
-							account.config.default_calendar.calendar_id;
+						nextSelected = String(
+							account.config.default_calendar.calendar_id
+						);
 						break;
 					}
 				}
@@ -820,10 +826,14 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 		let foundAccount: Account | undefined = undefined;
 		let foundCalendar: any = null;
 
+		const remoteId = decodeRemoteCalendarSelectValue(value);
+
 		for (const account of accounts) {
 			if (!account.calendars) continue;
 
-			const calendar = account.calendars.find((cal) => cal.id === value);
+			const calendar = account.calendars.find(
+				(cal) => String(cal.id) === remoteId
+			);
 			if (calendar) {
 				foundAccount = account;
 				foundCalendar = calendar;
@@ -834,9 +844,10 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 		if (!foundAccount || !foundCalendar) return;
 
 		const foundId = String(foundAccount.id);
+		const remoteCalendarId = String(foundCalendar.id);
 
 		// Update local state first for immediate feedback
-		setSelectedCalendar(value);
+		setSelectedCalendar(remoteCalendarId);
 		onCalendarSelect(true);
 
 		// Update all accounts — only one keeps the default calendar (normalize ids as strings)
@@ -847,7 +858,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 					config: {
 						...account.config,
 						default_calendar: {
-							calendar_id: value,
+							calendar_id: remoteCalendarId,
 							account_id: String(account.id),
 						},
 					},
@@ -881,7 +892,18 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				});
 			});
 
-		Promise.all(updatedAccounts.map((account) => putAccountConfig(account)))
+		// Sequential, never Promise.all: every account lives in ONE host meta
+		// array and the server's update_account() is a read-modify-write over
+		// the whole array. Concurrent writes all read the same starting state,
+		// so the last response to land overwrites the others — and since this
+		// flow always pairs "set the chosen account" with "clear its siblings",
+		// the clearing write would erase the selection the user just made. The
+		// UI still looked correct until a reload revealed the empty field.
+		updatedAccounts
+			.reduce(
+				(chain, account) => chain.then(() => putAccountConfig(account)),
+				Promise.resolve()
+			)
 			.then(() => {
 				setNotice({
 					type: 'success',
@@ -905,29 +927,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 			});
 	};
 
-	// Get all available calendars across all accounts
-	const getAllCalendars = () => {
-		const options: { value: string; label: string; can_edit: boolean }[] =
-			[];
-		const seenCalendars = new Set<string>();
-
-		for (const account of accounts) {
-			if (!account.calendars || !account.calendars.length) continue;
-
-			for (const calendar of account.calendars) {
-				// Skip if we've already seen this calendar
-				if (seenCalendars.has(calendar.id)) continue;
-				seenCalendars.add(calendar.id);
-
-				options.push({
-					value: calendar.id,
-					label: `${calendar.name} (${account.name})${!calendar.can_edit ? ' (Read Only)' : ''}`,
-					can_edit: calendar.can_edit,
-				});
-			}
-		}
-		return options;
-	};
+	const getAllCalendars = () => buildRemoteCalendarOptions(accounts);
 
 	const handleSettingsChange = (
 		accountId: string,
@@ -1013,7 +1013,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 										alt={integration.name}
 										className="size-8"
 									/>
-									<div className="flex justify-between items-center">
+									<div className="flex justify-between items-center gap-4">
 										<div>
 											<span className="text-[#09090B] font-bold text-2xl block">
 												{account.name}
@@ -1770,6 +1770,16 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 										</Button>
 									</div>
 								</div>
+							) : loading && accounts.length === 0 ? (
+								<div className="flex items-center gap-2 text-muted-foreground py-8">
+									<Spinner className="h-4 w-4" />
+									<span>
+										{__(
+											'Loading calendars…',
+											'doublescale'
+										)}
+									</span>
+								</div>
 							) : (
 								<div className="flex flex-col gap-5 w-full">
 									<div className="flex flex-col">
@@ -1789,15 +1799,18 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 											// reached the server and the field looked empty again
 											// after a reload. It still keys on provider/host so
 											// switching integration resets cleanly.
-											key={`remote-cal-${integrationSlug}-${calendarId}-${selectedCalendar || 'none'}`}
+											key={`remote-cal-${integrationSlug}-${calendarId}`}
 											value={
-												selectedCalendar || undefined
+												selectedCalendar
+													? encodeRemoteCalendarSelectValue(
+															selectedCalendar
+														)
+													: undefined
 											}
 											onValueChange={
 												handleRemoteCalendarChange
 											}
 											disabled={
-												loading ||
 												!accounts.length ||
 												appleIntegrationUiLocked
 											}

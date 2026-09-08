@@ -11561,6 +11561,9 @@ msgstr ""
 msgid "Loading booking…"
 msgstr ""
 
+msgid "Loading calendars…"
+msgstr ""
+
 msgid "Loading campaign details..."
 msgstr ""
 

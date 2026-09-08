@@ -362,6 +362,7 @@ const RemoteCalendarsPage: FC = () => {
 						<Card>
 							<CardContent className="p-5">
 								<IntegrationDetailsPage
+									key={selectedSlug}
 									integration={activeIntegration}
 									calendarId={String(id)}
 									slug={selectedSlug}

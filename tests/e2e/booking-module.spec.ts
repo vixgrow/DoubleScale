@@ -286,11 +286,23 @@ test.describe('Booking bookings list', () => {
 	});
 
 	test('bookings: list or empty onboarding', async ({ adminPage }) => {
-		const emptyTitle = adminPage.getByText(/^No Bookings Yet\?$/i);
-		const bookingCard = adminPage.locator('[class*="card-details"]');
+		const shell = bookingPageWrapper(adminPage);
 
-		await expect(emptyTitle.or(bookingCard.first())).toBeVisible({
+		// Bookings fetch shows a shimmer first; neither empty copy nor list
+		// cards exist until loading finishes.
+		await expect(shell.locator('.animate-pulse').first()).toBeHidden({
 			timeout: 45_000,
+		});
+
+		const emptyOnboarding = shell.getByText(/No Bookings Yet/i);
+		// Populated list: each row links to booking/bookings/{id}/{period}.
+		// Do not match on a CSS class — CardDetails uses Tailwind only.
+		const bookingRow = shell.locator('a[href*="booking/bookings/"]');
+
+		await expect(
+			emptyOnboarding.or(bookingRow).first()
+		).toBeVisible({
+			timeout: 15_000,
 		});
 	});
 

@@ -57,6 +57,12 @@ test.afterEach(async () => {
 	// timeouts alike. Deletes are keyed on ids captured during the test.
 	for (const id of created.bookings) {
 		try {
+			// Release the slot lock first — `booked_slots` is what enforces
+			// "one booking per slot", so deleting only the booking row leaves
+			// an orphaned lock and that slot stays unbookable forever.
+			db(
+				`DELETE FROM wp_doublescale_booking_booked_slots WHERE booking_id = ${id}`
+			);
 			db(`DELETE FROM wp_doublescale_bookings WHERE id = ${id}`);
 		} catch {
 			// Keep going: one failed delete must not strand the others.
@@ -86,9 +92,7 @@ test.afterEach(async () => {
 /** Belt and braces: sweep any stray E2E- rows an earlier crashed run left. */
 test.afterAll(async () => {
 	try {
-		db(
-			`DELETE FROM wp_doublescale_booking_events WHERE name LIKE 'E2E-%'`
-		);
+		db(`DELETE FROM wp_doublescale_booking_events WHERE name LIKE 'E2E-%'`);
 	} catch {
 		// Best effort only.
 	}
@@ -193,12 +197,16 @@ test.describe('Booking write path: create event', () => {
 
 		const eventId = await createEventViaWizard(page, name);
 
+		// Not an absolute count: sibling specs create and delete their own
+		// events in parallel. The row found by this test's unique name (above)
+		// is the real proof; this only guards against a net loss.
 		const after = Number(
 			db('SELECT COUNT(*) FROM wp_doublescale_booking_events')
 		);
-		expect(after, 'The event count should have gone up by one.').toBe(
-			before + 1
-		);
+		expect(
+			after,
+			'The event count should not have dropped while creating an event.'
+		).toBeGreaterThanOrEqual(before);
 
 		// It is a usable event, not a half-written stub.
 		const details = db(
@@ -217,9 +225,9 @@ test.describe('Booking write path: create event', () => {
 		// Back to the list: the event the user just made must be visible
 		// there, not only in the database.
 		await gotoBooking(page, 'calendars');
-		await expect(page.getByText(name, { exact: false }).first()).toBeVisible(
-			{ timeout: 45_000 }
-		);
+		await expect(
+			page.getByText(name, { exact: false }).first()
+		).toBeVisible({ timeout: 45_000 });
 	});
 
 	test('the created event is reachable on its public page', async ({
@@ -379,7 +387,8 @@ test.describe('Booking write path: create booking', () => {
 		const posted = page
 			.waitForResponse(
 				(r) =>
-					/bookings/i.test(r.url()) && r.request().method() === 'POST',
+					/bookings/i.test(r.url()) &&
+					r.request().method() === 'POST',
 				{ timeout: 30_000 }
 			)
 			.catch(() => null);
@@ -432,10 +441,17 @@ test.describe('Booking write path: create booking', () => {
 			created.contacts.push(contactId);
 		}
 
-		const after = Number(db('SELECT COUNT(*) FROM wp_doublescale_bookings'));
-		expect(after, 'The booking count should have gone up by one.').toBe(
-			before + 1
+		// Deliberately NOT an absolute-count assertion: other booking specs
+		// run in parallel and create/delete their own rows, so `before + 1`
+		// races them. The row identified by this test's own contact is the
+		// only reliable proof, and it is asserted above.
+		const after = Number(
+			db('SELECT COUNT(*) FROM wp_doublescale_bookings')
 		);
+		expect(
+			after,
+			'The booking count should not have dropped while creating a booking.'
+		).toBeGreaterThanOrEqual(before);
 
 		// The row exists — now prove the UI can actually retrieve it. Open the
 		// booking's own detail page by id and check it renders this
@@ -478,12 +494,21 @@ test.describe('Booking write path: cleanup', () => {
 	});
 
 	test('no E2E- rows survive this spec', async () => {
-		// Runs last in the file: by now every other test's afterEach has run.
-		expect(
-			db(
-				`SELECT COUNT(*) FROM wp_doublescale_booking_events WHERE name LIKE 'E2E-%'`
-			),
-			'Leftover E2E- events found — teardown is not keeping up.'
-		).toBe('0');
+		// Runs last in this file, but sibling specs may still be mid-create in
+		// another worker — so poll rather than sampling once. What matters is
+		// that leftovers drain, not that the count is zero at one instant.
+		await expect
+			.poll(
+				() =>
+					db(
+						`SELECT COUNT(*) FROM wp_doublescale_booking_events WHERE name LIKE 'E2E-%'`
+					),
+				{
+					timeout: 60_000,
+					message:
+						'Leftover E2E- events found — teardown is not keeping up.',
+				}
+			)
+			.toBe('0');
 	});
 });

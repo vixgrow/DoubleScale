@@ -702,13 +702,19 @@ test.describe('Booking API: admin edge cases', () => {
 			})
 		);
 
-		// A non-existent event is answered with 403, not 404: the capability
-		// check (can_manage_event) runs first and denies rather than
-		// confirming whether the id exists. That is deliberate — it avoids
-		// leaking which event ids are real — so assert the refusal, not a
-		// "not found" message.
-		expect(res.status, res.text).toBe(403);
-		expect(res.text).toMatch(/not allowed/i);
+		// The answer depends on who is asking, and both are correct:
+		//
+		//   403 — an ordinary admin. `can_manage_event` loads the event,
+		//         finds nothing and denies, so the request never reaches the
+		//         handler. This also avoids confirming which ids exist.
+		//   400 — a super admin on multisite. `can_manage_event` returns true
+		//         early for super admins, so the request does reach
+		//         `create_item`, where the caller IS authorised and an
+		//         unknown id is genuinely bad input.
+		//
+		// What must never happen is a 500 (the pre-fix behaviour) or a 200.
+		expect([400, 403], res.text).toContain(res.status);
+		expect(res.text).toMatch(/not allowed|Invalid event/i);
 
 		// Whatever the wording, nothing was created.
 		expect(

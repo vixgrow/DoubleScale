@@ -508,17 +508,26 @@ test.describe('Booking API: admin edge cases', () => {
 	}
 
 	/**
-	 * KNOWN DEFECT, pinned so a fix is noticed.
+	 * INTENDED BEHAVIOUR — historical backfill. Not a defect.
 	 *
-	 * RestBookingController::create_item skips validate_start_date entirely
-	 * when `ignore_availability` is set (see the `$can_skip_availability`
-	 * branch), so an admin can create a booking dated in the past. The public
-	 * path correctly refuses this.
+	 * `RestBookingController::create_item` deliberately skips
+	 * `validate_start_date` inside the `$can_skip_availability` branch, so a
+	 * user with `doublescale_booking_manage_all_bookings` can record a
+	 * meeting that already happened. The supporting evidence:
 	 *
-	 * When the past-date guard is applied to the admin path too, this test
-	 * fails — flip it to expect a rejection then.
+	 *   - the branch's own comment says "e.g. backfilling";
+	 *   - the Add Booking dialog offers a "Completed" status at creation
+	 *     time, which only makes sense for a past event;
+	 *   - the dialog's date input has no `min`, so past dates are selectable
+	 *     on purpose;
+	 *   - `mark_booking_completed` is otherwise scheduled for the future, so
+	 *     a completed booking can only be produced by a past-dated create.
+	 *
+	 * The public (unauthenticated) path still refuses past dates — proven by
+	 * "a past date is refused" above. This test pins the admin capability so
+	 * an accidental tightening is noticed.
 	 */
-	test('admin ignore_availability wrongly accepts a past date', async ({
+	test('admin ignore_availability allows historical backfill', async ({
 		page,
 	}) => {
 		const nonce = await adminNonce(page);
@@ -537,7 +546,7 @@ test.describe('Booking API: admin edge cases', () => {
 
 		expect(
 			res.status,
-			`Past-dated admin booking is now refused — the guard was added; invert this test. ${res.text}`
+			`Historical backfill was refused — an admin can no longer record a past meeting. If that tightening is intended, update this test and the Completed-status flow with it. ${res.text}`
 		).toBe(200);
 
 		// It really did land in the past.
@@ -583,34 +592,101 @@ test.describe('Booking API: admin edge cases', () => {
 	});
 
 	/**
-	 * KNOWN DEFECT, pinned.
+	 * Regression for the "validation errors returned 500" defect.
 	 *
-	 * An invalid invitee email is a client error, but create_item wraps every
-	 * exception as `array( 'status' => 500 )`, so validation failures are
-	 * reported as server errors. Callers cannot distinguish "you sent bad
-	 * data" from "the server broke".
+	 * `create_item` used to wrap every exception as `status => 500`, so a
+	 * caller could not tell "you sent bad data" from "the server broke".
+	 * Input failures now raise InvalidBookingInputException and are mapped to
+	 * 400 with the `rest_booking_invalid_input` code; everything else still
+	 * falls through to 500.
+	 *
+	 * Before the fix each of these answered 500.
 	 */
-	test('invalid email is reported as 500 instead of 400', async ({
-		page,
-	}) => {
+	for (const [label, over] of [
+		[
+			'invalid email',
+			{ name: 'E2E-bademail', email: 'not-an-email' },
+		],
+		['empty name', { name: '', email: 'e2e-empty@example.test' }],
+	] as [string, Record<string, unknown>][]) {
+		test(`invalid input is a 400, not a 500: ${label}`, async ({
+			page,
+		}) => {
+			const nonce = await adminNonce(page);
+
+			const res = await restBooking(
+				page,
+				nonce,
+				bookingBody({
+					start_date: '2027-05-06 10:00:00',
+					ignore_availability: true,
+					...over,
+				})
+			);
+
+			expect(
+				res.status,
+				`Client input errors must use 4xx. ${res.text}`
+			).toBe(400);
+			expect(res.text).toMatch(/rest_booking_invalid_input/);
+			expect(res.text).toMatch(/Invalid invitee/i);
+		});
+	}
+
+	test('an unparseable date is a 400, not a 500', async ({ page }) => {
 		const nonce = await adminNonce(page);
+		const { name, email } = probe('baddate');
 
 		const res = await restBooking(
 			page,
 			nonce,
 			bookingBody({
-				start_date: '2027-05-06 10:00:00',
-				name: 'E2E-bademail',
-				email: 'not-an-email',
-				ignore_availability: true,
+				start_date: 'not-a-date',
+				name,
+				email,
 			})
 		);
 
-		expect(
-			res.status,
-			`Validation errors now use a 4xx status — the contract was fixed; update this test. ${res.text}`
-		).toBe(500);
-		expect(res.text).toMatch(/Invalid invitee/i);
+		expect(res.status, res.text).toBe(400);
+		expect(res.text).toMatch(/rest_booking_invalid_input/);
+		expect(res.text).toMatch(/Invalid date format or timezone/i);
+	});
+
+	/**
+	 * The 400 mapping must be narrow: a slot conflict is NOT client-input
+	 * validation, so it keeps its own status. This guards against the fix
+	 * being widened into a blanket "everything is 400".
+	 */
+	test('a slot conflict keeps its own status, not 400', async ({ page }) => {
+		const nonce = await adminNonce(page);
+		const first = probe('conflict1');
+		const second = probe('conflict2');
+		const start = futureWeekday(210, '14:00:00');
+
+		const a = await restBooking(
+			page,
+			nonce,
+			bookingBody({
+				start_date: start,
+				name: first.name,
+				email: first.email,
+			})
+		);
+		expect(a.status, `First booking should succeed. ${a.text}`).toBe(200);
+
+		const b = await restBooking(
+			page,
+			nonce,
+			bookingBody({
+				start_date: start,
+				name: second.name,
+				email: second.email,
+			})
+		);
+
+		// Whatever the code, it must NOT be reclassified as invalid input.
+		expect(b.status, b.text).not.toBe(200);
+		expect(b.text).not.toMatch(/rest_booking_invalid_input/);
 	});
 
 	test('an unknown event id is rejected', async ({ page }) => {

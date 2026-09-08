@@ -337,12 +337,12 @@ test.describe('Booking write path: create booking', () => {
 			'No time slot was offered for the chosen date, even ignoring availability.'
 		);
 
-		// Skip "00:00" (index 0) and vary the slot, so repeat runs on the same
-		// date do not collide with each other's bookings.
+		// Vary the slot so repeat runs on the same date do not collide with
+		// each other's bookings. Index 0 ("00:00") is deliberately included:
+		// it submits correctly when availability is ignored — verified live,
+		// 200 with the row stored at the right UTC offset.
 		const count = await timeOptions.count();
-		const pick =
-			count > 1 ? 1 + Math.floor(Math.random() * (count - 1)) : 0;
-		await timeOptions.nth(pick).click();
+		await timeOptions.nth(Math.floor(Math.random() * count)).click();
 
 		// Attendee — switch to "New contact" so this test owns the contact it
 		// creates instead of attaching to a real one.

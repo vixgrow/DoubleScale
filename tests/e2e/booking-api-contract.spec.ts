@@ -603,10 +603,7 @@ test.describe('Booking API: admin edge cases', () => {
 	 * Before the fix each of these answered 500.
 	 */
 	for (const [label, over] of [
-		[
-			'invalid email',
-			{ name: 'E2E-bademail', email: 'not-an-email' },
-		],
+		['invalid email', { name: 'E2E-bademail', email: 'not-an-email' }],
 		['empty name', { name: '', email: 'e2e-empty@example.test' }],
 	] as [string, Record<string, unknown>][]) {
 		test(`invalid input is a 400, not a 500: ${label}`, async ({

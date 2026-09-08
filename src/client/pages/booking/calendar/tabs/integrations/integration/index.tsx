@@ -794,10 +794,17 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 		}
 		const needsRemoteCalendar =
 			accountManagerLayout && integrationSlug !== 'zoom';
-		const canDismiss =
-			!needsRemoteCalendar ||
-			accounts.length === 0 ||
-			Boolean(selectedCalendar);
+		let canDismiss = true;
+		if (needsRemoteCalendar) {
+			if (loading && accounts.length === 0) {
+				// Accounts have not arrived yet — do not let Back slip through.
+				canDismiss = false;
+			} else if (accounts.length === 0) {
+				canDismiss = true;
+			} else {
+				canDismiss = Boolean(selectedCalendar);
+			}
+		}
 		onCloseReadinessChange(canDismiss);
 	}, [
 		onCloseReadinessChange,
@@ -805,6 +812,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 		integrationSlug,
 		accounts.length,
 		selectedCalendar,
+		loading,
 	]);
 
 	const canAddAccount = () => accountManagerLayout && visible == false;

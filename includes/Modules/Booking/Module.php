@@ -414,7 +414,10 @@ final class Module extends AbstractModule implements ProvidesAbilities {
 		}
 
 		$user_id = get_current_user_id();
-		if ( ! is_user_member_of_blog( $user_id, get_current_blog_id() ) ) {
+		if (
+			! is_user_member_of_blog( $user_id, get_current_blog_id() )
+			&& ! is_super_admin( $user_id )
+		) {
 			return;
 		}
 

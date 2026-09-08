@@ -55,6 +55,10 @@ const configData: ConfigData = {
 	siteUrl: serverData.siteUrl || parentData.siteUrl || '',
 	nonce: serverData.nonce || parentData.nonce || '',
 	hasCalendars: serverData.hasCalendars || false,
+	integrationHostCalendarId:
+		typeof serverData.integrationHostCalendarId === 'number'
+			? serverData.integrationHostCalendarId
+			: null,
 	hasAvailability: serverData.hasAvailability || false,
 	isWoocommerceActive: serverData.isWoocommerceActive || false,
 	proPluginData: serverData.proPluginData || {
@@ -243,6 +247,7 @@ export interface ConfigApi {
 	getMergeTags: () => MergeTagGroups;
 	setMergeTags: (value: MergeTagGroups) => void;
 	getHasCalendars: () => boolean;
+	getIntegrationHostCalendarId: () => number | null;
 	setHasCalendars: (value: boolean) => void;
 	getHasAvailability: () => boolean;
 	setHasAvailability: (value: boolean) => void;
@@ -287,6 +292,7 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.getMergeTags = () => getMergeTags(data);
 	configApi.setMergeTags = setMergeTags(data);
 	configApi.getHasCalendars = getHasCalendars(data);
+	configApi.getIntegrationHostCalendarId = () => data.integrationHostCalendarId;
 	configApi.setHasCalendars = setHasCalendars(data);
 	configApi.getHasAvailability = getHasAvailability(data);
 	configApi.setHasAvailability = setHasAvailability(data);

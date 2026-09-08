@@ -68,6 +68,11 @@ final class MultisiteScope {
 
 		self::$member_user_ids = array_map( 'intval', $ids );
 
+
+		if ( is_user_logged_in() && is_super_admin( get_current_user_id() ) ) {
+			self::$member_user_ids[] = (int) get_current_user_id();
+			self::$member_user_ids = array_values( array_unique( self::$member_user_ids ) );
+		}
 		return self::$member_user_ids;
 	}
 
@@ -83,6 +88,10 @@ final class MultisiteScope {
 
 		if ( $user_id <= 0 ) {
 			return false;
+		}
+
+		if ( is_user_logged_in() && is_super_admin( get_current_user_id() ) && $user_id === (int) get_current_user_id() ) {
+			return true;
 		}
 
 		return in_array( $user_id, self::member_user_ids(), true );

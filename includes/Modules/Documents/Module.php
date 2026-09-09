@@ -92,9 +92,9 @@ final class Module extends AbstractSalesChildModule implements ProvidesAbilities
 		return array(
 			$this->sales_migration_path( 'SalesProposalsTable.php' ),
 			$this->sales_migration_path( 'SalesProposalTableViewedAt.php' ),
+			$this->sales_migration_path( 'SalesProposalTableResponseColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalTableSignatureColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalTableContentColumns.php' ),
-			$this->sales_migration_path( 'SalesProposalTableResponseColumns.php' ),
 			$this->sales_migration_path( 'SalesProposalTableTemplateColumn.php' ),
 			$this->sales_migration_path( 'SalesProposalTableTemplateColorColumn.php' ),
 			$this->sales_migration_path( 'SalesInvoicesTable.php' ),
@@ -119,6 +119,7 @@ final class Module extends AbstractSalesChildModule implements ProvidesAbilities
 
 		Migrations\SalesInvoiceTableCurrencyNullable::ensure();
 		Migrations\SalesProposalTableCurrencyNullable::ensure();
+		Migrations\SalesProposalTableContentColumns::ensure();
 
 		require_once dirname( __DIR__ ) . '/Sales/MergeTags/AbstractSalesMergeTag.php';
 		$this->loadModuleMergeTagFiles();

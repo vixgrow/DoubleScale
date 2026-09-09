@@ -35,6 +35,6 @@ class SalesInvoiceTableContentColumns {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "ALTER TABLE `{$table}` ADD `sections` JSON NULL AFTER `terms`" );
+		$wpdb->query( "ALTER TABLE `{$table}` ADD `sections` JSON NULL" );
 	}
 }

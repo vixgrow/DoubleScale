@@ -276,6 +276,11 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 
 == Changelog ==
 
+= 1.3.27 = 9 Sep 2026
+- Sync missing table columns from the current CREATE definitions so upgrades do not depend on chained ALTER migrations
+- Include proposal terms, sections, signatures, and related sales columns on the base tables
+- Return a proper error when a proposal cannot be saved instead of a fatal
+
 = 1.3.25 = 5 Sep 2026
 - Add a Coming Soon section on Discover Pro for Membership, LMS, and Community modules
 - Fix MCP task-type schema so clients keep the task tools (enum of stored keys, not labels)

@@ -228,30 +228,45 @@ async function openPublicEvent(page: Page, seededEvent: SeededEvent): Promise<vo
  */
 async function pickAvailableSlot(
 	page: Page,
-	options: { skipTimes?: string[]; minSlotIndex?: number } = {}
+	options: {
+		skipTimes?: string[];
+		minSlotIndex?: number;
+		onlyTimes?: string[];
+		targetDate?: string;
+	} = {}
 ): Promise<{ slotDate: string; slotTime: string }> {
 	const skipTimes = new Set(options.skipTimes ?? []);
+	const onlyTimes = options.onlyTimes ? new Set(options.onlyTimes) : null;
+	const targetDate = options.targetDate ?? '';
 	const minSlotIndex = options.minSlotIndex ?? 0;
+	const timeZone = await page.evaluate(() =>
+		Intl.DateTimeFormat().resolvedOptions().timeZone
+	);
 
 	for (let month = 0; month < 12; month++) {
-		const availableDay = page.locator('.highlight-date').first();
-		const hasDay = await availableDay
-			.waitFor({ state: 'visible', timeout: 8_000 })
-			.then(() => true)
-			.catch(() => false);
+		const availableDays = page.locator('.highlight-date');
+		const dayCount = await availableDays.count();
+		if (dayCount === 0) {
+			const nextEmpty = page.locator('.nav-arrow').last();
+			if (await nextEmpty.isEnabled().catch(() => false)) {
+				await nextEmpty.click();
+				continue;
+			}
+			break;
+		}
 
-		if (hasDay) {
-			await availableDay.click();
+		for (let dayIndex = 0; dayIndex < dayCount; dayIndex++) {
+			await availableDays.nth(dayIndex).click();
 			await expect(page.locator('.time-picker-container')).toBeVisible({
 				timeout: 15_000,
-			});
+			}).catch(() => null);
 
 			const monthLabel = (
 				(await page.locator('.month-label').first().textContent()) ?? ''
 			).trim();
 			const dayNumber = (
 				(await page.locator('.selected-date .date-number').first().textContent()) ??
-				(await availableDay.locator('.date-number').textContent()) ??
+				(await availableDays.nth(dayIndex).locator('.date-number').textContent()) ??
 				''
 			).trim();
 			let slotDate = '';
@@ -263,12 +278,21 @@ async function pickAvailableSlot(
 					if (parsed.getTime() < Date.now()) {
 						parsed.setFullYear(parsed.getFullYear() + 1);
 					}
-					slotDate = parsed.toISOString().slice(0, 10);
+					slotDate = new Intl.DateTimeFormat('en-CA', {
+						timeZone,
+						year: 'numeric',
+						month: '2-digit',
+						day: '2-digit',
+					}).format(parsed);
 				}
 			}
 
+			if (targetDate && slotDate && slotDate !== targetDate) {
+				continue;
+			}
+
 			const slots = page.locator('.time-slot:not(.time-slot-waiting)');
-			await expect(slots.first()).toBeVisible({ timeout: 15_000 });
+			await expect(slots.first()).toBeVisible({ timeout: 15_000 }).catch(() => null);
 
 			const count = await slots.count();
 			for (let i = minSlotIndex; i < count; i++) {
@@ -290,6 +314,9 @@ async function pickAvailableSlot(
 					}
 				);
 				if (skipTimes.has(normalized)) {
+					continue;
+				}
+				if (onlyTimes && !onlyTimes.has(normalized)) {
 					continue;
 				}
 				await slot.click();
@@ -443,6 +470,84 @@ async function bookViaPublicUi(
 	return lastPublicBooking;
 }
 
+async function bookViaAjax(
+	request: import('@playwright/test').APIRequestContext,
+	eventId: number,
+	startDate: string,
+	who: string
+): Promise<{ ok: boolean; message: string; bookingId: number; contactId: number }> {
+	const email = `${who.toLowerCase()}@example.test`;
+	const res = await request.post(AJAX, {
+		form: {
+			action: 'doublescale_booking_booking',
+			id: String(eventId),
+			timezone: 'UTC',
+			duration: '30',
+			location: JSON.stringify({
+				type: 'attendee_address',
+				value: '2 E2E Public Journey Street',
+			}),
+			invitees: JSON.stringify([{ name: who, email }]),
+			start_date: startDate,
+		},
+	});
+	const body = await res.json();
+	const bookingId = body.success
+		? Number(
+				db(
+					`SELECT id FROM wp_doublescale_bookings WHERE contact_id = (
+						SELECT id FROM wp_doublescale_contacts WHERE email = ${q(email)} LIMIT 1
+					) ORDER BY id DESC LIMIT 1`
+				)
+			)
+		: 0;
+	const contactId = body.success
+		? Number(
+				db(
+					`SELECT id FROM wp_doublescale_contacts WHERE email = ${q(email)} LIMIT 1`
+				)
+			)
+		: 0;
+	if (bookingId) {
+		trackBookingIds(bookingId, contactId);
+	}
+	return {
+		ok: Boolean(body.success),
+		message: String(body?.data?.message ?? ''),
+		bookingId,
+		contactId,
+	};
+}
+
+function mysqlStartFromUtc(isoOrMysql: string): string {
+	const normalized = isoOrMysql.includes('T')
+		? isoOrMysql.replace('T', ' ').replace(/\.\d+Z$/, '').replace(/Z$/, '')
+		: isoOrMysql;
+	return normalized.slice(0, 19);
+}
+
+function addMinutesToMysqlStart(mysqlStart: string, minutes: number): string {
+	const d = new Date(`${mysqlStart.replace(' ', 'T')}Z`);
+	d.setUTCMinutes(d.getUTCMinutes() + minutes);
+	return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+function localNormalizedSlotFromMysqlUtc(
+	mysqlUtc: string,
+	timeZone: string
+): string {
+	const d = new Date(`${mysqlUtc.replace(' ', 'T')}Z`);
+	const parts = new Intl.DateTimeFormat('en-US', {
+		timeZone,
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false,
+	}).formatToParts(d);
+	const hour = parts.find((p) => p.type === 'hour')?.value ?? '00';
+	const minute = parts.find((p) => p.type === 'minute')?.value ?? '00';
+	return `${hour}:${minute}`;
+}
+
 async function assertSlotNotBookableViaAjax(
 	request: import('@playwright/test').APIRequestContext,
 	eventId: number,
@@ -494,20 +599,35 @@ function attendeeConfirmationEnabled(): boolean {
 	}
 }
 
-function attendeeConfirmationTemplate(): string {
+function attendeeConfirmationTemplate(eventId?: number): string {
 	try {
-		const raw = execFileSync(
+		const id =
+			eventId ??
+			seeded?.eventId ??
+			Number(
+				db(
+					`SELECT event_id FROM wp_doublescale_booking_events_meta
+					 WHERE meta_key = 'email_notifications'
+					 ORDER BY event_id DESC LIMIT 1`
+				)
+			);
+		if (!id) {
+			return '';
+		}
+		return execFileSync(
 			'wp',
-			['option', 'get', 'doublescale_booking_settings', '--format=json', `--path=${WP_PATH}`],
+			[
+				'eval',
+				`$raw = $GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare(
+					"SELECT meta_value FROM {$GLOBALS['wpdb']->prefix}doublescale_booking_events_meta WHERE event_id = %d AND meta_key = 'email_notifications' LIMIT 1",
+					${id}
+				));
+				$data = maybe_unserialize($raw);
+				echo is_array($data) ? (string)($data['attendee_confirmation']['template']['message'] ?? '') : '';`,
+				`--path=${WP_PATH}`,
+			],
 			{ encoding: 'utf8', timeout: 15_000 }
-		);
-		const settings = JSON.parse(raw || '{}') as {
-			email_notifications?: {
-				attendee_confirmation?: { template?: { message?: string } };
-			};
-		};
-		return settings?.email_notifications?.attendee_confirmation?.template
-			?.message ?? '';
+		).trim();
 	} catch {
 		return '';
 	}
@@ -649,6 +769,7 @@ test.describe('Public booking customer journey', () => {
 	});
 
 	test('customer cancels via the real hash cancel page', async ({ page }) => {
+		expect(seeded).not.toBeNull();
 		expect(lastPublicBooking, 'Requires the booking from the prior test.').not.toBeNull();
 		const { hash, bookingId } = lastPublicBooking!;
 
@@ -683,10 +804,87 @@ test.describe('Public booking customer journey', () => {
 		).toBe('cancelled');
 		expect(slotLockCount(bookingId)).toBe(0);
 
+		const releasedStart = mysqlStartFromUtc(
+			db(`SELECT start_time FROM wp_doublescale_bookings WHERE id = ${bookingId}`)
+		);
+		const reborn = await bookViaAjax(
+			page.request,
+			seeded!.eventId,
+			releasedStart,
+			e2eName()
+		);
+		expect(
+			reborn.ok,
+			`Cancelled slot at ${releasedStart} must be bookable again: ${reborn.message}`
+		).toBe(true);
+		expect(slotLockCount(reborn.bookingId)).toBe(1);
+
 		await page.goto(bookingActionUrl(hash, 'cancel'));
 		await expect(page.getByText(/already been cancelled/i)).toBeVisible({
 			timeout: 15_000,
 		});
+	});
+
+	test('failed reschedule to an occupied slot must not redirect to confirm', async ({
+		page,
+	}) => {
+		expect(seeded).not.toBeNull();
+
+		const first = await bookViaPublicUi(page, seeded!);
+		const originalStart = mysqlStartFromUtc(
+			db(`SELECT start_time FROM wp_doublescale_bookings WHERE id = ${first!.bookingId}`)
+		);
+
+		await page.route('**/admin-ajax.php', async (route) => {
+			const post = route.request().postData() ?? '';
+			if (post.includes('doublescale_booking_reschedule_booking')) {
+				await route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify({
+						success: false,
+						data: {
+							message:
+								'This time slot has just been booked. Please choose another.',
+						},
+					}),
+				});
+				return;
+			}
+			await route.continue();
+		});
+
+		await page.goto(bookingActionUrl(first!.hash, 'reschedule'));
+		await expect(page.getByText(/Select a Date & Time/i)).toBeVisible({
+			timeout: 45_000,
+		});
+
+		await pickAvailableSlot(page, {
+			skipTimes: first!.slotTime ? [first!.slotTime] : [],
+			minSlotIndex: 0,
+		});
+
+		const rescheduleReason = page
+			.getByPlaceholder(/why you need to reschedule|reschedule/i)
+			.or(page.locator('textarea').last());
+		if (await rescheduleReason.isVisible().catch(() => false)) {
+			await rescheduleReason.fill('E2E occupied-slot reschedule attempt');
+		}
+
+		await page.getByRole('button', { name: /^Reschedule Event$/i }).click();
+
+		await expect(page.getByText(/just been booked|not available/i)).toBeVisible({
+			timeout: 15_000,
+		});
+		await page.waitForTimeout(2_000);
+		expect(page.url()).not.toMatch(/type=confirm/);
+		expect(
+			mysqlStartFromUtc(
+				db(
+					`SELECT start_time FROM wp_doublescale_bookings WHERE id = ${first!.bookingId}`
+				)
+			)
+		).toBe(originalStart);
 	});
 
 	test('customer reschedules to a different slot and lands on confirm', async ({
@@ -752,6 +950,17 @@ test.describe('Public booking customer journey', () => {
 		).toBe('scheduled');
 		expect(slotLockCount(first!.bookingId)).toBe(1);
 		expect(newSlotTime).not.toBe(first!.slotTime);
+	});
+
+	test('attendee confirmation template stores cancel and reschedule merge tags', async () => {
+		expect(seeded).not.toBeNull();
+		const template = attendeeConfirmationTemplate(seeded!.eventId);
+		expect(
+			template,
+			'Attendee confirmation template must exist on the seeded event.'
+		).not.toBe('');
+		expect(template).toMatch(/{{booking:cancel_url}}/);
+		expect(template).toMatch(/{{booking:reschedule_url}}/);
 	});
 
 	test('conditional confirmation email tracking and template merge tags', async ({

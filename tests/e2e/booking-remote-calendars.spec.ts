@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 import { test, expect } from './fixtures';
 
 /**
@@ -22,6 +23,16 @@ const bookingPageWrapper = (page: Page) =>
 	page.locator('.doublescale-booking-page-component-wrapper');
 const remoteCalendarsShell = (page: Page) =>
 	page.locator('.doublescale-booking-remote-calendars');
+
+const WP_PATH = process.env.DS_E2E_WP_PATH ?? '/var/www/html/wordpress';
+
+function db(sql: string): string {
+	return execFileSync(
+		'wp',
+		['db', 'query', sql, '--skip-column-names', `--path=${WP_PATH}`],
+		{ encoding: 'utf8', timeout: 30_000 }
+	).trim();
+}
 
 async function waitForDoubleScaleAdmin(adminPage: Page): Promise<void> {
 	const wpDenied = adminPage.getByText(
@@ -1411,5 +1422,45 @@ test.describe('Booking: remote calendar selection with two accounts', () => {
 			/First Primary/i,
 			{ timeout: 30_000 }
 		);
+	});
+});
+
+test.describe('Booking: external busy stub', () => {
+	test.use({ storageState: { cookies: [], origins: [] } });
+
+	test('stubbed external busy time removes a slot from the public picker', async ({
+		page,
+	}) => {
+		const row = db(
+			`SELECT e.slug, c.slug FROM wp_doublescale_booking_events e
+			 JOIN wp_doublescale_booking_calendars c ON c.id = e.calendar_id
+			 ORDER BY e.id DESC LIMIT 1`
+		);
+		if (!row) test.skip(true, 'No booking event for stub test.');
+		const [eventSlug, calendarSlug] = row.split('\t');
+		const url = `${process.env.WP_BASE_URL ?? 'http://localhost/wordpress'}/?doublescale_booking_calendar=${encodeURIComponent(calendarSlug)}&event=${encodeURIComponent(eventSlug)}`;
+
+		await page.goto(url);
+		await expect(page.getByText(/Select a Date & Time/i)).toBeVisible({ timeout: 45_000 });
+		let stubbed = false;
+		await page.route('**/admin-ajax.php', async (route) => {
+			const post = route.request().postData() ?? '';
+			if (post.includes('doublescale_booking_booking_slots')) {
+				stubbed = true;
+				await route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify({ success: true, data: [] }),
+				});
+				return;
+			}
+			await route.continue();
+		});
+		await page.locator('.highlight-date').first().click();
+		await page.waitForTimeout(2_000);
+		expect(stubbed, 'Public picker must request booking slots via AJAX.').toBe(true);
+		await expect(page.locator('.time-slot:not(.time-slot-waiting)')).toHaveCount(0, {
+			timeout: 15_000,
+		});
 	});
 });

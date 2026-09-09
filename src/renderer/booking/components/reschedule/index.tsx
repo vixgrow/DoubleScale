@@ -35,6 +35,7 @@ const Reschedule: React.FC<RescheduleProps> = ({
 }) => {
 	const [form] = Form.useForm();
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState<string | null>(null);
 
 	// Helper function to render form label with required mark if needed
 	const renderLabel = (field: { label: string; required: boolean }) => (
@@ -49,6 +50,7 @@ const Reschedule: React.FC<RescheduleProps> = ({
 	// Called when the user clicks "Reschedule Event"
 	const handleFinish = async (values: any) => {
 		setIsSubmitting(true);
+		setSubmitError(null);
 		const formData = new FormData();
 		formData.append('action', 'doublescale_booking_reschedule_booking');
 		formData.append('nonce', (window as any)['doublescale_booking_config']?.nonce || '');
@@ -70,12 +72,24 @@ const Reschedule: React.FC<RescheduleProps> = ({
 				body: formData,
 			});
 
-			if (response.ok) {
+			const data = await response.json().catch(() => null);
+
+			if (response.ok && data?.success) {
 				(window.top || window).location.href =
 					`${url}/?doublescale_booking=booking&id=${booking?.hash_id}&type=confirm`;
+				return;
 			}
+
+			const message =
+				(typeof data?.data?.message === 'string' && data.data.message) ||
+				(typeof data?.message === 'string' && data.message) ||
+				__('Sorry, this booking could not be rescheduled.', 'doublescale');
+			setSubmitError(message);
 		} catch (error) {
 			console.error('Error rescheduling booking:', error);
+			setSubmitError(
+				__('Sorry, this booking could not be rescheduled.', 'doublescale')
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -163,6 +177,9 @@ const Reschedule: React.FC<RescheduleProps> = ({
 						)}
 
 					<Form.Item className="schedule-btn-container">
+						{submitError ? (
+							<p className="text-red-600 text-sm mb-3">{submitError}</p>
+						) : null}
 						<button
 							className={`schedule-btn ${css`
 								background-color: ${baseColor};

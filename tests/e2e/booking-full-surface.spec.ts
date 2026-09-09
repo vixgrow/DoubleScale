@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 import { test, expect } from './fixtures';
 
 /**
@@ -16,6 +17,16 @@ import { test, expect } from './fixtures';
 
 const bookingPageWrapper = (page: Page) =>
 	page.locator('.doublescale-booking-page-component-wrapper');
+
+const WP_PATH = process.env.DS_E2E_WP_PATH ?? '/var/www/html/wordpress';
+
+function db(sql: string): string {
+	return execFileSync(
+		'wp',
+		['db', 'query', sql, '--skip-column-names', `--path=${WP_PATH}`],
+		{ encoding: 'utf8', timeout: 30_000 }
+	).trim();
+}
 
 async function waitForDoubleScaleAdmin(adminPage: Page): Promise<void> {
 	const wpDenied = adminPage.getByText(
@@ -677,37 +688,41 @@ test.describe('Booking calendar and event actions', () => {
  * ================================================================== */
 
 test.describe('Booking event editor', () => {
-	/** Open the first event's editor, skipping when the site has none. */
+	/** Open an event editor that has full meta (fields, limits, email). */
 	async function openFirstEvent(adminPage: Page): Promise<void> {
-		await gotoBookingPath(adminPage, 'calendars');
-		await ensureBookingModuleActive(adminPage);
+		adminPage.on('dialog', (dialog) => dialog.accept());
 
-		const shell = adminPage.locator('.doublescale-booking-calendars');
-
-		// Event rows carry no anchor — event-actions/index.tsx navigates with
-		// `navigate('booking/calendars/{id}/events/{event}')`, so the only way
-		// in is the row's action menu.
-		const eventActions = shell.getByRole('button', {
-			name: /Event actions/i,
-		});
-		if (!(await appears(eventActions.first(), 30_000))) {
-			test.skip(true, 'No event exists to edit on this site.');
+		const eventId = db(
+			`SELECT e.id FROM wp_doublescale_booking_events e
+			 INNER JOIN wp_doublescale_booking_events_meta f
+			   ON f.event_id = e.id AND f.meta_key = 'fields'
+			 INNER JOIN wp_doublescale_booking_events_meta l
+			   ON l.event_id = e.id AND l.meta_key = 'limits'
+			 INNER JOIN wp_doublescale_booking_availability a
+			   ON a.id = e.availability_id
+			 ORDER BY e.id DESC LIMIT 1`
+		);
+		if (!eventId) {
+			test.skip(
+				true,
+				'No event with fields, limits, and a linked availability exists on this site.'
+			);
 		}
+		const calendarId = db(
+			`SELECT calendar_id FROM wp_doublescale_booking_events WHERE id = ${eventId}`
+		);
 
-		await eventActions.first().click();
-
-		// Wait for the popover's Edit before clicking: several rows expose an
-		// "Edit", and a click fired before the popover paints hits nothing.
-		const edit = adminPage.getByRole('button', { name: /^Edit$/i }).first();
-		await expect(edit).toBeVisible({ timeout: 20_000 });
-		await edit.click();
+		await gotoBookingPath(
+			adminPage,
+			`calendars/${calendarId}/events/${eventId}`
+		);
 
 		await expect(adminPage).toHaveURL(/events(%2F|\/)/i, {
 			timeout: 45_000,
 		});
-
-		// The editor is a lazy chunk — wait for its tab strip before any test
-		// starts hunting for tabs.
+		await expect(
+			adminPage.getByText(/Event Setup/i).first()
+		).toBeVisible({ timeout: 45_000 });
 		await expect(
 			adminPage.getByRole('button', {
 				name: 'Event Details',
@@ -731,12 +746,18 @@ test.describe('Booking event editor', () => {
 	/**
 	 * Click a tab by its exact label; returns false when it is not rendered.
 	 *
-	 * The strip renders as buttons, not `role="tab"` — verified live, all
-	 * eight resolve to exactly one button each.
+	 * Tab panels lazy-fetch via REST (fields, limits, email_notifications).
+	 * Wait for the GET that hydrates the panel, then for copy that proves the
+	 * shimmer gave way to real content.
 	 */
 	async function openEventTab(
 		adminPage: Page,
-		label: string
+		label: string,
+		options?: {
+			apiPath?: RegExp;
+			apiPaths?: RegExp[];
+			panelText?: RegExp;
+		}
 	): Promise<boolean> {
 		const tab = adminPage
 			.getByRole('button', { name: label, exact: true })
@@ -746,12 +767,30 @@ test.describe('Booking event editor', () => {
 			return false;
 		}
 
-		await tab.click();
+		const paths = options?.apiPaths ?? (options?.apiPath ? [options.apiPath] : []);
+		const responseWaits = paths.map((pattern) =>
+			adminPage.waitForResponse(
+				(r) =>
+					pattern.test(r.url()) &&
+					r.request().method() === 'GET' &&
+					r.ok(),
+				{ timeout: 45_000 }
+			)
+		);
 
-		// Do NOT assert on the page wrapper here: inside the event editor that
-		// div renders empty (zero-height), so toBeVisible() always fails. The
-		// tab strip staying on screen is the real signal that the click landed.
+		await tab.click();
 		await expect(tab).toBeVisible();
+
+		for (const wait of responseWaits) {
+			await wait.catch(() => null);
+		}
+
+		if (options?.panelText) {
+			const panel = adminPage.locator('.doublescale-booking-event');
+			await expect(panel.getByText(options.panelText).first()).toBeVisible({
+				timeout: 45_000,
+			});
+		}
 		return true;
 	}
 
@@ -806,22 +845,20 @@ test.describe('Booking event editor', () => {
 	}) => {
 		await openFirstEvent(adminPage);
 
-		if (!(await openEventTab(adminPage, 'Questions'))) {
+		if (
+			!(await openEventTab(adminPage, 'Questions', {
+				apiPath: /meta\/fields/,
+				panelText: /Question Settings/i,
+			}))
+		) {
 			test.skip(true, 'Questions tab not present in this build.');
 		}
 
-		// The panel lists the system questions and their editors.
-		await expect(
-			adminPage.getByText(/Question Settings/i).first()
-		).toBeVisible({ timeout: 15_000 });
 		await expect(
 			adminPage.getByText(/Booking Questions/i).first()
 		).toBeVisible();
-
-		// Every event ships four system questions (Text, Email, Textarea,
-		// Radio) that cannot be removed.
 		await expect(
-			adminPage.getByText(/Question \(1\)/i).first()
+			adminPage.getByText(/Question\s*\(1\)/i).first()
 		).toBeVisible();
 	});
 
@@ -830,20 +867,23 @@ test.describe('Booking event editor', () => {
 	}) => {
 		await openFirstEvent(adminPage);
 
-		if (!(await openEventTab(adminPage, 'Availability & Limits'))) {
+		if (
+			!(await openEventTab(adminPage, 'Availability & Limits', {
+				apiPaths: [/meta\/limits/, /\/range/, /\/settings/],
+				panelText:
+					/Availability Range|Choose a common schedule|Which Schedule Do You Want|Control your availability/i,
+			}))
+		) {
 			test.skip(
 				true,
 				'Availability & Limits tab not present in this build.'
 			);
 		}
 
-		await expect(
-			adminPage
-				.getByText(
-					/Choose a common schedule|Availability Range|Default Duration|Before Event|After Event/i
-				)
-				.first()
-		).toBeVisible({ timeout: 15_000 });
+		const panel = adminPage.locator('.doublescale-booking-event');
+		await expect(panel.getByText(/Before Event/i).first()).toBeVisible({
+			timeout: 15_000,
+		});
 	});
 
 	test('event editor: SMS Notification tab renders', async ({
@@ -938,7 +978,13 @@ test.describe('Booking event editor', () => {
 	}) => {
 		await openFirstEvent(adminPage);
 
-		if (!(await openEventTab(adminPage, 'Email Notification'))) {
+		if (
+			!(await openEventTab(adminPage, 'Email Notification', {
+				apiPath: /email_notifications/,
+				panelText:
+					/Email Body|Email Notification|Booking Confirmation Email to Attendee/i,
+			}))
+		) {
 			test.skip(
 				true,
 				'Email Notification tab not present in this build.'
@@ -948,7 +994,7 @@ test.describe('Booking event editor', () => {
 		await expect(
 			adminPage
 				.getByText(
-					/Email Body|Additional Recipients|Before Event|After Event/i
+					/Email Body|Booking Confirmation Email to Attendee|Customize the email notifications/i
 				)
 				.first()
 		).toBeVisible({ timeout: 15_000 });

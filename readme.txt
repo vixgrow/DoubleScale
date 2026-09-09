@@ -4,7 +4,7 @@ Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1.0
 Requires PHP: 7.4
-Stable tag: 1.3.25
+Stable tag: 1.3.27
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -280,6 +280,16 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 - Sync missing table columns from the current CREATE definitions so upgrades do not depend on chained ALTER migrations
 - Include proposal terms, sections, signatures, and related sales columns on the base tables
 - Return a proper error when a proposal cannot be saved instead of a fatal
+- Add Google/Outlook remote calendars for booking, including a loading state and clearer connection errors
+- Isolate booking data per multisite blog and provision host calendars on each site
+- Show Connect to remote calendars for network super admins on subsites
+- Stop deleting a contact from leaving orphaned bookings
+- Add a booking shortcode for embedding scheduling on the front end
+- Add contact merge with conflict resolution, and offer the existing contact when creating a duplicate
+- Email a configured address after an automatic contact merge
+- Support WhatsApp template headers, buttons, and interactive sub-types
+- Improve long text in admin tables and shared fetch-generation state in the UI
+- Fix Action Scheduler heartbeat updates when the task meta row is missing
 
 = 1.3.25 = 5 Sep 2026
 - Add a Coming Soon section on Discover Pro for Membership, LMS, and Community modules

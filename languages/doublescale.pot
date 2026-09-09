@@ -651,10 +651,10 @@ msgstr ""
 msgid "Accept UPI, cards, netbanking and wallet payments for invoices via Razorpay."
 msgstr ""
 
-msgid "Access Denied"
+msgid "Access denied"
 msgstr ""
 
-msgid "Access denied"
+msgid "Access Denied"
 msgstr ""
 
 msgid "Access denied. Please ensure your API key has the necessary permissions."
@@ -687,10 +687,10 @@ msgstr ""
 msgid "Account id already exists"
 msgstr ""
 
-msgid "Account Name"
+msgid "Account name"
 msgstr ""
 
-msgid "Account name"
+msgid "Account Name"
 msgstr ""
 
 msgid "Account name is missing."
@@ -1032,10 +1032,10 @@ msgstr ""
 msgid "Add Conditions"
 msgstr ""
 
-msgid "Add Connection"
+msgid "Add connection"
 msgstr ""
 
-msgid "Add connection"
+msgid "Add Connection"
 msgstr ""
 
 msgid "Add Contact"
@@ -1077,10 +1077,10 @@ msgstr ""
 msgid "Added to a list u2192 send a sequence"
 msgstr ""
 
-msgid "Add Field"
+msgid "Add field"
 msgstr ""
 
-msgid "Add field"
+msgid "Add Field"
 msgstr ""
 
 msgid "Add Filter"
@@ -1155,10 +1155,10 @@ msgstr ""
 msgid "Add New Field"
 msgstr ""
 
-msgid "Add New Manager"
+msgid "Add new Manager"
 msgstr ""
 
-msgid "Add new Manager"
+msgid "Add New Manager"
 msgstr ""
 
 msgid "Add New Option"
@@ -1170,10 +1170,10 @@ msgstr ""
 msgid "Add New Section"
 msgstr ""
 
-msgid "Add Note"
+msgid "Add note"
 msgstr ""
 
-msgid "Add note"
+msgid "Add Note"
 msgstr ""
 
 msgid "Add notes to contacts in bulk"
@@ -1266,10 +1266,10 @@ msgstr ""
 msgid "Add step here"
 msgstr ""
 
-msgid "Add Tag"
+msgid "Add tag"
 msgstr ""
 
-msgid "Add tag"
+msgid "Add Tag"
 msgstr ""
 
 msgid "Add Tags"
@@ -1332,10 +1332,10 @@ msgstr ""
 msgid "Add to List"
 msgstr ""
 
-msgid "Add to Lists"
+msgid "Add To Lists"
 msgstr ""
 
-msgid "Add To Lists"
+msgid "Add to Lists"
 msgstr ""
 
 msgid "Add to wp-config.php"
@@ -1470,10 +1470,10 @@ msgstr ""
 msgid "AI Assistant"
 msgstr ""
 
-msgid "AI Email Builder"
+msgid "AI email builder"
 msgstr ""
 
-msgid "AI email builder"
+msgid "AI Email Builder"
 msgstr ""
 
 msgid "AI features are disabled."
@@ -1572,6 +1572,9 @@ msgstr ""
 msgid "All Events & Services"
 msgstr ""
 
+msgid "All form builders DoubleScale supports. Install and activate a plugin to map its forms."
+msgstr ""
+
 msgid "All Hosts"
 msgstr ""
 
@@ -1611,10 +1614,10 @@ msgstr ""
 msgid "All Status"
 msgstr ""
 
-msgid "All statuses"
+msgid "All Statuses"
 msgstr ""
 
-msgid "All Statuses"
+msgid "All statuses"
 msgstr ""
 
 msgid "All templates"
@@ -1653,7 +1656,7 @@ msgstr ""
 msgid "Alt Text"
 msgstr ""
 
-msgid "Amazon SES documentation"
+msgid "Amazon SES setup guide"
 msgstr ""
 
 msgid "Amazon SES — IAM access key, secret, and region."
@@ -1698,10 +1701,10 @@ msgstr ""
 msgid "an automatic update"
 msgstr ""
 
-msgid "AND"
+msgid "And"
 msgstr ""
 
-msgid "And"
+msgid "AND"
 msgstr ""
 
 msgid "and click next."
@@ -1827,13 +1830,13 @@ msgstr ""
 msgid "API Error"
 msgstr ""
 
-msgid "API key"
+msgid "Api Key"
 msgstr ""
 
 msgid "API Key"
 msgstr ""
 
-msgid "Api Key"
+msgid "API key"
 msgstr ""
 
 msgid "API Key (optional for Ollama/local)"
@@ -1863,10 +1866,10 @@ msgstr ""
 msgid "A pipeline log that keeps itself up to date."
 msgstr ""
 
-msgid "Api Token"
+msgid "API token"
 msgstr ""
 
-msgid "API token"
+msgid "Api Token"
 msgstr ""
 
 msgid "API token is missing."
@@ -1971,10 +1974,10 @@ msgstr ""
 msgid "Approval Withdrawn"
 msgstr ""
 
-msgid "Approval Workflow"
+msgid "Approval workflow"
 msgstr ""
 
-msgid "Approval workflow"
+msgid "Approval Workflow"
 msgstr ""
 
 msgid "Approve or reject with a required reason"
@@ -2418,10 +2421,10 @@ msgstr ""
 msgid "Automation List"
 msgstr ""
 
-msgid "Automation Name"
+msgid "Automation name"
 msgstr ""
 
-msgid "Automation name"
+msgid "Automation Name"
 msgstr ""
 
 msgid "Automation name is required"
@@ -2781,10 +2784,10 @@ msgstr ""
 msgid "Booking Cancellation"
 msgstr ""
 
-msgid "Booking cancelled"
+msgid "Booking Cancelled"
 msgstr ""
 
-msgid "Booking Cancelled"
+msgid "Booking cancelled"
 msgstr ""
 
 msgid "Booking cancelled: %s"
@@ -2820,10 +2823,10 @@ msgstr ""
 msgid "Booking Confirmation Email to Attendee"
 msgstr ""
 
-msgid "Booking Confirmed"
+msgid "Booking confirmed"
 msgstr ""
 
-msgid "Booking confirmed"
+msgid "Booking Confirmed"
 msgstr ""
 
 msgid "Booking confirmed by Host"
@@ -2958,10 +2961,10 @@ msgstr ""
 msgid "Booking Request"
 msgstr ""
 
-msgid "Booking Rescheduled"
+msgid "Booking rescheduled"
 msgstr ""
 
-msgid "Booking rescheduled"
+msgid "Booking Rescheduled"
 msgstr ""
 
 msgid "Booking rescheduled by Attendee"
@@ -3081,10 +3084,10 @@ msgstr ""
 msgid "Brevo (Sendinblue) — v3 API key and optional sending domain."
 msgstr ""
 
-msgid "Brevo API"
+msgid "Brevo API returned HTTP %d."
 msgstr ""
 
-msgid "Brevo API returned HTTP %d."
+msgid "Brevo setup guide"
 msgstr ""
 
 msgid "Broadcast"
@@ -3256,6 +3259,9 @@ msgid "Calendar"
 msgstr ""
 
 msgid "Calendar actions"
+msgstr ""
+
+msgid "Calendar and booking management"
 msgstr ""
 
 msgid "Calendar Avatar"
@@ -3474,10 +3480,10 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-msgid "Cancel booking"
+msgid "Cancel Booking"
 msgstr ""
 
-msgid "Cancel Booking"
+msgid "Cancel booking"
 msgstr ""
 
 msgid "cancellation"
@@ -3657,16 +3663,16 @@ msgstr ""
 msgid "Catch big swings in a deal before the review meeting."
 msgstr ""
 
-msgid "Categories"
-msgstr ""
-
 msgid "categories"
 msgstr ""
 
-msgid "Category"
+msgid "Categories"
 msgstr ""
 
 msgid "category"
+msgstr ""
+
+msgid "Category"
 msgstr ""
 
 msgid "Category:"
@@ -3978,10 +3984,10 @@ msgstr ""
 msgid "Click to insert a merge tag from form fields"
 msgstr ""
 
-msgid "Click to open rate"
+msgid "Click to Open Rate"
 msgstr ""
 
-msgid "Click to Open Rate"
+msgid "Click to open rate"
 msgstr ""
 
 msgid "Click to rename"
@@ -4152,10 +4158,10 @@ msgstr ""
 msgid "Company or Policy & Terms Updates"
 msgstr ""
 
-msgid "Company registration number"
+msgid "Company Registration Number"
 msgstr ""
 
-msgid "Company Registration Number"
+msgid "Company registration number"
 msgstr ""
 
 msgid "Company registration number."
@@ -4461,10 +4467,10 @@ msgstr ""
 msgid "Connection ID"
 msgstr ""
 
-msgid "Connection Name"
+msgid "Connection name"
 msgstr ""
 
-msgid "Connection name"
+msgid "Connection Name"
 msgstr ""
 
 msgid "Connection name: %s"
@@ -4683,13 +4689,16 @@ msgstr ""
 msgid "Contact Profile settings help you organize and manage imported contacts efficiently. Assign contacts to lists for targeted campaigns, add tags for segmentation, set their subscription status, and control how duplicate contacts are handled. These settings ensure your contacts are properly categorized from the moment they enter your CRM."
 msgstr ""
 
-msgid "Contacts"
-msgstr ""
-
 msgid "contacts"
 msgstr ""
 
+msgid "Contacts"
+msgstr ""
+
 msgid "Contacts & CRM Insights"
+msgstr ""
+
+msgid "Contacts, activity, and notes on the go"
 msgstr ""
 
 msgid "Contacts:"
@@ -5358,10 +5367,10 @@ msgstr ""
 msgid "Create a WordPress page with the [doublescale_proposal] shortcode before sending proposals."
 msgstr ""
 
-msgid "Create campaign"
+msgid "Create Campaign"
 msgstr ""
 
-msgid "Create Campaign"
+msgid "Create campaign"
 msgstr ""
 
 msgid "Create contact"
@@ -5739,10 +5748,10 @@ msgstr ""
 msgid "Custom field not found"
 msgstr ""
 
-msgid "Custom fields"
+msgid "Custom Fields"
 msgstr ""
 
-msgid "Custom Fields"
+msgid "Custom fields"
 msgstr ""
 
 msgid "Custom fields and multi-step flows"
@@ -5865,10 +5874,10 @@ msgstr ""
 msgid "Date and time when the calendar was last updated."
 msgstr ""
 
-msgid "Date range"
+msgid "Date Range"
 msgstr ""
 
-msgid "Date Range"
+msgid "Date range"
 msgstr ""
 
 msgid "Date the object was created."
@@ -5877,10 +5886,10 @@ msgstr ""
 msgid "Date the object was last modified."
 msgstr ""
 
-msgid "day"
+msgid "Day"
 msgstr ""
 
-msgid "Day"
+msgid "day"
 msgstr ""
 
 msgid "Day(s)"
@@ -5976,10 +5985,10 @@ msgstr ""
 msgid "Deals Closed Won"
 msgstr ""
 
-msgid "Deal Source Analysis"
+msgid "Deal source analysis"
 msgstr ""
 
-msgid "Deal source analysis"
+msgid "Deal Source Analysis"
 msgstr ""
 
 msgid "Deal Stage Changed"
@@ -6054,16 +6063,16 @@ msgstr ""
 msgid "Default calendar updated successfully"
 msgstr ""
 
-msgid "Default connection"
-msgstr ""
-
 msgid "Default Connection"
 msgstr ""
 
-msgid "Default country Code"
+msgid "Default connection"
 msgstr ""
 
 msgid "Default Country Code"
+msgstr ""
+
+msgid "Default country Code"
 msgstr ""
 
 msgid "Default Duration"
@@ -6135,10 +6144,10 @@ msgstr ""
 msgid "Delete %s?"
 msgstr ""
 
-msgid "Delete account"
+msgid "Delete Account"
 msgstr ""
 
-msgid "Delete Account"
+msgid "Delete account"
 msgstr ""
 
 msgid "Delete Action"
@@ -6147,10 +6156,10 @@ msgstr ""
 msgid "Delete after specific days"
 msgstr ""
 
-msgid "Delete All"
+msgid "Delete all"
 msgstr ""
 
-msgid "Delete all"
+msgid "Delete All"
 msgstr ""
 
 msgid "Delete all email log entries?"
@@ -6177,10 +6186,10 @@ msgstr ""
 msgid "Delete Contract"
 msgstr ""
 
-msgid "Delete contract type"
+msgid "Delete Contract Type"
 msgstr ""
 
-msgid "Delete Contract Type"
+msgid "Delete contract type"
 msgstr ""
 
 msgid "Deleted Contact"
@@ -6219,10 +6228,10 @@ msgstr ""
 msgid "Delete note"
 msgstr ""
 
-msgid "Delete Payment"
+msgid "Delete payment"
 msgstr ""
 
-msgid "Delete payment"
+msgid "Delete Payment"
 msgstr ""
 
 msgid "Delete Proposal"
@@ -6252,10 +6261,10 @@ msgstr ""
 msgid "Delete Tags"
 msgstr ""
 
-msgid "Delete tax"
+msgid "Delete Tax"
 msgstr ""
 
-msgid "Delete Tax"
+msgid "Delete tax"
 msgstr ""
 
 msgid "Delete the selected %s?"
@@ -6505,6 +6514,9 @@ msgid "DKIM is not enabled for this domain in SES."
 msgstr ""
 
 msgid "DKIM settings"
+msgstr ""
+
+msgid "Docs"
 msgstr ""
 
 msgid "Document"
@@ -6795,10 +6807,10 @@ msgstr ""
 msgid "Due"
 msgstr ""
 
-msgid "Due date"
+msgid "Due Date"
 msgstr ""
 
-msgid "Due Date"
+msgid "Due date"
 msgstr ""
 
 msgid "Due Date Changed"
@@ -6927,10 +6939,10 @@ msgstr ""
 msgid "Editable types are authored by people; system types are generated automatically by the CRM and are not written by hand."
 msgstr ""
 
-msgid "Edit account"
+msgid "Edit Account"
 msgstr ""
 
-msgid "Edit Account"
+msgid "Edit account"
 msgstr ""
 
 msgid "Edit Action"
@@ -6960,10 +6972,10 @@ msgstr ""
 msgid "Edit Contract"
 msgstr ""
 
-msgid "Edit contract type"
+msgid "Edit Contract Type"
 msgstr ""
 
-msgid "Edit Contract Type"
+msgid "Edit contract type"
 msgstr ""
 
 msgid "Edit Credentials"
@@ -7071,10 +7083,10 @@ msgstr ""
 msgid "Edit tags"
 msgstr ""
 
-msgid "Edit Tax"
+msgid "Edit tax"
 msgstr ""
 
-msgid "Edit tax"
+msgid "Edit Tax"
 msgstr ""
 
 msgid "Edit Template"
@@ -7098,9 +7110,6 @@ msgstr ""
 msgid "Either pick a saved SMTP credential set or choose “Create new” and enter host, port, encryption, and username/password. Those values are stored as the provider account for this mailer."
 msgstr ""
 
-msgid "Elastic Email API"
-msgstr ""
-
 msgid "ElasticEmail API Error"
 msgstr ""
 
@@ -7111,6 +7120,9 @@ msgid "ElasticEmail Getting User Profile Error"
 msgstr ""
 
 msgid "ElasticEmail is not properly configured."
+msgstr ""
+
+msgid "Elastic Email setup guide"
 msgstr ""
 
 msgid "Elastic Email — API key."
@@ -7134,10 +7146,10 @@ msgstr ""
 msgid "Email, SMS, and channel tracking."
 msgstr ""
 
-msgid "Email address"
+msgid "Email Address"
 msgstr ""
 
-msgid "Email Address"
+msgid "Email address"
 msgstr ""
 
 msgid "email address"
@@ -7218,10 +7230,10 @@ msgstr ""
 msgid "Email Clicked Tracking Error"
 msgstr ""
 
-msgid "Email content"
+msgid "Email Content"
 msgstr ""
 
-msgid "Email Content"
+msgid "Email content"
 msgstr ""
 
 msgid "Email delivery"
@@ -7296,10 +7308,10 @@ msgstr ""
 msgid "Email Preferences - %s"
 msgstr ""
 
-msgid "Email Preview"
+msgid "Email preview"
 msgstr ""
 
-msgid "Email preview"
+msgid "Email Preview"
 msgstr ""
 
 msgid "Email Provider Setup"
@@ -7464,10 +7476,10 @@ msgstr ""
 msgid "Enable Booking Summary Notification."
 msgstr ""
 
-msgid "Enable Cart Tracking"
+msgid "enable cart tracking"
 msgstr ""
 
-msgid "enable cart tracking"
+msgid "Enable Cart Tracking"
 msgstr ""
 
 msgid "Enable Condition"
@@ -8201,10 +8213,10 @@ msgstr ""
 msgid "Export Contact"
 msgstr ""
 
-msgid "Export Contacts"
+msgid "Export contacts"
 msgstr ""
 
-msgid "Export contacts"
+msgid "Export Contacts"
 msgstr ""
 
 msgid "Export contacts to CSV"
@@ -9254,9 +9266,6 @@ msgstr ""
 msgid "Format: https://yoursubdomain.api-us1.com or https://yoursubdomain.activehosted.com"
 msgstr ""
 
-msgid "Form builder plugins installed on this WordPress site."
-msgstr ""
-
 msgid "Form created successfully"
 msgstr ""
 
@@ -9374,10 +9383,10 @@ msgstr ""
 msgid " from campaign \"%s\""
 msgstr ""
 
-msgid "From email"
+msgid "From Email"
 msgstr ""
 
-msgid "From Email"
+msgid "From email"
 msgstr ""
 
 msgid "From email (for email channel)"
@@ -9626,6 +9635,9 @@ msgstr ""
 msgid "Gmail Send Error"
 msgstr ""
 
+msgid "Gmail setup guide"
+msgstr ""
+
 msgid "Gmail — OAuth 2.0; authorize a mailbox in wp-admin."
 msgstr ""
 
@@ -9708,9 +9720,6 @@ msgid "Google Meet"
 msgstr ""
 
 msgid "Google Meet is not connected. Please connect it first."
-msgstr ""
-
-msgid "Google OAuth 2.0"
 msgstr ""
 
 msgid "Google rejected the token exchange. Details:"
@@ -9833,10 +9842,10 @@ msgstr ""
 msgid "Headers"
 msgstr ""
 
-msgid "heading 1"
+msgid "Heading 1"
 msgstr ""
 
-msgid "Heading 1"
+msgid "heading 1"
 msgstr ""
 
 msgid "Heading 2"
@@ -9956,10 +9965,10 @@ msgstr ""
 msgid "hour"
 msgstr ""
 
-msgid "hours"
+msgid "Hours"
 msgstr ""
 
-msgid "Hours"
+msgid "hours"
 msgstr ""
 
 msgid "Hours Before"
@@ -10154,10 +10163,10 @@ msgstr ""
 msgid "Import Automations"
 msgstr ""
 
-msgid "Import completed"
+msgid "Import Completed"
 msgstr ""
 
-msgid "Import Completed"
+msgid "Import completed"
 msgstr ""
 
 msgid "Import Completed!"
@@ -10166,16 +10175,16 @@ msgstr ""
 msgid "Import Contact"
 msgstr ""
 
-msgid "Import Contacts"
-msgstr ""
-
 msgid "Import contacts"
 msgstr ""
 
-msgid "imported"
+msgid "Import Contacts"
 msgstr ""
 
 msgid "Imported"
+msgstr ""
+
+msgid "imported"
 msgstr ""
 
 msgid "Imported automations are created as inactive so you can review them first."
@@ -10220,10 +10229,10 @@ msgstr ""
 msgid "Import steps"
 msgstr ""
 
-msgid "Import Summary"
+msgid "Import summary"
 msgstr ""
 
-msgid "Import summary"
+msgid "Import Summary"
 msgstr ""
 
 msgid "In-app"
@@ -10262,10 +10271,10 @@ msgstr ""
 msgid "Include or exclude specific tags"
 msgstr ""
 
-msgid "includes"
+msgid "Includes"
 msgstr ""
 
-msgid "Includes"
+msgid "includes"
 msgstr ""
 
 msgid "includes all"
@@ -10361,10 +10370,10 @@ msgstr ""
 msgid "Insert Link Trigger"
 msgstr ""
 
-msgid "Insert merge tag"
+msgid "Insert Merge Tag"
 msgstr ""
 
-msgid "Insert Merge Tag"
+msgid "Insert merge tag"
 msgstr ""
 
 msgid "Insert Merge Tags"
@@ -10853,10 +10862,10 @@ msgstr ""
 msgid "Invoice Revenue"
 msgstr ""
 
-msgid "invoices"
+msgid "Invoices"
 msgstr ""
 
-msgid "Invoices"
+msgid "invoices"
 msgstr ""
 
 msgid "Invoices, proposals, contracts, credit notes, and projects in one tabbed report hub."
@@ -10899,6 +10908,9 @@ msgid "Invoice {{sales:invoice_number}} has been paid in full."
 msgstr ""
 
 msgid "In Zapier"
+msgstr ""
+
+msgid "iOS and Android apps for your team"
 msgstr ""
 
 msgid "iOS App"
@@ -10982,10 +10994,10 @@ msgstr ""
 msgid "Item name"
 msgstr ""
 
-msgid "items"
+msgid "Items"
 msgstr ""
 
-msgid "Items"
+msgid "items"
 msgstr ""
 
 msgid "Items per page"
@@ -11030,10 +11042,10 @@ msgstr ""
 msgid "June"
 msgstr ""
 
-msgid "Just now"
+msgid "just now"
 msgstr ""
 
-msgid "just now"
+msgid "Just now"
 msgstr ""
 
 msgid "Kanban project board"
@@ -11108,10 +11120,10 @@ msgstr ""
 msgid "Last month"
 msgstr ""
 
-msgid "Last name"
+msgid "Last Name"
 msgstr ""
 
-msgid "Last Name"
+msgid "Last name"
 msgstr ""
 
 msgid "Last name of the contact."
@@ -11480,10 +11492,10 @@ msgstr ""
 msgid "List proposals with number, subject, status, contact, and total. If your sales scope is \"own\" you see only proposals assigned to you."
 msgstr ""
 
-msgid "lists"
+msgid "Lists"
 msgstr ""
 
-msgid "Lists"
+msgid "lists"
 msgstr ""
 
 msgid "Lists: %1$d subscribed / %2$d assigned"
@@ -11771,10 +11783,10 @@ msgstr ""
 msgid "Looks like your remote connection for this location is disabled. Every team member added to this event must connect %s before guests can use this location."
 msgstr ""
 
-msgid "Loops API"
+msgid "Loops Send Email Error"
 msgstr ""
 
-msgid "Loops Send Email Error"
+msgid "Loops setup guide"
 msgstr ""
 
 msgid "Loops — API key plus transactional template ID."
@@ -11786,10 +11798,10 @@ msgstr ""
 msgid "Lorem ipsum contains the typefaces more in use, an aspect that."
 msgstr ""
 
-msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview ."
+msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
 msgstr ""
 
-msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
+msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview ."
 msgstr ""
 
 msgid "Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview."
@@ -11813,10 +11825,10 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-msgid "Lower Than"
+msgid "Lower than"
 msgstr ""
 
-msgid "Lower than"
+msgid "Lower Than"
 msgstr ""
 
 msgid "LTR"
@@ -11876,9 +11888,6 @@ msgstr ""
 msgid "Mailer returned false without a specific error message."
 msgstr ""
 
-msgid "MailerSend API"
-msgstr ""
-
 msgid "MailerSend batch sending is not available. Please update smtp."
 msgstr ""
 
@@ -11886,6 +11895,9 @@ msgid "MailerSend is not properly configured."
 msgstr ""
 
 msgid "MailerSend Send Email Error"
+msgstr ""
+
+msgid "MailerSend setup guide"
 msgstr ""
 
 msgid "MailerSend — bearer API token."
@@ -11900,7 +11912,7 @@ msgstr ""
 msgid "Mailgun Send Email Error"
 msgstr ""
 
-msgid "Mailgun sending domains"
+msgid "Mailgun setup guide"
 msgstr ""
 
 msgid "Mailgun — domain, region, and private API key."
@@ -11912,10 +11924,10 @@ msgstr ""
 msgid "Mailjet is not properly configured."
 msgstr ""
 
-msgid "Mailjet REST API"
+msgid "Mailjet Send Email Error"
 msgstr ""
 
-msgid "Mailjet Send Email Error"
+msgid "Mailjet setup guide"
 msgstr ""
 
 msgid "Mailjet — API key and secret key pair."
@@ -12041,10 +12053,10 @@ msgstr ""
 msgid "Mandrill (Mailchimp) — transactional API key."
 msgstr ""
 
-msgid "Mandrill API docs"
+msgid "Mandrill Send Email Error"
 msgstr ""
 
-msgid "Mandrill Send Email Error"
+msgid "Mandrill setup guide"
 msgstr ""
 
 msgid "Manual and gateway-recorded payments"
@@ -12122,10 +12134,10 @@ msgstr ""
 msgid "Mark as sent"
 msgstr ""
 
-msgid "Mark as subscribed"
+msgid "Mark as Subscribed"
 msgstr ""
 
-msgid "Mark as Subscribed"
+msgid "Mark as subscribed"
 msgstr ""
 
 msgid "Mark as Unavailable"
@@ -12230,10 +12242,10 @@ msgstr ""
 msgid "Max File Count"
 msgstr ""
 
-msgid "Max file size (MB)"
+msgid "Max File Size (MB)"
 msgstr ""
 
-msgid "Max File Size (MB)"
+msgid "Max file size (MB)"
 msgstr ""
 
 msgid "Maximum 50 recipients per batch."
@@ -12512,9 +12524,6 @@ msgstr ""
 msgid "Microsoft account."
 msgstr ""
 
-msgid "Microsoft identity platform"
-msgstr ""
-
 msgid "Microsoft Outlook"
 msgstr ""
 
@@ -12527,10 +12536,10 @@ msgstr ""
 msgid "Microsoft Teams is not enabled for your default account. Please enable it in the Outlook integration settings."
 msgstr ""
 
-msgid "min"
+msgid "Min"
 msgstr ""
 
-msgid "Min"
+msgid "min"
 msgstr ""
 
 msgid "Min Date"
@@ -12551,10 +12560,10 @@ msgstr ""
 msgid "Mins"
 msgstr ""
 
-msgid "Minutes"
+msgid "minutes"
 msgstr ""
 
-msgid "minutes"
+msgid "Minutes"
 msgstr ""
 
 msgid "Minutes Before"
@@ -12746,10 +12755,10 @@ msgstr ""
 msgid "My Sections"
 msgstr ""
 
-msgid "My support tickets"
+msgid "My Support Tickets"
 msgstr ""
 
-msgid "My Support Tickets"
+msgid "My support tickets"
 msgstr ""
 
 msgid "My Templates"
@@ -12795,6 +12804,9 @@ msgid "Name this SMS campaign for your workspace. Recipients never see this titl
 msgstr ""
 
 msgid "Narrow the trigger"
+msgstr ""
+
+msgid "Native iOS and Android app"
 msgstr ""
 
 msgid "Native mobile push notifications (iOS & Android)"
@@ -12914,10 +12926,10 @@ msgstr ""
 msgid "New task u2192 Asana task"
 msgstr ""
 
-msgid "New Ticket"
+msgid "New ticket"
 msgstr ""
 
-msgid "New ticket"
+msgid "New Ticket"
 msgstr ""
 
 msgid "New ticket from %s"
@@ -13535,10 +13547,10 @@ msgstr ""
 msgid "Not connected"
 msgstr ""
 
-msgid "note"
+msgid "Note"
 msgstr ""
 
-msgid "Note"
+msgid "note"
 msgstr ""
 
 msgid "Note:"
@@ -13976,10 +13988,10 @@ msgstr ""
 msgid "Number of Bookings"
 msgstr ""
 
-msgid "Number of days"
+msgid "Number of Days"
 msgstr ""
 
-msgid "Number of Days"
+msgid "Number of days"
 msgstr ""
 
 msgid "Number of events to retrieve."
@@ -14261,10 +14273,10 @@ msgstr ""
 msgid "Options are required for %s field"
 msgstr ""
 
-msgid "or"
+msgid "OR"
 msgstr ""
 
-msgid "OR"
+msgid "or"
 msgstr ""
 
 msgid "Or adding New Customer"
@@ -14352,6 +14364,9 @@ msgid "Outlook rejected the access token (HTTP 401) after a refresh. The mailbox
 msgstr ""
 
 msgid "Outlook Send Error"
+msgstr ""
+
+msgid "Outlook setup guide"
 msgstr ""
 
 msgid "Output HTML suitable for an email text block (paragraphs, lists, links). Keep it concise and on-brand."
@@ -14520,6 +14535,9 @@ msgid "Payment Gateway"
 msgstr ""
 
 msgid "Payment gateway not found."
+msgstr ""
+
+msgid "Payment gateways: Stripe, PayPal, Square, Mollie, Razorpay & Authorize.Net"
 msgstr ""
 
 msgid "Payment has been successfully processed"
@@ -15206,13 +15224,16 @@ msgstr ""
 msgid "Plus"
 msgstr ""
 
+msgid "Plus and Enterprise plans only"
+msgstr ""
+
 msgid "Plus LTD"
 msgstr ""
 
-msgid "Points"
+msgid "points"
 msgstr ""
 
-msgid "points"
+msgid "Points"
 msgstr ""
 
 msgid "points!"
@@ -15248,9 +15269,6 @@ msgstr ""
 msgid "Post ID:"
 msgstr ""
 
-msgid "Postmark API"
-msgstr ""
-
 msgid "Postmark API Error"
 msgstr ""
 
@@ -15261,6 +15279,9 @@ msgid "Postmark batch sending is not available. Please update smtp."
 msgstr ""
 
 msgid "Postmark is not properly configured."
+msgstr ""
+
+msgid "Postmark setup guide"
 msgstr ""
 
 msgid "Postmark — server API token and optional message stream."
@@ -15305,10 +15326,10 @@ msgstr ""
 msgid "Presto Player plugin is not installed or activated. Install Presto Player to use these triggers."
 msgstr ""
 
-msgid "preview"
+msgid "Preview"
 msgstr ""
 
-msgid "Preview"
+msgid "preview"
 msgstr ""
 
 msgid "Preview & Share"
@@ -15461,6 +15482,9 @@ msgstr ""
 msgid "Pro Feature:"
 msgstr ""
 
+msgid "Pro features"
+msgstr ""
+
 msgid "Pro features include:"
 msgstr ""
 
@@ -15473,10 +15497,10 @@ msgstr ""
 msgid "Project"
 msgstr ""
 
-msgid "Project activity"
+msgid "Project Activity"
 msgstr ""
 
-msgid "Project Activity"
+msgid "Project activity"
 msgstr ""
 
 msgid "Project Assigned to Me"
@@ -15872,10 +15896,10 @@ msgstr ""
 msgid "Ready-made Zaps. \"Use this workflow\" opens Zapier with both steps already chosen — connect your accounts and turn it on."
 msgstr ""
 
-msgid "Ready-To-Use"
+msgid "Ready-to-use"
 msgstr ""
 
-msgid "Ready-to-use"
+msgid "Ready-To-Use"
 msgstr ""
 
 msgid "Ready to unlock the full platform?"
@@ -16238,10 +16262,10 @@ msgstr ""
 msgid "Replies sent."
 msgstr ""
 
-msgid "Reply"
+msgid "reply"
 msgstr ""
 
-msgid "reply"
+msgid "Reply"
 msgstr ""
 
 msgid "Reply-To"
@@ -16532,10 +16556,10 @@ msgstr ""
 msgid "Rule updated successfully"
 msgstr ""
 
-msgid "Run"
+msgid "run"
 msgstr ""
 
-msgid "run"
+msgid "Run"
 msgstr ""
 
 msgid "Run batch identifier (YYYY-MM-DD HH:MM)"
@@ -16611,6 +16635,9 @@ msgid "Sales Manager"
 msgstr ""
 
 msgid "Sales Pipeline"
+msgstr ""
+
+msgid "Sales pipelines, deals, and follow-ups"
 msgstr ""
 
 msgid "Sales pipelines, deal stages, and pipeline value."
@@ -16730,10 +16757,10 @@ msgstr ""
 msgid "Saved blocks library for reuse across emails"
 msgstr ""
 
-msgid "Save Failed"
+msgid "Save failed"
 msgstr ""
 
-msgid "Save failed"
+msgid "Save Failed"
 msgstr ""
 
 msgid "Save failed."
@@ -16766,10 +16793,10 @@ msgstr ""
 msgid "Save Setting Changes"
 msgstr ""
 
-msgid "Save Settings"
+msgid "Save settings"
 msgstr ""
 
-msgid "Save settings"
+msgid "Save Settings"
 msgstr ""
 
 msgid "Save Template"
@@ -17021,10 +17048,10 @@ msgstr ""
 msgid "Secret access key"
 msgstr ""
 
-msgid "Secret key"
+msgid "Secret Key"
 msgstr ""
 
-msgid "Secret Key"
+msgid "Secret key"
 msgstr ""
 
 msgid "Secret key is missing."
@@ -17180,10 +17207,10 @@ msgstr ""
 msgid "Select CSV file to import"
 msgstr ""
 
-msgid "Select date"
+msgid "Select Date"
 msgstr ""
 
-msgid "Select Date"
+msgid "Select date"
 msgstr ""
 
 msgid "Select date & time"
@@ -17306,10 +17333,10 @@ msgstr ""
 msgid "Select link trigger(s)"
 msgstr ""
 
-msgid "Select list"
+msgid "Select List"
 msgstr ""
 
-msgid "Select List"
+msgid "Select list"
 msgstr ""
 
 msgid "Select lists to remove contacts from"
@@ -17342,10 +17369,10 @@ msgstr ""
 msgid "Select one or more roles. Capabilities merge across every assigned role."
 msgstr ""
 
-msgid "Select Option"
+msgid "Select option"
 msgstr ""
 
-msgid "Select option"
+msgid "Select Option"
 msgstr ""
 
 msgid "Select options..."
@@ -17426,10 +17453,10 @@ msgstr ""
 msgid "Select to choose a form, map fields, and activate the connection."
 msgstr ""
 
-msgid "Select Type"
+msgid "Select type"
 msgstr ""
 
-msgid "Select type"
+msgid "Select Type"
 msgstr ""
 
 msgid "Select User"
@@ -17558,9 +17585,6 @@ msgstr ""
 msgid "SendGrid API error."
 msgstr ""
 
-msgid "SendGrid API keys"
-msgstr ""
-
 msgid "SendGrid batch sending is not available. Please update smtp."
 msgstr ""
 
@@ -17568,6 +17592,9 @@ msgid "SendGrid HTTP API — API key authentication."
 msgstr ""
 
 msgid "SendGrid is not properly configured."
+msgstr ""
+
+msgid "SendGrid setup guide"
 msgstr ""
 
 msgid "Sendinblue/Brevo batch sending is not available. Please update smtp."
@@ -17618,10 +17645,10 @@ msgstr ""
 msgid "Send Invoice via WhatsApp"
 msgstr ""
 
-msgid "SendLayer"
+msgid "SendLayer API Error"
 msgstr ""
 
-msgid "SendLayer API Error"
+msgid "SendLayer setup guide"
 msgstr ""
 
 msgid "SendLayer — API key."
@@ -17666,10 +17693,10 @@ msgstr ""
 msgid "Send Test"
 msgstr ""
 
-msgid "Send test email"
+msgid "Send Test Email"
 msgstr ""
 
-msgid "Send Test Email"
+msgid "Send test email"
 msgstr ""
 
 msgid "Send Test Push"
@@ -17678,10 +17705,10 @@ msgstr ""
 msgid "Send Test SMS"
 msgstr ""
 
-msgid "Send test WhatsApp"
+msgid "Send Test WhatsApp"
 msgstr ""
 
-msgid "Send Test WhatsApp"
+msgid "Send test WhatsApp"
 msgstr ""
 
 msgid "Send the same reply to %d selected tickets."
@@ -18134,22 +18161,22 @@ msgstr ""
 msgid "Slug of the calendar."
 msgstr ""
 
-msgid "Sms"
-msgstr ""
-
 msgid "SMS"
 msgstr ""
 
+msgid "Sms"
+msgstr ""
+
 msgid "SMS, WhatsApp & Unified Inbox"
+msgstr ""
+
+msgid "SMS Campaigns"
 msgstr ""
 
 msgid "Sms Campaigns"
 msgstr ""
 
 msgid "SMS campaigns"
-msgstr ""
-
-msgid "SMS Campaigns"
 msgstr ""
 
 msgid "SMS campaigns and broadcast messaging"
@@ -18179,10 +18206,10 @@ msgstr ""
 msgid "SMS Notifications"
 msgstr ""
 
-msgid "SMS Preview"
+msgid "SMS preview"
 msgstr ""
 
-msgid "SMS preview"
+msgid "SMS Preview"
 msgstr ""
 
 msgid "SMS preview requires DoubleScale Pro."
@@ -18224,9 +18251,6 @@ msgstr ""
 msgid "SMTP (built-in)"
 msgstr ""
 
-msgid "SMTP.com API"
-msgstr ""
-
 msgid "SMTP.com expects both an API key and a sender name label for the account. Enter both when creating a new stored account."
 msgstr ""
 
@@ -18236,10 +18260,10 @@ msgstr ""
 msgid "SMTP / Email Sending Service Settings"
 msgstr ""
 
-msgid "SMTP2GO API"
+msgid "SMTP2GO Send Email Error"
 msgstr ""
 
-msgid "SMTP2GO Send Email Error"
+msgid "SMTP2GO setup guide"
 msgstr ""
 
 msgid "SMTP2GO — REST API key."
@@ -18264,6 +18288,9 @@ msgid "SMTP host is required."
 msgstr ""
 
 msgid "SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered."
+msgstr ""
+
+msgid "SMTP mailers"
 msgstr ""
 
 msgid "SMTP Not Configured"
@@ -18305,10 +18332,10 @@ msgstr ""
 msgid "Social Media"
 msgstr ""
 
-msgid "SocketLabs injection API"
+msgid "SocketLabs Send Email Error"
 msgstr ""
 
-msgid "SocketLabs Send Email Error"
+msgid "SocketLabs setup guide"
 msgstr ""
 
 msgid "SocketLabs — API key and numeric server ID."
@@ -18374,10 +18401,10 @@ msgstr ""
 msgid "Sorry, you cannot delete the default availability."
 msgstr ""
 
-msgid "Sort By"
+msgid "Sort by"
 msgstr ""
 
-msgid "Sort by"
+msgid "Sort By"
 msgstr ""
 
 msgid "Sort by field. activity_date sorts by the actual event time."
@@ -18416,9 +18443,6 @@ msgstr ""
 msgid "Spam protection and consent options"
 msgstr ""
 
-msgid "SparkPost API"
-msgstr ""
-
 msgid "SparkPost API Error"
 msgstr ""
 
@@ -18426,6 +18450,9 @@ msgid "SparkPost batch sending is not available. Please update smtp."
 msgstr ""
 
 msgid "SparkPost is not properly configured."
+msgstr ""
+
+msgid "SparkPost setup guide"
 msgstr ""
 
 msgid "SparkPost — API key and EU/US region."
@@ -18833,10 +18860,10 @@ msgstr ""
 msgid "Support team"
 msgstr ""
 
-msgid "Support Tickets"
+msgid "Support tickets"
 msgstr ""
 
-msgid "Support tickets"
+msgid "Support Tickets"
 msgstr ""
 
 msgid "Support tickets, threads, and workload summaries."
@@ -18887,10 +18914,10 @@ msgstr ""
 msgid "Sync with Outlook and optional Microsoft Teams."
 msgstr ""
 
-msgid "system"
+msgid "System"
 msgstr ""
 
-msgid "System"
+msgid "system"
 msgstr ""
 
 msgid "System Alerts"
@@ -18908,10 +18935,10 @@ msgstr ""
 msgid "Tablet"
 msgstr ""
 
-msgid "Table view"
+msgid "Table View"
 msgstr ""
 
-msgid "Table View"
+msgid "Table view"
 msgstr ""
 
 msgid "Tag"
@@ -18935,10 +18962,10 @@ msgstr ""
 msgid "Tag Description"
 msgstr ""
 
-msgid "Tag name"
+msgid "Tag Name"
 msgstr ""
 
-msgid "Tag Name"
+msgid "Tag name"
 msgstr ""
 
 msgid "Tag name is required"
@@ -18998,6 +19025,9 @@ msgstr ""
 msgid "Take contacts off lists. The list itself is not deleted. Provide exactly one of: contact_id, contact_ids, or filter. Set dry_run to preview without writing."
 msgstr ""
 
+msgid "Take DoubleScale with you. The mobile app is included with Plus and Enterprise — not Basic."
+msgstr ""
+
 msgid "Target Products"
 msgstr ""
 
@@ -19007,10 +19037,10 @@ msgstr ""
 msgid "Task activities require Plugin Pro plugin"
 msgstr ""
 
-msgid "Task Activity"
+msgid "Task activity"
 msgstr ""
 
-msgid "Task activity"
+msgid "Task Activity"
 msgstr ""
 
 msgid "Task Assigned"
@@ -19082,6 +19112,9 @@ msgstr ""
 msgid "Tasks on projects"
 msgstr ""
 
+msgid "Tasks with native push notifications"
+msgstr ""
+
 msgid "Task updated successfully"
 msgstr ""
 
@@ -19100,10 +19133,10 @@ msgstr ""
 msgid "Tax/VAT: %s"
 msgstr ""
 
-msgid "Tax / VAT Number"
+msgid "Tax / VAT number"
 msgstr ""
 
-msgid "Tax / VAT number"
+msgid "Tax / VAT Number"
 msgstr ""
 
 msgid "Taxes"
@@ -20199,10 +20232,10 @@ msgstr ""
 msgid "Ticket custom fields"
 msgstr ""
 
-msgid "Ticket Details"
+msgid "Ticket details"
 msgstr ""
 
-msgid "Ticket details"
+msgid "Ticket Details"
 msgstr ""
 
 msgid "Ticket lifecycle notifications for agents (new ticket, customer reply, assignment, resolved, reopened)."
@@ -20217,10 +20250,10 @@ msgstr ""
 msgid "Ticket received confirmation"
 msgstr ""
 
-msgid "Ticket Reopened"
+msgid "Ticket reopened"
 msgstr ""
 
-msgid "Ticket reopened"
+msgid "Ticket Reopened"
 msgstr ""
 
 msgid "Ticket Reply"
@@ -20736,10 +20769,10 @@ msgstr ""
 msgid "Try a Free demo"
 msgstr ""
 
-msgid "Try again"
+msgid "Try Again"
 msgstr ""
 
-msgid "Try Again"
+msgid "Try again"
 msgstr ""
 
 msgid "Try clearing the filter to see all your tickets."
@@ -20931,10 +20964,10 @@ msgstr ""
 msgid "Unit"
 msgstr ""
 
-msgid "Unknown"
+msgid "unknown"
 msgstr ""
 
-msgid "unknown"
+msgid "Unknown"
 msgstr ""
 
 msgid "Unknown %1$s ids: %2$s. Call list-contact-segments for ids that exist."
@@ -21012,10 +21045,10 @@ msgstr ""
 msgid "Unselect all options"
 msgstr ""
 
-msgid "unsubscribe"
+msgid "Unsubscribe"
 msgstr ""
 
-msgid "Unsubscribe"
+msgid "unsubscribe"
 msgstr ""
 
 msgid "Unsubscribe - %s"
@@ -21799,9 +21832,6 @@ msgstr ""
 msgid "What hours are you available?"
 msgstr ""
 
-msgid "What is SMTP?"
-msgstr ""
-
 msgid "What is the customer reporting?"
 msgstr ""
 
@@ -21877,10 +21907,10 @@ msgstr ""
 msgid "WhatsApp number"
 msgstr ""
 
-msgid "Whatsapp Phone"
+msgid "WhatsApp Phone"
 msgstr ""
 
-msgid "WhatsApp Phone"
+msgid "Whatsapp Phone"
 msgstr ""
 
 msgid "Whatsapp phone number of the contact in E.164 format (e.g., +12025551234)."
@@ -22189,10 +22219,10 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-msgid "Yes, cancel"
+msgid "Yes, Cancel"
 msgstr ""
 
-msgid "Yes, Cancel"
+msgid "Yes, cancel"
 msgstr ""
 
 msgid "Yes, Delete"
@@ -22561,10 +22591,10 @@ msgstr ""
 msgid "Your meeting has been Scheduled"
 msgstr ""
 
-msgid "Your name"
+msgid "Your Name"
 msgstr ""
 
-msgid "Your Name"
+msgid "Your name"
 msgstr ""
 
 msgid "Your own notifications, newest first, with whether each has been read. Always scoped to you — there is no way to read another user's notifications, and no user id to pass. Only notifications for categories you have the bell enabled on appear, matching the dashboard exactly. Use mark-notifications-read to clear unread ones."
@@ -22672,13 +22702,13 @@ msgstr ""
 msgid "Zoho Getting User Profile Error"
 msgstr ""
 
-msgid "Zoho Mail OAuth"
-msgstr ""
-
 msgid "Zoho Mail — OAuth; pick your Zoho data center."
 msgstr ""
 
 msgid "Zoho Send Error"
+msgstr ""
+
+msgid "Zoho setup guide"
 msgstr ""
 
 msgid "Zoho Upload Attachment"
@@ -22708,13 +22738,13 @@ msgstr ""
 msgid "[%s] Duplicate contacts were merged automatically"
 msgstr ""
 
-msgid " · last used %s"
-msgstr ""
-
 msgid "— None —"
 msgstr ""
 
 msgid "— Unassigned —"
+msgstr ""
+
+msgid " · last used %s"
 msgstr ""
 
 msgid "👋 Welcome back"

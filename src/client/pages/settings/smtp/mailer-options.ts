@@ -144,6 +144,9 @@ export type SmtpMailerUiMeta = {
 	docLabel?: string;
 };
 
+/** DoubleScale SMTP mailer docs (BetterDocs category). */
+export const SMTP_MAILER_DOCS_HOME = 'https://doublescale.io/docs/smtp/';
+
 /**
  * Per-mailer UX copy and doc links for the connection wizard.
  * Keys align with `SMTP_MAILER_OPTIONS` / PHP mailer slugs.
@@ -159,6 +162,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'No API keys or SMTP vault entry is required. Set From identity below if you want this connection to participate in routing.',
 			'doublescale'
 		),
+		docLabel: __('SMTP mailers', 'doublescale'),
+		docUrl: SMTP_MAILER_DOCS_HOME,
 	},
 	smtp: {
 		category: 'relay',
@@ -170,8 +175,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Either pick a saved SMTP credential set or choose “Create new” and enter host, port, encryption, and username/password. Those values are stored as the provider account for this mailer.',
 			'doublescale'
 		),
-		docLabel: __('What is SMTP?', 'doublescale'),
-		docUrl: 'https://developer.mozilla.org/en-US/docs/Glossary/SMTP',
+		docLabel: __('SMTP mailers', 'doublescale'),
+		docUrl: SMTP_MAILER_DOCS_HOME,
 	},
 	sendgrid: {
 		category: 'api',
@@ -183,8 +188,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Create an API key in SendGrid with mail-send permission, then add it here as a new provider account or reuse one you already stored.',
 			'doublescale'
 		),
-		docLabel: __('SendGrid API keys', 'doublescale'),
-		docUrl: 'https://docs.sendgrid.com/ui/account-and-settings/api-keys',
+		docLabel: __('SendGrid setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}sendgrid-2/`,
 	},
 	mailgun: {
 		category: 'api',
@@ -196,8 +201,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Each provider account is a domain + API key pair (and region). Add a new account for each Mailgun domain you send from, or select an existing stored account.',
 			'doublescale'
 		),
-		docLabel: __('Mailgun sending domains', 'doublescale'),
-		docUrl: 'https://documentation.mailgun.com/en/latest/user_manual.html#sending-domains',
+		docLabel: __('Mailgun setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}mailgun-2/`,
 	},
 	aws: {
 		category: 'api',
@@ -213,8 +218,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Required for Amazon SES — stored with the credential in the provider vault.',
 			'doublescale'
 		),
-		docLabel: __('Amazon SES documentation', 'doublescale'),
-		docUrl: 'https://docs.aws.amazon.com/ses/',
+		docLabel: __('Amazon SES setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}amazon-ses-2/`,
 	},
 	gmail: {
 		category: 'oauth',
@@ -226,8 +231,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Register a Google Cloud OAuth client, paste client ID and secret here, save them, then authorize. When the popup completes, pick the mailbox from the provider account list.',
 			'doublescale'
 		),
-		docLabel: __('Google OAuth 2.0', 'doublescale'),
-		docUrl: 'https://developers.google.com/identity/protocols/oauth2',
+		docLabel: __('Gmail setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}gmail/`,
 	},
 	postmark: {
 		category: 'api',
@@ -239,8 +244,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Use a Server API token from Postmark. You can store one account per server or reuse a token across connections.',
 			'doublescale'
 		),
-		docLabel: __('Postmark API', 'doublescale'),
-		docUrl: 'https://postmarkapp.com/developer',
+		docLabel: __('Postmark setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}postmark-2/`,
 	},
 	sendinblue: {
 		category: 'api',
@@ -252,8 +257,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Generate an SMTP & API key in Brevo. Each key (and optional domain hint) can be its own stored provider account.',
 			'doublescale'
 		),
-		docLabel: __('Brevo API', 'doublescale'),
-		docUrl: 'https://developers.brevo.com/',
+		docLabel: __('Brevo setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}brevo-sendinblue-2/`,
 	},
 	loops: {
 		category: 'api',
@@ -265,8 +270,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Create a Loops API key and the transactional ID from your Loops workspace, then save as a new provider account.',
 			'doublescale'
 		),
-		docLabel: __('Loops API', 'doublescale'),
-		docUrl: 'https://loops.so/docs',
+		docLabel: __('Loops setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}loops/`,
 	},
 	mailersend: {
 		category: 'api',
@@ -275,8 +280,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Use a token from MailerSend with email-sending scope. Store one account per token or reuse an existing account.',
 			'doublescale'
 		),
-		docLabel: __('MailerSend API', 'doublescale'),
-		docUrl: 'https://developers.mailersend.com/',
+		docLabel: __('MailerSend setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}mailersend/`,
 	},
 	mailjet: {
 		category: 'api',
@@ -285,8 +290,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Both keys are required for each stored Mailjet account. Add a new pair or select a saved account.',
 			'doublescale'
 		),
-		docLabel: __('Mailjet REST API', 'doublescale'),
-		docUrl: 'https://dev.mailjet.com/',
+		docLabel: __('Mailjet setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}mailjet/`,
 	},
 	mandrill: {
 		category: 'api',
@@ -298,8 +303,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Use your Mandrill API key from Mailchimp Transactional. One stored account per key is typical.',
 			'doublescale'
 		),
-		docLabel: __('Mandrill API docs', 'doublescale'),
-		docUrl: 'https://mailchimp.com/developer/transactional/api/messages/',
+		docLabel: __('Mandrill setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}mandrill/`,
 	},
 	sparkpost: {
 		category: 'api',
@@ -308,8 +313,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Match the API key to the correct SparkPost region. Create separate stored accounts if you send from both.',
 			'doublescale'
 		),
-		docLabel: __('SparkPost API', 'doublescale'),
-		docUrl: 'https://developers.sparkpost.com/api/',
+		docLabel: __('SparkPost setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}sparkpost-2/`,
 	},
 	sendlayer: {
 		category: 'api',
@@ -318,8 +323,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Paste your SendLayer API key to create a new provider account or pick one already in the vault.',
 			'doublescale'
 		),
-		docLabel: __('SendLayer', 'doublescale'),
-		docUrl: 'https://sendlayer.com/docs/',
+		docLabel: __('SendLayer setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}sendlayer/`,
 	},
 	smtp2go: {
 		category: 'api',
@@ -328,8 +333,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Create an API key in SMTP2GO and store it here. Reuse the same stored account on multiple connections if needed.',
 			'doublescale'
 		),
-		docLabel: __('SMTP2GO API', 'doublescale'),
-		docUrl: 'https://developers.smtp2go.com/',
+		docLabel: __('SMTP2GO setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}smtp2go-2/`,
 	},
 	smtpcom: {
 		category: 'api',
@@ -341,8 +346,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'SMTP.com expects both an API key and a sender name label for the account. Enter both when creating a new stored account.',
 			'doublescale'
 		),
-		docLabel: __('SMTP.com API', 'doublescale'),
-		docUrl: 'https://www.smtp.com/smtp-api-documentation/',
+		docLabel: __('SMTP mailers', 'doublescale'),
+		docUrl: SMTP_MAILER_DOCS_HOME,
 	},
 	elasticemail: {
 		category: 'api',
@@ -351,8 +356,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Use an Elastic Email API key with sending permissions. Store each key as its own provider account.',
 			'doublescale'
 		),
-		docLabel: __('Elastic Email API', 'doublescale'),
-		docUrl: 'https://elasticemail.com/developers/api-documentation/rest-api',
+		docLabel: __('Elastic Email setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}elasticemail/`,
 	},
 	outlook: {
 		category: 'oauth',
@@ -364,8 +369,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Register an app in Microsoft Entra (Azure AD), paste client ID and secret, save, then authorize. Choose the authorized mailbox from the list.',
 			'doublescale'
 		),
-		docLabel: __('Microsoft identity platform', 'doublescale'),
-		docUrl: 'https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app',
+		docLabel: __('Outlook setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}outlook/`,
 	},
 	zoho: {
 		category: 'oauth',
@@ -377,8 +382,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Choose the correct Zoho domain, enter OAuth client credentials, save, then authorize in wp-admin and select the Zoho mailbox account.',
 			'doublescale'
 		),
-		docLabel: __('Zoho Mail OAuth', 'doublescale'),
-		docUrl: 'https://www.zoho.com/mail/help/api/using-oauth-2.html',
+		docLabel: __('Zoho setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}zoho/`,
 	},
 	socketlabs: {
 		category: 'api',
@@ -390,8 +395,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Both values come from the SocketLabs control panel. Store them together as one provider account per server.',
 			'doublescale'
 		),
-		docLabel: __('SocketLabs injection API', 'doublescale'),
-		docUrl: 'https://www.socketlabs.com/docs/',
+		docLabel: __('SocketLabs setup guide', 'doublescale'),
+		docUrl: `${SMTP_MAILER_DOCS_HOME}socketlabs/`,
 	},
 };
 

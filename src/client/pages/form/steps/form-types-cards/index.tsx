@@ -137,9 +137,6 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 }) => {
 	const navigate = useNavigate();
 	const proAddonActive = isProActive();
-	// Pro ships its own ConfigAPI, so a getter added on free may be absent there
-	// until Pro is rebuilt. Fall back instead of crashing the whole dialog.
-	const activeFormPlugins = ConfigAPI.getActiveFormPlugins?.() ?? [];
 	const { isConnected: isTypeformConnected, isLoading: isTypeformStatusLoading } =
 		useTypeformIntegrationStatus();
 	const { isConnected: isJotformConnected, isLoading: isJotformStatusLoading } =
@@ -173,20 +170,9 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 			return (mergedForms[a].label || '').localeCompare(mergedForms[b].label || '');
 		});
 
-	// Only list WordPress form plugins actually installed/active on this site
-	// (plus the currently selected type, so editing an existing form whose
-	// plugin was since deactivated doesn't lose its card) — showing every
-	// supported-but-absent plugin is dead-end clutter, not a useful choice.
-	// Pro-only vendors (no Free Form model, e.g. WS Form) still show — with
-	// their existing Pro-locked badge — when the plugin itself is detected
-	// active, since the site genuinely has it installed.
 	const wordpressKeys = sortFormKeys(
 		Object.keys(mergedForms).filter(
-			(key) =>
-				(mergedForms[key].platform || 'wordpress') === 'wordpress' &&
-				(mergedForms[key].is_enabled ||
-					activeFormPlugins.includes(key) ||
-					key === selectedType)
+			(key) => (mergedForms[key].platform || 'wordpress') === 'wordpress'
 		)
 	);
 
@@ -435,7 +421,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 				{renderSection(
 					__('WordPress Forms', 'doublescale'),
 					__(
-						'Form builder plugins installed on this WordPress site.',
+						'All form builders DoubleScale supports. Install and activate a plugin to map its forms.',
 						'doublescale'
 					),
 					wordpressKeys

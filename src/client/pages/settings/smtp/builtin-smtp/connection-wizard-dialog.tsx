@@ -381,42 +381,63 @@ export function ConnectionWizardDialog({
 																{SMTP_MAILER_OPTIONS.map((o) => {
 																	const selected = form.mailer === o.value;
 																	const logoSrc = getSmtpMailerLogoUrl(o.value);
+																	const mailerMeta = getSmtpMailerUiMeta(o.value);
 																	return (
-																		<button
+																		<div
 																			key={o.value}
-																			type="button"
-																			title={o.label}
-																			onClick={() => applyMailerSelection(o.value)}
 																			className={cn(
-																				'flex flex-col items-center gap-2 rounded-xl border border-border bg-muted p-4 text-center transition-shadow hover:border-primary/50 hover:shadow-sm',
+																				'flex flex-col items-center rounded-xl border border-border bg-muted text-center transition-shadow hover:border-primary/50 hover:shadow-sm',
 																				selected &&
 																					'border-brandPrimary bg-[rgba(101,73,202,0.06)] ring-1 ring-brandPrimary shadow-sm'
 																			)}
 																		>
-																			<div className="flex h-14 w-full items-center justify-center px-1">
-																				{logoSrc ? (
-																					<img
-																						src={logoSrc}
-																						alt=""
-																						className="max-h-14 w-auto max-w-[120px] object-contain"
-																						loading="lazy"
-																						decoding="async"
-																					/>
-																				) : (
-																					<span
-																						className={cn(
-																							'flex p-4 items-center justify-center rounded-lg text-[11px] font-bold',
-																							selected
-																								? 'bg-brandPrimary text-white'
-																								: 'bg-muted text-muted-foreground'
-																						)}
+																			<button
+																				type="button"
+																				title={o.label}
+																				onClick={() => applyMailerSelection(o.value)}
+																				className="flex w-full flex-col items-center gap-2 p-4 pb-2"
+																			>
+																				<div className="flex h-14 w-full items-center justify-center px-1">
+																					{logoSrc ? (
+																						<img
+																							src={logoSrc}
+																							alt=""
+																							className="max-h-14 w-auto max-w-[120px] object-contain"
+																							loading="lazy"
+																							decoding="async"
+																						/>
+																					) : (
+																						<span
+																							className={cn(
+																								'flex p-4 items-center justify-center rounded-lg text-[11px] font-bold',
+																								selected
+																									? 'bg-brandPrimary text-white'
+																									: 'bg-muted text-muted-foreground'
+																							)}
+																							aria-hidden
+																						>
+																							{mailerInitialsFromLabel(o.label)}
+																						</span>
+																					)}
+																				</div>
+																			</button>
+																			{mailerMeta.docUrl ? (
+																				<a
+																					href={mailerMeta.docUrl}
+																					target="_blank"
+																					rel="noopener noreferrer"
+																					className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-brandPrimary hover:underline"
+																				>
+																					<ExternalLinkIcon
+																						width={14}
+																						height={14}
+																						className="h-3.5 w-3.5 shrink-0"
 																						aria-hidden
-																					>
-																						{mailerInitialsFromLabel(o.label)}
-																					</span>
-																				)}
-																			</div>
-																		</button>
+																					/>
+																					{__('Docs', 'doublescale')}
+																				</a>
+																			) : null}
+																		</div>
 																	);
 																})}
 															</div>

@@ -1,6 +1,6 @@
-=== DoubleScale | Self-Hosted CRM – Sales, Marketing, Booking, Helpdesk, Automation, MCP & More ===
+=== DoubleScale | All-in-One CRM – Sales, Multi-Channel Marketing, Booking, Helpdesk, Automation, MCP & More ===
 Contributors: samuelgallegos, vixgrowy
-Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
+Tags:  crm, email marketing, sales pipeline, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1.0
 Requires PHP: 7.4

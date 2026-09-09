@@ -43,12 +43,21 @@ const TeamAvailability = ({
 }) => {
 	const handleCardChange = (id: number) => {
 		setDisabled(false);
-		setSelectedUser(event?.hosts?.find((h) => h.id === id));
-		setAvailability(teamAvailability[id]);
-		setDateOverrides(teamAvailability[id].value.override || {});
+		const host = event?.hosts?.find((h) => h.id === id);
+		if (!host) {
+			return;
+		}
+		setSelectedUser(host);
+		const hostAvailability =
+			teamAvailability[id] ?? teamAvailability[String(id)] ?? null;
+		setAvailability(hostAvailability);
+		setDateOverrides(hostAvailability?.value?.override || {});
 	};
 
 	const onAvailabilityChange = (availabilityId: number) => {
+		if (!selectedUser?.id) {
+			return;
+		}
 		setAvailabilityMeta({
 			...availabilityMeta,
 			hosts_schedules: {
@@ -77,6 +86,9 @@ const TeamAvailability = ({
 	};
 
 	const onCustomAvailabilityChange = (day, field, value) => {
+		if (!availability?.value || !selectedUser?.id) {
+			return;
+		}
 		setDisabled(false);
 		const updatedAvailability = { ...availability };
 		if (field === 'off') {
@@ -117,12 +129,19 @@ const TeamAvailability = ({
 				});
 			}
 		} else {
+			if (!selectedUser?.id) {
+				return;
+			}
+			const currentHostAvailability = teamAvailability[selectedUser.id];
+			if (!currentHostAvailability?.value) {
+				return;
+			}
 			setTeamAvailability({
 				...teamAvailability,
 				[selectedUser.id]: {
-					...teamAvailability[selectedUser.id],
+					...currentHostAvailability,
 					value: {
-						...teamAvailability[selectedUser.id].value,
+						...currentHostAvailability.value,
 						override: newOverrides,
 					},
 				},
@@ -143,7 +162,7 @@ const TeamAvailability = ({
 							key={host.id}
 							onClick={() => handleCardChange(host.id)}
 							className={`cursor-pointer transition-all rounded-lg border w-[200px] h-[93px] ${
-								selectedUser.id === host.id
+								selectedUser?.id === host.id
 									? 'border-primary bg-secondary'
 									: ''
 							}`}
@@ -162,7 +181,7 @@ const TeamAvailability = ({
 			</div>
             <SelectSchedule
 				availability={availability as Availability}
-				hosts={[selectedUser]}
+				hosts={selectedUser ? [selectedUser] : []}
 				onAvailabilityChange={onAvailabilityChange}
 				title={__('Which Schedule Do You Want to Use?', 'doublescale')}
 			/>
@@ -172,6 +191,7 @@ const TeamAvailability = ({
 					'doublescale'
 				)}
 			</p>
+            {availability?.value && (
             <Card className="mt-4 pt-4 overflow-hidden"><CardContent className="min-w-0">
                     <Schedule
                         availability={availability.value}
@@ -180,6 +200,7 @@ const TeamAvailability = ({
                         startDay={startDay}
                     />
                 </CardContent></Card>
+            )}
             <div className="mt-4">
 				<OverrideSection
 					dateOverrides={dateOverrides}

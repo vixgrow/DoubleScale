@@ -890,6 +890,70 @@ test.describe('Booking event editor', () => {
 		});
 	});
 
+	test('event editor: collective team event Availability tab does not crash', async ({
+		adminPage,
+	}) => {
+		adminPage.on('dialog', (dialog) => dialog.accept());
+
+		const eventRow = db(
+			`SELECT e.id, e.calendar_id
+			 FROM wp_doublescale_booking_events e
+			 INNER JOIN wp_doublescale_booking_calendars c ON c.id = e.calendar_id
+			 WHERE e.type = 'collective' AND c.type = 'team'
+			 ORDER BY e.id DESC LIMIT 1`
+		);
+		if (!eventRow) {
+			test.skip(
+				true,
+				'No collective event on a team calendar exists on this site.'
+			);
+		}
+
+		const [eventId, calendarId] = eventRow.split(/\s+/);
+		const consoleErrors: string[] = [];
+		adminPage.on('console', (msg) => {
+			if (msg.type() !== 'error') {
+				return;
+			}
+			const text = msg.text();
+			if (
+				text.includes("Cannot read properties of null (reading 'value')")
+			) {
+				consoleErrors.push(text);
+			}
+		});
+
+		await gotoBookingPath(
+			adminPage,
+			`calendars/${calendarId}/events/${eventId}`
+		);
+		await expect(adminPage.getByText(/Event Setup/i).first()).toBeVisible({
+			timeout: 45_000,
+		});
+
+		const opened = await openEventTab(adminPage, 'Availability & Limits', {
+			apiPaths: [/meta\/limits/, /\/range/, /\/settings/],
+			panelText:
+				/Add Availability Per Users|Choose a common schedule|Which Schedule Do You Want|Control your availability/i,
+		});
+		if (!opened) {
+			test.skip(
+				true,
+				'Availability & Limits tab not present in this build.'
+			);
+		}
+
+		const panel = adminPage.locator('.doublescale-booking-event');
+		await expect(
+			panel
+				.getByText(
+					/Add Availability Per Users|Choose a common schedule|Which Schedule Do You Want/i
+				)
+				.first()
+		).toBeVisible({ timeout: 15_000 });
+		expect(consoleErrors).toEqual([]);
+	});
+
 	test('event editor: SMS Notification tab renders', async ({
 		adminPage,
 	}) => {

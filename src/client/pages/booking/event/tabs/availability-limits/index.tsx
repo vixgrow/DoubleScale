@@ -29,6 +29,39 @@ import {
 import { useApi, useEvent } from '@/hooks/booking';
 import Shimmer from './shimmer';
 
+const resolveScheduleId = (
+	hostsSchedules: Record<string, number> | undefined,
+	hostId: number
+): number | undefined => {
+	if (!hostsSchedules) {
+		return undefined;
+	}
+	const scheduleId =
+		hostsSchedules[hostId] ?? hostsSchedules[String(hostId)];
+	return scheduleId != null ? Number(scheduleId) : undefined;
+};
+
+const resolveHostAvailability = (
+	host: Host,
+	hostsSchedules: Record<string, number> | undefined
+): Availability | null => {
+	const scheduleId = resolveScheduleId(hostsSchedules, host.id);
+	if (scheduleId != null) {
+		const matched = host.availabilities?.find(
+			(item) => Number(item.id) === scheduleId
+		);
+		if (matched) {
+			return matched;
+		}
+	}
+
+	return (
+		host.availabilities?.find((item) => item.is_default) ??
+		host.availabilities?.[0] ??
+		null
+	);
+};
+
 const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 	(props, ref) => {
 		// Event state
@@ -52,6 +85,9 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 			Record<string, Availability | null>
 		>({});
 		const [selectedUser, setSelectedUser] = useState<Host | null>(null);
+		const [hydratedEventId, setHydratedEventId] = useState<number | null>(
+			null
+		);
 		// Global settings state
 		const [startDay, setStartDay] = useState<string>('monday');
 		const [timeFormat, setTimeFormat] = useState<string>('12');
@@ -163,38 +199,32 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 			}
 
 			if (event.calendar.type === 'team') {
+				const hostsSchedules =
+					event.availability_meta?.hosts_schedules;
 				const availabilityObj: Record<string, Availability | null> =
 					event.hosts?.reduce(
 						(
 							acc: Record<string, Availability | null>,
 							host: Host
 						) => {
-							const availabilityId =
-								event.availability_meta?.hosts_schedules?.[
-									host.id
-								];
-
-							const foundAvailability = host.availabilities?.find(
-								(availability: Availability) =>
-									availability.id === availabilityId
+							acc[host.id] = resolveHostAvailability(
+								host,
+								hostsSchedules
 							);
-
-							acc[host.id] = foundAvailability || null;
 							return acc;
 						},
 						{} as Record<string, Availability | null>
 					) || {};
 
 				setTeamAvailability(availabilityObj);
-				if (event.hosts?.[0]?.id) {
+				const firstHost = event.hosts?.[0];
+				if (firstHost && event.availability_meta?.is_common !== true) {
 					const firstHostAvailability =
-						availabilityObj?.[event?.hosts?.[0]?.id];
-					if (event.availability_meta?.is_common === false) {
-						setAvailability(firstHostAvailability || null);
-						setDateOverrides(
-							firstHostAvailability?.value.override || {}
-						);
-					}
+						availabilityObj[firstHost.id] ?? null;
+					setAvailability(firstHostAvailability);
+					setDateOverrides(
+						firstHostAvailability?.value?.override || {}
+					);
 				}
 			}
 			setSelectedUser(event.hosts?.[0] || null);
@@ -202,6 +232,7 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 			setAvailabilityMeta(event.availability_meta || null);
 			setAvailabilityType(event.availability_type);
 			setReservetimes(event.reserve_times ?? false);
+			setHydratedEventId(event.id);
 		}, [event]);
 
 		useImperativeHandle(ref, () => ({
@@ -240,7 +271,13 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 			}
 		};
 
-		if (!limits || loading || eventLoading) {
+		if (
+			!limits ||
+			loading ||
+			eventLoading ||
+			!event ||
+			hydratedEventId !== event.id
+		) {
 			return <Shimmer />;
 		}
 

@@ -6915,6 +6915,9 @@ msgstr ""
 msgid "e.g. Spring promo — enterprise segment"
 msgstr ""
 
+msgid "Each contact needs an email address or a phone number. Your file can include first name, last name, phone, email, and other columns. (Maximum file size 12 MB)"
+msgstr ""
+
 msgid "Each provider account is a domain + API key pair (and region). Add a new account for each Mailgun domain you send from, or select an existing stored account."
 msgstr ""
 
@@ -7309,6 +7312,9 @@ msgid "Email Opened Tracking Error"
 msgstr ""
 
 msgid "Email opens, clicks, and engagement"
+msgstr ""
+
+msgid "Email or phone field is required."
 msgstr ""
 
 msgid "Email Page"
@@ -22601,9 +22607,6 @@ msgid "You replied to a support ticket"
 msgstr ""
 
 msgid "Your file must include a column with either first name, last name and email addresses for each contact. (Maximum file size 12 MB )"
-msgstr ""
-
-msgid "Your file must include a column with either first name, last name and etc... for each contact. (Maximum file size 12 MB)"
 msgstr ""
 
 msgid "Your GoHighLevel app Client ID from the marketplace"

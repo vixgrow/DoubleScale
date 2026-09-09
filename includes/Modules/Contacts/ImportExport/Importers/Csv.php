@@ -79,10 +79,7 @@ class Csv extends Importer {
 		}
 
 		$mapping = $this->build_mapping( $this->mapping );
-		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( esc_html__( 'Email field is required.', 'doublescale' ) );
-		}
+		$this->assert_identifier_mapping( $mapping );
 
 		try {
 			$file_path = Security::get_upload_file_path( $this->file_name );
@@ -167,6 +164,22 @@ class Csv extends Importer {
 		}
 
 		return $built;
+	}
+
+	/**
+	 * Contacts need an email or a phone. WhatsApp alone is not an identifier.
+	 *
+	 * @param array $mapping Contact-field => csv-column mapping.
+	 *
+	 * @throws \Exception If neither email nor phone is mapped.
+	 */
+	protected function assert_identifier_mapping( $mapping ) {
+		$has_email = ! empty( $mapping['email'] );
+		$has_phone = ! empty( $mapping['phone'] );
+		if ( ! $has_email && ! $has_phone ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
+			throw new \Exception( esc_html__( 'Email or phone field is required.', 'doublescale' ) );
+		}
 	}
 
 	/**

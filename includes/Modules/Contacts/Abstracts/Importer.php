@@ -19,6 +19,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\PhoneAsWhatsappSetting;
 use DoubleScale\Core\Utils\Utils;
+use DoubleScale\Core\Validators\PhoneValidator;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Modules\Contacts\Models\TagModel;
@@ -276,11 +277,25 @@ abstract class Importer {
 		$this->last_failure_reason = '';
 
 		try {
-			$email = $this->subscriber_value( $subscriber, $mapping['email'] ?? '' );
+			$email          = $this->subscriber_value( $subscriber, $mapping['email'] ?? '' );
+			$phone          = $this->subscriber_value( $subscriber, $mapping['phone'] ?? '' );
+			$whatsapp_phone = $this->subscriber_value( $subscriber, $mapping['whatsapp_phone'] ?? '' );
+			$country        = $this->subscriber_value( $subscriber, $mapping['country'] ?? '' );
 
-			// Validate email — skip this row only; never abort the file.
-			if ( empty( $email ) || ! is_email( $email ) ) {
+			if ( is_string( $email ) ) {
+				$email = trim( $email );
+			} else {
+				$email = '';
+			}
+
+			// Invalid email skips this row only; never abort the file.
+			if ( '' !== $email && ! is_email( $email ) ) {
 				$this->last_failure_reason = 'invalid_email';
+				return false;
+			}
+
+			if ( ! ContactModel::has_identifier( $email, $phone, $whatsapp_phone ) ) {
+				$this->last_failure_reason = 'missing_identifier';
 				return false;
 			}
 
@@ -289,7 +304,14 @@ abstract class Importer {
 			$tags  = is_object( $subscriber ) ? $subscriber->tags ?? array() : $subscriber['tags'] ?? array();
 			$tags  = $tags ? explode( ',', $tags ) : array();
 
-			$contact  = ContactModel::where( 'email', $email )->first();
+			$contact  = ContactModel::find_by_identifiers(
+				array(
+					'email'          => $email,
+					'phone'          => $phone,
+					'whatsapp_phone' => $whatsapp_phone,
+					'country'        => $country,
+				)
+			);
 			$existing = $contact ? true : false;
 			if ( ! $contact ) {
 				$contact = new ContactModel();
@@ -323,6 +345,8 @@ abstract class Importer {
 					$contact->email_status = $this->status;
 				}
 
+				$this->maybe_copy_phone_to_whatsapp( $contact );
+
 				$contact->save();
 
 				if ( ! empty( $custom_field_values ) && class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
@@ -334,7 +358,7 @@ abstract class Importer {
 					}
 				}
 
-				if ( ! $existing && $this->send_double_optin && 'unverified' === $contact->email_status ) {
+				if ( ! $existing && $this->send_double_optin && 'unverified' === $contact->email_status && ! empty( $contact->email ) ) {
 					$this->send_double_optin_email( $contact );
 				}
 
@@ -437,6 +461,30 @@ abstract class Importer {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Copy phone onto WhatsApp when the import toggle is on and WhatsApp is empty.
+	 *
+	 * Invalid E.164 conversions are skipped so a national phone still imports.
+	 *
+	 * @param ContactModel $contact Contact being saved.
+	 */
+	protected function maybe_copy_phone_to_whatsapp( $contact ) {
+		if ( ! PhoneAsWhatsappSetting::is_enabled( $this->phone_is_whatsapp ) ) {
+			return;
+		}
+
+		$phone    = (string) ( $contact->phone ?? '' );
+		$whatsapp = (string) ( $contact->whatsapp_phone ?? '' );
+		if ( '' === $phone || '' !== $whatsapp ) {
+			return;
+		}
+
+		$converted = PhoneValidator::to_e164( $phone, (string) ( $contact->country ?? '' ) );
+		if ( null !== $converted ) {
+			$contact->whatsapp_phone = $converted;
+		}
 	}
 
 	/**

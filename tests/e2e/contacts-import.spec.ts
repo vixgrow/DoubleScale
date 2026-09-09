@@ -16,12 +16,15 @@ async function waitForAdminShell(adminPage: Page): Promise<void> {
 	}
 }
 
-function writeTempCsv(rows: string[]): string {
+function writeTempCsv(
+	rows: string[],
+	header = 'first_name,last_name,email'
+): string {
 	const file = path.join(
 		os.tmpdir(),
 		`ds-e2e-import-${Date.now()}-${Math.random().toString(36).slice(2)}.csv`
 	);
-	fs.writeFileSync(file, ['first_name,last_name,email', ...rows].join('\n'), 'utf8');
+	fs.writeFileSync(file, [header, ...rows].join('\n'), 'utf8');
 	return file;
 }
 
@@ -118,6 +121,31 @@ test.describe('Contact CSV import', () => {
 		await mapCsvColumn(adminPage, 'first_name', 'First Name');
 		await mapCsvColumn(adminPage, 'last_name', 'Last Name');
 		await mapCsvColumn(adminPage, 'email', 'Email');
+
+		await adminPage.getByRole('button', { name: /Import contacts/i }).click();
+
+		await expect(adminPage.getByText('Import Completed!').first()).toBeVisible({
+			timeout: 45_000,
+		});
+		await expect(adminPage.getByText(/1 of 1 contacts processed/i)).toBeVisible();
+
+		fs.unlinkSync(csvPath);
+	});
+
+	test('imports a CSV that has phone numbers and no email column', async ({
+		adminPage,
+	}) => {
+		const stamp = Date.now();
+		const phone = `+1555${String(stamp).slice(-7)}`;
+		const csvPath = writeTempCsv(
+			[`Ada,Lovelace,${phone}`],
+			'first_name,last_name,phone'
+		);
+
+		await openCsvMappingStep(adminPage, csvPath);
+		await mapCsvColumn(adminPage, 'first_name', 'First Name');
+		await mapCsvColumn(adminPage, 'last_name', 'Last Name');
+		await mapCsvColumn(adminPage, 'phone', 'Phone');
 
 		await adminPage.getByRole('button', { name: /Import contacts/i }).click();
 

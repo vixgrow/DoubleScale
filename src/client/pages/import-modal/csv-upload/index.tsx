@@ -261,7 +261,7 @@ const CsvUpload: React.FC = () => {
 		);
 	};
 
-	const exampleCsv = `first_name,last_name,email\nJohn,Doe,john@example.com`;
+	const exampleCsv = `first_name,last_name,email,phone\nJohn,Doe,john@example.com,+12025551234`;
 
 	const handleDownloadExample = () => {
 		const blob = new Blob([exampleCsv], { type: 'text/csv;charset=utf-8;' });
@@ -283,7 +283,7 @@ const CsvUpload: React.FC = () => {
 						</CardTitle>
 						<CardDescription className="text-base leading-7 text-muted-foreground">
 							{__(
-								'Your file must include a column with either first name, last name and etc... for each contact. (Maximum file size 12 MB)',
+								'Each contact needs an email address or a phone number. Your file can include first name, last name, phone, email, and other columns. (Maximum file size 12 MB)',
 								'doublescale'
 							)}
 						</CardDescription>

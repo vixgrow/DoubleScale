@@ -121,6 +121,10 @@ final class Module extends AbstractSalesChildModule implements ProvidesAbilities
 		Migrations\SalesInvoiceTableCurrencyNullable::ensure();
 		Migrations\SalesProposalTableCurrencyNullable::ensure();
 		Migrations\SalesProposalTableContentColumns::ensure();
+		// Same self-heal as the proposal twin above: a site whose migration
+		// ledger already advanced past the ALTER never re-runs it, leaving the
+		// table permanently without `sections` and failing every invoice save.
+		Migrations\SalesInvoiceTableContentColumns::ensure();
 
 		require_once dirname( __DIR__ ) . '/Sales/MergeTags/AbstractSalesMergeTag.php';
 		$this->loadModuleMergeTagFiles();

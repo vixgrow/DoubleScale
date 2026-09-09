@@ -9,8 +9,10 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { getToLink } from '@doublescale/navigation';
 import config from '@doublescale/config';
 import { summarizeProposals } from '@doublescale/shared/utils/proposal-summary';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
 import {
 	InvoiceFormDialog,
 	InvoiceStatusPill,
@@ -74,33 +76,75 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 		[navigate]
 	);
 
-	const { data: proposalsData, loading: proposalsLoading, refetch: refetchProposals } = useProposals({
+	const [proposalsPage, setProposalsPage] = useState(1);
+	const [proposalsPerPage, setProposalsPerPage] = useState(10);
+	const [invoicesPage, setInvoicesPage] = useState(1);
+	const [invoicesPerPage, setInvoicesPerPage] = useState(10);
+	const [paymentsPage, setPaymentsPage] = useState(1);
+	const [paymentsPerPage, setPaymentsPerPage] = useState(10);
+	const [proposalDialogOpen, setProposalDialogOpen] = useState(false);
+	const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+
+	const {
+		data: proposalsData,
+		loading: proposalsLoading,
+		refetch: refetchProposals,
+	} = useProposals({
 		contact_id,
+		// One fetch powers both the summary cards and the table page slice.
 		per_page: 100,
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
-	const { data: invoicesData, loading: invoicesLoading, refetch: refetchInvoices } = useInvoices({
+	const {
+		data: invoicesData,
+		loading: invoicesLoading,
+		refetch: refetchInvoices,
+	} = useInvoices({
 		contact_id,
-		per_page: 10,
+		page: invoicesPage,
+		per_page: invoicesPerPage,
 		sort_by: 'created_at',
 		sort_order: 'desc',
 	});
-	const [paymentsPage] = useState(1);
-	const [proposalDialogOpen, setProposalDialogOpen] = useState(false);
-	const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
-	const { data: paymentsData, loading: paymentsLoading } = useContactSalesPayments(
-		contact_id,
-		paymentsPage,
-		10
-	);
+	const { data: paymentsData, loading: paymentsLoading } =
+		useContactSalesPayments(contact_id, paymentsPage, paymentsPerPage);
 
-	const proposals = proposalsData?.data ?? [];
+	const allProposals = proposalsData?.data ?? [];
 	const invoices = invoicesData?.data ?? [];
 	const payments = paymentsData?.data ?? [];
+	const proposalsTotal = allProposals.length;
+	const invoicesTotal = invoicesData?.meta?.total ?? 0;
+	const paymentsTotal = paymentsData?.meta?.total ?? 0;
 	const showDocuments = config.isModuleToggleEnabled('documents');
-	const proposalSummary = summarizeProposals(proposals);
-	const proposalCurrency = proposals[0]?.currency || 'USD';
+	const proposalSummary = summarizeProposals(allProposals);
+	const proposalCurrency = allProposals[0]?.currency || 'USD';
+	const proposals = useMemo(() => {
+		const start = (proposalsPage - 1) * proposalsPerPage;
+		return allProposals.slice(start, start + proposalsPerPage);
+	}, [allProposals, proposalsPage, proposalsPerPage]);
+
+	const proposalsTable = useServerSideTable({
+		page: proposalsPage,
+		perPage: proposalsPerPage,
+		totalRecords: proposalsTotal,
+		setPage: setProposalsPage,
+		setPerPage: setProposalsPerPage,
+	});
+	const invoicesTable = useServerSideTable({
+		page: invoicesPage,
+		perPage: invoicesPerPage,
+		totalRecords: invoicesTotal,
+		setPage: setInvoicesPage,
+		setPerPage: setInvoicesPerPage,
+	});
+	const paymentsTable = useServerSideTable({
+		page: paymentsPage,
+		perPage: paymentsPerPage,
+		totalRecords: paymentsTotal,
+		setPage: setPaymentsPage,
+		setPerPage: setPaymentsPerPage,
+	});
 
 	const handleViewProposal = useCallback(
 		(proposalId: number) => {
@@ -350,7 +394,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 						/>
 					</div>
 					<div>
-						{!proposalsLoading && proposals.length === 0 ? (
+						{!proposalsLoading && proposalsTotal === 0 ? (
 							<NoData
 								icon={<GradientProposalsIcon />}
 								title={__(
@@ -365,18 +409,19 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 								onClick={() => setProposalDialogOpen(true)}
 							/>
 						) : (
-							<DataTable
-								columns={proposalColumns}
-								data={proposals}
-								loading={proposalsLoading}
-								showPagination={false}
-								initialPageSize={
-									proposals.length > 10 ? proposals.length : 10
-								}
-								showMainActions={false}
-								setPage={() => {}}
-								config={{}}
-							/>
+							<>
+								<DataTable
+									columns={proposalColumns}
+									data={proposals}
+									loading={proposalsLoading}
+									showPagination={false}
+									initialPageSize={proposalsPerPage}
+									showMainActions={false}
+									setPage={setProposalsPage}
+									config={{}}
+								/>
+								<DataTablePagination table={proposalsTable} />
+							</>
 						)}
 					</div>
 				</section>
@@ -398,7 +443,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 							</Button>
 						</div>
 						<div>
-							{!invoicesLoading && invoices.length === 0 ? (
+							{!invoicesLoading && invoicesTotal === 0 ? (
 								<NoData
 									icon={<NovicesIcon />}
 									title={__(
@@ -413,18 +458,19 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 									onClick={() => setInvoiceDialogOpen(true)}
 								/>
 							) : (
-								<DataTable
-									columns={invoiceColumns}
-									data={invoices}
-									loading={invoicesLoading}
-									showPagination={false}
-									initialPageSize={
-										invoices.length > 10 ? invoices.length : 10
-									}
-									showMainActions={false}
-									setPage={() => {}}
-									config={{}}
-								/>
+								<>
+									<DataTable
+										columns={invoiceColumns}
+										data={invoices}
+										loading={invoicesLoading}
+										showPagination={false}
+										initialPageSize={invoicesPerPage}
+										showMainActions={false}
+										setPage={setInvoicesPage}
+										config={{}}
+									/>
+									<DataTablePagination table={invoicesTable} />
+								</>
 							)}
 						</div>
 					</section>
@@ -436,7 +482,7 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 							{__('Payments', 'doublescale')}
 						</h3>
 						<div>
-							{!paymentsLoading && payments.length === 0 ? (
+							{!paymentsLoading && paymentsTotal === 0 ? (
 								<NoData
 									icon={<EmptyPaymentsIcon />}
 									title={__(
@@ -449,18 +495,19 @@ const ContactSales: React.FC<ContactSalesProps> = ({
 									)}
 								/>
 							) : (
-								<DataTable
-									columns={paymentColumns}
-									data={payments}
-									loading={paymentsLoading}
-									showPagination={false}
-									initialPageSize={
-										payments.length > 10 ? payments.length : 10
-									}
-									showMainActions={false}
-									setPage={() => {}}
-									config={{}}
-								/>
+								<>
+									<DataTable
+										columns={paymentColumns}
+										data={payments}
+										loading={paymentsLoading}
+										showPagination={false}
+										initialPageSize={paymentsPerPage}
+										showMainActions={false}
+										setPage={setPaymentsPage}
+										config={{}}
+									/>
+									<DataTablePagination table={paymentsTable} />
+								</>
 							)}
 						</div>
 					</section>

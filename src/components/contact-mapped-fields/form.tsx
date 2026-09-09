@@ -265,22 +265,30 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 		return '';
 	};
 
-	// For form imports, filter to only show email-type fields
+	const allFieldOptions = Object.entries(fields).map(([fieldKey, field]) => ({
+		label: getFieldLabel(field) || fieldKey,
+		value: fieldKey,
+	}));
+
+	// Form plugins expose typed fields (`label.type === 'email'`). CRM importers
+	// like MailerLite only send `{ label: string }`, so fall back to all fields.
 	let emailOptions = Object.entries(fields)
 		.filter(([, field]) => getFieldType(field) === 'email')
 		.map(([fieldKey, field]) => ({
-			label: getFieldLabel(field),
+			label: getFieldLabel(field) || fieldKey,
 			value: fieldKey,
 		}));
 
+	if (emailOptions.length === 0) {
+		emailOptions = allFieldOptions;
+	}
+
 	// Create merge tag options from form fields
-	const formFieldMergeTags = Object.entries(fields).map(
-		([fieldKey, field]) => ({
-			label: getFieldLabel(field) || fieldKey,
-			value: `{{form:${fieldKey}}}`,
-			fieldKey: fieldKey,
-		})
-	);
+	const formFieldMergeTags = allFieldOptions.map((option) => ({
+		label: option.label,
+		value: `{{form:${option.value}}}`,
+		fieldKey: option.value,
+	}));
 
 	/**
 	 * Add a new other field row

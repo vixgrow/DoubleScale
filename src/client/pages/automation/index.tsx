@@ -13,7 +13,7 @@ import { useMemo, useReducer, useRef } from 'react';
 /**
  * Internal dependencies
  */
-import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
+import { useParams, useNavigate, useLocation, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
@@ -87,7 +87,23 @@ const Automation: React.FC = () => {
 	const [canRedo, setCanRedo] = useState<boolean>(false);
 	const [isVersioning, setIsVersioning] = useState<boolean>(false);
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { createNotice } = useDispatch('doublescale/core');
+
+	// Optional return path (e.g. contact automation tab) so close goes back
+	// instead of always dumping users on the automations list.
+	const returnToPath = useMemo(() => {
+		const params = new URLSearchParams(location.search);
+		const value = params.get('return');
+		if (!value || !/^[a-z0-9/_-]+$/i.test(value)) {
+			return null;
+		}
+		return value;
+	}, [location.search]);
+
+	const navigateBack = () => {
+		navigate(getToLink(returnToPath || 'automations'));
+	};
 
 	useEffect(() => {
 		fetchAutomation();
@@ -469,7 +485,7 @@ const Automation: React.FC = () => {
 				onOpenChange={(isOpen) => {
 					if (!isOpen && open) {
 						// Only navigate back if the dialog was closed by clicking outside or escape key
-						navigate(getToLink('automations'));
+						navigateBack();
 					}
 					setOpen(isOpen);
 				}}
@@ -526,9 +542,11 @@ const Automation: React.FC = () => {
 							</p>
 							<Button
 								variant="outline"
-								onClick={() => navigate(getToLink('automations'))}
+								onClick={navigateBack}
 							>
-								{__('Back to Automations', 'doublescale')}
+								{returnToPath
+									? __('Back to Contact', 'doublescale')
+									: __('Back to Automations', 'doublescale')}
 							</Button>
 						</div>
 					) : (
@@ -555,16 +573,17 @@ const Automation: React.FC = () => {
 											<button
 												type="button"
 												className="shrink-0 cursor-pointer text-base font-medium leading-7 text-foreground transition-colors hover:text-secondary"
-												onClick={() =>
-													navigate(
-														getToLink('automations')
-													)
-												}
+												onClick={navigateBack}
 											>
-												{__(
-													'Automation List',
-													'doublescale'
-												)}
+												{returnToPath
+													? __(
+															'Contact',
+															'doublescale'
+														)
+													: __(
+															'Automation List',
+															'doublescale'
+														)}
 											</button>
 
 												<AccordingRightIcon

@@ -203,7 +203,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 		? [
 				{
 					key: 'woo-total-orders',
-					icon: <TotalOrdersIcon />,
+					icon: <TotalOrdersIcon width={32} height={32} />,
 					value: purchaseHistory.wc.total,
 					label: __('Total Orders', 'doublescale'),
 					iconBgClass: 'bg-primary/10',
@@ -211,7 +211,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'woo-total-revenue',
-					icon: <TotalRevenueIcon />,
+					icon: <TotalRevenueIcon width={32} height={32} />,
 					value: formatRevenueByCurrency(
 						purchaseHistory.wc.revenue_by_currency,
 						purchaseHistory.wc.revenue,
@@ -223,7 +223,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'woo-average-order',
-					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					icon: <AnalyticsReportsIcon width={32} height={32} />,
 					value: formatAverageOrderValue(
 						purchaseHistory.wc.revenue_by_currency,
 						purchaseHistory.wc.average,
@@ -240,7 +240,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 		? [
 				{
 					key: 'edd-total-orders',
-					icon: <TotalOrdersIcon />,
+					icon: <TotalOrdersIcon width={32} height={32} />,
 					value: purchaseHistory.edd.total,
 					label: __('Total Orders', 'doublescale'),
 					iconBgClass: 'bg-primary/10',
@@ -248,7 +248,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'edd-total-revenue',
-					icon: <TotalRevenueIcon />,
+					icon: <TotalRevenueIcon width={32} height={32} />,
 					value: formatRevenueByCurrency(
 						purchaseHistory.edd.revenue_by_currency,
 						purchaseHistory.edd.revenue,
@@ -260,7 +260,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'edd-average-order',
-					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					icon: <AnalyticsReportsIcon width={32} height={32} />,
 					value: formatAverageOrderValue(
 						purchaseHistory.edd.revenue_by_currency,
 						purchaseHistory.edd.average,
@@ -277,7 +277,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 		? [
 				{
 					key: 'surecart-total-orders',
-					icon: <TotalOrdersIcon />,
+					icon: <TotalOrdersIcon width={32} height={32} />,
 					value: purchaseHistory.surecart.total,
 					label: __('Total Orders', 'doublescale'),
 					iconBgClass: 'bg-primary/10',
@@ -285,7 +285,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'surecart-total-revenue',
-					icon: <TotalRevenueIcon />,
+					icon: <TotalRevenueIcon width={32} height={32} />,
 					value: `${purchaseHistory.surecart.revenue?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`,
 					label: __('Total Revenue', 'doublescale'),
 					iconBgClass: 'bg-emerald-50',
@@ -293,7 +293,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 				},
 				{
 					key: 'surecart-average-order',
-					icon: <AnalyticsReportsIcon width={40} height={40} />,
+					icon: <AnalyticsReportsIcon width={32} height={32} />,
 					value: `${purchaseHistory.surecart.average?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`,
 					label: __('Average Order Value', 'doublescale'),
 					iconBgClass: 'bg-violet-50',

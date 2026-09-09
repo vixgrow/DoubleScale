@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@doublescale/services/activities-service';
-import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@doublescale/components';
+import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon, DeleteModal } from '@doublescale/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
 import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
@@ -121,6 +121,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
     const [callDialogOpen, setCallDialogOpen] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<EditableActivity | null>(null);
     const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{
+        id: number;
+        type: 'activity' | 'task';
+    } | null>(null);
 
     dayjs.extend(utc);
     dayjs.extend(timezone);
@@ -193,40 +197,49 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
         setTimeout(() => setNotice(null), 3000);
     };
 
-    const handleDeleteActivity = async (activityId: number) => {
-        if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'doublescale'))) {
-            return;
-        }
-
-        try {
-            await deleteActivity(activityId);
-            fetchUpcomingActivities();
-            showNotice('success', __('Activity deleted successfully', 'doublescale'));
-        } catch (error) {
-            console.error('Failed to delete activity:', error);
-            showNotice('error', __('Failed to delete activity', 'doublescale'));
-        }
+    const handleDeleteActivity = (activityId: number) => {
+        setItemToDelete({ id: activityId, type: 'activity' });
     };
 
-    const handleDeleteTask = async (taskId: number) => {
+    const handleDeleteTask = (taskId: number) => {
         if (!ConfigAPI.isModuleEnabled('tasks')) {
             return;
         }
-        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'doublescale'))) {
+        setItemToDelete({ id: taskId, type: 'task' });
+    };
+
+    const confirmDelete = async () => {
+        if (!itemToDelete) {
             return;
         }
+
+        const { id, type } = itemToDelete;
+        setItemToDelete(null);
+
         try {
+            if (type === 'activity') {
+                await deleteActivity(id);
+                fetchUpcomingActivities();
+                showNotice('success', __('Activity deleted successfully', 'doublescale'));
+                return;
+            }
+
             const TaskService = getProTaskService();
             if (!TaskService) {
                 showNotice('error', __('Task deletion requires Pro plugin.', 'doublescale'));
                 return;
             }
-            await TaskService.deleteTask(taskId);
+            await TaskService.deleteTask(id);
             fetchUpcomingActivities();
             showNotice('success', __('Task deleted successfully', 'doublescale'));
         } catch (error) {
-            console.error('Failed to delete task:', error);
-            showNotice('error', __('Failed to delete task', 'doublescale'));
+            console.error(`Failed to delete ${type}:`, error);
+            showNotice(
+                'error',
+                type === 'activity'
+                    ? __('Failed to delete activity', 'doublescale')
+                    : __('Failed to delete task', 'doublescale')
+            );
         }
     };
 
@@ -671,6 +684,14 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                     showNotice={showNotice}
                 />
             )}
+
+            <DeleteModal
+                isOpen={!!itemToDelete}
+                onClose={() => setItemToDelete(null)}
+                onConfirm={confirmDelete}
+                selectedCount={1}
+                activeTab={itemToDelete?.type === 'task' ? 'task' : 'activity'}
+            />
         </div>
     );
 };

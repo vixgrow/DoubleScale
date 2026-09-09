@@ -395,7 +395,9 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			/>
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				<div className="mb-4">
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				</div>
 			)}
 
 			<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">

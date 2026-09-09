@@ -12,6 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { CampaignEmail } from '@doublescale/client';
 import { Button } from '@doublescale/components/ui/button';
 import {
+	AttachmentsIcon,
 	OpenedIcon,
 	ResendIcon,
 	TimeAgoCell,
@@ -88,8 +89,9 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 						)}
 						<span>{subject}</span>
 						{hasAttachments && (
-							<Paperclip
-								className="w-3.5 h-3.5 text-muted-foreground shrink-0"
+							<AttachmentsIcon
+								width={20}
+								height={20}
 								aria-label={__('Has attachments', 'doublescale')}
 							/>
 						)}
@@ -129,7 +131,7 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 				return (
 					<div className="flex items-center gap-2">
 						<div className="text-emerald-600">
-							<OpenedIcon />
+							<OpenedIcon width={20} height={20} />
 						</div>
 						{row.original.clicked_at ? (
 							<TimeAgoCell value={row.original.clicked_at} />
@@ -158,7 +160,7 @@ export function getColumns({ onViewTemplate, onToggleExpand, onReply }: ColumnsP
 				return (
 					<div className="flex items-center gap-2">
 						<div className="text-emerald-600">
-							<OpenedIcon />
+							<OpenedIcon width={20} height={20} />
 						</div>
 						{row.original.opened_at ? (
 							<TimeAgoCell value={row.original.opened_at} />

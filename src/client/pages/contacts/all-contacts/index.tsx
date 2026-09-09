@@ -62,7 +62,9 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 
 		return (
 			<div className="doublescale-all-contacts w-full">
+				<div className="mb-4">
 				<NoticeSection />
+				</div>
 				<div className="rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]">
 					{loading || hasRecords ? (
 						<ContactsTable activeTab={activeTab} />

@@ -65,6 +65,16 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 				itemType = __('page visit', 'doublescale');
 				itemTypePlural = __('page visits', 'doublescale');
 				break;
+			case 'activity':
+			case 'activities':
+				itemType = __('activity', 'doublescale');
+				itemTypePlural = __('activities', 'doublescale');
+				break;
+			case 'task':
+			case 'tasks':
+				itemType = __('task', 'doublescale');
+				itemTypePlural = __('tasks', 'doublescale');
+				break;
 			default:
 				itemType = __('item', 'doublescale');
 				itemTypePlural = __('items', 'doublescale');

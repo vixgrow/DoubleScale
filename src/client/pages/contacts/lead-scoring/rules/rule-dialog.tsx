@@ -120,7 +120,7 @@ export const RuleDialog: React.FC<RuleDialogProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={onClose}>
-			<DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+			<DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<CustomDialogHeader title={isEditing
 							? __('Edit Lead Scoring Rule', 'doublescale')

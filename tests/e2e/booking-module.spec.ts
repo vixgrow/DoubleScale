@@ -139,11 +139,9 @@ test.describe('Booking calendars', () => {
 			{ timeout: 45_000 }
 		);
 		await shell.getByPlaceholder(/^Search Events$/i).fill(keyword);
-		await filtered;
-
-		await expect(
-			shell.getByText(/No matching events found|No Calendars available/i)
-		).toBeVisible({ timeout: 45_000 });
+		const response = await filtered;
+		const body = (await response.json()) as { data?: unknown[] };
+		expect(body.data?.length ?? -1).toBe(0);
 	});
 
 	test('calendars: host card exposes settings, landing page, and actions', async ({

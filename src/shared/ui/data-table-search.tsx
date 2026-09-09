@@ -32,7 +32,7 @@ export function DataTableSearch({
 				placeholder={placeholder}
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
-				className="rounded-lg border-[#E4E4E7]"
+				className="!rounded-lg !border-border"
 			/>
 			<Search className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 		</div>

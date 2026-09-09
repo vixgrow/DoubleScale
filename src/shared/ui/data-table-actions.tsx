@@ -432,8 +432,8 @@ export function DataTableActions<TData>({
 						</Button>
 					</DialogTrigger>
 
-					<DialogContent className="">
-						<DialogHeader>
+					<DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-6">
+						<DialogHeader className="shrink-0">
 							<DialogTitle>
 								<CustomDialogHeader
 									title={__('Manage Columns', 'doublescale')}
@@ -446,39 +446,41 @@ export function DataTableActions<TData>({
 							</DialogTitle>
 						</DialogHeader>
 
-						<div className="mt-4 grid grid-cols-2 justify-between gap-x-5 gap-y-4">
-							{table
-								.getAllColumns()
-								.filter((column) => column.getCanHide())
-								.map((column) => (
-									<div
-										key={column.id}
-										className="flex items-center space-x-2"
-									>
-										<Checkbox
-											id={`col-${column.id}`}
-											checked={
-												columnVisibility[column.id] ??
-												column.getIsVisible()
-											}
-											onCheckedChange={(value) =>
-												handleColumnToggle(
-													column.id,
-													!!value
-												)
-											}
-										/>
-										<label
-											htmlFor={`col-${column.id}`}
-											className="text-base capitalize text-[#3F4254] font-semibold"
+						<div className="mt-4 min-h-0 flex-1 overflow-y-auto">
+							<div className="grid grid-cols-2 justify-between gap-x-5 gap-y-4 pe-1">
+								{table
+									.getAllColumns()
+									.filter((column) => column.getCanHide())
+									.map((column) => (
+										<div
+											key={column.id}
+											className="flex items-center space-x-2"
 										>
-											{column.id.replace(/_/g, ' ')}
-										</label>
-									</div>
-								))}
+											<Checkbox
+												id={`col-${column.id}`}
+												checked={
+													columnVisibility[column.id] ??
+													column.getIsVisible()
+												}
+												onCheckedChange={(value) =>
+													handleColumnToggle(
+														column.id,
+														!!value
+													)
+												}
+											/>
+											<label
+												htmlFor={`col-${column.id}`}
+												className="text-base capitalize text-[#3F4254] font-semibold"
+											>
+												{column.id.replace(/_/g, ' ')}
+											</label>
+										</div>
+									))}
+							</div>
 						</div>
 
-						<DialogFooter className="mt-6">
+						<DialogFooter className="mt-6 shrink-0">
 							<DialogClose asChild>
 								<Button
 									onClick={handleSubmitColumns}

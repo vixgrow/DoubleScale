@@ -83,7 +83,7 @@ export function getWooColumns() {
 			cell: ({ row }) => (
 				<Button
 					size="sm"
-					className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+					className="bg-transparent border-0 shadow-none text-primary hover:bg-transparent hover:text-primary/80"
 					onClick={() => window.open(row.original.url, '_blank')}
 				>
 					<ViewIcon />

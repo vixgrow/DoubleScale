@@ -79,26 +79,38 @@ class Csv extends Importer {
 		}
 
 		$mapping = $this->build_mapping( $this->mapping );
-		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( esc_html__( 'Email field is required.', 'doublescale' ) );
+		$this->assert_identifier_mapping( $mapping );
+
+		try {
+			$file_path = Security::get_upload_file_path( $this->file_name );
+			if ( ! is_readable( $file_path ) ) {
+				throw new \Exception( esc_html__( 'The uploaded CSV file could not be read. Upload it again.', 'doublescale' ) );
+			}
+
+			$csv = Reader::createFromPath( $file_path, 'r' );
+			$csv->setHeaderOffset( 0 );
+			$total = count( $csv );
+			$limit = $this->get_contacts_per_request();
+
+			$result = $this->import_with_offset(
+				$total,
+				$this->offset,
+				function ( $offset ) use ( $csv, $limit ) {
+					$stmt        = ( new Statement() )->offset( $offset )->limit( $limit );
+					$subscribers = $stmt->process( $csv );
+					return $subscribers;
+				},
+				$mapping
+			);
+		} catch ( \League\Csv\Exception $e ) {
+			throw new \Exception(
+				sprintf(
+					/* translators: %s: parser error */
+					esc_html__( 'Could not read the CSV file: %s. Save it as UTF-8 CSV (comma-separated) and try again.', 'doublescale' ),
+					esc_html( $e->getMessage() )
+				)
+			);
 		}
-
-		$file_path = Security::get_upload_file_path( $this->file_name );
-		$csv       = Reader::createFromPath( $file_path, 'r' );
-		$csv->setHeaderOffset( 0 );
-		$total = count( $csv );
-
-		$result = $this->import_with_offset(
-			$total,
-			$this->offset,
-			function ( $offset ) use ( $csv ) {
-				$stmt        = ( new Statement() )->offset( $offset )->limit( 20 );
-				$subscribers = $stmt->process( $csv );
-				return $subscribers;
-			},
-			$mapping
-		);
 
 		if ( 'completed' === $result['status'] ) {
 			wp_delete_file( $file_path );
@@ -152,6 +164,22 @@ class Csv extends Importer {
 		}
 
 		return $built;
+	}
+
+	/**
+	 * Contacts need an email or a phone. WhatsApp alone is not an identifier.
+	 *
+	 * @param array $mapping Contact-field => csv-column mapping.
+	 *
+	 * @throws \Exception If neither email nor phone is mapped.
+	 */
+	protected function assert_identifier_mapping( $mapping ) {
+		$has_email = ! empty( $mapping['email'] );
+		$has_phone = ! empty( $mapping['phone'] );
+		if ( ! $has_email && ! $has_phone ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
+			throw new \Exception( esc_html__( 'Email or phone field is required.', 'doublescale' ) );
+		}
 	}
 
 	/**

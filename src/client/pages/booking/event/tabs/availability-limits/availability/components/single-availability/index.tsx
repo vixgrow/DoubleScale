@@ -23,6 +23,9 @@ const SingleAvailability = ({
 	eventAvailability,
 }) => {
 	const onCustomAvailabilityChange = (day, field, value) => {
+		if (!availability?.value) {
+			return;
+		}
 		setDisabled(false);
 		const updatedAvailability = { ...availability };
 		if (field === 'off') {
@@ -93,6 +96,7 @@ const SingleAvailability = ({
 					</p>
 				</>
 			)}
+            {availability?.value && (
             <Card className="mt-4 pt-4 overflow-hidden"><CardContent className="min-w-0">
                     <Schedule
                         availability={availability.value}
@@ -101,6 +105,7 @@ const SingleAvailability = ({
                         startDay={startDay}
                     />
                 </CardContent></Card>
+            )}
             <div className="mt-4">
 				<OverrideSection
 					dateOverrides={dateOverrides}

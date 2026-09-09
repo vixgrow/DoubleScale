@@ -94,7 +94,101 @@ if ( empty( $GLOBALS['wpdb'] ) ) {
 	$GLOBALS['wpdb'] = new class() {
 		/** @var string */
 		public $prefix = 'wp_';
+
+		/** @var string */
+		public $posts = 'wp_posts';
+
+		/**
+		 * Escape LIKE wildcards, matching wpdb::esc_like().
+		 *
+		 * @param string $text Raw text.
+		 * @return string
+		 */
+		public function esc_like( $text ) {
+			return addcslashes( (string) $text, '_%\\' );
+		}
+
+		/**
+		 * @param string $query   Query with placeholders.
+		 * @param mixed  ...$args Placeholder values.
+		 * @return string
+		 */
+		public function prepare( $query, ...$args ) {
+			unset( $args );
+			return (string) $query;
+		}
+
+		/**
+		 * The fast suite has no database, so lookups resolve to "not found"
+		 * rather than fataling. Tests needing real rows use the integration suite.
+		 *
+		 * @param string $query Query.
+		 * @return null
+		 */
+		public function get_var( $query = null ) {
+			unset( $query );
+			return null;
+		}
+
+		/**
+		 * @param string $query  Query.
+		 * @param string $output Output type.
+		 * @return array<int, mixed>
+		 */
+		public function get_results( $query = null, $output = null ) {
+			unset( $query, $output );
+			return array();
+		}
 	};
+}
+
+// Post-lookup shims. The fast suite has no database, so these resolve to
+// "nothing found" rather than fataling — code under test must handle the empty
+// case, which is exactly the fresh-install state worth asserting here.
+if ( ! function_exists( 'get_posts' ) ) {
+	/**
+	 * @param array<string, mixed> $args Query args.
+	 * @return array<int, mixed>
+	 */
+	function get_posts( $args = array() ) {
+		unset( $args );
+		return array();
+	}
+}
+
+if ( ! function_exists( 'get_permalink' ) ) {
+	/**
+	 * @param int|object $post Post or id.
+	 * @return string
+	 */
+	function get_permalink( $post = 0 ) {
+		$id = is_object( $post ) ? ( isset( $post->ID ) ? $post->ID : 0 ) : (int) $post;
+		return $id > 0 ? 'http://example.test/?page_id=' . $id : '';
+	}
+}
+
+if ( ! function_exists( 'get_edit_post_link' ) ) {
+	/**
+	 * @param int    $post    Post id.
+	 * @param string $context Link context.
+	 * @return string
+	 */
+	function get_edit_post_link( $post = 0, $context = 'display' ) {
+		unset( $context );
+		$id = (int) $post;
+		return $id > 0 ? 'http://example.test/wp-admin/post.php?post=' . $id . '&action=edit' : '';
+	}
+}
+
+if ( ! function_exists( 'has_shortcode' ) ) {
+	/**
+	 * @param string $content Post content.
+	 * @param string $tag     Shortcode tag.
+	 * @return bool
+	 */
+	function has_shortcode( $content, $tag ) {
+		return false !== strpos( (string) $content, '[' . (string) $tag );
+	}
 }
 
 // Minimal WP REST shim so PHPUnit can autoload REST controller classes without WordPress.

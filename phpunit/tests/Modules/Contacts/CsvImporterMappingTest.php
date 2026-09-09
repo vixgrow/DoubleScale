@@ -150,4 +150,32 @@ final class CsvImporterMappingTest extends TestCase {
 	public function test_empty_mapping_yields_empty_result(): void {
 		$this->assertSame( array(), $this->build( array() ) );
 	}
+
+	/**
+	 * Invoke the protected identifier-mapping gate.
+	 *
+	 * @param array $mapping Contact-field => csv-column mapping.
+	 */
+	private function assert_identifier( array $mapping ): void {
+		$importer = ( new \ReflectionClass( Csv::class ) )->newInstanceWithoutConstructor();
+		$method   = new \ReflectionMethod( Csv::class, 'assert_identifier_mapping' );
+		$method->setAccessible( true );
+		$method->invoke( $importer, $mapping );
+	}
+
+	public function test_phone_mapping_without_email_is_accepted(): void {
+		$this->assert_identifier( array( 'phone' => 'Phone' ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	public function test_email_mapping_without_phone_is_accepted(): void {
+		$this->assert_identifier( array( 'email' => 'Email' ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	public function test_neither_email_nor_phone_mapping_is_rejected(): void {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Email or phone field is required.' );
+		$this->assert_identifier( array( 'first_name' => 'First Name' ) );
+	}
 }

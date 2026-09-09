@@ -17,6 +17,7 @@ use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Abilities\ProvidesAbilities;
 use DoubleScale\Modules\Booking\Abilities\BookingAbilities;
 use DoubleScale\Core\Container;
+use DoubleScale\Core\Services\ShortcodePageProvisioner;
 use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 
@@ -196,6 +197,16 @@ final class Module extends AbstractModule implements ProvidesAbilities {
 		// Registers `[doublescale_booking]`, which embeds the standalone booking
 		// page served by the handler above.
 		$container->get( Renderer\BookingShortcode::class );
+
+		// Auto-create the page hosting that shortcode so the booking embed has a
+		// published home on a fresh install.
+		ShortcodePageProvisioner::register(
+			Renderer\BookingShortcode::SHORTCODE_NAME,
+			array(
+				'title' => __( 'Book a Meeting', 'doublescale' ),
+				'slug'  => 'doublescale-booking',
+			)
+		);
 
 		$container->get( Managers\FieldsManager::class );
 		$container->get( Managers\LocationsManager::class );

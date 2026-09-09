@@ -812,6 +812,12 @@ export const generateSlug = (name: string): string => {
 };
 
 export {
+	getImportErrorMessage,
+	isInvalidJsonResponse,
+	type ImportErrorStats,
+} from './import-error-message';
+
+export {
 	getSubject,
 	groupMessagesIntoThreads,
 	type EmailRow,

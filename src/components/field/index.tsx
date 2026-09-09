@@ -35,6 +35,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import PipelineStageChange from '@/components/pipeline-stage-change';
 import DealValueChange from '@/components/deal-value-change';
 import DealOwnerChange from '@/components/deal-owner-change';
@@ -621,7 +623,7 @@ const Field: React.FC<FieldProps> = ({
 							.filter(Boolean)
 					: [];
 			fieldContent = (
-				<div className="space-y-1">
+				<div className="space-y-2">
 					{checkboxOptions.map((option) => {
 						const optionValue = String(option.value);
 						const selected = selectedCheckboxValues.includes(
@@ -630,18 +632,22 @@ const Field: React.FC<FieldProps> = ({
 						return (
 							<label
 								key={optionValue}
-								className="flex items-center gap-2 text-sm"
+								className="flex items-center gap-2 text-sm cursor-pointer"
 							>
-								<input
-									type="checkbox"
+								<Checkbox
 									disabled={disabled}
 									checked={selected}
-									onChange={(e) => {
-										const current = [...selectedCheckboxValues];
-										if (e.target.checked) {
-											current.push(optionValue);
+									onCheckedChange={(checked) => {
+										const current = [
+											...selectedCheckboxValues,
+										];
+										if (checked) {
+											if (!current.includes(optionValue)) {
+												current.push(optionValue);
+											}
 										} else {
-											const idx = current.indexOf(optionValue);
+											const idx =
+												current.indexOf(optionValue);
 											if (idx >= 0) {
 												current.splice(idx, 1);
 											}
@@ -659,28 +665,29 @@ const Field: React.FC<FieldProps> = ({
 		}
 		case 'radio': {
 			const radioOptions = options || [];
-			const radioGroupName = `ds-radio-${String(label || 'group').replace(/\s+/g, '-')}`;
 			fieldContent = (
-				<div className="space-y-1">
+				<RadioGroup
+					value={value != null && value !== '' ? String(value) : ''}
+					onValueChange={(nextValue) => onChange(nextValue)}
+					disabled={disabled}
+					className="space-y-2"
+				>
 					{radioOptions.map((option) => {
 						const optionValue = String(option.value);
 						return (
 							<label
 								key={optionValue}
-								className="flex items-center gap-2 text-sm"
+								className="flex items-center gap-2 text-sm cursor-pointer"
 							>
-								<input
-									type="radio"
-									name={radioGroupName}
+								<RadioGroupItem
+									value={optionValue}
 									disabled={disabled}
-									checked={String(value) === optionValue}
-									onChange={() => onChange(optionValue)}
 								/>
 								{option.label}
 							</label>
 						);
 					})}
-				</div>
+				</RadioGroup>
 			);
 			break;
 		}

@@ -54,16 +54,19 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 
 		return (
 			<div
-				className="doublescale-lead-scoring min-w-0 w-full rounded-[20px] bg-white p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)]"
+				className="doublescale-lead-scoring min-w-0 w-full overflow-hidden rounded-xl bg-white px-6 pt-6 pb-6 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]"
 				dir={dir}
 			>
 				<PageTabs
 					className="min-w-0 w-full"
-					tabsContentClassName="min-w-0 w-full"
-					tabsListClassName="flex w-full justify-start bg-transparent text-foreground gap-3"
+					tabsVariant="underline"
+					tabsContentClassName="min-w-0 w-full pt-6"
 					defaultValue="rules"
 					value={currentTab}
 					onValueChange={handleTabChange}
+					tabsListWrapperClassName="border-b border-border/60 pb-0"
+					tabsListClassName="gap-6"
+					tabsTriggerClassName="gap-2 px-1 pb-3 pt-1 text-muted-foreground"
 					tabsList={[
 						{
 							label: __('Rules', 'doublescale'),
@@ -93,7 +96,6 @@ const LeadScoring = forwardRef<LeadScoringRef, LeadScoringProps>(
 							),
 						},
 					]}
-					tabsListWrapperClassName="border !border-border px-5 py-3 rounded-lg mb-4"
 				/>
 			</div>
 		);

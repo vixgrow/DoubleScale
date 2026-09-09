@@ -95,7 +95,11 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 			setIsResultDialogOpen(true);
 		},
 		onViewAutomation: (automationContact) => {
-			navigate(getToLink(`automations/${automationContact.automation_id}`));
+			navigate(
+				getToLink(`automations/${automationContact.automation_id}`, {
+					return: `contacts/${contact_id}/automation`,
+				})
+			);
 		},
 	});
 

@@ -668,9 +668,21 @@ class RestImportExportController extends RestController {
 			$importer = new $importer( $args );
 			$result   = $importer->import();
 
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
 			return new WP_REST_Response( $result, 200 );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'import_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( \Throwable $e ) {
+			return new WP_Error(
+				'import_error',
+				sprintf(
+					/* translators: %s: underlying error */
+					__( 'Import stopped unexpectedly: %s. Contacts already processed stay in your list. Re-import the same file with “Update existing contacts” enabled to continue.', 'doublescale' ),
+					$e->getMessage()
+				),
+				array( 'status' => 500 )
+			);
 		}
 	}
 

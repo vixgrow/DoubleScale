@@ -8,13 +8,24 @@ import { useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
-import { createContext, useContext, useState, useEffect } from 'react';
+import {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+	useRef,
+	useCallback,
+} from 'react';
 /**
  * internal dependencies
  */
-import type { Filter as FilterType, ContactsResponse } from '@doublescale/client';
+import type { ContactsResponse } from '@doublescale/client';
 import type { RuleItem } from '@/components/rules-builder';
 import { getFilteredRulesGroups, getInitialRule } from '@/utils';
+
+/** Stable JSON key for nested rules (count refetch + change detection). */
+const serializeRules = (input: Array<Array<RuleItem>>): string =>
+	JSON.stringify(input ?? []);
 
 interface ExportContextType {
 	// State
@@ -22,7 +33,6 @@ interface ExportContextType {
 	offset: number;
 	total: number;
 	loading: boolean;
-	filters: FilterType[] | any;
 	rules: Array<Array<RuleItem>>;
 	rulesGroups: any;
 	isFiltering: boolean;
@@ -30,7 +40,6 @@ interface ExportContextType {
 
 	// Actions
 	setSelectedFields: (fields: string[]) => void;
-	setFilters: (filters: FilterType[]) => void;
 	setRules: (rules: Array<Array<RuleItem>>) => void;
 	handleExport: () => Promise<void>;
 	handleClose: () => void;
@@ -66,7 +75,6 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	const [offset, setOffset] = useState(0);
 	const [total, setTotal] = useState(0);
 	const [loading, setLoading] = useState(false);
-	const [filters, setFilters] = useState<FilterType[] | any>([]);
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [totalContact, setTotalContact] = useState(0);
 	const { createNotice } = useDispatch('doublescale/core');
@@ -76,15 +84,14 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	const [rules, setRules] = useState<Array<Array<RuleItem>>>([
 		[getInitialRule(rulesGroups)],
 	]);
+	const rulesRef = useRef(rules);
+	rulesRef.current = rules;
+	const fetchGenerationRef = useRef(0);
 
-	// Sync rules to filters when rules change
-	useEffect(() => {
-		// Only update if filters actually changed to avoid infinite loops
-		if (JSON.stringify(rules) !== JSON.stringify(filters)) {
-			setFilters(rules);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [rules]);
+	/** Deep-clone so RulesBuilder in-place nested edits cannot alias prior state. */
+	const updateRules = useCallback((next: Array<Array<RuleItem>>) => {
+		setRules(JSON.parse(JSON.stringify(next ?? [])) as Array<Array<RuleItem>>);
+	}, []);
 
 	const handleExport = async (currentOffset = 0, file = '') => {
 		if (selectedFields.length === 0 || loading) {
@@ -100,7 +107,8 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 					fields: selectedFields,
 					offset: currentOffset,
 					file_id: file,
-					filters: filters,
+					// Backend Contact_Filters_Process accepts nested RuleItem rows.
+					filters: rulesRef.current,
 				},
 			})) as {
 				offset: number;
@@ -160,10 +168,10 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	};
 
 	const handleClose = () => {
+		fetchGenerationRef.current += 1;
 		setOffset(0);
 		setLoading(false);
 		setSelectedFields(['first_name', 'last_name', 'email']);
-		setFilters([]);
 		setRules([[getInitialRule(rulesGroups)]]);
 		setTotalContact(0);
 		setTotal(0);
@@ -171,29 +179,43 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		onClose();
 	};
 
-	const fetchContacts = async () => {
-		setIsFiltering(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/contacts', {
-					per_page: 1,
-					page: 1,
-					filters: filters,
-				}),
-				method: 'GET',
-				parse: true,
-			})) as ContactsResponse;
+	const fetchContacts = useCallback(
+		async (filtersToApply: Array<Array<RuleItem>>) => {
+			const generation = ++fetchGenerationRef.current;
+			setIsFiltering(true);
+			try {
+				const response = (await apiFetch({
+					path: addQueryArgs('/doublescale/v1/contacts', {
+						per_page: 1,
+						page: 1,
+						filters: filtersToApply,
+					}),
+					method: 'GET',
+					parse: true,
+				})) as ContactsResponse;
 
-			setTotalContact(response.total);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch contacts', 'doublescale'),
-			});
-		} finally {
-			setIsFiltering(false);
-		}
-	};
+				if (generation !== fetchGenerationRef.current) {
+					return;
+				}
+
+				// Laravel paginator `total` is the filtered match count.
+				setTotalContact(response.total ?? 0);
+			} catch (error) {
+				if (generation !== fetchGenerationRef.current) {
+					return;
+				}
+				createNotice({
+					type: 'error',
+					message: __('Failed to fetch contacts', 'doublescale'),
+				});
+			} finally {
+				if (generation === fetchGenerationRef.current) {
+					setIsFiltering(false);
+				}
+			}
+		},
+		[createNotice]
+	);
 
 	const toggleField = (field: string) => {
 		if (selectedFields.includes(field)) {
@@ -203,25 +225,31 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		}
 	};
 
+	// Refetch count whenever the modal is open and rules change.
+	// RulesBuilder often mutates nested arrays in place; serialize so we still
+	// detect value edits and never share a live reference with fetch/export.
+	const rulesKey = serializeRules(rules);
 	useEffect(() => {
-		if (open) {
-			fetchContacts();
+		if (!open) {
+			return;
 		}
-	}, [open, filters]);
+		const filtersSnapshot = JSON.parse(rulesKey) as Array<
+			Array<RuleItem>
+		>;
+		void fetchContacts(filtersSnapshot);
+	}, [open, rulesKey, fetchContacts]);
 
 	const contextValue: ExportContextType = {
 		selectedFields,
 		offset,
 		total,
 		loading,
-		filters,
 		rules,
 		rulesGroups,
 		isFiltering,
 		totalContact,
 		setSelectedFields,
-		setFilters,
-		setRules,
+		setRules: updateRules,
 		handleExport,
 		handleClose,
 		toggleField,

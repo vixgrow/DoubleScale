@@ -14,6 +14,7 @@ import { useEffect, useRef } from 'react';
  * internal dependencies
  */
 import ConfigAPI from '@doublescale/config';
+import { getImportErrorMessage, isInvalidJsonResponse } from '@doublescale/utils';
 import { useImportContext, type ImportStats } from './contexts';
 import { useGoHighLevelOAuth } from './hooks/use-gohighlevel-oauth';
 import { isIntegrationApiImportSource } from './source-definitions';
@@ -322,11 +323,14 @@ export const useImportActions = () => {
 		}
 	};
 
-	const startImport = async (currentOffset = 0): Promise<boolean> => {
+	const startImport = async (
+		currentOffset = 0,
+		retryCount = 0
+	): Promise<boolean> => {
 		dispatch({ type: 'SET_IMPORTING', payload: true });
 
-		// Reset stats at the start of import (only on first call)
-		if (currentOffset === 0) {
+		// Reset stats at the start of import (only on first call, not retries)
+		if (currentOffset === 0 && retryCount === 0) {
 			importStatsRef.current = { imported: 0, skipped: 0, failed: 0 };
 			dispatch({ type: 'SET_IMPORT_STATS', payload: { imported: 0, skipped: 0, failed: 0 } });
 		}
@@ -390,7 +394,11 @@ export const useImportActions = () => {
 				handleImportComplete(importStatsRef.current);
 				return true;
 			}
-		} catch (error: any) {
+		} catch (error: unknown) {
+			if (isInvalidJsonResponse(error) && retryCount < 2) {
+				await new Promise((resolve) => setTimeout(resolve, 1500));
+				return await startImport(currentOffset, retryCount + 1);
+			}
 			handleImportError(error);
 			return false;
 		}
@@ -438,150 +446,136 @@ export const useImportActions = () => {
 		});
 	};
 
-	const handleImportError = (error: any) => {
+	const handleImportError = (error: unknown) => {
 		console.error('Import error:', error);
 
-		// Platform-specific import error handling
-		let errorMessage =
-			error.message || __('Failed to import contacts', 'doublescale');
+		const rawMessage =
+			error && typeof error === 'object' && 'message' in error
+				? String((error as { message?: string }).message || '')
+				: '';
 
-		if (state.source === 'activecampaign') {
-			if (
-				error.message?.includes('rate limit') ||
-				error.message?.includes('429')
-			) {
-				errorMessage = __(
-					'ActiveCampaign API rate limit reached. Please wait a few minutes and try again.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('timeout')) {
-				errorMessage = __(
-					'ActiveCampaign connection timeout. The import will resume from where it left off.',
-					'doublescale'
-				);
-			}
-		} else if (state.source === 'mailerlite') {
-			if (
-				error.message?.includes('rate limit') ||
-				error.message?.includes('429')
-			) {
-				errorMessage = __(
-					'MailerLite API rate limit reached. Please wait and try again.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('no groups')) {
-				errorMessage = __(
-					'No MailerLite groups found to import from. Please create groups in your MailerLite account first.',
-					'doublescale'
-				);
-			}
-		} else if (state.source === 'hubspot') {
-			if (
-				error.message?.includes('rate limit') ||
-				error.message?.includes('429')
-			) {
-				errorMessage = __(
-					'HubSpot API rate limit reached. Please wait and try again later.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('timeout')) {
-				errorMessage = __(
-					'HubSpot connection timeout. The import will resume from where it left off.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('no contacts')) {
-				errorMessage = __(
-					'No HubSpot contacts found to import. Please ensure you have contacts in your HubSpot account.',
-					'doublescale'
-				);
-			}
-		} else if (state.source === 'pipedrive') {
-			if (
-				error.message?.includes('rate limit') ||
-				error.message?.includes('429')
-			) {
-				errorMessage = __(
-					'Pipedrive API rate limit reached. Please wait and try again later.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('timeout')) {
-				errorMessage = __(
-					'Pipedrive connection timeout. The import will resume from where it left off.',
-					'doublescale'
-				);
-			} else if (
-				error.message?.includes('invalid') ||
-				error.message?.includes('credentials') ||
-				error.message?.includes('Token is invalid') ||
-				error.message?.includes('API Domain') ||
-				error.message?.includes('401') ||
-				error.message?.includes('403')
-			) {
-				errorMessage = __(
-					'Invalid Pipedrive credentials. Please check your API Domain and Token.',
-					'doublescale'
-				);
+		let errorMessage = getImportErrorMessage(error, importStatsRef.current);
+
+		if (!isInvalidJsonResponse(error)) {
+			if (state.source === 'activecampaign') {
+				if (rawMessage.includes('rate limit') || rawMessage.includes('429')) {
+					errorMessage = __(
+						'ActiveCampaign API rate limit reached. Please wait a few minutes and try again.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('timeout')) {
+					errorMessage = __(
+						'ActiveCampaign connection timeout. The import will resume from where it left off.',
+						'doublescale'
+					);
+				}
+			} else if (state.source === 'mailerlite') {
+				if (rawMessage.includes('rate limit') || rawMessage.includes('429')) {
+					errorMessage = __(
+						'MailerLite API rate limit reached. Please wait and try again.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('no groups')) {
+					errorMessage = __(
+						'No MailerLite groups found to import from. Please create groups in your MailerLite account first.',
+						'doublescale'
+					);
+				}
+			} else if (state.source === 'hubspot') {
+				if (rawMessage.includes('rate limit') || rawMessage.includes('429')) {
+					errorMessage = __(
+						'HubSpot API rate limit reached. Please wait and try again later.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('timeout')) {
+					errorMessage = __(
+						'HubSpot connection timeout. The import will resume from where it left off.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('no contacts')) {
+					errorMessage = __(
+						'No HubSpot contacts found to import. Please ensure you have contacts in your HubSpot account.',
+						'doublescale'
+					);
+				}
+			} else if (state.source === 'pipedrive') {
+				if (rawMessage.includes('rate limit') || rawMessage.includes('429')) {
+					errorMessage = __(
+						'Pipedrive API rate limit reached. Please wait and try again later.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('timeout')) {
+					errorMessage = __(
+						'Pipedrive connection timeout. The import will resume from where it left off.',
+						'doublescale'
+					);
+				} else if (
+					rawMessage.includes('invalid') ||
+					rawMessage.includes('credentials') ||
+					rawMessage.includes('Token is invalid') ||
+					rawMessage.includes('API Domain') ||
+					rawMessage.includes('401') ||
+					rawMessage.includes('403')
+				) {
+					errorMessage = __(
+						'Invalid Pipedrive credentials. Please check your API Domain and Token.',
+						'doublescale'
+					);
+					dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+					dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
+					dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+				} else if (
+					rawMessage.includes('no persons') ||
+					rawMessage.includes('no contacts')
+				) {
+					errorMessage = __(
+						'No Pipedrive contacts found to import. Please ensure you have contacts in your Pipedrive account.',
+						'doublescale'
+					);
+				}
+			} else if (state.source === 'gohighlevel') {
+				if (
+					rawMessage.includes('OAuth connection has expired') ||
+					rawMessage.includes('invalid') ||
+					rawMessage.includes('401') ||
+					rawMessage.includes('403')
+				) {
+					errorMessage = __(
+						'GoHighLevel OAuth connection has expired. Please reconnect your account.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('rate limit') || rawMessage.includes('429')) {
+					errorMessage = __(
+						'GoHighLevel API rate limit reached. Please wait and try again later.',
+						'doublescale'
+					);
+				} else if (rawMessage.includes('timeout')) {
+					errorMessage = __(
+						'GoHighLevel connection timeout. The import will resume from where it left off.',
+						'doublescale'
+					);
+				} else if (
+					rawMessage.includes('no contacts') ||
+					rawMessage.includes('connect to your GoHighLevel account')
+				) {
+					errorMessage = __(
+						'Please connect to your GoHighLevel account using OAuth first.',
+						'doublescale'
+					);
+				}
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
 				dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
-			} else if (
-				error.message?.includes('no persons') ||
-				error.message?.includes('no contacts')
-			) {
-				errorMessage = __(
-					'No Pipedrive contacts found to import. Please ensure you have contacts in your Pipedrive account.',
-					'doublescale'
-				);
 			}
-		} else if (state.source === 'gohighlevel') {
-			if (
-				error.message?.includes('OAuth connection has expired') ||
-				error.message?.includes('invalid') ||
-				error.message?.includes('401') ||
-				error.message?.includes('403')
-			) {
-				errorMessage = __(
-					'GoHighLevel OAuth connection has expired. Please reconnect your account.',
-					'doublescale'
-				);
-			} else if (
-				error.message?.includes('rate limit') ||
-				error.message?.includes('429')
-			) {
-				errorMessage = __(
-					'GoHighLevel API rate limit reached. Please wait and try again later.',
-					'doublescale'
-				);
-			} else if (error.message?.includes('timeout')) {
-				errorMessage = __(
-					'GoHighLevel connection timeout. The import will resume from where it left off.',
-					'doublescale'
-				);
-			} else if (
-				error.message?.includes('no contacts') ||
-				error.message?.includes('connect to your GoHighLevel account')
-			) {
-				errorMessage = __(
-					'Please connect to your GoHighLevel account using OAuth first.',
-					'doublescale'
-				);
-			}
-			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
-			dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
-			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 		}
 
 		createNotice({
 			type: 'error',
 			message: errorMessage,
+			duration: 15000,
 		});
 
-		// Stop importing state but don't reset progress counters
-		// This prevents returning to step 2 unexpectedly
 		dispatch({ type: 'SET_IMPORTING', payload: false });
-		// Don't reset count and offset - keep the current state
-		// dispatch({ type: 'SET_COUNT', payload: 0 });
-		// dispatch({ type: 'SET_OFFSET', payload: 0 });
 		dispatch({ type: 'SET_CURSOR', payload: null });
 	};
 

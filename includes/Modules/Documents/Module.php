@@ -13,6 +13,7 @@ use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\Abilities\ProvidesAbilities;
 use DoubleScale\Core\Container;
+use DoubleScale\Core\Services\ShortcodePageProvisioner;
 use DoubleScale\Modules\Documents\Abilities\DocumentAbilities;
 use DoubleScale\Modules\Sales\AbstractSalesChildModule;
 use DoubleScale\Modules\Documents\Renderer\InvoiceFrontendHandler;
@@ -126,6 +127,24 @@ final class Module extends AbstractSalesChildModule implements ProvidesAbilities
 
 		new ProposalFrontendHandler();
 		new InvoiceFrontendHandler();
+
+		// Auto-create the pages hosting the customer-facing shortcodes, so a
+		// sent proposal/invoice always has somewhere to link to. Without this
+		// the public URL resolves empty and the mail ships a dead link.
+		ShortcodePageProvisioner::register(
+			ProposalFrontendHandler::SHORTCODE_NAME,
+			array(
+				'title' => __( 'Proposal', 'doublescale' ),
+				'slug'  => 'doublescale-proposal',
+			)
+		);
+		ShortcodePageProvisioner::register(
+			InvoiceFrontendHandler::SHORTCODE_NAME,
+			array(
+				'title' => __( 'Invoice', 'doublescale' ),
+				'slug'  => 'doublescale-invoice',
+			)
+		);
 
 		add_action( 'init', array( $this, 'register_schedules' ) );
 		add_action( 'doublescale_sales_invoice_paid', array( $this, 'on_invoice_paid' ), 10, 1 );

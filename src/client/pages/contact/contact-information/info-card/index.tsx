@@ -171,27 +171,92 @@ const InfoCard: React.FC = () => {
 		}));
 	};
 
-	// Helper function to get custom field value from contact
+	/**
+	 * Drop values left over from a previous field type (e.g. text → select,
+	 * checkbox → radio) so the UI does not keep showing invalid data.
+	 */
+	const sanitizeCustomFieldValueForType = (
+		rawValue: unknown,
+		fieldType: string,
+		options?: { value: string; label: string }[]
+	): string | boolean | string[] => {
+		const optionValues = (options || []).map((option) => option.value);
+		const hasOptions = optionValues.length > 0;
+
+		if (fieldType === 'boolean') {
+			if (rawValue === true || rawValue === 'true' || rawValue === 1 || rawValue === '1') {
+				return true;
+			}
+			if (
+				rawValue === false ||
+				rawValue === 'false' ||
+				rawValue === 0 ||
+				rawValue === '0' ||
+				rawValue === '' ||
+				rawValue == null
+			) {
+				return false;
+			}
+			return false;
+		}
+
+		if (fieldType === 'multiselect' || fieldType === 'checkbox') {
+			const values = Array.isArray(rawValue)
+				? rawValue.map((item) => String(item).trim()).filter(Boolean)
+				: typeof rawValue === 'string' && rawValue
+					? rawValue
+							.split(',')
+							.map((item) => item.trim())
+							.filter(Boolean)
+					: [];
+			if (hasOptions) {
+				return values.filter((item) => optionValues.includes(item));
+			}
+			return values;
+		}
+
+		if (fieldType === 'select' || fieldType === 'radio') {
+			if (Array.isArray(rawValue) || typeof rawValue === 'boolean') {
+				return '';
+			}
+			const value = rawValue == null ? '' : String(rawValue);
+			if (hasOptions && value && !optionValues.includes(value)) {
+				return '';
+			}
+			return value;
+		}
+
+		// Scalar types: discard array/boolean leftovers from a prior type.
+		if (Array.isArray(rawValue) || typeof rawValue === 'boolean') {
+			return '';
+		}
+		return rawValue == null ? '' : String(rawValue);
+	};
+
 	const getCustomFieldValue = (fieldId: number, fieldType?: string) => {
 		const customField = contact?.custom_fields?.find(
 			(cf) => cf.id === fieldId
 		);
-		const value = customField?.pivot?.value || '';
-
-		// Convert string values to appropriate types
-		if (fieldType === 'boolean') {
-			return value === 'true';
-		}
-
-		return value;
+		const value = customField?.pivot?.value ?? '';
+		return sanitizeCustomFieldValueForType(
+			value,
+			fieldType || 'text'
+		);
 	};
 
 	const handleEditCustomField = (
 		fieldId: number,
-		currentValue: string | boolean | string[]
+		currentValue: string | boolean | string[],
+		fieldType?: string,
+		options?: { value: string; label: string }[]
 	) => {
+		const sanitized = sanitizeCustomFieldValueForType(
+			currentValue,
+			fieldType || 'text',
+			options
+		);
 		setEditingCustomField(fieldId);
-		setCustomFieldValue(currentValue || '');
+		setCustomFieldValue(sanitized);
 		setCustomFieldErrors((prev) => {
 			if (!prev[fieldId]) {
 				return prev;
@@ -656,24 +721,6 @@ const InfoCard: React.FC = () => {
 											<div className="flex flex-col">
 												{group.custom_fields.map(
 													(customField, index) => {
-														const fieldValue =
-															getCustomFieldValue(
-																customField.id,
-																customField.type
-															);
-
-														// Get formatted value for multiselect
-														const formattedValue =
-															customField.type ===
-																'multiselect' ||
-															customField.type ===
-																'checkbox'
-																? getMultiselectValue(
-																		fieldValue as string
-																	)
-																: fieldValue;
-
-														// Get options for select/multiselect/radio/checkbox fields
 														const fieldOptions = [
 															'select',
 															'multiselect',
@@ -686,6 +733,32 @@ const InfoCard: React.FC = () => {
 																	customField
 																)
 															: undefined;
+
+														const fieldValue =
+															sanitizeCustomFieldValueForType(
+																getCustomFieldValue(
+																	customField.id,
+																	customField.type
+																),
+																customField.type,
+																fieldOptions
+															);
+
+														const formattedValue =
+															customField.type ===
+																'multiselect' ||
+															customField.type ===
+																'checkbox'
+																? (Array.isArray(
+																		fieldValue
+																	)
+																		? fieldValue
+																		: getMultiselectValue(
+																				String(
+																					fieldValue
+																				)
+																		  ))
+																: fieldValue;
 
 														const isEditing =
 															editingCustomField ===
@@ -731,7 +804,9 @@ const InfoCard: React.FC = () => {
 																			onClick={() =>
 																				handleEditCustomField(
 																					customField.id,
-																					formattedValue
+																					formattedValue,
+																					customField.type,
+																					fieldOptions
 																				)
 																			}
 																			className="h-7 w-7 shrink-0 rounded-full bg-primary/10 p-0 text-primary shadow-none"
@@ -788,6 +863,7 @@ const InfoCard: React.FC = () => {
 																		}}
 																	>
 																		<Field
+																			key={`${customField.id}-${customField.type}`}
 																			type={
 																				customField.type
 																			}

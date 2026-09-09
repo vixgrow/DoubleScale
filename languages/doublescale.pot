@@ -909,7 +909,13 @@ msgstr ""
 msgid "Activities"
 msgstr ""
 
+msgid "activities"
+msgstr ""
+
 msgid "Activity"
+msgstr ""
+
+msgid "activity"
 msgstr ""
 
 msgid "Activity Date"
@@ -2016,9 +2022,6 @@ msgstr ""
 msgid "Are you sure you want to delete this account?"
 msgstr ""
 
-msgid "Are you sure you want to delete this activity? This action cannot be undone."
-msgstr ""
-
 msgid "Are you sure you want to delete this availability?"
 msgstr ""
 
@@ -2041,9 +2044,6 @@ msgid "Are you sure you want to delete this payment? The invoice status will be 
 msgstr ""
 
 msgid "Are you sure you want to delete this tag?"
-msgstr ""
-
-msgid "Are you sure you want to delete this task? This action cannot be undone."
 msgstr ""
 
 msgid "Are you sure you want to delete this tax? Existing line items are not changed."
@@ -2617,6 +2617,9 @@ msgid "Back to calendars"
 msgstr ""
 
 msgid "Back to connection"
+msgstr ""
+
+msgid "Back to Contact"
 msgstr ""
 
 msgid "Back to Contracts"
@@ -5116,6 +5119,9 @@ msgid "Could not load SMTP settings."
 msgstr ""
 
 msgid "Could not prepare the WhatsApp message."
+msgstr ""
+
+msgid "Could not read the CSV file: %s. Save it as UTF-8 CSV (comma-separated) and try again."
 msgstr ""
 
 msgid "Could not refresh tokens."
@@ -10230,6 +10236,9 @@ msgid "Import in progress"
 msgstr ""
 
 msgid "Import steps"
+msgstr ""
+
+msgid "Import stopped unexpectedly: %s. Contacts already processed stay in your list. Re-import the same file with “Update existing contacts” enabled to continue."
 msgstr ""
 
 msgid "Import summary"
@@ -19043,6 +19052,9 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
+msgid "task"
+msgstr ""
+
 msgid "Task activities require Plugin Pro plugin"
 msgstr ""
 
@@ -19113,6 +19125,9 @@ msgid "Task reminders, assignments, and status"
 msgstr ""
 
 msgid "Tasks"
+msgstr ""
+
+msgid "tasks"
 msgstr ""
 
 msgid "Tasks, statuses, due dates, and workload."
@@ -19626,6 +19641,9 @@ msgstr ""
 msgid "The importer is not active"
 msgstr ""
 
+msgid "The invoice could not be saved. Please try again, or contact support if the problem persists."
+msgstr ""
+
 msgid "The invoice was saved, but the recurring schedule could not be stored."
 msgstr ""
 
@@ -19761,6 +19779,12 @@ msgstr ""
 msgid "These Pro modules are in development. Get Pro now and they will land in the same workspace."
 msgstr ""
 
+msgid "The server stopped the import before it finished (timeout or crash). %d contacts were already processed. Re-import the same file with “Update existing contacts” turned on to continue. A bad email or phone only skips that row — it does not stop the file. If you have an automation that runs when a contact is added, pause it during large imports; it can time the server out."
+msgstr ""
+
+msgid "The server stopped the import before it finished. This usually means the request timed out or crashed. Try again. A bad email or phone only skips that row. If you have an automation that runs when a contact is added, pause it during large imports, then re-import with “Update existing contacts” on."
+msgstr ""
+
 msgid "The settings of the automation."
 msgstr ""
 
@@ -19804,6 +19828,9 @@ msgid "The trigger of the automation."
 msgstr ""
 
 msgid "The type of the step."
+msgstr ""
+
+msgid "The uploaded CSV file could not be read. Upload it again."
 msgstr ""
 
 msgid "The value must be unique"

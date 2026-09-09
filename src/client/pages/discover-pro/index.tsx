@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { GraduationCap, MessagesSquare, Sparkles, Users } from 'lucide-react';
+import { GraduationCap, MessagesSquare, Smartphone, Sparkles, Users } from 'lucide-react';
 
 /**
  * DoubleScale dependencies
@@ -36,8 +36,10 @@ import {
 /**
  * Internal dependencies
  */
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import './style.scss';
 
 const DEMO_URL = 'https://try.doublescale.io';
@@ -202,6 +204,7 @@ const useFeatureCategories = (): FeatureCategory[] => [
 		icon: <IntegrationsIcon width={24} height={24} />,
 		title: __('Third-Party Integrations', 'doublescale'),
 		features: [
+			__('Payment gateways: Stripe, PayPal, Square, Mollie, Razorpay & Authorize.Net', 'doublescale'),
 			__('Meta WhatsApp Business API', 'doublescale'),
 			__('Twilio SMS and Slack notifications', 'doublescale'),
 			__('Typeform & Jotform', 'doublescale'),
@@ -210,9 +213,18 @@ const useFeatureCategories = (): FeatureCategory[] => [
 	},
 ];
 
+const useMobileAppFeatures = (): string[] => [
+	__('Contacts, activity, and notes on the go', 'doublescale'),
+	__('Sales pipelines, deals, and follow-ups', 'doublescale'),
+	__('Calendar and booking management', 'doublescale'),
+	__('Tasks with native push notifications', 'doublescale'),
+	__('iOS and Android apps for your team', 'doublescale'),
+];
+
 const DiscoverPro: React.FC = () => {
 	const pricingUrl = ConfigAPI.getUrlDoubleScalePro();
 	const categories = useFeatureCategories();
+	const mobileAppFeatures = useMobileAppFeatures();
 
 	const openExternal = (url: string) => {
 		window.open(url, '_blank', 'noopener,noreferrer');
@@ -258,90 +270,140 @@ const DiscoverPro: React.FC = () => {
 				</div>
 			</div>
 
-			<div className="doublescale-discover-pro-grid">
-				{categories.map((category) => (
-					<Card key={category.title} className="shadow-none">
-						<CardContent className="p-5">
-							<div className="doublescale-discover-pro-grid__card-header">
-								<span className="doublescale-discover-pro-grid__card-icon">
-									{category.icon}
-								</span>
-								<h3 className="doublescale-discover-pro-grid__card-title">
-									{category.title}
-								</h3>
-							</div>
-							<ul className="doublescale-discover-pro-grid__card-list">
-								{category.features.map((feature) => (
-									<li key={feature}>
-										<CheckCircleIcon width={16} height={16} />
-										<span>{feature}</span>
-									</li>
-								))}
-							</ul>
-						</CardContent>
-					</Card>
-				))}
-			</div>
-
-			<div className="doublescale-discover-pro-coming-soon">
-				<div className="doublescale-discover-pro-coming-soon__intro">
-					<span className="doublescale-discover-pro-coming-soon__badge">
-						<Sparkles width={14} height={14} />
+			<Tabs defaultValue="features" className="doublescale-discover-pro-tabs">
+				<TabsList className="doublescale-discover-pro-tabs__list">
+					<TabsTrigger value="features">
+						{__('Pro features', 'doublescale')}
+					</TabsTrigger>
+					<TabsTrigger value="mobile">
+						<Smartphone width={16} height={16} />
+						{__('Mobile app', 'doublescale')}
+					</TabsTrigger>
+					<TabsTrigger value="coming-soon">
 						{__('Coming soon', 'doublescale')}
-					</span>
-					<h2>{__('Next modules on the roadmap', 'doublescale')}</h2>
-					<p>
-						{__(
-							'These Pro modules are in development. Get Pro now and they will land in the same workspace.',
-							'doublescale'
-						)}
-					</p>
-				</div>
-				<div className="doublescale-discover-pro-coming-soon__grid">
-					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
-						<CardContent className="p-5">
-							<span className="doublescale-discover-pro-coming-soon__icon">
-								<Users width={22} height={22} />
+					</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="features" className="doublescale-discover-pro-tabs__panel">
+					<div className="doublescale-discover-pro-grid">
+						{categories.map((category) => (
+							<Card key={category.title} className="shadow-none">
+								<CardContent className="p-5">
+									<div className="doublescale-discover-pro-grid__card-header">
+										<span className="doublescale-discover-pro-grid__card-icon">
+											{category.icon}
+										</span>
+										<h3 className="doublescale-discover-pro-grid__card-title">
+											{category.title}
+										</h3>
+									</div>
+									<ul className="doublescale-discover-pro-grid__card-list">
+										{category.features.map((feature) => (
+											<li key={feature}>
+												<CheckCircleIcon width={16} height={16} />
+												<span>{feature}</span>
+											</li>
+										))}
+									</ul>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</TabsContent>
+
+				<TabsContent value="mobile" className="doublescale-discover-pro-tabs__panel">
+					<div className="doublescale-discover-pro-mobile">
+						<div className="doublescale-discover-pro-mobile__intro">
+							<span className="doublescale-discover-pro-mobile__icon">
+								<Smartphone width={28} height={28} />
 							</span>
-							<h3>{__('Membership Module', 'doublescale')}</h3>
+							<Badge
+								variant="secondary"
+								className="doublescale-discover-pro-mobile__plan-badge"
+							>
+								{__('Plus and Enterprise plans only', 'doublescale')}
+							</Badge>
+							<h2>{__('Native iOS and Android app', 'doublescale')}</h2>
 							<p>
 								{__(
-									'Plans, member portals, and access rules tied to the same contact record.',
+									'Take DoubleScale with you. The mobile app is included with Plus and Enterprise — not Basic.',
 									'doublescale'
 								)}
 							</p>
-						</CardContent>
-					</Card>
-					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
-						<CardContent className="p-5">
-							<span className="doublescale-discover-pro-coming-soon__icon">
-								<GraduationCap width={22} height={22} />
+						</div>
+						<ul className="doublescale-discover-pro-mobile__list">
+							{mobileAppFeatures.map((feature) => (
+								<li key={feature}>
+									<CheckCircleIcon width={16} height={16} />
+									<span>{feature}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="coming-soon" className="doublescale-discover-pro-tabs__panel">
+					<div className="doublescale-discover-pro-coming-soon">
+						<div className="doublescale-discover-pro-coming-soon__intro">
+							<span className="doublescale-discover-pro-coming-soon__badge">
+								<Sparkles width={14} height={14} />
+								{__('Coming soon', 'doublescale')}
 							</span>
-							<h3>{__('LMS Module', 'doublescale')}</h3>
+							<h2>{__('Next modules on the roadmap', 'doublescale')}</h2>
 							<p>
 								{__(
-									'Courses, enrollments, and progress that trigger automations from the CRM.',
+									'These Pro modules are in development. Get Pro now and they will land in the same workspace.',
 									'doublescale'
 								)}
 							</p>
-						</CardContent>
-					</Card>
-					<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
-						<CardContent className="p-5">
-							<span className="doublescale-discover-pro-coming-soon__icon">
-								<MessagesSquare width={22} height={22} />
-							</span>
-							<h3>{__('Community Module', 'doublescale')}</h3>
-							<p>
-								{__(
-									'Spaces, discussions, and member activity on the same timeline as sales and support.',
-									'doublescale'
-								)}
-							</p>
-						</CardContent>
-					</Card>
-				</div>
-			</div>
+						</div>
+						<div className="doublescale-discover-pro-coming-soon__grid">
+							<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+								<CardContent className="p-5">
+									<span className="doublescale-discover-pro-coming-soon__icon">
+										<Users width={22} height={22} />
+									</span>
+									<h3>{__('Membership Module', 'doublescale')}</h3>
+									<p>
+										{__(
+											'Plans, member portals, and access rules tied to the same contact record.',
+											'doublescale'
+										)}
+									</p>
+								</CardContent>
+							</Card>
+							<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+								<CardContent className="p-5">
+									<span className="doublescale-discover-pro-coming-soon__icon">
+										<GraduationCap width={22} height={22} />
+									</span>
+									<h3>{__('LMS Module', 'doublescale')}</h3>
+									<p>
+										{__(
+											'Courses, enrollments, and progress that trigger automations from the CRM.',
+											'doublescale'
+										)}
+									</p>
+								</CardContent>
+							</Card>
+							<Card className="doublescale-discover-pro-coming-soon__card shadow-none">
+								<CardContent className="p-5">
+									<span className="doublescale-discover-pro-coming-soon__icon">
+										<MessagesSquare width={22} height={22} />
+									</span>
+									<h3>{__('Community Module', 'doublescale')}</h3>
+									<p>
+										{__(
+											'Spaces, discussions, and member activity on the same timeline as sales and support.',
+											'doublescale'
+										)}
+									</p>
+								</CardContent>
+							</Card>
+						</div>
+					</div>
+				</TabsContent>
+			</Tabs>
 
 			<div className="doublescale-discover-pro-footer-cta">
 				<h2>{__('Ready to unlock the full platform?', 'doublescale')}</h2>

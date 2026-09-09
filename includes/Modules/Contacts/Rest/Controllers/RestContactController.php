@@ -2755,9 +2755,18 @@ class RestContactController extends RestController {
 		$impact = $this->build_contact_deletion_impact( $contact_ids );
 
 		if ( ! $force && $this->contact_deletion_requires_force( $impact ) ) {
+			// Bookings block deletion for a different reason than invoices, so
+			// say which one it is — "delete their invoices first" is useless
+			// advice to someone whose contact only has a booking.
+			$blocks_on_bookings = empty( $impact['invoices'] )
+				&& empty( $impact['contracts'] )
+				&& empty( $impact['credit_notes'] );
+
 			return new WP_Error(
-				'contact_has_invoices',
-				__( 'These contacts have invoices and cannot be deleted. Delete or reassign their invoices first.', 'doublescale' ),
+				$blocks_on_bookings ? 'contact_has_bookings' : 'contact_has_invoices',
+				$blocks_on_bookings
+					? __( 'These contacts have bookings and cannot be deleted. Cancel or reassign their bookings first.', 'doublescale' )
+					: __( 'These contacts have invoices and cannot be deleted. Delete or reassign their invoices first.', 'doublescale' ),
 				array(
 					'status'         => 409,
 					'blocked_ids'      => $this->contact_ids_with_invoices( $contact_ids ),
@@ -2781,7 +2790,10 @@ class RestContactController extends RestController {
 	 * @return bool
 	 */
 	private function contact_deletion_requires_force( array $impact ): bool {
-		foreach ( array( 'invoices', 'contracts', 'credit_notes' ) as $key ) {
+		// `bookings` belongs here with the financial records: a booking row
+		// keyed to a deleted contact loses the attendee's identity AND keeps
+		// its `booked_slots` lock, so that slot can never be booked again.
+		foreach ( array( 'invoices', 'contracts', 'credit_notes', 'bookings' ) as $key ) {
 			if ( ! empty( $impact[ $key ] ) ) {
 				return true;
 			}

@@ -101,8 +101,15 @@ const Calendars: React.FC = () => {
 				Number( c.user_id ) === Number( currentUserId )
 		)?.id ?? null;
 
+	const integrationHostCalendarIdFromConfig =
+		typeof ConfigAPI.getIntegrationHostCalendarId === 'function'
+			? ConfigAPI.getIntegrationHostCalendarId()
+			: null;
+
 	const integrationCalendarId =
-		ownHostCalendarIdFromList ?? ownHostCalendarIdOverride;
+		ownHostCalendarIdFromList ??
+		ownHostCalendarIdOverride ??
+		integrationHostCalendarIdFromConfig;
 
 	const adminViewingOtherHost =
 		currentUser.isAdmin() &&
@@ -114,10 +121,13 @@ const Calendars: React.FC = () => {
 			setOwnHostCalendarIdOverride(null);
 			return;
 		}
-		if (!calendars || loading || !adminViewingOtherHost) {
-			if (!adminViewingOtherHost) {
-				setOwnHostCalendarIdOverride(null);
-			}
+		if (!calendars || loading) {
+			return;
+		}
+		const shouldResolveOwnHostCalendar =
+			currentUser.isAdmin() || adminViewingOtherHost;
+		if (!shouldResolveOwnHostCalendar) {
+			setOwnHostCalendarIdOverride(null);
 			return;
 		}
 		let cancelled = false;
@@ -125,9 +135,9 @@ const Calendars: React.FC = () => {
 			path: addQueryArgs(`calendars`, {
 				per_page: 20,
 				keyword: '',
+				user: String( currentUserId ),
 				filter: {
 					type: 'host',
-					user_id: String( currentUserId ),
 				},
 			}),
 			onSuccess: (response: CalendarResponse) => {

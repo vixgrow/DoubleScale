@@ -6,9 +6,11 @@
 import { describe, expect, it } from 'vitest';
 import {
 	SLUG_ORDER,
+	DEFAULT_PROVIDER_SLUG,
 	fallbackProviderCopy,
 	normalizeProviderSlug,
 	resolveProviderCopy,
+	resolveProviderSlug,
 } from './providers';
 
 describe('normalizeProviderSlug', () => {
@@ -23,6 +25,21 @@ describe('normalizeProviderSlug', () => {
 		expect(normalizeProviderSlug('')).toBeNull();
 		expect(normalizeProviderSlug(null)).toBeNull();
 		expect(normalizeProviderSlug(undefined)).toBeNull();
+	});
+});
+
+describe('resolveProviderSlug', () => {
+	it('defaults missing and unknown values to Google', () => {
+		expect(DEFAULT_PROVIDER_SLUG).toBe('google');
+		expect(resolveProviderSlug(null)).toBe('google');
+		expect(resolveProviderSlug('')).toBe('google');
+		expect(resolveProviderSlug('not-a-provider')).toBe('google');
+	});
+
+	it('keeps a valid slug from the OAuth return URL', () => {
+		expect(resolveProviderSlug('apple')).toBe('apple');
+		expect(resolveProviderSlug('zoom')).toBe('zoom');
+		expect(resolveProviderSlug('google')).toBe('google');
 	});
 });
 

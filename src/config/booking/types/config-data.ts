@@ -9,6 +9,7 @@ export type ConfigData = Record<string, unknown> & {
 	ajaxUrl: string;
 	nonce: string;
 	hasCalendars: boolean;
+	integrationHostCalendarId: number | null;
 	isWoocommerceActive: boolean;
 	timezones: Record<string, string>;
 	integrations: Integrations;

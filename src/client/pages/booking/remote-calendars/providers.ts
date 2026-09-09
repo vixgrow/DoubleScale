@@ -22,8 +22,8 @@ export type ProviderCopy = {
 
 /**
  * A provider slug is only honoured when it is one we render. Anything else
- * (a stale bookmark, a hand-edited URL) falls back to no selection rather than
- * rendering an empty panel.
+ * (a stale bookmark, a hand-edited URL) is rejected so the page can fall
+ * back to Google rather than rendering an empty panel.
  */
 export const normalizeProviderSlug = (
 	value: string | null | undefined
@@ -31,6 +31,18 @@ export const normalizeProviderSlug = (
 	value && (SLUG_ORDER as string[]).includes(value)
 		? (value as CalendarIntegrationSlug)
 		: null;
+
+/**
+ * Opening "Connect to remote calendars" always lands on a real panel. Google
+ * is first in the list and the usual OAuth path, so missing or unknown
+ * `provider` query values resolve here instead of a chooser screen.
+ */
+export const DEFAULT_PROVIDER_SLUG: CalendarIntegrationSlug = 'google';
+
+export const resolveProviderSlug = (
+	value: string | null | undefined
+): CalendarIntegrationSlug =>
+	normalizeProviderSlug(value) ?? DEFAULT_PROVIDER_SLUG;
 
 export const fallbackProviderCopy = (
 	slug: CalendarIntegrationSlug

@@ -3816,9 +3816,6 @@ msgstr ""
 msgid "Choose a design and accent color. You can change both later while editing."
 msgstr ""
 
-msgid "Choose a different service"
-msgstr ""
-
 msgid "Choose a link trigger, then set the link text that appears in your message."
 msgstr ""
 
@@ -3829,9 +3826,6 @@ msgid "Choose another source"
 msgstr ""
 
 msgid "Choose A Pre-built Template"
-msgstr ""
-
-msgid "Choose a service to add or connect an account"
 msgstr ""
 
 msgid "Choose files"
@@ -11559,6 +11553,9 @@ msgid "Loading blocks..."
 msgstr ""
 
 msgid "Loading booking…"
+msgstr ""
+
+msgid "Loading calendars…"
 msgstr ""
 
 msgid "Loading campaign details..."

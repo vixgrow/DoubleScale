@@ -43,11 +43,12 @@ import {
 	SLUG_ORDER,
 	normalizeProviderSlug,
 	resolveProviderCopy,
+	resolveProviderSlug,
 	type CalendarIntegrationSlug,
 } from './providers';
 
 export type { CalendarIntegrationSlug } from './providers';
-export { SLUG_ORDER, normalizeProviderSlug } from './providers';
+export { SLUG_ORDER, normalizeProviderSlug, resolveProviderSlug } from './providers';
 
 const BUNDLED_ICONS: Record<CalendarIntegrationSlug, string> = {
 	google: googleIcon,
@@ -104,8 +105,8 @@ const RemoteCalendarsPage: FC = () => {
 	// and drops the wp-admin script, producing a 404 on reload. Same approach
 	// as the calendar tabs (see calendar/tabs/integrations/index.tsx).
 	const [selectedSlug, setSelectedSlug] =
-		useState<CalendarIntegrationSlug | null>(() =>
-			normalizeProviderSlug(
+		useState<CalendarIntegrationSlug>(() =>
+			resolveProviderSlug(
 				new URLSearchParams(window.location.search).get('provider')
 			)
 		);
@@ -119,7 +120,7 @@ const RemoteCalendarsPage: FC = () => {
 	useEffect(() => {
 		const syncFromUrl = () => {
 			setSelectedSlug(
-				normalizeProviderSlug(
+				resolveProviderSlug(
 					new URLSearchParams(window.location.search).get('provider')
 				)
 			);
@@ -132,19 +133,31 @@ const RemoteCalendarsPage: FC = () => {
 	 * Write the provider into the current wp-admin URL without touching the
 	 * `page` / `path` parameters that route the admin screen.
 	 */
-	const writeProviderToUrl = (slug: CalendarIntegrationSlug | null) => {
+	const writeProviderToUrl = (
+		slug: CalendarIntegrationSlug,
+		mode: 'push' | 'replace' = 'push'
+	) => {
 		const params = new URLSearchParams(window.location.search);
-		if (slug) {
-			params.set('provider', slug);
-		} else {
-			params.delete('provider');
+		params.set('provider', slug);
+		const next = `${window.location.pathname}?${params.toString()}`;
+		if (mode === 'replace') {
+			window.history.replaceState({}, '', next);
+			return;
 		}
-		window.history.pushState(
-			{},
-			'',
-			`${window.location.pathname}?${params.toString()}`
-		);
+		window.history.pushState({}, '', next);
 	};
+
+	useEffect(() => {
+		const current = normalizeProviderSlug(
+			new URLSearchParams(window.location.search).get('provider')
+		);
+		if (current !== selectedSlug) {
+			writeProviderToUrl(selectedSlug, 'replace');
+		}
+		// Default Google onto the URL once so a reload and the OAuth return
+		// see the same provider the panel already opened.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const isProActive = Boolean(
 		applyFilters('doublescale_is_pro_active', false)
@@ -188,26 +201,19 @@ const RemoteCalendarsPage: FC = () => {
 	// Clear a stale notice whenever the user switches provider.
 	useEffect(() => {
 		setNotice(null);
+		setPanelAllowsLeave(false);
 	}, [selectedSlug]);
 
 	/**
 	 * Whether the integration panel currently allows the user to walk away.
 	 * The panel reports this through `onCloseReadinessChange`: false while it
 	 * has a connected account whose Remote Calendar has not been chosen yet.
-	 * Defaults to true so a provider with no panel open never traps anyone.
+	 * Starts false until the Google panel reports — otherwise Back to calendars
+	 * would slip through during the first accounts fetch.
 	 */
-	const [panelAllowsLeave, setPanelAllowsLeave] = useState(true);
+	const [panelAllowsLeave, setPanelAllowsLeave] = useState(false);
 
-	// A provider with no panel mounted has nothing to strand.
-	useEffect(() => {
-		if (!selectedSlug) {
-			setPanelAllowsLeave(true);
-		}
-	}, [selectedSlug]);
-
-	// No provider open means nothing can be stranded; otherwise defer to the
-	// panel, which owns the account/calendar state the rule depends on.
-	const canLeave = !selectedSlug || panelAllowsLeave;
+	const canLeave = !isProActive || panelAllowsLeave;
 
 	/**
 	 * Refuse an exit while a connected account still needs a Remote Calendar,
@@ -239,14 +245,6 @@ const RemoteCalendarsPage: FC = () => {
 		}
 		setSelectedSlug(slug);
 		writeProviderToUrl(slug);
-	};
-
-	const clearProvider = () => {
-		if (!confirmLeave()) {
-			return;
-		}
-		setSelectedSlug(null);
-		writeProviderToUrl(null);
 	};
 
 	const leaveToCalendars = () => {
@@ -362,6 +360,7 @@ const RemoteCalendarsPage: FC = () => {
 						<Card>
 							<CardContent className="p-5">
 								<IntegrationDetailsPage
+									key={selectedSlug}
 									integration={activeIntegration}
 									calendarId={String(id)}
 									slug={selectedSlug}
@@ -370,29 +369,6 @@ const RemoteCalendarsPage: FC = () => {
 									hasAccounts={() => {}}
 									onCloseReadinessChange={setPanelAllowsLeave}
 								/>
-								<div className="pt-4">
-									<Button
-										type="button"
-										variant="ghost"
-										onClick={clearProvider}
-									>
-										{__(
-											'Choose a different service',
-											'doublescale'
-										)}
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-
-					{!selectedSlug && (
-						<Card>
-							<CardContent className="p-8 text-center text-muted-foreground">
-								{__(
-									'Choose a service to add or connect an account',
-									'doublescale'
-								)}
 							</CardContent>
 						</Card>
 					)}

@@ -2,7 +2,14 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useCallback,
+	useMemo,
+} from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -34,7 +41,9 @@ import {
 import { useSidebarLayout } from '../workflow-sidebar/sidebar-layout-context';
 
 const collectOpenBuilderFieldKeys = (
-	fields: Record<string, { type?: string; fields?: Record<string, unknown> }> | undefined
+	fields:
+		| Record<string, { type?: string; fields?: Record<string, unknown> }>
+		| undefined
 ): string[] => {
 	if (!fields) {
 		return [];
@@ -85,9 +94,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	// Determine if this is a messaging action that requires provider
 	const actionKey =
-		step.type === 'delay'
-			? step.action || 'delay'
-			: step.action;
+		step.type === 'delay' ? step.action || 'delay' : step.action;
 	const action =
 		step.type === 'action' || step.type === 'delay'
 			? getAction(actionKey)
@@ -143,7 +150,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					| Record<
 							string,
 							{ type?: string; fields?: Record<string, unknown> }
-						>
+					  >
 					| undefined
 			),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -259,7 +266,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		// `action` is read for the error label only and is intentionally omitted
 		// to keep handleSave's identity stable (it feeds the footer effect).
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [step, settings, saveStep, requiredFieldKeys, createNotice, isWhatsAppAction, currentTrigger]);
+	}, [
+		step,
+		settings,
+		saveStep,
+		requiredFieldKeys,
+		createNotice,
+		isWhatsAppAction,
+		currentTrigger,
+	]);
 
 	const handleDelete = useCallback(async () => {
 		setIsDeleting(true);
@@ -279,7 +294,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					onClick={handleDelete}
 					disabled={isSaving || isDeleting}
 					variant="destructive"
-
 				>
 					{isDeleting
 						? __('Deleting...', 'doublescale')
@@ -289,13 +303,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					onClick={handleSave}
 					disabled={isSaving || isDeleting}
 					variant="default"
-
 				>
 					{isSaving
 						? __('Saving...', 'doublescale')
 						: __('Save Changes', 'doublescale')}
 				</Button>
-
 			</div>
 		);
 		return () => setFooter(null);
@@ -362,15 +374,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		const warningMessage =
 			step.type === 'goal'
 				? step.settings?._goal_warning_message ||
-				__(
-					'Goal requires a plugin that is not currently active.',
-					'doublescale'
-				)
+					__(
+						'Goal requires a plugin that is not currently active.',
+						'doublescale'
+					)
 				: step.settings?._action_warning_message ||
-				__(
-					'Action requires a plugin that is not currently active.',
-					'doublescale'
-				);
+					__(
+						'Action requires a plugin that is not currently active.',
+						'doublescale'
+					);
 		const labelText =
 			step.type === 'goal'
 				? __('Goal:', 'doublescale')
@@ -422,7 +434,9 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 							channel={channel}
 							onConfigureClick={() => {
 								if (channel === 'whatsapp') {
-									navigate(getToLink('integrations/meta-whatsapp'));
+									navigate(
+										getToLink('integrations/meta-whatsapp')
+									);
 								} else {
 									setShowTwilioConfig(true);
 								}
@@ -463,7 +477,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						variant="destructive"
 						className="mb-4 border-orange-500 bg-orange-50"
 					>
-						<AlertTriangleIcon width={20} height={20} color="#EA580C" />
+						<AlertTriangleIcon
+							width={20}
+							height={20}
+							color="#EA580C"
+						/>
 						<AlertDescription className="text-sm text-orange-800">
 							{__(
 								'Free-form WhatsApp messages are only available when the trigger is WhatsApp Message Received. Switch to a template or change the trigger.',

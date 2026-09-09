@@ -1,4 +1,12 @@
-import type { Page } from '@playwright/test';
+import type { Page, Browser } from '@playwright/test';
+import path from 'node:path';
+import {
+	createEventViaWizard,
+	deleteWizardEvent,
+	deriveEventSlugs,
+	e2eName,
+	publicEventUrl,
+} from './booking-public-helpers';
 import { execFileSync } from 'node:child_process';
 import { test, expect } from './fixtures';
 
@@ -1428,20 +1436,40 @@ test.describe('Booking: remote calendar selection with two accounts', () => {
 test.describe('Booking: external busy stub', () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
+	let stubEventUrl = '';
+
+	let stubEventId: number | null = null;
+
+	test.beforeAll(async ({ browser }: { browser: Browser }) => {
+		const context = await browser.newContext({
+			storageState: path.resolve(__dirname, '.auth/admin.json'),
+		});
+		const page = await context.newPage();
+		stubEventId = await createEventViaWizard(page, e2eName('E2E-Stub'));
+		const { eventSlug, calendarSlug } = deriveEventSlugs(stubEventId);
+		stubEventUrl = publicEventUrl(calendarSlug, eventSlug);
+		await context.close();
+	});
+
+	test.afterAll(async () => {
+		if (stubEventId) deleteWizardEvent(stubEventId);
+	});
+
 	test('stubbed external busy time removes a slot from the public picker', async ({
 		page,
 	}) => {
-		const row = db(
-			`SELECT e.slug, c.slug FROM wp_doublescale_booking_events e
-			 JOIN wp_doublescale_booking_calendars c ON c.id = e.calendar_id
-			 ORDER BY e.id DESC LIMIT 1`
-		);
-		if (!row) test.skip(true, 'No booking event for stub test.');
-		const [eventSlug, calendarSlug] = row.split('\t');
-		const url = `${process.env.WP_BASE_URL ?? 'http://localhost/wordpress'}/?doublescale_booking_calendar=${encodeURIComponent(calendarSlug)}&event=${encodeURIComponent(eventSlug)}`;
+		if (!stubEventUrl) test.skip(true, 'Wizard event was not seeded for stub test.');
+		const url = stubEventUrl;
 
 		await page.goto(url);
 		await expect(page.getByText(/Select a Date & Time/i)).toBeVisible({ timeout: 45_000 });
+		for (let month = 0; month < 12; month++) {
+			if ((await page.locator('.highlight-date').count()) > 0) break;
+			const next = page.locator('.nav-arrow').last();
+			if (!(await next.isEnabled().catch(() => false))) break;
+			await next.click();
+		}
+
 		let stubbed = false;
 		await page.route('**/admin-ajax.php', async (route) => {
 			const post = route.request().postData() ?? '';
@@ -1450,15 +1478,22 @@ test.describe('Booking: external busy stub', () => {
 				await route.fulfill({
 					status: 200,
 					contentType: 'application/json',
-					body: JSON.stringify({ success: true, data: [] }),
+					body: JSON.stringify({ success: true, data: { slots: {} } }),
 				});
 				return;
 			}
 			await route.continue();
 		});
-		await page.locator('.highlight-date').first().click();
-		await page.waitForTimeout(2_000);
-		expect(stubbed, 'Public picker must request booking slots via AJAX.').toBe(true);
+
+		const next = page.locator('.nav-arrow').last();
+		await expect(next).toBeEnabled({ timeout: 15_000 });
+		await next.click();
+		await expect
+			.poll(() => stubbed, {
+				timeout: 15_000,
+				message: 'Public picker must request booking slots via AJAX.',
+			})
+			.toBe(true);
 		await expect(page.locator('.time-slot:not(.time-slot-waiting)')).toHaveCount(0, {
 			timeout: 15_000,
 		});

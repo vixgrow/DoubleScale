@@ -74,10 +74,14 @@ async function ensureBookingModuleActive(adminPage: Page): Promise<void> {
 
 /** Close whatever dialog is open, tolerating an already-closed one. */
 async function dismissDialog(adminPage: Page): Promise<void> {
-	await adminPage.keyboard.press('Escape');
-	await expect(adminPage.getByRole('dialog')).toBeHidden({
-		timeout: 15_000,
-	});
+	const dialog = adminPage.getByRole('dialog');
+	const cancel = dialog.getByRole('button', { name: /^Cancel$/i });
+	if (await cancel.isVisible().catch(() => false)) {
+		await cancel.click();
+	} else {
+		await adminPage.keyboard.press('Escape');
+	}
+	await expect(dialog).toBeHidden({ timeout: 15_000 });
 }
 
 /**

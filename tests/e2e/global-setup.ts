@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const AUTH_DIR = path.resolve(__dirname, '.auth');
-const STORAGE_STATE = path.join(AUTH_DIR, 'admin.json');
+const STORAGE_STATE = path.resolve(AUTH_DIR, 'admin.json');
 
 const DEFAULT_BASE = 'http://localhost:8889';
 

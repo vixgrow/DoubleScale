@@ -110,7 +110,6 @@ export default function ModulesStep({
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6">
 					{displayRows.map((mod) => {
 						const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingModuleChanges);
-						const requires = mod.dependencies?.length ? mod.dependencies.join(', ') : null;
 						const childRows = buildChildModuleRows(mod.slug, modules, isProAddonActive);
 
 						return (
@@ -134,11 +133,6 @@ export default function ModulesStep({
 								</div>
 								<div className="flex flex-col gap-1.5">
 									<p className="text-base leading-7 text-muted-foreground">{mod.description}</p>
-									{requires && (
-										<p className="text-sm font-medium leading-4 text-[#CB5301]">
-											{__('Requires:', 'doublescale')} {requires}
-										</p>
-									)}
 									{mod.unavailableUntilPro && (
 										<p className="text-sm leading-4 text-muted-foreground">
 											{__(

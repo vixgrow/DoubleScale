@@ -4,7 +4,7 @@ Tags:  email marketing, sales pipeline, whatsapp crm, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1.0
 Requires PHP: 7.4
-Stable tag: 1.3.27
+Stable tag: 1.3.26
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,7 +276,8 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 
 == Changelog ==
 
-= 1.3.27 = 9 Sep 2026
+= 1.3.26 = 9 Sep 2026
+- Detect WPForms Lite (`wpforms-lite/wpforms.php`) on the Forms type picker, not only WPForms Pro
 - Sync missing table columns from the current CREATE definitions so upgrades do not depend on chained ALTER migrations
 - Include proposal terms, sections, signatures, and related sales columns on the base tables
 - Return a proper error when a proposal cannot be saved instead of a fatal

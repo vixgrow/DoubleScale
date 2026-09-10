@@ -20,6 +20,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { ListsIcon, TagsIcon } from '@doublescale/components';
+import { sortByName, sortNames } from '@doublescale/utils';
 
 type List = {
 	id: number;
@@ -130,12 +131,14 @@ const formatSelectedLabel = (
 		return '';
 	}
 
-	const names = selectedIds
-		.map((selectedId) => {
-			const found = items.find((item) => String(item.id) === selectedId);
-			return found?.name;
-		})
-		.filter(Boolean) as string[];
+	const names = sortNames(
+		selectedIds
+			.map((selectedId) => {
+				const found = items.find((item) => String(item.id) === selectedId);
+				return found?.name;
+			})
+			.filter(Boolean) as string[]
+	);
 
 	if (names.length === 0) {
 		return '';
@@ -189,14 +192,14 @@ export const ContactFilterSection = forwardRef<
 			})) as { data: List[]; total: number };
 
 			if (page === 1) {
-				setLists(response.data);
+				setLists(sortByName(response.data));
 			} else {
 				setLists((prev) => {
 					const existing = new Set(prev.map((item) => item.id));
 					const incoming = response.data.filter(
 						(item) => !existing.has(item.id)
 					);
-					return [...prev, ...incoming];
+					return sortByName([...prev, ...incoming]);
 				});
 			}
 
@@ -227,14 +230,14 @@ export const ContactFilterSection = forwardRef<
 			})) as { data: Tag[]; total: number };
 
 			if (page === 1) {
-				setTags(response.data);
+				setTags(sortByName(response.data));
 			} else {
 				setTags((prev) => {
 					const existing = new Set(prev.map((item) => item.id));
 					const incoming = response.data.filter(
 						(item) => !existing.has(item.id)
 					);
-					return [...prev, ...incoming];
+					return sortByName([...prev, ...incoming]);
 				});
 			}
 

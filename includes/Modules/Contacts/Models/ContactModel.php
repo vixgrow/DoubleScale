@@ -157,7 +157,8 @@ class ContactModel extends Model {
 	public function lists() {
 		return $this->belongsToMany( ListModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
 			->wherePivot( 'taxonomy_type', 'list' )
-			->withPivot( 'taxonomy_type', 'status' );
+			->withPivot( 'taxonomy_type', 'status' )
+			->orderBy( 'name', 'asc' );
 	}
 
 	/**
@@ -170,7 +171,8 @@ class ContactModel extends Model {
 	public function tags() {
 		return $this->belongsToMany( TagModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
 			->wherePivot( 'taxonomy_type', 'tag' )
-			->withPivot( 'taxonomy_type' );
+			->withPivot( 'taxonomy_type' )
+			->orderBy( 'name', 'asc' );
 	}
 
 	/**

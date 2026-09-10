@@ -36,6 +36,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
+use DoubleScale\Modules\Contacts\Services\ContactQueryBuilder;
 use DoubleScale\Modules\Contacts\Services\ContactUpdateNotifier;
 use DoubleScale\Modules\Contacts\Services\ContactMergeService;
 use DoubleScale\Modules\Contacts\Services\EmailAttachmentService;
@@ -2408,17 +2409,9 @@ class RestContactController extends RestController {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page           = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page               = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$keywords           = $request->get_param( 'keywords' ) ?? '';
-			$filters            = $this->normalize_contact_filters_param( $request->get_param( 'filters' ) );
-			$subscribed         = $request->get_param( 'subscribed' ) ?? false;
-			$campaign_type      = $request->get_param( 'campaign_type' ) ?? null;
-			$has_whatsapp_phone = $request->get_param( 'has_whatsapp_phone' ) ?? null;
-			$from               = $request->get_param( 'from' ) ?? null;
-			$to                 = $request->get_param( 'to' ) ?? null;
-			$query              = ContactModel::query();
-			$total_count        = $query->count();
+			$per_page    = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page        = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$total_count = ContactModel::query()->count();
 
 			// Start with base query and load relationships
 			// Load custom_fields when the CustomField model is available.
@@ -2426,89 +2419,10 @@ class RestContactController extends RestController {
 			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$relationships[] = 'custom_fields';
 			}
-			$contacts = $query->with( $relationships );
 
-			// Apply date range filters
-			if ( $from ) {
-				$contacts->where( 'created_at', '>=', $from );
-			}
-			if ( $to ) {
-				$contacts->where( 'created_at', '<=', $to );
-			}
-
-			// Apply filters FIRST to narrow down the results
-			if ( $filters ) {
-				$filters_process = new Contact_Filters_Process( $contacts, $filters );
-				$contacts        = $filters_process->filter();
-			}
-
-			// Apply subscription filter
-			if ( $subscribed ) {
-				$contacts = $contacts->where( 'email_status', 'subscribed' );
-			}
-
-			// Apply campaign type filter (email/phone availability + channel status)
-			if ( $campaign_type ) {
-				// Convert campaign_type to integer format for processing
-				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
-				if ( is_numeric( $campaign_type ) ) {
-					$campaign_type_int = (int) $campaign_type;
-				} else {
-					$campaign_type_int = CampaignChannel::to_integer( $campaign_type );
-				}
-
-				// Convert back to string for channel status field lookup
-				$campaign_type_string = CampaignChannel::to_string( $campaign_type_int );
-
-				if ( $campaign_type_string ) {
-					// Apply channel-specific status filter (e.g., sms_status = 'subscribed')
-					$channel_status_field = $campaign_type_string . '_status';
-					$contacts             = $contacts->where( $channel_status_field, 'subscribed' );
-
-					if ( class_exists( '\DoubleScale\Modules\Campaigns\Services\CampaignContactFilter' ) ) {
-						$campaign_contact_filter = \DoubleScale\Modules\Campaigns\Services\CampaignContactFilter::instance();
-						$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
-					}
-				}
-			}
-
-			// Apply WhatsApp phone filter
-			if ( ! is_null( $has_whatsapp_phone ) ) {
-				if ( $has_whatsapp_phone ) {
-					$contacts = $contacts->whereNotNull( 'whatsapp_phone' )
-						->where( 'whatsapp_phone', '!=', '' );
-				} else {
-					$contacts = $contacts->where(
-						function ( $query ) {
-							$query->whereNull( 'whatsapp_phone' )
-								->orWhere( 'whatsapp_phone', '=', '' );
-						}
-					);
-				}
-			}
-
-			// Apply keyword search AFTER filters (search within filtered results)
-			if ( '' !== $keywords ) {
-				$has_custom_fields = class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' );
-				$contacts          = $contacts->where(
-					function ( $query ) use ( $keywords, $has_custom_fields ) {
-						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
-							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
-							->orWhere( 'email', 'like', '%' . $keywords . '%' )
-							->orWhere( 'phone', 'like', '%' . $keywords . '%' )
-							->orWhere( 'whatsapp_phone', 'like', '%' . $keywords . '%' );
-
-						if ( $has_custom_fields ) {
-							$query->orWhereHas(
-								'custom_fields',
-								function ( $custom_field_query ) use ( $keywords ) {
-									$custom_field_query->where( 'value', 'like', '%' . $keywords . '%' );
-								}
-							);
-						}
-					}
-				);
-			}
+			// Shared with the filter-targeted bulk actions so "select all
+			// matching" mutates exactly the rows this list displays.
+			$contacts = ContactQueryBuilder::from_request( $request, array( 'with' => $relationships ) );
 
 			// Paginate and get results (pagination automatically handles total count)
 			// Note: paginate() returns total in the response, so filtered_total comes from pagination
@@ -4307,33 +4221,6 @@ class RestContactController extends RestController {
 	 * @return array|null
 	 */
 	private function normalize_contact_filters_param( $filters ) {
-		if ( null === $filters || false === $filters || '' === $filters ) {
-			return null;
-		}
-		if ( is_string( $filters ) ) {
-			$decoded = json_decode( $filters, true );
-			if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $decoded ) ) {
-				return null;
-			}
-			$filters = $decoded;
-		} elseif ( is_object( $filters ) ) {
-			$decoded = json_decode( wp_json_encode( $filters ), true );
-			if ( ! is_array( $decoded ) ) {
-				return null;
-			}
-			$filters = $decoded;
-		}
-		if ( ! is_array( $filters ) ) {
-			return null;
-		}
-		if ( empty( $filters ) ) {
-			return $filters;
-		}
-		return map_deep(
-			$filters,
-			static function ( $value ) {
-				return $value;
-			}
-		);
+		return ContactQueryBuilder::normalize_filters( $filters );
 	}
 }

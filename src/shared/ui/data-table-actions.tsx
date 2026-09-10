@@ -253,6 +253,10 @@ export function DataTableActions<TData>({
 						selectedLists={config.bulkActions.lists?.selected || []}
 						selectedTags={config.bulkActions.tags?.selected || []}
 						activeTab={activeTab}
+						effectiveCount={config.bulkActions.effectiveCount}
+						selectAllMatching={
+							config.bulkActions.selectAllMatching
+						}
 					/>
 				</div>
 			)}

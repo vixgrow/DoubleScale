@@ -42,6 +42,13 @@ interface BulkActionSelectProps {
 	selectedTags: string[];
 	activeTab?: string;
 	data: any[]; // <-- add data from context
+	/**
+	 * How many records the action will actually touch. Defaults to the number
+	 * of checked rows; a filter-wide selection reports the full matched total.
+	 */
+	effectiveCount?: number;
+	/** Selection spans every record matching the filter, not just this page. */
+	selectAllMatching?: boolean;
 }
 
 const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
@@ -54,8 +61,12 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 	selectedLists,
 	selectedTags,
 	activeTab,
+	effectiveCount,
+	selectAllMatching = false,
 }) => {
 	const { canDeleteContacts } = useCapabilities();
+	// Screens that never opt into filter-wide selection keep counting rows.
+	const targetCount = effectiveCount ?? selectedRowKeys.length;
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -137,17 +148,33 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 		setBulkAction('');
 	};
 
+	interface BulkActionOption {
+		value: string;
+		label: string;
+		icon?: React.ReactNode;
+		disabled?: boolean;
+		disabledReason?: string;
+	}
+
 	// Define bulk actions based on active tab
-	const getBulkActionsForTab = () => {
+	const getBulkActionsForTab = (): BulkActionOption[] => {
 		switch (activeTab) {
 			case 'all': // All Contacts tab
 				return [
+					// Deletion is irreversible and the confirmation dialog
+					// reports per-contact consequences that cannot be computed
+					// for an abstract filter, so it stays page-scoped.
 					...(canDeleteContacts()
 						? [
 								{
 									value: 'delete',
 									label: __('Delete', 'doublescale'),
 									icon: <DeleteIcon />,
+									disabled: selectAllMatching,
+									disabledReason: __(
+										'Delete only applies to contacts selected on this page.',
+										'doublescale'
+									),
 								},
 							]
 						: []),
@@ -230,7 +257,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				<Select
 					value={bulkAction}
 					onValueChange={handleAction}
-					disabled={selectedRowKeys.length === 0}
+					disabled={targetCount === 0}
 				>
 					<SelectTrigger
 						className="group h-10 w-full min-w-[180px] gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-white lg:min-w-0 lg:w-[8.75rem] lg:max-w-[8.75rem] lg:gap-1.5 lg:px-2 xl:min-w-[180px] xl:w-auto xl:max-w-none xl:gap-2.5 xl:px-3"
@@ -244,6 +271,12 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 							<SelectItem
 								key={action.value}
 								value={action.value}
+								disabled={action.disabled ?? false}
+								title={
+									action.disabled
+										? action.disabledReason
+										: undefined
+								}
 								className={
 									action.value === 'delete'
 										? 'text-destructive focus:text-destructive hover:text-destructive'
@@ -272,7 +305,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 					isOpen={isDeleteModalOpen}
 					onClose={handleDeleteModalClose}
 					onConfirm={handleDeleteConfirm}
-					selectedCount={selectedRowKeys.length}
+					selectedCount={targetCount}
 					activeTab={activeTab}
 				/>
 			)}
@@ -282,7 +315,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				isOpen={isListModalOpen}
 				onClose={handleListModalClose}
 				onSubmit={handleListModalSubmit}
-				selectedCount={selectedRowKeys.length}
+				selectedCount={targetCount}
 				mode={modalMode}
 				initialSelectedLists={[]}
 			/>
@@ -292,7 +325,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				isOpen={isTagModalOpen}
 				onClose={handleTagModalClose}
 				onSubmit={handleTagModalSubmit}
-				selectedCount={selectedRowKeys.length}
+				selectedCount={targetCount}
 				mode={modalMode}
 				initialSelectedTags={[]}
 			/>

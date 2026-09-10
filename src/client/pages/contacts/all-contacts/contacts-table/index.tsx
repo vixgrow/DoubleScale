@@ -20,6 +20,8 @@ import {
 	getSavedContactsColumnVisibility,
 	saveContactsColumnVisibility,
 } from '../contacts-column-visibility';
+import SelectAllBanner from '../select-all-banner';
+import { getEffectiveSelectionCount } from '../select-all-matching';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -32,6 +34,9 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		hasRecords,
 		selectedRowKeys,
 		setSelectedRowKeys,
+		selectAllMatching,
+		setSelectAllMatching,
+		clearSelection,
 		selectedLists,
 		setSelectedLists,
 		selectedTags,
@@ -120,6 +125,14 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			currentAction: bulkAction,
 			onActionChange: setBulkAction,
 			onExecuteAction: doBulkAction,
+			// In filter-wide mode the action reaches every match, not just the
+			// rows on screen — the modals must say so.
+			effectiveCount: getEffectiveSelectionCount({
+				selectAllMatching,
+				selectedRowKeys,
+				total: totalRecords,
+			}),
+			selectAllMatching,
 			lists: {
 				selected: selectedLists,
 				onSelectionChange: (lists: string[]) =>
@@ -170,6 +183,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			page,
 			selectedLists,
 			selectedRowKeys,
+			selectAllMatching,
+			totalRecords,
 			selectedTags,
 			setBulkAction,
 			setDateRange,
@@ -202,6 +217,13 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 				initialPageSize={perPage}
 				setPage={setPage}
 				loading={loading}
+			/>
+			<SelectAllBanner
+				pageCount={selectedRowKeys.length}
+				total={totalRecords}
+				selectAllMatching={selectAllMatching}
+				onSelectAll={() => setSelectAllMatching(true)}
+				onClear={clearSelection}
 			/>
 			<DataTablePagination table={serverSideTable} />
 		</>

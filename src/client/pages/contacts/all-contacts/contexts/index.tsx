@@ -73,10 +73,15 @@ export interface ContactsState {
 
 	// Selection state
 	selectedRowKeys: React.Key[];
+	// Selection spans every contact matching the current filter, not just the
+	// checked rows on this page.
+	selectAllMatching: boolean;
 	selectedLists: string[];
 	selectedTags: string[];
 	bulkAction: string;
 	isApplying: boolean;
+	// Progress of a running filter-wide bulk action, null when idle.
+	bulkProgress: { processed: number; total: number } | null;
 
 	// Modal state
 	createContactVisible: boolean;
@@ -108,6 +113,11 @@ export interface ContactsActions {
 
 	// Selection actions
 	setSelectedRowKeys: (keys: React.Key[]) => void;
+	setSelectAllMatching: (selectAll: boolean) => void;
+	clearSelection: () => void;
+	setBulkProgress: (
+		progress: { processed: number; total: number } | null
+	) => void;
 	setSelectedLists: (lists: string[]) => void;
 	setSelectedTags: (tags: string[]) => void;
 	setBulkAction: (action: string) => void;
@@ -150,10 +160,12 @@ function buildContactsInitialState(): ContactsState {
 		isFiltering: false,
 		dateRange: parseSavedDateRange(saved.date_range),
 		selectedRowKeys: [],
+		selectAllMatching: false,
 		selectedLists: [],
 		selectedTags: [],
 		bulkAction: '',
 		isApplying: false,
+		bulkProgress: null,
 		createContactVisible: false,
 		importModalVisible: false,
 		exportModalVisible: false,
@@ -161,6 +173,15 @@ function buildContactsInitialState(): ContactsState {
 		notice: null,
 	};
 }
+
+/**
+ * State reset applied whenever the result set changes underneath a selection.
+ */
+const clearedSelection = {
+	selectedRowKeys: [] as React.Key[],
+	selectAllMatching: false,
+	bulkProgress: null,
+};
 
 const ContactsContext = createContext<
 	(ContactsState & ContactsActions) | undefined
@@ -202,22 +223,36 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		setLoading: (loading) => updateState({ loading }),
 		setData: (data) => updateState({ data }),
 		setTotal: (total) => updateState({ total }),
-		setPage: (page) => updateState({ page }),
+		// Checked rows belong to the page they were checked on, so paging away
+		// drops them. Filter-wide selection is the exception: spanning pages is
+		// the entire point, so it survives.
+		setPage: (page) => updateState({ page, selectedRowKeys: [] }),
 		// Re-sorting reorders the whole result set server-side, so the current
 		// page number no longer points at the same rows.
 		setSort: (sort) => updateState({ sort, page: 1 }),
 		setPerPage: (perPage) => updateState({ perPage }),
 		// Changing a filter narrows the result set, so the current page number no
 		// longer refers to the same rows — go back to the first page.
-		setKeywords: (keywords) => updateState({ keywords, page: 1 }),
+		//
+		// It also invalidates the selection: "all 5,243 matching" was a promise
+		// about the *previous* filter, and silently carrying it over would let a
+		// bulk action hit a set the user never saw. Clearing is the safe default.
+		setKeywords: (keywords) =>
+			updateState({ keywords, page: 1, ...clearedSelection }),
 		setTotalRecords: (totalRecords) => updateState({ totalRecords }),
 		setHasRecords: (hasRecords) => updateState({ hasRecords }),
 		setShowFilters: (showFilters) => updateState({ showFilters }),
-		setFilters: (filters) => updateState({ filters, page: 1 }),
+		setFilters: (filters) =>
+			updateState({ filters, page: 1, ...clearedSelection }),
 		setIsFiltering: (isFiltering) => updateState({ isFiltering }),
-		setDateRange: (dateRange) => updateState({ dateRange, page: 1 }),
+		setDateRange: (dateRange) =>
+			updateState({ dateRange, page: 1, ...clearedSelection }),
 		setSelectedRowKeys: (selectedRowKeys) =>
 			updateState({ selectedRowKeys }),
+		setSelectAllMatching: (selectAllMatching) =>
+			updateState({ selectAllMatching }),
+		clearSelection: () => updateState({ ...clearedSelection }),
+		setBulkProgress: (bulkProgress) => updateState({ bulkProgress }),
 		setSelectedLists: (selectedLists) => updateState({ selectedLists }),
 		setSelectedTags: (selectedTags) => updateState({ selectedTags }),
 		setBulkAction: (bulkAction) => updateState({ bulkAction }),

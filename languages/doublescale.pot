@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the DoubleScale plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: DoubleScale 1.3.27\n"
+"Project-Id-Version: DoubleScale 1.3.28\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/doublescale/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -291,6 +291,11 @@ msgstr ""
 
 msgid "%s clicked a link in a WhatsApp message"
 msgstr ""
+
+msgid "%s contact on this page is selected."
+msgid_plural "All %s contacts on this page are selected."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%s created this deal"
 msgstr ""
@@ -1529,6 +1534,11 @@ msgstr ""
 
 msgid "All"
 msgstr ""
+
+msgid "All %s contact matching this filter is selected."
+msgid_plural "All %s contacts matching this filter are selected."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "All Accounts"
 msgstr ""
@@ -5688,6 +5698,9 @@ msgstr ""
 msgid "Cursor"
 msgstr ""
 
+msgid "Cursor: process contacts with an ID greater than this."
+msgstr ""
+
 msgid "custom"
 msgstr ""
 
@@ -6237,6 +6250,9 @@ msgstr ""
 msgid "Delete note"
 msgstr ""
 
+msgid "Delete only applies to contacts selected on this page."
+msgstr ""
+
 msgid "Delete Payment"
 msgstr ""
 
@@ -6316,6 +6332,9 @@ msgid "Delete tickets"
 msgstr ""
 
 msgid "Deleting..."
+msgstr ""
+
+msgid "Deleting contacts requires selecting them explicitly; a filter target is not supported."
 msgstr ""
 
 msgid "Deleting…"
@@ -12197,6 +12216,9 @@ msgstr ""
 msgid "Match each form question to a contact field. Add extra rows below for more attributes."
 msgstr ""
 
+msgid "Matched total carried across batches for progress reporting."
+msgstr ""
+
 msgid "Matches"
 msgstr ""
 
@@ -13298,6 +13320,9 @@ msgstr ""
 msgid "No lists found"
 msgstr ""
 
+msgid "No lists were provided."
+msgstr ""
+
 msgid "No lists yet"
 msgstr ""
 
@@ -13539,6 +13564,9 @@ msgid "No tags excluded"
 msgstr ""
 
 msgid "No tags found"
+msgstr ""
+
+msgid "No tags were provided."
 msgstr ""
 
 msgid "No tags yet"
@@ -14280,6 +14308,9 @@ msgid "Optional channel to filter results (e.g., sms, whatsapp). If not provided
 msgstr ""
 
 msgid "Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers."
+msgstr ""
+
+msgid "Optional filter target applying the action to every matching contact."
 msgstr ""
 
 msgid "Optional live builder JSON. When present, the test is rendered from this instead of the last saved template."
@@ -15722,6 +15753,9 @@ msgstr ""
 msgid "Provide either a contact id or an email address."
 msgstr ""
 
+msgid "Provide either contact IDs or a filter target, not both."
+msgstr ""
+
 msgid "Provide exactly one of: %s. Combining them is refused so a filter cannot silently widen a row list."
 msgstr ""
 
@@ -17144,6 +17178,11 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
+msgid "Select all %s contact matching this filter"
+msgid_plural "Select all %s contacts matching this filter"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Select all on this page"
 msgstr ""
 
@@ -17331,6 +17370,9 @@ msgid "Select Image"
 msgstr ""
 
 msgid "Selecting..."
+msgstr ""
+
+msgid "Selecting every contact requires an explicit confirmation when no filter is applied."
 msgstr ""
 
 msgid "Selecting this template will permanently replace your current design."

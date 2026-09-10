@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContactContext } from '../../state/context';
 import type { List, Tag } from '@doublescale/client';
+import { sortByName } from '@doublescale/utils';
 
 const ListsTagsCards: React.FC = () => {
 	const { contact, updateContact } = useContactContext();
@@ -35,6 +36,9 @@ const ListsTagsCards: React.FC = () => {
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 	const [isListsCollapsed, setIsListsCollapsed] = useState(false);
 	const [isTagsCollapsed, setIsTagsCollapsed] = useState(false);
+
+	const lists = sortByName(contact?.lists);
+	const tags = sortByName(contact?.tags);
 
 	const deleteList = async (listId: number) => {
 		if (!contact) {
@@ -93,9 +97,11 @@ const ListsTagsCards: React.FC = () => {
 			const newLists = response.data;
 
 			// Merge with existing lists and remove duplicates
-			const allLists = [...contact.lists, ...newLists].filter(
-				(list, index, self) =>
-					index === self.findIndex((t) => t.id === list.id)
+			const allLists = sortByName(
+				[...contact.lists, ...newLists].filter(
+					(list, index, self) =>
+						index === self.findIndex((t) => t.id === list.id)
+				)
 			);
 
 			// Update the contact - the updateContact function will handle the API call and parent refresh
@@ -128,9 +134,11 @@ const ListsTagsCards: React.FC = () => {
 			const newTags = response.data;
 
 			// Merge with existing tags and remove duplicates
-			const allTags = [...contact.tags, ...newTags].filter(
-				(tag, index, self) =>
-					index === self.findIndex((t) => t.id === tag.id)
+			const allTags = sortByName(
+				[...contact.tags, ...newTags].filter(
+					(tag, index, self) =>
+						index === self.findIndex((t) => t.id === tag.id)
+				)
 			);
 
 			// Update the contact - the updateContact function will handle the API call and parent refresh
@@ -180,8 +188,8 @@ const ListsTagsCards: React.FC = () => {
 						<div className="px-0 pb-3 pt-1">
 							{isAddingLists || deletingListId !== null ? (
 								<div className="flex flex-wrap gap-1.5 items-center">
-									{contact?.lists && contact.lists.length > 0 ? (
-										contact.lists.map((list) => (
+									{lists.length > 0 ? (
+										lists.map((list) => (
 											<Skeleton
 												key={list.id}
 												className="h-6 w-20 rounded-md"
@@ -193,8 +201,8 @@ const ListsTagsCards: React.FC = () => {
 								</div>
 							) : (
 								<div className="flex flex-wrap gap-1.5 items-center">
-									{contact?.lists && contact.lists.length > 0 ? (
-										contact.lists.map((list) => (
+									{lists.length > 0 ? (
+										lists.map((list) => (
 											<Badge
 												key={list.id}
 												variant="outline"
@@ -267,8 +275,8 @@ const ListsTagsCards: React.FC = () => {
 						<div className="px-0 pb-3 pt-1">
 							{isAddingTags || deletingTagId !== null ? (
 								<div className="flex flex-wrap gap-1.5 items-center">
-									{contact?.tags && contact.tags.length > 0 ? (
-										contact.tags.map((tag) => (
+									{tags.length > 0 ? (
+										tags.map((tag) => (
 											<Skeleton
 												key={tag.id}
 												className="h-6 w-20 rounded-md"
@@ -280,8 +288,8 @@ const ListsTagsCards: React.FC = () => {
 								</div>
 							) : (
 								<div className="flex flex-wrap gap-1.5 items-center">
-									{contact?.tags && contact.tags.length > 0 ? (
-										contact.tags.map((tag) => (
+									{tags.length > 0 ? (
+										tags.map((tag) => (
 											<Badge
 												key={tag.id}
 												variant="outline"

@@ -20,6 +20,17 @@ import {
 	type ContactIdentifierField,
 } from '@doublescale/shared/utils/contact-identifier-errors';
 import { useContactsContext } from './contexts';
+import { buildBulkTarget } from './select-all-matching';
+
+/** One round of a resumable membership bulk action. */
+interface BulkActionResponse {
+	status: 'in_progress' | 'completed';
+	total: number;
+	processed: number;
+	updated: number;
+	skipped: number;
+	next_after_id: number | null;
+}
 
 interface ContactPayload {
 	email?: string;
@@ -48,6 +59,9 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		filters,
 		dateRange,
 		selectedRowKeys,
+		selectAllMatching,
+		clearSelection,
+		setBulkProgress,
 		keywords,
 		sort,
 		setTotalRecords,
@@ -222,37 +236,94 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		}
 	};
 
+	/**
+	 * Run a membership bulk action to completion.
+	 *
+	 * A filter-wide selection is processed server-side one batch per request,
+	 * so keep re-posting with the cursor we get back until it reports done.
+	 * The explicit-ids path finishes in a single round.
+	 */
+	const runMembershipBulk = async (
+		path: string,
+		termsKey: 'tag_ids' | 'list_ids',
+		termIds: number[],
+		successMessage: string
+	) => {
+		const target = buildBulkTarget({
+			selectAllMatching,
+			selectedRowKeys,
+			filters,
+			keywords,
+			dateRange: {
+				from: formatDateForAPI(dateRange.from),
+				to: formatDateForAPI(dateRange.to),
+			},
+		});
+
+		setIsApplying(true);
+
+		let afterId = 0;
+		let total = 0;
+		let updated = 0;
+		let skipped = 0;
+
+		try {
+			// Bounded so a backend that never reports completion cannot spin
+			// the browser forever.
+			for (let round = 0; round < 10000; round++) {
+				const response = (await apiFetch({
+					path,
+					method: 'POST',
+					data: {
+						[termsKey]: termIds,
+						...(target.mode === 'ids' ? { ids: target.ids } : {}),
+						...(target.mode === 'filter' ? { target } : {}),
+						after_id: afterId,
+						total,
+					},
+				})) as BulkActionResponse;
+
+				total = response.total ?? 0;
+				updated += response.updated ?? 0;
+				skipped += response.skipped ?? 0;
+
+				if (response.status !== 'in_progress') {
+					break;
+				}
+
+				afterId = response.next_after_id ?? 0;
+				setBulkProgress({
+					processed: Math.min(updated + skipped, total),
+					total,
+				});
+			}
+
+			clearSelection();
+			setBulkAction('');
+			showNotice('success', successMessage);
+			fetchContacts();
+		} catch (error: any) {
+			showNotice('error', error.message);
+		} finally {
+			setBulkProgress(null);
+			setIsApplying(false);
+		}
+	};
+
 	const addToListWithData = async (lists: string[]) => {
 		if (lists.length === 0) {
 			showNotice('error', __('Please select a list', 'doublescale'));
 			return;
 		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/doublescale/v1/contacts/add-to-list',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					list_ids: lists.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			showNotice(
-				'success',
-				__(
-					'Contacts were successfully added to list  — check it out!',
-					'doublescale'
-				)
-			);
-			fetchContacts();
-		} catch (error: any) {
-			showNotice('error', error.message);
-		} finally {
-			setIsApplying(false);
-		}
+		await runMembershipBulk(
+			'/doublescale/v1/contacts/add-to-list',
+			'list_ids',
+			lists.map(Number),
+			__(
+				'Contacts were successfully added to list  — check it out!',
+				'doublescale'
+			)
+		);
 	};
 
 	const removeFromListWithData = async (lists: string[]) => {
@@ -260,29 +331,12 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			showNotice('error', __('Please select a list', 'doublescale'));
 			return;
 		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/doublescale/v1/contacts/remove-from-list',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					list_ids: lists.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			showNotice(
-				'success',
-				__('Contacts removed from list successfully', 'doublescale')
-			);
-			fetchContacts();
-		} catch (error: any) {
-			showNotice('error', error.message);
-		} finally {
-			setIsApplying(false);
-		}
+		await runMembershipBulk(
+			'/doublescale/v1/contacts/remove-from-list',
+			'list_ids',
+			lists.map(Number),
+			__('Contacts removed from list successfully', 'doublescale')
+		);
 	};
 
 	const addTagWithData = async (tags: string[]) => {
@@ -290,26 +344,12 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			showNotice('error', __('Please select a tag', 'doublescale'));
 			return;
 		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/doublescale/v1/contacts/add-tag',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					tag_ids: tags.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			showNotice('success', __('Tags added successfully', 'doublescale'));
-			fetchContacts();
-		} catch (error: any) {
-			showNotice('error', error.message);
-		} finally {
-			setIsApplying(false);
-		}
+		await runMembershipBulk(
+			'/doublescale/v1/contacts/add-tag',
+			'tag_ids',
+			tags.map(Number),
+			__('Tags added successfully', 'doublescale')
+		);
 	};
 
 	const removeTagWithData = async (tags: string[]) => {
@@ -317,26 +357,12 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			showNotice('error', __('Please select a tag', 'doublescale'));
 			return;
 		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/doublescale/v1/contacts/remove-tag',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					tag_ids: tags.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			showNotice('success', __('Tags removed successfully', 'doublescale'));
-			fetchContacts();
-		} catch (error: any) {
-			showNotice('error', error.message);
-		} finally {
-			setIsApplying(false);
-		}
+		await runMembershipBulk(
+			'/doublescale/v1/contacts/remove-tag',
+			'tag_ids',
+			tags.map(Number),
+			__('Tags removed successfully', 'doublescale')
+		);
 	};
 
 	const doBulkAction = async (action: string, data?: any) => {

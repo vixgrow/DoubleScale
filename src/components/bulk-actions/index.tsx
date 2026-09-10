@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { useState } from 'react';
-import { uniq, flatten } from 'lodash';
 import { Download } from 'lucide-react';
 /**
  * internal dependencies
@@ -55,7 +54,6 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 	selectedLists,
 	selectedTags,
 	activeTab,
-	data, // <-- add data from context
 }) => {
 	const { canDeleteContacts } = useCapabilities();
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -226,32 +224,6 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 	const availableActions = getBulkActionsForTab();
 
-	// Compute all unique list IDs assigned to selected contacts
-	const assignedListIds = uniq(
-		flatten(
-			data
-				.filter((contact) =>
-					selectedRowKeys.includes(contact.id.toString())
-				)
-				.map((contact) =>
-					contact.lists ? contact.lists.map((l) => l.id) : []
-				)
-		)
-	);
-
-	// Compute all unique tag IDs assigned to selected contacts
-	const assignedTagIds = uniq(
-		flatten(
-			data
-				.filter((contact) =>
-					selectedRowKeys.includes(contact.id.toString())
-				)
-				.map((contact) =>
-					contact.tags ? contact.tags.map((t) => t.id) : []
-				)
-		)
-	);
-
 	return (
 		<>
 			<div className="flex flex-wrap gap-4 lg:gap-2">
@@ -312,9 +284,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				onSubmit={handleListModalSubmit}
 				selectedCount={selectedRowKeys.length}
 				mode={modalMode}
-				initialSelectedLists={
-					modalMode === 'add' ? assignedListIds : []
-				}
+				initialSelectedLists={[]}
 			/>
 
 			{/* Unified Tags Modal for both Add and Remove operations */}
@@ -324,7 +294,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				onSubmit={handleTagModalSubmit}
 				selectedCount={selectedRowKeys.length}
 				mode={modalMode}
-				initialSelectedTags={modalMode === 'add' ? assignedTagIds : []}
+				initialSelectedTags={[]}
 			/>
 		</>
 	);

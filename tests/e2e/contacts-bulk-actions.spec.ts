@@ -8,9 +8,15 @@ type CreatedContact = {
 	first_name?: string;
 	last_name?: string;
 	tags?: Array<{ id: number; name: string }>;
+	lists?: Array<{ id: number; name: string }>;
 };
 
 type CreatedTag = {
+	id: number;
+	name: string;
+};
+
+type CreatedList = {
 	id: number;
 	name: string;
 };
@@ -114,6 +120,38 @@ async function pickTagInModal(adminPage: Page, tagName: string): Promise<void> {
 		.filter({ hasText: tagName });
 	await expect(option.first()).toBeVisible({ timeout: 15_000 });
 	await option.first().click();
+}
+
+async function openAddToListModal(adminPage: Page): Promise<void> {
+	const trigger = bulkTrigger(adminPage);
+	await expect(trigger).toBeEnabled({ timeout: 10_000 });
+	await trigger.click();
+	await adminPage.getByRole('option', { name: /^Add to List$/i }).click();
+	await expect(
+		adminPage.getByText(/Add basic information below to add new List/i)
+	).toBeVisible({ timeout: 10_000 });
+}
+
+async function pickListInModal(adminPage: Page, listName: string): Promise<void> {
+	const dialog = adminPage.getByRole('dialog').filter({
+		hasText: /Add basic information below to add new List/i,
+	});
+	const select = dialog.locator('.react-select-container').first();
+	await expect(select).toBeVisible();
+	await select.click();
+	const input = dialog.locator('input').first();
+	await input.fill(listName);
+	const option = adminPage
+		.locator('.react-select__option')
+		.filter({ hasText: listName });
+	await expect(option.first()).toBeVisible({ timeout: 15_000 });
+	await option.first().click();
+}
+
+async function selectBothContactRows(adminPage: Page): Promise<void> {
+	const table = adminPage.getByRole('table');
+	await expect(table.locator('tbody tr')).toHaveCount(2, { timeout: 20_000 });
+	await table.getByRole('checkbox', { name: /Select all/i }).click();
 }
 
 test.describe('Contacts Bulk Actions and Advanced Filters', () => {
@@ -312,6 +350,206 @@ test.describe('Contacts Bulk Actions and Advanced Filters', () => {
 		expect(names).toContain(keptName);
 		expect(names).toContain(addedName);
 		expect(extra.id).toBeGreaterThan(0);
+	});
+
+	test('Add Tag does not pre-select or cross-apply existing tags', async ({
+		adminPage,
+	}) => {
+		test.setTimeout(90_000);
+
+		await gotoContacts(adminPage);
+
+		const stamp = Date.now();
+		const lastName = `E2ECrossTag${stamp}`;
+		const tagAName = `E2E TagA ${stamp}`;
+		const tagBName = `E2E TagB ${stamp}`;
+		const tagCName = `E2E TagC ${stamp}`;
+		const emailA = `e2e-cross-a-${stamp}@example.test`;
+		const emailB = `e2e-cross-b-${stamp}@example.test`;
+
+		const tagA = await restJson<CreatedTag>(adminPage, 'doublescale/v1/tags', {
+			method: 'POST',
+			body: { name: tagAName },
+		});
+		const tagB = await restJson<CreatedTag>(adminPage, 'doublescale/v1/tags', {
+			method: 'POST',
+			body: { name: tagBName },
+		});
+		const tagC = await restJson<CreatedTag>(adminPage, 'doublescale/v1/tags', {
+			method: 'POST',
+			body: { name: tagCName },
+		});
+
+		const contactA = await restJson<CreatedContact>(
+			adminPage,
+			'doublescale/v1/contacts',
+			{
+				method: 'POST',
+				body: {
+					first_name: 'CrossA',
+					last_name: lastName,
+					email: emailA,
+				},
+			}
+		);
+		const contactB = await restJson<CreatedContact>(
+			adminPage,
+			'doublescale/v1/contacts',
+			{
+				method: 'POST',
+				body: {
+					first_name: 'CrossB',
+					last_name: lastName,
+					email: emailB,
+				},
+			}
+		);
+		await restJson(adminPage, 'doublescale/v1/contacts/add-tag', {
+			method: 'POST',
+			body: { ids: [contactA.id], tag_ids: [tagA.id] },
+		});
+		await restJson(adminPage, 'doublescale/v1/contacts/add-tag', {
+			method: 'POST',
+			body: { ids: [contactB.id], tag_ids: [tagB.id] },
+		});
+
+		await searchContacts(adminPage, lastName);
+		await selectBothContactRows(adminPage);
+		await openAddTagModal(adminPage);
+
+		const dialog = adminPage.getByRole('dialog').filter({
+			hasText: 'Select tags to add to contacts',
+		});
+		await expect(dialog.getByText(tagAName, { exact: true })).toHaveCount(0);
+		await expect(dialog.getByText(tagBName, { exact: true })).toHaveCount(0);
+		const addButton = adminPage.getByRole('button', { name: /^Add Tags$/i });
+		await expect(addButton).toBeDisabled();
+
+		await pickTagInModal(adminPage, tagCName);
+		await expect(addButton).toBeEnabled();
+		await addButton.click();
+
+		await expect(
+			adminPage.getByText(/Tags added successfully/i)
+		).toBeVisible({ timeout: 20_000 });
+
+		const updatedA = await restJson<CreatedContact>(
+			adminPage,
+			`doublescale/v1/contacts/${contactA.id}`
+		);
+		const updatedB = await restJson<CreatedContact>(
+			adminPage,
+			`doublescale/v1/contacts/${contactB.id}`
+		);
+		const namesA = (updatedA.tags ?? []).map((t) => t.name);
+		const namesB = (updatedB.tags ?? []).map((t) => t.name);
+		expect(namesA).toContain(tagAName);
+		expect(namesA).toContain(tagCName);
+		expect(namesA).not.toContain(tagBName);
+		expect(namesB).toContain(tagBName);
+		expect(namesB).toContain(tagCName);
+		expect(namesB).not.toContain(tagAName);
+		expect(tagC.id).toBeGreaterThan(0);
+	});
+
+	test('Add to List does not pre-select or cross-apply existing lists', async ({
+		adminPage,
+	}) => {
+		test.setTimeout(90_000);
+
+		await gotoContacts(adminPage);
+
+		const stamp = Date.now();
+		const lastName = `E2ECrossList${stamp}`;
+		const listAName = `E2E ListA ${stamp}`;
+		const listBName = `E2E ListB ${stamp}`;
+		const listCName = `E2E ListC ${stamp}`;
+		const emailA = `e2e-list-a-${stamp}@example.test`;
+		const emailB = `e2e-list-b-${stamp}@example.test`;
+
+		const listA = await restJson<CreatedList>(adminPage, 'doublescale/v1/lists', {
+			method: 'POST',
+			body: { name: listAName },
+		});
+		const listB = await restJson<CreatedList>(adminPage, 'doublescale/v1/lists', {
+			method: 'POST',
+			body: { name: listBName },
+		});
+		const listC = await restJson<CreatedList>(adminPage, 'doublescale/v1/lists', {
+			method: 'POST',
+			body: { name: listCName },
+		});
+
+		const contactA = await restJson<CreatedContact>(
+			adminPage,
+			'doublescale/v1/contacts',
+			{
+				method: 'POST',
+				body: {
+					first_name: 'ListA',
+					last_name: lastName,
+					email: emailA,
+				},
+			}
+		);
+		const contactB = await restJson<CreatedContact>(
+			adminPage,
+			'doublescale/v1/contacts',
+			{
+				method: 'POST',
+				body: {
+					first_name: 'ListB',
+					last_name: lastName,
+					email: emailB,
+				},
+			}
+		);
+		await restJson(adminPage, 'doublescale/v1/contacts/add-to-list', {
+			method: 'POST',
+			body: { ids: [contactA.id], list_ids: [listA.id] },
+		});
+		await restJson(adminPage, 'doublescale/v1/contacts/add-to-list', {
+			method: 'POST',
+			body: { ids: [contactB.id], list_ids: [listB.id] },
+		});
+
+		await searchContacts(adminPage, lastName);
+		await selectBothContactRows(adminPage);
+		await openAddToListModal(adminPage);
+
+		const dialog = adminPage.getByRole('dialog').filter({
+			hasText: /Add basic information below to add new List/i,
+		});
+		await expect(dialog.getByText(listAName, { exact: true })).toHaveCount(0);
+		await expect(dialog.getByText(listBName, { exact: true })).toHaveCount(0);
+		const addButton = adminPage.getByRole('button', { name: /^Add to Lists$/i });
+		await expect(addButton).toBeDisabled();
+
+		await pickListInModal(adminPage, listCName);
+		await expect(addButton).toBeEnabled();
+		await addButton.click();
+
+		await expect(
+			adminPage.getByText(/successfully added to list/i)
+		).toBeVisible({ timeout: 20_000 });
+
+		const updatedA = await restJson<CreatedContact>(
+			adminPage,
+			`doublescale/v1/contacts/${contactA.id}`
+		);
+		const updatedB = await restJson<CreatedContact>(
+			adminPage,
+			`doublescale/v1/contacts/${contactB.id}`
+		);
+		const namesA = (updatedA.lists ?? []).map((l) => l.name);
+		const namesB = (updatedB.lists ?? []).map((l) => l.name);
+		expect(namesA).toContain(listAName);
+		expect(namesA).toContain(listCName);
+		expect(namesA).not.toContain(listBName);
+		expect(namesB).toContain(listBName);
+		expect(namesB).toContain(listCName);
+		expect(namesB).not.toContain(listAName);
+		expect(listC.id).toBeGreaterThan(0);
 	});
 
 	test('Advanced Filters opens the rules dialog (Pro) or stays gated (Free)', async ({

@@ -148,7 +148,7 @@ function buildContactsInitialState(): ContactsState {
 		total: 0,
 		// A deep link (list_id / tag_id) applies its own filters, so the saved
 		// page belongs to a different result set — start at the top instead.
-		page: deepLinkFilters ? 1 : saved.page ?? 1,
+		page: deepLinkFilters ? 1 : (saved.page ?? 1),
 		sort: parseSavedSort(saved.sort, CONTACT_SORTABLE_COLUMNS),
 		perPage: saved.per_page ?? 10,
 		keywords: saved.keyword ?? '',
@@ -190,7 +190,9 @@ const ContactsContext = createContext<
 export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
-	const [state, setState] = useState<ContactsState>(buildContactsInitialState);
+	const [state, setState] = useState<ContactsState>(
+		buildContactsInitialState
+	);
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -206,8 +208,7 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		}
 		setState((prev) => {
 			if (
-				JSON.stringify(prev.filters) ===
-				JSON.stringify(deepLinkFilters)
+				JSON.stringify(prev.filters) === JSON.stringify(deepLinkFilters)
 			) {
 				return prev;
 			}

@@ -254,9 +254,7 @@ export function DataTableActions<TData>({
 						selectedTags={config.bulkActions.tags?.selected || []}
 						activeTab={activeTab}
 						effectiveCount={config.bulkActions.effectiveCount}
-						selectAllMatching={
-							config.bulkActions.selectAllMatching
-						}
+						selectAllMatching={config.bulkActions.selectAllMatching}
 					/>
 				</div>
 			)}
@@ -463,8 +461,9 @@ export function DataTableActions<TData>({
 											<Checkbox
 												id={`col-${column.id}`}
 												checked={
-													columnVisibility[column.id] ??
-													column.getIsVisible()
+													columnVisibility[
+														column.id
+													] ?? column.getIsVisible()
 												}
 												onCheckedChange={(value) =>
 													handleColumnToggle(

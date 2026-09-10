@@ -22,19 +22,19 @@ interface SelectAllBannerProps {
  * Without this the only way to act on thousands of contacts is to walk the
  * pagination one page at a time.
  */
-const SelectAllBanner: React.FC< SelectAllBannerProps > = ( {
+const SelectAllBanner: React.FC<SelectAllBannerProps> = ({
 	pageCount,
 	total,
 	selectAllMatching,
 	onSelectAll,
 	onClear,
-} ) => {
-	if ( pageCount === 0 && ! selectAllMatching ) {
+}) => {
+	if (pageCount === 0 && !selectAllMatching) {
 		return null;
 	}
 
 	// Nothing to widen to when the page already shows every match.
-	const canSelectAll = ! selectAllMatching && total > pageCount;
+	const canSelectAll = !selectAllMatching && total > pageCount;
 
 	return (
 		<div
@@ -42,7 +42,7 @@ const SelectAllBanner: React.FC< SelectAllBannerProps > = ( {
 			data-testid="contacts-select-all-banner"
 		>
 			<span className="text-foreground">
-				{ selectAllMatching
+				{selectAllMatching
 					? sprintf(
 							/* translators: %s: number of contacts matching the current filter. */
 							_n(
@@ -62,16 +62,16 @@ const SelectAllBanner: React.FC< SelectAllBannerProps > = ( {
 								'doublescale'
 							),
 							pageCount.toLocaleString()
-						) }
+						)}
 			</span>
 
-			{ canSelectAll && (
+			{canSelectAll && (
 				<button
 					type="button"
-					onClick={ onSelectAll }
+					onClick={onSelectAll}
 					className="font-medium text-brandPrimary underline underline-offset-2 hover:opacity-80"
 				>
-					{ sprintf(
+					{sprintf(
 						/* translators: %s: total number of contacts matching the current filter. */
 						_n(
 							'Select all %s contact matching this filter',
@@ -80,16 +80,16 @@ const SelectAllBanner: React.FC< SelectAllBannerProps > = ( {
 							'doublescale'
 						),
 						total.toLocaleString()
-					) }
+					)}
 				</button>
-			) }
+			)}
 
 			<button
 				type="button"
-				onClick={ onClear }
+				onClick={onClear}
 				className="font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
 			>
-				{ __( 'Clear selection', 'doublescale' ) }
+				{__('Clear selection', 'doublescale')}
 			</button>
 		</div>
 	);

@@ -217,7 +217,10 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				];
 			case 'custom-fields': // Custom Fields tab
 				return [
-					{ value: 'delete', label: __('Delete Fields', 'doublescale') },
+					{
+						value: 'delete',
+						label: __('Delete Fields', 'doublescale'),
+					},
 				];
 			case 'automations':
 				return [
@@ -259,9 +262,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 					onValueChange={handleAction}
 					disabled={targetCount === 0}
 				>
-					<SelectTrigger
-						className="group h-10 w-full min-w-[180px] gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-white lg:min-w-0 lg:w-[8.75rem] lg:max-w-[8.75rem] lg:gap-1.5 lg:px-2 xl:min-w-[180px] xl:w-auto xl:max-w-none xl:gap-2.5 xl:px-3"
-					>
+					<SelectTrigger className="group h-10 w-full min-w-[180px] gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-white lg:min-w-0 lg:w-[8.75rem] lg:max-w-[8.75rem] lg:gap-1.5 lg:px-2 xl:min-w-[180px] xl:w-auto xl:max-w-none xl:gap-2.5 xl:px-3">
 						<SelectValue
 							placeholder={__('Bulk Actions', 'doublescale')}
 						/>

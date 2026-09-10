@@ -41,16 +41,16 @@ interface BulkTargetInput {
  * In filter-wide mode that is the matched total the list endpoint reported,
  * not the handful of rows rendered on screen.
  */
-export function getEffectiveSelectionCount( {
+export function getEffectiveSelectionCount({
 	selectAllMatching,
 	selectedRowKeys,
 	total,
-}: SelectionCountInput ): number {
-	if ( ! selectAllMatching ) {
+}: SelectionCountInput): number {
+	if (!selectAllMatching) {
 		return selectedRowKeys.length;
 	}
 
-	return Number.isFinite( total ) ? total : 0;
+	return Number.isFinite(total) ? total : 0;
 }
 
 /**
@@ -59,47 +59,47 @@ export function getEffectiveSelectionCount( {
  * The backend refuses a request carrying both an id list and a filter, so the
  * two modes are kept strictly exclusive here.
  */
-export function buildBulkTarget( {
+export function buildBulkTarget({
 	selectAllMatching,
 	selectedRowKeys,
 	filters,
 	keywords,
 	dateRange,
-}: BulkTargetInput ): BulkTarget {
-	if ( ! selectAllMatching ) {
+}: BulkTargetInput): BulkTarget {
+	if (!selectAllMatching) {
 		return {
 			mode: 'ids',
-			ids: selectedRowKeys.map( ( key ) =>
-				Number( key as string | number | bigint )
+			ids: selectedRowKeys.map((key) =>
+				Number(key as string | number | bigint)
 			),
 			confirm_all: false,
 		};
 	}
 
-	const trimmedKeywords = ( keywords ?? '' ).trim();
-	const filterList = Array.isArray( filters ) ? ( filters as unknown[] ) : [];
+	const trimmedKeywords = (keywords ?? '').trim();
+	const filterList = Array.isArray(filters) ? (filters as unknown[]) : [];
 	const hasFilters = filterList.length > 0;
-	const hasDateRange = Boolean( dateRange?.from || dateRange?.to );
+	const hasDateRange = Boolean(dateRange?.from || dateRange?.to);
 
 	// Nothing narrows the set, so this addresses every contact in the
 	// database. The backend rejects that unless we say we meant it.
-	const confirmAll = ! hasFilters && ! hasDateRange && trimmedKeywords === '';
+	const confirmAll = !hasFilters && !hasDateRange && trimmedKeywords === '';
 
 	const target: BulkTarget = {
 		mode: 'filter',
 		confirm_all: confirmAll,
 	};
 
-	if ( hasFilters ) {
+	if (hasFilters) {
 		target.filters = filterList;
 	}
-	if ( trimmedKeywords !== '' ) {
+	if (trimmedKeywords !== '') {
 		target.keywords = keywords;
 	}
-	if ( dateRange?.from ) {
+	if (dateRange?.from) {
 		target.from = dateRange.from;
 	}
-	if ( dateRange?.to ) {
+	if (dateRange?.to) {
 		target.to = dateRange.to;
 	}
 

@@ -406,7 +406,10 @@ export const useContactOrderDetails = () => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
 
 	const getOrderDate = (order: Order): string => {
-		if (typeof order.date_created_gmt === 'string' && order.date_created_gmt.trim()) {
+		if (
+			typeof order.date_created_gmt === 'string' &&
+			order.date_created_gmt.trim()
+		) {
 			return order.date_created_gmt;
 		}
 		if (order.date?.date) {
@@ -438,13 +441,17 @@ export const useContactOrderDetails = () => {
 			if (!orderDate) {
 				return latest;
 			}
-			if (!latest || new Date(orderDate).getTime() > new Date(latest).getTime()) {
+			if (
+				!latest ||
+				new Date(orderDate).getTime() > new Date(latest).getTime()
+			) {
 				return orderDate;
 			}
 			return latest;
 		}, '');
 
-		details.lastOrderDate = latestOrderDate || contact.orders[0]?.date_created_gmt || '-';
+		details.lastOrderDate =
+			latestOrderDate || contact.orders[0]?.date_created_gmt || '-';
 
 		return details;
 	};

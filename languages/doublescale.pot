@@ -16361,9 +16361,6 @@ msgstr ""
 msgid "Requirements"
 msgstr ""
 
-msgid "Requires:"
-msgstr ""
-
 msgid "Requires DoubleScale Pro."
 msgstr ""
 

@@ -28,6 +28,26 @@ function writeTempCsv(
 	return file;
 }
 
+/**
+ * Excel on Arabic Windows saves CSV as Windows-1256, not UTF-8.
+ * محمد = E3 CD E3 CF, علي = DA E1 ED.
+ */
+function writeWindows1256Csv(email: string): string {
+	const file = path.join(
+		os.tmpdir(),
+		`ds-e2e-import-ar-${Date.now()}-${Math.random().toString(36).slice(2)}.csv`
+	);
+	const body = Buffer.concat([
+		Buffer.from('first_name,last_name,email\n', 'ascii'),
+		Buffer.from([0xe3, 0xcd, 0xe3, 0xcf]),
+		Buffer.from(',', 'ascii'),
+		Buffer.from([0xda, 0xe1, 0xed]),
+		Buffer.from(`,${email}\n`, 'ascii'),
+	]);
+	fs.writeFileSync(file, body);
+	return file;
+}
+
 async function openCsvMappingStep(adminPage: Page, csvPath: string): Promise<void> {
 	await adminPage.goto('wp-admin/admin.php?page=doublescale&path=contacts');
 	await waitForAdminShell(adminPage);
@@ -128,6 +148,44 @@ test.describe('Contact CSV import', () => {
 			timeout: 45_000,
 		});
 		await expect(adminPage.getByText(/1 of 1 contacts processed/i)).toBeVisible();
+
+		fs.unlinkSync(csvPath);
+	});
+
+	test('imports Arabic names from a Windows-1256 CSV', async ({
+		adminPage,
+	}) => {
+		const stamp = Date.now();
+		const email = `e2e-import-ar-${stamp}@example.test`;
+		const csvPath = writeWindows1256Csv(email);
+
+		await openCsvMappingStep(adminPage, csvPath);
+		await mapCsvColumn(adminPage, 'first_name', 'First Name');
+		await mapCsvColumn(adminPage, 'last_name', 'Last Name');
+		await mapCsvColumn(adminPage, 'email', 'Email');
+
+		await adminPage.getByRole('button', { name: /Import contacts/i }).click();
+
+		await expect(adminPage.getByText('Import Completed!').first()).toBeVisible({
+			timeout: 45_000,
+		});
+		await expect(adminPage.getByText(/1 of 1 contacts processed/i)).toBeVisible();
+
+		await adminPage.locator('button.px-8').filter({ hasText: /^Close$/ }).click();
+
+		await expect(
+			adminPage.getByRole('heading', { name: /Contacts List/i })
+		).toBeVisible({ timeout: 45_000 });
+
+		const search = adminPage.getByPlaceholder(/Search contacts/i);
+		await expect(search).toBeVisible();
+		await search.fill(email);
+
+		await expect(adminPage.getByText('محمد').first()).toBeVisible({
+			timeout: 20_000,
+		});
+		await expect(adminPage.getByText('علي').first()).toBeVisible();
+		await expect(adminPage.getByText('?????')).toHaveCount(0);
 
 		fs.unlinkSync(csvPath);
 	});

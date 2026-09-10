@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use DoubleScale\Modules\Contacts\ImportExport\CsvEncoding;
 use DoubleScale\Modules\Contacts\ImportExport\Security;
 
 /**
@@ -86,6 +87,8 @@ class Csv extends Importer {
 			if ( ! is_readable( $file_path ) ) {
 				throw new \Exception( esc_html__( 'The uploaded CSV file could not be read. Upload it again.', 'doublescale' ) );
 			}
+
+			CsvEncoding::ensure_file_is_utf8( $file_path );
 
 			$csv = Reader::createFromPath( $file_path, 'r' );
 			$csv->setHeaderOffset( 0 );

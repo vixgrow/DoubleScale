@@ -828,3 +828,5 @@ export {
 	parseCampaignRecipientFilters,
 	type ParsedRecipientFilters,
 } from './campaignRecipientFilters';
+
+export { compareByName, sortByName, sortNames } from './sort-by-name';

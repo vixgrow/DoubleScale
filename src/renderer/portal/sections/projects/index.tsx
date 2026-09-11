@@ -195,7 +195,7 @@ const ProjectDetailModal = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
-				className="max-w-lg gap-0 overflow-hidden rounded-2xl border border-border sm:rounded-2xl"
+				className="doublescale-portal-dialog max-w-lg gap-0 overflow-hidden rounded-2xl border border-border bg-white sm:rounded-2xl"
 				overlayClassName="bg-black/40 backdrop-blur-sm"
 			>
 				<DialogHeader>
@@ -433,11 +433,9 @@ const ProjectsBoard = ({
 				</h2>
 
 				<div className="relative mb-6">
-					<Search
-						width={16}
-						height={16}
-						className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
-					/>
+					<span className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-muted-foreground">
+						<Search width={16} height={16} aria-hidden />
+					</span>
 					<Input
 						type="search"
 						value={query}
@@ -446,7 +444,7 @@ const ProjectsBoard = ({
 							'Search by project name…',
 							'doublescale'
 						)}
-						className="pl-9"
+						className="h-10 pl-9 leading-5"
 					/>
 				</div>
 			</div>

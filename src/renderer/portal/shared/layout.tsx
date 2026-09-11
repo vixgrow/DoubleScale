@@ -1,6 +1,8 @@
 /**
  * Portal shell: identity header + grouped section nav + content area.
- * Below `lg`, nav is a horizontal settings-style tab strip (no Main/CRM/Other).
+ * Nav switches at the same width as Tailwind `lg` (1024px), measured from the
+ * shortcode container — so a theme content max-width of 768px matches the
+ * md/sm–lg responsive layout, not the desktop sidebar.
  */
 
 import { useEffect, useRef, useState } from '@wordpress/element';
@@ -9,6 +11,10 @@ import { NavLink } from 'react-router-dom';
 
 import type { PortalIdentity, PortalSection } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon, PortalNavIcon } from './icons';
+import {
+	PortalBreakpointContext,
+	usePortalBreakpointObserver,
+} from './use-portal-breakpoint';
 
 /** Outer shell for every portal tab's main content. */
 const PORTAL_CONTENT_SHELL =
@@ -73,13 +79,7 @@ const NavGroup = ({
 	}
 
 	return (
-		<div
-			className={
-				showDivider
-					? 'border-b border-border py-3'
-					: 'py-3'
-			}
-		>
+		<div className={showDivider ? 'border-b border-border py-3' : 'py-3'}>
 			<p className="pb-2 text-sm font-normal uppercase tracking-wide text-muted-foreground">
 				{title}
 			</p>
@@ -91,7 +91,10 @@ const NavGroup = ({
 							end={item.to === '/'}
 							className={linkClass}
 						>
-							<PortalNavIcon slug={item.slug} fallbackIcon={item.icon} />
+							<PortalNavIcon
+								slug={item.slug}
+								fallbackIcon={item.icon}
+							/>
 							<span className="truncate">{item.label}</span>
 							{!!item.badge && item.badge > 0 && (
 								<span className="ms-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-secondary px-1.5 text-xs font-semibold text-secondary-foreground">
@@ -106,13 +109,7 @@ const NavGroup = ({
 	);
 };
 
-const NavBadge = ({
-	count,
-	active,
-}: {
-	count?: number;
-	active?: boolean;
-}) => {
+const NavBadge = ({ count, active }: { count?: number; active?: boolean }) => {
 	if (!count || count <= 0) {
 		return null;
 	}
@@ -132,10 +129,7 @@ const NavBadge = ({
 
 interface HorizontalNavProps {
 	items: NavItem[];
-	linkClass: (props: {
-		isActive: boolean;
-		isPending?: boolean;
-	}) => string;
+	linkClass: (props: { isActive: boolean; isPending?: boolean }) => string;
 }
 
 /** Settings-style horizontal tabs with scroll chevrons when content overflows. */
@@ -152,9 +146,7 @@ const HorizontalNav = ({ items, linkClass }: HorizontalNavProps) => {
 		const { scrollLeft, scrollWidth, clientWidth } = el;
 		const hasOverflow = scrollWidth > clientWidth + 1;
 		setShowLeft(hasOverflow && scrollLeft > 2);
-		setShowRight(
-			hasOverflow && scrollLeft < scrollWidth - clientWidth - 2
-		);
+		setShowRight(hasOverflow && scrollLeft < scrollWidth - clientWidth - 2);
 	};
 
 	useEffect(() => {
@@ -186,7 +178,7 @@ const HorizontalNav = ({ items, linkClass }: HorizontalNavProps) => {
 	};
 
 	return (
-		<div className={`${NAV_SHELL} relative px-2.5 py-3 lg:hidden`}>
+		<div className={`${NAV_SHELL} relative px-2.5 py-3`}>
 			{showLeft && (
 				<>
 					<div
@@ -243,7 +235,10 @@ const HorizontalNav = ({ items, linkClass }: HorizontalNavProps) => {
 						type="button"
 						onClick={() => scrollBy('right')}
 						className="absolute end-0 top-0 z-10 flex h-full items-center justify-center rounded-e-[20px] bg-white px-1"
-						aria-label={__('Scroll navigation right', 'doublescale')}
+						aria-label={__(
+							'Scroll navigation right',
+							'doublescale'
+						)}
 					>
 						<ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
 					</button>
@@ -260,6 +255,9 @@ interface Props {
 }
 
 export const PortalLayout = ({ identity, sections, children }: Props) => {
+	const rootRef = useRef<HTMLDivElement | null>(null);
+	const bp = usePortalBreakpointObserver(rootRef);
+
 	const sectionItems: NavItem[] = sections
 		.filter((s) => s.slug !== 'calendar')
 		.map((s) => ({
@@ -312,7 +310,9 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 	}): string => {
 		const active = isActive || Boolean(isPending);
 		return [
-			'portal-nav-link portal-nav-link--tabs inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg p-1 text-sm font-medium transition-all sm:px-4',
+			`portal-nav-link portal-nav-link--tabs inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg p-1 text-sm font-medium transition-all ${
+				bp.sm ? 'px-4' : ''
+			}`,
 			active
 				? 'portal-nav-link--tabs-active bg-primary text-primary-foreground shadow-sm'
 				: 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
@@ -335,50 +335,81 @@ export const PortalLayout = ({ identity, sections, children }: Props) => {
 		: displayName;
 
 	return (
-		<div className="doublescale-client-portal overflow-x-hidden rounded-2xl bg-[#F7F8FA] text-base text-foreground">
-			<div className="mx-auto w-full max-w-[93rem] px-4 py-6 sm:px-6 sm:py-8">
-				<div className="mb-6 flex items-center gap-4 rounded-[20px] bg-white p-4 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] sm:p-5">
-					<div className="flex min-w-0 items-center gap-4">
-						<Avatar identity={identity} />
-						<div className="min-w-0">
-							<p className="truncate text-base font-semibold leading-tight text-foreground">
-								{__('👋 Welcome back', 'doublescale')},{' '}
-								{welcomeLine}
-							</p>
-							<p className="mt-2 text-sm text-muted-foreground">
-								{__(
-									'Everything is updated and aligned so you can focus on what matters most.',
-									'doublescale'
-								)}
-							</p>
+		<PortalBreakpointContext.Provider value={bp}>
+			<div
+				ref={rootRef}
+				className="doublescale-client-portal overflow-x-hidden rounded-2xl bg-[#F7F8FA] text-base text-foreground"
+				data-portal-bp={bp.bp}
+			>
+				<div
+					className={`mx-auto w-full max-w-full ${
+						bp.sm ? 'px-6 py-8' : 'px-3 py-5'
+					}`}
+				>
+					<div
+						className={`mb-6 flex min-w-0 items-center gap-4 rounded-[20px] bg-white shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] ${
+							bp.sm ? 'p-5' : 'p-4'
+						}`}
+					>
+						<div className="flex min-w-0 items-center gap-4">
+							<Avatar identity={identity} />
+							<div className="min-w-0">
+								<p className="truncate text-base font-semibold leading-tight text-foreground">
+									{__('👋 Welcome back', 'doublescale')},{' '}
+									{welcomeLine}
+								</p>
+								<p className="mt-2 text-sm text-muted-foreground">
+									{__(
+										'Everything is updated and aligned so you can focus on what matters most.',
+										'doublescale'
+									)}
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div className="flex flex-col gap-6 lg:flex-row">
-					<div className="min-w-0 lg:w-72 lg:shrink-0">
-						{/* max-lg: settings-style horizontal tabs (no Main/CRM/Other) */}
-						<HorizontalNav items={flatNavItems} linkClass={tabsLinkClass} />
-
-						{/* lg+: vertical grouped sidebar */}
-						<div className={`${NAV_SHELL} hidden px-5 py-2 lg:block`}>
-							{navGroups.map((group, index) => (
-								<NavGroup
-									key={group.title}
-									title={group.title}
-									items={group.items}
-									linkClass={sidebarLinkClass}
-									showDivider={index < navGroups.length - 1}
+					{/*
+					 * Same as responsive: < lg → tabs; ≥ lg → sidebar.
+					 * Driven by shortcode width (theme content max-width).
+					 */}
+					<div
+						className={`flex gap-6 ${bp.lg ? 'flex-row' : 'flex-col'}`}
+					>
+						<div
+							className={`min-w-0 ${bp.lg ? 'w-72 shrink-0' : ''}`}
+						>
+							{!bp.lg && (
+								<HorizontalNav
+									items={flatNavItems}
+									linkClass={tabsLinkClass}
 								/>
-							))}
-						</div>
-					</div>
+							)}
 
-					<div className="min-w-0 flex-1">
-						<div className={PORTAL_CONTENT_SHELL}>{children}</div>
+							{bp.lg && (
+								<div className={`${NAV_SHELL} px-5 py-2`}>
+									{navGroups.map((group, index) => (
+										<NavGroup
+											key={group.title}
+											title={group.title}
+											items={group.items}
+											linkClass={sidebarLinkClass}
+											showDivider={
+												index < navGroups.length - 1
+											}
+										/>
+									))}
+								</div>
+							)}
+						</div>
+
+						<div className="min-w-0 flex-1 overflow-x-hidden">
+							<div className={PORTAL_CONTENT_SHELL}>
+								{children}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</PortalBreakpointContext.Provider>
 	);
 };

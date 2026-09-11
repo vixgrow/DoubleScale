@@ -50,6 +50,7 @@ import type { PortalBooking } from '../../types';
 import { formatTime } from '../../shared/format';
 import { ClockIcon, MapPinIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui';
+import { usePortalBreakpoint } from '../../shared/use-portal-breakpoint';
 
 const PAGE_SIZE = 6;
 
@@ -327,7 +328,7 @@ const CancelBookingDialog = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
-				className="max-w-md gap-0 overflow-hidden rounded-2xl border border-border sm:rounded-2xl"
+				className="doublescale-portal-dialog max-w-md gap-0 overflow-hidden rounded-2xl border border-border bg-white sm:rounded-2xl"
 				overlayClassName="bg-black/40 backdrop-blur-sm"
 			>
 				<DialogHeader>
@@ -450,7 +451,7 @@ const BookingDetailModal = ({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
-				className="max-w-lg gap-0 overflow-hidden rounded-2xl border border-border sm:rounded-2xl"
+				className="doublescale-portal-dialog max-w-lg gap-0 overflow-hidden rounded-2xl border border-border bg-white sm:rounded-2xl"
 				overlayClassName="bg-black/40 backdrop-blur-sm"
 			>
 				<DialogHeader>
@@ -746,6 +747,7 @@ const BookingsBoard = ({
 	initialBookingId?: number | null;
 	onCloseDeepLink?: () => void;
 }) => {
+	const { sm, xl } = usePortalBreakpoint();
 	const [filter, setFilter] = useState<BookingFilter>('all');
 	const [query, setQuery] = useState('');
 	const [page, setPage] = useState(1);
@@ -822,7 +824,13 @@ const BookingsBoard = ({
 
 	return (
 		<section>
-			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div
+				className={`mb-6 flex gap-4 ${
+					sm
+						? 'flex-row items-center justify-between'
+						: 'flex-col'
+				}`}
+			>
 				<h2 className="text-2xl font-semibold text-foreground">
 					{__('Bookings', 'doublescale')}
 				</h2>
@@ -845,17 +853,15 @@ const BookingsBoard = ({
 			</div>
 
 			<div className="relative mb-6">
-				<Search
-					width={16}
-					height={16}
-					className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
-				/>
+				<span className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-muted-foreground">
+					<Search width={16} height={16} aria-hidden />
+				</span>
 				<Input
 					type="search"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder={__('Search by booking name…', 'doublescale')}
-					className="pl-9"
+					className="h-10 pl-9 leading-5"
 				/>
 			</div>
 
@@ -883,7 +889,15 @@ const BookingsBoard = ({
 
 			{!loading && !error && hasVisibleBookings && (
 				<>
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+					<div
+						className={`grid gap-4 ${
+							xl
+								? 'grid-cols-3'
+								: sm
+									? 'grid-cols-2'
+									: 'grid-cols-1'
+						}`}
+					>
 						{pageBookings.map((booking) => (
 							<PortalBookingCard
 								key={booking.id}

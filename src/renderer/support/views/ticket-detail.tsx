@@ -29,6 +29,7 @@ import {
 	type PendingAttachment,
 } from '@/components/support';
 import type { PortalConfig, PortalConversationItem } from '../types';
+import { usePortalBreakpoint } from '../../portal/shared/use-portal-breakpoint';
 
 interface Props {
 	ticketId: number;
@@ -46,6 +47,8 @@ const TicketDetail = ({
 	showMobileBack = false,
 }: Props) => {
 	const isPane = variant === 'pane';
+	const { width } = usePortalBreakpoint();
+	const wide = width >= 1200;
 	const limits = config.attachment_limits;
 	const ticket = usePortalTicket(ticketId);
 	const conv = usePortalConversation(ticketId);
@@ -129,7 +132,9 @@ const TicketDetail = ({
 		<div
 			className={
 				isPane
-					? 'support-portal-ticket-detail flex flex-col overflow-hidden max-[1199px]:h-auto min-[1200px]:h-full min-[1200px]:min-h-0'
+					? `support-portal-ticket-detail flex flex-col overflow-hidden ${
+							wide ? 'h-full min-h-0' : 'h-auto'
+						}`
 					: 'support-portal-ticket-detail flex h-auto flex-col overflow-visible rounded-xl border border-border bg-[#F7F8FA] p-6 shadow-sm'
 			}
 		>
@@ -138,7 +143,7 @@ const TicketDetail = ({
 					<Button
 						variant="secondaryDeepBlue"
 						size="sm"
-						className="mb-3 lg:hidden"
+						className="mb-3"
 						onClick={onBack}
 					>
 						<ArrowLeft width={14} height={14} className="mr-1" />
@@ -168,7 +173,9 @@ const TicketDetail = ({
 
 			{/* Height follows reply content; scrolls only when the thread is long. */}
 			<section
-				className="support-portal-ticket-detail__conversation support-portal-conversation-scroll overflow-x-hidden overflow-y-auto px-5 py-4 max-[1199px]:flex-none min-[1200px]:min-h-0 min-[1200px]:flex-1"
+				className={`support-portal-ticket-detail__conversation support-portal-conversation-scroll overflow-x-hidden overflow-y-auto px-5 py-4 ${
+					wide ? 'min-h-0 flex-1' : 'flex-none'
+				}`}
 				aria-label={__('Conversation', 'doublescale')}
 			>
 				{conv.loading && (

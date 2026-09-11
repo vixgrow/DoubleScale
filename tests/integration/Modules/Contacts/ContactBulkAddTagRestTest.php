@@ -171,7 +171,10 @@ final class ContactBulkAddTagRestTest extends IntegrationTestCase {
 			$user_id
 		);
 
-		$this->assertSame( 404, $response->get_status() );
+		// 400, not 404: an empty tag list is a malformed request, not a
+		// missing resource. The route returned 404 before the bulk rework.
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'doublescale_bulk_missing_terms', $response->get_data()['code'] );
 	}
 
 	/**

@@ -1006,6 +1006,14 @@ export interface DataTableConfig<TData> {
 			onSelectionChange: (tags: string[]) => void;
 		};
 		activeTab?: string;
+		/**
+		 * How many records the pending action will touch. Defaults to the
+		 * number of checked rows; a filter-wide selection reports the full
+		 * matched total instead.
+		 */
+		effectiveCount?: number;
+		/** Selection spans every record matching the filter, not one page. */
+		selectAllMatching?: boolean;
 	};
 	filters?: {
 		enabled: boolean;

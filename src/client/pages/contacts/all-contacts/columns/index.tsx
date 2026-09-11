@@ -11,7 +11,7 @@ import { ColumnDef } from '@tanstack/react-table';
  */
 import type { Contact } from '@doublescale/client';
 import { CONTACT_STATUS } from '@doublescale/client';
-import { convertDate } from '@doublescale/utils';
+import { convertDate, sortByName } from '@doublescale/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import {
@@ -239,7 +239,7 @@ export const useContactsColumns = () => {
 			),
 			cell: ({ row }) => {
 				const contact = row.original;
-				const lists = contact.lists ?? [];
+				const lists = sortByName(contact.lists ?? []);
 				const subscribedCount = lists.filter(
 					(l) =>
 						l.pivot?.status !== CONTACT_STATUS.EMAIL.UNSUBSCRIBED
@@ -364,8 +364,8 @@ export const useContactsColumns = () => {
 			accessorKey: 'tags',
 			header: __('Tag', 'doublescale'),
 			cell: ({ row }) => {
-				const tags = row.original.tags;
-				if (!tags || tags.length === 0) return <span className="text-muted-foreground">-</span>;
+				const tags = sortByName(row.original.tags);
+				if (tags.length === 0) return <span className="text-muted-foreground">-</span>;
 				return (
 					<div className="flex flex-wrap gap-1">
 						{tags.slice(0, 2).map((tag) => (
@@ -386,8 +386,8 @@ export const useContactsColumns = () => {
 			accessorKey: 'lists',
 			header: __('List', 'doublescale'),
 			cell: ({ row }) => {
-				const lists = row.original.lists;
-				if (!lists || lists.length === 0) return <span className="text-muted-foreground">-</span>;
+				const lists = sortByName(row.original.lists);
+				if (lists.length === 0) return <span className="text-muted-foreground">-</span>;
 				return (
 					<div className="flex flex-wrap gap-1">
 						{lists.slice(0, 2).map((list) => (

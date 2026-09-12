@@ -26,6 +26,7 @@ import type { TicketFilters } from '@/types/support';
 import { usePortalTickets } from '../api';
 import type { PortalConfig, PortalTicket } from '../types';
 import { CalendarIcon, GradientTicketsIcon } from '@doublescale/components';
+import { usePortalBreakpoint } from '../../portal/shared/use-portal-breakpoint';
 
 interface Props {
 	config: PortalConfig;
@@ -45,6 +46,7 @@ const TicketList = ({
 	onTicketsLoaded,
 }: Props) => {
 	const isPane = variant === 'pane';
+	const { sm } = usePortalBreakpoint();
 	const [statusFilter, setStatusFilter] = useState<'all' | TicketStatus>('all');
 	const [query, setQuery] = useState('');
 
@@ -97,7 +99,11 @@ const TicketList = ({
 
 	const listBody = (
 		<>
-			<div className="flex flex-col gap-2 py-4 mx-4 sm:flex-row sm:items-center border-b border-border">
+			<div
+				className={`mx-4 flex gap-2 border-b border-border py-4 ${
+					sm ? 'flex-row items-center' : 'flex-col'
+				}`}
+			>
 				<div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-muted-foreground">
 					<Search width={14} height={14} className="shrink-0" />
 					<input
@@ -116,13 +122,13 @@ const TicketList = ({
 				>
 					<SelectTrigger
 						aria-label={__('Filter by status', 'doublescale')}
-						className="h-9 w-auto shrink-0 min-w-[8.5rem] bg-white"
+						className="doublescale-portal-status-trigger h-9 w-auto shrink-0 min-w-[8.5rem] bg-white"
 					>
 						<SelectValue
 							placeholder={__('All Statuses', 'doublescale')}
 						/>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="doublescale-portal-menu">
 						<SelectItem value="all">
 							{__('All Statuses', 'doublescale')}
 						</SelectItem>

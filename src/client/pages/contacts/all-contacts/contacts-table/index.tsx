@@ -20,6 +20,8 @@ import {
 	getSavedContactsColumnVisibility,
 	saveContactsColumnVisibility,
 } from '../contacts-column-visibility';
+import SelectAllBanner from '../select-all-banner';
+import { getEffectiveSelectionCount } from '../select-all-matching';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -32,6 +34,9 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		hasRecords,
 		selectedRowKeys,
 		setSelectedRowKeys,
+		selectAllMatching,
+		setSelectAllMatching,
+		clearSelection,
 		selectedLists,
 		setSelectedLists,
 		selectedTags,
@@ -72,7 +77,10 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 				const message =
 					error instanceof Error
 						? error.message
-						: __('Failed to save column preferences', 'doublescale');
+						: __(
+								'Failed to save column preferences',
+								'doublescale'
+							);
 				showNotice('error', message);
 			}
 		},
@@ -94,68 +102,77 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 
 	const tableConfig: DataTableConfig<any> = useMemo(
 		() => ({
-		toolbarClassName:
-			'min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:gap-1',
-		manageColumns: {
-			enabled: true,
-			onSubmit: handleColumnVisibilitySubmit,
-		},
-		search: {
-			placeholder: __('Search contacts...', 'doublescale'),
-			onChange: (value) => {
-				setKeywords(value);
-				if (page > 1) {
-					setPage(1);
-				}
+			toolbarClassName:
+				'min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:gap-1',
+			manageColumns: {
+				enabled: true,
+				onSubmit: handleColumnVisibilitySubmit,
 			},
-			value: keywords,
-		},
-		selection: {
-			enabled: true,
-			selectedKeys: selectedRowKeys,
-			onSelectionChange: setSelectedRowKeys,
-		},
-		bulkActions: {
-			enabled: true,
-			currentAction: bulkAction,
-			onActionChange: setBulkAction,
-			onExecuteAction: doBulkAction,
-			lists: {
-				selected: selectedLists,
-				onSelectionChange: (lists: string[]) =>
-					setSelectedLists(lists.map((id) => id.toString())),
+			search: {
+				placeholder: __('Search contacts...', 'doublescale'),
+				onChange: (value) => {
+					setKeywords(value);
+					if (page > 1) {
+						setPage(1);
+					}
+				},
+				value: keywords,
 			},
-			tags: {
-				selected: selectedTags,
-				onSelectionChange: (tags: string[]) => setSelectedTags(tags),
+			selection: {
+				enabled: true,
+				selectedKeys: selectedRowKeys,
+				onSelectionChange: setSelectedRowKeys,
 			},
-			activeTab: activeTab,
-		},
-		filters: {
-			enabled: true,
-			showFilters: showFilters,
-			onToggleFilters: setShowFilters,
-			currentFilters: filters,
-			onFiltersChange: setFilters,
-			onApplyFilters: handleApplyFilters,
-			isApplying: isFiltering,
-		},
-		dateRange: {
-			enabled: true,
-			value: dateRange,
-			onDateChange: (range) => {
-				setDateRange(range);
-				if (page > 1) {
-					setPage(1);
-				}
+			bulkActions: {
+				enabled: true,
+				currentAction: bulkAction,
+				onActionChange: setBulkAction,
+				onExecuteAction: doBulkAction,
+				// In filter-wide mode the action reaches every match, not just the
+				// rows on screen — the modals must say so.
+				effectiveCount: getEffectiveSelectionCount({
+					selectAllMatching,
+					selectedRowKeys,
+					total: totalRecords,
+				}),
+				selectAllMatching,
+				lists: {
+					selected: selectedLists,
+					onSelectionChange: (lists: string[]) =>
+						setSelectedLists(lists.map((id) => id.toString())),
+				},
+				tags: {
+					selected: selectedTags,
+					onSelectionChange: (tags: string[]) =>
+						setSelectedTags(tags),
+				},
+				activeTab: activeTab,
 			},
-			placeholder: __('Date Range', 'doublescale'),
-		},
-		sorting: {
-			value: sort,
-			onSortChange: setSort,
-		},
-		initialColumnVisibility: columnVisibility,
+			filters: {
+				enabled: true,
+				showFilters: showFilters,
+				onToggleFilters: setShowFilters,
+				currentFilters: filters,
+				onFiltersChange: setFilters,
+				onApplyFilters: handleApplyFilters,
+				isApplying: isFiltering,
+			},
+			dateRange: {
+				enabled: true,
+				value: dateRange,
+				onDateChange: (range) => {
+					setDateRange(range);
+					if (page > 1) {
+						setPage(1);
+					}
+				},
+				placeholder: __('Date Range', 'doublescale'),
+			},
+			sorting: {
+				value: sort,
+				onSortChange: setSort,
+			},
+			initialColumnVisibility: columnVisibility,
 		}),
 		[
 			activeTab,
@@ -170,6 +187,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			page,
 			selectedLists,
 			selectedRowKeys,
+			selectAllMatching,
+			totalRecords,
 			selectedTags,
 			setBulkAction,
 			setDateRange,
@@ -202,6 +221,13 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 				initialPageSize={perPage}
 				setPage={setPage}
 				loading={loading}
+			/>
+			<SelectAllBanner
+				pageCount={selectedRowKeys.length}
+				total={totalRecords}
+				selectAllMatching={selectAllMatching}
+				onSelectAll={() => setSelectAllMatching(true)}
+				onClear={clearSelection}
 			/>
 			<DataTablePagination table={serverSideTable} />
 		</>

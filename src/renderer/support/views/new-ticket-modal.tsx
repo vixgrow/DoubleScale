@@ -187,10 +187,11 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 		<Dialog open onOpenChange={(open) => !open && onClose()}>
 			<DialogContent
 				className={cn(
-					'z-[150200] !flex !flex-col bg-white',
-					'mx-1 w-[calc(100%-2rem)] max-w-5xl max-h-[calc(100dvh-2rem)]',
-					'gap-0 overflow-hidden rounded-2xl p-0 sm:mx-auto sm:w-full'
+					'doublescale-portal-dialog z-[150200] !flex !h-auto max-h-[80vh] min-h-0 !flex-col overflow-hidden bg-white',
+					'mx-1 w-[calc(100%-2rem)] max-w-5xl',
+					'gap-0 rounded-2xl p-0 sm:mx-auto sm:w-full'
 				)}
+				style={{ maxHeight: '80vh' }}
 				overlayClassName="bg-black/40 backdrop-blur-sm"
 			>
 				<DialogHeader className="shrink-0 space-y-0 bg-white px-4 pt-4 text-left sm:px-6 sm:pt-6">
@@ -206,58 +207,57 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="flex min-h-0 flex-1 flex-col">
-					<div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-6">
-						<div className="space-y-4 rounded-lg border border-border bg-[#F7F8FA] p-4 sm:p-5">
-							<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-								<div className="min-w-0 space-y-2">
-									<Label
-										htmlFor="doublescale-portal-title"
-										className="text-sm font-medium text-foreground"
-									>
-										{__('Title', 'doublescale')}
-										<span className="text-destructive"> *</span>
-									</Label>
-									<Input
-										id="doublescale-portal-title"
-										type="text"
-										value={title}
-										onChange={(e) => setTitle(e.target.value)}
-										placeholder={__('Title', 'doublescale')}
-										className="bg-white"
-									/>
-								</div>
+				<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 [overflow-anchor:none]" data-scroll-lock-scrollable="">
+					<div className="space-y-4 rounded-lg border border-border bg-[#F7F8FA] p-4 sm:p-5">
+						<div className="flex flex-row items-end gap-4">
+							<div className="min-w-0 flex-1 space-y-2">
+								<Label
+									htmlFor="doublescale-portal-title"
+									className="text-sm font-medium text-foreground"
+								>
+									{__('Title', 'doublescale')}
+									<span className="text-destructive"> *</span>
+								</Label>
+								<Input
+									id="doublescale-portal-title"
+									type="text"
+									value={title}
+									onChange={(e) => setTitle(e.target.value)}
+									placeholder={__('Title', 'doublescale')}
+									className="bg-white"
+								/>
+							</div>
 
-								<div className="min-w-0 space-y-2">
-									<p className="m-0 text-sm font-medium text-foreground">
-										{__('Priority', 'doublescale')}
-										<span className="text-destructive"> *</span>
-									</p>
-									<div className="flex flex-wrap gap-2">
-										{TICKET_PRIORITIES.map((p) => {
-											const selected = priority === p;
-											return (
-												<button
-													key={p}
-													type="button"
-													onClick={() => setPriority(p)}
-													className={`inline-flex items-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm font-medium transition ${
-														selected
-															? 'border-primary text-primary ring-1 ring-primary'
-															: 'border-border text-foreground hover:border-primary/40'
-													}`}
-												>
-													<span
-														className={`h-3.5 w-3.5 shrink-0 rounded-sm ${PRIORITY_SWATCH[p]}`}
-														aria-hidden
-													/>
-													{PRIORITY_LABELS[p]}
-												</button>
-											);
-										})}
-									</div>
+							<div className="shrink-0 space-y-2">
+								<p className="m-0 text-sm font-medium text-foreground">
+									{__('Priority', 'doublescale')}
+									<span className="text-destructive"> *</span>
+								</p>
+								<div className="flex flex-nowrap items-center gap-2">
+									{TICKET_PRIORITIES.map((p) => {
+										const selected = priority === p;
+										return (
+											<button
+												key={p}
+												type="button"
+												onClick={() => setPriority(p)}
+												className={`inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border bg-white px-3 text-sm font-medium transition ${
+													selected
+														? 'border-primary text-primary ring-1 ring-primary'
+														: 'border-border text-foreground hover:border-primary/40'
+												}`}
+											>
+												<span
+													className={`h-3.5 w-3.5 shrink-0 rounded-sm ${PRIORITY_SWATCH[p]}`}
+													aria-hidden
+												/>
+												{PRIORITY_LABELS[p]}
+											</button>
+										);
+									})}
 								</div>
 							</div>
+						</div>
 
 							{showMailboxSelect && (
 								<div className="min-w-0 space-y-2">
@@ -372,7 +372,7 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 						</div>
 					</div>
 
-					<DialogFooter className="shrink-0 flex-row justify-end gap-3 bg-white px-4 py-4 sm:space-x-0 sm:px-6">
+					<DialogFooter className="shrink-0 flex-row justify-end gap-3 border-t border-border bg-white px-4 py-4 sm:space-x-0 sm:px-6">
 						<Button
 							type="button"
 							variant="secondaryDeepBlue"
@@ -393,7 +393,6 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 								: __('Create Ticket', 'doublescale')}
 						</Button>
 					</DialogFooter>
-				</div>
 			</DialogContent>
 		</Dialog>
 	);

@@ -40,6 +40,11 @@ export interface PortalRendererConfig {
 	credit_note_public_rest_url?: string;
 	/** Mailbox scope for the Tickets section (from the shortcode `box_id`). */
 	box_id?: number;
+	/**
+	 * Absolute URLs for portal CSS (Shadow DOM injects these so theme styles
+	 * never reach the SPA). Prefer over discovering <link> tags in the light DOM.
+	 */
+	style_urls?: string[];
 	/** Injected by the Support module for the reused ticket views. */
 	rest_url?: string;
 	public_rest_url?: string;

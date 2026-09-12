@@ -33,6 +33,7 @@ import {
 } from '../../shared/ui';
 import type { ReactNode } from 'react';
 import CalendarPanel from './calendar-panel';
+import { usePortalBreakpoint } from '../../shared/use-portal-breakpoint';
 
 const CARD_ORDER = [
 	'outstanding_balance',
@@ -351,6 +352,7 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 	const { data, loading, error } = useAsync(() => fetchTimeline(1, 15), []);
 	const items = data?.data || [];
 	const cards = orderSummaryCards(summary);
+	const { sm, xl } = usePortalBreakpoint();
 
 	return (
 		<section className="space-y-6">
@@ -358,14 +360,28 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 				{__('Dashboard', 'doublescale')}
 			</h1>
 
-			<div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px] xl:items-stretch">
+			{/*
+			 * Same as responsive sm / xl, using shortcode width (theme content
+			 * max-width). At 768px → md layout: 2-col cards, stacked activity.
+			 */}
+			<div
+				className={`grid grid-cols-1 gap-6 ${
+					xl
+						? 'grid-cols-[minmax(0,1fr)_minmax(0,320px)] items-stretch'
+						: ''
+				}`}
+			>
 				<div className="min-w-0 space-y-6">
 					{cards.length > 0 && (
 						<div className={PORTAL_DASHBOARD_PANEL}>
 							<h2 className="mb-4 text-base font-semibold text-foreground">
 								{__('Analytics Overview', 'doublescale')}
 							</h2>
-							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<div
+								className={`grid grid-cols-1 gap-4 ${
+									sm ? 'grid-cols-2' : ''
+								}`}
+							>
 								{cards.map((card) => (
 									<AnalyticsStatCard
 										key={card.key}
@@ -376,17 +392,15 @@ const Dashboard = ({ summary }: { summary: PortalSummaryCard[] }) => {
 						</div>
 					)}
 
-					<div className={PORTAL_DASHBOARD_PANEL}>
+					<div className={`min-w-0 ${PORTAL_DASHBOARD_PANEL}`}>
 						<CalendarPanel />
 					</div>
 				</div>
 
-				{/*
-				 * xl+: match analytics+calendar height (h-0/min-h-full so this
-				 * column doesn't grow the grid row); scroll inside.
-				 */}
 				<div
-					className={`${PORTAL_DASHBOARD_PANEL} flex min-h-0 flex-col overflow-hidden max-xl:max-h-[32rem] xl:h-0 xl:min-h-full`}
+					className={`${PORTAL_DASHBOARD_PANEL} flex min-h-0 min-w-0 flex-col overflow-hidden ${
+						xl ? 'h-0 min-h-full max-h-none' : 'max-h-[512px]'
+					}`}
 				>
 					<div className="mb-4 shrink-0">
 						<h2 className="text-base font-semibold text-foreground">

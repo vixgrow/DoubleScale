@@ -1,12 +1,14 @@
 /**
  * Client Portal renderer entry. Mounts onto `#doublescale-client-portal` from
- * the `[doublescale_client_portal]` shortcode.
+ * the `[doublescale_client_portal]` shortcode — inside a Shadow DOM so the
+ * active WordPress theme cannot restyle the portal UI.
  */
 
 import { createRoot } from '@wordpress/element';
 
 import PortalApp from './app';
 import { getPortalConfig } from './config';
+import { createPortalShadowMount } from './mount-shadow';
 import './style.scss';
 
 /**
@@ -21,25 +23,25 @@ import './style.scss';
  * the base from `rest_root` (WP `rest_url()`) is correct for both pretty and plain
  * permalinks. Only set when absent so a real localized config is never clobbered.
  */
-const seedSalesPublicConfig = ( restRoot: string, lang: string ): void => {
-	const base = restRoot.replace( /\/$/, '' );
-	if ( ! window.doublescale_invoice_config ) {
+const seedSalesPublicConfig = (restRoot: string, lang: string): void => {
+	const base = restRoot.replace(/\/$/, '');
+	if (!window.doublescale_invoice_config) {
 		window.doublescale_invoice_config = {
-			public_rest_url: `${ base }/doublescale/v1/sales/public/invoices`,
+			public_rest_url: `${base}/doublescale/v1/sales/public/invoices`,
 			lang,
 			mount_id: '',
 		};
 	}
-	if ( ! window.doublescale_proposal_config ) {
+	if (!window.doublescale_proposal_config) {
 		window.doublescale_proposal_config = {
-			public_rest_url: `${ base }/doublescale/v1/sales/public/proposals`,
+			public_rest_url: `${base}/doublescale/v1/sales/public/proposals`,
 			lang,
 			mount_id: '',
 		};
 	}
-	if ( ! window.doublescale_contract_config ) {
+	if (!window.doublescale_contract_config) {
 		window.doublescale_contract_config = {
-			public_rest_url: `${ base }/doublescale/v1/sales/public/contracts`,
+			public_rest_url: `${base}/doublescale/v1/sales/public/contracts`,
 			lang,
 			mount_id: '',
 		};
@@ -47,16 +49,20 @@ const seedSalesPublicConfig = ( restRoot: string, lang: string ): void => {
 };
 
 const config = getPortalConfig();
-const mount = config?.mount_id ? document.getElementById(config.mount_id) : null;
+const host = config?.mount_id ? document.getElementById(config.mount_id) : null;
 
-if (mount && config) {
-	if ( config.rest_root ) {
-		seedSalesPublicConfig( config.rest_root, config.lang || '' );
+if (host && config) {
+	if (config.rest_root) {
+		seedSalesPublicConfig(config.rest_root, config.lang || '');
 	}
 
-	const rawBoxId = parseInt(mount.getAttribute('data-box-id') || '0', 10);
+	const rawBoxId = parseInt(host.getAttribute('data-box-id') || '0', 10);
 	if (Number.isFinite(rawBoxId) && rawBoxId > 0) {
 		config.box_id = rawBoxId;
 	}
-	createRoot(mount).render(<PortalApp config={config} />);
+
+	const { appRoot } = createPortalShadowMount(host, {
+		styleUrls: config.style_urls || [],
+	});
+	createRoot(appRoot).render(<PortalApp config={config} />);
 }

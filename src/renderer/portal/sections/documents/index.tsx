@@ -97,6 +97,7 @@ import type { PortalDocument, PortalPayment } from '../../types';
 import { formatDate } from '../../shared/format';
 import { ChevronLeftIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, Spinner } from '../../shared/ui';
+import { usePortalBreakpoint } from '../../shared/use-portal-breakpoint';
 
 type DocTab = DocumentFilter | 'payments';
 
@@ -818,7 +819,7 @@ const StatusFilterSelect = ({
 			<DropdownMenuTrigger asChild>
 				<button
 					type="button"
-					className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-medium text-foreground"
+					className="doublescale-portal-status-trigger inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-medium text-foreground"
 				>
 					{label}
 					<ChevronDown width={16} height={16} className="text-muted-foreground" />
@@ -826,7 +827,7 @@ const StatusFilterSelect = ({
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
 				align="end"
-				className="max-h-56 w-60 overflow-y-auto"
+				className="doublescale-portal-menu max-h-56 w-60 overflow-y-auto"
 			>
 				<StatusOptionCheckbox
 					checked={selected.length === 0}
@@ -1072,6 +1073,7 @@ const PaymentCard = ({ payment }: { payment: PortalPayment }) => {
 };
 
 const DocumentsHome = () => {
+	const { sm, md, xl } = usePortalBreakpoint();
 	const [tab, setTab] = useState<DocTab>('all');
 	const [query, setQuery] = useState('');
 	const [statuses, setStatuses] = useState<string[]>([]);
@@ -1271,7 +1273,13 @@ const DocumentsHome = () => {
 
 	return (
 		<section>
-			<div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+			<div
+				className={`mb-6 flex gap-4 ${
+					xl
+						? 'flex-row items-center justify-between'
+						: 'flex-col'
+				}`}
+			>
 				<h2 className="text-2xl font-semibold text-foreground">
 					{__('Documents', 'doublescale')}
 				</h2>
@@ -1294,19 +1302,21 @@ const DocumentsHome = () => {
 				</div>
 			</div>
 
-			<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+			<div
+				className={`mb-6 flex gap-3 ${
+					sm ? 'flex-row items-center' : 'flex-col'
+				}`}
+			>
 				<div className="relative min-w-0 flex-1">
-					<Search
-						width={16}
-						height={16}
-						className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground"
-					/>
+					<span className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-muted-foreground">
+						<Search width={16} height={16} aria-hidden />
+					</span>
 					<Input
 						type="search"
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						placeholder={__('Search by title…', 'doublescale')}
-						className="pl-9"
+						className="h-10 pl-9 leading-5"
 					/>
 				</div>
 				<StatusFilterSelect
@@ -1351,7 +1361,15 @@ const DocumentsHome = () => {
 										</span>
 									</p>
 								)}
-							<div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
+							<div
+								className={`grid items-stretch gap-4 ${
+									xl
+										? 'grid-cols-3'
+										: md
+											? 'grid-cols-2'
+											: 'grid-cols-1'
+								}`}
+							>
 								{pageItems.map((item) =>
 									item.kind === 'payment' ? (
 										<div

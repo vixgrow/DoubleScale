@@ -20,6 +20,7 @@ import { fetchCalendar } from '../../api';
 import { getPortalConfig } from '../../config';
 import { ChevronLeftIcon, ChevronRightIcon } from '../../shared/icons';
 import { EmptyState, ErrorState, PORTAL_DASHBOARD_TILE, Spinner } from '../../shared/ui';
+import { usePortalBreakpoint } from '../../shared/use-portal-breakpoint';
 
 interface KindFilter {
 	kind: PortalCalendarEventKind;
@@ -39,6 +40,7 @@ const KIND_FILTERS: KindFilter[] = [
 ];
 
 const CalendarPanel = () => {
+	const { sm } = usePortalBreakpoint();
 	const navigate = useNavigate();
 	const weekStartsOn = normalizeWeekStartsOn(
 		getPortalConfig()?.calendarWeekStartsOn
@@ -148,10 +150,12 @@ const CalendarPanel = () => {
 			{!loading && !error && (
 				<>
 					<div
-						className={`min-w-0 max-sm:overflow-x-auto sm:overflow-hidden ${PORTAL_DASHBOARD_TILE}`}
+						className={`min-w-0 ${
+							sm ? 'overflow-hidden' : 'overflow-x-auto'
+						} ${PORTAL_DASHBOARD_TILE}`}
 					>
-						{/* Keep desktop cell width on phones; scroll horizontally instead of squashing. */}
-						<div className="max-sm:min-w-[42rem]">
+						{/* Keep cell width when column is narrow; scroll instead of squashing. */}
+						<div className={sm ? undefined : 'min-w-[42rem]'}>
 							<MonthGrid
 								days={grid.days}
 								cursor={grid.cursor}

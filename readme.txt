@@ -4,7 +4,7 @@ Tags:  crm, email marketing, sales pipeline, booking calendar, helpdesk
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.27
+Stable tag: 1.3.29
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -275,6 +275,19 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+
+= 1.3.29 = 11 Sep 2026
+- Skip default email footer when body already contains an unsubscribe link
+
+= 1.3.28 = 10 Sep 2026
+- Allow CSV contact import without an email column
+- Keep large CSV imports from dying mid-file
+- Repair table columns that migrations marked as applied but never added
+- Stop invoice creation from fataling when a column is missing
+- Auto-create WordPress pages for DoubleScale shortcodes
+- Improve booking host availability when resolving calendars
+- Keep the return path when navigating away from an automation
+- Improve how custom field values show on the contact info card
 
 = 1.3.27 = 9 Sep 2026
 - Rename the plugin to All-in-One CRM with multi-channel marketing in the title

@@ -906,6 +906,7 @@ export type CampaignsResponse = Response & {
 
 export type CampaignEmailsResponse = Response & {
 	data: CampaignEmail[];
+	failed_total?: number;
 };
 
 export type CustomFieldsResponse = Response & {

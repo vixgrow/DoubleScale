@@ -33,6 +33,7 @@ import {
 	type TemplateItemConfig,
 } from './templatesConfig';
 import {
+	getTemplate,
 	getUserTemplates,
 	renderTemplate,
 	saveTemplate,
@@ -275,6 +276,26 @@ const EmailTemplatesStep: React.FC = () => {
 		}
 	}, [activeTab, campaign?.id]);
 
+	const getCurrentCampaignTemplate = async (): Promise<EmailTemplate | null> => {
+		const templateId = campaign?.settings?.template_ids?.[0];
+		const attachedTemplate = campaign?.settings?.templates?.[0] as
+			| EmailTemplate
+			| undefined;
+
+		if (!templateId) {
+			return attachedTemplate ?? null;
+		}
+
+		try {
+			return await getTemplate(templateId);
+		} catch (error) {
+			if (attachedTemplate) {
+				return attachedTemplate;
+			}
+			throw error;
+		}
+	};
+
 	const applyBuiltInTemplateAndNavigate = async (
 		template: TemplateItemConfig
 	) => {
@@ -289,7 +310,9 @@ const EmailTemplatesStep: React.FC = () => {
 				buttonSettings?: Record<string, unknown>;
 			};
 
-			const existingTemplateId = campaign.settings?.template_ids?.[0];
+			const currentTemplate = await getCurrentCampaignTemplate();
+			const existingTemplateId =
+				currentTemplate?.id ?? campaign.settings?.template_ids?.[0];
 			const savedTemplate = await saveTemplate({
 				...(existingTemplateId ? { id: existingTemplateId } : {}),
 				name:
@@ -300,6 +323,12 @@ const EmailTemplatesStep: React.FC = () => {
 					type: 'builder',
 					value: resolved,
 				}),
+				// A reusable template contributes design/content only. Sender,
+				// subject, reply-to, UTM, and other campaign settings were
+				// configured in the previous step and must remain unchanged.
+				...(currentTemplate?.settings
+					? { settings: currentTemplate.settings }
+					: {}),
 				campaign_id: campaign.id,
 				hidden: true,
 			} as Parameters<typeof saveTemplate>[0]);
@@ -339,8 +368,41 @@ const EmailTemplatesStep: React.FC = () => {
 	const applyUserTemplateAndNavigate = async (template: EmailTemplate) => {
 		if (!campaign || !template.id) return;
 		try {
+			const [currentTemplate, selectedTemplate] = await Promise.all([
+				getCurrentCampaignTemplate(),
+				getTemplate(template.id),
+			]);
+			const existingTemplateId =
+				currentTemplate?.id ?? campaign.settings?.template_ids?.[0];
+
+			const savedTemplate = await saveTemplate({
+				...(existingTemplateId ? { id: existingTemplateId } : {}),
+				name:
+					(campaign.name && String(campaign.name).trim()) ||
+					selectedTemplate.name,
+				type: 'email',
+				body: selectedTemplate.body,
+				// Do not attach the reusable template itself: its sender
+				// settings may intentionally be empty. Copy only its content
+				// into the campaign-owned template.
+				...(currentTemplate?.settings
+					? { settings: currentTemplate.settings }
+					: {}),
+				campaign_id: campaign.id,
+				hidden: true,
+			} as Parameters<typeof saveTemplate>[0]);
+
+			if (!savedTemplate?.id) {
+				throw new Error(
+					__(
+						'Could not save email template for this campaign.',
+						'doublescale'
+					)
+				);
+			}
+
 			const ok = await saveCampaignStep('email-templates', {
-				template_id: template.id,
+				template_id: savedTemplate.id,
 			});
 			if (!ok) return;
 			const navState = isNewCampaign

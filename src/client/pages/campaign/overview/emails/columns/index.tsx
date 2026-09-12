@@ -46,6 +46,26 @@ export function getColumns({
 			header: __('Contact', 'doublescale'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
+				if (!contact) {
+					return (
+						<div className="flex items-center gap-2.5">
+							<Avatar className="w-9 h-9 rounded-full">
+								<AvatarFallback className="rounded-full bg-muted text-muted-foreground font-semibold text-xs">
+									?
+								</AvatarFallback>
+							</Avatar>
+							<div className="flex flex-col">
+								<div className="font-medium text-sm text-foreground">
+									{__('Contact unavailable', 'doublescale')}
+								</div>
+								<div className="text-xs text-muted-foreground">
+									{row.original.recipient || '—'}
+								</div>
+							</div>
+						</div>
+					);
+				}
+
 				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
 				const initials = getContactInitials(contact.first_name || '', contact.last_name || '');
 				const avatarUrl = (contact as any).avatar_url;

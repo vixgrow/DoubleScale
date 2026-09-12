@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -77,7 +77,7 @@ const EmailsTab: React.FC = () => {
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [showRetryDialog, setShowRetryDialog] = useState(false);
-	const [hasFailedEmails, setHasFailedEmails] = useState(false);
+	const [failedEmailCount, setFailedEmailCount] = useState(0);
 	const [retryType, setRetryType] = useState<'all' | 'single'>('all');
 	const [emailToRetry, setEmailToRetry] = useState<CampaignEmail | null>(
 		null
@@ -126,11 +126,12 @@ const EmailsTab: React.FC = () => {
 			setTotalRecords(response.total);
 			setData(response.data);
 
-			const hasFailed =
-				response.data?.some(
-					(email) => email.status_slug === 'failed'
-				) || false;
-			setHasFailedEmails(hasFailed);
+			setFailedEmailCount(
+				response.failed_total ??
+					response.data.filter(
+						(email) => email.status_slug === 'failed'
+					).length
+			);
 		} catch (error: any) {
 			if (!isCurrent(generation)) {
 				return;
@@ -353,7 +354,7 @@ const EmailsTab: React.FC = () => {
 					/>
 				)}
 
-				{hasFailedEmails && !isLoading && (
+				{failedEmailCount > 0 && !isLoading && (
 					<div className="flex sm:flex-row flex-col gap-3 sm:gap-0 justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
 						<div className="flex items-center gap-2">
 							<InfoIcon width={20} height={20}/>
@@ -362,9 +363,14 @@ const EmailsTab: React.FC = () => {
 									{__('Warning:', 'doublescale')}
 								</div>
 								<div>
-									{__(
-										`${data.filter((email) => email.status_slug === 'failed').length} Failed Email to send to recipients. try resending it again.`,
-										'doublescale'
+									{sprintf(
+										_n(
+											'%d email failed to send. Try sending it again.',
+											'%d emails failed to send. Try sending them again.',
+											failedEmailCount,
+											'doublescale'
+										),
+										failedEmailCount
 									)}
 								</div>
 							</div>
